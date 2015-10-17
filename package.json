@@ -1,0 +1,29 @@
+{
+  "name": "generator-docker",
+  "version": "0.0.4",
+  "description": "Docker generator",
+  "files": [
+    "generators/app"
+  ],
+  "keywords": [
+    "yeoman-generator",
+    "vscode",
+    "docker",
+    "extensions",
+    "visual studio",
+    "docker compose"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "DockerToolsDevTeam",
+    "url": "https://github.com/Microsoft"
+  },
+   "dependencies": {
+    "yeoman-generator": "^0.19.0",
+    "chalk": "^1.0.0",
+    "yosay": "^1.0.2"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}

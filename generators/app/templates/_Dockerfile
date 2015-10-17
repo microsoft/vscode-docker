@@ -1,0 +1,3 @@
+# Hello World Dockerfile
+FROM ubuntu:latest
+RUN ["/bin/echo", "Hello World!"]
