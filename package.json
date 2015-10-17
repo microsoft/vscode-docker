@@ -1,0 +1,40 @@
+{
+	"name": "vscode-docker",
+	"version": "0.0.1",
+	"publisher": "Microsoft",
+	"engines": {
+		"vscode": "*"
+	},
+	"activationEvents": ["onLanguage:dockerfile", "onLanguage:yaml"],
+	"main": "./out/dockerExtension",
+	"contributes": {
+		"languages": [{
+			"id": "dockerfile",
+			"extensions": [ ".dockerfile" ],
+			"filenames": [ "Dockerfile" ],
+			"aliases": [ "Dockerfile" ]
+		},
+		{
+			"id": "yaml",
+			"aliases": ["YAML", "yaml"],
+			"extensions": [".eyaml", ".eyml", ".yaml", ".yml"],
+			"firstLine": "^#cloud-config"
+			}],
+			"grammars": [{
+			"language": "yaml",
+			"scopeName": "source.yaml",
+			"path": "./syntaxes/YAML.plist"
+		}]
+	},
+	"scripts": {
+		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../gulpfile.plugins.js compile-plugin:docker",
+		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+	},
+	"extensionDependencies": [
+		"vscode.docker",	
+		"vscode.yaml"
+	],
+	"devDependencies": {
+		"vscode": "*"
+	}
+}
