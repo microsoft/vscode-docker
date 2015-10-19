@@ -31,6 +31,8 @@ export function searchImageInRegistryHub(imageName:string, cache:boolean): Promi
 	});
 }
 
+
+
 var popular = [
 	{"is_automated":false,"name":"redis","is_trusted":false,"is_official":true,"star_count":831,"description":"Redis is an open source key-value store that functions as a data structure server."},
 	{"is_automated":false,"name":"ubuntu","is_trusted":false,"is_official":true,"star_count":1827,"description":"Ubuntu is a Debian-based Linux operating system based on free software."},
@@ -46,8 +48,12 @@ var popular = [
 
 export function searchImagesInRegistryHub(prefix:string, cache:boolean): Promise<IHubSearchResponseResult[]> {
 	if (prefix.length === 0) {
+		// return the popular images if user invoked intellisense 
+		// right after typing the keyword and ':' (e.g. 'image:').
 		return Promise.resolve(popular.slice(0));
 	}
+	
+	// Do an image search on Docker hub and return the results 
 	return invokeHubSearch(prefix, 100, cache).then((data) => {
 		return data.results;
 	});

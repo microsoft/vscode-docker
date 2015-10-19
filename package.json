@@ -17,13 +17,8 @@
 		{
 			"id": "yaml",
 			"aliases": ["YAML", "yaml"],
-			"extensions": [".eyaml", ".eyml", ".yaml", ".yml"],
-			"firstLine": "^#cloud-config"
-			}],
-			"grammars": [{
-			"language": "yaml",
-			"scopeName": "source.yaml",
-			"path": "./syntaxes/YAML.plist"
+			"extensions": [".yml"],
+			"filenames": ["Docker-compose.yml"]
 		}]
 	},
 	"scripts": {

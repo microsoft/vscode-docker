@@ -7,6 +7,7 @@
 import vscode = require('vscode');
 import parser = require('./yamlParser');
 import hub = require('../dockerHubApi');
+import htmlHelper = require('../helpers/htmlHelper');
 
 function isDockerCompose(resource:vscode.Uri): boolean {
 	return /docker\-compose\.yml$/.test(resource.toString());
@@ -28,6 +29,7 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		}
 
 		var tokens = parser.parseLine(line);
+
 
 		return this._computeInfoForLineWithTokens(line, tokens, position);
 	}
@@ -77,6 +79,8 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		return null;
 	}
 
+	// TODO (peterj, 10/19/2015): Same functionality needs to be added to the Dockerfile when 
+	// hovering over image name.
 	private _getImageNameHover(line:string, tokens:parser.IToken[], tokenIndex:number): Promise<vscode.IHTMLContentElement[]> {
 		// -------------
 		// Detect <<image: [["something"]]>>
@@ -130,91 +134,17 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 			});
 		}
 	}
-
-
-
+	
 	private static getInfoForKey(keyName:string): vscode.IHTMLContentElement[] {
 		if (ExtraInfoSupport._KEY_INFO === null) {
 			ExtraInfoSupport._KEY_INFO = {};
 			Object.keys(parser.RAW_KEY_INFO).forEach((keyName) => {
-				ExtraInfoSupport._KEY_INFO[keyName] = simpleMarkDownToHTMLContent(parser.RAW_KEY_INFO[keyName]);
+				ExtraInfoSupport._KEY_INFO[keyName] = htmlHelper.simpleMarkDownToHTMLContent(parser.RAW_KEY_INFO[keyName]);
 			});
 		}
 		return ExtraInfoSupport._KEY_INFO[keyName] || null;
 	}
 	private static _KEY_INFO: { [keyName:string]: vscode.IHTMLContentElement[]; } = null;
-}
-
-enum TagType {
-	pre,
-	bold,
-	normal
-}
-// TODO (peterj, 10/16/2015): this code is duplicated in dockerfileExtraInfo.ts, consider extracting it to a common file.
-function simpleMarkDownToHTMLContent(source:string): vscode.IHTMLContentElement[] {
-	var r:vscode.IHTMLContentElement[] = [];
-
-	var lastPushedTo:number;
-	var push = (to:number, type:TagType) => {
-		if (lastPushedTo >= to) {
-			return;
-		}
-		var text = source.substring(lastPushedTo, to);
-
-		if (type === TagType.pre) {
-			r.push({
-				tagName: "span",
-				style: "font-family:monospace",
-				className: "token keyword",
-				text: text
-			});
-		} else if (type === TagType.bold) {
-			r.push({
-				tagName: "strong",
-				text: text
-			});
-		} else if (type === TagType.normal) {
-			r.push({
-				tagName: "span",
-				text: text
-			});
-		}
-		lastPushedTo = to;
-	}
-
-	var currentTagType = () => {
-		if (inPre) {
-			return TagType.pre;
-		}
-		if (inBold) {
-			return TagType.bold;
-		}
-		return TagType.normal;
-	}
-
-	var inPre = false, inBold = false;
-	for (var i = 0, len = source.length; i < len; i++) {
-		var ch = source.charAt(i);
-
-		if (ch === '\n') {
-			push(i, currentTagType());
-			r.push({
-				tagName: 'br'
-			});
-			lastPushedTo = i + 1;
-		} else if (ch === '`') {
-			push(i, currentTagType());
-			lastPushedTo = i + 1;
-			inPre = !inPre;
-		} else if (ch === '*') {
-			push(i, currentTagType());
-			lastPushedTo = i + 1;
-			inBold = !inBold;
-		}
-	}
-	push(source.length, currentTagType());
-
-	return r;
 }
 
 function searchImageInRegistryHub(imageName:string): Promise<vscode.IHTMLContentElement[]> {
@@ -262,4 +192,3 @@ function searchImageInRegistryHub(imageName:string): Promise<vscode.IHTMLContent
 		}
 	})
 }
-
