@@ -1,9 +1,15 @@
 {
 	"name": "vscode-docker",
 	"version": "0.0.1",
-	"publisher": "Microsoft",
+	"publisher": "DockerTools",
+	"description": "Docker support for Visual Studio Code",
 	"engines": {
 		"vscode": "*"
+	},
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-docker.git"
 	},
 	"activationEvents": ["onLanguage:dockerfile", "onLanguage:yaml"],
 	"main": "./out/dockerExtension",
