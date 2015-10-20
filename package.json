@@ -22,11 +22,11 @@
 		}]
 	},
 	"scripts": {
-		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../gulpfile.plugins.js compile-plugin:docker",
-		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+		"vscode:prepublish": "tsc",
+        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
 	},
 	"extensionDependencies": [
-		"vscode.docker",	
+		"vscode.docker",
 		"vscode.yaml"
 	],
 	"devDependencies": {
