@@ -6,7 +6,7 @@
 
 import vscode = require('vscode');
 import helper = require('../helpers/suggestSupportHelper');
-import parser = require('./yamlParser');
+import keyInfo = require('./yamlKeyInfo');
 import hub = require('../dockerHubApi');
 
 function isDockerCompose(resource:vscode.Uri): boolean {
@@ -67,12 +67,12 @@ export class SuggestSupport implements vscode.Modes.ISuggestSupport {
 	private suggestKeys(word:string): vscode.Modes.ISuggestions {
 			return {
 			currentWord: word,
-			suggestions: Object.keys(parser.RAW_KEY_INFO).map((ruleName) => {
+			suggestions: Object.keys(keyInfo.KEY_INFO).map((ruleName) => {
 				return {
 					label: ruleName,
 					codeSnippet: ruleName + ': ',
 					type: 'property',
-					documentationLabel: parser.RAW_KEY_INFO[ruleName]
+					documentationLabel: keyInfo.KEY_INFO[ruleName]
 				}
 			})
 			};

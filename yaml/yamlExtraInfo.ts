@@ -5,7 +5,8 @@
 'use strict';
 
 import vscode = require('vscode');
-import parser = require('./yamlParser');
+import parser = require('../parser');
+import keyInfo = require('./yamlKeyInfo')
 import hub = require('../dockerHubApi');
 import htmlHelper = require('../helpers/htmlHelper');
 
@@ -14,7 +15,12 @@ function isDockerCompose(resource:vscode.Uri): boolean {
 }
 
 export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
-
+	_parser: parser.Parser; 
+	
+	constructor () {
+		this._parser = new parser.Parser('yaml');
+	}
+	
 	public computeInfo(document: vscode.TextDocument, position: vscode.Position) {
 		if (!isDockerCompose(document.getUri())) {
 			return Promise.resolve(null);
@@ -28,14 +34,14 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 			return Promise.resolve(null);
 		}
 
-		var tokens = parser.parseLine(line);
-
-
+		var tokens = this._parser.parseLine(line);
 		return this._computeInfoForLineWithTokens(line, tokens, position);
 	}
 
+	// TODO (peterj, 10/19/2015): Move this out to a separate class;
+	// this code is pretty much duplicated in dockerfileExtraInfo. 
 	private _computeInfoForLineWithTokens(line:string, tokens:parser.IToken[], position:vscode.Position): Promise<vscode.Modes.IComputeExtraInfoResult> {
-		var possibleTokens = parser.tokensAtColumn(tokens, position.character);
+		var possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
 
 		return Promise.all(possibleTokens.map(tokenIndex => this._computeInfoForToken(line, tokens, tokenIndex))).then((results) => {
 			return possibleTokens.map((tokenIndex, arrayIndex) => {
@@ -61,7 +67,7 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		// -------------
 		// Detect hovering on a key
 		if (tokens[tokenIndex].type === parser.TokenType.Key) {
-			var keyName = parser.keyNameFromKeyToken(parser.tokenValue(line, tokens[tokenIndex]));
+			var keyName = this._parser.keyNameFromKeyToken(this._parser.tokenValue(line, tokens[tokenIndex]));
 			var r = ExtraInfoSupport.getInfoForKey(keyName);
 			if (r) {
 				return Promise.resolve(r);
@@ -79,13 +85,12 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		return null;
 	}
 
-	// TODO (peterj, 10/19/2015): Same functionality needs to be added to the Dockerfile when 
 	// hovering over image name.
 	private _getImageNameHover(line:string, tokens:parser.IToken[], tokenIndex:number): Promise<vscode.IHTMLContentElement[]> {
 		// -------------
 		// Detect <<image: [["something"]]>>
 		// Detect <<image: [[something]]>>
-		var originalValue = parser.tokenValue(line, tokens[tokenIndex]);
+		var originalValue = this._parser.tokenValue(line, tokens[tokenIndex]);
 
 		var keyToken:string = null;
 		tokenIndex--;
@@ -95,7 +100,7 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 				return null;
 			}
 			if (type === parser.TokenType.Key) {
-				keyToken = parser.tokenValue(line, tokens[tokenIndex]);
+				keyToken = this._parser.tokenValue(line, tokens[tokenIndex]);
 				break;
 			}
 			tokenIndex--;
@@ -104,7 +109,7 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		if (!keyToken) {
 			return null;
 		}
-		var keyName = parser.keyNameFromKeyToken(keyToken);
+		var keyName = this._parser.keyNameFromKeyToken(keyToken);
 		if (keyName === 'image') {
 			var imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
 			return Promise.all([searchImageInRegistryHub(imageName)]).then((results) => {
@@ -138,8 +143,8 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 	private static getInfoForKey(keyName:string): vscode.IHTMLContentElement[] {
 		if (ExtraInfoSupport._KEY_INFO === null) {
 			ExtraInfoSupport._KEY_INFO = {};
-			Object.keys(parser.RAW_KEY_INFO).forEach((keyName) => {
-				ExtraInfoSupport._KEY_INFO[keyName] = htmlHelper.simpleMarkDownToHTMLContent(parser.RAW_KEY_INFO[keyName]);
+			Object.keys(keyInfo.KEY_INFO).forEach((keyName) => {
+				ExtraInfoSupport._KEY_INFO[keyName] = htmlHelper.simpleMarkDownToHTMLContent(keyInfo.KEY_INFO[keyName]);
 			});
 		}
 		return ExtraInfoSupport._KEY_INFO[keyName] || null;
