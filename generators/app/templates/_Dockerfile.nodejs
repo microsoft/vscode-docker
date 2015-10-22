@@ -1,5 +1,4 @@
 FROM <%= imageName %>
-MAINTAINER <%= maintainer %>
 RUN mkdir /src
 ADD . /src
 WORKDIR /src

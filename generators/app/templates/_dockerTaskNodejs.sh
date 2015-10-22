@@ -1,7 +1,7 @@
 imageName="<%= imageName %>"
 containerPort=<%= portNumber %>
 dockerHostName="<%= dockerHostName %>"
-publicPort=8080
+publicPort=<%= portNumber %>
 
 # Kills all running containers of an image and then removes them. 
 cleanAll () {
@@ -37,9 +37,9 @@ showUsage () {
 	echo ""
 	echo "Options:"
 	echo "    build: Builds a Docker image (\'$imageName\')."
-	echo "    run: Runs container based on an existing Docker image (\'$imageName\')." 
+	echo "    run: Runs a container based on an existing Docker image (\'$imageName\')." 
 	echo "    buildrun: Builds a Docker image and runs the container."
-	echo "    clean: Remove the image \'$imageName\' and all containers based on that image." 
+	echo "    clean: Removes the image \'$imageName\' and kills all containers based on that image." 
 	echo ""
 	echo "Example:"
 	echo "    ./build.sh build"
