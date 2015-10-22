@@ -21,7 +21,7 @@ var dockerHostName = "default";
 
 // Node.js variables
 var addnodemon = false;
-var nodeMonCommand = 'RUN npm install nodemon -g';
+var nodemonCommand = 'RUN npm install nodemon -g';
 var ScriptNameNodeJs = 'dockerTask.sh';
 
 function showPrompts() {
@@ -77,14 +77,14 @@ function showPrompts() {
 function handleNodeJs(yo) {
     // Add the Nodemon command if selected.
     if (!addnodemon) {
-        nodeMonCommand = '';
+        nodemonCommand = '';
     }
 
     yo.fs.copyTpl(
         yo.templatePath('_Dockerfile.nodejs'),
         yo.destinationPath('Dockerfile'), {
             imageName: 'node',
-            nodeMonCommand: nodeMonCommand,
+            nodemonCommand: nodemonCommand,
             portNumber: portNumber,
         });
 

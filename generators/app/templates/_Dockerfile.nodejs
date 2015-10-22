@@ -3,6 +3,6 @@ RUN mkdir /src
 ADD . /src
 WORKDIR /src
 EXPOSE <%= portNumber %>
-<%= nodeMonCommand %>
+<%= nodemonCommand %>
 RUN npm install 
 ENTRYPOINT ["nodemon"]
