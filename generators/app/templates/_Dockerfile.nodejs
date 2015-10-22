@@ -1,0 +1,8 @@
+FROM <%= imageName %>
+RUN mkdir /src
+ADD . /src
+WORKDIR /src
+EXPOSE <%= portNumber %>
+<%= nodemonCommand %>
+RUN npm install 
+ENTRYPOINT ["nodemon"]
