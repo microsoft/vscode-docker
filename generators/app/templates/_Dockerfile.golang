@@ -1,0 +1,11 @@
+# Image with the latest Go installed. Go workspace (GOPATH) is configured in /go folder.
+FROM golang
+
+# Add source code to the container.
+ADD . /go/src/github.com/<%= projectName %>
+
+# Run go install.
+RUN go install github.com/<%= projectName %>
+
+# Set the entrypoint to the project.
+ENTRYPOINT /go/bin/<%= projectName %>
