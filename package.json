@@ -1,6 +1,6 @@
 {
   "name": "generator-docker",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Docker generator",
   "files": [
     "generators/app"
@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "DockerToolsDevTeam",
+    "name": "DockerTools",
     "url": "https://github.com/Microsoft"
   },
    "dependencies": {
