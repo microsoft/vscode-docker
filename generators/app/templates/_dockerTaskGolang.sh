@@ -1,7 +1,5 @@
 imageName="<%= imageName %>"
-containerPort=<%= portNumber %>
 dockerHostName="<%= dockerHostName %>"
-publicPort=<%= portNumber %>
 
 # Kills all running containers of an image and then removes them.
 cleanAll () {
@@ -23,11 +21,9 @@ runContainer () {
     # Check if container is already running, stop it and run a new one.
 	docker kill $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
 
-	# Create a container from the image.
-	docker run -di -p $publicPort:$containerPort $imageName
-
-	# Open the site.
-	open "http://$(docker-machine ip $dockerHostName):$publicPort"
+    # Create a container from the image.
+	<%= runImageCommand %>
+	<%= openWebSiteCommand %>
 }
 
 # Shows the usage for the script.
