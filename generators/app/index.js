@@ -50,7 +50,7 @@ function showPrompts() {
     }, {
         type: 'confirm',
         name: 'isGoWeb',
-        message: 'Is your Go project using a web server?',
+        message: 'Does your Go project use a web server?',
         when: function(answers) {
             return answers.type === 'golang';
         }
