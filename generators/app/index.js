@@ -87,9 +87,15 @@ function showPrompts() {
 }
 
 function handleNodeJs(yo) {
-    // Add the Nodemon command if selected.
+    
+    var runCommand = 'CMD ["nodemon"]';
+    var containerRunCommand = 'docker run -di -p $publicPort:$containerPort -v `pwd`:/src $imageName';
+    
     if (!addnodemon) {
+        // If we don't need nodemon, just use node and don't share the volume.
         nodemonCommand = '';
+        runCommand = 'CMD ["node", "./bin/www"]';
+        containerRunCommand = 'docker run -di -p $publicPort:$containerPort $imageName';
     }
 
     yo.fs.copyTpl(
@@ -98,6 +104,7 @@ function handleNodeJs(yo) {
             imageName: 'node',
             nodemonCommand: nodemonCommand,
             portNumber: portNumber,
+            runCommand: runCommand
         });
 
     yo.fs.copyTpl(
@@ -105,7 +112,8 @@ function handleNodeJs(yo) {
         yo.destinationPath(ScriptName), {
             imageName: imageName,
             portNumber: portNumber,
-            dockerHostName: dockerHostName
+            dockerHostName: dockerHostName,
+            containerRunCommand: containerRunCommand
         });
 }
 
