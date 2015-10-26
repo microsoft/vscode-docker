@@ -67,7 +67,7 @@ function showPrompts() {
         type: 'input',
         name: 'imageName',
         message: 'What do you want to name your image?',
-        default: process.cwd().split(path.sep).pop() + '_image',
+        default: process.cwd().split(path.sep).pop().toLowerCase() + '_image',
     }, {
         type: 'input',
         name: 'dockerHostName',
