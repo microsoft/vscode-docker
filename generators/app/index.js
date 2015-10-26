@@ -34,6 +34,9 @@ function showPrompts() {
         name: 'type',
         message: 'What language is your project using?',
         choices: [{
+            name: 'ASP.NET 5',
+            value: 'aspnet'
+        }, {
             name: 'Golang',
             value: 'golang'
         }, {
@@ -82,6 +85,11 @@ function showPrompts() {
         imageName = props.imageName;
         dockerHostName = props.dockerHostName;
         isGoWeb = props.isGoWeb;
+
+        if (projectType === 'aspnet') {
+             this.log.error('Not implemented yet :(');
+             return;
+        }
         done();
     }.bind(this));
 }
