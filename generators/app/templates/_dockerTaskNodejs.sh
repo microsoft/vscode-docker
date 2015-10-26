@@ -48,21 +48,26 @@ showUsage () {
 	echo "        Build a Docker image named $imageName."
 }
 
-case "$1" in
-    "build")
-	       buildImage
-		   ;;
-    "run")
-	       runContainer
-		   ;;
-    "clean")
-	       cleanAll
-		   ;;
-    "buildrun")
-	       buildImage
-		   runContainer
-		   ;;
-    *)
-	       showUsage
-	       ;;
-esac
+if [ $# -eq 0 ]; then
+  buildImage
+  runContainer
+else
+  case "$1" in
+      "build")
+	         buildImage
+			 ;;
+      "run")
+	         runContainer
+		     ;;
+      "clean")
+	         cleanAll
+		     ;;
+      "buildrun")
+	         buildImage
+	    	 runContainer
+		     ;;
+      *)
+	         showUsage
+	         ;;
+  esac
+fi
