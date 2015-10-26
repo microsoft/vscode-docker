@@ -17,5 +17,5 @@ EXPOSE <%= portNumber %>
 # Install the dependencies.
 RUN npm install
 
-# Run nodemon.
-ENTRYPOINT ["nodemon"]
+# Run the app.
+<%= runCommand %>

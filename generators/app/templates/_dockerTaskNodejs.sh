@@ -24,7 +24,7 @@ runContainer () {
 	docker kill $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
 
 	# Create a container from the image.
-	docker run -di -p $publicPort:$containerPort $imageName
+	<%= containerRunCommand %>
 
 	# Open the site.
 	open "http://$(docker-machine ip $dockerHostName):$publicPort"
