@@ -199,7 +199,6 @@ var DockerGenerator = yeoman.generators.Base.extend({
                 this.log.error(':( not implemented.');
                 break;
         }
-
     },
     end: end
 });
