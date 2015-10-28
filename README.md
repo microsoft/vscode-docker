@@ -19,13 +19,6 @@ Run the following command from the root folder of the project:
 mocha
 ```
 
-## Publishing
-To publish a new version of the docker generator, increase the generator version and run:
-
-```bash
-npm publish
-```
-
 ## Installing
 To install generator-docker from npm, run:
 
