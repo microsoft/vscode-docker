@@ -1,6 +1,6 @@
 # Yeoman Docker Generator
 
- [![CI Status](circleci-badge)](circleci-badge)
+ [![CI Status](https://circleci.com/gh/Microsoft/generator-docker.svg?style=shield&circle-token=:circle-token)]
 
 ## Developing & testing
 After making changes to the code, run:
@@ -41,5 +41,3 @@ yo docker
 ## License
 
 MIT
-
-[circleci-badge]:https://circleci.com/gh/Microsoft/generator-docker.svg?style=shield&circle-token=:circle-token
