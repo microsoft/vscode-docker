@@ -1,26 +1,28 @@
-# Yeoman Docker Generator 
+# Yeoman Docker Generator
+
+ [![CI Status](circleci-badge)](circleci-badge)
 
 ## Developing & testing
-After making changes to the code, run: 
+After making changes to the code, run:
 ```bash
-npm link 
+npm link
 ```
 
 And then run the generator:
 ```bash
-yo docker 
+yo docker
 ```
 
-Run the following command from the root folder of the project: 
+Run the following command from the root folder of the project:
 ```bash
 mocha
 ```
 
-## Publishing 
-To publish a new version of the docker generator, increase the generator version and run: 
+## Publishing
+To publish a new version of the docker generator, increase the generator version and run:
 
 ```bash
-npm publish 
+npm publish
 ```
 
 ## Installing
@@ -39,3 +41,5 @@ yo docker
 ## License
 
 MIT
+
+[circleci-badge]:https://circleci.com/gh/Microsoft/generator-docker.svg?style=shield&circle-token=:circle-token
