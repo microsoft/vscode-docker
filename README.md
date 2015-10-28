@@ -1,6 +1,7 @@
 # Yeoman Docker Generator
 
  ![CI Status](https://circleci.com/gh/Microsoft/generator-docker.svg?style=shield&circle-token=a1a705d77cd91720fdd8b021e17c41bbabc4b00d)
+ ![Downloads](https://img.shields.io/npm/dm/generator-docker.svg)
 
 ## Developing & testing
 After making changes to the code, run:
