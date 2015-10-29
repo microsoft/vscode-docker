@@ -27,8 +27,6 @@ export class SuggestSupportHelper {
 				}
 				return {
 					label: image.name,
-					// Don't need " " when suggesting the image name for Docker file "
-					// codeSnippet: '"' + image.name + '"',
 					codeSnippet: image.name,
 					type: 'value',
 					documentationLabel: image.description,

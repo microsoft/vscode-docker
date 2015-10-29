@@ -31,8 +31,6 @@ export function searchImageInRegistryHub(imageName:string, cache:boolean): Promi
 	});
 }
 
-
-
 var popular = [
 	{"is_automated":false,"name":"redis","is_trusted":false,"is_official":true,"star_count":831,"description":"Redis is an open source key-value store that functions as a data structure server."},
 	{"is_automated":false,"name":"ubuntu","is_trusted":false,"is_official":true,"star_count":1827,"description":"Ubuntu is a Debian-based Linux operating system based on free software."},

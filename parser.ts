@@ -15,7 +15,6 @@ export class Parser {
 		this._modeId = modeId; 
 		
 		// Set the parser settings, depending on the mode. 
-		// TODO (peterj, 10/19/2015): Might make sense to move this to ParserSettings class. 
 		if (this._modeId === "dockerfile") {
 			this._keySeparator = ' ';
 			this._tokenParseRegex = /\ +$/g;

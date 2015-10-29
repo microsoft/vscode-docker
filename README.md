@@ -14,7 +14,7 @@ cd vscode-docker
 npm install
 ```
 
-Restart Visual Studio code and enjoy awesome Docker and docker_compose.yml support!
+Restart Visual Studio code and enjoy awesome Dockerfile and docker-compose.yml support!
 
 ## License 
 [MIT](LICENSE)
