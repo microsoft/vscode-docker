@@ -8,6 +8,16 @@ var path = require('path');
 var assert = require('yeoman-generator').assert;
 var helpers = require('yeoman-generator').test;
 
+function createGolangPrompts(isWebProject, portNumber, imageName, dockerHostName) {
+    return {
+        projectType: 'golang',
+        isGoWeb: isWebProject,
+        portNumber: portNumber,
+        imageName: imageName,
+        dockerHostName: dockerHostName
+    }
+}
+
 describe('golang generator', function() {
     it('creates files', function(done) {
             helpers.run(path.join(__dirname, '../generators/app'))
@@ -101,13 +111,3 @@ describe('golang generator', function() {
             })
     })
 });
-
-function createGolangPrompts(isWebProject, portNumber, imageName, dockerHostName) {
-    return {
-        type: 'golang',
-        isGoWeb: isWebProject,
-        portNumber: portNumber,
-        imageName: imageName,
-        dockerHostName: dockerHostName
-    }
-}
