@@ -9,11 +9,11 @@ var yosay = require('yosay');
 var path = require('path');
 var process = require('process');
 var exec = require('child_process').exec;
+var os = require('os');
 
 // General
 var projectType = "";
 var error = false;
-var ScriptName = 'dockerTask.sh';
 
 // Docker variables
 var portNumber = 3000;
@@ -26,6 +26,22 @@ var nodemonCommand = 'RUN npm install nodemon -g';
 
 // Golang variables
 var isGoWeb = false;
+
+function isWindows() {
+    return os.platform() === 'win32';
+}
+
+function getDestinationScriptName() {
+    return isWindows() ? 'dockerTask.cmd' : 'dockerTask.sh';
+}
+
+function getNodeJsTemplateScriptName() {
+    return isWindows() ? '_dockerTaskNodejs.cmd' : '_dockerTaskNodejs.sh';
+}
+
+function getGolangTemplateScriptName() {
+    return isWindows() ? '_dockerTaskGolang.cmd' : '_dockerTaskGolang.sh';
+}
 
 function showPrompts() {
     var done = this.async();
@@ -47,14 +63,14 @@ function showPrompts() {
         type: 'confirm',
         name: 'addnodemon',
         message: 'Do you want to use Nodemon?',
-        when: function(answers) {
+        when: function (answers) {
             return answers.type === 'nodejs';
         }
     }, {
         type: 'confirm',
         name: 'isGoWeb',
         message: 'Does your Go project use a web server?',
-        when: function(answers) {
+        when: function (answers) {
             return answers.type === 'golang';
         }
     }, {
@@ -62,7 +78,7 @@ function showPrompts() {
         name: 'portNumber',
         message: 'Which port is your app listening to?',
         default: "3000",
-        when: function(answers) {
+        when: function (answers) {
             // Show this answer if user picked Node.js or Golang that's using a web server.
             return answers.type === 'nodejs' || (answers.type === 'golang' && answers.isGoWeb);
         }
@@ -78,7 +94,7 @@ function showPrompts() {
         default: 'default',
     }];
 
-    this.prompt(prompts, function(props) {
+    this.prompt(prompts, function (props) {
         projectType = props.type;
         addnodemon = props.addnodemon;
         portNumber = props.portNumber;
@@ -87,23 +103,31 @@ function showPrompts() {
         isGoWeb = props.isGoWeb;
 
         if (projectType === 'aspnet') {
-             this.log.error('Not implemented yet :(');
-             return;
+            this.log.error('Not implemented yet :(');
+            return;
         }
         done();
     }.bind(this));
 }
 
 function handleNodeJs(yo) {
-    
+
     var runCommand = 'CMD ["nodemon"]';
     var containerRunCommand = 'docker run -di -p $publicPort:$containerPort -v `pwd`:/src $imageName';
-    
+
+    if (isWindows()) {
+        containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% -v `pwd`:/src %imageName%';
+    }
+
     if (!addnodemon) {
         // If we don't need nodemon, just use node and don't share the volume.
         nodemonCommand = '';
         runCommand = 'CMD ["node", "./bin/www"]';
         containerRunCommand = 'docker run -di -p $publicPort:$containerPort $imageName';
+
+        if (isWindows()) {
+            containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% %imageName%';
+        }
     }
 
     yo.fs.copyTpl(
@@ -116,8 +140,8 @@ function handleNodeJs(yo) {
         });
 
     yo.fs.copyTpl(
-        yo.templatePath('_dockerTaskNodejs.sh'),
-        yo.destinationPath(ScriptName), {
+        yo.templatePath(getNodeJsTemplateScriptName()),
+        yo.destinationPath(getDestinationScriptName()), {
             imageName: imageName,
             portNumber: portNumber,
             dockerHostName: dockerHostName,
@@ -129,9 +153,14 @@ function handleGolang(yo) {
 
     var openWebSiteCommand = "";
     var runImageCommand = "docker run -di " + imageName;
+
     if (isGoWeb) {
         openWebSiteCommand = "open \"http://$(docker-machine ip $dockerHostName):" + portNumber + "\"";
         runImageCommand = "docker run -di -p " + portNumber + ":" + portNumber + " " + imageName;
+
+        if (isWindows()) {
+            openWebSiteCommand = 'set ip="docker-machine ip %dockerHostName%" & start %ip%:%publicPort%';
+        }
     }
 
     yo.fs.copyTpl(
@@ -143,8 +172,8 @@ function handleGolang(yo) {
         });
 
     yo.fs.copyTpl(
-        yo.templatePath('_dockerTaskGolang.sh'),
-        yo.destinationPath(ScriptName), {
+        yo.templatePath(getGolangTemplateScriptName()),
+        yo.destinationPath(getDestinationScriptName()), {
             imageName: imageName,
             runImageCommand: runImageCommand,
             openWebSiteCommand: openWebSiteCommand,
@@ -158,31 +187,32 @@ function end() {
     }
 
     var done = this.async();
-    exec('chmod +x ' + ScriptName, function(err) {
-        if (err) {
-            this.log.error(err);
-            this.log.error('Error making script executable. Run ' + chalk.bold('chmod +x ' + ScriptName) + ' manually.');
-            error = true;
-        }
-        done();
-    }.bind(this));
+    if (!isWindows()) {
+        exec('chmod +x ' + getDestinationScriptName(), function (err) {
+            if (err) {
+                this.log.error(err);
+                this.log.error('Error making script executable. Run ' + chalk.bold('chmod +x ' + getDestinationScriptName()) + ' manually.');
+                error = true;
+            }
+            done();
+        }.bind(this));
+    }
     this.log('Your project is now ready to run in a Docker container!');
-    this.log('Run ' + chalk.green(ScriptName) + ' to build a Docker image and run your app in a container.');
-
+    this.log('Run ' + chalk.green(getDestinationScriptName()) + ' to build a Docker image and run your app in a container.');
 }
 
 // Docker Generator.
 var DockerGenerator = yeoman.generators.Base.extend({
-    constructor: function() {
+    constructor: function () {
         yeoman.generators.Base.apply(this, arguments);
     },
 
-    init: function() {
+    init: function () {
         this.log(yosay('Welcome to the ' + chalk.red('Docker') + ' generator!' + chalk.green('\nLet\'s add Docker container magic to your app!')));
     },
 
     askFor: showPrompts,
-    writing: function() {
+    writing: function () {
         this.sourceRoot(path.join(__dirname, './templates'));
         switch (projectType) {
             case 'nodejs':

@@ -5,15 +5,13 @@ publicPort=<%= portNumber %>
 
 # Kills all running containers of an image and then removes them.
 cleanAll () {
-	# List all running containers that use $imageName, kill them and then remove them.
+    # List all running containers that use $imageName, kill them and then remove them.
     docker kill $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
-	docker rm $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
+    docker rm $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
 }
 
 # Builds the Docker image.
 buildImage () {
-    cleanAll
-
     echo "Building the image $imageName."
     docker build -t $imageName .
 }
@@ -21,31 +19,31 @@ buildImage () {
 # Runs the container.
 runContainer () {
     # Check if container is already running, stop it and run a new one.
-	docker kill $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
+    docker kill $(docker ps -a | awk '{ print $1,$2 }' | grep $imageName | awk '{ print $1}') > /dev/null 2>&1;
 
-	# Create a container from the image.
-	<%= containerRunCommand %>
+    # Create a container from the image.
+    <%= containerRunCommand %>
 
-	# Open the site.
-	open "http://$(docker-machine ip $dockerHostName):$publicPort"
+    # Open the site.
+    open "http://$(docker-machine ip $dockerHostName):$publicPort"
 }
 
 # Shows the usage for the script.
 showUsage () {
     echo "Description:"
-	echo "    Builds and runs a Docker image."
-	echo ""
-	echo "Options:"
-	echo "    build: Builds a Docker image ('$imageName')."
-	echo "    run: Runs a container based on an existing Docker image ('$imageName')."
-	echo "    buildrun: Builds a Docker image and runs the container."
-	echo "    clean: Removes the image '$imageName' and kills all containers based on that image."
-	echo ""
-	echo "Example:"
-	echo "    ./build.sh build"
-	echo ""
-	echo "    This will:"
-	echo "        Build a Docker image named $imageName."
+    echo "    Builds and runs a Docker image."
+    echo ""
+    echo "Options:"
+    echo "    build: Builds a Docker image ('$imageName')."
+    echo "    run: Runs a container based on an existing Docker image ('$imageName')."
+    echo "    buildrun: Builds a Docker image and runs the container."
+    echo "    clean: Removes the image '$imageName' and kills all containers based on that image."
+    echo ""
+    echo "Example:"
+    echo "    ./dockerTask.sh build"
+    echo ""
+    echo "    This will:"
+    echo "        Build a Docker image named $imageName."
 }
 
 if [ $# -eq 0 ]; then
@@ -54,20 +52,20 @@ if [ $# -eq 0 ]; then
 else
   case "$1" in
       "build")
-	         buildImage
-			 ;;
+             buildImage
+             ;;
       "run")
-	         runContainer
-		     ;;
+             runContainer
+             ;;
       "clean")
-	         cleanAll
-		     ;;
+             cleanAll
+             ;;
       "buildrun")
-	         buildImage
-	    	 runContainer
-		     ;;
+             buildImage
+             runContainer
+             ;;
       *)
-	         showUsage
-	         ;;
+             showUsage
+             ;;
   esac
 fi
