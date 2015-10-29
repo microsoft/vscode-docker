@@ -27,6 +27,22 @@ var nodemonCommand = 'RUN npm install nodemon -g';
 // Golang variables
 var isGoWeb = false;
 
+function isWindows() {
+    return os.platform() === 'win32';
+}
+
+function getDestinationScriptName() {
+    return isWindows() ? 'dockerTask.cmd' : 'dockerTask.sh';
+}
+
+function getNodeJsTemplateScriptName() {
+    return isWindows() ? '_dockerTaskNodejs.cmd' : '_dockerTaskNodejs.sh';
+}
+
+function getGolangTemplateScriptName() {
+    return isWindows() ? '_dockerTaskGolang.cmd' : '_dockerTaskGolang.sh';
+}
+
 function showPrompts() {
     var done = this.async();
     var prompts = [{
@@ -183,22 +199,6 @@ function end() {
     }
     this.log('Your project is now ready to run in a Docker container!');
     this.log('Run ' + chalk.green(getDestinationScriptName()) + ' to build a Docker image and run your app in a container.');
-}
-
-function isWindows() {
-    return os.platform() === 'win32';
-}
-
-function getDestinationScriptName() {
-    return isWindows() ? 'dockerTask.cmd' : 'dockerTask.sh';
-}
-
-function getNodeJsTemplateScriptName() {
-    return isWindows() ? '_dockerTaskNodejs.cmd' : '_dockerTaskNodejs.sh';
-}
-
-function getGolangTemplateScriptName() {
-    return isWindows() ? '_dockerTaskGolang.cmd' : '_dockerTaskGolang.sh';
 }
 
 // Docker Generator.
