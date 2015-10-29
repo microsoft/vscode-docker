@@ -42,7 +42,7 @@ showUsage () {
 	echo "    clean: Removes the image '$imageName' and kills all containers based on that image."
 	echo ""
 	echo "Example:"
-	echo "    ./build.sh build"
+	echo "    ./dockerTask.sh build"
 	echo ""
 	echo "    This will:"
 	echo "        Build a Docker image named $imageName."
