@@ -12,7 +12,7 @@ describe('golang generator', function() {
     it('creates files', function(done) {
             helpers.run(path.join(__dirname, '../generators/app'))
                 .withPrompts({
-                    type: 'golang'
+                    projectType: 'golang'
                 })
                 .on('end', function() {
                     assert.file([

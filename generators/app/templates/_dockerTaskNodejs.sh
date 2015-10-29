@@ -1,5 +1,4 @@
 imageName="<%= imageName %>"
-containerPort=<%= portNumber %>
 dockerHostName="<%= dockerHostName %>"
 publicPort=<%= portNumber %>
 
