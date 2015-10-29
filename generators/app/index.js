@@ -183,7 +183,6 @@ function end() {
     }
     this.log('Your project is now ready to run in a Docker container!');
     this.log('Run ' + chalk.green(getDestinationScriptName()) + ' to build a Docker image and run your app in a container.');
-
 }
 
 function isWindows() {
