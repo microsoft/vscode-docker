@@ -11,7 +11,7 @@ cleanAll () {
 }
 
 # Builds the Docker image.
-buildImage () {    
+buildImage () {
     echo "Building the image $imageName."
     docker build -t $imageName .
 }

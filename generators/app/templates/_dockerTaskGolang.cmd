@@ -23,7 +23,7 @@ if /I "%1" == "buildrun" (
     goto :eof
 )
 
-REM By default, show usage. 
+REM By default, show usage.
 call :showUsage
 goto :eof
 
