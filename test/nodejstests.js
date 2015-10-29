@@ -8,6 +8,16 @@ var path = require('path');
 var assert = require('yeoman-generator').assert;
 var helpers = require('yeoman-generator').test;
 
+function createNodeJsPrompts(addNodemon, portNumber, imageName, dockerHostName) {
+    return {
+        projectType: 'nodejs',
+        addnodemon: addNodemon,
+        portNumber: portNumber,
+        imageName: imageName,
+        dockerHostName: dockerHostName
+    }
+}
+
 describe('node.js generator', function() {
     it('creates files', function(done) {
             helpers.run(path.join(__dirname, '../generators/app'))
@@ -28,7 +38,7 @@ describe('node.js generator', function() {
             var dockerHostName = 'default';
             helpers.run(path.join(__dirname, '../generators/app'))
                 .withPrompts(createNodeJsPrompts(true, portNumber, imageName, dockerHostName))
-                .on('end', function() {
+                .on('end', function() {            
                     assert.fileContent(
                         'Dockerfile', 'FROM node');
                     assert.fileContent(
@@ -49,8 +59,6 @@ describe('node.js generator', function() {
                 .on('end', function() {
                     assert.fileContent(
                         'dockerTask.sh', 'imageName="' + imageName + '"');
-                    assert.fileContent(
-                        'dockerTask.sh', 'containerPort=' + portNumber);
                     assert.fileContent(
                         'dockerTask.sh', 'publicPort=' + portNumber);
                     assert.fileContent(
@@ -88,8 +96,6 @@ describe('node.js generator', function() {
                     assert.fileContent(
                         'dockerTask.sh', 'imageName="' + imageName + '"');
                     assert.fileContent(
-                        'dockerTask.sh', 'containerPort=' + portNumber);
-                    assert.fileContent(
                         'dockerTask.sh', 'publicPort=' + portNumber);
                     assert.fileContent(
                         'dockerTask.sh', 'dockerHostName="' + dockerHostName + '"');
@@ -99,13 +105,3 @@ describe('node.js generator', function() {
                 })
         })
 });
-
-function createNodeJsPrompts(addNodemon, portNumber, imageName, dockerHostName) {
-    return {
-        type: 'nodejs',
-        addnodemon: addNodemon,
-        portNumber: portNumber,
-        imageName: imageName,
-        dockerHostName: dockerHostName
-    }
-}
