@@ -27,6 +27,9 @@ var nodemonCommand = 'RUN npm install nodemon -g';
 // Golang variables
 var isGoWeb = false;
 
+// ASP.NET variables
+var aspnetVersion = '';
+
 function showPrompts() {
     var done = this.async();
     var prompts = [{
@@ -51,6 +54,18 @@ function showPrompts() {
             return answers.type === 'nodejs';
         }
     }, {
+        type: 'list',
+        name: 'aspnetVersion',
+        message: 'Which ASP.NET 5 version is your project using?',
+        choices: [{
+            name: 'beta8',
+            value: '1.0.0-beta8'
+        }, {
+            name: 'beta7',
+            value: '1.0.0-beta7'
+        }]
+    }, 
+    {
         type: 'confirm',
         name: 'isGoWeb',
         message: 'Does your Go project use a web server?',
@@ -61,10 +76,12 @@ function showPrompts() {
         type: 'input',
         name: 'portNumber',
         message: 'Which port is your app listening to?',
-        default: "3000",
+        default: function(answers) {
+            return answers.type === 'aspnet' ? 5000 : 3000; 
+        },
         when: function(answers) {
-            // Show this answer if user picked Node.js or Golang that's using a web server.
-            return answers.type === 'nodejs' || (answers.type === 'golang' && answers.isGoWeb);
+            // Show this answer if user picked ASP.NET, Node.js or Golang that's using a web server.
+            return answers.type === 'aspnet' || answers.type === 'nodejs' || (answers.type === 'golang' && answers.isGoWeb);
         }
     }, {
         type: 'input',
@@ -85,11 +102,8 @@ function showPrompts() {
         imageName = props.imageName;
         dockerHostName = props.dockerHostName;
         isGoWeb = props.isGoWeb;
-
-        if (projectType === 'aspnet') {
-             this.log.error('Not implemented yet :(');
-             return;
-        }
+        aspnetVersion = props.aspnetVersion;
+        
         done();
     }.bind(this));
 }
@@ -152,6 +166,28 @@ function handleGolang(yo) {
         });
 }
 
+function handleAspnet(yo) {
+    var imageName = 'microsoft/aspnet:' + aspnetVersion;
+    var containerRunCommand = 'docker run -di -p $publicPort:$containerPort $imageName';
+    
+    yo.fs.copyTpl(
+        yo.templatePath('_Dockerfile.aspnet'),
+        yo.destinationPath('Dockerfile'), {
+            imageName: imageName,
+            portNumber: portNumber,
+            aspnetCommandName: 'kestrel'
+        });
+
+    yo.fs.copyTpl(
+        yo.templatePath('_dockerTaskNodejs.sh'),
+        yo.destinationPath(ScriptName), {
+            imageName: imageName,
+            portNumber: portNumber,
+            dockerHostName: dockerHostName,
+            containerRunCommand: containerRunCommand
+        });
+}
+
 function end() {
     if (error) {
         this.log(chalk.red(':( errors occured.'));
@@ -193,6 +229,11 @@ var DockerGenerator = yeoman.generators.Base.extend({
             case 'golang':
                 {
                     handleGolang(this);
+                    break;
+                }
+            case 'aspnet':
+                {
+                    handleAspnet(this);
                     break;
                 }
             default:
