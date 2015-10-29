@@ -2,33 +2,28 @@
 set imageName="<%= imageName %>"
 set dockerHostName="<%= dockerHostName %>"
 
-if "%1"=="" (
-	call :buildImage
-	call :runContainer
-	goto :eof
-)
-
-if "%1" == "build" (
+if /I "%1" == "build" (
   	call :buildImage
 	goto :eof
 )
 
-if "%1" == "run" (
+if /I "%1" == "run" (
   	call :runContainer
   	goto :eof
 ) 
 
-if "%1" == "clean" (
+if /I "%1" == "clean" (
 	call :cleanAll
 	goto :eof
 )
 		    
-if "%1" == "buildrun" (
+if /I "%1" == "buildrun" (
 	call :buildImage
 	call :runContainer
 	goto :eof
 )
 
+REM By default, show usage. 
 call :showUsage
 goto :eof
 
@@ -45,8 +40,6 @@ goto :eof
 
 REM Builds the Docker image.
 :buildImage
-    call :cleanAll
-
     echo Building the image %imageName%.
     docker build -t %imageName% .
 goto :eof

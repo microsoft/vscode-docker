@@ -47,14 +47,14 @@ function showPrompts() {
         type: 'confirm',
         name: 'addnodemon',
         message: 'Do you want to use Nodemon?',
-        when: function(answers) {
+        when: function (answers) {
             return answers.type === 'nodejs';
         }
     }, {
         type: 'confirm',
         name: 'isGoWeb',
         message: 'Does your Go project use a web server?',
-        when: function(answers) {
+        when: function (answers) {
             return answers.type === 'golang';
         }
     }, {
@@ -62,7 +62,7 @@ function showPrompts() {
         name: 'portNumber',
         message: 'Which port is your app listening to?',
         default: "3000",
-        when: function(answers) {
+        when: function (answers) {
             // Show this answer if user picked Node.js or Golang that's using a web server.
             return answers.type === 'nodejs' || (answers.type === 'golang' && answers.isGoWeb);
         }
@@ -78,7 +78,7 @@ function showPrompts() {
         default: 'default',
     }];
 
-    this.prompt(prompts, function(props) {
+    this.prompt(prompts, function (props) {
         projectType = props.type;
         addnodemon = props.addnodemon;
         portNumber = props.portNumber;
@@ -87,33 +87,33 @@ function showPrompts() {
         isGoWeb = props.isGoWeb;
 
         if (projectType === 'aspnet') {
-             this.log.error('Not implemented yet :(');
-             return;
+            this.log.error('Not implemented yet :(');
+            return;
         }
         done();
     }.bind(this));
 }
 
 function handleNodeJs(yo) {
-    
+
     var runCommand = 'CMD ["nodemon"]';
     var containerRunCommand = 'docker run -di -p $publicPort:$containerPort -v `pwd`:/src $imageName';
-    
+
     if (isWindows()) {
         containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% -v `pwd`:/src %imageName%';
     }
-    
+
     if (!addnodemon) {
         // If we don't need nodemon, just use node and don't share the volume.
         nodemonCommand = '';
         runCommand = 'CMD ["node", "./bin/www"]';
         containerRunCommand = 'docker run -di -p $publicPort:$containerPort $imageName';
-        
+
         if (isWindows()) {
-               containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% %imageName%';       
+            containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% %imageName%';
         }
     }
-    
+
     yo.fs.copyTpl(
         yo.templatePath('_Dockerfile.nodejs'),
         yo.destinationPath('Dockerfile'), {
@@ -122,7 +122,7 @@ function handleNodeJs(yo) {
             portNumber: portNumber,
             runCommand: runCommand
         });
-            
+
     yo.fs.copyTpl(
         yo.templatePath(getNodeJsTemplateScriptName()),
         yo.destinationPath(getDestinationScriptName()), {
@@ -131,19 +131,19 @@ function handleNodeJs(yo) {
             dockerHostName: dockerHostName,
             containerRunCommand: containerRunCommand
         });
-}   
+}
 
 function handleGolang(yo) {
 
     var openWebSiteCommand = "";
     var runImageCommand = "docker run -di " + imageName;
-    
+
     if (isGoWeb) {
         openWebSiteCommand = "open \"http://$(docker-machine ip $dockerHostName):" + portNumber + "\"";
         runImageCommand = "docker run -di -p " + portNumber + ":" + portNumber + " " + imageName;
-        
+
         if (isWindows()) {
-            openWebSiteCommand = 'set ip="docker-machine ip %dockerHostName%" & start %ip%:%publicPort%';      
+            openWebSiteCommand = 'set ip="docker-machine ip %dockerHostName%" & start %ip%:%publicPort%';
         }
     }
 
@@ -172,7 +172,7 @@ function end() {
 
     var done = this.async();
     if (!isWindows()) {
-        exec('chmod +x ' + getDestinationScriptName(), function(err) {
+        exec('chmod +x ' + getDestinationScriptName(), function (err) {
             if (err) {
                 this.log.error(err);
                 this.log.error('Error making script executable. Run ' + chalk.bold('chmod +x ' + getDestinationScriptName()) + ' manually.');
@@ -187,15 +187,15 @@ function end() {
 }
 
 function isWindows() {
-    return os.platform() === 'win32'; 
+    return os.platform() === 'win32';
 }
 
 function getDestinationScriptName() {
-    return isWindows() ? 'dockerTask.cmd' : 'dockerTask.sh';    
+    return isWindows() ? 'dockerTask.cmd' : 'dockerTask.sh';
 }
 
 function getNodeJsTemplateScriptName() {
-    return isWindows() ? '_dockerTaskNodejs.cmd' : '_dockerTaskNodejs.sh';   
+    return isWindows() ? '_dockerTaskNodejs.cmd' : '_dockerTaskNodejs.sh';
 }
 
 function getGolangTemplateScriptName() {
@@ -204,16 +204,16 @@ function getGolangTemplateScriptName() {
 
 // Docker Generator.
 var DockerGenerator = yeoman.generators.Base.extend({
-    constructor: function() {
+    constructor: function () {
         yeoman.generators.Base.apply(this, arguments);
     },
 
-    init: function() {
+    init: function () {
         this.log(yosay('Welcome to the ' + chalk.red('Docker') + ' generator!' + chalk.green('\nLet\'s add Docker container magic to your app!')));
     },
 
     askFor: showPrompts,
-    writing: function() {
+    writing: function () {
         this.sourceRoot(path.join(__dirname, './templates'));
         switch (projectType) {
             case 'nodejs':
