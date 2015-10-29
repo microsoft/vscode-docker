@@ -1,5 +1,6 @@
 @echo off 
 set imageName="<%= imageName %>"
+set containerPort=<%= portNumber %>
 set dockerHostName="<%= dockerHostName %>"
 set publicPort=<%= portNumber %>
 
