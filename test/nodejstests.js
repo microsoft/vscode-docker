@@ -12,7 +12,7 @@ describe('node.js generator', function() {
     it('creates files', function(done) {
             helpers.run(path.join(__dirname, '../generators/app'))
                 .withPrompts({
-                    type: 'nodejs'
+                    projectType: 'nodejs'
                 })
                 .on('end', function() {
                     assert.file([
