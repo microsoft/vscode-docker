@@ -38,8 +38,6 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		return this._computeInfoForLineWithTokens(line, tokens, position);
 	}
 
-	// TODO (peterj, 10/19/2015): Move this out to a separate class;
-	// this code is pretty much duplicated in dockerfileExtraInfo. 
 	private _computeInfoForLineWithTokens(line:string, tokens:parser.IToken[], position:vscode.Position): Promise<vscode.Modes.IComputeExtraInfoResult> {
 		var possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
 

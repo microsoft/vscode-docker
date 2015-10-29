@@ -77,8 +77,6 @@ export class ExtraInfoSupport implements vscode.Modes.IExtraInfoSupport  {
 		return null;
 	}
 
-	// TODO (peterj, 10/19/2015): Same functionality needs to be added to the Dockerfile when 
-	// hovering over image name.
 	private _getImageNameHover(line:string, tokens:parser.IToken[], tokenIndex:number): Promise<vscode.IHTMLContentElement[]> {
 		// -------------
 		// Detect <<image: [["something"]]>>
