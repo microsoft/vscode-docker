@@ -57,12 +57,11 @@ REM Runs the container.
     REM Create a container from the image.
     <%= containerRunCommand %>
 
-    REM Open the site.
-    set ipCommand="docker-machine ip %dockerHostName%"
-    FOR /F %%i IN (' %ipCommand% ') do (
+    REM Open the site.    
+    FOR /F %%i IN (' "docker-machine ip %dockerHostName%" ') do (
        set ipValue=%%i
     )
-    
+
     start http://%ipValue%:%publicPort%
 goto :eof
 
