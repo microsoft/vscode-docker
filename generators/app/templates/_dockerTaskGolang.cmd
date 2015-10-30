@@ -53,7 +53,7 @@ REM Runs the container.
         )
     )
     
-    # Create a container from the image.
+    REM Create a container from the image.
     <%= runImageCommand %>
     <%= openWebSiteCommand %>
 goto :eof

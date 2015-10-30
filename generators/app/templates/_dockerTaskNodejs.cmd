@@ -60,10 +60,9 @@ REM Runs the container.
     REM Open the site.
     set ipCommand="docker-machine ip %dockerHostName%"
     FOR /F %%i IN (' %ipCommand% ') do (
-       set tmpValue=%%i
+       set ipValue=%%i
     )
-
-    set ipValue=%tmpValue: =%        
+    
     start http://%ipValue%:%publicPort%
 goto :eof
 
