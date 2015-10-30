@@ -174,8 +174,8 @@ function handleGolang(yo) {
         openWebSiteCommand = "open \"http://$(docker-machine ip $dockerHostName):" + portNumber + "\"";
         runImageCommand = "docker run -di -p " + portNumber + ":" + portNumber + " " + imageName;
 
-        if (isWindows()) {
-            openWebSiteCommand = 'set ip="docker-machine ip %dockerHostName%" & start %ip%:%publicPort%';
+        if (isWindows()) {                            
+            openWebSiteCommand = 'FOR /F %%i IN (\' "docker-machine ip %dockerHostName:"=%" \') do set tmpValue=%%i\r\n\t\tset ipValue=%tmpValue: =%\r\n\t\tstart http://%ipValue%:' + portNumber;
         }
     }
 
