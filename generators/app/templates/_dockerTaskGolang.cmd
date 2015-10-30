@@ -31,9 +31,9 @@ REM Kills all running containers of an image and then removes them.
 :cleanAll
     REM List all running containers that use %imageName%, kill them and then remove them.
     FOR /F "tokens=1,2" %%a IN ('docker ps -a') DO (
-        if "%%a" == "%imageName%" (
-            docker kill "%%b"
-            docker rm "%%b"
+        if "%%b" == %imageName% (
+            docker kill %%a
+            docker rm %%a
         )
     )
 goto :eof
@@ -47,9 +47,9 @@ goto :eof
 REM Runs the container.
 :runContainer
     REM Check if container is already running, stop it and run a new one.
-    FOR /F "tokens=1,2" %%a IN ('docker ps -a') DO (
-        if "%%a" == "%imageName%" (
-            docker kill "%%b"
+    FOR /F "tokens=1,2" %%a IN ('docker ps') DO (
+        if "%%b" == %imageName% (
+            docker kill %%a
         )
     )
     
