@@ -127,12 +127,24 @@ function showPrompts() {
 }
 
 function handleNodeJs(yo) {
-
+    
+    if (isWindows() && addnodemon) {
+        var splitFolders = process.cwd().split(path.sep);
+        var rootFolder = splitFolders[0] + path.sep + splitFolders[1];
+        
+        if (rootFolder.toLowerCase() != splitFolders[0].toLowerCase() + path.sep + 'users') {
+            error = true;
+            yo.log.error('Your project has to be under [drive]:\Users folder in order to use Nodemon on Windows.');
+            return;
+        }
+   }
+               
     var runCommand = 'CMD ["nodemon"]';
     var containerRunCommand = 'docker run -di -p $publicPort:$containerPort -v `pwd`:/src $imageName';
 
     if (isWindows()) {
-        containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% -v `pwd`:/src %imageName%';
+        var sourcePath = '/' + process.cwd().replace(path.sep, '/');
+        containerRunCommand = 'docker run -di -p %publicPort%:%containerPort% -v ' + sourcePath + ':/src %imageName%';
     }
 
     if (!addnodemon) {
@@ -211,7 +223,7 @@ function handleAspnet(yo) {
 
     yo.fs.copyTpl(
         yo.templatePath('_dockerTaskNodejs.sh'),
-        yo.destinationPath(ScriptName), {
+        yo.destinationPath(getDestinationScriptName()), {
             imageName: imageName,
             portNumber: portNumber,
             dockerHostName: dockerHostName,
@@ -250,8 +262,8 @@ var DockerGenerator = yeoman.generators.Base.extend({
     },
 
     askFor: showPrompts,
-    writing: function () {
-        this.sourceRoot(path.join(__dirname, './templates'));
+    writing: function () {                
+        this.sourceRoot(path.join(__dirname, './templates'));        
         switch (projectType) {
             case 'nodejs':
                 {
