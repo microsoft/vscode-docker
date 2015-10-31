@@ -28,6 +28,7 @@
     "mocha": "*"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha test/*.js"
+    "test": "node_modules/.bin/mocha test/*.js",
+    "patch-release": "npm version patch && npm publish && git push --follow-tags"
   }
 }
