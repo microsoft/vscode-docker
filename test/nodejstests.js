@@ -11,7 +11,7 @@ var helpers = require('yeoman-generator').test;
 function createNodeJsPrompts(addNodemon, portNumber, imageName, dockerHostName) {
     return {
         projectType: 'nodejs',
-        addnodemon: addNodemon,
+        addNodemon: addNodemon,
         portNumber: portNumber,
         imageName: imageName,
         dockerHostName: dockerHostName
