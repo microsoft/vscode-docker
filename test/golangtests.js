@@ -1,7 +1,7 @@
 /*---------------------------------------------------------
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
- 
+
 'use strict';
 
 var path = require('path');
@@ -29,8 +29,8 @@ describe('golang generator', function() {
                         'Dockerfile',
                         'dockerTask.sh',
                     ]);
-                    done();
-                })
+                });
+            done();
         }),
         it('creates Dockerfile with correct contents (Web project)', function(done) {
             var portNumber = 1234;
@@ -48,8 +48,8 @@ describe('golang generator', function() {
                         'Dockerfile', 'RUN go install github.com/' + currentFolder);
                     assert.fileContent(
                         'Dockerfile', 'ENTRYPOINT /go/bin/' + currentFolder);
-                    done();
-                })
+                });
+            done();
         }),
         it('creates Dockerfile with correct contents (non-Web project)', function(done) {
             var portNumber = 1234;
@@ -67,8 +67,8 @@ describe('golang generator', function() {
                         'Dockerfile', 'RUN go install github.com/' + currentFolder);
                     assert.fileContent(
                         'Dockerfile', 'ENTRYPOINT /go/bin/' + currentFolder);
-                    done();
-                })
+                });
+            done();
         }),
         it('creates dockerTask.sh with correct contents (Web project)', function(done) {
             var portNumber = 1234;
@@ -87,8 +87,8 @@ describe('golang generator', function() {
                         'dockerTask.sh', 'open \"http://$(docker-machine ip $dockerHostName):' + portNumber + '"');
                     assert.fileContent(
                         'dockerTask.sh', 'docker run -di -p ' + portNumber + ':' + portNumber + ' ' + imageName);
-                    done();
-                })
+                });
+            done();
         })
     it('creates dockerTask.sh with correct contents (non-Web project)', function(done) {
         var portNumber = 1234;
@@ -107,7 +107,7 @@ describe('golang generator', function() {
                     'dockerTask.sh', 'open \"http://$(docker-machine ip $dockerHostName):' + portNumber + '"');
                 assert.fileContent(
                     'dockerTask.sh', 'docker run -di ' + imageName);
-                done();
-            })
+            });
+        done();
     })
 });

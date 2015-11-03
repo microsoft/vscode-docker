@@ -76,6 +76,11 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
             return;
         }
 
+        // Remove BOM.
+        if (data.charCodeAt(0) === 0xFEFF) {
+            data = data.replace(/^\uFEFF/, '');
+        }
+
         data = JSON.parse(data);
 
         if (data.commands.kestrel === undefined) {

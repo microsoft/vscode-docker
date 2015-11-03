@@ -50,8 +50,8 @@ describe('aspnet generator', function() {
                         'Dockerfile',
                         'dockerTask.sh',
                     ]);
-                    done();
                 })
+            done();
         }),
         it('creates Dockerfile with correct contents', function(done) {
             var portNumber = 1234;
@@ -72,8 +72,9 @@ describe('aspnet generator', function() {
                         'Dockerfile', 'EXPOSE ' + portNumber);
                     assert.fileContent(
                         'Dockerfile', 'ENTRYPOINT ["dnx", "-p", "project.json", "kestrel"');
-                    done();
                 })
+
+            done();
         }),
         it('updates project.json and adds the kestrel command if it doesn\'t exist', function(done) {
             var portNumber = 1234;
@@ -87,92 +88,86 @@ describe('aspnet generator', function() {
                 })
                 .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
                 .on('end', function() {
-                    fs.readFile('project.json', 'utf8', function (err, data) {
-                        console.log(data);
-                        var kestrel = JSON.parse(data).commands.kestrel; 
-                        console.log(JSON.parse(data).commands.kestrel);
-                    assert.fileContent('project.json', kestrel);
-       
-                    });
                     assert.file('project.json');
-                    assert.fileContent('project.json', 'Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel --server.urls http://*:1234');
-                    done();
+                    assert.fileContent('project.json', 'Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel --server.urls http://*:' + portNumber);
                 })
+            done();
+        }),
+        it('creates a project.json.backup file if we add a command', function(done) {
+            var portNumber = 1234;
+            var imageName = 'aspnetimagename';
+            var dockerHostName = 'default';
+            var aspNetVersion = '1.0.0-beta8';
+
+            helpers.run(path.join(__dirname, '../generators/app'))
+                .inTmpDir(function(dir) {
+                    createTestProjectJson(dir);
+                })
+                .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
+                .on('end', function() {
+                    assert.file('project.json');
+                    assert.file('project.json.backup');
+                })
+            done();
+        })
+
+    it('does not create a project.json.backup file if we don\'t add the command', function(done) {
+        var portNumber = 1234;
+        var imageName = 'aspnetimagename';
+        var dockerHostName = 'default';
+        var aspNetVersion = '1.0.0-beta8';
+
+        helpers.run(path.join(__dirname, '../generators/app'))
+            .inTmpDir(function(dir) {
+                createTestProjectJson(dir, 'EXISTING_KESTREL_COMMAND');
+            })
+            .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
+            .on('end', function() {
+                assert.file('project.json');
+                assert.noFile('project.json.backup');
+            });
+        done();
+    })
+    it('does not add the kestrel command if it\'s already there', function(done) {
+            var portNumber = 1234;
+            var imageName = 'aspnetimagename';
+            var dockerHostName = 'default';
+            var aspNetVersion = '1.0.0-beta8';
+
+            helpers.run(path.join(__dirname, '../generators/app'))
+                .inTmpDir(function(dir) {
+                    createTestProjectJson(dir, 'EXISTING_KESTREL_COMMAND');
+                })
+                .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
+                .on('end', function() {
+                    assert.file('project.json');
+                    assert.fileContent('project.json', 'EXISTING_KESTREL_COMMAND');
+                });
+            done();
+        }),
+
+        it('creates dockerTask.sh with correct contents ', function(done) {
+            var portNumber = 1234;
+            var imageName = 'aspnetimagename';
+            var dockerHostName = 'default';
+            var aspNetVersion = '1.0.0-beta8';
+
+            helpers.run(path.join(__dirname, '../generators/app'))
+                .inTmpDir(function(dir) {
+                    createTestProjectJson(dir);
+                })
+                .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
+                .on('end', function() {
+                    assert.file('dockerTask.sh');
+                    assert.fileContent(
+                        'dockerTask.sh', 'imageName="' + imageName + '"');
+                    assert.fileContent(
+                        'dockerTask.sh', 'publicPort=' + portNumber);
+                    assert.fileContent(
+                        'dockerTask.sh', 'dockerHostName="' + dockerHostName + '"');
+                    assert.fileContent(
+                        'dockerTask.sh', 'docker run -di -p $publicPort:$containerPort $imageName');
+                });
+            done();
         })
 });
-
-//         it('creates a project.json.backup file if we add a command', function(done) {
-//             var portNumber = 1234;
-//             var imageName = 'aspnetimagename';
-//             var dockerHostName = 'default';
-//             var aspNetVersion = '1.0.0-beta8';
-// 
-//             helpers.run(path.join(__dirname, '../generators/app'))
-//                 .inTmpDir(function(dir) {
-//                     createTestProjectJson(dir);
-//                 })
-//                 .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
-//                 .on('end', function() {
-//                     assert.file('project.json');
-//                     assert.file('project.json.backup');
-//                     done();
-//                 })
-//         }),
-//         it('does not create a project.json.backup file if we don\'t add the command', function(done) {
-//             var portNumber = 1234;
-//             var imageName = 'aspnetimagename';
-//             var dockerHostName = 'default';
-//             var aspNetVersion = '1.0.0-beta8';
-// 
-//             helpers.run(path.join(__dirname, '../generators/app'))
-//                 .inTmpDir(function(dir) {
-//                     createTestProjectJson(dir, 'EXISTING_KESTREL_COMMAND');
-//                 })
-//                 .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
-//                 .on('end', function() {
-//                     assert.file('project.json');
-//                     assert.noFile('project.json.backup');
-//                     done();
-//                 })
-//         }),
-//         it('does not add the kestrel command if it\'s already there', function(done) {
-//             var portNumber = 1234;
-//             var imageName = 'aspnetimagename';
-//             var dockerHostName = 'default';
-//             var aspNetVersion = '1.0.0-beta8';
-// 
-//             helpers.run(path.join(__dirname, '../generators/app'))
-//                 .inTmpDir(function(dir) {
-//                     createTestProjectJson(dir, 'EXISTING_KESTREL_COMMAND');
-//                 })
-//                 .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
-//                 .on('end', function() {
-//                     assert.file('project.json');
-//                     assert.fileContent('project.json', 'EXISTING_KESTREL_COMMAND');
-//                     done();
-//                 })
-//         }),
-//         it('creates dockerTask.sh with correct contents ', function(done) {
-//             var portNumber = 1234;
-//             var imageName = 'aspnetimagename';
-//             var dockerHostName = 'default';
-//             var aspNetVersion = '1.0.0-beta8';
-// 
-//             helpers.run(path.join(__dirname, '../generators/app'))
-//                 .inTmpDir(function(dir) {
-//                     createTestProjectJson(dir);
-//                 })
-//                 .withPrompts(createAspNetPrompts(aspNetVersion, portNumber, imageName, dockerHostName))
-//                 .on('end', function() {
-//                     assert.file('dockerTask.sh');
-//                     assert.fileContent(
-//                         'dockerTask.sh', 'imageName="' + imageName + '"');
-//                     assert.fileContent(
-//                         'dockerTask.sh', 'publicPort=' + portNumber);
-//                     assert.fileContent(
-//                         'dockerTask.sh', 'dockerHostName="' + dockerHostName + '"');
-//                     assert.fileContent(
-//                         'dockerTask.sh', 'docker run -di -p $publicPort:$containerPort $imageName');
-//                     done();
-//                 })
-//         })
