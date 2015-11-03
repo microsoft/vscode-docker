@@ -76,10 +76,15 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
             return;
         }
 
-        AspNetHelper.prototype._backupFile(fileName, backupFile);
+        // Remove BOM.
+        if (data.charCodeAt(0) === 0xFEFF) {
+            data = data.replace(/^\uFEFF/, '');
+        }
+
         data = JSON.parse(data);
 
         if (data.commands.kestrel === undefined) {
+            AspNetHelper.prototype._backupFile(fileName, backupFile);
             data.commands.kestrel = 'Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel --server.urls http://*:' + port;
             fs.writeFile(fileName, JSON.stringify(data), function(err) {
                 if (err) {
