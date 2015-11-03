@@ -6,4 +6,4 @@ RUN ["dnu", "restore"]
 COPY . /app
 
 EXPOSE <%= portNumber %>
-ENTRYPOINT ["dnx", "-p", "project.json", "<%= aspnetCommandName %>"]
+ENTRYPOINT ["dnx", "-p", "project.json", "<%= aspNetCommandName %>"]
