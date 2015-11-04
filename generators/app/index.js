@@ -125,7 +125,7 @@ function handleNodeJs(yo) {
 
     if (!nodeJs.canShareVolume()) {
         error = true;
-        yo.log.error('Your project has to be under [drive]:\Users folder in order to use Nodemon on Windows.');
+        yo.log.error('Your project has to be under %HOMEDRIVE%\Users folder in order to use Nodemon on Windows.');
         return;
     }
 
@@ -177,26 +177,31 @@ function handleGolang(yo) {
 function handleAspNet(yo) {
     var aspNet = new AspNetHelper(aspNetVersion, portNumber, imageName);
 
-    aspNet.addKestrelCommand(function(commandAdded) {
+    aspNet.addKestrelCommand(function(err, commandAdded) {
+        if (err) {
+            error = true;
+            yo.log.error(err);
+            return;
+        }
+
         kestrelCommandAdded = commandAdded;
+        yo.fs.copyTpl(
+            yo.templatePath(aspNet.getTemplateDockerfileName()),
+            yo.destinationPath(DOCKERFILE_NAME), {
+                imageName: aspNet.getDockerImageName(),
+                portNumber: aspNet.getPortNumber(),
+                aspNetCommandName: aspNet.getAspNetCommandName()
+            });
+
+        yo.fs.copyTpl(
+            yo.templatePath(aspNet.getTemplateScriptName()),
+            yo.destinationPath(util.getDestinationScriptName()), {
+                imageName: aspNet.getImageName(),
+                portNumber: aspNet.getPortNumber(),
+                dockerHostName: dockerHostName,
+                containerRunCommand: aspNet.getContainerRunCommand()
+            });
     });
-
-    yo.fs.copyTpl(
-        yo.templatePath(aspNet.getTemplateDockerfileName()),
-        yo.destinationPath(DOCKERFILE_NAME), {
-            imageName: aspNet.getDockerImageName(),
-            portNumber: aspNet.getPortNumber(),
-            aspNetCommandName: aspNet.getAspNetCommandName()
-        });
-
-    yo.fs.copyTpl(
-        yo.templatePath(aspNet.getTemplateScriptName()),
-        yo.destinationPath(util.getDestinationScriptName()), {
-            imageName: aspNet.getImageName(),
-            portNumber: aspNet.getPortNumber(),
-            dockerHostName: dockerHostName,
-            containerRunCommand: aspNet.getContainerRunCommand()
-        });
 }
 
 /**
@@ -204,7 +209,8 @@ function handleAspNet(yo) {
  */
 function end() {
     if (error) {
-        this.log(chalk.red(':( errors occured.'));
+        this.log(chalk.red('Errors occured. Please fix them and re-run the generator.'));
+        return;
     }
 
     var done = this.async();
@@ -225,6 +231,7 @@ function end() {
 
     this.log('Your project is now ready to run in a Docker container!');
     this.log('Run ' + chalk.green(util.getDestinationScriptName()) + ' to build a Docker image and run your app in a container.');
+
 }
 
 /**

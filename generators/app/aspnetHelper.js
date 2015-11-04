@@ -72,7 +72,7 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
 
     fs.readFile(fileName, 'utf8', function(err, data) {
         if (err) {
-            console.log('Error reading project.json file: ' + err);
+            cb(new Error('Can\'t read project.json file. Make sure project.json file exists.'));
             return;
         }
 
@@ -88,15 +88,14 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
             data.commands.kestrel = 'Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel --server.urls http://*:' + port;
             fs.writeFile(fileName, JSON.stringify(data), function(err) {
                 if (err) {
-                    console.log('Error writing to project.json file: ' + err);
+                    cb(new Error('Can\'t write to project.json file.'));
                     return;
                 }
+
+                cb(null, true);
             });
-            return cb(true);
         }
     });
-
-    return cb(false);
 }
 
 /**

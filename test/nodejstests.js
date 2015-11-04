@@ -1,7 +1,7 @@
 /*---------------------------------------------------------
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
- 
+
 'use strict';
 
 var path = require('path');
@@ -29,8 +29,8 @@ describe('node.js generator', function() {
                         'Dockerfile',
                         'dockerTask.sh',
                     ]);
-                    done();
-                })
+                });
+            done();
         }),
         it('creates Dockerfile with correct contents (with Nodemon)', function(done) {
             var portNumber = 1234;
@@ -38,7 +38,7 @@ describe('node.js generator', function() {
             var dockerHostName = 'default';
             helpers.run(path.join(__dirname, '../generators/app'))
                 .withPrompts(createNodeJsPrompts(true, portNumber, imageName, dockerHostName))
-                .on('end', function() {            
+                .on('end', function() {
                     assert.fileContent(
                         'Dockerfile', 'FROM node');
                     assert.fileContent(
@@ -47,8 +47,8 @@ describe('node.js generator', function() {
                         'Dockerfile', 'RUN npm install nodemon -g');
                     assert.fileContent(
                         'Dockerfile', 'CMD ["nodemon"]');
-                    done();
-                })
+                });
+            done();
         }),
         it('creates dockerTask.sh with correct contents (with Nodemon)', function(done) {
             var portNumber = 1234;
@@ -65,8 +65,8 @@ describe('node.js generator', function() {
                         'dockerTask.sh', 'dockerHostName="' + dockerHostName + '"');
                     assert.fileContent(
                         'dockerTask.sh', 'docker run -di -p $publicPort:$containerPort -v `pwd`:/src $imageName');
-                    done();
-                })
+                });
+            done();
         })
     it('creates Dockerfile with correct contents (without Nodemon)', function(done) {
             var portNumber = 1234;
@@ -83,8 +83,8 @@ describe('node.js generator', function() {
                         'Dockerfile', 'RUN npm install nodemon -g');
                     assert.fileContent(
                         'Dockerfile', 'CMD ["node", "./bin/www"]');
-                    done();
-                })
+                });
+            done();
         }),
         it('creates dockerTask.sh with correct contents (without Nodemon)', function(done) {
             var portNumber = 1234;
@@ -101,7 +101,7 @@ describe('node.js generator', function() {
                         'dockerTask.sh', 'dockerHostName="' + dockerHostName + '"');
                     assert.fileContent(
                         'dockerTask.sh', 'docker run -di -p $publicPort:$containerPort $imageName');
-                    done();
-                })
+                });
+            done();
         })
 });
