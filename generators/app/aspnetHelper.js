@@ -95,6 +95,7 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
                 cb(null, true);
             });
         }
+        cb(null, false);
     });
 }
 

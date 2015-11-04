@@ -177,6 +177,7 @@ function handleGolang(yo) {
 function handleAspNet(yo) {
     var aspNet = new AspNetHelper(aspNetVersion, portNumber, imageName);
 
+    var done = yo.async();
     aspNet.addKestrelCommand(function(err, commandAdded) {
         if (err) {
             error = true;
@@ -185,6 +186,7 @@ function handleAspNet(yo) {
         }
 
         kestrelCommandAdded = commandAdded;
+        
         yo.fs.copyTpl(
             yo.templatePath(aspNet.getTemplateDockerfileName()),
             yo.destinationPath(DOCKERFILE_NAME), {
@@ -201,6 +203,8 @@ function handleAspNet(yo) {
                 dockerHostName: dockerHostName,
                 containerRunCommand: aspNet.getContainerRunCommand()
             });
+
+            done(); 
     });
 }
 
