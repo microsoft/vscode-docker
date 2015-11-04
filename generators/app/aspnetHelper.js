@@ -69,7 +69,7 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
     var fileName = rootFolder + 'project.json';
     var backupFile = rootFolder + 'project.json.backup';
     var port = this._portNumber;
-
+    
     fs.readFile(fileName, 'utf8', function(err, data) {
         if (err) {
             cb(new Error('Can\'t read project.json file. Make sure project.json file exists.'));
@@ -91,11 +91,12 @@ AspNetHelper.prototype.addKestrelCommand = function(cb) {
                     cb(new Error('Can\'t write to project.json file.'));
                     return;
                 }
-
                 cb(null, true);
+                return;
             });
         }
         cb(null, false);
+        return;
     });
 }
 

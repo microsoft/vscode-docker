@@ -184,9 +184,10 @@ function handleAspNet(yo) {
             yo.log.error(err);
             return;
         }
-
         kestrelCommandAdded = commandAdded;
-        
+        done();
+    }.bind(yo));
+    
         yo.fs.copyTpl(
             yo.templatePath(aspNet.getTemplateDockerfileName()),
             yo.destinationPath(DOCKERFILE_NAME), {
@@ -203,9 +204,6 @@ function handleAspNet(yo) {
                 dockerHostName: dockerHostName,
                 containerRunCommand: aspNet.getContainerRunCommand()
             });
-
-            done(); 
-    });
 }
 
 /**
@@ -227,7 +225,7 @@ function end() {
             }
             done();
         }.bind(this));
-    }
+    } 
 
     if (kestrelCommandAdded) {
         this.log('We noticed your project.json file didn\'t know how to start the kestrel web server. We\'ve fixed that for you.');
@@ -235,7 +233,6 @@ function end() {
 
     this.log('Your project is now ready to run in a Docker container!');
     this.log('Run ' + chalk.green(util.getDestinationScriptName()) + ' to build a Docker image and run your app in a container.');
-
 }
 
 /**
