@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 // https://docs.docker.com/reference/builder/
-export var KEY_INFO:{[keyName:string]:string;} = {
+export var DOCKER_KEY_INFO:{[keyName:string]:string;} = {
 	'FROM': (
 		"Sets the *Base Image* for subsequent instructions."
 	),
@@ -49,5 +49,8 @@ export var KEY_INFO:{[keyName:string]:string;} = {
 	'ONBUILD': (
 		"Adds to the image a trigger instruction to be executed at a later time, when the image is used as the " +
 		"base for another build."
+	),
+	'STOPSIGNAL': (
+		"Sets the system call signal that will be sent to the container to exit."
 	)
 }

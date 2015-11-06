@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 // https://docs.docker.com/compose/yml/
-export var KEY_INFO:{[keyName:string]:string;} = {
+export var YAML_KEY_INFO: { [keyName: string]: string; } = {
 	'image': (
 		"Tag or partial image ID. Can be local or remote - Compose will attempt to pull if it doesn't exist locally."
 	),
@@ -68,4 +68,39 @@ export var KEY_INFO:{[keyName:string]:string;} = {
 	'dns_search': (
 		"Custom DNS search domains. Can be a single value or a list."
 	),
+	'cgroup_parent': (
+		"Specify an optional parent cgroup for the container."
+	),
+	'container_name': (
+		"Specify custom container name, rather than a generated default name."
+	),
+	'devices': (
+		"List of device mappings. Uses the same format as the `--device` docker client create option."
+	),
+	'dockerfile': (
+		"Alternate dockerfile. Compose will use an alternate file to build with. Using `dockerfile` together with `image` is not allowed. Attempting to do so results in an error."
+	),
+	'extends': (
+		"Extend another service, in the current file or another, optionally overriding configuration.\nYou can use `extends` on any service together with other configuration keys. " +
+		"The `extends` value must be a dictionary defined with a required `service` and an optional `file` key."
+	),
+	'extra_hosts': (
+		"Add hostname mappings. Use the same values as the docker client `--add-host` parameter."
+	),
+	'labels': (
+		"Add metadata to containers using Docker labels. You can either use an array or a dictionary.\n" +
+		"It's recommended that you use reverse-DNS notation to prevent your labels from conflicting with those used by other software."
+	),
+	'log_driver': (
+		"Specify a logging driver for the service's containers, as with the `--log-driver` option for docker run. The default value is json-file."
+	),
+	'log_opt': (
+		"Specify logging options with `log_opt` for the logging driver, as with the `--log-opt` option for docker run."
+	),
+	'security_opt': (
+		"Override the default labeling scheme for each container."
+	),
+	'volume_driver': (
+		"If you use a volume name (instead of a volume path), you may also specify a `volume_driver`."
+	)
 }
