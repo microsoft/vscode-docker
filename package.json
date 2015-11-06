@@ -1,41 +1,37 @@
 {
-	"name": "vscode-docker",
-	"version": "0.0.2",
-	"publisher": "DockerTools",
-	"description": "Dockerfile and Docker yaml file support for Visual Studio Code",
-	"engines": {
-		"vscode": "*"
-	},
-	"private": true,
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-docker.git"
-	},
-	"activationEvents": ["onLanguage:dockerfile", "onLanguage:yaml"],
-	"main": "./out/dockerExtension",
-	"contributes": {
-		"languages": [{
-			"id": "dockerfile",
-			"extensions": [ ".dockerfile" ],
-			"filenames": [ "Dockerfile" ],
-			"aliases": [ "Dockerfile" ]
-		},
-		{
-			"id": "yaml",
-			"aliases": ["YAML", "yaml"],
-			"extensions": [".yml"],
-			"filenames": ["Docker-compose.yml"]
-		}]
-	},
-	"scripts": {
-		"vscode:prepublish": "tsc",
-        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
-	},
-	"extensionDependencies": [
-		"vscode.docker",
-		"vscode.yaml"
-	],
-	"devDependencies": {
-		"vscode": "*"
-	}
+  "name": "vscode-docker",
+  "version": "0.0.2",
+  "publisher": "DockerTools",
+  "description": "Dockerfile and Docker yaml file support for Visual Studio Code",
+  "engines": {
+    "vscode": "0.10.x"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-docker.git"
+  },
+  "activationEvents": [
+    "onLanguage:dockerfile",
+    "onLanguage:yaml"
+  ],
+  "main": "./out/dockerExtension",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "dockerfile",
+        "path": "./snippets/dockerfile.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc",
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+  },
+  "extensionDependencies": [
+     "vscode.yaml"
+  ],
+  "devDependencies": {
+    "vscode": "0.10.x"
+  }
 }
