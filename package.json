@@ -16,7 +16,11 @@
   "license": "MIT",
   "author": {
     "name": "DockerTools",
-    "url": "https://github.com/Microsoft"
+    "url": "https://github.com/Microsoft/generator-docker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/generator-docker"
   },
   "dependencies": {
     "yeoman-generator": "^0.19.0",
