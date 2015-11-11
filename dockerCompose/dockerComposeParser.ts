@@ -10,7 +10,6 @@ import {Parser, TokenType, IToken} from '../parser';
 export class DockerComposeParser extends Parser {
     constructor() {
         var parseRegex = /\:+$/g;
-        super(parseRegex, new RegExp("/docker\-compose\.yml$/"));
     }
 
     parseLine(textLine: vscode.TextLine): IToken[] {

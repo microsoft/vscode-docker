@@ -29,7 +29,8 @@
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "extensionDependencies": [
-     "vscode.yaml"
+    "vscode.docker",
+    "vscode.yaml"
   ],
   "devDependencies": {
     "vscode": "0.10.x"

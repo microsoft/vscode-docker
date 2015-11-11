@@ -8,19 +8,9 @@ import {TextLine} from 'vscode';
 
 export abstract class Parser {
     _tokenParseRegex: RegExp;
-    _fileNameRegex: RegExp;
 
-    constructor(parseTokenRegex: RegExp, fileNameRegex: RegExp) {
+    constructor(parseTokenRegex: RegExp) {
         this._tokenParseRegex = parseTokenRegex;
-        this._fileNameRegex = fileNameRegex;
-    }
-
-    isFileSupported(fileName: string): boolean {
-        if (this._fileNameRegex !== undefined) {
-            return this._fileNameRegex.test(fileName);
-        }
-
-        return true;
     }
 
     keyNameFromKeyToken(keyToken: string): string {
