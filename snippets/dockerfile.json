@@ -2,113 +2,113 @@
     "FROM": {
         "prefix": "FROM",
         "body": [
-			"FROM ${baseImage}",
-			"$0"
-		],
-		"description": "FROM"
+            "FROM ${baseImage}",
+            "$0"
+        ],
+        "description": "FROM"
     },
     "MAINTAINER": {
         "prefix": "MAINTAINER",
         "body": [
-			"MAINTAINER ${name}",
-			"$0"
-		],
-		"description": "MAINTAINER"
+            "MAINTAINER ${name}",
+            "$0"
+        ],
+        "description": "MAINTAINER"
     },
     "RUN": {
         "prefix": "RUN",
         "body": [
-			"RUN ${cmd}",
-			"$0"
-		],
-		"description": "RUN"
+            "RUN ${cmd}",
+            "$0"
+        ],
+        "description": "RUN"
     },
     "CMD": {
         "prefix": "CMD",
         "body": [
-			"CMD ${command}",
-			"$0"
-		],
-		"description": "CMD"
+            "CMD ${command}",
+            "$0"
+        ],
+        "description": "CMD"
     },
     "LABEL": {
         "prefix": "LABEL",
         "body": [
-			"LABEL ${key}=${value}",
-			"$0"
-		],
-		"description": "LABEL"
+            "LABEL ${key}=${value}",
+            "$0"
+        ],
+        "description": "LABEL"
     },
     "EXPOSE": {
         "prefix": "EXPOSE",
         "body": [
-			"EXPOSE ${port}",
-			"$0"
-		],
-		"description": "EXPOSE"
+            "EXPOSE ${port}",
+            "$0"
+        ],
+        "description": "EXPOSE"
     },
     "ENV": {
         "prefix": "ENV",
         "body": [
-			"ENV ${key}=${value}",
-			"$0"
-		],
-		"description": "ENV"
+            "ENV ${key}=${value}",
+            "$0"
+        ],
+        "description": "ENV"
     },
     "ADD": {
         "prefix": "ADD",
         "body": [
-			"ADD ${source} ${dest}",
-			"$0"
-		],
-		"description": "ADD"
+            "ADD ${source} ${dest}",
+            "$0"
+        ],
+        "description": "ADD"
     },
     "COPY": {
         "prefix": "COPY",
         "body": [
-			"COPY ${source} ${dest}",
-			"$0"
-		],
-		"description": "COPY"
+            "COPY ${source} ${dest}",
+            "$0"
+        ],
+        "description": "COPY"
     },
     "ENTRYPOINT": {
         "prefix": "ENTRYPOINT",
         "body": [
-			"ENTRYPOINT ${command}",
-			"$0"
-		],
-		"description": "ENTRYPOINT"
+            "ENTRYPOINT ${command}",
+            "$0"
+        ],
+        "description": "ENTRYPOINT"
     },
     "VOLUME": {
         "prefix": "VOLUME",
         "body": [
-			"VOLUME ${name}",
-			"$0"
-		],
-		"description": "VOLUME"
+            "VOLUME ${name}",
+            "$0"
+        ],
+        "description": "VOLUME"
     },
     "USER": {
         "prefix": "USER",
         "body": [
-			"USER ${daemon}",
-			"$0"
-		],
-		"description": "USER"
+            "USER ${daemon}",
+            "$0"
+        ],
+        "description": "USER"
     },
     "WORKDIR": {
         "prefix": "WORKDIR",
         "body": [
-			"WORKDIR ${path}",
-			"$0"
-		],
-		"description": "WORKDIR"
+            "WORKDIR ${path}",
+            "$0"
+        ],
+        "description": "WORKDIR"
     },
-	"ONBUILD": {
+    "ONBUILD": {
         "prefix": "ONBUILD",
         "body": [
-			"ONBUILD ${instruction}",
-			"$0"
-		],
-		"description": "ONBUILD"
+            "ONBUILD ${instruction}",
+            "$0"
+        ],
+        "description": "ONBUILD"
     }
 }
