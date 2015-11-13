@@ -1,11 +1,22 @@
 {
   "name": "vscode-docker",
   "version": "0.0.2",
-  "publisher": "DockerTools",
-  "description": "Dockerfile and Docker yaml file support for Visual Studio Code",
-  "engines": {
-    "vscode": "0.10.x"
+  "publisher": "PeterJausovec",
+  "displayName": "Dockerfile and Docker Compose File (yml) Support",
+  "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "icon": "images/docker_icon.svg",
+  "galleryBanner": {
+    "color": "#5c2d91",
+    "theme": "dark"
   },
+  "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
+  "bugs": {
+    "url":"https://github.com/Microsoft/vscode-docker/issues"
+  },
+  "categories": [
+    "Other"
+  ],
   "private": true,
   "repository": {
     "type": "git",
@@ -23,6 +34,9 @@
         "path": "./snippets/dockerfile.json"
       }
     ]
+  },
+  "engines": {
+    "vscode": "0.10.x"
   },
   "scripts": {
     "vscode:prepublish": "tsc",
