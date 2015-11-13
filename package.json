@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "PeterJausovec",
   "displayName": "Dockerfile and Docker Compose File (yml) Support",
   "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
