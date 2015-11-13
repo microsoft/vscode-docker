@@ -10,7 +10,7 @@ import {Parser, TokenType, IToken} from '../parser';
 export class DockerfileParser extends Parser {
     constructor() {
         var parseRegex = /\ +$/g;
-        super(parseRegex, undefined);
+        super(parseRegex);
     }
 
     parseLine(textLine: TextLine): IToken[] {

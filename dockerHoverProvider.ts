@@ -20,10 +20,6 @@ export class DockerHoverProvider implements HoverProvider {
     }
 
     public provideHover(document: TextDocument, position: Position, token: CancellationToken): Thenable<Hover> {
-        if (!this._parser.isFileSupported(document.fileName)) {
-            return Promise.resolve(null);
-        }
-
         var line = document.lineAt(position.line);
 
         if (line.text.length === 0) {
