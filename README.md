@@ -1,20 +1,30 @@
 ## Docker Extension for Visual Studio Code
 -------------------
-> **NOTE:** All content within this repo is private and cannot be shared with others without the express written permission of the product team. 
+## Functionality
+This extension adds syntax highlighting, snippets and additional intellisense for Dockerfiles and docker-compose files in Visual Studio Code. Hovering over 
+commands in your Dockerfile will show you additional information about commands and images. 
 
-This extension adds syntax highlighting, snippets and additional intellisense for Dockerfiles and Docker-compose files.
+![dockerfile](images/dockerfile.gif)
 
-### How to use it
-Install Visual Studio Code `0.9.2` from https://code.visualstudio.com, clone this repo into your VS Code extensions folder, and then run `npm install`. 
+Similar functionality is available for docker compose files:
 
-```bash
-cd ~/.vscode/extensions/
-git clone https://github.com/Microsoft/vscode-docker 
-cd vscode-docker
-npm install
-```
+![composefile](images/dockercompose.gif)
 
-Restart Visual Studio code and enjoy awesome Dockerfile and docker-compose.yml support!
+## Install
+Open up Visual Studio Code, press F1 and type `ext install` and select **Dockerfile and Docker Compose File (yml) Support**. Once extension is installed you will
+be prompted to restart Visual Studio Code.
+
+![installation](images/installing.gif)
+
+## Contributing
+There are a couple of ways you can contribute to this repo:
+
+- Ideas, feature requests and bugs: We are open to all ideas and we want to get rid of bugs! Use the Issues section to either report a new issue, provide your ideas or contribute to existing threads
+- Documentation: Found a typo or strangely worded sentences? Submit a PR!
+- Code: Contribute bug fixes, features or design changes.
+
+## Legal
+Before we can accept your pull request you will need to sign a **Contribution License Agreement**. All you need to do is to submit a pull request, then the PR will get appropriately labelled (e.g. `cla-required`, `cla-norequired`, `cla-signed`, `cla-already-signed`). If you already signed the agreement we will continue with reviewing the PR, otherwise system will tell you how you can sign the CLA. Once you sign the CLA all future PR's will be labeled as `cla-signed`.
 
 ## License 
 [MIT](LICENSE)
