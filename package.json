@@ -1,7 +1,7 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.3",
-  "publisher": "Peter Jausovec",
+  "version": "0.0.5",
+  "publisher": "PeterJausovec",
   "displayName": "Dockerfile and Docker Compose File (yml) Support",
   "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -15,7 +15,7 @@
     "url":"https://github.com/Microsoft/vscode-docker/issues"
   },
   "categories": [
-    "Other"
+    "Languages"
   ],
   "private": true,
   "repository": {
