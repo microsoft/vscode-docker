@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
   "bugs": {
-    "url":"https://github.com/Microsoft/vscode-docker/issues"
+    "url": "https://github.com/Microsoft/vscode-docker/issues"
   },
   "categories": [
     "Languages"
@@ -32,6 +32,18 @@
       {
         "language": "dockerfile",
         "path": "./snippets/dockerfile.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "dockerfile",
+        "aliases": [
+          "Dockerfile"
+        ],
+        "filenamePatterns": [
+          "dockerfile*.*",
+          "Dockerfile*.*"
+        ]
       }
     ]
   },
