@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "PeterJausovec",
   "displayName": "Dockerfile and Docker Compose File (yml) Support",
   "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
@@ -48,10 +48,11 @@
     ]
   },
   "engines": {
-    "vscode": "0.10.x"
+    "vscode": "^0.10.8"
   },
   "scripts": {
     "vscode:prepublish": "tsc",
+    "postinstall": "node ./node_modules/vscode/bin/install",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "extensionDependencies": [
@@ -59,6 +60,6 @@
     "vscode.yaml"
   ],
   "devDependencies": {
-    "vscode": "0.10.x"
+    "vscode": "0.11.x"
   }
 }

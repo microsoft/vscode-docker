@@ -82,20 +82,12 @@ export class SuggestSupportHelper {
         }
         var keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-
             var imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
-            return Promise.all([this.searchImageInRegistryHub(imageName)]).then((results) => {
+            return this.searchImageInRegistryHub(imageName).then((results) => {
                 if (results[0] && results[1]) {
-                    return [{
-                        value: '**DockerHub:**'
-                    }, {
-                            value: results[0]
-                        }, {
-                            value: '**DockerRuntime**'
-                        }, {
-                            value: results[1]
-                        }]
+                    return ['**DockerHub:**', results[0], '**DockerRuntime**', results[1]];
                 }
+
                 if (results[0]) {
                     return results[0];
                 }

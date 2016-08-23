@@ -48,8 +48,11 @@ export class DockerHoverProvider implements HoverProvider {
             }
 
             let range = new Range(position.line, r[0].startIndex, position.line, r[0].endIndex);
-            let hover = new Hover(r[0].result, range);
-            return hover;
+            r[0].result.then((t) => {
+                let hover = new Hover(t, range);
+                return hover;
+            })
+
         });
     }
 
