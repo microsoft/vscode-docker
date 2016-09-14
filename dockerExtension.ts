@@ -15,6 +15,7 @@ import {startContainer} from './commands/start-container';
 import {stopContainer} from './commands/stop-container'; 
 import {showLogsContainer} from './commands/showlogs-container'; 
 import {openShellContainer} from './commands/open-shell-container'; 
+import {composeUp, composeDown} from './commands/docker-compose'; 
 
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
@@ -32,4 +33,6 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
 }
