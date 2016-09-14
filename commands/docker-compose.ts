@@ -9,7 +9,7 @@ function getDockerComposeFileUris(): Thenable<vscode.Uri[]>{
     if (!hasWorkspaceFolder()) {
         return Promise.resolve(null);
     }
-    return Promise.resolve(vscode.workspace.findFiles('**/[dD]ocker-[cC]ompose.yml', null, 9999, null));
+    return Promise.resolve(vscode.workspace.findFiles('{**/[dD]ocker-[cC]ompose.*.yml,**/[dD]ocker-[cC]ompose.yml}', null, 9999, null));
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -20,11 +20,12 @@ interface Item extends vscode.QuickPickItem {
 function createItem(uri: vscode.Uri) : Item {
     let length = vscode.workspace.rootPath.length;
     let label = uri.path.substr(length);
+    let slashIndex = label.lastIndexOf('/');
     return <Item> {
         label: label,
         description: null,
-        path: '.' + label.substr(0, label.length - '/docker-compose.yml'.length),
-        file: label.substr(label.length - 'docker-compose.yml'.length)
+        path: '.' + label.substr(0, slashIndex),
+        file: label.substr(slashIndex + 1)
     };
 }
 
@@ -38,13 +39,13 @@ function computeItems(uris: vscode.Uri[]) : vscode.QuickPickItem[] {
 
 
 
-export function compose(command: string) {
+export function compose(command: string, message: string) {
     getDockerComposeFileUris().then(function (uris: vscode.Uri[]) {
         if (!uris || uris.length == 0) {
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose file in your workspace.');
         } else {
             let items: vscode.QuickPickItem[] = computeItems(uris);
-            vscode.window.showQuickPick(items, { placeHolder: 'Choose Docker Compose file' }).then(function(selectedItem : Item) {
+            vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
                     terminal.sendText(`cd ${selectedItem.path}; docker-compose -f ${selectedItem.file} ${command}`);
@@ -56,9 +57,9 @@ export function compose(command: string) {
 }
 
 export function composeUp() {
-    compose('up');
+    compose('up', 'to bring up');
 }
 
 export function composeDown() {
-    compose('down');
+    compose('down', 'to take down');
 }
