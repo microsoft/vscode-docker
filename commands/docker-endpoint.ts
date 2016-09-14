@@ -26,8 +26,7 @@ class DockerClient {
                 if (err) {
                     return reject(err); 
                 }
-                let filteredImages = images.filter(image => "" === image.ParentId);
-                return resolve(filteredImages);
+                return resolve(images);
             });
         });
     };
