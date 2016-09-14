@@ -33,7 +33,7 @@ export function startContainer() {
             vscode.window.showQuickPick(items, { placeHolder: 'Choose Image' }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal(selectedItem.label);
-                    terminal.sendText(`docker run ${selectedItem.label}`);
+                    terminal.sendText(`docker run --rm ${selectedItem.label}`);
                     terminal.show();
                 }
             });
