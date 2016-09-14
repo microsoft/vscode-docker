@@ -24,7 +24,12 @@
   },
   "activationEvents": [
     "onLanguage:dockerfile",
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "onCommand:vscode-docker.image.build",
+    "onCommand:vscode-docker.container.start",
+    "onCommand:vscode-docker.container.stop",
+    "onCommand:vscode-docker.container.show-logs",
+    "onCommand:vscode-docker.container.open-shell"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -45,10 +50,37 @@
           "Dockerfile*.*"
         ]
       }
+    ],
+    "commands": [
+      {
+        "command": "vscode-docker.image.build",
+        "title": "Docker: Build Image",
+        "description": "Build a Docker image from a dockerfile"
+      },
+      {
+        "command": "vscode-docker.container.start",
+        "title": "Docker: Start Container",
+        "description": "Starts a container from an image"
+      },
+      {
+        "command": "vscode-docker.container.stop",
+        "title": "Docker: Stop Container",
+        "description": "Stop a running container"
+      },
+      {
+        "command": "vscode-docker.container.show-logs",
+        "title": "Docker: Show Logs",
+        "description": "Show the logs of a running container"
+      },
+      {
+        "command": "vscode-docker.container.open-shell",
+        "title": "Docker: Open Interactive Shell",
+        "description": "Open a terminal with an interactive shell for a running container"
+      }
     ]
   },
   "engines": {
-    "vscode": "^0.10.8"
+    "vscode": "^1.5.2"
   },
   "scripts": {
     "vscode:prepublish": "tsc",
@@ -60,6 +92,10 @@
     "vscode.yaml"
   ],
   "devDependencies": {
-    "vscode": "0.11.x"
+    "vscode": "0.11.x",
+    "typescript": "1.8.x"
+  },
+  "dependencies": {
+    "dockerode": "^2.3.0" 
   }
 }
