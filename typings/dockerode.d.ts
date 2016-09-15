@@ -47,6 +47,10 @@ declare module Docker {
 		exec(options: ExecOptions, cb: (err: Error, exec: Exec)=>void): void;
 	}
 
+	class Image {
+		remove(options: any, cb: (err: Error, exec: Exec)=>void): void;
+	}
+
 	interface ImageDesc {
 		Id: string;
 		ParentId: string;
@@ -66,6 +70,8 @@ declare class Docker {
 	constructor(options: Docker.DockerOptions);
 
 	listImages(cb: (err:Error , images: Docker.ImageDesc[])=>void): void;
+	getImage(id:string): Docker.Image;
+	
 	createContainer(options: Docker.CreateContainerOptions, cb: (err: Error, container: Docker.Container)=>void): void;
 	listContainers(cb: (err:Error , containers: Docker.ContainerDesc[])=>void): void;
 	getContainer(id: string): Docker.Container;

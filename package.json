@@ -26,6 +26,7 @@
     "onLanguage:dockerfile",
     "onLanguage:yaml",
     "onCommand:vscode-docker.image.build",
+    "onCommand:vscode-docker.image.delete",
     "onCommand:vscode-docker.container.start",
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.container.show-logs",
@@ -60,6 +61,11 @@
         "description": "Build a Docker image from a dockerfile"
       },
       {
+        "command": "vscode-docker.image.remove",
+        "title": "Docker: Remove Image",
+        "description": "Remove a Docker image"
+      },
+      {
         "command": "vscode-docker.container.start",
         "title": "Docker: Start Container",
         "description": "Starts a container from an image"
@@ -92,7 +98,7 @@
     ]
   },
   "engines": {
-    "vscode": "^1.5.2"
+    "vscode": "^1.5.1"
   },
   "scripts": {
     "vscode:prepublish": "tsc",

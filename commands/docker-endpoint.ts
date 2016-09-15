@@ -34,6 +34,10 @@ class DockerClient {
     public getContainer(id: string): Docker.Container {
         return this.endPoint.getContainer(id);
     }
+
+    public getImage(id:string): Docker.Image {
+        return this.endPoint.getImage(id);
+    }
 }
 
 export const docker = new DockerClient();
