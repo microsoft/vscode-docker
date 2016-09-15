@@ -67,12 +67,12 @@
       },
       {
         "command": "vscode-docker.container.start",
-        "title": "Docker: Start Container",
+        "title": "Docker: Run",
         "description": "Starts a container from an image"
       },
       {
         "command": "vscode-docker.container.stop",
-        "title": "Docker: Stop Container",
+        "title": "Docker: Stop",
         "description": "Stop a running container"
       },
       {
@@ -82,17 +82,17 @@
       },
       {
         "command": "vscode-docker.container.open-shell",
-        "title": "Docker: Open Interactive Shell",
+        "title": "Docker: Exec Bash",
         "description": "Open a terminal with an interactive shell for a running container"
       },
       {
         "command": "vscode-docker.compose.up",
-        "title": "Docker-Compose: Start a Composition",
+        "title": "Docker: Compose Up",
         "description": "Starts a composition of containers"
       },
       {
         "command": "vscode-docker.compose.down",
-        "title": "Docker-Compose: Stop a Composition",
+        "title": "Docker: Compose Down",
         "description": "Stops a composition of containers"
       }
     ]
