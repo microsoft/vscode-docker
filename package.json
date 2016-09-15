@@ -101,7 +101,7 @@
     "vscode": "^1.5.1"
   },
   "scripts": {
-    "vscode:prepublish": "tsc",
+    "vscode:prepublish": "./node_modules/typescript/bin/tsc",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },

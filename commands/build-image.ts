@@ -45,7 +45,9 @@ export function buildImage() {
             vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-                    terminal.sendText(`docker build ${selectedItem.path} --file ${selectedItem.file}`);
+                    let imageName: string = vscode.workspace.rootPath.split('/').pop();
+                    imageName = imageName.toLowerCase();
+                    terminal.sendText(`docker build  -f ${selectedItem.file} -t ${imageName} ${selectedItem.path}`);
                     terminal.show();
                 }
             });
