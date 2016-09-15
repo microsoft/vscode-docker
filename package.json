@@ -27,6 +27,7 @@
     "onLanguage:yaml",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.remove",
+    "onCommand:vscode-docker.image.push",
     "onCommand:vscode-docker.container.start",
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.container.show-logs",
@@ -110,6 +111,11 @@
         "command": "vscode-docker.compose.down",
         "title": "Docker: Compose Down",
         "description": "Stops a composition of containers"
+      },
+      {
+        "command": "vscode-docker.image.push",
+        "title": "Docker: Push",
+        "description": "Push an image to a registry"
       }
     ]
   },

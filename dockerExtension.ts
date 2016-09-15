@@ -12,6 +12,7 @@ import {DockerfileParser} from './dockerfile/dockerfileParser';
 import vscode = require('vscode');
 import {buildImage} from './commands/build-image'; 
 import {removeImage} from './commands/remove-image'; 
+import {pushImage} from './commands/push-image'; 
 import {startContainer} from './commands/start-container'; 
 import {stopContainer} from './commands/stop-container'; 
 import {showLogsContainer} from './commands/showlogs-container'; 
@@ -31,6 +32,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start', startContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));

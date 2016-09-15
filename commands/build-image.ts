@@ -45,7 +45,7 @@ export function buildImage() {
             vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-                    let imageName: string = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+                    let imageName: string = selectedItem.path.split('/').pop().toLowerCase();
                     let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
                     let defaultRegistry: string = configOptions.get('defaultRegistry', '');
                     let defaultRegistryPath: string = configOptions.get('defaultRegistryPath', '');
