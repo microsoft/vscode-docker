@@ -54,6 +54,22 @@
         ]
       }
     ],
+    "configuration": {
+      "type": "object",
+      "title": "Docker configuration options",
+      "properties": {
+        "docker.defaultRegistry": {
+          "type": "string",
+          "default": "",
+          "description": "Default registry to push to, empty string will push to Dockerhub."
+        },
+        "docker.defaultRegistryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path within registry to push to."
+        }
+      }
+    },
     "commands": [
       {
         "command": "vscode-docker.image.build",
@@ -114,6 +130,6 @@
     "typescript": "1.8.x"
   },
   "dependencies": {
-    "dockerode": "^2.3.0" 
+    "dockerode": "^2.3.0"
   }
 }

@@ -46,6 +46,15 @@ export function buildImage() {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
                     let imageName: string = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+                    let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+                    let defaultRegistry: string = configOptions.get('defaultRegistry', '');
+                    let defaultRegistryPath: string = configOptions.get('defaultRegistryPath', '');
+                    if (defaultRegistryPath.length > 0) {
+                        imageName = defaultRegistryPath + '/' + imageName;
+                    }
+                    if (defaultRegistry.length > 0) {
+                        imageName = defaultRegistry + '/' + imageName;
+                    }
                     terminal.sendText(`docker build  -f ${selectedItem.file} -t ${imageName} ${selectedItem.path}`);
                     terminal.show();
                 }
