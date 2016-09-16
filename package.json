@@ -1,9 +1,9 @@
 {
-  "name": "vscode-docker",
+  "name": "thermocloud",
   "version": "0.0.6",
-  "publisher": "PeterJausovec",
-  "displayName": "Dockerfile and Docker Compose File (yml) Support",
-  "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
+  "publisher": "chrisdias",
+  "displayName": "Docker Support",
+  "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
   "icon": "images/docker_icon.svg",
   "galleryBanner": {
@@ -11,17 +11,6 @@
     "theme": "dark"
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
-  "bugs": {
-    "url": "https://github.com/Microsoft/vscode-docker/issues"
-  },
-  "categories": [
-    "Languages"
-  ],
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Microsoft/vscode-docker.git"
-  },
   "activationEvents": [
     "onLanguage:dockerfile",
     "onLanguage:yaml",
