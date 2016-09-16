@@ -1,6 +1,6 @@
 {
   "name": "thermocloud",
-  "version": "0.0.6",
+  "version": "0.0.1",
   "publisher": "chrisdias",
   "displayName": "Docker Support",
   "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
