@@ -14,6 +14,7 @@ import {buildImage} from './commands/build-image';
 import {removeImage} from './commands/remove-image'; 
 import {pushImage} from './commands/push-image'; 
 import {startContainer} from './commands/start-container'; 
+import {startContainerInteractive} from './commands/start-container-interactive'; 
 import {stopContainer} from './commands/stop-container'; 
 import {showLogsContainer} from './commands/showlogs-container'; 
 import {openShellContainer} from './commands/open-shell-container'; 
@@ -34,6 +35,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start', startContainer));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));

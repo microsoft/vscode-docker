@@ -29,6 +29,7 @@
     "onCommand:vscode-docker.image.remove",
     "onCommand:vscode-docker.image.push",
     "onCommand:vscode-docker.container.start",
+    "onCommand:vscode-docker.container.start.interactive",
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.container.show-logs",
     "onCommand:vscode-docker.container.open-shell",
@@ -88,6 +89,11 @@
         "description": "Starts a container from an image"
       },
       {
+        "command": "vscode-docker.container.start.interactive",
+        "title": "Docker: Run Interactive",
+        "description": "Starts a container from an image and runs it interactively"
+      },
+      {
         "command": "vscode-docker.container.stop",
         "title": "Docker: Stop",
         "description": "Stop a running container"
@@ -99,7 +105,7 @@
       },
       {
         "command": "vscode-docker.container.open-shell",
-        "title": "Docker: Exec Bash",
+        "title": "Docker: Attach Shell",
         "description": "Open a terminal with an interactive shell for a running container"
       },
       {
