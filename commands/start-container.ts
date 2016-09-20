@@ -1,42 +1,22 @@
 import vscode = require('vscode');
-import {docker} from './docker-endpoint';
-import * as Docker from 'dockerode';
+import {ImageItem, quickPickImage} from './utils/quick-pick-image';
 
 
-
-interface Item extends vscode.QuickPickItem {
-    id: string,
-}
-
-function createItem(image: Docker.ImageDesc) : Item {
-    return <Item> {
-        label: image.RepoTags[0] || '<none>',
-        description: null,
-        id: image.Id
-    };
-}
-
-function computeItems(images: Docker.ImageDesc[]) : vscode.QuickPickItem[] {
-    let items : vscode.QuickPickItem[] = [];
-    for (let i = 0; i < images.length; i++) {
-        items.push(createItem(images[i]));
-    }
-    return items;
+function doStartContainer(interactive: boolean) {
+    quickPickImage().then(function (selectedItem: ImageItem) {
+        if (selectedItem) {
+            let option = interactive ? '-it' : '';
+            let terminal = vscode.window.createTerminal(selectedItem.label);
+            terminal.sendText(`docker run ${option} --rm ${selectedItem.label}`);
+            terminal.show();
+        }
+    });
 }
 
 export function startContainer() {
-    docker.getImageDescriptors().then(images => {
-        if (!images || images.length == 0) {
-            vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
-        } else {
-            let items: vscode.QuickPickItem[] = computeItems(images);
-            vscode.window.showQuickPick(items, { placeHolder: 'Choose Image' }).then(function(selectedItem : Item) {
-                if (selectedItem) {
-                    let terminal: vscode.Terminal = vscode.window.createTerminal(selectedItem.label);
-                    terminal.sendText(`docker run --rm ${selectedItem.label}`);
-                    terminal.show();
-                }
-            });
-        }
-    });
+    doStartContainer(false);
+}
+
+export function startContainerInteractive() {
+    doStartContainer(true);
 }

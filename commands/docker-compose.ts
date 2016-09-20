@@ -37,8 +37,6 @@ function computeItems(uris: vscode.Uri[]) : vscode.QuickPickItem[] {
     return items;
 }
 
-
-
 export function compose(command: string, message: string) {
     getDockerComposeFileUris().then(function (uris: vscode.Uri[]) {
         if (!uris || uris.length == 0) {
