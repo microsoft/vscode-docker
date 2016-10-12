@@ -1,9 +1,9 @@
 {
-  "name": "vscode-docker",
-  "version": "0.0.6",
+  "name": "docker",
+  "version": "0.0.7",
   "publisher": "PeterJausovec",
-  "displayName": "Dockerfile and Docker Compose File (yml) Support",
-  "description": "Adds syntax highlighting, snippets and description on hover for Dockerfiles and Docker compose files.",
+  "displayName": "Docker Support",
+  "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
   "icon": "images/docker_icon.svg",
   "galleryBanner": {
@@ -11,20 +11,19 @@
     "theme": "dark"
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
-  "bugs": {
-    "url": "https://github.com/Microsoft/vscode-docker/issues"
-  },
-  "categories": [
-    "Languages"
-  ],
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Microsoft/vscode-docker.git"
-  },
   "activationEvents": [
     "onLanguage:dockerfile",
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "onCommand:vscode-docker.image.build",
+    "onCommand:vscode-docker.image.remove",
+    "onCommand:vscode-docker.image.push",
+    "onCommand:vscode-docker.container.start",
+    "onCommand:vscode-docker.container.start.interactive",
+    "onCommand:vscode-docker.container.stop",
+    "onCommand:vscode-docker.container.show-logs",
+    "onCommand:vscode-docker.container.open-shell",
+    "onCommand:vscode-docker.compose.up",
+    "onCommand:vscode-docker.compose.down"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -45,13 +44,81 @@
           "Dockerfile*.*"
         ]
       }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Docker configuration options",
+      "properties": {
+        "docker.defaultRegistry": {
+          "type": "string",
+          "default": "",
+          "description": "Default registry to push to, empty string will push to Dockerhub."
+        },
+        "docker.defaultRegistryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path within registry to push to."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "vscode-docker.image.build",
+        "title": "Docker: Build Image",
+        "description": "Build a Docker image from a dockerfile"
+      },
+      {
+        "command": "vscode-docker.image.remove",
+        "title": "Docker: Remove Image",
+        "description": "Remove a Docker image"
+      },
+      {
+        "command": "vscode-docker.container.start",
+        "title": "Docker: Run",
+        "description": "Starts a container from an image"
+      },
+      {
+        "command": "vscode-docker.container.start.interactive",
+        "title": "Docker: Run Interactive",
+        "description": "Starts a container from an image and runs it interactively"
+      },
+      {
+        "command": "vscode-docker.container.stop",
+        "title": "Docker: Stop",
+        "description": "Stop a running container"
+      },
+      {
+        "command": "vscode-docker.container.show-logs",
+        "title": "Docker: Show Logs",
+        "description": "Show the logs of a running container"
+      },
+      {
+        "command": "vscode-docker.container.open-shell",
+        "title": "Docker: Attach Shell",
+        "description": "Open a terminal with an interactive shell for a running container"
+      },
+      {
+        "command": "vscode-docker.compose.up",
+        "title": "Docker: Compose Up",
+        "description": "Starts a composition of containers"
+      },
+      {
+        "command": "vscode-docker.compose.down",
+        "title": "Docker: Compose Down",
+        "description": "Stops a composition of containers"
+      },
+      {
+        "command": "vscode-docker.image.push",
+        "title": "Docker: Push",
+        "description": "Push an image to a registry"
+      }
     ]
   },
   "engines": {
-    "vscode": "^0.10.8"
+    "vscode": "^1.5.1"
   },
   "scripts": {
-    "vscode:prepublish": "tsc",
+    "vscode:prepublish": "./node_modules/typescript/bin/tsc",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
@@ -60,6 +127,10 @@
     "vscode.yaml"
   ],
   "devDependencies": {
-    "vscode": "0.11.x"
+    "vscode": "0.11.x",
+    "typescript": "1.8.x"
+  },
+  "dependencies": {
+    "dockerode": "^2.3.0"
   }
 }
