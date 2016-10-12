@@ -19,7 +19,7 @@ interface Item extends vscode.QuickPickItem {
 
 function createItem(uri: vscode.Uri) : Item {
     let length = vscode.workspace.rootPath.length;
-    let label = uri.path.substr(length);
+    let label = uri.fsPath.substr(length);
     let slashIndex = label.lastIndexOf('/');
     return <Item> {
         label: label,
