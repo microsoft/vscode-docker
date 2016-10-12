@@ -1,7 +1,7 @@
 {
   "name": "docker",
-  "version": "0.0.1",
-  "publisher": "chrisdias",
+  "version": "0.0.7",
+  "publisher": "PeterJausovec",
   "displayName": "Docker Support",
   "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
