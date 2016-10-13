@@ -1,6 +1,8 @@
 import vscode = require('vscode');
 import * as path from 'path';
 import * as fs from 'fs';
+import { promptForPort, quickPickPlatform } from './config-prompts';
+
 
 const dockerFileTemplate: string = [
     'FROM node:latest',
@@ -9,11 +11,11 @@ const dockerFileTemplate: string = [
     'COPY package.json',
     'RUN npm install --production',
     'COPY . /src',
-    'EXPOSE 3000',
+    'EXPOSE ${port}',
     'CMD ["npm", "start"]'
 ].join(process.platform === 'win32' ? '\r\n' : '\n');
 
-const dockerComposeTemplate: string  = [
+const dockerComposeTemplate: string = [
     'version: \'2\'',
     '',
     'services:',
@@ -23,10 +25,10 @@ const dockerComposeTemplate: string  = [
     '      context: .',
     '      dockerfile: dockerfile',
     '    ports:',
-    '      - 3000:3000'
+    '      - ${port}:${port}'
 ].join(process.platform === 'win32' ? '\r\n' : '\n');
 
-const dockerComposeDebugTemplate: string  = [
+const dockerComposeDebugTemplate: string = [
     'version: \'2\'',
     '',
     'services:',
@@ -36,7 +38,7 @@ const dockerComposeDebugTemplate: string  = [
     '      context: .',
     '      dockerfile: dockerfile',
     '    ports:',
-    '      - 3000:3000',
+    '      - ${port}:${port}',
     '      - 5858:5858',
     '    volumes:',
     '      - .:/src',
@@ -51,27 +53,65 @@ export function configure(): void {
         return;
     }
 
-    let dockerFile = path.join(vscode.workspace.rootPath, 'dockerfile');
-    let dockerComposeFile = path.join(vscode.workspace.rootPath, 'docker-copose.yml');
-    let dockerComposeDebugFile = path.join(vscode.workspace.rootPath, 'docker-compose.debug.yml');
+    // promptForPort()
+    //    .then(function (port: string) {
+    //     if (port) {
+    //         vscode.window.showInformationMessage(port);
+    //     }
 
-    if (fs.existsSync(dockerFile)) {
-        vscode.window.showInformationMessage('A dockerfile already exists.');
-    } else {
-        fs.writeFileSync(dockerFile, dockerFileTemplate, { encoding: 'utf8' });
-    }
+    // }).then(() => {
 
-    if (fs.existsSync(dockerComposeFile)) {
-        vscode.window.showInformationMessage('A docker-compose.yml file already exists.');
-    } else {
-        fs.writeFileSync(dockerComposeFile, dockerComposeTemplate, { encoding: 'utf8' });
-    }
+    //     quickPickPlatform().then(function (selectedItem: string) {
+    //     if (selectedItem) {
+    //         vscode.window.showInformationMessage(selectedItem);
+    //     }
 
-    if (fs.existsSync(dockerComposeDebugFile)) {
-        vscode.window.showInformationMessage('A docker-compose.debug.yml file already exists.');
-    } else {
-        fs.writeFileSync(dockerComposeDebugFile, dockerComposeDebugTemplate, { encoding: 'utf8' });
-    }
+    // })});
+
+
+    promptForPort().then((port: string) => {
+        return port;
+    }).then((port: string) => {
+        quickPickPlatform().then((selectedItem: string) => {
+
+            let platformType = 'other';
+            let portNumber = '3000';
+
+            if (port) {
+                portNumber = port;
+            };
+
+            if (selectedItem) {
+                platformType = selectedItem;
+            }
+
+            vscode.window.showInformationMessage(portNumber);
+            vscode.window.showInformationMessage(platformType);
+
+            let dockerFile = path.join(vscode.workspace.rootPath, 'dockerfile');
+            let dockerComposeFile = path.join(vscode.workspace.rootPath, 'docker-copose.yml');
+            let dockerComposeDebugFile = path.join(vscode.workspace.rootPath, 'docker-compose.debug.yml');
+
+            if (fs.existsSync(dockerFile)) {
+                vscode.window.showInformationMessage('A dockerfile already exists.');
+            } else {
+                fs.writeFileSync(dockerFile, dockerFileTemplate, { encoding: 'utf8' });
+            }
+
+            if (fs.existsSync(dockerComposeFile)) {
+                vscode.window.showInformationMessage('A docker-compose.yml file already exists.');
+            } else {
+                fs.writeFileSync(dockerComposeFile, dockerComposeTemplate, { encoding: 'utf8' });
+            }
+
+            if (fs.existsSync(dockerComposeDebugFile)) {
+                vscode.window.showInformationMessage('A docker-compose.debug.yml file already exists.');
+            } else {
+                fs.writeFileSync(dockerComposeDebugFile, dockerComposeDebugTemplate, { encoding: 'utf8' });
+            }
+
+        });
+    });
 
     // update launch.json
 
