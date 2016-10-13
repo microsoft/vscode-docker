@@ -18,6 +18,7 @@ import {stopContainer} from './commands/stop-container';
 import {showLogsContainer} from './commands/showlogs-container'; 
 import {openShellContainer} from './commands/open-shell-container'; 
 import {composeUp, composeDown} from './commands/docker-compose'; 
+import {configure} from './configureWorkspace/configure'; 
 
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
@@ -30,6 +31,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));

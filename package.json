@@ -63,6 +63,11 @@
     },
     "commands": [
       {
+        "command": "vscode-docker.configure",
+        "title": "Docker: Configure Workspace",
+        "description": "Add Dockerfile, docker-compose.yml files"
+      },
+      {
         "command": "vscode-docker.image.build",
         "title": "Docker: Build Image",
         "description": "Build a Docker image from a dockerfile"
