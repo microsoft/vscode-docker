@@ -23,7 +23,8 @@
     "onCommand:vscode-docker.container.show-logs",
     "onCommand:vscode-docker.container.open-shell",
     "onCommand:vscode-docker.compose.up",
-    "onCommand:vscode-docker.compose.down"
+    "onCommand:vscode-docker.compose.down",
+    "onCommand:vscode-docker.debug.configureLaunchJson"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -33,6 +34,13 @@
         "path": "./snippets/dockerfile.json"
       }
     ],
+    "debuggers": [
+			{
+				"type": "docker",
+				"label": "Docker Attach",
+				"initialConfigurations": "vscode-docker.debug.configureLaunchJson"
+			}
+		],
     "languages": [
       {
         "id": "dockerfile",
@@ -62,6 +70,11 @@
       }
     },
     "commands": [
+      {
+        "command": "vscode-docker.configure",
+        "title": "Docker: Add docker files to workspace",
+        "description": "Add Dockerfile, docker-compose.yml files"
+      },
       {
         "command": "vscode-docker.image.build",
         "title": "Docker: Build Image",
