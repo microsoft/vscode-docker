@@ -24,6 +24,7 @@
     "onCommand:vscode-docker.container.open-shell",
     "onCommand:vscode-docker.compose.up",
     "onCommand:vscode-docker.compose.down",
+    "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.debug.configureLaunchJson"
   ],
   "main": "./out/dockerExtension",

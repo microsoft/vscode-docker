@@ -3,6 +3,16 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { promptForPort, quickPickPlatform } from './config-utils';
 
+const yesNoPrompt: vscode.MessageItem[] =
+    [{
+        "title": 'Yes',
+        "isCloseAffordance": false
+    },
+    {
+        "title": 'No',
+        "isCloseAffordance": true
+    }];
+
 function genDockerFile(platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
@@ -116,7 +126,7 @@ services:
     dockerfile: dockerfile
   ports:
     - ${port}:${port}`;
-  }
+    }
 }
 
 function genDockerComposeDebug(serviceName: string, platform: string, port: string): string {
@@ -185,8 +195,8 @@ services:
     }
 }
 
-const launchJsonTemplate: string = 
-`{
+const launchJsonTemplate: string =
+    `{
     "version": "0.2.0",
     "configurations": [
         {
@@ -234,28 +244,12 @@ export function configure(): void {
 
             var portNum: string = port || '3000';
             var platformType: string = platform || 'node';
-            var serviceName: string = 'webapp';
-
-            var yesNoPrompt: vscode.MessageItem [] = 
-            [{
-                "title": 'Yes',
-                "isCloseAffordance": false
-            },
-            {
-                "title": 'No',
-                "isCloseAffordance": true
-            }];
+            var serviceName: string = vscode.workspace.rootPath.split('/').pop().toLowerCase();
 
             if (fs.existsSync(dockerFile)) {
                 vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    switch (item.title) {
-                        case 'Yes':
-                            fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
-                            break;
-                        case 'No':
-                            break;
-                        default:
-                            return;
+                    if (item.title.toLowerCase() === 'yes') {
+                        fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
@@ -264,14 +258,8 @@ export function configure(): void {
 
             if (fs.existsSync(dockerComposeFile)) {
                 vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    switch (item.title) {
-                        case 'Yes':
-                            fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
-                            break;
-                        case 'No':
-                            break;
-                        default:
-                            return;
+                    if (item.title.toLowerCase() === 'yes') {
+                        fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
@@ -280,14 +268,8 @@ export function configure(): void {
 
             if (fs.existsSync(dockerComposeDebugFile)) {
                 vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    switch (item.title) {
-                        case 'Yes':
-                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
-                            break;
-                        case 'No':
-                            break;
-                        default:
-                            return;
+                    if (item.title.toLowerCase() === 'yes') {
+                        fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
