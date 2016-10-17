@@ -231,25 +231,69 @@ export function configure(): void {
             if (!port) {
                 return;
             }
-            
+
             var portNum: string = port || '3000';
             var platformType: string = platform || 'node';
             var serviceName: string = 'webapp';
 
+            var no: vscode.MessageItem = {
+                "title": 'No',
+                "isCloseAffordance": true
+            };
+
             if (fs.existsSync(dockerFile)) {
-                vscode.window.showInformationMessage('A dockerfile already exists.');
+                vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', {
+                    title: 'Yes',
+                    isCloseAffordance: false
+                }, no).then((item: vscode.MessageItem) => {
+                    switch (item.title) {
+                        case 'Yes':
+                            fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
+                            break;
+                        case 'No':
+                            break;
+                        default:
+                            return;
+                    }
+                });
             } else {
                 fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
             }
 
             if (fs.existsSync(dockerComposeFile)) {
-                vscode.window.showInformationMessage('A docker-compose.yml file already exists.');
+                vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', {
+                    title: 'Yes',
+                    isCloseAffordance: false
+                }, no).then((item: vscode.MessageItem) => {
+                    switch (item.title) {
+                        case 'Yes':
+                            fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
+                            break;
+                        case 'No':
+                            break;
+                        default:
+                            return;
+                    }
+                });
             } else {
                 fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
             }
 
             if (fs.existsSync(dockerComposeDebugFile)) {
-                vscode.window.showInformationMessage('A docker-compose.debug.yml file already exists.');
+                vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', {
+                    title: 'Yes',
+                    isCloseAffordance: false
+                }, no).then((item: vscode.MessageItem) => {
+                    switch (item.title) {
+                        case 'Yes':
+                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
+                            break;
+                        case 'No':
+                            break;
+                        default:
+                            return;
+                    }
+                });
             } else {
                 fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
             }
