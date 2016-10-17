@@ -236,16 +236,18 @@ export function configure(): void {
             var platformType: string = platform || 'node';
             var serviceName: string = 'webapp';
 
-            var no: vscode.MessageItem = {
+            var yesNoPrompt: vscode.MessageItem [] = 
+            [{
+                "title": 'Yes',
+                "isCloseAffordance": false
+            },
+            {
                 "title": 'No',
                 "isCloseAffordance": true
-            };
+            }];
 
             if (fs.existsSync(dockerFile)) {
-                vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', {
-                    title: 'Yes',
-                    isCloseAffordance: false
-                }, no).then((item: vscode.MessageItem) => {
+                vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     switch (item.title) {
                         case 'Yes':
                             fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
@@ -261,10 +263,7 @@ export function configure(): void {
             }
 
             if (fs.existsSync(dockerComposeFile)) {
-                vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', {
-                    title: 'Yes',
-                    isCloseAffordance: false
-                }, no).then((item: vscode.MessageItem) => {
+                vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     switch (item.title) {
                         case 'Yes':
                             fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
@@ -280,10 +279,7 @@ export function configure(): void {
             }
 
             if (fs.existsSync(dockerComposeDebugFile)) {
-                vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', {
-                    title: 'Yes',
-                    isCloseAffordance: false
-                }, no).then((item: vscode.MessageItem) => {
+                vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     switch (item.title) {
                         case 'Yes':
                             fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
