@@ -13,7 +13,7 @@ const yesNoPrompt: vscode.MessageItem[] =
         "isCloseAffordance": true
     }];
 
-function genDockerFile(platform: string, port: string): string {
+function genDockerFile(serviceName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
@@ -51,12 +51,12 @@ EXPOSE ${port}
         case '.net core':
 
             return `
-FROM microsoft/dotnet:1.0.0-core
+FROM microsoft/aspnetcore:1.0.1
+ARG source=.
 WORKDIR /app
-ENV ASPNETCORE_URLS http://*:${port}
 EXPOSE ${port}
-ENTRYPOINT ["dotnet", "dn.dll"]
-COPY . /app
+COPY $source .
+ENTRYPOINT dotnet ${serviceName}.dll
 `;
 
         default:
@@ -79,14 +79,14 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  environment:
-    NODE_ENV: production
-  ports:
-    - ${port}:${port}`;
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - ${port}:${port}`;
 
         case 'go':
             return `
@@ -94,12 +94,12 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-    - ${port}:${port}`;
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${port}:${port}`;
 
         case '.net core':
             return `
@@ -107,12 +107,12 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-    - ${port}:${port}`;
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${port}:${port}`;
 
         default:
             return `
@@ -120,12 +120,12 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-    - ${port}:${port}`;
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${port}:${port}`;
     }
 }
 
@@ -138,19 +138,19 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  environment:
-    NODE_ENV: development
-  ports:
-    - ${port}:${port}
-    - 5858:5858
-  volumes:
-    - .:/src
-  command:
-    - node --debug=5858 server.js
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - ${port}:${port}
+      - 5858:5858
+    volumes:
+      - .:/src
+    command:
+      - node --debug=5858 server.js
 `;
 
         case 'go':
@@ -159,38 +159,46 @@ version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-      - ${port}:${port}
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+        - ${port}:${port}
 `;
         case '.net core':
             return `
-version: \'2\'
+version: '2'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-    - ${port}:${port}
+    build:
+      args:
+        source: obj/Docker/empty/
+    labels:
+      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    volumes:
+      - .:/app
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ~/clrdbg:/clrdbg:ro
+    entrypoint: tail -f /dev/null
 `;
+
         default:
             return `
 version: \'2\'
 
 services:
   ${serviceName}:
-  image: ${serviceName}
-  build:
-    context: .
-    dockerfile: dockerfile
-  ports:
-    - ${port}:${port}
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - ${port}:${port}
 `;
     }
 }
@@ -249,11 +257,11 @@ export function configure(): void {
             if (fs.existsSync(dockerFile)) {
                 vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
+                        fs.writeFileSync(dockerFile, genDockerFile(serviceName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
-                fs.writeFileSync(dockerFile, genDockerFile(platformType, portNum), { encoding: 'utf8' });
+                fs.writeFileSync(dockerFile, genDockerFile(serviceName, platformType, portNum), { encoding: 'utf8' });
             }
 
             if (fs.existsSync(dockerComposeFile)) {
