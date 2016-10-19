@@ -20,11 +20,11 @@ function genDockerFile(serviceName: string, platform: string, port: string): str
 
             return `
 FROM node:latest
-RUN mkdir -p /src
-WORKDIR /src
-COPY package.json /src
-RUN npm install --production
-COPY . /src
+COPY package.json /tmp/package.json
+RUN cd /tmp && npm install --production
+RUN mkdir -p /app && mv /tmp/node_modules /app
+WORKDIR /app
+COPY . /app
 EXPOSE ${port}
 CMD ["npm", "start"]
 `;
@@ -148,7 +148,7 @@ services:
       - ${port}:${port}
       - 5858:5858
     volumes:
-      - .:/src
+      - .:/app
     command:
       - node --debug=5858 server.js
 `;
@@ -217,7 +217,7 @@ const launchJsonTemplate: string =
             "sourceMaps": false,
             "outFiles": [],
             "localRoot": "\${workspaceRoot}",
-            "remoteRoot": "/src"
+            "remoteRoot": "/app"
         }
     ]
 }`
