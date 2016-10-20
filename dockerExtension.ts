@@ -17,6 +17,7 @@ import { startContainer, startContainerInteractive } from './commands/start-cont
 import { stopContainer } from './commands/stop-container';
 import { showLogsContainer } from './commands/showlogs-container';
 import { openShellContainer } from './commands/open-shell-container';
+import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 
@@ -36,6 +37,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start', startContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));

@@ -1,34 +1,49 @@
 import * as Docker from 'dockerode';
-import {docker} from './docker-endpoint';
+import { docker } from './docker-endpoint';
 import vscode = require('vscode');
 
 export interface ImageItem extends vscode.QuickPickItem {
     ids: string[],
+    parentId: string,
+    created: Date,
+    repoTags: string[],
+    size: Number,
+    virtualSize: Number
 }
 
-function createItem(image: Docker.ImageDesc) : ImageItem {
-    return <ImageItem> {
-        label: image.RepoTags[0] || '<none>',
+function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
+
+    
+    return <ImageItem>{
+        label: repoTag || '<none>',
         description: null,
-        ids: [image.Id]
+        ids: [image.Id],
+        parentId: image.ParentId,
+        created: image.Created,
+        repoTags: image.RepoTags,
+        size: image.Size,
+        virtualSize: image.VirtualSize
     };
 }
 
-function computeItems(images: Docker.ImageDesc[], includeAll?: boolean) : ImageItem[] {
-    
+function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageItem[] {
+
     let allIds: string[] = [];
-    
-    let items : ImageItem[] = [];
+
+    let items: ImageItem[] = [];
+
     for (let i = 0; i < images.length; i++) {
-        let item = createItem(images[i]);
-        allIds.push(item.ids[0]);
-        items.push(item);
+        for (let j = 0; j < images[i].RepoTags.length; j++) {
+            let item = createItem(images[i], images[i].RepoTags[j]);
+            allIds.push(item.ids[0]);
+            items.push(item);
+        }
     }
 
     if (includeAll && allIds.length > 0) {
-        items.unshift(<ImageItem> {
+        items.unshift(<ImageItem>{
             label: 'All Images',
-            description: 'Removes all images',
+            description: 'Remove all images',
             ids: allIds
         });
     }
@@ -36,13 +51,13 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean) : ImageI
     return items;
 }
 
-export function quickPickImage() : Thenable<ImageItem> {
+export function quickPickImage(includeAll?: boolean): Thenable<ImageItem> {
     return docker.getImageDescriptors().then(images => {
         if (!images || images.length == 0) {
             vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
             return Promise.resolve(null);
         } else {
-            let items: ImageItem[] = computeItems(images, true);
+            let items: ImageItem[] = computeItems(images, includeAll);
             return vscode.window.showQuickPick(items, { placeHolder: 'Choose image' });
         }
     });

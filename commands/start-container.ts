@@ -3,7 +3,7 @@ import {ImageItem, quickPickImage} from './utils/quick-pick-image';
 
 
 function doStartContainer(interactive: boolean) {
-    quickPickImage().then(function (selectedItem: ImageItem) {
+    quickPickImage(false).then(function (selectedItem: ImageItem) {
         if (selectedItem) {
             let option = interactive ? '-it' : '';
             let terminal = vscode.window.createTerminal(selectedItem.label);
