@@ -36,13 +36,13 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean) : ImageI
     return items;
 }
 
-export function quickPickImage() : Thenable<ImageItem> {
+export function quickPickImage(includeAll?: boolean) : Thenable<ImageItem> {
     return docker.getImageDescriptors().then(images => {
         if (!images || images.length == 0) {
             vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
             return Promise.resolve(null);
         } else {
-            let items: ImageItem[] = computeItems(images, true);
+            let items: ImageItem[] = computeItems(images, includeAll);
             return vscode.window.showQuickPick(items, { placeHolder: 'Choose image' });
         }
     });

@@ -3,7 +3,7 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 
 export function removeImage() {
-    quickPickImage().then(function (selectedItem: ImageItem) {
+    quickPickImage(true).then(function (selectedItem: ImageItem) {
         if (selectedItem) {
             for (let i = 0; i < selectedItem.ids.length; i++) {
                 let image = docker.getImage(selectedItem.ids[i]);
