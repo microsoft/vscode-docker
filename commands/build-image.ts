@@ -1,11 +1,11 @@
 import vscode = require('vscode');
 
 
-function hasWorkspaceFolder() : boolean {
+function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
 }
 
-function getDockerFileUris(): Thenable<vscode.Uri[]>{
+function getDockerFileUris(): Thenable<vscode.Uri[]> {
     if (!hasWorkspaceFolder()) {
         return Promise.resolve(null);
     }
@@ -17,10 +17,10 @@ interface Item extends vscode.QuickPickItem {
     file: string
 }
 
-function createItem(uri: vscode.Uri) : Item {
+function createItem(uri: vscode.Uri): Item {
     let length = vscode.workspace.rootPath.length;
     let label = uri.fsPath.substr(length);
-    return <Item> {
+    return <Item>{
         label: label,
         description: null,
         path: '.' + label.substr(0, label.length - '/dockerfile'.length),
@@ -28,8 +28,8 @@ function createItem(uri: vscode.Uri) : Item {
     };
 }
 
-function computeItems(uris: vscode.Uri[]) : vscode.QuickPickItem[] {
-    let items : vscode.QuickPickItem[] = [];
+function computeItems(uris: vscode.Uri[]): vscode.QuickPickItem[] {
+    let items: vscode.QuickPickItem[] = [];
     for (let i = 0; i < uris.length; i++) {
         items.push(createItem(uris[i]));
     }
@@ -42,16 +42,29 @@ export function buildImage() {
             vscode.window.showInformationMessage('Couldn\'t find any dockerfile in your workspace.');
         } else {
             let items: vscode.QuickPickItem[] = computeItems(uris);
-            vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function(selectedItem : Item) {
+            vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function (selectedItem: Item) {
                 if (selectedItem) {
+
+                    // TODO: Prompt for name, prefill with generated name below...
                     
-                    let imageName = selectedItem.path.split('/').pop().toLowerCase();
-                    if (imageName === '.') {
-                        imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+                    var imageName: string;
+
+                    if (process.platform === 'win32') {
+                        let imageName = selectedItem.path.split('\\').pop().toLowerCase();
+                    } else {
+                        let imageName = selectedItem.path.split('/').pop().toLowerCase();
                     }
-                    
+
+                    if (imageName === '.') {
+                        if (process.platform === 'win32') {
+                            imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
+                        } else {
+                            imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+                        }
+                    }
+
                     let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-                    
+
                     let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
                     if (defaultRegistryPath.length > 0) {
                         imageName = defaultRegistryPath + '/' + imageName;

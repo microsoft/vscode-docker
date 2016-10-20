@@ -13,7 +13,7 @@ const yesNoPrompt: vscode.MessageItem[] =
         "isCloseAffordance": true
     }];
 
-function genDockerFile(serviceName: string, platform: string, port: string): string {
+function genDockerFile(serviceName: string, imageName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
@@ -70,7 +70,7 @@ CMD /usr/games/fortune -a | cowsay
 
 }
 
-function genDockerCompose(serviceName: string, platform: string, port: string): string {
+function genDockerCompose(serviceName: string, imageName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
@@ -79,7 +79,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -94,7 +94,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -107,7 +107,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -120,7 +120,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -129,7 +129,7 @@ services:
     }
 }
 
-function genDockerComposeDebug(serviceName: string, platform: string, port: string): string {
+function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
@@ -138,7 +138,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -158,7 +158,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -192,7 +192,7 @@ version: \'2\'
 
 services:
   ${serviceName}:
-    image: ${serviceName}
+    image: ${imageName}
     build:
       context: .
       dockerfile: dockerfile
@@ -251,36 +251,56 @@ export function configure(): void {
 
             var portNum: string = port || '3000';
             var platformType: string = platform || 'node';
-            var serviceName: string = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+            var serviceName: string;
+            
+            if (process.platform === 'win32') {
+                serviceName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
+            } else {
+                serviceName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+            }
+            
+            var imageName: string = serviceName;
+
+            let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+
+            let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+            if (defaultRegistryPath.length > 0) {
+                imageName = defaultRegistryPath + '/' + imageName;
+            }
+
+            let defaultRegistry = configOptions.get('defaultRegistry', '');
+            if (defaultRegistry.length > 0) {
+                imageName = defaultRegistry + '/' + imageName;
+            }
 
             if (fs.existsSync(dockerFile)) {
                 vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerFile, genDockerFile(serviceName, platformType, portNum), { encoding: 'utf8' });
+                        fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
-                fs.writeFileSync(dockerFile, genDockerFile(serviceName, platformType, portNum), { encoding: 'utf8' });
+                fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
             }
 
             if (fs.existsSync(dockerComposeFile)) {
                 vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
+                        fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
-                fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, platformType, portNum), { encoding: 'utf8' });
+                fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
             }
 
             if (fs.existsSync(dockerComposeDebugFile)) {
                 vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                     if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
+                        fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
                     }
                 });
             } else {
-                fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, platformType, portNum), { encoding: 'utf8' });
+                fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
             }
 
         });
