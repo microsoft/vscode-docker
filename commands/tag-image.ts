@@ -1,5 +1,7 @@
 import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
+import { docker } from './utils/docker-endpoint';
+
 
 export function tagImage() {
 
@@ -8,38 +10,28 @@ export function tagImage() {
 
             var imageName: string;
 
-            if (process.platform === 'win32') {
-                imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
-            } else {
-                imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
-            }
-
-            let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-
-            let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
-            if (defaultRegistryPath.length > 0) {
-                imageName = defaultRegistryPath + '/' + imageName;
-            }
-
-            let defaultRegistry = configOptions.get('defaultRegistry', '');
-            if (defaultRegistry.length > 0) {
-                imageName = defaultRegistry + '/' + imageName;
-            }
-
             var opt: vscode.InputBoxOptions = {
                 ignoreFocusOut: true,
-                placeHolder: imageName,
+                placeHolder: selectedItem.label,
                 prompt: 'Tag image with...',
-                value: imageName
+                value: selectedItem.label
             };
 
             vscode.window.showInputBox(opt).then((value: string) => {
                 if (value) {
-                    let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-                    terminal.sendText(`docker tag ... ${value}`);
-                    terminal.show();
+                    var repo: string = value;
+                    var tag: string = 'latest';
+                    if (value.lastIndexOf(':') > 0) {
+                        repo = value.slice(0, value.lastIndexOf(':'));
+                        tag = value.slice(value.lastIndexOf(':') + 1);
+                    }
+                    let image = docker.getImage(selectedItem.ids[0]);
+                    image.tag( {repo: repo, tag: tag}, function (err, data) {
+                        if (err) {
+                            console.log('Docker Tag error: ' + err);
+                        }
+                    });
                 }
-
             });
         };
     });

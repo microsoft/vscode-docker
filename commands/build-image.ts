@@ -46,13 +46,13 @@ export function buildImage() {
                 if (selectedItem) {
 
                     // TODO: Prompt for name, prefill with generated name below...
-                    
+
                     var imageName: string;
 
                     if (process.platform === 'win32') {
-                        let imageName = selectedItem.path.split('\\').pop().toLowerCase();
+                        imageName = selectedItem.path.split('\\').pop().toLowerCase();
                     } else {
-                        let imageName = selectedItem.path.split('/').pop().toLowerCase();
+                        imageName = selectedItem.path.split('/').pop().toLowerCase();
                     }
 
                     if (imageName === '.') {

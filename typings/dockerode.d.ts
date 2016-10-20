@@ -48,13 +48,18 @@ declare module Docker {
 	}
 
 	class Image {
+		name: string;
 		remove(options: any, cb: (err: Error, exec: Exec)=>void): void;
+		tag(options: any, cb: (err: Error, exec: Exec)=>void): void;
 	}
 
 	interface ImageDesc {
+		Created: Date;
 		Id: string;
 		ParentId: string;
-		RepoTags: string[]
+		RepoTags: string[];
+		Size: number;
+		VirtualSize: number;
 	}
 
 	interface ContainerDesc {
