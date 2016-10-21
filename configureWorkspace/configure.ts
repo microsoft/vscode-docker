@@ -13,7 +13,7 @@ const yesNoPrompt: vscode.MessageItem[] =
         "isCloseAffordance": true
     }];
 
-function genDockerFile(serviceName: string, imageName: string, platform: string, port: string): string {
+function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
@@ -26,7 +26,7 @@ RUN mkdir -p /usr/src/app && mv /tmp/node_modules /usr/src
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 EXPOSE ${port}
-CMD ["npm", "start"]
+CMD ${cmd}
 `;
 
         case 'go':
@@ -129,10 +129,19 @@ services:
     }
 }
 
-function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string): string {
+function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string, cmd:string): string {
 
     switch (platform.toLowerCase()) {
         case 'nodejs':
+
+            var cmdArray:string [] = cmd.split(' ');
+            if (cmdArray[0].toLowerCase() === 'node') {
+                cmdArray.splice(1, 0, '--debug=5858');
+                cmd = 'command: ' + cmdArray.join(' ');
+            } else {
+                cmd = '## set your startup file here\n    command: node --debug=5858 app.js';
+            }
+
             return `
 version: \'2\'
 
@@ -149,7 +158,7 @@ services:
       - 5858:5858
     volumes:
       - .:/usr/src/app
-    command: node --debug=5858 server.js
+    ${cmd}
 `;
 
         case 'go':
@@ -219,11 +228,59 @@ const launchJsonTemplate: string =
             "remoteRoot": "/usr/src/app"
         }
     ]
-}`
+}`;
+
+interface Command {
+    npmStart: boolean, //has npm start
+    cmd: string,
+    fullCommand: string //full command
+}
+
+function hasWorkspaceFolder(): boolean {
+    return vscode.workspace.rootPath ? true : false;
+}
+
+function getPackageJson(): Thenable<vscode.Uri[]> {
+    if (!hasWorkspaceFolder()) {
+        return Promise.resolve(null);
+    }
+
+    return Promise.resolve(vscode.workspace.findFiles('package.json', null, 1, null));
+}
+
+function getCommand(): Thenable<Command> {
+    // open package.json and look for main, scripts start
+    return getPackageJson().then(function (uris: vscode.Uri[]) {
+        var cmd: Command = {
+            npmStart: true,
+            fullCommand: 'npm start',
+            cmd: 'npm start'
+        }; //default
+
+        if (uris) {
+            var json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'))
+            if (json.scripts.start) {
+                cmd.npmStart = true;
+                cmd.fullCommand = json.scripts.start;
+                cmd.cmd = 'npm start';
+            } else if (json.main) {
+                cmd.npmStart = false;
+                cmd.fullCommand = 'node' + ' ' + json.main;
+                cmd.fullCommand;
+            } else {
+                cmd.fullCommand = '';
+            }
+        }
+
+        return Promise.resolve(cmd);
+
+    });
+}
 
 export function configure(): void {
 
-    if (!vscode.workspace.rootPath) {
+
+    if (!hasWorkspaceFolder()) {
         vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
         return;
     }
@@ -252,56 +309,49 @@ export function configure(): void {
             var portNum: string = port || '3000';
             var platformType: string = platform || 'node';
             var serviceName: string;
-            
-            if (process.platform === 'win32') {
-                serviceName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
-            } else {
-                serviceName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
-            }
-            
-            var imageName: string = serviceName;
 
-            let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+            getCommand().then((cmd: Command) => {
 
-            let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
-            if (defaultRegistryPath.length > 0) {
-                imageName = defaultRegistryPath + '/' + imageName;
-            }
 
-            let defaultRegistry = configOptions.get('defaultRegistry', '');
-            if (defaultRegistry.length > 0) {
-                imageName = defaultRegistry + '/' + imageName;
-            }
+                if (process.platform === 'win32') {
+                    serviceName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
+                } else {
+                    serviceName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+                }
 
-            if (fs.existsSync(dockerFile)) {
-                vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-                    }
-                });
-            } else {
-                fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-            }
+                var imageName: string = serviceName + ':latest';
 
-            if (fs.existsSync(dockerComposeFile)) {
-                vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-                    }
-                });
-            } else {
-                fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-            }
+                if (fs.existsSync(dockerFile)) {
+                    vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
+                        if (item.title.toLowerCase() === 'yes') {
+                            fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, cmd.cmd), { encoding: 'utf8' });
+                        }
+                    });
+                } else {
+                    fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, cmd.cmd), { encoding: 'utf8' });
+                }
 
-            if (fs.existsSync(dockerComposeDebugFile)) {
-                vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                    if (item.title.toLowerCase() === 'yes') {
-                        fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-                    }
-                });
-            } else {
-                fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-            }
+                if (fs.existsSync(dockerComposeFile)) {
+                    vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
+                        if (item.title.toLowerCase() === 'yes') {
+                            fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
+                        }
+                    });
+                } else {
+                    fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
+                }
+
+                if (fs.existsSync(dockerComposeDebugFile)) {
+                    vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
+                        if (item.title.toLowerCase() === 'yes') {
+                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, cmd.fullCommand), { encoding: 'utf8' });
+                        }
+                    });
+                } else {
+                    fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, cmd.fullCommand), { encoding: 'utf8' });
+                }
+
+            });
 
         });
     });

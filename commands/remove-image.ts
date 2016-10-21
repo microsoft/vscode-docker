@@ -17,7 +17,9 @@ export function removeImage() {
                 // image.remove removes by ID, so to remove a single *tagged* image we
                 // just overwrite the name. this is a hack around the dockerode api
                 if (selectedItem.ids.length === 1) {
-                    image.name = selectedItem.label;
+                    if (!selectedItem.label.toLowerCase().includes('<none>')) {
+                        image.name = selectedItem.label;
+                    }
                 }
 
                 image.remove({ force: true }, function (err, data) {
