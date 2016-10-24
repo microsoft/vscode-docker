@@ -1,5 +1,6 @@
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
+import vscode = require('vscode');
 
 
 export function removeImage() {
@@ -22,11 +23,27 @@ export function removeImage() {
                     }
                 }
 
-                image.remove({ force: true }, function (err, data) {
-                    // console.log("Removed - error: " + err);
-                    // console.log("Removed - data: " + data);
+                image.remove({ force: true }, function (err, data:any) {
+                    
+                    if (data) {
+                        for (i=0;i<data.length;i++) {
+                            if (data[i].Untagged) {
+                                console.log(data[i].Untagged);
+                            } else if (data[i].Deleted) {
+                                console.log(data[i].Deleted);
+                            }
+                        }
+
+                        vscode.window.showInformationMessage(selectedItem.label + ' successfully removed');
+                    } 
                 });
             }
+
+            // show the list again unless the user just did a 'remove all images'
+            // if (!selectedItem.label.toLowerCase().includes('all images')) {
+            //     setInterval(removeImage, 1000);
+            // }
+
         }
     });
 }

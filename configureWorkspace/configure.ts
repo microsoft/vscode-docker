@@ -257,16 +257,17 @@ function getCommand(): Thenable<Command> {
             cmd: 'npm start'
         }; //default
 
-        if (uris) {
-            var json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'))
-            if (json.scripts.start) {
+        if (uris && uris.length > 0) {
+            var json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
+
+            if (json.scripts && json.scripts.start) {
                 cmd.npmStart = true;
                 cmd.fullCommand = json.scripts.start;
                 cmd.cmd = 'npm start';
             } else if (json.main) {
                 cmd.npmStart = false;
                 cmd.fullCommand = 'node' + ' ' + json.main;
-                cmd.fullCommand;
+                cmd.cmd = cmd.fullCommand;
             } else {
                 cmd.fullCommand = '';
             }
