@@ -13,7 +13,7 @@ import vscode = require('vscode');
 import { buildImage } from './commands/build-image';
 import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
-import { startContainer, startContainerInteractive } from './commands/start-container';
+import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
 import { stopContainer } from './commands/stop-container';
 import { showLogsContainer } from './commands/showlogs-container';
 import { openShellContainer } from './commands/open-shell-container';
@@ -40,6 +40,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start', startContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.azurecli', startAzureCLI));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));

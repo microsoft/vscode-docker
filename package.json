@@ -20,6 +20,7 @@
     "onCommand:vscode-docker.image.tag",
     "onCommand:vscode-docker.container.start",
     "onCommand:vscode-docker.container.start.interactive",
+    "onCommand:vscode-docker.container.start.azurecli",
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.container.show-logs",
     "onCommand:vscode-docker.container.open-shell",
@@ -84,7 +85,7 @@
       },
       {
         "command": "vscode-docker.image.remove",
-        "title": "Docker: Remove Image",
+        "title": "Docker: Remove Images",
         "description": "Remove a Docker image"
       },
       {
@@ -103,6 +104,11 @@
         "description": "Starts a container from an image and runs it interactively"
       },
       {
+        "command": "vscode-docker.container.start.azurecli",
+        "title": "Docker: Azure CLI",
+        "description": "Starts a container from the Azure CLI image and runs it interactively"
+      },
+      {
         "command": "vscode-docker.container.stop",
         "title": "Docker: Stop",
         "description": "Stop a running container"
@@ -114,7 +120,7 @@
       },
       {
         "command": "vscode-docker.container.open-shell",
-        "title": "Docker: Attach Shell",
+        "title": "Docker: Attach Shell to a running container",
         "description": "Open a terminal with an interactive shell for a running container"
       },
       {

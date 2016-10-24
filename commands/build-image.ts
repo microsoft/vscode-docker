@@ -63,21 +63,24 @@ export function buildImage() {
                         }
                     }
 
-                    let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-
-                    let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
-                    if (defaultRegistryPath.length > 0) {
-                        imageName = defaultRegistryPath + '/' + imageName;
+                    var opt: vscode.InputBoxOptions = {
+                        prompt: 'Tag image as...',
+                        value: imageName + ':latest',
+                        placeHolder: imageName + ':latest'
                     }
 
-                    let defaultRegistry = configOptions.get('defaultRegistry', '');
-                    if (defaultRegistry.length > 0) {
-                        imageName = defaultRegistry + '/' + imageName;
-                    }
+                    vscode.window.showInputBox(opt).then((value: string) => {
 
-                    let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-                    terminal.sendText(`docker build  -f ${selectedItem.file} -t ${imageName} ${selectedItem.path}`);
-                    terminal.show();
+                        if (!value) {
+                            return;
+                        }
+
+                        let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
+                        terminal.sendText(`docker build  -f ${selectedItem.file} -t ${value} ${selectedItem.path}`);
+                        terminal.show();
+
+                    });
+
                 }
             });
         }

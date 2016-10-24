@@ -8,13 +8,25 @@ export function tagImage() {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
         if (selectedItem) {
 
-            var imageName: string;
+            var imageName: string = selectedItem.label;
+
+            let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+
+            let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+            if (defaultRegistryPath.length > 0) {
+                imageName = defaultRegistryPath + '/' + imageName;
+            }
+
+            let defaultRegistry = configOptions.get('defaultRegistry', '');
+            if (defaultRegistry.length > 0) {
+                imageName = defaultRegistry + '/' + imageName;
+            }
 
             var opt: vscode.InputBoxOptions = {
                 ignoreFocusOut: true,
                 placeHolder: selectedItem.label,
-                prompt: 'Tag image with...',
-                value: selectedItem.label
+                prompt: 'Tag image as...',
+                value: imageName
             };
 
             vscode.window.showInputBox(opt).then((value: string) => {
@@ -26,7 +38,7 @@ export function tagImage() {
                         tag = value.slice(value.lastIndexOf(':') + 1);
                     }
                     let image = docker.getImage(selectedItem.ids[0]);
-                    image.tag( {repo: repo, tag: tag}, function (err, data) {
+                    image.tag({ repo: repo, tag: tag }, function (err, data) {
                         if (err) {
                             console.log('Docker Tag error: ' + err);
                         }
