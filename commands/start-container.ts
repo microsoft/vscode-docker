@@ -23,7 +23,7 @@ export function startContainerInteractive() {
 
 export function startAzureCLI() {
     let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
-    terminal.sendText(`docker run -it --rm azure-xplat-cli:latest`);
+    terminal.sendText(`docker run -it --rm microsoft/azure-cli:latest`);
     terminal.show();
     terminal.sendText(`azure login`);
 }
