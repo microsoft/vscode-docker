@@ -6,7 +6,7 @@
 
 import {TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri} from 'vscode';
 import helper = require('../helpers/suggestSupportHelper');
-import {DOCKER_COMPOSE_KEY_INFO} from './dockerComposeKeyInfo';
+import {DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO} from './dockerComposeKeyInfo';
 import hub = require('../dockerHubApi');
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
@@ -17,12 +17,16 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
         var yamlSuggestSupport = new helper.SuggestSupportHelper(); 
 
+        // Determine the schema version of the current compose file,
+        // based on the existence of a top-level "version" property.
+        var isV2Document = /^version:/im.test(document.getText());
+
         // Get the line where intellisense was invoked on (e.g. 'image: u').
         var line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
-            return Promise.resolve(this.suggestKeys(''));
+            return Promise.resolve(this.suggestKeys('', isV2Document));
         }
 
         let range = document.getWordRangeAtPosition(position);
@@ -33,7 +37,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         var textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
-            return Promise.resolve(this.suggestKeys(word));
+            return Promise.resolve(this.suggestKeys(word, isV2Document));
         }
 
         // Matches strings like: 'image: "ubuntu'
@@ -55,12 +59,17 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         return Promise.resolve([]);
     }
 
-    private suggestKeys(word: string): CompletionItem[] {
-        return Object.keys(DOCKER_COMPOSE_KEY_INFO).map(ruleName => {
+    private suggestKeys(word: string, useV2Schema: boolean = false): CompletionItem[] {
+        // TODO: Now that there is a v2.1 compose format, we shouldn't treat schema
+        // selection as a binary operation long-term. Ideally, we could re-use the
+        // JSON schema files that the compose project maintain.
+        const keys = useV2Schema ? DOCKER_COMPOSE_V2_KEY_INFO : DOCKER_COMPOSE_V1_KEY_INFO;
+
+        return Object.keys(keys).map(ruleName => {
             var completionItem = new CompletionItem(ruleName);
             completionItem.kind = CompletionItemKind.Keyword;
             completionItem.insertText = ruleName + ': ';
-            completionItem.documentation = DOCKER_COMPOSE_KEY_INFO[ruleName];
+            completionItem.documentation = keys[ruleName];
             return completionItem;
         });
     }
