@@ -20,12 +20,11 @@ interface Item extends vscode.QuickPickItem {
 function createItem(uri: vscode.Uri) : Item {
     let length = vscode.workspace.rootPath.length;
     let label = uri.fsPath.substr(length);
-    let slashIndex = label.lastIndexOf('/');
-    return <Item> {
+    return <Item>{
         label: label,
         description: null,
-        path: '.' + label.substr(0, slashIndex),
-        file: label.substr(slashIndex + 1)
+        path: '.' + label.substr(0, label.length - '/dockerfile'.length),
+        file: '.' + label
     };
 }
 
@@ -46,7 +45,7 @@ export function compose(command: string, message: string) {
             vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
-                    terminal.sendText(`cd ${selectedItem.path}; docker-compose -f ${selectedItem.file} ${command}`);
+                    terminal.sendText(`docker-compose -f ${selectedItem.file} ${command}`);
                     terminal.show();
                 }
             });
