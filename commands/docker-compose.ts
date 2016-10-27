@@ -46,7 +46,7 @@ export function compose(command: string, message: string) {
             vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }).then(function(selectedItem : Item) {
                 if (selectedItem) {
                     let terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
-                    terminal.sendText(`cd ${selectedItem.path}; docker-compose -f ${selectedItem.file} ${command}`);
+                    terminal.sendText(`docker-compose -f ${selectedItem.file} ${command}`);
                     terminal.show();
                 }
             });
