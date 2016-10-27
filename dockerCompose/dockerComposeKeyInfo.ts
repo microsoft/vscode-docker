@@ -218,7 +218,12 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     ),
 
     // Added service/logging-level properties
-    'driver': null, // TODO: This could be a logging driver, a volume driver, a network driver, or a network IPAM driver.
+    // TODO: The "driver" property could be a logging driver, a volume driver,
+    // a network driver, or a network IPAM driver, so we should account for
+    // that when we add context-based completion.
+    'driver': (
+        "Specifies the logging driver to use for the service’s container."
+    ),
     'options': (
         'Options to pass to the specified logging driver, provided as key-value pairs.'
     ),
@@ -243,7 +248,6 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     ),
 
     // Network-level properties
-    // TODO: These properties could be either volume or network
     'driver_opts': (
         "Specify a list of options as key-value pairs to pass to the driver. Those options are driver-dependent - consult the driver’s documentation for more information."
     ),
@@ -255,7 +259,8 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     ),
 
     // Network/external-level properties
-    // TODO: This would also apply to an external volume.
+    // TODO: This would also apply to an external volume,
+    // so we should account for that when we add context-based completion.
     'name': (
         "Specifies the name of the externally defined network."
     ),
@@ -280,8 +285,9 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     ),
 
     // Volume-level properties
-    // TODO: Incudes "driver", "driver_opt", and "external"
-    // properties, which are already defined above.
+    // TODO: Top-level volumes support specifying the "driver",
+    // "driver_opt", and "external" properties, but these are already
+    // defined above. We can specialize these by adding context-based completion.
 });
 
 // Create a v2 only key set by removing the v1 properties that no longer exist. This
