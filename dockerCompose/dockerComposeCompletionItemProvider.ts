@@ -60,9 +60,6 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     }
 
     private suggestKeys(word: string, useV2Schema: boolean = false): CompletionItem[] {
-        // TODO: Now that there is a v2.1 compose format, we shouldn't treat schema
-        // selection as a binary operation long-term. Ideally, we could re-use the
-        // JSON schema files that the compose project maintain.
         const keys = useV2Schema ? DOCKER_COMPOSE_V2_KEY_INFO : DOCKER_COMPOSE_V1_KEY_INFO;
 
         return Object.keys(keys).map(ruleName => {

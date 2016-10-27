@@ -196,17 +196,11 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     'depends_on': (
         "Specifies the names of services that this service depends on."
     ),
-    'group_add': (
-        "Add additional groups to join."
-    ),
     'logging': (
         "Logging configuration for the service."
     ),
     'network_mode': (
         "Networking mode. Use the same values as the docker client `--net` parameter."
-    ),
-    'oom_score_adj': (
-        "Tune host's OOM preferences (-1000 to 1000)."
     ),
     'tmpfs': (
         "Mount a temporary file system inside the container. Can be a single value or a list."
@@ -295,7 +289,4 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
 export var DOCKER_COMPOSE_V2_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_KEY_INFO);
 ["log_driver", "log_opt", "net"].forEach((prop) => {
     delete DOCKER_COMPOSE_V2_KEY_INFO[prop];
-})
-
-// TODO: Add support for the v2.1 file format
-// https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.1.json
+});
