@@ -1,8 +1,7 @@
 ## Docker Extension for Visual Studio Code
 -------------------
 ## Functionality
-This extension adds syntax highlighting, snippets and additional intellisense for Dockerfiles and docker-compose files in Visual Studio Code. Hovering over 
-commands in your Dockerfile will show you additional information about commands and images. 
+This extension adds syntax highlighting, snippets and additional intellisense for Dockerfiles and docker-compose files in Visual Studio Code. Hovering over commands in your Dockerfile will show you additional information about commands and images. 
 
 ![dockerfile](images/dockerfile.gif)
 

@@ -1,5 +1,5 @@
 {
-  "name": "docker",
+  "name": "vscode-docker",
   "version": "0.0.7",
   "publisher": "PeterJausovec",
   "displayName": "Docker Support",
@@ -9,6 +9,15 @@
   "galleryBanner": {
     "color": "#5c2d91",
     "theme": "dark"
+  },
+  "categories": [
+    "Languages", "Snippets"
+  ],
+  "keywords": [
+    "docker", "compose", "container"
+  ],
+  "repository": {
+    "url": "https://github.com/microsoft/vscode-docker.git"
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
   "activationEvents": [
