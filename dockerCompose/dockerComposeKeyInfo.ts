@@ -2,12 +2,11 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import { ComposeVersionKeys, KeyInfo } from "../dockerExtension";
+
+// Define the keys that are shared between all compose file versions.
 // https://docs.docker.com/compose/yml/
-
-import { KeyInfo } from "../dockerExtension";
-
-// https://github.com/docker/compose/blob/master/compose/config/config_schema_v1.json
-export var DOCKER_COMPOSE_V1_KEY_INFO: KeyInfo = {
+var DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     'build': (
         "Path to a directory containing a Dockerfile. When the value supplied is a relative path, it is interpreted as relative to the " +
         "location of the yml file itself. This directory is also the build context that is sent to the Docker daemon.\n\n" +
@@ -97,12 +96,7 @@ export var DOCKER_COMPOSE_V1_KEY_INFO: KeyInfo = {
         "Link to containers in another service. Either specify both the service name and the link alias (`CONTAINER:ALIAS`), or " +
         "just the service name (which will also be used for the alias)."
     ),
-    'log_driver': (
-        "Specify a logging driver for the service's containers, as with the `--log-driver` option for docker run. The default value is json-file."
-    ),
-    'log_opt': (
-        "Specify logging options with `log_opt` for the logging driver, as with the `--log-opt` option for docker run."
-    ),
+
     'mac_address': (
         "Container MAC address (e.g. 92:d0:c6:0a:29:33)."
     ),
@@ -114,9 +108,6 @@ export var DOCKER_COMPOSE_V1_KEY_INFO: KeyInfo = {
     ),
     'mem_swappiness': (
         "Tune container memory swappiness (0 to 100) (default -1)."
-    ),
-    'net': (
-        "Networking mode. Use the same values as the docker client `--net` parameter."
     ),
     'pid': (
         "Sets the PID mode to the host PID mode. This turns on sharing between container and the host operating system the PID address space. " +
@@ -173,12 +164,25 @@ export var DOCKER_COMPOSE_V1_KEY_INFO: KeyInfo = {
     'working_dir': (
         "Working directory inside the container."
     )
-}
+};
 
-// Create a superset definition of both v1 and v2 keys, which can be used by the
-// hover provider to display help text for a property in either schema version.
+// Define the keys which are unique to the v1 format.
+// https://github.com/docker/compose/blob/master/compose/config/config_schema_v1.json
+var DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
+    'log_driver': (
+        "Specify a logging driver for the service's containers, as with the `--log-driver` option for docker run. The default value is json-file."
+    ),
+    'log_opt': (
+        "Specify logging options with `log_opt` for the logging driver, as with the `--log-opt` option for docker run."
+    ),
+    'net': (
+        "Networking mode. Use the same values as the docker client `--net` parameter."
+    )
+};
+
+// Define the keys which are unique to the v2 format.
 // https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.0.json
-export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V1_KEY_INFO, {
+var DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
     // Added top-level properties
     'services': (
         "Specify the set of services that your app is composed of."
@@ -282,11 +286,10 @@ export var DOCKER_COMPOSE_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_V
     // TODO: Top-level volumes support specifying the "driver",
     // "driver_opt", and "external" properties, but these are already
     // defined above. We can specialize these by adding context-based completion.
-});
+};
 
-// Create a v2 only key set by removing the v1 properties that no longer exist. This
-// allows the completion provider to be accurate when authoring v2 format files.
-export var DOCKER_COMPOSE_V2_KEY_INFO: KeyInfo = Object.assign({}, DOCKER_COMPOSE_KEY_INFO);
-["log_driver", "log_opt", "net"].forEach((prop) => {
-    delete DOCKER_COMPOSE_V2_KEY_INFO[prop];
-});
+export default <ComposeVersionKeys>{
+    v1: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V1_ONLY_KEY_INFO),
+    v2: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO),
+    All: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V1_ONLY_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO)
+};

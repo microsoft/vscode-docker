@@ -6,4 +6,6 @@
 	"search.exclude": {
 		"out": true
 	}
+,
+"typescript.check.workspaceVersion": false
 }

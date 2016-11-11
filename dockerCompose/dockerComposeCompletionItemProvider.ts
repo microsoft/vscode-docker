@@ -5,8 +5,8 @@
 'use strict';
 
 import {TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri} from 'vscode';
+import composeVersions from './dockerComposeKeyInfo';
 import helper = require('../helpers/suggestSupportHelper');
-import {DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO} from './dockerComposeKeyInfo';
 import hub = require('../dockerHubApi');
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
@@ -19,14 +19,15 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
 
         // Determine the schema version of the current compose file,
         // based on the existence of a top-level "version" property.
-        var isV2Document = /^version:/im.test(document.getText());
+        var versionMatch = document.getText().match(/^version:\s*["'](\d+(\.\d)?)["']\s*/im);
+        var version = versionMatch ? versionMatch[1] : "1";
 
         // Get the line where intellisense was invoked on (e.g. 'image: u').
         var line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
-            return Promise.resolve(this.suggestKeys('', isV2Document));
+            return Promise.resolve(this.suggestKeys('', version));
         }
 
         let range = document.getWordRangeAtPosition(position);
@@ -37,7 +38,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         var textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
-            return Promise.resolve(this.suggestKeys(word, isV2Document));
+            return Promise.resolve(this.suggestKeys(word, version));
         }
 
         // Matches strings like: 'image: "ubuntu'
@@ -59,8 +60,10 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         return Promise.resolve([]);
     }
 
-    private suggestKeys(word: string, useV2Schema: boolean = false): CompletionItem[] {
-        const keys = useV2Schema ? DOCKER_COMPOSE_V2_KEY_INFO : DOCKER_COMPOSE_V1_KEY_INFO;
+    private suggestKeys(word: string, version: string): CompletionItem[] {
+        // Attempt to grab the keys for the requested schema version, 
+        // otherwise, fall back to showing a composition of all possible keys.
+        const keys = composeVersions[`v${version}`] || composeVersions.All;
 
         return Object.keys(keys).map(ruleName => {
             var completionItem = new CompletionItem(ruleName);
