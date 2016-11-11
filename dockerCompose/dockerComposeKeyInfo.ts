@@ -6,7 +6,7 @@ import { ComposeVersionKeys, KeyInfo } from "../dockerExtension";
 
 // Define the keys that are shared between all compose file versions.
 // https://docs.docker.com/compose/yml/
-var DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
+const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     'build': (
         "Path to a directory containing a Dockerfile. When the value supplied is a relative path, it is interpreted as relative to the " +
         "location of the yml file itself. This directory is also the build context that is sent to the Docker daemon.\n\n" +
@@ -168,7 +168,7 @@ var DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
 
 // Define the keys which are unique to the v1 format.
 // https://github.com/docker/compose/blob/master/compose/config/config_schema_v1.json
-var DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
+const DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
     'log_driver': (
         "Specify a logging driver for the service's containers, as with the `--log-driver` option for docker run. The default value is json-file."
     ),
@@ -182,7 +182,7 @@ var DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
 
 // Define the keys which are unique to the v2 format.
 // https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.0.json
-var DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
+const DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
     // Added top-level properties
     'services': (
         "Specify the set of services that your app is composed of."
@@ -288,8 +288,15 @@ var DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
     // defined above. We can specialize these by adding context-based completion.
 };
 
+// Merge the specified version-specific keys with the shared
+// keys, in order to create a complete schema for a specic version.
+function composeVersionKeys(...versions: KeyInfo[]): KeyInfo {
+    return Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
+}
+
+// Create 
 export default <ComposeVersionKeys>{
-    v1: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V1_ONLY_KEY_INFO),
-    v2: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO),
-    All: Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, DOCKER_COMPOSE_V1_ONLY_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO)
+    v1: composeVersionKeys(DOCKER_COMPOSE_V1_ONLY_KEY_INFO),
+    v2: composeVersionKeys(DOCKER_COMPOSE_V2_ONLY_KEY_INFO),
+    All: composeVersionKeys(DOCKER_COMPOSE_V1_ONLY_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO)
 };
