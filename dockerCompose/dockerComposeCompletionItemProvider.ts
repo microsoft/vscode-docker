@@ -5,8 +5,8 @@
 'use strict';
 
 import {TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri} from 'vscode';
+import composeVersions from './dockerComposeKeyInfo';
 import helper = require('../helpers/suggestSupportHelper');
-import {DOCKER_COMPOSE_KEY_INFO} from './dockerComposeKeyInfo';
 import hub = require('../dockerHubApi');
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
@@ -17,12 +17,17 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
         var yamlSuggestSupport = new helper.SuggestSupportHelper(); 
 
+        // Determine the schema version of the current compose file,
+        // based on the existence of a top-level "version" property.
+        var versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
+        var version = versionMatch ? versionMatch[2] : "1";
+
         // Get the line where intellisense was invoked on (e.g. 'image: u').
         var line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
-            return Promise.resolve(this.suggestKeys(''));
+            return Promise.resolve(this.suggestKeys('', version));
         }
 
         let range = document.getWordRangeAtPosition(position);
@@ -33,7 +38,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         var textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
-            return Promise.resolve(this.suggestKeys(word));
+            return Promise.resolve(this.suggestKeys(word, version));
         }
 
         // Matches strings like: 'image: "ubuntu'
@@ -55,12 +60,16 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         return Promise.resolve([]);
     }
 
-    private suggestKeys(word: string): CompletionItem[] {
-        return Object.keys(DOCKER_COMPOSE_KEY_INFO).map(ruleName => {
+    private suggestKeys(word: string, version: string): CompletionItem[] {
+        // Attempt to grab the keys for the requested schema version, 
+        // otherwise, fall back to showing a composition of all possible keys.
+        const keys = composeVersions[`v${version}`] || composeVersions.All;
+
+        return Object.keys(keys).map(ruleName => {
             var completionItem = new CompletionItem(ruleName);
             completionItem.kind = CompletionItemKind.Keyword;
             completionItem.insertText = ruleName + ': ';
-            completionItem.documentation = DOCKER_COMPOSE_KEY_INFO[ruleName];
+            completionItem.documentation = keys[ruleName];
             return completionItem;
         });
     }

@@ -6,7 +6,7 @@ import { DockerHoverProvider } from './dockerHoverProvider';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DOCKERFILE_KEY_INFO } from './dockerfile/dockerfileKeyInfo';
-import { DOCKER_COMPOSE_KEY_INFO } from './dockerCompose/dockerComposeKeyInfo';
+import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileParser } from './dockerfile/dockerfileParser';
 import vscode = require('vscode');
@@ -21,6 +21,14 @@ import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 
+export interface ComposeVersionKeys {
+    All: KeyInfo,
+    v1: KeyInfo,
+    v2: KeyInfo
+};
+
+export type KeyInfo = { [keyName: string]: string; };
+
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
@@ -28,7 +36,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCKERFILE_MODE_ID, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: '**/docker-compose*.yml' };
-    var yamlHoverProvider = new DockerHoverProvider(new DockerComposeParser(), DOCKER_COMPOSE_KEY_INFO);
+    var yamlHoverProvider = new DockerHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 
