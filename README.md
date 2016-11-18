@@ -3,7 +3,7 @@ This extension adds syntax highlighting, snippets and additional intellisense fo
 
 ![dockerfile](images/dockerfile.gif)
 
-Similar functionality is available for docker compose files:
+Similar functionality is available for Docker compose files (v1 and v2 formats):
 
 ![composefile](images/dockercompose.gif)
 
@@ -14,7 +14,7 @@ be prompted to restart Visual Studio Code.
 ![installation](images/installing.gif)
 
 ### Running commands on Linux
-By default, Docker runs as the root user, requiring other users to access it with sudo. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)
+By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)
 
 ### Contributing
 There are a couple of ways you can contribute to this repo:
