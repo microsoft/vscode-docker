@@ -46,7 +46,7 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
         "Custom DNS search domains. Can be a single value or a list."
     ),
     'dockerfile': (
-        "Alternate dockerfile. Compose will use an alternate file to build with. Using `dockerfile` together with `image` is not allowed. Attempting to do so results in an error."
+        "Alternate Dockerfile. Compose will use an alternate file to build with. Using `dockerfile` together with `image` is not allowed. Attempting to do so results in an error."
     ),
     'domainname': (
         "Container domain name."
