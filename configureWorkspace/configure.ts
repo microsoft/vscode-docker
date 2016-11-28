@@ -16,7 +16,7 @@ const yesNoPrompt: vscode.MessageItem[] =
 function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
 
     switch (platform.toLowerCase()) {
-        case 'nodejs':
+        case 'node.js':
 
             return `
 FROM node:latest
@@ -73,7 +73,7 @@ CMD /usr/games/fortune -a | cowsay
 function genDockerCompose(serviceName: string, imageName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
-        case 'nodejs':
+        case 'node.js':
             return `
 version: \'2\'
 
