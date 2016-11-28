@@ -16,7 +16,7 @@ const yesNoPrompt: vscode.MessageItem[] =
 function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
 
     switch (platform.toLowerCase()) {
-        case 'nodejs':
+        case 'node.js':
 
             return `
 FROM node:latest
@@ -73,7 +73,7 @@ CMD /usr/games/fortune -a | cowsay
 function genDockerCompose(serviceName: string, imageName: string, platform: string, port: string): string {
 
     switch (platform.toLowerCase()) {
-        case 'nodejs':
+        case 'node.js':
             return `
 version: \'2\'
 
@@ -82,7 +82,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
     ports:
@@ -97,7 +97,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - ${port}:${port}`;
 
@@ -110,7 +110,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - ${port}:${port}`;
 
@@ -123,7 +123,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - ${port}:${port}`;
     }
@@ -132,7 +132,7 @@ services:
 function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string, cmd:string): string {
 
     switch (platform.toLowerCase()) {
-        case 'nodejs':
+        case 'node.js':
 
             var cmdArray:string [] = cmd.split(' ');
             if (cmdArray[0].toLowerCase() === 'node') {
@@ -150,7 +150,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: development
     ports:
@@ -170,7 +170,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
         - ${port}:${port}
 `;
@@ -204,7 +204,7 @@ services:
     image: ${imageName}
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - ${port}:${port}
 `;
@@ -286,7 +286,7 @@ export function configure(): void {
         return;
     }
 
-    let dockerFile = path.join(vscode.workspace.rootPath, 'dockerfile');
+    let dockerFile = path.join(vscode.workspace.rootPath, 'Dockerfile');
     let dockerComposeFile = path.join(vscode.workspace.rootPath, 'docker-compose.yml');
     let dockerComposeDebugFile = path.join(vscode.workspace.rootPath, 'docker-compose.debug.yml');
 
@@ -323,7 +323,7 @@ export function configure(): void {
                 var imageName: string = serviceName + ':latest';
 
                 if (fs.existsSync(dockerFile)) {
-                    vscode.window.showErrorMessage('A dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
+                    vscode.window.showErrorMessage('A Dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                         if (item.title.toLowerCase() === 'yes') {
                             fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, cmd.cmd), { encoding: 'utf8' });
                         }

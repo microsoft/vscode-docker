@@ -23,7 +23,7 @@ function createItem(uri: vscode.Uri) : Item {
     return <Item>{
         label: label,
         description: null,
-        path: '.' + label.substr(0, label.length - '/dockerfile'.length),
+        path: '.' + label.substr(0, label.length - '/Dockerfile'.length),
         file: '.' + label
     };
 }

@@ -23,7 +23,7 @@ function createItem(uri: vscode.Uri): Item {
     return <Item>{
         label: label,
         description: null,
-        path: '.' + label.substr(0, label.length - '/dockerfile'.length),
+        path: '.' + label.substr(0, label.length - '/Dockerfile'.length),
         file: '.' + label
     };
 }
@@ -39,7 +39,7 @@ function computeItems(uris: vscode.Uri[]): vscode.QuickPickItem[] {
 export function buildImage() {
     getDockerFileUris().then(function (uris: vscode.Uri[]) {
         if (!uris || uris.length == 0) {
-            vscode.window.showInformationMessage('Couldn\'t find any dockerfile in your workspace.');
+            vscode.window.showInformationMessage('Couldn\'t find any Dockerfile in your workspace.');
         } else {
             let items: vscode.QuickPickItem[] = computeItems(uris);
             vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function (selectedItem: Item) {

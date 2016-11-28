@@ -90,7 +90,7 @@
       {
         "command": "vscode-docker.image.build",
         "title": "Docker: Build Image",
-        "description": "Build a Docker image from a dockerfile"
+        "description": "Build a Docker image from a Dockerfile"
       },
       {
         "command": "vscode-docker.image.remove",
