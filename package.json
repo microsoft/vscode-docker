@@ -167,6 +167,7 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
-    "dockerode": "^2.3.0"
+    "dockerode": "^2.3.0",
+    "dockerlint": "^0.2.0"
   }
 }

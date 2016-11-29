@@ -20,6 +20,9 @@ import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
+import { doValidate } from './linting/dockerLinting';
+
+let diagnosticCollection: vscode.DiagnosticCollection;
 
 export interface ComposeVersionKeys {
     All: KeyInfo,
@@ -39,7 +42,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     var yamlHoverProvider = new DockerHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
-
+    
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.debug.configureLaunchJson', configureLaunchJson));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
@@ -54,4 +57,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
+
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('docker-diagnostics');
+    
+	ctx.subscriptions.push(diagnosticCollection);
+    vscode.workspace.onDidChangeTextDocument(doValidate, diagnosticCollection, ctx.subscriptions);
+    
+
+
 }
