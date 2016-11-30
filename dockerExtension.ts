@@ -22,7 +22,8 @@ import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { doValidate } from './linting/dockerLinting';
 
-let diagnosticCollection: vscode.DiagnosticCollection;
+export var diagnosticCollection: vscode.DiagnosticCollection;
+
 
 export interface ComposeVersionKeys {
     All: KeyInfo,

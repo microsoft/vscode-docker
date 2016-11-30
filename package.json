@@ -168,6 +168,6 @@
   },
   "dependencies": {
     "dockerode": "^2.3.0",
-    "dockerlint": "^0.2.0"
+    "dockerfile_lint": "^0.2.4"
   }
 }

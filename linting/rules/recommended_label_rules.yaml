@@ -1,0 +1,71 @@
+---
+  profile:
+    name: "Label"
+    description: "Label checking rule file."
+  line_rules:
+    LABEL:
+       paramSyntaxRegex: /.+/
+       # Use defined_label_rules to defined a set of labels for your dockerfile
+       # In this example, the labels "Vendor","Authoritative_Registry","BZComponent"
+       # have been defined. A label value is 'valid' if matches the regular
+       # expression 'valueRegex', otherwise an warn is logged with the string "message"
+       # at level 'level'.  'reference_url' provides a web link where the user can
+       # get more information about the rule.
+       #
+       defined_namevals:
+           Name:
+             valueRegex: /[\w]+/
+             message: "Label 'Name' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Version:
+             valueRegex: /[\w.${}()"'\\\/~<>\-?\%:]+/
+             message: "Label 'Version' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Release:
+             valueRegex: /[\w.${}()"'\\\/~<>\-?\%:]+/
+             message: "Label 'Release' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Architecture:
+             valueRegex: /[\w]*[6,8][4,6]|[.]*86[.]*64/
+             message: "Label 'Architecture' is missing or has invalid format: x86, i386, x86_64"
+             level: "true"
+             required: false
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Vendor:
+             valueRegex: /([\w]+).+/
+             message: "Label 'Vendor' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+
+  # The 'required_instructions' lists mandatory instructions
+  #
+  #required_instructions:
+    #
+    # This rule says, you must have 1 "LABEL" instruction
+   # -
+   #   instruction: "LABEL"
+   #   count: 1
+   #   level: "warn"
+   #   message: "No LABELs are defined"
+   #   description: "Labels are needed because...."
+   #   reference_url:
+   #     - "https://docs.docker.com/reference/builder/"
+   #     - "#label"
+
