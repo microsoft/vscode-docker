@@ -89,8 +89,8 @@
         },
         "docker.linterRuleFile": {
           "type": "string",
-          "default": "basic_rules.yaml",
-          "description": "Linting rules file to use. Create your own rules file (see https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) and place it in the root of the workspace."
+          "default": "",
+          "description": "Full path to the linting rules file to use. See https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) for sample files and how to create your own."
         }
       }
     },

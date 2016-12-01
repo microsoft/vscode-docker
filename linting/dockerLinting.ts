@@ -33,10 +33,12 @@ export function scheduleValidate(document: vscode.TextDocument) {
     let urisToValidate: { [uri: string]: boolean; } = {};
     let timeoutToken: NodeJS.Timer = null;
 
-    if (document.languageId !== 'dockerfile') {
-        return;
+    // should we even try validation? if not, get out!
+    if (!(configOptions.get('enableLinting', true)) || document.languageId !== 'dockerfile') {
+        return ;
     }
 
+    // schedule valiation so we're not invoking this on every keypress
     urisToValidate[document.uri.toString()] = true;
 
     if (timeoutToken !== null) {
@@ -58,34 +60,54 @@ export function scheduleValidate(document: vscode.TextDocument) {
 }
 
 function doValidate(document: vscode.TextDocument) {
-
     let diagnostics: vscode.Diagnostic[] = [];
 
-    let linterRuleFile = configOptions.get('linterRuleFile', 'basic_rules.yaml');
+    let linterRuleFile = configOptions.get('linterRuleFile', '');
 
-    if (fs.existsSync(path.normalize(__dirname + '/rules/' + linterRuleFile))) {
-        linterRuleFile = path.normalize(__dirname + '/rules/' + linterRuleFile);
-    } else if (fs.existsSync(path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile))) {
-        linterRuleFile = path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile);
-    } else {
-        console.log('DOCKER: Unable to lint dockerfile, no rules file found.');
-    }
+    // validate file exists
 
-    let validator = new DockerFileValidator(linterRuleFile);
-    let result = validator.validate(document.getText());
-
-    if (result.error.count > 0) {
-        for (let i = 0; i < result.error.count; i++) {
-            diagnostics.push(createErrDiagnostic(result.error.data[i], document));
+    if (linterRuleFile.length !== 0) {
+        // fully qualified path to file?
+        if (!fs.existsSync(path.normalize(linterRuleFile))) {
+            // if not, check to see if it is in the root of the workspace
+            if (!fs.existsSync(path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile))) {
+                // we can't find the rules file, default to '' which will use the default 
+                linterRuleFile = '';
+            } else {
+                linterRuleFile = path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile);
+            }
+        } else {
+            linterRuleFile = path.normalize(linterRuleFile);
         }
     }
 
-    if (result.warn.count > 0) {
-        for (let i = 0; i < result.warn.count; i++) {
-            diagnostics.push(new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), result.warn.data[i].message + ': ' + result.warn.data[i].description, vscode.DiagnosticSeverity.Warning));
-        }
-    }
+    try {
 
-    diagnosticCollection.set(document.uri, diagnostics);
+        let validator = new DockerFileValidator(linterRuleFile);
+        let result = validator.validate(document.getText());
+
+        if (result.error.count > 0) {
+            for (let i = 0; i < result.error.count; i++) {
+                diagnostics.push(createErrDiagnostic(result.error.data[i], document));
+            }
+        }
+
+        if (result.warn.count > 0) {
+            for (let i = 0; i < result.warn.count; i++) {
+                diagnostics.push(new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), result.warn.data[i].message + ': ' + result.warn.data[i].description, vscode.DiagnosticSeverity.Warning));
+            }
+        }
+
+        if (result.info.count > 0) {
+            for (let i = 0; i < result.info.count; i++) {
+                diagnostics.push(new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), result.info.data[i].message + ': ' + result.info.data[i].description, vscode.DiagnosticSeverity.Information));
+            }
+        }
+
+        diagnosticCollection.set(document.uri, diagnostics);
+
+    } catch (err) {
+        console.log(err);
+    }
 
 }
