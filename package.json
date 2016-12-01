@@ -11,10 +11,13 @@
     "theme": "dark"
   },
   "categories": [
-    "Languages", "Snippets"
+    "Languages",
+    "Snippets"
   ],
   "keywords": [
-    "docker", "compose", "container"
+    "docker",
+    "compose",
+    "container"
   ],
   "repository": {
     "url": "https://github.com/microsoft/vscode-docker.git"
@@ -47,12 +50,12 @@
       }
     ],
     "debuggers": [
-			{
-				"type": "docker",
-				"label": "Docker Attach",
-				"initialConfigurations": "vscode-docker.debug.configureLaunchJson"
-			}
-		],
+      {
+        "type": "docker",
+        "label": "Docker Attach",
+        "initialConfigurations": "vscode-docker.debug.configureLaunchJson"
+      }
+    ],
     "languages": [
       {
         "id": "dockerfile",
@@ -167,7 +170,7 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
-    "dockerode": "^2.3.0",
-    "dockerfile_lint": "^0.2.4"
+    "dockerfile_lint": "^0.2.4",
+    "dockerode": "^2.3.0"
   }
 }

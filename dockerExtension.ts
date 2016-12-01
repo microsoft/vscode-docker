@@ -20,7 +20,7 @@ import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
-import { doValidate } from './linting/dockerLinting';
+import { scheduleValidate } from './linting/dockerLinting';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -62,8 +62,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     diagnosticCollection = vscode.languages.createDiagnosticCollection('docker-diagnostics');
     
 	ctx.subscriptions.push(diagnosticCollection);
-    vscode.workspace.onDidChangeTextDocument(doValidate, diagnosticCollection, ctx.subscriptions);
-    
+
+    vscode.workspace.onDidChangeTextDocument((e) => scheduleValidate(e.document), ctx.subscriptions);
+
+    vscode.workspace.textDocuments.forEach((doc) => scheduleValidate(doc));
+    vscode.workspace.onDidOpenTextDocument((doc) => scheduleValidate(doc), ctx.subscriptions);
+    vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri), ctx.subscriptions);
 
 
 }
