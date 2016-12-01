@@ -1,6 +1,10 @@
 import vscode = require('vscode');
 import { diagnosticCollection } from '../dockerExtension';
+import * as fs from 'fs';
+import * as path from 'path';
+
 var DockerFileValidator = require('dockerfile_lint');
+let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
 
 function createErrDiagnostic(e, doc: vscode.TextDocument): vscode.Diagnostic {
     var r: vscode.Range;
@@ -29,7 +33,7 @@ export function scheduleValidate(document: vscode.TextDocument) {
     let urisToValidate: { [uri: string]: boolean; } = {};
     let timeoutToken: NodeJS.Timer = null;
 
-    if (document.languageId !== 'dockerfile') { 
+    if (document.languageId !== 'dockerfile') {
         return;
     }
 
@@ -56,7 +60,21 @@ export function scheduleValidate(document: vscode.TextDocument) {
 function doValidate(document: vscode.TextDocument) {
 
     let diagnostics: vscode.Diagnostic[] = [];
-    let validator = new DockerFileValidator(__dirname + '/rules/basic_rules.yaml');
+
+
+    let linterRuleFile = configOptions.get('linterRuleFile', 'basic_rules.yaml');
+
+    
+    if (fs.existsSync(__dirname + '/rules/' + linterRuleFile)) {
+        linterRuleFile = __dirname + '/rules/' + linterRuleFile;
+    } else if (fs.existsSync(vscode.workspace.rootPath + '/' + linterRuleFile)) {
+        linterRuleFile = vscode.workspace.rootPath + '/' + linterRuleFile;
+    }
+
+    linterRuleFile = path.normalize(linterRuleFile);
+    console.log(linterRuleFile);
+    
+    let validator = new DockerFileValidator(linterRuleFile);
     let result = validator.validate(document.getText());
 
     if (result.error.count > 0) {

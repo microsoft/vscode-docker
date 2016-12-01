@@ -81,6 +81,16 @@
           "type": "string",
           "default": "",
           "description": "Path within registry to push to."
+        },
+        "docker.enableLinting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Turn linting of Dockerfiles on or off."
+        },
+        "docker.linterRuleFile": {
+          "type": "string",
+          "default": "basic_rules.yaml",
+          "description": "Linting rules file to use. Create your own rules file (see https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) and place it in the root of the workspace."
         }
       }
     },
