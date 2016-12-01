@@ -61,19 +61,16 @@ function doValidate(document: vscode.TextDocument) {
 
     let diagnostics: vscode.Diagnostic[] = [];
 
-
     let linterRuleFile = configOptions.get('linterRuleFile', 'basic_rules.yaml');
 
-    
-    if (fs.existsSync(__dirname + '/rules/' + linterRuleFile)) {
-        linterRuleFile = __dirname + '/rules/' + linterRuleFile;
-    } else if (fs.existsSync(vscode.workspace.rootPath + '/' + linterRuleFile)) {
-        linterRuleFile = vscode.workspace.rootPath + '/' + linterRuleFile;
+    if (fs.existsSync(path.normalize(__dirname + '/rules/' + linterRuleFile))) {
+        linterRuleFile = path.normalize(__dirname + '/rules/' + linterRuleFile);
+    } else if (fs.existsSync(path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile))) {
+        linterRuleFile = path.normalize(vscode.workspace.rootPath + '/' + linterRuleFile);
+    } else {
+        console.log('DOCKER: Unable to lint dockerfile, no rules file found.');
     }
 
-    linterRuleFile = path.normalize(linterRuleFile);
-    console.log(linterRuleFile);
-    
     let validator = new DockerFileValidator(linterRuleFile);
     let result = validator.validate(document.getText());
 

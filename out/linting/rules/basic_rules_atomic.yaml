@@ -1,0 +1,287 @@
+---
+  profile:
+    name: "Default"
+    description: "Default Profile. Checks basic syntax."
+    includes:
+      #- recommended_label_rules.yaml
+  line_rules:
+    LABEL:
+       paramSyntaxRegex: /.+/
+       # Use defined_label_rules to defined a set of labels for your dockerfile
+       # In this example, the labels "Vendor","Authoritative_Registry","BZComponent"
+       # have been defined. A label value is 'valid' if matches the regular
+       # expression 'valueRegex', otherwise an warn is logged with the string "message"
+       # at level 'level'.  'reference_url' provides a web link where the user can
+       # get more information about the rule.
+       #
+       defined_namevals:
+           Name:
+             valueRegex: /[\w]+/
+             message: "Label 'Name' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Version:
+             valueRegex: "/[\w.${}()"'\\\/~<>\-?\%:]+/"
+             message: "Label 'Version' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Release:
+             valueRegex: "/[\w.${}()"'\\\/~<>\-?\%:]+/"
+             message: "Label 'Release' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Architecture:
+             valueRegex: /[\w]*[6,8][4,6]|[.]*86[.]*64/
+             message: "Label 'Architecture' is missing or has invalid format: x86, i386, x86_64"
+             level: "info"
+             required: false
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Vendor:
+             valueRegex: /([\w]+).+/
+             message: "Label 'Vendor' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Url:
+             valueRegex: /([\w]+).+/
+             message: "Label 'Url' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+           Help:
+             valueRegex: /([\w]+).+/
+             message: "Label 'Help' is missing or has invalid format"
+             level: "warn"
+             required: true
+             reference_url:
+               - "http://docs.projectatomic.io/container-best-practices/#"
+               - "_recommended_labels_for_your_project"
+
+    FROM: 
+      paramSyntaxRegex: /^[\w./-]+(:[\w.]+)?(-[\w]+)?$/
+      rules: 
+        - 
+          label: "is_latest_tag"
+          regex: /latest/
+          level: "error"
+          message: "base image uses 'latest' tag"
+          description: "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release."
+          reference_url: 
+            - "https://docs.docker.com/reference/builder/"
+            - "#from"
+          label: "no_tag"
+          regex: /^[:]/
+          level: "error"
+          message: "No tag is used"
+          description: "lorem ipsum tar"
+          reference_url: 
+            - "https://docs.docker.com/reference/builder/"
+            - "#from"
+          label: "specified_registry"
+          regex: "/[\w]+?\.[\w-]+(\:|\.)([\w.]+|(\d+)?)([/?:].*)?/"
+          level: "warn"
+          message: "using a specified registry in the FROM line"
+          description: "using a specified registry may supply invalid or unexpected base images"
+          reference_url:
+            - "https://docs.docker.com/reference/builder/"
+            - "#entrypoint"
+    MAINTAINER: 
+      paramSyntaxRegex: /.+/
+      rules: []
+    RUN: 
+      paramSyntaxRegex: /.+/
+      rules: 
+        - 
+          label: "no_yum_clean_all"
+          regex: /yum(?!.+clean all|.+\.repo|-config|\.conf)/g
+          level: "warn"
+          message: "yum clean all is not used"
+          description: "the yum cache will remain in this layer making the layer unnecessarily large"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads"
+        - 
+          label: "yum_update_all"
+          regex: /yum(.+update all|.+upgrade|.+update|\.config)/
+          level: "info"
+          message: "updating the entire base image may add unnecessary size to the container"
+          description: "update the entire base image may add unnecessary size to the container"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads"
+        -
+          label: "no_dnf_clean_all"
+          regex: /dnf(?!.+clean all|.+\.repo)/g
+          level: "warn"
+          message: "dnf clean all is not used"
+          description: "the dnf cache will remain in this layer making the layer unnecessarily large"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads"
+        -
+          label: "no_rvm_cleanup_all"
+          regex: /rvm install(?!.+cleanup all)/g
+          level: "warn"
+          message: "rvm cleanup is not used"
+          description: "the rvm cache will remain in this layer making the layer unnecessarily large"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads"
+        -
+          label: "no_gem_clean_all"
+          regex: /gem install(?!.+cleanup|.+\rvm cleanup all)/g
+          level: "warn"
+          message: "gem cleanup all is not used"
+          description: "the gem cache will remain in this layer making the layer unnecessarily large"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads" 
+        -
+          label: "no_apt-get_clean"
+          regex: /apt-get install(?!.+clean)/g
+          level: "warn"
+          message: "apt-get clean is not used"
+          description: "the apt-get cache will remain in this layer making the layer unnecessarily large"
+          reference_url: 
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_clear_packaging_caches_and_temporary_package_downloads" 
+        -
+          label: "privileged_run_container"
+          regex: /privileged/
+          level: "warn"
+          message: "a privileged run container is allowed access to host devices"
+          description: "Does this run need to be privileged?"
+          reference_url: 
+            - "http://docs.docker.com/engine/reference/run/#"
+            - "runtime-privilege-and-linux-capabilities"
+        -
+          label: "installing_ssh"
+          regex: /openssh-server/
+          level: "warn"
+          message: "installing SSH in a container is not recommended"
+          description: "Do you really need SSH in this image?"
+          reference_url: "https://github.com/jpetazzo/nsenter"	
+        - 
+          label: "no_ampersand_usage"
+          regex: / ; /
+          level: "warn"
+          message: "using ; instead of &&"
+          description: "RUN do_1 && do_2: The ampersands change the resulting evaluation into do_1 and then do_2 only if do_1 was successful."
+          reference_url:
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "#_using_semi_colons_vs_double_ampersands"
+    EXPOSE: 
+      paramSyntaxRegex: /^[\d-\s\w/\\]+$/
+      rules: []
+    ENV: 
+      paramSyntaxRegex: /^[a-zA-Z_]+[a-zA-Z0-9_]* .+$/
+      rules: []
+    ADD: 
+      paramSyntaxRegex: /^~?([\w-.~:/?#\[\]\\\/*@!$&'()*+,;=.{}"]+[\s]*)+$/
+    COPY: 
+      paramSyntaxRegex: /.+/
+      rules: []
+    ENTRYPOINT: 
+      paramSyntaxRegex: /.+/
+      rules: []
+    VOLUME:
+      paramSyntaxRegex: /.+/
+      rules: []
+    USER: 
+      paramSyntaxRegex: /^[a-z0-9_][a-z0-9_]{0,40}$/
+      rules: []
+    WORKDIR: 
+      paramSyntaxRegex: /^~?[\w\d-\/.{}$\/:]+[\s]*$/
+      rules: []
+    ONBUILD: 
+      paramSyntaxRegex: /.+/
+      rules: []
+  required_instructions: 
+    - 
+      instruction: "MAINTAINER"
+      count: 1
+      level: "error"
+      message: "Maintainer is not defined"
+      description: "The MAINTAINER line is useful for identifying the author in the form of MAINTAINER Joe Smith <joe.smith@example.com>"
+      reference_url: 
+        - "https://docs.docker.com/reference/builder/"
+        - "#maintainer"
+    - 
+      instruction: "EXPOSE"
+      count: 1
+      level: "info"
+      message: "There is no 'EXPOSE' instruction"
+      description: "Without exposed ports how will the service of the container be accessed?"
+      reference_url: 
+        - "https://docs.docker.com/reference/builder/"
+        - "#expose"
+    - 
+      instruction: "ENTRYPOINT"
+      count: 1
+      level: "info"
+      message: "There is no 'ENTRYPOINT' instruction"
+      description: "None"
+      reference_url: 
+        - "https://docs.docker.com/reference/builder/"
+        - "#entrypoint"
+    - 
+      instruction: "CMD"
+      count: 1
+      level: "info"
+      message: "There is no 'CMD' instruction"
+      description: "None"
+      reference_url: 
+        - "https://docs.docker.com/reference/builder/"
+        - "#cmd"
+    - 
+      instruction: "USER"
+      count: 1
+      level: "warn"
+      message: "No 'USER' instruction"
+      description: "The process(es) within the container may run as root and RUN instructions my be run as root"
+      reference_url: 
+        - "https://docs.docker.com/reference/builder/"
+        - "#user"
+    -
+      instruction: "INSTALL"
+      count: 1
+      level: "warn"
+      message: "No 'INSTALL' instruction"
+      description: "The INSTALL process provides information how to run an atomic install for the container"
+      reference_url:
+        - "http://docs.projectatomic.io/container-best-practices/#"
+        - "_recommended_labels_for_your_project"
+    -
+      instruction: "UNINSTALL"
+      count: 1
+      level: "warn"
+      message: "No 'UNINSTALL' instruction"
+      description: "The UNINSTALL process provides information how to run an atomic uninstall for the container and clean up"
+      reference_url:
+        - "http://docs.projectatomic.io/container-best-practices/#"
+        - "_recommended_labels_for_your_project"
+    -
+      instruction: "RUN"
+      count: 1
+      level: "warn"
+      message: "No 'RUN' instruction"
+      description: "The RUN process provides information how to run an atomic container"
+      reference_url:
+        - "http://docs.projectatomic.io/container-best-practices/#"
+        - "_recommended_labels_for_your_project"
+

@@ -1,0 +1,78 @@
+---
+profile:
+  description: "Label checking rule file."
+  name: Label
+line_rules:
+  ENV:
+    defined_namevals:
+      MYSQL_IP:
+        level: error
+        message: "ENV 'MYSQL_IP' is has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: true
+        valueRegex: /^[\d.]+$/
+    paramSyntaxRegex: /.+/
+  LABEL:
+    defined_namevals:
+      Authoritative_Registry:
+        level: error
+        message: "Label 'Authoritative_Registry' has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: true
+        valueRegex: /.+/
+      BZComponent:
+        level: error
+        message: "Label 'BZComponent' has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: recommended
+        valueRegex: /^\d+$/
+      Created_TimeStamp:
+        level: error
+        message: "Label 'Created_TimeStamp' has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: recommended
+        valueRegex: /.+/
+      Vendor:
+        level: error
+        message: "Label 'Vendor' has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: false
+        valueRegex: /.+/
+      VendorID:
+        level: error
+        message: "Label 'Vendor ID' is has invalid format"
+        reference_url:
+          - "https://docs.docker.com/reference/builder/"
+          - "#from"
+        required: true
+        valueRegex: /^\d+$/
+    nameval_defaults:
+      keyRegex: /.+/
+      level: error
+      name_error_message: "The key of the label has the wrong format"
+      reference_url:
+        - "https://docs.docker.com/reference/builder/"
+        - "#from"
+      valueRegex: /.+/
+      value_error_message: "The value of the label has the wrong format"
+    paramSyntaxRegex: /.+/
+required_instructions:
+  -
+    count: 1
+    description: "Labels are needed because...."
+    instruction: LABEL
+    level: error
+    message: "No LABELs are defined"
+    reference_url:
+      - "https://docs.docker.com/reference/builder/"
+      - "#label"

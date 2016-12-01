@@ -1,2 +1,3 @@
-out
+out/**/*.js
+out/**/*.map
 node_modules
