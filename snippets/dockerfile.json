@@ -110,5 +110,14 @@
             "$0"
         ],
         "description": "ONBUILD"
+    },
+    "HEALTHCHECK": {
+        "prefix": "HEALTHCHECK",
+        "body": [
+            "HEALTHCHECK CMD ${command}"
+            "$0"
+        ],
+        "description": "HEALTHCHECK"
     }
+}
 }
