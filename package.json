@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "publisher": "PeterJausovec",
   "displayName": "Docker Support",
   "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
