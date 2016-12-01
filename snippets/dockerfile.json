@@ -114,7 +114,7 @@
     "HEALTHCHECK": {
         "prefix": "HEALTHCHECK",
         "body": [
-            "HEALTHCHECK --interval=30s --timeout=30s --retries=3 CMD ${command}"
+            "HEALTHCHECK CMD ${command}"
             "$0"
         ],
         "description": "HEALTHCHECK"
