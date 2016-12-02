@@ -3,7 +3,7 @@
   "version": "0.0.9",
   "publisher": "PeterJausovec",
   "displayName": "Docker Support",
-  "description": "Adds syntax highlighting, snippets, commands and description on hover for Dockerfiles and Docker compose files.",
+  "description": "Adds syntax highlighting, snippets, commands,  hover tips, and linting for Dockerfile and docker-compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
   "icon": "images/docker_icon.svg",
   "galleryBanner": {
