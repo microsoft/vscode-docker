@@ -11,16 +11,24 @@ The Docker extension it easy to build and deploy containerized applications from
 ## Generating Dockerfile, docker-compose.yml, and docker-compose.debug.yml
 ![dockerfile](images/generateFiles.gif)
 
-Similar functionality is available for Docker compose files (v1 and v2 formats):
+IntelliSense (completions) for Dockerfile and docker-compose.yml files, including listing images from Dockerhub.com.
 
-![composefile](images/dockercompose.gif)
+![intelliSense](images/intelliSense.gif)
+
+## Docker commands
+Many of the most common Docker and docker-compose commands are built right into the Command Palette (F1).
+
+![intelliSense](images/commands.gif)
+
+## Dockerfile linting
+You can enable linting of Dockerfile files through the `docker.enableLinting` setting (CMD+ on MacOS, or Ctrl+, on Windows and Linux). The extension uses the awesome [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) rules based linter to analyze the Dockerfile. You can provide your own customized rules file by setting the `docker.linterRuleFile` setting. You can find [more information](https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) on how to create rules files as well as [sample rules files](https://github.com/projectatomic/dockerfile_lint/tree/master/sample_rules) in the [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) project. 
+
+![linting](images/linting.gif)
 
 ## Installation
-Installation is easy! In VS Code, press F1 and type in `ext install vscode-docker`. Once the extension is installed you will be prompted to restart Visual Studio Code which will only take (literally) a couple of seconds. 
+In VS Code, press F1 and type in `ext install vscode-docker`. Once the extension is installed you will be prompted to restart Visual Studio Code which will only take (literally) a couple of seconds. 
 
 Of course, you will want to have Docker installed on your computer in order to run commands from the Command Palette (F1, type in `Docker`).  
-
-![installation](images/installing.gif)
 
 ## Running commands on Linux
 By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)

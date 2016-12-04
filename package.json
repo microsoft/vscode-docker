@@ -84,7 +84,7 @@
         },
         "docker.enableLinting": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Turn linting of Dockerfiles on or off."
         },
         "docker.linterRuleFile": {
