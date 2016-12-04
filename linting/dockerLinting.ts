@@ -34,7 +34,8 @@ export function scheduleValidate(document: vscode.TextDocument) {
     let timeoutToken: NodeJS.Timer = null;
 
     // should we even try validation? if not, get out!
-    if (!(configOptions.get('enableLinting', true)) || document.languageId !== 'dockerfile') {
+    configOptions = vscode.workspace.getConfiguration('docker');
+    if (!(configOptions.get('enableLinting', false)) || document.languageId !== 'dockerfile') {
         return ;
     }
 
@@ -62,6 +63,7 @@ export function scheduleValidate(document: vscode.TextDocument) {
 function doValidate(document: vscode.TextDocument) {
     let diagnostics: vscode.Diagnostic[] = [];
 
+    configOptions = vscode.workspace.getConfiguration('docker');
     let linterRuleFile = configOptions.get('linterRuleFile', '');
 
     // validate file exists

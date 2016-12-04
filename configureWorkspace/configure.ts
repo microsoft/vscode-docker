@@ -13,13 +13,15 @@ const yesNoPrompt: vscode.MessageItem[] =
         "isCloseAffordance": true
     }];
 
-function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
+function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string, author: string, version: string): string {
 
     switch (platform.toLowerCase()) {
         case 'node.js':
 
             return `
 FROM node:latest
+MAINTAINER ${author}
+LABEL Name=${serviceName} Version=${version} 
 COPY package.json /tmp/package.json
 RUN cd /tmp && npm install --production
 RUN mkdir -p /usr/src/app && mv /tmp/node_modules /usr/src
@@ -36,10 +38,14 @@ CMD ${cmd}
 # fetches the application dependencies, builds the program, 
 # and configures it to run on startup 
 FROM golang:onbuild
+MAINTAINER ${author}
+LABEL Name=${serviceName} Version=${version} 
 EXPOSE ${port}
 
 # For more control, you can copy and build manually
 # FROM golang:latest 
+# MAINTAINER ${author}
+# LABEL Name=${serviceName} Version=${version} 
 # RUN mkdir /app 
 # ADD . /app/ 
 # WORKDIR /app 
@@ -52,6 +58,8 @@ EXPOSE ${port}
 
             return `
 FROM microsoft/aspnetcore:1.0.1
+MAINTAINER ${author}
+LABEL Name=${serviceName} Version=${version} 
 ARG source=.
 WORKDIR /app
 EXPOSE ${port}
@@ -63,6 +71,8 @@ ENTRYPOINT dotnet ${serviceName}.dll
 
             return `
 FROM docker/whalesay:latest
+MAINTAINER ${author}
+LABEL Name=${serviceName} Version=${version} 
 RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay
 `;
@@ -129,12 +139,12 @@ services:
     }
 }
 
-function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string, cmd:string): string {
+function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
 
     switch (platform.toLowerCase()) {
         case 'node.js':
 
-            var cmdArray:string [] = cmd.split(' ');
+            var cmdArray: string[] = cmd.split(' ');
             if (cmdArray[0].toLowerCase() === 'node') {
                 cmdArray.splice(1, 0, '--debug=5858');
                 cmd = 'command: ' + cmdArray.join(' ');
@@ -230,10 +240,12 @@ const launchJsonTemplate: string =
     ]
 }`;
 
-interface Command {
+interface PackageJson {
     npmStart: boolean, //has npm start
     cmd: string,
-    fullCommand: string //full command
+    fullCommand: string, //full command
+    author: string,
+    version: string
 }
 
 function hasWorkspaceFolder(): boolean {
@@ -248,32 +260,42 @@ function getPackageJson(): Thenable<vscode.Uri[]> {
     return Promise.resolve(vscode.workspace.findFiles('package.json', null, 1, null));
 }
 
-function getCommand(): Thenable<Command> {
+function readPackageJson(): Thenable<PackageJson> {
     // open package.json and look for main, scripts start
     return getPackageJson().then(function (uris: vscode.Uri[]) {
-        var cmd: Command = {
+        var pkg: PackageJson = {
             npmStart: true,
             fullCommand: 'npm start',
-            cmd: 'npm start'
+            cmd: 'npm start',
+            author: 'author',
+            version: '0.0.1'
         }; //default
 
         if (uris && uris.length > 0) {
             var json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
 
             if (json.scripts && json.scripts.start) {
-                cmd.npmStart = true;
-                cmd.fullCommand = json.scripts.start;
-                cmd.cmd = 'npm start';
+                pkg.npmStart = true;
+                pkg.fullCommand = json.scripts.start;
+                pkg.cmd = 'npm start';
             } else if (json.main) {
-                cmd.npmStart = false;
-                cmd.fullCommand = 'node' + ' ' + json.main;
-                cmd.cmd = cmd.fullCommand;
+                pkg.npmStart = false;
+                pkg.fullCommand = 'node' + ' ' + json.main;
+                pkg.cmd = pkg.fullCommand;
             } else {
-                cmd.fullCommand = '';
+                pkg.fullCommand = '';
+            }
+
+            if (json.author) {
+                pkg.author = json.author;
+            }
+
+            if (json.version) {
+                pkg.version = json.version;
             }
         }
 
-        return Promise.resolve(cmd);
+        return Promise.resolve(pkg);
 
     });
 }
@@ -311,8 +333,7 @@ export function configure(): void {
             var platformType: string = platform || 'node';
             var serviceName: string;
 
-            getCommand().then((cmd: Command) => {
-
+            readPackageJson().then((pkg: PackageJson) => {
 
                 if (process.platform === 'win32') {
                     serviceName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
@@ -325,11 +346,11 @@ export function configure(): void {
                 if (fs.existsSync(dockerFile)) {
                     vscode.window.showErrorMessage('A Dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                         if (item.title.toLowerCase() === 'yes') {
-                            fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, cmd.cmd), { encoding: 'utf8' });
+                            fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, pkg.cmd, pkg.author, pkg.version), { encoding: 'utf8' });
                         }
                     });
                 } else {
-                    fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, cmd.cmd), { encoding: 'utf8' });
+                    fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, pkg.cmd, pkg.author, pkg.version), { encoding: 'utf8' });
                 }
 
                 if (fs.existsSync(dockerComposeFile)) {
@@ -345,11 +366,11 @@ export function configure(): void {
                 if (fs.existsSync(dockerComposeDebugFile)) {
                     vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
                         if (item.title.toLowerCase() === 'yes') {
-                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, cmd.fullCommand), { encoding: 'utf8' });
+                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, pkg.fullCommand), { encoding: 'utf8' });
                         }
                     });
                 } else {
-                    fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, cmd.fullCommand), { encoding: 'utf8' });
+                    fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, pkg.fullCommand), { encoding: 'utf8' });
                 }
 
             });

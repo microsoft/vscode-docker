@@ -8,7 +8,8 @@ The Docker extension it easy to build and deploy containerized applications from
 * Linting (errors and warnings) for dockerfile files
 * Command Palette (F1) integration for the most common Docker commands (e.g. Build, Push)
 
-![dockerfile](images/dockerfile.gif)
+## Generating Dockerfile, docker-compose.yml, and docker-compose.debug.yml
+![dockerfile](images/generateFiles.gif)
 
 Similar functionality is available for Docker compose files (v1 and v2 formats):
 
