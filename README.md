@@ -21,7 +21,7 @@ Many of the most common Docker and docker-compose commands are built right into 
 ![intelliSense](images/commands.gif)
 
 ## Dockerfile linting
-You can enable linting of Dockerfile files through the `docker.enableLinting` setting (CMD+ on MacOS, or Ctrl+, on Windows and Linux). The extension uses the awesome [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) rules based linter to analyze the Dockerfile. You can provide your own customized rules file by setting the `docker.linterRuleFile` setting. You can find [more information](https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) on how to create rules files as well as [sample rules files](https://github.com/projectatomic/dockerfile_lint/tree/master/sample_rules) in the [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) project. 
+You can enable linting of Dockerfile files through the `docker.enableLinting` setting (CMD+, on MacOS, or Ctrl+, on Windows and Linux). The extension uses the awesome [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) rules based linter to analyze the Dockerfile. You can provide your own customized rules file by setting the `docker.linterRuleFile` setting. You can find [more information](https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) on how to create rules files as well as [sample rules files](https://github.com/projectatomic/dockerfile_lint/tree/master/sample_rules) in the [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) project. 
 
 ![linting](images/linting.gif)
 
