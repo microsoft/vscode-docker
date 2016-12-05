@@ -1,5 +1,5 @@
 # Docker Support for Visual Studio Code
-The Docker extension it easy to build and deploy containerized applications from Visual Studio Code. 
+The Docker extension makes it easy to build and deploy containerized applications from Visual Studio Code. 
 
 * Automatic dockerfile and docker-compose.yml file generation 
 * Syntax highlighting and hover tips for docker-compose.yml and dockerfile files
