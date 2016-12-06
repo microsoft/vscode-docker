@@ -6,7 +6,7 @@ export function showLogsContainer() {
     quickPickContainer().then(function (selectedItem: ContainerItem) {
         if (selectedItem) {
             let terminal = vscode.window.createTerminal(selectedItem.label);
-            terminal.sendText(`docker logs ${selectedItem.ids[0]}`);
+            terminal.sendText(`docker logs -f ${selectedItem.ids[0]}`);
             terminal.show();
         }
     });
