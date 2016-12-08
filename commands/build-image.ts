@@ -1,6 +1,5 @@
-
-import vscode = require('vscode');
-
+import * as path from "path";
+import * as vscode from "vscode";
 
 function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
@@ -14,18 +13,18 @@ function getDockerFileUris(): Thenable<vscode.Uri[]> {
 }
 
 interface Item extends vscode.QuickPickItem {
-    path: string,
-    file: string
+    file: string,
+    path: string
 }
 
 function createItem(uri: vscode.Uri): Item {
-    let length = vscode.workspace.rootPath.length;
-    let label = uri.fsPath.substr(length);
+    let filePath = hasWorkspaceFolder() ? path.join(".", uri.path.substr(vscode.workspace.rootPath.length)) : uri.path;
+
     return <Item>{
-        label: label,
         description: null,
-        path: '.' + label.substr(0, label.length - '/Dockerfile'.length),
-        file: '.' + label
+        file: filePath,
+        label: filePath,
+        path: path.dirname(filePath)        
     };
 }
 
@@ -37,53 +36,55 @@ function computeItems(uris: vscode.Uri[]): vscode.QuickPickItem[] {
     return items;
 }
 
-export function buildImage() {
-    getDockerFileUris().then(function (uris: vscode.Uri[]) {
-        if (!uris || uris.length == 0) {
-            vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
+function resolveImageItem(dockerFileUri?: vscode.Uri): Promise<Item> {
+    return new Promise((resolve) => {
+        if (dockerFileUri) {
+            return resolve(createItem(dockerFileUri));
+        };
+
+        getDockerFileUris().then((uris: vscode.Uri[]) => {
+            if (!uris || uris.length == 0) {
+                vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
+                resolve();
+            } else {
+                let items: vscode.QuickPickItem[] = computeItems(uris);
+                vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(resolve);
+            }
+        });
+    });
+}
+
+export function buildImage(dockerFileUri?: vscode.Uri) {
+    resolveImageItem(dockerFileUri).then((uri: Item) => {
+        if (!uri) return;
+
+        let imageName: string;
+        if (process.platform === 'win32') {
+            imageName = uri.path.split('\\').pop().toLowerCase();
         } else {
-            let items: vscode.QuickPickItem[] = computeItems(uris);
-            vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(function (selectedItem: Item) {
-                if (selectedItem) {
-
-                    // TODO: Prompt for name, prefill with generated name below...
-
-                    var imageName: string;
-
-                    if (process.platform === 'win32') {
-                        imageName = selectedItem.path.split('\\').pop().toLowerCase();
-                    } else {
-                        imageName = selectedItem.path.split('/').pop().toLowerCase();
-                    }
-
-                    if (imageName === '.') {
-                        if (process.platform === 'win32') {
-                            imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
-                        } else {
-                            imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
-                        }
-                    }
-
-                    var opt: vscode.InputBoxOptions = {
-                        prompt: 'Tag image as...',
-                        value: imageName + ':latest',
-                        placeHolder: imageName + ':latest'
-                    }
-
-                    vscode.window.showInputBox(opt).then((value: string) => {
-
-                        if (!value) {
-                            return;
-                        }
-
-                        let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-                        terminal.sendText(`docker build  -f ${selectedItem.file} -t ${value} ${selectedItem.path}`);
-                        terminal.show();
-
-                    });
-
-                }
-            });
+            imageName = uri.path.split('/').pop().toLowerCase();
         }
+
+        if (imageName === '.') {
+            if (process.platform === 'win32') {
+                imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
+            } else {
+                imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
+            }
+        }
+
+        const opt: vscode.InputBoxOptions = {
+            placeHolder: imageName + ':latest',            
+            prompt: 'Tag image as...',
+            value: imageName + ':latest'
+        };
+
+        vscode.window.showInputBox(opt).then((value: string) => {
+            if (!value) return;
+
+            let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
+            terminal.sendText(`docker build -f ${uri.file} -t ${value} ${uri.path}`);
+            terminal.show();
+        });
     });
 }
