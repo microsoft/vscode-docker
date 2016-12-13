@@ -52,9 +52,16 @@
     "menus": {
       "editor/context": [
         {
+          "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
-          "group": "navigation",
-          "when": "editorLangId == dockerfile"
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceLangId == dockerfile",
+          "command": "vscode-docker.image.build",
+          "group": "navigation@+1"
         }
       ]
     },
