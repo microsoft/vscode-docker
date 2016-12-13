@@ -54,14 +54,14 @@
         {
           "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
-          "group": "navigation"
+          "group": "docker"
         }
       ],
       "explorer/context": [
         {
           "when": "resourceLangId == dockerfile",
           "command": "vscode-docker.image.build",
-          "group": "navigation@+1"
+          "group": "docker"
         }
       ]
     },
