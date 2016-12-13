@@ -49,6 +49,22 @@
         "path": "./snippets/dockerfile.json"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == dockerfile",
+          "command": "vscode-docker.image.build",
+          "group": "docker"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceLangId == dockerfile",
+          "command": "vscode-docker.image.build",
+          "group": "docker"
+        }
+      ]
+    },
     "debuggers": [
       {
         "type": "docker",
