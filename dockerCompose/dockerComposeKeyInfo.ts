@@ -328,8 +328,8 @@ function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
 }
     
 export default <ComposeVersionKeys>{
-    "1": mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
-    "2": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
+    v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
+    v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
     "v2.1": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO),
     All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO)
 };
