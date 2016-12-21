@@ -4,7 +4,8 @@
 
 import { ComposeVersionKeys, KeyInfo } from "../dockerExtension";
 
-// Define the keys that are shared between all compose file versions.
+// Define the keys that are shared between all compose file versions,
+// regardless of the major/minor version (e.g. v1-v2.1+).
 // https://docs.docker.com/compose/yml/
 const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     'build': (
@@ -166,9 +167,9 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     )
 };
 
-// Define the keys which are unique to the v1 format.
+// Define the keys which are unique to the v1 format, and were deprecated in v2+.
 // https://github.com/docker/compose/blob/master/compose/config/config_schema_v1.json
-const DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
+const DOCKER_COMPOSE_V1_KEY_INFO: KeyInfo = {
     'log_driver': (
         "Specify a logging driver for the service's containers, as with the `--log-driver` option for docker run. The default value is json-file."
     ),
@@ -180,9 +181,9 @@ const DOCKER_COMPOSE_V1_ONLY_KEY_INFO: KeyInfo = {
     )
 };
 
-// Define the keys which are unique to the v2 format.
+// Define the keys which are shared with all v2+ compose file versions, but weren't defined in v1.
 // https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.0.json
-const DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
+const DOCKER_COMPOSE_V2_KEY_INFO: KeyInfo = {
     // Added top-level properties
     'services': (
         "Specify the set of services that your app is composed of."
@@ -288,15 +289,47 @@ const DOCKER_COMPOSE_V2_ONLY_KEY_INFO: KeyInfo = {
     // defined above. We can specialize these by adding context-based completion.
 };
 
-// Merge the specified version-specific keys with the shared
+// Define the keys which were introduced in the v2.1 format.
+// https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.1.json
+const DOCKER_COMPOSE_V2_1_KEY_INFO: KeyInfo = {
+    // Added service-level properties
+    'group_add': (
+        "Specifies additional groups to join"
+     ),
+    'isolation': (
+        "Container isolation technology"
+    ),
+    'oom_score_adj': (
+        "Tune host's OOM preferences (-1000 to 1000)"
+    ),
+
+    // Added service/network-level properties
+    'link_local_ips': (
+        "List of IPv4/IPv6 link-local addresses for the container"
+    ),
+
+    // Added network-level properties
+    'internal': (
+        "Restrict external access to the network"
+    ),
+    'enable_ipv6': (
+        "Enable IPv6 networking"
+    )
+
+    // Note that in v2.1, networks and volumes can now accept a "labels",
+    // property, however, this label is already defined for services
+    // in the v2.0 format, so we don't need to re-define it.
+};
+
+// Helper function that merges the specified version-specific keys with the shared
 // keys, in order to create a complete schema for a specic version.
-function composeVersionKeys(...versions: KeyInfo[]): KeyInfo {
+function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
     return Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
-
-// Create 
+    
 export default <ComposeVersionKeys>{
-    v1: composeVersionKeys(DOCKER_COMPOSE_V1_ONLY_KEY_INFO),
-    v2: composeVersionKeys(DOCKER_COMPOSE_V2_ONLY_KEY_INFO),
-    All: composeVersionKeys(DOCKER_COMPOSE_V1_ONLY_KEY_INFO, DOCKER_COMPOSE_V2_ONLY_KEY_INFO)
+    v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
+    v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
+    "v2.1": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO),
+    All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO)
 };
