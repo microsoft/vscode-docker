@@ -18,13 +18,13 @@ interface Item extends vscode.QuickPickItem {
 }
 
 function createItem(uri: vscode.Uri): Item {
-    let filePath = hasWorkspaceFolder() ? path.join(".", uri.path.substr(vscode.workspace.rootPath.length)) : uri.path;
+    let filePath = hasWorkspaceFolder() ? path.join(".", uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
 
     return <Item>{
         description: null,
         file: filePath,
         label: filePath,
-        path: path.dirname(filePath)        
+        path: path.dirname(filePath)
     };
 }
 
@@ -74,7 +74,7 @@ export function buildImage(dockerFileUri?: vscode.Uri) {
         }
 
         const opt: vscode.InputBoxOptions = {
-            placeHolder: imageName + ':latest',            
+            placeHolder: imageName + ':latest',
             prompt: 'Tag image as...',
             value: imageName + ':latest'
         };
