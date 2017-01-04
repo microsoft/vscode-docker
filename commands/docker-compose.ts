@@ -1,4 +1,5 @@
 import vscode = require('vscode');
+import * as path from "path";
 
 
 function hasWorkspaceFolder() : boolean {
@@ -17,14 +18,14 @@ interface Item extends vscode.QuickPickItem {
     file: string
 }
 
-function createItem(uri: vscode.Uri) : Item {
-    let length = vscode.workspace.rootPath.length;
-    let label = uri.fsPath.substr(length);
+function createItem(uri: vscode.Uri): Item {
+    let filePath = hasWorkspaceFolder() ? path.join(".", uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
+
     return <Item>{
-        label: label,
         description: null,
-        path: '.' + label.substr(0, label.length - '/Dockerfile'.length),
-        file: '.' + label
+        file: filePath,
+        label: filePath,
+        path: path.dirname(filePath)
     };
 }
 
