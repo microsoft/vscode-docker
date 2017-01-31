@@ -4,7 +4,7 @@ import {DockerEngineType, docker} from './utils/docker-endpoint';
 
 const engineTypeShellCommands = {
     [DockerEngineType.Linux]: "/bin/sh",
-    [DockerEngineType.Windows]: "cmd"
+    [DockerEngineType.Windows]: "powershell"
 }
 
 export function openShellContainer() {
