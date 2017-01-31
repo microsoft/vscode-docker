@@ -23,6 +23,10 @@ declare module Docker {
 		stdin?: boolean;
 	}
 
+	interface EngineInfo {
+		OSType: string;
+	}
+
 	interface ExecInspectData {
 		ExitCode: number;
 	}
@@ -69,10 +73,11 @@ declare module Docker {
 	}
 }
 
-
 declare class Docker {
 	modem: Docker.Modem;
 	constructor(options: Docker.DockerOptions);
+
+	info(cb: (err: Error, data: Docker.EngineInfo) => void): void;
 
 	listImages(cb: (err:Error , images: Docker.ImageDesc[])=>void): void;
 	getImage(id:string): Docker.Image;
