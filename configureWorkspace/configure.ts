@@ -57,7 +57,9 @@ EXPOSE ${port}
         case '.net core':
 
             return `
-FROM microsoft/dotnet:1.1-runtime
+# For console applications use dotnet
+#FROM microsoft/dotnet:1.1-runtime
+FROM microsoft/aspnetcore
 MAINTAINER ${author}
 LABEL Name=${serviceName} Version=${version} 
 ARG source=.
@@ -222,7 +224,9 @@ function genDockerDebug(serviceName: string, platform: string): string {
             return ``;
         case '.net core':
             return `
-FROM microsoft/dotnet:1.1-sdk-msbuild
+# For console apps use dotnet
+#FROM microsoft/dotnet:1.1-sdk-msbuild
+FROM microsoft/aspnetcore-build:1.1-msbuild
 ENV NUGET_XMLDOC_MODE skip
 ARG CLRDBG_VERSION=VS2015U2
 WORKDIR /clrdbg
