@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publisher": "PeterJausovec",
   "displayName": "Docker Support",
   "description": "Adds syntax highlighting, snippets, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -196,7 +196,7 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
-    "dockerfile_lint": "^0.2.4",
+    "dockerfile_lint": "^0.2.6",
     "dockerode": "^2.3.0"
   }
 }
