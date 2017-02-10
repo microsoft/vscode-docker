@@ -21,6 +21,7 @@ import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { scheduleValidate } from './linting/dockerLinting';
+import { systemPrune } from './commands/system-prune';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -58,6 +59,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
     diagnosticCollection = vscode.languages.createDiagnosticCollection('docker-diagnostics');
     
