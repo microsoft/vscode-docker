@@ -37,9 +37,6 @@ export const DOCKERFILE_KEY_INFO: KeyInfo = {
     'LABEL': (
         "Adds metadata to an image. A **LABEL** is a key-value pair."
     ),
-    'MAINTAINER': (
-        "Set the **Author** field of the generated images."
-    ),
     'ONBUILD': (
         "Adds to the image a trigger instruction to be executed at a later time, when the image is used as the " +
         "base for another build."

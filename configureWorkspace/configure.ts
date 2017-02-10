@@ -20,7 +20,6 @@ function genDockerFile(serviceName: string, imageName: string, platform: string,
 
             return `
 FROM node:latest
-MAINTAINER ${author}
 LABEL Name=${serviceName} Version=${version} 
 COPY package.json /tmp/package.json
 RUN cd /tmp && npm install --production
@@ -38,13 +37,11 @@ CMD ${cmd}
 # fetches the application dependencies, builds the program, 
 # and configures it to run on startup 
 FROM golang:onbuild
-MAINTAINER ${author}
 LABEL Name=${serviceName} Version=${version} 
 EXPOSE ${port}
 
 # For more control, you can copy and build manually
 # FROM golang:latest 
-# MAINTAINER ${author}
 # LABEL Name=${serviceName} Version=${version} 
 # RUN mkdir /app 
 # ADD . /app/ 
@@ -58,7 +55,6 @@ EXPOSE ${port}
 
             return `
 FROM microsoft/aspnetcore:1.0.1
-MAINTAINER ${author}
 LABEL Name=${serviceName} Version=${version} 
 ARG source=.
 WORKDIR /app
@@ -71,7 +67,6 @@ ENTRYPOINT dotnet ${serviceName}.dll
 
             return `
 FROM docker/whalesay:latest
-MAINTAINER ${author}
 LABEL Name=${serviceName} Version=${version} 
 RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay

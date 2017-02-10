@@ -7,14 +7,6 @@
         ],
         "description": "FROM"
     },
-    "MAINTAINER": {
-        "prefix": "MAINTAINER",
-        "body": [
-            "MAINTAINER ${name}",
-            "$0"
-        ],
-        "description": "MAINTAINER"
-    },
     "RUN": {
         "prefix": "RUN",
         "body": [
@@ -114,10 +106,9 @@
     "HEALTHCHECK": {
         "prefix": "HEALTHCHECK",
         "body": [
-            "HEALTHCHECK CMD ${command}"
+            "HEALTHCHECK CMD ${command}",
             "$0"
         ],
         "description": "HEALTHCHECK"
     }
-}
 }
