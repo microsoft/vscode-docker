@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "publisher": "PeterJausovec",
   "displayName": "Docker Support",
   "description": "Adds syntax highlighting, snippets, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -39,7 +39,8 @@
     "onCommand:vscode-docker.compose.up",
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
-    "onCommand:vscode-docker.debug.configureLaunchJson"
+    "onCommand:vscode-docker.debug.configureLaunchJson",
+    "onCommand:vscode-docker.system.prune"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -175,6 +176,11 @@
         "command": "vscode-docker.image.push",
         "title": "Docker: Push",
         "description": "Push an image to a registry"
+      },
+      {
+        "command": "vscode-docker.system.prune",
+        "title": "Docker: System Prune",
+        "description": "Removes unused data"
       }
     ]
   },
