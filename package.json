@@ -2,7 +2,7 @@
   "name": "vscode-docker",
   "version": "0.0.12",
   "publisher": "PeterJausovec",
-  "displayName": "Docker Support",
+  "displayName": "Docker",
   "description": "Adds syntax highlighting, snippets, commands, hover tips, and linting for Dockerfile and docker-compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
   "icon": "images/docker_icon.svg",
