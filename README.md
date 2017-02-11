@@ -7,6 +7,7 @@ The Docker extension makes it easy to build and deploy containerized application
 * IntelliSense (completions) on image names from Dockerhub.com
 * Linting (errors and warnings) for dockerfile files
 * Command Palette (F1) integration for the most common Docker commands (e.g. Build, Push)
+* Deploy images to the cloud by running the Azure CLI in a container 
 
 ## Generating Dockerfile, docker-compose.yml, and docker-compose.debug.yml
 ![dockerfile](images/generateFiles.gif)
@@ -32,6 +33,11 @@ Of course, you will want to have Docker installed on your computer in order to r
 
 ## Running commands on Linux
 By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)
+
+## Azure CLI
+Microsoft ships the latest Azure CLI as a Docker image. You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. Because containers don't retain state, you will need to login each time you run the command. 
+
+To login to your Azure account use the command `az login` and then set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`).
 
 ## Contributing
 There are a couple of ways you can contribute to this repo:
