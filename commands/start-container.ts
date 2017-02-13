@@ -22,8 +22,13 @@ export function startContainerInteractive() {
 }
 
 export function startAzureCLI() {
+    
+    let option: string = process.platform === 'linux' ? '--net=host' : '';
+    let cmd: string = `docker run ${option} -it --rm azuresdk/azure-cli-python:latest`;
+
     let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
-    terminal.sendText(`docker run -it --rm azuresdk/azure-cli-python:latest`);
+    terminal.sendText(cmd);
     terminal.show();
     terminal.sendText(`az login`);
+
 }
