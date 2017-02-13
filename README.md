@@ -35,9 +35,12 @@ Of course, you will want to have Docker installed on your computer in order to r
 By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)
 
 ## Azure CLI
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a Docker image. You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. Because containers don't retain state, you will need to login each time you run the command. 
+Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. 
 
-To login to your Azure account use the command `az login` and then set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`).
+After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). 
+
+> If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a **free** 30 day account and get **$200** in Azure Credits to try out any combination of Azure services.
+
 
 ## Contributing
 There are a couple of ways you can contribute to this repo:
