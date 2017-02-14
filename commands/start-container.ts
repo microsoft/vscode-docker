@@ -2,6 +2,7 @@ import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
+import os = require('os');
 
 
 function doStartContainer(interactive: boolean) {
@@ -46,7 +47,9 @@ export function startAzureCLI() {
         });
     } else {
         let option: string = process.platform === 'linux' ? '--net=host' : '';
-        let cmd: string = `docker run ${option} -it --rm azuresdk/azure-cli-python:latest`;
+        // volume map .azure folder so don't have to log in every time
+        let vol: string = '-v ' + os.homedir() + '/.azure:~/.azure';
+        let cmd: string = `docker run ${option} ${vol} -it --rm azuresdk/azure-cli-python:latest`;
 
         let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
         terminal.sendText(cmd);
