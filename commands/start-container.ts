@@ -52,7 +52,6 @@ export function startAzureCLI() {
             let vol: string = '-v ' + homeDir + '/.azure:/root/.azure';
             let cmd: string = `docker run ${option} ${vol} -it --rm azuresdk/azure-cli-python:latest`;
 
-            //docker run  -v c:/Users/cdias/.azure:/root/.azure -it --rm azuresdk/azure-cli-python:latest
             let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
             terminal.sendText(cmd);
             terminal.show();
