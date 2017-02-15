@@ -6,6 +6,7 @@
 * Removed `MAINTAINER` from templates and linting warnings by upgrading the `dockerfile_lint` module (Docker has deprecated `MAINTAINER` in favor of `LABEL`).
 * Added command to run `docker system prune`, note we use the `-f` (force) flag to ignore the confirmation prompt.
 * `Docker: Attach Shell` command now supports Windows containers [#58](https://github.com/microsoft/vscode-docker/pull/58).
+* Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windowns containers, fix Windows path issues
 
 ## 0.0.10 - 12 December 2016
 
