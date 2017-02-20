@@ -9,7 +9,10 @@ class DockerClient {
     private endPoint:Docker;
 
     constructor() {
-        if (process.platform === 'win32') {
+        if (process.env.DOCKER_HOST){
+            this.endPoint = new Docker();
+        }
+        else if (process.platform === 'win32') {
             this.endPoint = new Docker({ socketPath: "//./pipe/docker_engine" });
         } else {
             this.endPoint = new Docker({ socketPath: '/var/run/docker.sock' });
