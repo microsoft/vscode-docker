@@ -4,7 +4,7 @@
 
 import { KeyInfo } from "../dockerExtension";
 
-// https://docs.docker.com/reference/builder/
+// https://docs.docker.com/engine/reference/builder/
 export const DOCKERFILE_KEY_INFO: KeyInfo = {
     'ADD': (
         "The **ADD** instruction copies new files, directories or remote file URLs from `src` and adds them " +
