@@ -4,11 +4,9 @@ import vscode = require('vscode');
 export var reporter: TelemetryReporter;
 
 export class Reporter extends vscode.Disposable {
-    //private toDispose: vscode.Disposable[] = [];
 
     constructor(ctx: vscode.ExtensionContext) {
 
-        //super(() => this.toDispose.forEach((d) => d && d.dispose()));
         super(() => reporter.dispose());
 
         let packageInfo = getPackageInfo(ctx);
