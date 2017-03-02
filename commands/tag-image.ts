@@ -1,7 +1,8 @@
 import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { docker } from './utils/docker-endpoint';
-
+import { reporter } from '../telemetry/telemetry';
+const cmd: string = 'vscode-docker.image.tag';
 
 export function tagImage() {
 
@@ -43,6 +44,11 @@ export function tagImage() {
                             console.log('Docker Tag error: ' + err);
                         }
                     });
+                    if (reporter) {
+                        reporter.sendTelemetryEvent('command', {
+                            command: cmd
+                        });
+                    }
                 }
             });
         };

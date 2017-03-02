@@ -1,6 +1,7 @@
 import vscode = require('vscode');
-import {ContainerItem, quickPickContainer} from './utils/quick-pick-container';
-
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
+import { reporter } from '../telemetry/telemetry';
+const cmd: string = 'vscode-docker.container.show-logs';
 
 export function showLogsContainer() {
     quickPickContainer().then(function (selectedItem: ContainerItem) {
@@ -8,6 +9,11 @@ export function showLogsContainer() {
             let terminal = vscode.window.createTerminal(selectedItem.label);
             terminal.sendText(`docker logs -f ${selectedItem.ids[0]}`);
             terminal.show();
+            if (reporter) {
+                reporter.sendTelemetryEvent('command', {
+                    command: cmd
+                });
+            }
         }
     });
 }

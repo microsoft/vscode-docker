@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import {ContainerItem, quickPickContainer} from './utils/quick-pick-container';
-import {DockerEngineType, docker} from './utils/docker-endpoint';
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
+import { DockerEngineType, docker } from './utils/docker-endpoint';
+import { reporter } from '../telemetry/telemetry';
+const cmd: string = 'vscode-docker.container.open-shell';
 
 const engineTypeShellCommands = {
     [DockerEngineType.Linux]: "/bin/sh",
@@ -14,6 +16,12 @@ export function openShellContainer() {
                 const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.label}`);
                 terminal.sendText(`docker exec -it ${selectedItem.ids[0]} ${engineTypeShellCommands[engineType]}`);
                 terminal.show();
+                if (reporter) {
+                    reporter.sendTelemetryEvent('command', {
+                        command: cmd,
+                        dockerEngineType: engineTypeShellCommands[engineType]
+                    });
+                }
             });
         }
     });
