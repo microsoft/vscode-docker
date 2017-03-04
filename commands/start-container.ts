@@ -4,7 +4,7 @@ import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.container.start';
+const teleCmdId: string = 'vscode-docker.container.start';
 
 function doStartContainer(interactive: boolean) {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
@@ -63,7 +63,7 @@ export function startAzureCLI() {
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
-                    command: cmd + '.azurecli'
+                    command: teleCmdId + '.azurecli'
                 });
             }
         }

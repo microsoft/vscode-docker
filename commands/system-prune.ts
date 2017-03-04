@@ -1,6 +1,6 @@
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.system.prune';
+const teleCmdId: string = 'vscode-docker.system.prune';
 
 export function systemPrune() {
 
@@ -9,7 +9,7 @@ export function systemPrune() {
     terminal.show();
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
-            command: cmd
+            command: teleCmdId
         });
     }
 }
