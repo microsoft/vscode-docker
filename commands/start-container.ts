@@ -15,7 +15,7 @@ function doStartContainer(interactive: boolean) {
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
-                    command: interactive ? '.interactive' : ''
+                    command: interactive ? teleCmdId + '.interactive' : teleCmdId
                 });
             }
         }
