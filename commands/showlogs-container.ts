@@ -1,7 +1,7 @@
 import vscode = require('vscode');
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.container.show-logs';
+const teleCmdId: string = 'vscode-docker.container.show-logs';
 
 export function showLogsContainer() {
     quickPickContainer().then(function (selectedItem: ContainerItem) {
@@ -11,7 +11,7 @@ export function showLogsContainer() {
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
-                    command: cmd
+                    command: teleCmdId
                 });
             }
         }

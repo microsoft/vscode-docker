@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { promptForPort, quickPickPlatform } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.configure';
+const teleCmdId: string = 'vscode-docker.configure';
 
 const yesNoPrompt: vscode.MessageItem[] =
     [{
@@ -372,7 +372,7 @@ export function configure(): void {
 
                 if (reporter) {
                     reporter.sendTelemetryEvent('command', {
-                        command: cmd,
+                        command: teleCmdId,
                         platformType: platformType
                     });
                 }

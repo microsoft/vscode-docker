@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { DockerEngineType, docker } from './utils/docker-endpoint';
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.container.open-shell';
+const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const engineTypeShellCommands = {
     [DockerEngineType.Linux]: "/bin/sh",
@@ -18,7 +18,7 @@ export function openShellContainer() {
                 terminal.show();
                 if (reporter) {
                     reporter.sendTelemetryEvent('command', {
-                        command: cmd,
+                        command: teleCmdId,
                         dockerEngineType: engineTypeShellCommands[engineType]
                     });
                 }

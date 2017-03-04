@@ -1,7 +1,7 @@
 import vscode = require('vscode');
 import * as path from "path";
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
+const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
@@ -51,7 +51,7 @@ export function compose(command: string, message: string) {
                     terminal.show();
                     if (reporter) {
                         reporter.sendTelemetryEvent('command', {
-                            command: cmd + command
+                            command: teleCmdId + command
                         });
                     }
 

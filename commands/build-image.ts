@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.image.build';
+const teleCmdId: string = 'vscode-docker.image.build';
 
 function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
@@ -90,7 +90,7 @@ export function buildImage(dockerFileUri?: vscode.Uri) {
             
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
-                    command: cmd
+                    command: teleCmdId
                 });
             }
         });

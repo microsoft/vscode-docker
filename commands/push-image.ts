@@ -1,7 +1,7 @@
 import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { reporter } from '../telemetry/telemetry';
-const cmd: string = 'vscode-docker.image.push';
+const teleCmdId: string = 'vscode-docker.image.push';
 
 export function pushImage() {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
@@ -11,7 +11,7 @@ export function pushImage() {
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
-                    command: cmd
+                    command: teleCmdId
                 });
             }
         };
