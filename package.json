@@ -203,6 +203,6 @@
   },
   "dependencies": {
     "dockerfile_lint": "^0.2.6",
-    "dockerode": "^2.3.0"
+    "dockerode": "^2.3.2"
   }
 }
