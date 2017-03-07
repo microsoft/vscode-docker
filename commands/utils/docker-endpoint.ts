@@ -10,7 +10,7 @@ class DockerClient {
 
     constructor() {
         // Pass no options so that the defaultOpts of docker-modem will be used
-        this.endPoint = new Docker(null);
+        this.endPoint = new Docker();
     }
 
     public getContainerDescriptors(): Thenable<Docker.ContainerDesc[]>{
