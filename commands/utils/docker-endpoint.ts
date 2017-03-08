@@ -9,11 +9,8 @@ class DockerClient {
     private endPoint:Docker;
 
     constructor() {
-        if (process.platform === 'win32') {
-            this.endPoint = new Docker({ socketPath: "//./pipe/docker_engine" });
-        } else {
-            this.endPoint = new Docker({ socketPath: '/var/run/docker.sock' });
-        }
+        // Pass no options so that the defaultOpts of docker-modem will be used
+        this.endPoint = new Docker();
     }
 
     public getContainerDescriptors(): Thenable<Docker.ContainerDesc[]>{

@@ -41,6 +41,9 @@ Of course, you will want to have Docker installed on your computer in order to r
 ## Running commands on Linux
 By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#/create-a-docker-group)
 
+## Connecting to docker-machine
+The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host.
+
 ## Contributing
 There are a couple of ways you can contribute to this repo:
 

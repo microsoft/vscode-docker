@@ -75,7 +75,7 @@ declare module Docker {
 
 declare class Docker {
 	modem: Docker.Modem;
-	constructor(options: Docker.DockerOptions);
+	constructor(options?: Docker.DockerOptions);
 
 	info(cb: (err: Error, data: Docker.EngineInfo) => void): void;
 
