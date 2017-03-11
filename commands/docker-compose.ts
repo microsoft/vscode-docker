@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 
 function hasWorkspaceFolder() : boolean {
