@@ -1,6 +1,6 @@
-import vscode = require('vscode');
-import * as path from "path";
-
+import * as vscode from 'vscode';
+import * as path from 'path';
+import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 
 function hasWorkspaceFolder() : boolean {
     return vscode.workspace.rootPath ? true : false;
@@ -10,7 +10,7 @@ function getDockerComposeFileUris(): Thenable<vscode.Uri[]>{
     if (!hasWorkspaceFolder()) {
         return Promise.resolve(null);
     }
-    return Promise.resolve(vscode.workspace.findFiles('{**/[dD]ocker-[cC]ompose.*.yml,**/[dD]ocker-[cC]ompose.yml}', null, 9999, null));
+    return Promise.resolve(vscode.workspace.findFiles(COMPOSE_FILE_GLOB_PATTERN, null, 9999, null));
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -19,7 +19,7 @@ interface Item extends vscode.QuickPickItem {
 }
 
 function createItem(uri: vscode.Uri): Item {
-    let filePath = hasWorkspaceFolder() ? path.join(".", uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
+    let filePath = hasWorkspaceFolder() ? path.join('.', uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
 
     return <Item>{
         description: null,
