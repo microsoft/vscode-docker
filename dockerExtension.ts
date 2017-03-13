@@ -23,8 +23,10 @@ import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 
+export const COMPOSE_FILE_GLOB_PATTERN = '**/docker-compose*.{yaml,yml}';
 export var diagnosticCollection: vscode.DiagnosticCollection;
 
+export type KeyInfo = { [keyName: string]: string; };
 
 export interface ComposeVersionKeys {
     All: KeyInfo,
@@ -32,15 +34,13 @@ export interface ComposeVersionKeys {
     v2: KeyInfo
 };
 
-export type KeyInfo = { [keyName: string]: string; };
-
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCKERFILE_MODE_ID, new DockerfileCompletionItemProvider(), '.'));
 
-    const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: '**/docker-compose*.yml' };
+    const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
     var yamlHoverProvider = new DockerHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
@@ -70,6 +70,4 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.workspace.textDocuments.forEach((doc) => scheduleValidate(doc));
     vscode.workspace.onDidOpenTextDocument((doc) => scheduleValidate(doc), ctx.subscriptions);
     vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri), ctx.subscriptions);
-
-
 }
