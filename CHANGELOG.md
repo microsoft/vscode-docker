@@ -1,4 +1,9 @@
 
+## 0.0.13 - 14 March 2017
+
+* Support for `.yaml` file extension on `docker-compose` files. 
+* Add telemetry support, see the VS Code [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting) if you would like to turn it off. 
+* Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windowns containers, fix Windows path issues (didn't make it into `0.0.12`)
 
 
 ## 0.0.12 - 11 February 2017
@@ -6,7 +11,6 @@
 * Removed `MAINTAINER` from templates and linting warnings by upgrading the `dockerfile_lint` module (Docker has deprecated `MAINTAINER` in favor of `LABEL`).
 * Added command to run `docker system prune`, note we use the `-f` (force) flag to ignore the confirmation prompt.
 * `Docker: Attach Shell` command now supports Windows containers [#58](https://github.com/microsoft/vscode-docker/pull/58).
-* Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windowns containers, fix Windows path issues
 
 ## 0.0.10 - 12 December 2016
 
