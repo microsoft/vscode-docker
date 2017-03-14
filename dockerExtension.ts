@@ -22,6 +22,7 @@ import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
+import { Reporter } from './telemetry/telemetry';
 
 export const COMPOSE_FILE_GLOB_PATTERN = '**/docker-compose*.{yaml,yml}';
 export var diagnosticCollection: vscode.DiagnosticCollection;
@@ -36,6 +37,9 @@ export interface ComposeVersionKeys {
 
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
+    
+    ctx.subscriptions.push(new Reporter(ctx));
+
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCKERFILE_MODE_ID, new DockerfileCompletionItemProvider(), '.'));

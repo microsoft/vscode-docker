@@ -3,7 +3,8 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
 import os = require('os');
-
+import { reporter } from '../telemetry/telemetry';
+const teleCmdId: string = 'vscode-docker.container.start';
 
 function doStartContainer(interactive: boolean) {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
@@ -12,6 +13,11 @@ function doStartContainer(interactive: boolean) {
             let terminal = vscode.window.createTerminal(selectedItem.label);
             terminal.sendText(`docker run ${option} --rm ${selectedItem.label}`);
             terminal.show();
+            if (reporter) {
+                reporter.sendTelemetryEvent('command', {
+                    command: interactive ? teleCmdId + '.interactive' : teleCmdId
+                });
+            }
         }
     });
 }
@@ -46,7 +52,7 @@ export function startAzureCLI() {
             });
         } else {
             let option: string = process.platform === 'linux' ? '--net=host' : '';
-            
+
             // volume map .azure folder so don't have to log in every time
             let homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
             let vol: string = '-v ' + homeDir + '/.azure:/root/.azure';
@@ -55,7 +61,11 @@ export function startAzureCLI() {
             let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
             terminal.sendText(cmd);
             terminal.show();
-
+            if (reporter) {
+                reporter.sendTelemetryEvent('command', {
+                    command: teleCmdId + '.azurecli'
+                });
+            }
         }
     });
 }

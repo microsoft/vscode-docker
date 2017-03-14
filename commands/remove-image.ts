@@ -1,7 +1,8 @@
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import vscode = require('vscode');
-
+import { reporter } from '../telemetry/telemetry';
+const teleCmdId: string = 'vscode-docker.image.remove';
 
 export function removeImage() {
     quickPickImage(true).then(function (selectedItem: ImageItem) {
@@ -23,10 +24,10 @@ export function removeImage() {
                     }
                 }
 
-                image.remove({ force: true }, function (err, data:any) {
-                    
+                image.remove({ force: true }, function (err, data: any) {
+
                     if (data) {
-                        for (i=0;i<data.length;i++) {
+                        for (i = 0; i < data.length; i++) {
                             if (data[i].Untagged) {
                                 console.log(data[i].Untagged);
                             } else if (data[i].Deleted) {
@@ -35,7 +36,13 @@ export function removeImage() {
                         }
 
                         vscode.window.showInformationMessage(selectedItem.label + ' successfully removed');
-                    } 
+
+                        if (reporter) {
+                            reporter.sendTelemetryEvent('command', {
+                                command: teleCmdId
+                            });
+                        }
+                    }
                 });
             }
 

@@ -1,5 +1,20 @@
 
+## 0.0.12 - 06 March 2017
+* Added telemetry to understand which commands developers find useful. This will help us refine which commands we add in the future. We track whether the following commands are executed and in some cases additional metadata about the command:
+  * `build image`
+  * `compose up`, `compose down`
+  * `open shell` on running container and whether or not it is a Windows or Linux based container
+  * `push image` (we don't track the image name or the location)
+  * `remove image`
+  * `show logs`
+  * `start container`, `start container interactive`
+  * `start Azure CLI` container
+  * `stop container`
+  * `system prune`
+  * `tag` (we don't track tag name)
+  * Configure workspace along with the type (e.g. Node or Other)
 
+> Please note, you can turn off telemetry reporting for VS Code and all extensions through the ["telemetry.enableTelemetry": false setting](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
 
 ## 0.0.12 - 11 February 2017
 

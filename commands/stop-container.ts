@@ -1,6 +1,7 @@
-import {docker} from './utils/docker-endpoint';
-import {ContainerItem, quickPickContainer} from './utils/quick-pick-container';
-
+import { docker } from './utils/docker-endpoint';
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
+import { reporter } from '../telemetry/telemetry';
+const teleCmdId: string = 'vscode-docker.container.stop';
 
 export function stopContainer() {
     quickPickContainer(true).then(function (selectedItem: ContainerItem) {
@@ -11,6 +12,11 @@ export function stopContainer() {
                     // console.log("Stopped - error: " + err);
                     // console.log("Stopped - data: " + data);
                 });
+                if (reporter) {
+                    reporter.sendTelemetryEvent('command', {
+                        command: teleCmdId
+                    });
+                }
             }
         }
     });

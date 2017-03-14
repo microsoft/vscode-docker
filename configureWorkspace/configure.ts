@@ -2,6 +2,8 @@ import vscode = require('vscode');
 import * as path from 'path';
 import * as fs from 'fs';
 import { promptForPort, quickPickPlatform } from './config-utils';
+import { reporter } from '../telemetry/telemetry';
+const teleCmdId: string = 'vscode-docker.configure';
 
 const yesNoPrompt: vscode.MessageItem[] =
     [{
@@ -366,6 +368,13 @@ export function configure(): void {
                     });
                 } else {
                     fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, pkg.fullCommand), { encoding: 'utf8' });
+                }
+
+                if (reporter) {
+                    reporter.sendTelemetryEvent('command', {
+                        command: teleCmdId,
+                        platformType: platformType
+                    });
                 }
 
             });
