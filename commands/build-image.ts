@@ -1,6 +1,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { reporter } from '../telemetry/telemetry';
+import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+
 const teleCmdId: string = 'vscode-docker.image.build';
 
 function hasWorkspaceFolder(): boolean {
@@ -11,7 +13,7 @@ function getDockerFileUris(): Thenable<vscode.Uri[]> {
     if (!hasWorkspaceFolder()) {
         return Promise.resolve(null);
     }
-    return Promise.resolve(vscode.workspace.findFiles('**/[dD]ocker[fF]ile', null, 9999, null));
+    return Promise.resolve(vscode.workspace.findFiles(DOCKERFILE_GLOB_PATTERN, null, 1000, null));
 }
 
 interface Item extends vscode.QuickPickItem {

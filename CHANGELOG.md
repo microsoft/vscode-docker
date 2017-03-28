@@ -1,4 +1,7 @@
 
+## 0.0.14 - 27 March 2017
+* Support different variations on naming of `dockerfile` such as `dockerfile-development`
+
 ## 0.0.13 - 14 March 2017
 * Support for `.yaml` file extension on `docker-compose` files. 
 * Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windowns containers, fix Windows path issues (this didn't make it into `0.0.12`)

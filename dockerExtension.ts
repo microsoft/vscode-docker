@@ -24,7 +24,9 @@ import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
 
-export const COMPOSE_FILE_GLOB_PATTERN = '**/docker-compose*.{yaml,yml}';
+export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
+export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
+
 export var diagnosticCollection: vscode.DiagnosticCollection;
 
 export type KeyInfo = { [keyName: string]: string; };
