@@ -18,8 +18,8 @@ export class DockerfileCompletionItemProvider implements CompletionItemProvider 
 
         var textLine = document.lineAt(position.line);
 
-        // Matches strings like: 'FROM imagename'
-        var fromTextDocker = textLine.text.match(/^\s*FROM\s*([^"]*)$/);
+        // Matches strings like: 'FROM imagename', and strips the optional alias
+        var fromTextDocker = textLine.text.match(/^\s*FROM\s*([\w-\/:]*)(\s*AS\s*\w+)?$/i);
 
         if (fromTextDocker) {
             return dockerSuggestSupport.suggestImages(fromTextDocker[1]);
