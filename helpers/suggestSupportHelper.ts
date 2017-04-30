@@ -82,7 +82,14 @@ export class SuggestSupportHelper {
         }
         var keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-            var imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
+            var imageName = originalValue.replace(/^"/, '').replace(/"$/, ''); 
+            
+            // Strip off the optional alias that may be
+            // specified when performing a multi-stage build
+            if (keyName === 'FROM') {
+                imageName = imageName.replace(/\s*AS\s*\w+$/i, '');
+            }
+
             return this.searchImageInRegistryHub(imageName).then((results) => {
                 if (results[0] && results[1]) {
                     return ['**DockerHub:**', results[0], '**DockerRuntime**', results[1]];
