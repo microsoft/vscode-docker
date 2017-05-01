@@ -7,6 +7,7 @@
 import vscode = require('vscode');
 import hub = require('../dockerHubApi');
 import parser = require('../parser');
+import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 
 export class SuggestSupportHelper {
     suggestImages(word: string): Promise<vscode.CompletionItem[]> {
@@ -82,12 +83,12 @@ export class SuggestSupportHelper {
         }
         var keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-            var imageName = originalValue.replace(/^"/, '').replace(/"$/, ''); 
-            
-            // Strip off the optional alias that may be
-            // specified when performing a multi-stage build
+            let imageName;
+
             if (keyName === 'FROM') {
-                imageName = imageName.replace(/\s*AS\s*\w+$/i, '');
+                imageName = line.match(FROM_DIRECTIVE_PATTERN)[1];
+            } else {
+                imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
             }
 
             return this.searchImageInRegistryHub(imageName).then((results) => {
@@ -96,9 +97,10 @@ export class SuggestSupportHelper {
                 }
 
                 if (results[0]) {
-                    return results[0];
+                    return [results[0]];
                 }
-                return results[1];
+                
+                return [results[1]];
             });
         }
     }
