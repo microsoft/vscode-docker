@@ -6,6 +6,7 @@
 
 import { CompletionItemProvider, TextDocument, Position, CancellationToken, CompletionItem } from 'vscode';
 import helper = require('../helpers/suggestSupportHelper');
+import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 
 // IntelliSense
 export class DockerfileCompletionItemProvider implements CompletionItemProvider {
@@ -18,8 +19,7 @@ export class DockerfileCompletionItemProvider implements CompletionItemProvider 
 
         var textLine = document.lineAt(position.line);
 
-        // Matches strings like: 'FROM imagename'
-        var fromTextDocker = textLine.text.match(/^\s*FROM\s*([^"]*)$/);
+        var fromTextDocker = textLine.text.match(FROM_DIRECTIVE_PATTERN);
 
         if (fromTextDocker) {
             return dockerSuggestSupport.suggestImages(fromTextDocker[1]);

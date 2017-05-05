@@ -7,6 +7,7 @@
 import vscode = require('vscode');
 import hub = require('../dockerHubApi');
 import parser = require('../parser');
+import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 
 export class SuggestSupportHelper {
     suggestImages(word: string): Promise<vscode.CompletionItem[]> {
@@ -82,16 +83,24 @@ export class SuggestSupportHelper {
         }
         var keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-            var imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
+            let imageName;
+
+            if (keyName === 'FROM') {
+                imageName = line.match(FROM_DIRECTIVE_PATTERN)[1];
+            } else {
+                imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
+            }
+
             return this.searchImageInRegistryHub(imageName).then((results) => {
                 if (results[0] && results[1]) {
                     return ['**DockerHub:**', results[0], '**DockerRuntime**', results[1]];
                 }
 
                 if (results[0]) {
-                    return results[0];
+                    return [results[0]];
                 }
-                return results[1];
+                
+                return [results[1]];
             });
         }
     }
