@@ -1,4 +1,7 @@
 
+## 0.0.15 - 09 May 2017
+* Support for Docker multi stage builds
+
 ## 0.0.14 - 27 March 2017
 * Support different variations on naming of `dockerfile` such as `dockerfile-development`
 
