@@ -78,12 +78,21 @@
       {
         "id": "dockerfile",
         "aliases": [
-          "Dockerfile"
+          "Dockerfile",
+          "dockerfile"
         ],
+        "configuration": "./language-configuration.json",
         "filenamePatterns": [
           "dockerfile*.*",
           "Dockerfile*.*"
         ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dockerfile",
+        "scopeName": "source.dockerfile",
+        "path": "./syntaxes/dockerfile.tmLanguage"
       }
     ],
     "configuration": {
