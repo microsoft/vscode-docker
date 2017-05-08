@@ -1,7 +1,8 @@
 
-## 0.0.14 - 09 May 2017
-* Support for Docker multi stage builds
+## 0.0.14 - 08 May 2017
+* Support for Docker multi stage build Dockerfiles (syntax, linting)
 * Support different variations on naming of `dockerfile` such as `dockerfile-development`
+* Bug fixing
 
 ## 0.0.13 - 14 March 2017
 * Support for `.yaml` file extension on `docker-compose` files. 
