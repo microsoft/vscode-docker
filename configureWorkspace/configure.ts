@@ -21,7 +21,7 @@ function genDockerFile(serviceName: string, imageName: string, platform: string,
         case 'node.js':
 
             return `
-FROM node:latest
+FROM node:6-slim
 LABEL Name=${serviceName} Version=${version} 
 COPY package.json /tmp/package.json
 RUN cd /tmp && npm install --production
@@ -56,7 +56,7 @@ EXPOSE ${port}
         case '.net core':
 
             return `
-FROM microsoft/aspnetcore:1.0.1
+FROM microsoft/aspnetcore:1
 LABEL Name=${serviceName} Version=${version} 
 ARG source=.
 WORKDIR /app
