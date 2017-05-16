@@ -41,6 +41,7 @@
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.debug.configureLaunchJson",
+    "onCommand:vscode-docker.deploy",
     "onCommand:vscode-docker.system.prune"
   ],
   "main": "./out/dockerExtension",
@@ -182,6 +183,11 @@
         "command": "vscode-docker.system.prune",
         "title": "Docker: System Prune",
         "description": "Removes unused data"
+      },
+      {
+        "command": "vscode-docker.deploy",
+        "title": "Docker: Deploy to Azure",
+        "description": "Deploy the Image to Azure App Services"
       }
     ]
   },

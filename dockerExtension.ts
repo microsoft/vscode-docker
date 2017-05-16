@@ -22,6 +22,7 @@ import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
+import { deployImage } from './commands/deploy-image';
 import { Reporter } from './telemetry/telemetry';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -67,6 +68,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.deploy', deployImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
     diagnosticCollection = vscode.languages.createDiagnosticCollection('docker-diagnostics');
