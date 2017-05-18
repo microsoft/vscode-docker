@@ -20,17 +20,14 @@ function genDockerFile(serviceName: string, imageName: string, platform: string,
     switch (platform.toLowerCase()) {
         case 'node.js':
 
-            return `
-FROM node:6-slim
-LABEL Name=${serviceName} Version=${version} 
-COPY package.json /tmp/package.json
-RUN cd /tmp && npm install --production
-RUN mkdir -p /usr/src/app && mv /tmp/node_modules /usr/src
-WORKDIR /usr/src/app
-COPY . /usr/src/app
-EXPOSE ${port}
-CMD ${cmd}
-`;
+            return `FROM node:6-alpine
++LABEL Name=${serviceName} Version=${version}
++WORKDIR /usr/src/app 
++COPY package.json package.json
++RUN npm install --only=prod
++COPY . .
+ EXPOSE ${port}
+-CMD ${cmd}`;
 
         case 'go':
 
