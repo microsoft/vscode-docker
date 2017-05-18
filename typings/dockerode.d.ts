@@ -53,6 +53,7 @@ declare module Docker {
 
 	class Image {
 		name: string;
+		inspect(cb: (err: Error, data: any) => void): void;
 		remove(options: any, cb: (err: Error, exec: Exec)=>void): void;
 		tag(options: any, cb: (err: Error, exec: Exec)=>void): void;
 	}
