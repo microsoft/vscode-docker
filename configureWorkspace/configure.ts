@@ -78,15 +78,12 @@ function genDockerCompose(serviceName: string, imageName: string, platform: stri
 
     switch (platform.toLowerCase()) {
         case 'node.js':
-            return `
-version: \'2\'
+            return `version: '2'
 
 services:
   ${serviceName}:
     image: ${imageName}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     environment:
       NODE_ENV: production
     ports:
@@ -138,32 +135,28 @@ function genDockerComposeDebug(serviceName: string, imageName: string, platform:
     switch (platform.toLowerCase()) {
         case 'node.js':
 
-            var cmdArray: string[] = cmd.split(' ');
+            const cmdArray: string[] = cmd.split(' ');
             if (cmdArray[0].toLowerCase() === 'node') {
-                cmdArray.splice(1, 0, '--debug=5858');
-                cmd = 'command: ' + cmdArray.join(' ');
+                cmdArray.splice(1, 0, '--inspect');
+                cmd = `command: ${cmdArray.join(' ')}`;
             } else {
-                cmd = '## set your startup file here\n    command: node --debug=5858 app.js';
+                cmd = '## set your startup file here\n    command: node --inspect app.js';
             }
 
-            return `
-version: \'2\'
+            return `version: '2'
 
 services:
   ${serviceName}:
     image: ${imageName}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     environment:
       NODE_ENV: development
     ports:
       - ${port}:${port}
-      - 5858:5858
+      - 9229:9229
     volumes:
       - .:/usr/src/app
-    ${cmd}
-`;
+    ${cmd}`;
 
         case 'go':
             return `
@@ -223,11 +216,8 @@ const launchJsonTemplate: string =
             "name": "Docker: Attach to Node",
             "type": "node",
             "request": "attach",
-            "port": 5858,
+            "port": 9229,
             "address": "localhost",
-            "restart": false,
-            "sourceMaps": false,
-            "outFiles": [],
             "localRoot": "\${workspaceRoot}",
             "remoteRoot": "/usr/src/app"
         }
