@@ -57,6 +57,15 @@ class DockerClient {
         return Promise.resolve(DockerEngineType.Linux);
     }
 
+    public getExposedPorts(imageId: string) : Thenable<string[]> {
+        return new Promise((resolve, reject) => {
+            this.getImage(imageId).inspect((error, { Config: { ExposedPorts = {} }}) => {
+                const ports = Object.keys(ExposedPorts).map((port) => port.split("/")[0]);
+                resolve(ports);
+            });
+        });
+    }
+
     public getImage(id:string): Docker.Image {
         return this.endPoint.getImage(id);
     }

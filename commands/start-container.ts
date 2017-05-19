@@ -9,15 +9,28 @@ const teleCmdId: string = 'vscode-docker.container.start';
 function doStartContainer(interactive: boolean) {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
         if (selectedItem) {
-            let option = interactive ? '-it' : '';
-            let terminal = vscode.window.createTerminal(selectedItem.label);
-            terminal.sendText(`docker run ${option} --rm ${selectedItem.label}`);
-            terminal.show();
-            if (reporter) {
-                reporter.sendTelemetryEvent('command', {
-                    command: interactive ? teleCmdId + '.interactive' : teleCmdId
-                });
-            }
+            docker.getExposedPorts(selectedItem.label).then((ports: string[]) => {
+                let options = '--rm'
+                
+                if (interactive) {
+                    options += ' -it';
+                }
+
+                if (ports.length) {
+                    const portMappings = ports.map((port) => `-p ${port}:${port}`);
+                    options += ` ${portMappings.join(' ')}`;
+                }
+                
+                const terminal = vscode.window.createTerminal(selectedItem.label);                                
+                terminal.sendText(`docker run ${options} ${selectedItem.label}`);
+                terminal.show();
+
+                if (reporter) {
+                    reporter.sendTelemetryEvent('command', {
+                        command: interactive ? teleCmdId + '.interactive' : teleCmdId
+                    });
+                }
+            });
         }
     });
 }
