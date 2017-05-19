@@ -72,7 +72,7 @@ const locationsQuickPick: vscode.QuickPickItem[] = [
 
 const teleCmdId: string = 'vscode-docker.deploy';
 
-function azLogin(): Thenable<string> {
+function azLogin(): Promise<string> {
     return new Promise((resolve, reject) => {
         let enterCodeString = 'enter the code ';
         let authString = ' to authenticate.';
@@ -105,7 +105,7 @@ function azLogin(): Thenable<string> {
         ls.on('exit', function (code) {
             resolve(null);
         });
-    })
+    });
 }
 
 function createGroupItem(label: string, location: string): GroupItem {
@@ -115,77 +115,77 @@ function createGroupItem(label: string, location: string): GroupItem {
     };
 }
 
-function getGroup(): Thenable<GroupItem> {
-    return new Promise((resolve, reject) => {
+// function getGroup(): Thenable<GroupItem> {
+//     return new Promise((resolve, reject) => {
 
-        let ls = cp.spawn('az', ['group', 'list']);
+//         let ls = cp.spawn('az', ['group', 'list']);
         
-        ls.stdout.on('data', function (data) {
-            let qpi: GroupItem[] = [];
+//         ls.stdout.on('data', function (data) {
+//             let qpi: GroupItem[] = [];
             
-            JSON.parse(data.toString()).forEach(element => {
-                qpi.push(createGroupItem(element.name, element.location));
-            });
+//             JSON.parse(data.toString()).forEach(element => {
+//                 qpi.push(createGroupItem(element.name, element.location));
+//             });
 
-            return vscode.window.showQuickPick(qpi, { placeHolder: 'Choose Resource Group or Create New' }).then((groupItem: GroupItem) => {
-                if (groupItem) {
-                    if (groupItem.location) {
-                        return(groupItem);
-                    }
-                    // else new group
-                    vscode.window.showQuickPick(locationsQuickPick, {placeHolder: 'Choose Location'}).then((location) => {
-                        if (location) {
-                            groupItem.location = location.label;
-                            return(groupItem);
-                        } else {
-                            return Promise.reject(null);
-                        }
-                    });
-                } else {
-                    return Promise.reject(null);
-                }
-            });
-        });
+//             return vscode.window.showQuickPick(qpi, { placeHolder: 'Choose Resource Group or Create New' }).then((groupItem: GroupItem) => {
+//                 if (groupItem) {
+//                     if (groupItem.location) {
+//                         return(groupItem);
+//                     }
+//                     // else new group
+//                     vscode.window.showQuickPick(locationsQuickPick, {placeHolder: 'Choose Location'}).then((location) => {
+//                         if (location) {
+//                             groupItem.location = location.label;
+//                             return(groupItem);
+//                         } else {
+//                             return Promise.reject(null);
+//                         }
+//                     });
+//                 } else {
+//                     return Promise.reject(null);
+//                 }
+//             });
+//         });
 
-        ls.stderr.on('data', function (data: Uint8Array) {
-            //console.log('stderr data: ' + data);
-            reject(null);
-        });
+//         ls.stderr.on('data', function (data: Uint8Array) {
+//             //console.log('stderr data: ' + data);
+//             reject(null);
+//         });
 
-        ls.on('exit', function (code) {
-            //console.log('child process exited with code ' + code);
-            resolve(null);
-        });
+//         ls.on('exit', function (code) {
+//             //console.log('child process exited with code ' + code);
+//             resolve(null);
+//         });
 
-    });
-}
+//     });
+// }
 
-function azCreateGroup(): Thenable<{ groupName: string, location: string }> {
+// function azCreateGroup(): Thenable<{ groupName: string, location: string }> {
 
-    return new Promise((resolve, reject) => {
-        getGroup().then((groupItem: GroupItem) => {
-            console.log(groupItem);
-        });
-        // let ls = cp.spawn('az', ['group', 'create', '-o', 'json', '-g', 'stickerapp-rg']);
-        // ls.stdout.on('data', function (data) {
-        //     //console.log('stdout data: ' + data);
-        //     resolve(data.toString());
-        // });
+//     return new Promise((resolve, reject) => {
+//         getGroup().then((groupItem: GroupItem) => {
+//             console.log(groupItem);
+//         });
+//         // let ls = cp.spawn('az', ['group', 'create', '-o', 'json', '-g', 'stickerapp-rg']);
+//         // ls.stdout.on('data', function (data) {
+//         //     //console.log('stdout data: ' + data);
+//         //     resolve(data.toString());
+//         // });
 
-        // ls.stderr.on('data', function (data: Uint8Array) {
-        //     //console.log('stderr data: ' + data);
-        //     reject(null);
-        // });
+//         // ls.stderr.on('data', function (data: Uint8Array) {
+//         //     //console.log('stderr data: ' + data);
+//         //     reject(null);
+//         // });
 
-        // ls.on('exit', function (code) {
-        //     //console.log('child process exited with code ' + code);
-        //     resolve(null);
-        // });
+//         // ls.on('exit', function (code) {
+//         //     //console.log('child process exited with code ' + code);
+//         //     resolve(null);
+//         // });
 
-    })
-}
+//     })
+// }
 
-function azSetSubscription(subscriptions: string): Thenable<any> {
+async function azSetSubscription(subscriptions: string): Promise<string> {
     let qpi: vscode.QuickPickItem[] = [];
 
     JSON.parse(subscriptions).forEach(element => {
@@ -193,20 +193,20 @@ function azSetSubscription(subscriptions: string): Thenable<any> {
     });
 
     if (qpi.length > 0) {
-        return vscode.window.showQuickPick(qpi, { placeHolder: 'Choose Subscription' }).then((value) => {
+        vscode.window.showQuickPick(qpi, { placeHolder: 'Choose Subscription' }).then((value) => {
 
             return new Promise((resolve, reject) => {
                 const ls = cp.spawn('az', ['account', 'set', '--subscription', value.toString()]);
                 ls.stdout.on('data', function (data) {
-                    resolve();
+                    resolve(value.toString());
                 });
 
                 ls.stderr.on('data', function (data: Uint8Array) {
-                    reject();
+                    reject(null);
                 });
 
                 ls.on('exit', function (code) {
-                    resolve();
+                    resolve(null);
                 });
 
             });
@@ -216,35 +216,28 @@ function azSetSubscription(subscriptions: string): Thenable<any> {
     }
 }
 
-export function deployImage() {
-    quickPickImage(false).then((selectedItem: ImageItem) => {
-        if (selectedItem) {
-            azLogin().then((subscriptions: string) => {
-                if (subscriptions) {
-                    azSetSubscription(subscriptions).then(() => {
-                        azCreateGroup().then((value: { groupName: string, location: string }) => {
-                            if (groupName) {
-                                console.log('groupName: ' + groupName);
-                                // azCreateACR(groupName, location).then((acrName) => {
-                                //     if (acrName) {
-                                //         pushImage(acrName).then(() => {
-                                //             azCreateWebSite().then(() => {
-                                //                 azSetSiteSettings().then(() => {
-                                //                     azSetSiteContainer().then(() => {
-                                //                         azBrowseSite()
-                                //                     })
-                                //                 })
-                                //             })
-                                //         })
-                                //     }
-                                // })
-                            }
-                        });
-                    });
-                }
-            });
-        }
-    });
+export async function deployImage() {
+
+    const subscriptions: string = await azLogin();
+    const subscription: string = await azSetSubscription(subscriptions);
+    console.log(subscription);
+    
+    //const loc: string = azGetLocation(subscription);
+
+    // quickPickImage(false).then((selectedItem: ImageItem) => {
+    //     if (selectedItem) {
+    //         const subscriptions: string = await azLogin();
+    //         await azSetSubscription(subscriptions);
+    //         // const loc: string = await azGetLocation();
+    //         // const group: string = await azCreateGroup();
+    //         // const 
+    //         // const acr: string = await azCreateACR(group);
+    //         // const plan: string = await azCreatePlan(group, loc);
+    //         // const site: string = await azCreateSite(plan, group, loc);
+    //         // await azSetSiteSettings(site, group, loc);
+    //         // await azSetContainer(site, group, loc);
+
+    // }});
 }
 
 
