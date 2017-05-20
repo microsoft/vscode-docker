@@ -21,10 +21,10 @@ function genDockerFile(serviceName: string, imageName: string, platform: string,
         case 'node.js':
 
             return `FROM node:6-alpine
-LABEL Name=${serviceName} Version=${version}
-WORKDIR /usr/src/app 
-COPY package.json package.json
-RUN npm install --only=prod
+ENV NODE_ENV production
+WORKDIR /usr/src/app
+COPY ["package.json", "yarn.lock*", ".yarnclean*", "./"]
+RUN yarn install --production --modules-folder ../node_modules
 COPY . .
 EXPOSE ${port}
 CMD ${cmd}`;
@@ -78,53 +78,42 @@ function genDockerCompose(serviceName: string, imageName: string, platform: stri
 
     switch (platform.toLowerCase()) {
         case 'node.js':
-            return `version: '2'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
     image: ${imageName}
     build: .
-    environment:
-      NODE_ENV: production
     ports:
       - ${port}:${port}`;
 
         case 'go':
-            return `
-version: \'2\'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
     image: ${imageName}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - ${port}:${port}`;
 
         case '.net core':
-            return `
-version: \'2\'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
     image: ${imageName}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - ${port}:${port}`;
 
         default:
-            return `
-version: \'2\'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
     image: ${imageName}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - ${port}:${port}`;
     }
@@ -143,7 +132,7 @@ function genDockerComposeDebug(serviceName: string, imageName: string, platform:
                 cmd = '## set your startup file here\n    command: node --inspect app.js';
             }
 
-            return `version: '2'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
@@ -159,8 +148,7 @@ services:
     ${cmd}`;
 
         case 'go':
-            return `
-version: \'2\'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
@@ -172,8 +160,7 @@ services:
         - ${port}:${port}
 `;
         case '.net core':
-            return `
-version: '2'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
@@ -193,8 +180,7 @@ services:
 `;
 
         default:
-            return `
-version: \'2\'
+            return `version: '2.1'
 
 services:
   ${serviceName}:
@@ -325,7 +311,7 @@ export function configure(): void {
                     serviceName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
                 }
 
-                var imageName: string = serviceName + ':latest';
+                var imageName: string = serviceName;
 
                 if (fs.existsSync(dockerFile)) {
                     vscode.window.showErrorMessage('A Dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
