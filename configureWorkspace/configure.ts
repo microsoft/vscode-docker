@@ -11,8 +11,8 @@ function genDockerFile(serviceName: string, platform: string, port: string, { cm
             return `FROM node:6-alpine
 ENV NODE_ENV production
 WORKDIR /usr/src/app
-COPY ["package.json", "yarn.lock*", ".yarnclean*", "./"]
-RUN yarn install --production --modules-folder ../node_modules
+COPY ["package.json", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production && mv node_modules ../
 COPY . .
 EXPOSE ${port}
 CMD ${cmd}`;
