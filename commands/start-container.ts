@@ -10,12 +10,7 @@ function doStartContainer(interactive: boolean) {
     quickPickImage(false).then(function (selectedItem: ImageItem) {
         if (selectedItem) {
             docker.getExposedPorts(selectedItem.label).then((ports: string[]) => {
-                let options = '--rm'
-                
-                if (interactive) {
-                    options += ' -it';
-                }
-
+                let options = `--rm ${interactive ? '-it' : '-d'}`;
                 if (ports.length) {
                     const portMappings = ports.map((port) => `-p ${port}:${port}`);
                     options += ` ${portMappings.join(' ')}`;
