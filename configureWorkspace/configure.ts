@@ -196,7 +196,7 @@ const launchJsonTemplate: string =
 }`;
 
 function genDockerIgnoreFile(service, platformType, port) {
-    // TODO: Add support for other platform typrs
+    // TODO: Add support for other platform types
     return `node_modules
 npm-debug.log
 Dockerfile*
