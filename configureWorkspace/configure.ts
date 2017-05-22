@@ -199,8 +199,8 @@ function genDockerIgnoreFile(service, platformType, port) {
     // TODO: Add support for other platform typrs
     return `node_modules
 npm-debug.log
-Dockerfile*
-docmer-compose*.yml
+Dockerfile
+docker-compose*
 .dockerignore
 .git
 .gitignore
