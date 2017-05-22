@@ -3,28 +3,16 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { promptForPort, quickPickPlatform } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
-const teleCmdId: string = 'vscode-docker.configure';
 
-const yesNoPrompt: vscode.MessageItem[] =
-    [{
-        "title": 'Yes',
-        "isCloseAffordance": false
-    },
-    {
-        "title": 'No',
-        "isCloseAffordance": true
-    }];
-
-function genDockerFile(serviceName: string, imageName: string, platform: string, port: string, cmd: string, author: string, version: string): string {
-
+function genDockerFile(serviceName: string, platform: string, port: string, { cmd, author, version }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
             return `FROM node:6-alpine
 ENV NODE_ENV production
 WORKDIR /usr/src/app
-COPY ["package.json", "yarn.lock*", ".yarnclean*", "./"]
-RUN yarn install --production --modules-folder ../node_modules
+COPY ["package.json", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production --silent && mv node_modules ../
 COPY . .
 EXPOSE ${port}
 CMD ${cmd}`;
@@ -71,18 +59,16 @@ RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay
 `;
     }
-
 }
 
-function genDockerCompose(serviceName: string, imageName: string, platform: string, port: string): string {
-
+function genDockerCompose(serviceName: string, platform: string, port: string): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
             return `version: '2.1'
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build: .
     ports:
       - ${port}:${port}`;
@@ -92,7 +78,7 @@ services:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build: .
     ports:
       - ${port}:${port}`;
@@ -102,7 +88,7 @@ services:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build: .
     ports:
       - ${port}:${port}`;
@@ -112,15 +98,14 @@ services:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build: .
     ports:
       - ${port}:${port}`;
     }
 }
 
-function genDockerComposeDebug(serviceName: string, imageName: string, platform: string, port: string, cmd: string): string {
-
+function genDockerComposeDebug(serviceName: string, platform: string, port: string, { fullCommand: cmd }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -136,7 +121,7 @@ function genDockerComposeDebug(serviceName: string, imageName: string, platform:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build: .
     environment:
       NODE_ENV: development
@@ -152,7 +137,7 @@ services:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build:
       context: .
       dockerfile: Dockerfile
@@ -184,7 +169,7 @@ services:
 
 services:
   ${serviceName}:
-    image: ${imageName}
+    image: ${serviceName}
     build:
       context: .
       dockerfile: Dockerfile
@@ -209,6 +194,20 @@ const launchJsonTemplate: string =
         }
     ]
 }`;
+
+function genDockerIgnoreFile(service, platformType, port) {
+    // TODO: Add support for other platform types
+    return `node_modules
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+README.md
+LICENSE
+.vscode`;
+}
 
 interface PackageJson {
     npmStart: boolean, //has npm start
@@ -266,95 +265,62 @@ function readPackageJson(): Thenable<PackageJson> {
         }
 
         return Promise.resolve(pkg);
-
     });
 }
 
-export function configure(): void {
+const DOCKER_FILE_TYPES = {
+    'docker-compose.yml': genDockerCompose,
+    'docker-compose.debug.yml': genDockerComposeDebug,
+    'Dockerfile': genDockerFile,
+    '.dockerignore': genDockerIgnoreFile
+};
 
+const YES_OR_NO_PROMPT: vscode.MessageItem[] = [
+    {
+        "title": 'Yes',
+        "isCloseAffordance": false
+    },
+    {
+        "title": 'No',
+        "isCloseAffordance": true
+    }
+];
 
+export async function configure(): Promise<void> {
     if (!hasWorkspaceFolder()) {
         vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
         return;
     }
 
-    let dockerFile = path.join(vscode.workspace.rootPath, 'Dockerfile');
-    let dockerComposeFile = path.join(vscode.workspace.rootPath, 'docker-compose.yml');
-    let dockerComposeDebugFile = path.join(vscode.workspace.rootPath, 'docker-compose.debug.yml');
+    const platformType = await quickPickPlatform();
+    if (!platformType) return;
 
+    const port = await promptForPort();
+    if (!port) return;
 
-    quickPickPlatform().then((platform: string) => {
-        return platform;
-    }).then((platform: string) => {
+    const serviceName = path.basename(vscode.workspace.rootPath).toLowerCase();
+    const pkg = await readPackageJson();
+    
+    await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
+        return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+    }));
 
-        // user pressed Esc?
-        if (!platform) {
-            return;
-        }
-
-        promptForPort().then((port: string) => {
-
-            // user pressed Esc?
-            if (!port) {
-                return;
-            }
-
-            var portNum: string = port || '3000';
-            var platformType: string = platform || 'node';
-            var serviceName: string;
-
-            readPackageJson().then((pkg: PackageJson) => {
-
-                if (process.platform === 'win32') {
-                    serviceName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
-                } else {
-                    serviceName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
-                }
-
-                var imageName: string = serviceName;
-
-                if (fs.existsSync(dockerFile)) {
-                    vscode.window.showErrorMessage('A Dockerfile already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                        if (item.title.toLowerCase() === 'yes') {
-                            fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, pkg.cmd, pkg.author, pkg.version), { encoding: 'utf8' });
-                        }
-                    });
-                } else {
-                    fs.writeFileSync(dockerFile, genDockerFile(serviceName, imageName, platformType, portNum, pkg.cmd, pkg.author, pkg.version), { encoding: 'utf8' });
-                }
-
-                if (fs.existsSync(dockerComposeFile)) {
-                    vscode.window.showErrorMessage('A docker-compose.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                        if (item.title.toLowerCase() === 'yes') {
-                            fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-                        }
-                    });
-                } else {
-                    fs.writeFileSync(dockerComposeFile, genDockerCompose(serviceName, imageName, platformType, portNum), { encoding: 'utf8' });
-                }
-
-                if (fs.existsSync(dockerComposeDebugFile)) {
-                    vscode.window.showErrorMessage('A docker-compose.debug.yml already exists. Overwrite?', ...yesNoPrompt).then((item: vscode.MessageItem) => {
-                        if (item.title.toLowerCase() === 'yes') {
-                            fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, pkg.fullCommand), { encoding: 'utf8' });
-                        }
-                    });
-                } else {
-                    fs.writeFileSync(dockerComposeDebugFile, genDockerComposeDebug(serviceName, imageName, platformType, portNum, pkg.fullCommand), { encoding: 'utf8' });
-                }
-
-                if (reporter) {
-                    reporter.sendTelemetryEvent('command', {
-                        command: teleCmdId,
-                        platformType: platformType
-                    });
-                }
-
-            });
-
-        });
+    reporter && reporter.sendTelemetryEvent('command', {
+        command: 'vscode-docker.configure',
+        platformType
     });
 
+    async function createWorkspaceFileIfNotExists(fileName, writerFunction) {
+        const workspacePath = path.join(vscode.workspace.rootPath, fileName);
+        if (fs.existsSync(workspacePath)) {
+            const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
+            if (item.title.toLowerCase() === 'yes') {
+                fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
+            }
+        } else {
+            fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
+        }
+    }
 }
 
 export function configureLaunchJson(): string {
