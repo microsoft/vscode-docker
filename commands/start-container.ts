@@ -63,7 +63,7 @@ export function startAzureCLI() {
 
             // volume map .azure folder so don't have to log in every time
             let homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
-            let vol: string = '-v ' + homeDir + '/.azure:/root/.azure';
+            let vol: string = `-v ${homeDir}/.azure:/root/.azure -v ${homeDir}/.ssh:/root/.ssh -v ${homeDir}/.kube:/root/.kube`;
             let cmd: string = `docker run ${option} ${vol} -it --rm azuresdk/azure-cli-python:latest`;
 
             let terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
