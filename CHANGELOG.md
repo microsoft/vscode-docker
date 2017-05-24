@@ -1,3 +1,9 @@
+## 0.0.15 - 25 May 2017
+
+* Updated both the `Docker: Run` and `Docker: Run Interactive` commands to automatically publish the ports that the specified image exposes
+* Updated the `Docker: Run` command to run the specified container in the background
+* Updated the `Docker: Add docker files to workspace` command to generate a `.dockerignore` file
+* Updated the `Docker: Azure CLI` command to fully support running `az acs` commands
 
 ## 0.0.14 - 08 May 2017
 * Support for Docker multi stage build Dockerfiles (syntax, linting)
