@@ -2,7 +2,7 @@
     "FROM": {
         "prefix": "FROM",
         "body": [
-            "FROM ${baseImage}",
+            "FROM ${1:baseImage}",
             "$0"
         ],
         "description": "FROM"
@@ -10,7 +10,7 @@
     "RUN": {
         "prefix": "RUN",
         "body": [
-            "RUN ${cmd}",
+            "RUN ${1:cmd}",
             "$0"
         ],
         "description": "RUN"
@@ -18,7 +18,7 @@
     "CMD": {
         "prefix": "CMD",
         "body": [
-            "CMD ${command}",
+            "CMD ${1:command}",
             "$0"
         ],
         "description": "CMD"
@@ -26,7 +26,7 @@
     "LABEL": {
         "prefix": "LABEL",
         "body": [
-            "LABEL ${key}=${value}",
+            "LABEL ${1:key}=${2:value}",
             "$0"
         ],
         "description": "LABEL"
@@ -34,7 +34,7 @@
     "EXPOSE": {
         "prefix": "EXPOSE",
         "body": [
-            "EXPOSE ${port}",
+            "EXPOSE ${1:port}",
             "$0"
         ],
         "description": "EXPOSE"
@@ -42,7 +42,7 @@
     "ENV": {
         "prefix": "ENV",
         "body": [
-            "ENV ${key}=${value}",
+            "ENV ${1:key}=${2:value}",
             "$0"
         ],
         "description": "ENV"
@@ -50,7 +50,7 @@
     "ADD": {
         "prefix": "ADD",
         "body": [
-            "ADD ${source} ${dest}",
+            "ADD ${1:source} ${2:dest}",
             "$0"
         ],
         "description": "ADD"
@@ -58,7 +58,7 @@
     "COPY": {
         "prefix": "COPY",
         "body": [
-            "COPY ${source} ${dest}",
+            "COPY ${1:source} ${2:dest}",
             "$0"
         ],
         "description": "COPY"
@@ -66,7 +66,7 @@
     "ENTRYPOINT": {
         "prefix": "ENTRYPOINT",
         "body": [
-            "ENTRYPOINT ${command}",
+            "ENTRYPOINT ${1:command}",
             "$0"
         ],
         "description": "ENTRYPOINT"
@@ -74,7 +74,7 @@
     "VOLUME": {
         "prefix": "VOLUME",
         "body": [
-            "VOLUME ${name}",
+            "VOLUME ${1:name}",
             "$0"
         ],
         "description": "VOLUME"
@@ -82,7 +82,7 @@
     "USER": {
         "prefix": "USER",
         "body": [
-            "USER ${daemon}",
+            "USER ${1:daemon}",
             "$0"
         ],
         "description": "USER"
@@ -90,7 +90,7 @@
     "WORKDIR": {
         "prefix": "WORKDIR",
         "body": [
-            "WORKDIR ${path}",
+            "WORKDIR ${1:path}",
             "$0"
         ],
         "description": "WORKDIR"
@@ -98,7 +98,7 @@
     "ONBUILD": {
         "prefix": "ONBUILD",
         "body": [
-            "ONBUILD ${instruction}",
+            "ONBUILD ${1:instruction}",
             "$0"
         ],
         "description": "ONBUILD"
@@ -106,7 +106,7 @@
     "HEALTHCHECK": {
         "prefix": "HEALTHCHECK",
         "body": [
-            "HEALTHCHECK CMD ${command}",
+            "HEALTHCHECK CMD ${1:command}",
             "$0"
         ],
         "description": "HEALTHCHECK"
