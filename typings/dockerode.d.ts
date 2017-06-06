@@ -84,7 +84,7 @@ declare class Docker {
 	getImage(id:string): Docker.Image;
 	
 	createContainer(options: Docker.CreateContainerOptions, cb: (err: Error, container: Docker.Container)=>void): void;
-	listContainers(cb: (err:Error , containers: Docker.ContainerDesc[])=>void): void;
+	listContainers(options: {}, cb: (err:Error , containers: Docker.ContainerDesc[])=>void): void;
 	getContainer(id: string): Docker.Container;
 }
 
