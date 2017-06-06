@@ -13,7 +13,6 @@ export interface ImageItem extends vscode.QuickPickItem {
 
 function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
 
-
     return <ImageItem>{
         label: repoTag || '<none>',
         description: null,
@@ -28,19 +27,19 @@ function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
 
 function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageItem[] {
 
-    let allIds: string[] = [];
+    const allIds: string[] = [];
 
-    let items: ImageItem[] = [];
+    const items: ImageItem[] = [];
 
     for (let i = 0; i < images.length; i++) {
         if (!images[i].RepoTags) {
-            let item = createItem(images[i], '<none>:<none>');
+            const item = createItem(images[i], '<none>:<none>');
             allIds.push(item.ids[0]);
             items.push(item);
         } else {
 
             for (let j = 0; j < images[i].RepoTags.length; j++) {
-                let item = createItem(images[i], images[i].RepoTags[j]);
+                const item = createItem(images[i], images[i].RepoTags[j]);
                 allIds.push(item.ids[0]);
                 items.push(item);
             }
@@ -60,14 +59,16 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
     return items;
 }
 
-export function quickPickImage(includeAll?: boolean): Thenable<ImageItem> {
-    return docker.getImageDescriptors().then(images => {
-        if (!images || images.length == 0) {
-            vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
-            return Promise.resolve(null);
-        } else {
-            let items: ImageItem[] = computeItems(images, includeAll);
-            return vscode.window.showQuickPick(items, { placeHolder: 'Choose image' });
-        }
-    });
+export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
+
+    const images = await docker.getImageDescriptors();
+
+    if (!images || images.length == 0) {
+        vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
+        return;
+    } else {
+        const items: ImageItem[] = computeItems(images, includeAll);
+        return vscode.window.showQuickPick(items, { placeHolder: 'Choose image' });
+    }
+
 }

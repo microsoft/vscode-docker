@@ -4,21 +4,22 @@ import { docker } from './utils/docker-endpoint';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export function tagImage() {
+export async function tagImage() {
 
-    quickPickImage(false).then(function (selectedItem: ImageItem) {
+    const selectedItem: ImageItem = await quickPickImage(false);
+
         if (selectedItem) {
 
-            var imageName: string = selectedItem.label;
+            let imageName: string = selectedItem.label;
 
-            let configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+            const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
 
-            let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+            const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
             if (defaultRegistryPath.length > 0) {
                 imageName = defaultRegistryPath + '/' + imageName;
             }
 
-            let defaultRegistry = configOptions.get('defaultRegistry', '');
+            const defaultRegistry = configOptions.get('defaultRegistry', '');
             if (defaultRegistry.length > 0) {
                 imageName = defaultRegistry + '/' + imageName;
             }
@@ -30,27 +31,25 @@ export function tagImage() {
                 value: imageName
             };
 
-            vscode.window.showInputBox(opt).then((value: string) => {
-                if (value) {
-                    var repo: string = value;
-                    var tag: string = 'latest';
-                    if (value.lastIndexOf(':') > 0) {
-                        repo = value.slice(0, value.lastIndexOf(':'));
-                        tag = value.slice(value.lastIndexOf(':') + 1);
-                    }
-                    let image = docker.getImage(selectedItem.ids[0]);
-                    image.tag({ repo: repo, tag: tag }, function (err, data) {
-                        if (err) {
-                            console.log('Docker Tag error: ' + err);
-                        }
-                    });
-                    if (reporter) {
-                        reporter.sendTelemetryEvent('command', {
-                            command: teleCmdId
-                        });
-                    }
+            const value: string = await vscode.window.showInputBox(opt);
+            if (value) {
+                let repo: string = value;
+                let tag: string = 'latest';
+                if (value.lastIndexOf(':') > 0) {
+                    repo = value.slice(0, value.lastIndexOf(':'));
+                    tag = value.slice(value.lastIndexOf(':') + 1);
                 }
-            });
+                const image = docker.getImage(selectedItem.ids[0]);
+                image.tag({ repo: repo, tag: tag }, function (err, data) {
+                    if (err) {
+                        console.log('Docker Tag error: ' + err);
+                    }
+                });
+                if (reporter) {
+                    reporter.sendTelemetryEvent('command', {
+                        command: teleCmdId
+                    });
+                }
+            }
         };
-    });
 }

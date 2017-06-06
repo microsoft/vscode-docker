@@ -9,20 +9,21 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: "powershell"
 }
 
-export function openShellContainer() {
-    quickPickContainer().then((selectedItem: ContainerItem) => {
-        if (selectedItem) {
-            docker.getEngineType().then((engineType: DockerEngineType) => {
-                const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.label}`);
-                terminal.sendText(`docker exec -it ${selectedItem.ids[0]} ${engineTypeShellCommands[engineType]}`);
-                terminal.show();
-                if (reporter) {
-                    reporter.sendTelemetryEvent('command', {
-                        command: teleCmdId,
-                        dockerEngineType: engineTypeShellCommands[engineType]
-                    });
-                }
-            });
-        }
-    });
+export async function openShellContainer() {
+
+    const selectedItem: ContainerItem = await quickPickContainer();
+    
+    if (selectedItem) {
+        docker.getEngineType().then((engineType: DockerEngineType) => {
+            const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.label}`);
+            terminal.sendText(`docker exec -it ${selectedItem.ids[0]} ${engineTypeShellCommands[engineType]}`);
+            terminal.show();
+            if (reporter) {
+                reporter.sendTelemetryEvent('command', {
+                    command: teleCmdId,
+                    dockerEngineType: engineTypeShellCommands[engineType]
+                });
+            }
+        });
+    }
 }
