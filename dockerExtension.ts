@@ -48,7 +48,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
     const dockerExplorerProvider = new DockerExplorerProvider();
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
-    vscode.commands.registerCommand('dockerExplorer.refreshEntry', () => dockerExplorerProvider.refresh());
+    vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
 
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
@@ -84,4 +84,5 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.workspace.textDocuments.forEach((doc) => scheduleValidate(doc));
     vscode.workspace.onDidOpenTextDocument((doc) => scheduleValidate(doc), ctx.subscriptions);
     vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri), ctx.subscriptions);
+
 }

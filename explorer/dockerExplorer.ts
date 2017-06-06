@@ -16,8 +16,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     }
 
     getTreeItem(element: DockerNode): vscode.TreeItem {
-
-        console.log(element.label);
         return element;
     }
 
@@ -27,17 +25,18 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
     private async getDockerNodes(element?: DockerNode): Promise<DockerNode[]> {
 
+        let opts = {};
+
         const nodes: DockerNode[] = [];
         if (!element) {
-            nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed));
-            nodes.push(new DockerNode("Running Containers", vscode.TreeItemCollapsibleState.Collapsed));
-            nodes.push(new DockerNode("Stopped Containers", vscode.TreeItemCollapsibleState.Collapsed));
+            nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+            nodes.push(new DockerNode("Running Containers", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+            nodes.push(new DockerNode("Stopped Containers", vscode.TreeItemCollapsibleState.Collapsed, null, null));
         } else {
 
             if (element.label === 'Images') {
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
                 if (!images || images.length == 0) {
-                    vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
                     return [];
                 } else {
                     for (let i = 0; i < images.length; i++) {
@@ -53,16 +52,41 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             }
 
             if (element.label === 'Running Containers') {
-                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors();
+
+                opts = {
+                    "filters": {
+                        "status": ["created", "restarting", "running", "paused"]
+                    }
+                };
+
+                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
                 if (!containers || containers.length == 0) {
-                    vscode.window.showInformationMessage('There are no running docker containers.');
                     return [];
                 } else {
                     for (let i = 0; i < containers.length; i++) {
-                        nodes.push(new DockerNode(containers[i].Image, vscode.TreeItemCollapsibleState.None));
+                        nodes.push(new DockerNode(containers[i].Image + ' (' + containers[i].Status + ')', vscode.TreeItemCollapsibleState.None));
                     }
                 }
             }
+
+            if (element.label === 'Stopped Containers') {
+
+                opts = {
+                    "filters": {
+                        "status": ["exited", "dead"]
+                    }
+                };
+
+                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+                if (!containers || containers.length == 0) {
+                    return [];
+                } else {
+                    for (let i = 0; i < containers.length; i++) {
+                        nodes.push(new DockerNode(containers[i].Image + ' (' + containers[i].Status + ')', vscode.TreeItemCollapsibleState.None));
+                    }
+                }
+            }
+
         }
 
 
@@ -102,16 +126,24 @@ class DockerNode extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly command?: vscode.Command
+        public readonly command?: vscode.Command,
+        public iconPath: any = {
+            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
+            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')}
     ) {
         super(label, collapsibleState);
+        this.iconPath = iconPath;
     }
 
-    iconPath = {
-        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-    };
 
+    // iconPath = {
+    //     light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
+    //     dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+    // };
+
+    // if(icon) {
+    //     iconPath = icon
+    // }
     //contextValue = 'dependency';
 
 }
