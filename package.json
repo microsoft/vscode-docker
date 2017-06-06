@@ -43,7 +43,7 @@
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
-    "onView:docker"
+    "onView:dockerExplorer"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -70,7 +70,7 @@
       ],
       "view/title": [
         {
-          "command": "docker.refreshExplorer",
+          "command": "dockerExplorer.refreshExplorer",
           "when": "view == dockerExplorer",
           "group": "navigation"
         }
@@ -198,7 +198,7 @@
         "description": "Removes unused data"
       },
       {
-        "command": "docker.refreshExplorer",
+        "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
         "icon":{
           "light": "images/light/refresh.svg",

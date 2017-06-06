@@ -13,9 +13,13 @@ class DockerClient {
         this.endPoint = new Docker();
     }
 
-    public getContainerDescriptors(): Thenable<Docker.ContainerDesc[]>{
+    public getContainerDescriptors(opts?: {}): Thenable<Docker.ContainerDesc[]>{
         return new Promise((resolve, reject) => {
-            this.endPoint.listContainers((err, containers) => {
+            if (!opts) {
+                let opts = {}
+            }
+            
+            this.endPoint.listContainers(opts, (err, containers) => {
                 if (err) {
                     return reject(err); 
                 }
