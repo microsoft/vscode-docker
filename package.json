@@ -42,7 +42,8 @@
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.debug.configureLaunchJson",
-    "onCommand:vscode-docker.system.prune"
+    "onCommand:vscode-docker.system.prune",
+    "onView:docker"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -65,6 +66,13 @@
           "when": "resourceLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "docker.refreshExplorer",
+          "when": "view == dockerExplorer",
+          "group": "navigation"
         }
       ]
     },
@@ -188,11 +196,27 @@
         "command": "vscode-docker.system.prune",
         "title": "Docker: System Prune",
         "description": "Removes unused data"
+      },
+      {
+        "command": "docker.refreshExplorer",
+        "title": "Refresh",
+        "icon":{
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "dockerExplorer",
+          "name": "Docker"
+        }
+      ]
+    }
   },
   "engines": {
-    "vscode": "^1.9.0"
+    "vscode": "^1.13.0"
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",

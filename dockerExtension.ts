@@ -25,6 +25,7 @@ import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
+import { DockerExplorerProvider } from './explorer/dockerExplorer';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 
@@ -45,6 +46,11 @@ export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     
     ctx.subscriptions.push(new Reporter(ctx));
+
+
+    const dockerExplorerProvider = new DockerExplorerProvider();
+    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
+    vscode.commands.registerCommand('dockerExplorer.refreshEntry', () => dockerExplorerProvider.refresh());
 
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
