@@ -9,11 +9,11 @@ function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
 }
 
-function getDockerFileUris(): Thenable<vscode.Uri[]> {
+async function getDockerFileUris(): Promise<vscode.Uri[]> {
     if (!hasWorkspaceFolder()) {
-        return Promise.resolve(null);
+        return;
     }
-    return Promise.resolve(vscode.workspace.findFiles(DOCKERFILE_GLOB_PATTERN, null, 1000, null));
+    return await vscode.workspace.findFiles(DOCKERFILE_GLOB_PATTERN, null, 1000, null);
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -40,61 +40,62 @@ function computeItems(uris: vscode.Uri[]): vscode.QuickPickItem[] {
     return items;
 }
 
-function resolveImageItem(dockerFileUri?: vscode.Uri): Promise<Item> {
-    return new Promise((resolve) => {
-        if (dockerFileUri) {
-            return resolve(createItem(dockerFileUri));
-        };
+async function resolveImageItem(dockerFileUri?: vscode.Uri): Promise<Item> {
 
-        getDockerFileUris().then((uris: vscode.Uri[]) => {
-            if (!uris || uris.length == 0) {
-                vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
-                resolve();
-            } else {
-                let items: vscode.QuickPickItem[] = computeItems(uris);
-                vscode.window.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' }).then(resolve);
-            }
-        });
-    });
+    if (dockerFileUri) {
+        return createItem(dockerFileUri);
+    };
+
+    const uris: vscode.Uri[] = await getDockerFileUris();
+
+    if (!uris || uris.length == 0) {
+        vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
+        return;
+    } else {
+        const res: vscode.QuickPickItem = await vscode.window.showQuickPick(computeItems(uris), {placeHolder: 'Choose Dockerfile to build'});
+        return <Item>res;
+    }
+
 }
 
-export function buildImage(dockerFileUri?: vscode.Uri) {
-    resolveImageItem(dockerFileUri).then((uri: Item) => {
-        if (!uri) return;
+export async function buildImage(dockerFileUri?: vscode.Uri) {
 
-        let imageName: string;
+    const uri: Item = await resolveImageItem(dockerFileUri);
+
+    if (!uri) return;
+
+    let imageName: string;
+    if (process.platform === 'win32') {
+        imageName = uri.path.split('\\').pop().toLowerCase();
+    } else {
+        imageName = uri.path.split('/').pop().toLowerCase();
+    }
+
+    if (imageName === '.') {
         if (process.platform === 'win32') {
-            imageName = uri.path.split('\\').pop().toLowerCase();
+            imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
         } else {
-            imageName = uri.path.split('/').pop().toLowerCase();
+            imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
         }
+    }
 
-        if (imageName === '.') {
-            if (process.platform === 'win32') {
-                imageName = vscode.workspace.rootPath.split('\\').pop().toLowerCase();
-            } else {
-                imageName = vscode.workspace.rootPath.split('/').pop().toLowerCase();
-            }
-        }
+    const opt: vscode.InputBoxOptions = {
+        placeHolder: imageName + ':latest',
+        prompt: 'Tag image as...',
+        value: imageName + ':latest'
+    };
 
-        const opt: vscode.InputBoxOptions = {
-            placeHolder: imageName + ':latest',
-            prompt: 'Tag image as...',
-            value: imageName + ':latest'
-        };
+    const value: string = await vscode.window.showInputBox(opt);
 
-        vscode.window.showInputBox(opt).then((value: string) => {
-            if (!value) return;
+    if (!value) return;
 
-            let terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-            terminal.sendText(`docker build -f ${uri.file} -t ${value} ${uri.path}`);
-            terminal.show();
-            
-            if (reporter) {
-                reporter.sendTelemetryEvent('command', {
-                    command: teleCmdId
-                });
-            }
+    const terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
+    terminal.sendText(`docker build -f ${uri.file} -t ${value} ${uri.path}`);
+    terminal.show();
+    
+    if (reporter) {
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
         });
-    });
+    }
 }

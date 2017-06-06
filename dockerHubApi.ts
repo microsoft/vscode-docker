@@ -25,7 +25,7 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
 export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult> {
     return invokeHubSearch(imageName, 1, cache).then((data) => {
         if (data.results.length === 0) {
-            return null;
+            return;
         }
         return data.results[0];
     });

@@ -17,11 +17,11 @@ function createItem(container: Docker.ContainerDesc) : ContainerItem {
 
 function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean) : ContainerItem[] {
 
-    let allIds: string[] = [];
+    const allIds: string[] = [];
 
-    let items : ContainerItem[] = [];
+    const items : ContainerItem[] = [];
     for (let i = 0; i < containers.length; i++) {
-        let item = createItem(containers[i]);
+        const item = createItem(containers[i]);
         allIds.push(item.ids[0]);
         items.push(item);
     }
@@ -37,14 +37,14 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean) :
     return items;
 }
 
-export function quickPickContainer(includeAll: boolean = false) : Thenable<ContainerItem>{
-    return docker.getContainerDescriptors().then(containers => {
-        if (!containers || containers.length == 0) {
-            vscode.window.showInformationMessage('There are no running docker containers.');
-            return Promise.resolve(null);
-        } else {
-            let items: ContainerItem[] = computeItems(containers, includeAll);
-            return vscode.window.showQuickPick(items, { placeHolder: 'Choose Container' });
-        }
-    });
+export async function quickPickContainer(includeAll: boolean = false) : Promise<ContainerItem>{
+    const containers = await docker.getContainerDescriptors();
+
+    if (!containers || containers.length == 0) {
+        vscode.window.showInformationMessage('There are no running docker containers.');
+        return;
+    } else {
+        const items: ContainerItem[] = computeItems(containers, includeAll);
+        return vscode.window.showQuickPick(items, { placeHolder: 'Choose Container' });
+    }
 }
