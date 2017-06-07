@@ -69,7 +69,7 @@ export class SuggestSupportHelper {
         while (tokenIndex >= 0) {
             var type = tokens[tokenIndex].type;
             if (type === parser.TokenType.String || type === parser.TokenType.Text) {
-                return null;
+                return;
             }
             if (type === parser.TokenType.Key) {
                 keyToken = _parser.tokenValue(line, tokens[tokenIndex]);
@@ -79,7 +79,7 @@ export class SuggestSupportHelper {
         }
 
         if (!keyToken) {
-            return null;
+            return;
         }
         var keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {

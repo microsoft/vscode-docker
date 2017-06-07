@@ -45,7 +45,7 @@ export class DockerHoverProvider implements HoverProvider {
         }).then((results) => {
             var r = results.filter(r => !!r.result);
             if (r.length === 0) {
-                return null;
+                return;
             }
 
             let range = new Range(position.line, r[0].startIndex, position.line, r[0].endIndex);
@@ -77,6 +77,6 @@ export class DockerHoverProvider implements HoverProvider {
             return r2;
         }
 
-        return null;
+        return;
     }
 }

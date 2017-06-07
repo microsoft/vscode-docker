@@ -8,11 +8,11 @@ function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
 }
 
-function getDockerComposeFileUris(): Thenable<vscode.Uri[]> {
+async function getDockerComposeFileUris(): Promise<vscode.Uri[]> {
     if (!hasWorkspaceFolder()) {
-        return Promise.resolve(null);
+        return;
     }
-    return Promise.resolve(vscode.workspace.findFiles(COMPOSE_FILE_GLOB_PATTERN, null, 9999, null));
+    return await vscode.workspace.findFiles(COMPOSE_FILE_GLOB_PATTERN, null, 9999, null);
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -21,7 +21,7 @@ interface Item extends vscode.QuickPickItem {
 }
 
 function createItem(uri: vscode.Uri): Item {
-    let filePath = hasWorkspaceFolder() ? path.join('.', uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
+    const filePath = hasWorkspaceFolder() ? path.join('.', uri.fsPath.substr(vscode.workspace.rootPath.length)) : uri.fsPath;
 
     return <Item>{
         description: null,
@@ -32,34 +32,33 @@ function createItem(uri: vscode.Uri): Item {
 }
 
 function computeItems(uris: vscode.Uri[]): vscode.QuickPickItem[] {
-    let items: vscode.QuickPickItem[] = [];
+    const items: vscode.QuickPickItem[] = [];
     for (let i = 0; i < uris.length; i++) {
         items.push(createItem(uris[i]));
     }
     return items;
 }
 
-export function compose(command: string, message: string) {
-    getDockerComposeFileUris().then(function (uris: vscode.Uri[]) {
-        if (!uris || uris.length == 0) {
-            vscode.window.showInformationMessage('Couldn\'t find any docker-compose file in your workspace.');
-        } else {
-            let items: vscode.QuickPickItem[] = computeItems(uris);
-            vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }).then(function (selectedItem: Item) {
-                if (selectedItem) {
-                    let terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
-                    terminal.sendText(`docker-compose -f ${selectedItem.file} ${command}`);
-                    terminal.show();
-                    if (reporter) {
-                        reporter.sendTelemetryEvent('command', {
-                            command: teleCmdId + command
-                        });
-                    }
+export async function compose(command: string, message: string) {
 
-                }
-            });
+    const uris: vscode.Uri[] = await getDockerComposeFileUris();
+    if (!uris || uris.length == 0) {
+        vscode.window.showInformationMessage('Couldn\'t find any docker-compose file in your workspace.');
+    } else {
+        const items: vscode.QuickPickItem[] = computeItems(uris);
+        const selectedItem: Item = <Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` });
+        if (selectedItem) {
+            const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
+            terminal.sendText(`docker-compose -f ${selectedItem.file} ${command}`);
+            terminal.show();
+            if (reporter) {
+                reporter.sendTelemetryEvent('command', {
+                    command: teleCmdId + command
+                });
+            }
+
         }
-    });
+    }
 }
 
 export function composeUp() {

@@ -221,51 +221,50 @@ function hasWorkspaceFolder(): boolean {
     return vscode.workspace.rootPath ? true : false;
 }
 
-function getPackageJson(): Thenable<vscode.Uri[]> {
+async function getPackageJson(): Promise<vscode.Uri[]> {
     if (!hasWorkspaceFolder()) {
-        return Promise.resolve(null);
+        return;
     }
 
-    return Promise.resolve(vscode.workspace.findFiles('package.json', null, 1, null));
+    return vscode.workspace.findFiles('package.json', null, 1, null);
 }
 
-function readPackageJson(): Thenable<PackageJson> {
+async function readPackageJson(): Promise<PackageJson> {
     // open package.json and look for main, scripts start
-    return getPackageJson().then(function (uris: vscode.Uri[]) {
-        var pkg: PackageJson = {
-            npmStart: true,
-            fullCommand: 'npm start',
-            cmd: 'npm start',
-            author: 'author',
-            version: '0.0.1'
-        }; //default
+    const uris: vscode.Uri[] = await getPackageJson();
+    var pkg: PackageJson = {
+        npmStart: true,
+        fullCommand: 'npm start',
+        cmd: 'npm start',
+        author: 'author',
+        version: '0.0.1'
+    }; //default
 
-        if (uris && uris.length > 0) {
-            var json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
+    if (uris && uris.length > 0) {
+        const json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
 
-            if (json.scripts && json.scripts.start) {
-                pkg.npmStart = true;
-                pkg.fullCommand = json.scripts.start;
-                pkg.cmd = 'npm start';
-            } else if (json.main) {
-                pkg.npmStart = false;
-                pkg.fullCommand = 'node' + ' ' + json.main;
-                pkg.cmd = pkg.fullCommand;
-            } else {
-                pkg.fullCommand = '';
-            }
-
-            if (json.author) {
-                pkg.author = json.author;
-            }
-
-            if (json.version) {
-                pkg.version = json.version;
-            }
+        if (json.scripts && json.scripts.start) {
+            pkg.npmStart = true;
+            pkg.fullCommand = json.scripts.start;
+            pkg.cmd = 'npm start';
+        } else if (json.main) {
+            pkg.npmStart = false;
+            pkg.fullCommand = 'node' + ' ' + json.main;
+            pkg.cmd = pkg.fullCommand;
+        } else {
+            pkg.fullCommand = '';
         }
 
-        return Promise.resolve(pkg);
-    });
+        if (json.author) {
+            pkg.author = json.author;
+        }
+
+        if (json.version) {
+            pkg.version = json.version;
+        }
+    }
+
+    return pkg;
 }
 
 const DOCKER_FILE_TYPES = {

@@ -30,5 +30,5 @@ function getPackageInfo(context: vscode.ExtensionContext): IPackageInfo {
             aiKey: extensionPackage.aiKey
         };
     }
-    return null;
+    return;
 }

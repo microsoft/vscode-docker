@@ -15,14 +15,14 @@ export class DockerfileParser extends Parser {
 
     parseLine(textLine: TextLine): IToken[] {
         if (textLine.isEmptyOrWhitespace) {
-            return null;
+            return;
         }
 
         var startIndex = textLine.firstNonWhitespaceCharacterIndex;
 
         // Check for comment 
         if (textLine.text.charAt(startIndex) === '#') {
-            return null;
+            return;
         }
 
         var tokens: IToken[] = [];
