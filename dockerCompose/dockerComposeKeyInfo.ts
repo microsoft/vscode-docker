@@ -332,7 +332,7 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
         "Usable percentage of the available CPUs (Windows only)"
     ),
     'cpus': (
-        "Cpu quota in number of cpus"
+        "CPU quota in number of CPUs"
     )
 };
 
