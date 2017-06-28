@@ -72,8 +72,60 @@
           "command": "dockerExplorer.refreshExplorer",
           "when": "view == dockerExplorer",
           "group": "navigation"
-        }
-      ]
+				},
+				{
+					"command": "dockerExplorer.systemPrune",
+					"when": "view == dockerExplorer",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "vscode-docker.image.remove",
+					"when": "view == dockerExplorer && viewItem == dockerImage"
+				},
+				{
+					"command": "vscode-docker.image.tag",
+					"when": "view == dockerExplorer && viewItem == dockerImage"
+				},
+				{
+					"command": "vscode-docker.image.start",
+					"when": "view == dockerExplorer && viewItem == dockerImage"
+				},
+				{
+					"command": "vscode-docker.container.start.interactive",
+					"when": "view == dockerExplorer && viewItem == dockerImage"
+				},
+				{
+					"command": "vscode-docker.image.push",
+					"when": "view == dockerExplorer && viewItem == dockerImage"
+				},
+				{
+					"command": "vscode-docker.container.stop",
+					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+				},
+				{
+					"command": "docker.stopAllContainers",
+					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+				},
+				{
+					"command": "vscode-docker.container.show-logs",
+					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+				},
+				{
+					"command": "vscode-docker.container.open-shell",
+					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+				},
+				{
+					"command": "docker.removeContainer",
+					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
+				},
+				{
+					"command": "docker.removeAllContainers",
+					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
+				}
+			]
+
     },
     "debuggers": [
       {
@@ -133,7 +185,7 @@
       },
       {
         "command": "vscode-docker.image.remove",
-        "title": "Docker: Remove Images",
+        "title": "Docker: Remove Image",
         "description": "Remove a Docker image"
       },
       {
@@ -194,6 +246,14 @@
       {
         "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
+        "icon":{
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
+      }, 
+      {
+        "command": "dockerExplorer.systemPrune",
+        "title": "System Prune",
         "icon":{
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
