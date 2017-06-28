@@ -321,6 +321,21 @@ const DOCKER_COMPOSE_V2_1_KEY_INFO: KeyInfo = {
     // in the v2.0 format, so we don't need to re-define it.
 };
 
+// Define the keys which were introduced in the v2.2 format.
+// https://github.com/docker/compose/blob/master/compose/config/config_schema_v2.2.json
+const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
+    // Added service-level properties
+    'cpu_count': (
+        "Number of usable CPUs (Windows only)"
+     ),
+    'cpu_percent': (
+        "Usable percentage of the available CPUs (Windows only)"
+    ),
+    'cpus': (
+        "Cpu quota in number of cpus"
+    )
+};
+
 // Helper function that merges the specified version-specific keys with the shared
 // keys, in order to create a complete schema for a specic version.
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
@@ -331,5 +346,6 @@ export default <ComposeVersionKeys>{
     v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
     v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
     "v2.1": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO),
-    All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO)
+    "v2.2": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO),
+    All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO)
 };
