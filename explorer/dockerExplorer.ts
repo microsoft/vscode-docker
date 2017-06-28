@@ -144,6 +144,6 @@ class DockerNode extends vscode.TreeItem {
     // if(icon) {
     //     iconPath = icon
     // }
-    //contextValue = 'dependency';
+    contextValue = 'dockerImage';
 
 }
