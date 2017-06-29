@@ -1,14 +1,14 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, snippets, commands, hover tips, and linting for Dockerfile and docker-compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
-  "icon": "images/docker_icon.svg",
+  "icon": "images/docker_icon.png",
   "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
   "galleryBanner": {
-    "color": "#5c2d91",
+    "color": "#1289B9",
     "theme": "dark"
   },
   "categories": [

@@ -1,3 +1,8 @@
+## 0.0.16 - 09 June 2017
+
+* Update snippet syntax to be in accordance with the [stricter snippet syntax](https://code.visualstudio.com/updates/v1_13#_strict-snippets)
+* Moved source code to support async/await (important if you want to make PRs!)
+
 ## 0.0.15 - 25 May 2017
 
 * Updated both the `Docker: Run` and `Docker: Run Interactive` commands to automatically publish the ports that the specified image exposes
