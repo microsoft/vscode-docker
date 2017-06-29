@@ -270,7 +270,7 @@
         {
           "id": "dockerExplorer",
           "name": "Docker",
-          "when": "docker.showExplorer == true"
+          "when": "config.docker.showExplorer == true"
         }
       ]
     }
