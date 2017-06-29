@@ -169,6 +169,11 @@
           "type": "string",
           "default": "",
           "description": "Full path to the linting rules file to use. See https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) for sample files and how to create your own."
+        },
+        "docker.showExplorer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show or hide the image and container Explorer."
         }
       }
     },
@@ -264,7 +269,8 @@
       "explorer": [
         {
           "id": "dockerExplorer",
-          "name": "Docker"
+          "name": "Docker",
+          "when": "docker.showExplorer == true"
         }
       ]
     }
