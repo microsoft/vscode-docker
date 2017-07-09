@@ -51,6 +51,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     const dockerExplorerProvider = new DockerExplorerProvider();
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
+    vscode.commands.registerCommand('dockerExplorer.systemPrune', () => systemPrune());
 
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
