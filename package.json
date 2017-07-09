@@ -74,7 +74,7 @@
           "group": "navigation"
 				},
 				{
-					"command": "dockerExplorer.systemPrune",
+					"command": "vscode-docker.system.prune",
 					"when": "view == dockerExplorer",
 					"group": "navigation"
 				}
@@ -105,7 +105,7 @@
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				},
 				{
-					"command": "docker.stopAllContainers",
+					"command": "vscode-docker.stopAllContainers",
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				},
 				{
@@ -117,11 +117,11 @@
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				},
 				{
-					"command": "docker.removeContainer",
+					"command": "vscode-docker.removeContainer",
 					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
 				},
 				{
-					"command": "docker.removeAllContainers",
+					"command": "vscode-docker.removeAllContainers",
 					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
 				}
 			]
@@ -246,19 +246,15 @@
       {
         "command": "vscode-docker.system.prune",
         "title": "Docker: System Prune",
-        "description": "Removes unused data"
+        "description": "Removes unused data",
+        "icon":{
+          "light": "images/light/scissors.png",
+          "dark": "images/dark/scissors.png"
+        }
       },
       {
         "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
-        "icon":{
-          "light": "images/light/refresh.svg",
-          "dark": "images/dark/refresh.svg"
-        }
-      }, 
-      {
-        "command": "dockerExplorer.systemPrune",
-        "title": "System Prune",
         "icon":{
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
