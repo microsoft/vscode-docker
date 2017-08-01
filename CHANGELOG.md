@@ -1,3 +1,7 @@
+## 0.0.17 - XX XXXX 2017
+
+* Add `docker inspect` command
+
 ## 0.0.16 - 09 June 2017
 
 * Update snippet syntax to be in accordance with the [stricter snippet syntax](https://code.visualstudio.com/updates/v1_13#_strict-snippets)
