@@ -11,6 +11,7 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileParser } from './dockerfile/dockerfileParser';
 import vscode = require('vscode');
 import { buildImage } from './commands/build-image';
+import inspectImageCommand from './commands/inspect-image';
 import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
 import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
@@ -23,6 +24,7 @@ import { configure, configureLaunchJson } from './configureWorkspace/configure';
 import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
+import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 
@@ -53,9 +55,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
     
+    ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
+
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.debug.configureLaunchJson', configureLaunchJson));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImageCommand));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));

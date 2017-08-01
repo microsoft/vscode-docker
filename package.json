@@ -28,6 +28,7 @@
     "onLanguage:dockerfile",
     "onLanguage:yaml",
     "onCommand:vscode-docker.image.build",
+    "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
     "onCommand:vscode-docker.image.push",
     "onCommand:vscode-docker.image.tag",
@@ -124,6 +125,11 @@
         "description": "Build a Docker image from a Dockerfile"
       },
       {
+        "command": "vscode-docker.image.inspect",
+        "title": "Docker: Inspect Image",
+        "description": "Inspect the metadata of a Docker image"
+      },
+      {
         "command": "vscode-docker.image.remove",
         "title": "Docker: Remove Images",
         "description": "Remove a Docker image"
@@ -190,7 +196,7 @@
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -watch -p ./",
+    "compile": "tsc -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "extensionDependencies": [
