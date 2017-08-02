@@ -70,6 +70,7 @@ declare module Docker {
 	interface ContainerDesc {
 		Id: string;
 		Image: string;
+		State: string;
 		Status: string;
 	}
 }
