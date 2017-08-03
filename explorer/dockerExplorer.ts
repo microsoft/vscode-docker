@@ -26,12 +26,13 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     private async getDockerNodes(element?: DockerNode): Promise<DockerNode[]> {
 
         let opts = {};
-
+        let iconPath: any = {};
         const nodes: DockerNode[] = [];
+
         if (!element) {
             nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, null, null));
             nodes.push(new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, null, null));
-            nodes.push(new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+            // nodes.push(new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, null, null));
         } else {
 
             if (element.label === 'Images') {
@@ -59,7 +60,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     }
                 };
 
-                var iconPath: any = {};
 
                 const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
                 if (!containers || containers.length == 0) {
@@ -83,38 +83,15 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 }
             }
 
+            if (element.label === 'Registries') {
+
+                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+            }
+
 
         }
-
-
         return nodes;
-
-
-        // if (this.pathExists(packageJsonPath)) {
-        //     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-
-        //     const toDep = (moduleName: string): DockerNode => {
-        //         if (this.pathExists(path.join(this.workspaceRoot, 'node_modules', moduleName))) {
-        //             return new DockerNode(moduleName, vscode.TreeItemCollapsibleState.Collapsed);
-        //         } else {
-        //             return new DockerNode(moduleName, vscode.TreeItemCollapsibleState.None, {
-        //                 command: 'extension.openPackageOnNpm',
-        //                 title: '',
-        //                 arguments: [moduleName],
-        //             });
-        //         }
-        //     }
-
-        //     const deps = packageJson.dependencies
-        //         ? Object.keys(packageJson.dependencies).map(toDep)
-        //         : [];
-        //     const devDeps = packageJson.devDependencies
-        //         ? Object.keys(packageJson.devDependencies).map(toDep)
-        //         : [];
-        //     return deps.concat(devDeps);
-        // } else {
-        //     return [];
-        // }
     }
 }
 
