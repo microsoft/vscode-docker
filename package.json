@@ -126,7 +126,6 @@
 					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
 				}
 			]
-
     },
     "debuggers": [
       {
@@ -260,6 +259,10 @@
       },
       {
         "command": "dockerExplorer.refreshExplorer",
+        "description": "Removes unused data"
+      },
+      {
+        "command": "docker.refreshExplorer",
         "title": "Refresh",
         "icon":{
           "light": "images/light/refresh.svg",

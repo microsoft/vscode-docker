@@ -38,6 +38,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             if (element.label === 'Images') {
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
                 if (!images || images.length == 0) {
+                    vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
                     return [];
                 } else {
                     for (let i = 0; i < images.length; i++) {
