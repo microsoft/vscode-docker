@@ -4,22 +4,35 @@ import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
+import { DockerNode } from '../explorer/dockerExplorer';
+
 const teleCmdId: string = 'vscode-docker.container.start';
 
-async function doStartContainer(interactive: boolean) {
+async function doStartContainer(context:DockerNode, interactive: boolean) {
+    let imageName: string = "";
 
-    const selectedItem: ImageItem = await quickPickImage(false);
+    // if invokde from the explorer we have the name of the image
+    // otherwise open a quick pick list
+    if (context) {
+        imageName = context.label;
+    } else {
+        const selectedItem: ImageItem = await quickPickImage(false);
+        if (selectedItem) {
+            imageName = selectedItem.label;
+        }
+    }
 
-    if (selectedItem) {
-        docker.getExposedPorts(selectedItem.label).then((ports: string[]) => {
+    // if the user pressed cancel on the quick pick, we won't have an image name
+    if (imageName.length > 0) {
+        docker.getExposedPorts(imageName).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
                 const portMappings = ports.map((port) => `-p ${port}:${port}`);
                 options += ` ${portMappings.join(' ')}`;
             }
             
-            const terminal = vscode.window.createTerminal(selectedItem.label);                                
-            terminal.sendText(`docker run ${options} ${selectedItem.label}`);
+            const terminal = vscode.window.createTerminal(imageName);
+            terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
             if (reporter) {
@@ -31,12 +44,13 @@ async function doStartContainer(interactive: boolean) {
     }
 }
 
-export function startContainer() {
-    doStartContainer(false);
+export function startContainer(context: DockerNode) {
+    // if invoked from explorer, we will get the Node passed in
+    doStartContainer(context, false);
 }
 
-export function startContainerInteractive() {
-    doStartContainer(true);
+export function startContainerInteractive(context: DockerNode) {
+    doStartContainer(context, true);
 }
 
 export async function startAzureCLI() {

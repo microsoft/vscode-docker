@@ -4,7 +4,9 @@ import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.container.stop';
 
 export async function stopContainer() {
+
     const selectedItem: ContainerItem = await quickPickContainer(true);
+    
     if (selectedItem) {
         for (let i = 0; i < selectedItem.ids.length; i++) {
             const container = docker.getContainer(selectedItem.ids[i]);
