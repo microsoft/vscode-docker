@@ -10,20 +10,19 @@ const teleCmdId: string = 'vscode-docker.container.start';
 
 async function doStartContainer(context:DockerNode, interactive: boolean) {
     let imageName: string = "";
+    let selectedItem: ImageItem;
 
     // if invokde from the explorer we have the name of the image
     // otherwise open a quick pick list
     if (context) {
+        selectedItem = context.image;
         imageName = context.label;
     } else {
-        const selectedItem: ImageItem = await quickPickImage(false);
-        if (selectedItem) {
-            imageName = selectedItem.label;
-        }
+        selectedItem = await quickPickImage(false);
     }
 
     // if the user pressed cancel on the quick pick, we won't have an image name
-    if (imageName.length > 0) {
+    if (selectedItem) {
         docker.getExposedPorts(imageName).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
