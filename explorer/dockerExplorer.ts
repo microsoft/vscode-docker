@@ -28,6 +28,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         let opts = {};
         let iconPath: any = {};
         let contextValue: string = "";
+        let node: DockerNode;
         const nodes: DockerNode[] = [];
 
         if (!element) {
@@ -45,10 +46,14 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     for (let i = 0; i < images.length; i++) {
                         contextValue = "dockerImage";
                         if (!images[i].RepoTags) {
-                            nodes.push(new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue));
+                            let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue);
+                            node.image = images[i];
+                            nodes.push(node);
                         } else {
                             for (let j = 0; j < images[i].RepoTags.length; j++) {
-                                nodes.push(new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue));
+                                let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue);
+                                node.image = images[i];
+                                nodes.push(node);
                             }
                         }
                     }
@@ -63,27 +68,29 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     }
                 };
 
-
                 const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
                 if (!containers || containers.length == 0) {
                     return [];
                 } else {
                     for (let i = 0; i < containers.length; i++) {
                         if (['exited', 'dead'].includes(containers[i].State)) {
-                            // show stopped icon
+                            contextValue = "dockerContainerStopped";
                             iconPath = {
                                 light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
                                 dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
                             };
-                            contextValue = "dockerContainerStopped";
                         } else {
+                            contextValue = "dockerContainerRunning";
                             iconPath = {
                                 light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
                                 dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
                             };
-                            contextValue = "dockerContainerRunning";
                         }
-                        nodes.push(new DockerNode(containers[i].Image + ' [' + containers[i].Status + ']', vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath));
+
+                        let node = new DockerNode(containers[i].Image + ' [' + containers[i].Status + ']', vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath);
+                        node.container = containers[i];
+                        nodes.push(node);
+
                     }
                 }
             }
@@ -94,7 +101,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
             }
 
-
         }
         return nodes;
     }
@@ -102,21 +108,20 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
 export class DockerNode extends vscode.TreeItem {
 
-    constructor(
-        public readonly label: string,
+    constructor(public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
         public readonly command?: vscode.Command,
         public iconPath: any = {
             light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
             dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-        }
-    ) {
+        }) {
+
         super(label, collapsibleState);
-        this.iconPath = iconPath;
-        this.contextValue = contextValue;
     }
 
-    // contextValue = 'dockerImage';
+    public container: Docker.ContainerDesc;
+    public image: Docker.ImageDesc;
+    public registry: string;
 
 }
