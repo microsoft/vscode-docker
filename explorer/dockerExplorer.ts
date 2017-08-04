@@ -27,12 +27,14 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
         let opts = {};
         let iconPath: any = {};
+        let contextValue: string = "";
         const nodes: DockerNode[] = [];
 
         if (!element) {
-            nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, null, null));
-            nodes.push(new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, null, null));
-            // nodes.push(new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+            contextValue = "dockerLabel"
+            nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+            nodes.push(new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+            // nodes.push(new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
         } else {
 
             if (element.label === 'Images') {
@@ -41,11 +43,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     return [];
                 } else {
                     for (let i = 0; i < images.length; i++) {
+                        contextValue = "dockerImage";
                         if (!images[i].RepoTags) {
-                            nodes.push(new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None));
+                            nodes.push(new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue));
                         } else {
                             for (let j = 0; j < images[i].RepoTags.length; j++) {
-                                nodes.push(new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None));
+                                nodes.push(new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue));
                             }
                         }
                     }
@@ -71,22 +74,24 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                             iconPath = {
                                 light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
                                 dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-                            }
+                            };
+                            contextValue = "dockerContainerStopped";
                         } else {
                             iconPath = {
                                 light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
                                 dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
-                            }
+                            };
+                            contextValue = "dockerContainerRunning";
                         }
-                        nodes.push(new DockerNode(containers[i].Image + ' [' + containers[i].Status + ']', vscode.TreeItemCollapsibleState.None, null, iconPath));
+                        nodes.push(new DockerNode(containers[i].Image + ' [' + containers[i].Status + ']', vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath));
                     }
                 }
             }
 
             if (element.label === 'Registries') {
-
-                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, null, null));
-                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, null, null));
+                contextValue = "dockerLabel";
+                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
             }
 
 
@@ -95,11 +100,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     }
 }
 
-class DockerNode extends vscode.TreeItem {
+export class DockerNode extends vscode.TreeItem {
 
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly contextValue: string,
         public readonly command?: vscode.Command,
         public iconPath: any = {
             light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
@@ -108,8 +114,9 @@ class DockerNode extends vscode.TreeItem {
     ) {
         super(label, collapsibleState);
         this.iconPath = iconPath;
+        this.contextValue = contextValue;
     }
 
-    contextValue = 'dockerImage';
+    // contextValue = 'dockerImage';
 
 }

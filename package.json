@@ -82,15 +82,7 @@
 			],
 			"view/item/context": [
 				{
-					"command": "vscode-docker.image.remove",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.tag",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.start",
+					"command": "vscode-docker.container.start",
 					"when": "view == dockerExplorer && viewItem == dockerImage"
 				},
 				{
@@ -106,24 +98,12 @@
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				},
 				{
-					"command": "vscode-docker.stopAllContainers",
-					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
-				{
 					"command": "vscode-docker.container.show-logs",
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				},
 				{
 					"command": "vscode-docker.container.open-shell",
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
-				{
-					"command": "vscode-docker.removeContainer",
-					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
-				},
-				{
-					"command": "vscode-docker.removeAllContainers",
-					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
 				}
 			]
 
@@ -181,78 +161,93 @@
     "commands": [
       {
         "command": "vscode-docker.configure",
-        "title": "Docker: Add docker files to workspace",
-        "description": "Add Dockerfile, docker-compose.yml files"
+        "title": "Add docker files to workspace",
+        "description": "Add Dockerfile, docker-compose.yml files",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.image.build",
-        "title": "Docker: Build Image",
-        "description": "Build a Docker image from a Dockerfile"
+        "title": "Build Image",
+        "description": "Build a Docker image from a Dockerfile",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.image.inspect",
-        "title": "Docker: Inspect Image",
-        "description": "Inspect the metadata of a Docker image"
+        "title": "Inspect Image",
+        "description": "Inspect the metadata of a Docker image",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.image.remove",
-        "title": "Docker: Remove Image",
-        "description": "Remove a Docker image"
+        "title": "Remove Image",
+        "description": "Remove a Docker image",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.image.tag",
-        "title": "Docker: Tag Image",
-        "description": "Tag a Docker image"
+        "title": "Tag Image",
+        "description": "Tag a Docker image",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.start",
-        "title": "Docker: Run",
-        "description": "Starts a container from an image"
+        "title": "Run",
+        "description": "Starts a container from an image",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.start.interactive",
-        "title": "Docker: Run Interactive",
-        "description": "Starts a container from an image and runs it interactively"
+        "title": "Run Interactive",
+        "description": "Starts a container from an image and runs it interactively",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.start.azurecli",
-        "title": "Docker: Azure CLI",
-        "description": "Starts a container from the Azure CLI image and runs it interactively"
+        "title": "Azure CLI",
+        "description": "Starts a container from the Azure CLI image and runs it interactively",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.stop",
-        "title": "Docker: Stop",
-        "description": "Stop a running container"
+        "title": "Stop",
+        "description": "Stop a running container",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.show-logs",
-        "title": "Docker: Show Logs",
-        "description": "Show the logs of a running container"
+        "title": "Show Logs",
+        "description": "Show the logs of a running container",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.container.open-shell",
-        "title": "Docker: Attach Shell to a running container",
-        "description": "Open a terminal with an interactive shell for a running container"
+        "title": "Attach Shell to a running container",
+        "description": "Open a terminal with an interactive shell for a running container",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.compose.up",
-        "title": "Docker: Compose Up",
-        "description": "Starts a composition of containers"
+        "title": "Compose Up",
+        "description": "Starts a composition of containers",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.compose.down",
-        "title": "Docker: Compose Down",
-        "description": "Stops a composition of containers"
+        "title": "Compose Down",
+        "description": "Stops a composition of containers",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.image.push",
-        "title": "Docker: Push",
-        "description": "Push an image to a registry"
+        "title": "Push",
+        "description": "Push an image to a registry",
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.system.prune",
-        "title": "Docker: System Prune",
+        "title": "System Prune",
         "description": "Removes unused data",
+        "category": "Docker",
         "icon":{
           "light": "images/light/scissors.png",
           "dark": "images/dark/scissors.png"
@@ -261,6 +256,7 @@
       {
         "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
+        "category": "Docker",
         "icon":{
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
