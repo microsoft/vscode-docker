@@ -15,8 +15,8 @@ export async function openShellContainer() {
     
     if (selectedItem) {
         docker.getEngineType().then((engineType: DockerEngineType) => {
-            const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.label}`);
-            terminal.sendText(`docker exec -it ${selectedItem.ids[0]} ${engineTypeShellCommands[engineType]}`);
+            const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.containerDesc.Image}`);
+            terminal.sendText(`docker exec -it ${selectedItem.containerDesc.Image} ${engineTypeShellCommands[engineType]}`);
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {

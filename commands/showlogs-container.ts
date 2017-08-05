@@ -7,8 +7,8 @@ export async function showLogsContainer() {
 
     const selectedItem: ContainerItem = await quickPickContainer();
     if (selectedItem) {
-        const terminal = vscode.window.createTerminal(selectedItem.label);
-        terminal.sendText(`docker logs -f ${selectedItem.ids[0]}`);
+        const terminal = vscode.window.createTerminal(selectedItem.containerDesc.Image);
+        terminal.sendText(`docker logs -f ${selectedItem.containerDesc.Image}`);
         terminal.show();
         if (reporter) {
             reporter.sendTelemetryEvent('command', {

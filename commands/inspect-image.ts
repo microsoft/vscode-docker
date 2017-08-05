@@ -5,7 +5,7 @@ import { reporter } from "../telemetry/telemetry";
 export default async function inspectImage() {
     const selectedImage = await quickPickImage();
     if (selectedImage) {
-        await DockerInspectDocumentContentProvider.openImageInspectDocument(selectedImage.label);
+        await DockerInspectDocumentContentProvider.openImageInspectDocument(selectedImage.imageDesc);
         reporter && reporter.sendTelemetryEvent("command", { command: "vscode-docker.image.inspect" });
     }
 };
