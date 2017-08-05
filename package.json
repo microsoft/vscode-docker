@@ -262,7 +262,7 @@
         "description": "Removes unused data"
       },
       {
-        "command": "docker.refreshExplorer",
+        "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
         "icon":{
           "light": "images/light/refresh.svg",
