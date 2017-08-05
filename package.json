@@ -268,14 +268,6 @@
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
         }
-      }, 
-      {
-        "command": "dockerExplorer.systemPrune",
-        "title": "System Prune",
-        "icon":{
-          "light": "images/light/refresh.svg",
-          "dark": "images/dark/refresh.svg"
-        }
       }
     ],
     "views": {
