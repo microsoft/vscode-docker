@@ -47,12 +47,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         contextValue = "dockerImage";
                         if (!images[i].RepoTags) {
                             let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue);
-                            node.image = images[i];
+                            node.imageDesc = images[i];
                             nodes.push(node);
                         } else {
                             for (let j = 0; j < images[i].RepoTags.length; j++) {
                                 let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue);
-                                node.image = images[i];
+                                node.imageDesc = images[i];
                                 nodes.push(node);
                             }
                         }
@@ -88,7 +88,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         }
 
                         let node = new DockerNode(containers[i].Image + ' [' + containers[i].Status + ']', vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath);
-                        node.container = containers[i];
+                        node.containerDesc = containers[i];
                         nodes.push(node);
 
                     }
@@ -120,8 +120,8 @@ export class DockerNode extends vscode.TreeItem {
         super(label, collapsibleState);
     }
 
-    public container: Docker.ContainerDesc;
-    public image: Docker.ImageDesc;
+    public containerDesc: Docker.ContainerDesc;
+    public imageDesc: Docker.ImageDesc;
     public registry: string;
 
 }

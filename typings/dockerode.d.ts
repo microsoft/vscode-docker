@@ -48,6 +48,7 @@ declare module Docker {
 		start(options: any, cb: (err: Error, data: any)=>void): void;
 		start(cb: (err: Error, data: any)=>void): void;
 		stop(cb: (err: Error, data: any)=>void): void;
+		stop(): Promise<Container>;
 		exec(options: ExecOptions, cb: (err: Error, exec: Exec)=>void): void;
 	}
 
