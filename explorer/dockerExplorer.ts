@@ -110,15 +110,6 @@ class DockerNode extends vscode.TreeItem {
         this.iconPath = iconPath;
     }
 
-
-    // iconPath = {
-    //     light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-    //     dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-    // };
-
-    // if(icon) {
-    //     iconPath = icon
-    // }
     contextValue = 'dockerImage';
 
 }
