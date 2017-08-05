@@ -106,10 +106,6 @@
 					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
 				}
 			]
-<<<<<<< HEAD
-=======
-
->>>>>>> 0eedaf955fbf1d98e2ffc6139a2f2dbb89d243bc
     },
     "debuggers": [
       {
