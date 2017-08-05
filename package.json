@@ -75,11 +75,7 @@
           "group": "navigation"
 				},
 				{
-<<<<<<< b816cb8271d3e7923e7b2efe3e1b230ff842df4f
 					"command": "vscode-docker.system.prune",
-=======
-					"command": "dockerExplorer.systemPrune",
->>>>>>> merging master
 					"when": "view == dockerExplorer",
 					"group": "navigation"
 				}
