@@ -9,29 +9,30 @@ import { DockerNode } from '../explorer/dockerExplorer';
 const teleCmdId: string = 'vscode-docker.container.start';
 
 export async function startContainer(context?:DockerNode, interactive?: boolean) {
-    let selectedItem: ImageItem;
+    let imageName: string;
+    let imageToStart: Docker.ImageDesc;
 
-    // if invokde from the explorer we have the image
-    // otherwise open a quick pick list
-
-    if (context) {
-        selectedItem.imageDesc = context.imageDesc;
-        selectedItem.label = context.label;
+    if (context.imageDesc) {
+        imageToStart = context.imageDesc;
+        imageName = context.label;
     } else {
-        selectedItem = await quickPickImage(false);
+        const selectedItem: ImageItem = await quickPickImage(false)
+        if (selectedItem) {
+            imageToStart = selectedItem.imageDesc;
+            imageName = selectedItem.label;
+        }
     }
 
-    // if the user pressed cancel on the quick pick, we won't have an image 
-    if (selectedItem) {
-        docker.getExposedPorts(selectedItem.imageDesc.Id).then((ports: string[]) => {
+    if (imageToStart) {
+        docker.getExposedPorts(imageToStart.Id).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
                 const portMappings = ports.map((port) => `-p ${port}:${port}`);
                 options += ` ${portMappings.join(' ')}`;
             }
             
-            const terminal = vscode.window.createTerminal(selectedItem.label);
-            terminal.sendText(`docker run ${options} ${selectedItem.label}`);
+            const terminal = vscode.window.createTerminal(imageName);
+            terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
             if (reporter) {

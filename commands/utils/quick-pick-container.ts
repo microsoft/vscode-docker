@@ -24,23 +24,31 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean) :
 
     if (includeAll && containers.length > 0) {
         items.unshift(<ContainerItem> {
-            label: 'All Containers' //,
-            // description: 'Stops all running containers',
-            // ids: allIds
+            label: 'All Containers' 
         });
     }
 
     return items;
 }
 
-export async function quickPickContainer(includeAll: boolean = false) : Promise<ContainerItem>{
-    const containers = await docker.getContainerDescriptors();
+export async function quickPickContainer(includeAll: boolean = false, opts?: {}) : Promise<ContainerItem>{
+
+    // "status": ["created", "restarting", "running", "paused", "exited", "dead"]
+    if (!opts) {
+        opts = {
+            "filters": {
+                "status": ["running"]
+            }
+        };
+    };
+
+    const containers = await docker.getContainerDescriptors(opts);
 
     if (!containers || containers.length == 0) {
-        vscode.window.showInformationMessage('There are no running docker containers.');
+        vscode.window.showInformationMessage('There are no Docker Containers.');
         return;
     } else {
         const items: ContainerItem[] = computeItems(containers, includeAll);
-        return vscode.window.showQuickPick(items, { placeHolder: 'Choose Container' });
+        return vscode.window.showQuickPick(items, { placeHolder: 'Choose container...' });
     }
 }

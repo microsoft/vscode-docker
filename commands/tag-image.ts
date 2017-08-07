@@ -2,18 +2,31 @@ import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { docker } from './utils/docker-endpoint';
 import { reporter } from '../telemetry/telemetry';
+import { DockerNode } from '../explorer/dockerExplorer';
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage() {
+export async function tagImage(context?: DockerNode) {
 
-    const selectedItem: ImageItem = await quickPickImage(false);
+    let imageName: string;
+    let imageToTag: Docker.ImageDesc;
 
-    if (selectedItem) {
+    if (context.imageDesc) {
+        imageToTag = context.imageDesc;
+        imageName = context.label;
+    } else {
+        const selectedItem: ImageItem = await quickPickImage(false);
+        if (selectedItem) {
+            imageToTag = selectedItem.imageDesc
+            imageName = selectedItem.label;
+        }
 
-        let imageName: string = selectedItem.label;
+    }
+
+    if (imageToTag) {
+
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-
         const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+
         if (defaultRegistryPath.length > 0) {
             imageName = defaultRegistryPath + '/' + imageName;
         }
@@ -25,7 +38,7 @@ export async function tagImage() {
 
         var opt: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
-            placeHolder: selectedItem.label,
+            placeHolder: imageName,
             prompt: 'Tag image as...',
             value: imageName
         };
@@ -40,13 +53,14 @@ export async function tagImage() {
                 tag = value.slice(value.lastIndexOf(':') + 1);
             }
 
-            const image = docker.getImage(selectedItem.imageDesc.Id);
+            const image = docker.getImage(imageToTag.Id);
 
-            image.tag({ repo: repo, tag: tag }, function (err, data) {
+            image.tag({ repo: repo, tag: tag }, function (err: Error, data: any) {
                 if (err) {
-                    console.log('Docker Tag error: ' + err);
+                    vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
                 }
             });
+
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
                     command: teleCmdId

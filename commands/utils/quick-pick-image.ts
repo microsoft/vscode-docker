@@ -46,11 +46,11 @@ export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
     const images = await docker.getImageDescriptors();
 
     if (!images || images.length == 0) {
-        vscode.window.showInformationMessage('There are no docker images yet. Try Build first.');
+        vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
         return;
     } else {
         const items: ImageItem[] = computeItems(images, includeAll);
-        return vscode.window.showQuickPick(items, { placeHolder: 'Choose image' });
+        return vscode.window.showQuickPick(items, { placeHolder: 'Choose image...' });
     }
 
 }

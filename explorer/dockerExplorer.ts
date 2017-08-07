@@ -7,12 +7,42 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
     private _onDidChangeTreeData: vscode.EventEmitter<DockerNode | undefined> = new vscode.EventEmitter<DockerNode | undefined>();
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
-
+    private _imagesNode: DockerNode;
+    private _containersNode: DockerNode;
+    private _registriesNode: DockerNode;
+    private _debounceTimer: NodeJS.Timer;
+    
     constructor() {
     }
 
     refresh(): void {
-        this._onDidChangeTreeData.fire();
+        this.refreshImages()
+        this.refreshContainers()
+        //this.refreshRegistries()
+    }
+
+    refreshImages(): void {
+        this._onDidChangeTreeData.fire(this._imagesNode);
+    }
+    
+    refreshContainers(): void {
+        this._onDidChangeTreeData.fire(this._containersNode);
+    }
+
+    refreshRegistries(): void {
+        // if (this._registriesNode.collapsibleState === vscode.TreeItemCollapsibleState.Expanded) {
+        //     this._onDidChangeTreeData.fire(this._registriesNode);
+        // }
+    }
+
+    private setAutoRefresh(interval: number): void {
+        //const interval = Utility.getConfiguration().get<number>("autoRefreshInterval");
+        //if (interval > 0) {
+            clearTimeout(this._debounceTimer);
+            this._debounceTimer = setTimeout(() => {
+                this.refresh();
+            }, interval);
+        //}
     }
 
     getTreeItem(element: DockerNode): vscode.TreeItem {
@@ -32,10 +62,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         const nodes: DockerNode[] = [];
 
         if (!element) {
-            contextValue = "dockerLabel"
-            nodes.push(new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-            nodes.push(new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-            // nodes.push(new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelImages", null, null);
+            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelContainers", null, null);
+            // this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelRegistries", null, null);
+            nodes.push(this._imagesNode);
+            nodes.push(this._containersNode);
+            // nodes.push(this._registriesNode);
         } else {
 
             if (element.label === 'Images') {
@@ -102,6 +134,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             }
 
         }
+
+        this.setAutoRefresh(1000);
         return nodes;
     }
 }
