@@ -214,6 +214,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show or hide the image and container Explorer."
+        },
+        "docker.explorerRefreshInterval": {
+          "type": "number",
+          "default": 1000,
+          "description": "Docker explorer refresh interval (default 1000ms)"
         }
       }
     },
@@ -286,7 +291,7 @@
       },
       {
         "command": "vscode-docker.container.open-shell",
-        "title": "Attach Shell to a running container",
+        "title": "Attach Shell",
         "description": "Open a terminal with an interactive shell for a running container",
         "category": "Docker"
       },

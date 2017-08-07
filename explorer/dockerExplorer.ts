@@ -35,14 +35,17 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         // }
     }
 
-    private setAutoRefresh(interval: number): void {
-        //const interval = Utility.getConfiguration().get<number>("autoRefreshInterval");
-        //if (interval > 0) {
+    private setAutoRefresh(): void {
+
+        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+        const interval = configOptions.get('explorerRefreshInterval', 1000);
+
+        if (interval > 0) {
             clearTimeout(this._debounceTimer);
             this._debounceTimer = setTimeout(() => {
                 this.refresh();
             }, interval);
-        //}
+        }
     }
 
     getTreeItem(element: DockerNode): vscode.TreeItem {
@@ -135,7 +138,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
         }
 
-        this.setAutoRefresh(1000);
+        this.setAutoRefresh();
         return nodes;
     }
 }
