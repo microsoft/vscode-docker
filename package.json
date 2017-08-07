@@ -87,7 +87,7 @@
 				},
 				{
 					"command": "vscode-docker.container.start",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.container.start.interactive",
@@ -95,7 +95,7 @@
 				},
 				{
 					"command": "vscode-docker.container.start.interactive",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.image.push",
@@ -103,7 +103,7 @@
 				},
 				{
 					"command": "vscode-docker.image.push",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.image.remove",
@@ -111,7 +111,7 @@
 				},
 				{
 					"command": "vscode-docker.image.remove",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.image.inspect",
@@ -119,7 +119,7 @@
 				},
 				{
 					"command": "vscode-docker.image.inspect",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.image.tag",
@@ -127,7 +127,7 @@
 				},
 				{
 					"command": "vscode-docker.image.tag",
-					"when": "view == dockerExplorer && viewItem == dockerLabelImages"
+					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
 				},
 				{
 					"command": "vscode-docker.container.stop",
@@ -135,7 +135,7 @@
 				},
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem == dockerLabelContainers"
+          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
         },
 				{
 					"command": "vscode-docker.container.show-logs",
@@ -143,7 +143,7 @@
 				},
 				{
 					"command": "vscode-docker.container.show-logs",
-					"when": "view == dockerExplorer && viewItem == dockerLabelContainers"
+					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
 				},
 				{
 					"command": "vscode-docker.container.open-shell",
@@ -151,7 +151,7 @@
 				},
 				{
 					"command": "vscode-docker.container.open-shell",
-					"when": "view == dockerExplorer && viewItem == dockerLabelContainers"
+					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
 				},
 				{
 					"command": "vscode-docker.container.remove",
@@ -163,7 +163,7 @@
 				},
 				{
 					"command": "vscode-docker.container.remove",
-					"when": "view == dockerExplorer && viewItem == dockerLabelContainers"
+					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
 				}
 			]
     },

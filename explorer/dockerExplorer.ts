@@ -62,8 +62,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         const nodes: DockerNode[] = [];
 
         if (!element) {
-            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelImages", null, null);
-            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelContainers", null, null);
+            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "dockerImagesLabel", null, null);
+            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "dockerContainersLabel", null, null);
             // this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelRegistries", null, null);
             nodes.push(this._imagesNode);
             nodes.push(this._containersNode);
