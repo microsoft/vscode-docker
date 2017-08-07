@@ -30,9 +30,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     }
 
     refreshRegistries(): void {
-        // if (this._registriesNode.collapsibleState === vscode.TreeItemCollapsibleState.Expanded) {
         //     this._onDidChangeTreeData.fire(this._registriesNode);
-        // }
     }
 
     private setAutoRefresh(): void {
