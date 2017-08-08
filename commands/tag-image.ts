@@ -10,7 +10,7 @@ export async function tagImage(context?: DockerNode) {
     let imageName: string;
     let imageToTag: Docker.ImageDesc;
 
-    if (context.imageDesc) {
+    if (context) {
         imageToTag = context.imageDesc;
         imageName = context.label;
     } else {

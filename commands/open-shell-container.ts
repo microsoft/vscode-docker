@@ -13,7 +13,7 @@ const engineTypeShellCommands = {
 export async function openShellContainer(context?: DockerNode) {
     let containerToAttach: Docker.ContainerDesc;
 
-    if (context.containerDesc) {
+    if (context) {
         containerToAttach = context.containerDesc;
     } else {
         const opts = {

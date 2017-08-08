@@ -8,7 +8,7 @@ export async function showLogsContainer(context?: DockerNode) {
 
     let containerToLog: Docker.ContainerDesc;
 
-    if (context.containerDesc) {
+    if (context) {
         containerToLog = context.containerDesc;
     } else {
         const opts = {
