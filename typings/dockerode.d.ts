@@ -103,6 +103,7 @@ declare module Docker {
 	interface ContainerDesc {
 		Id: string;
 		Image: string;
+		Names: string[];
 		State: string;
 		Status: string;
 	}
