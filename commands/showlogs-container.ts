@@ -24,7 +24,7 @@ export async function showLogsContainer(context?: DockerNode) {
 
     if (containerToLog) {
         const terminal = vscode.window.createTerminal(containerToLog.Image);
-        terminal.sendText(`docker logs -f ${containerToLog.Image}`);
+        terminal.sendText(`docker logs -f ${containerToLog.Id}`);
         terminal.show();
         if (reporter) {
             reporter.sendTelemetryEvent('command', {
