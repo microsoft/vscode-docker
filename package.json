@@ -73,99 +73,99 @@
           "command": "dockerExplorer.refreshExplorer",
           "when": "view == dockerExplorer",
           "group": "navigation"
-				},
-				{
-					"command": "vscode-docker.system.prune",
-					"when": "view == dockerExplorer",
-					"group": "navigation"
-				}
-			],
-			"view/item/context": [
-				{
-					"command": "vscode-docker.container.start",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.container.start",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.container.start.interactive",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.container.start.interactive",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.image.push",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.push",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.image.remove",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.remove",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.image.inspect",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.inspect",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.image.tag",
-					"when": "view == dockerExplorer && viewItem == dockerImage"
-				},
-				{
-					"command": "vscode-docker.image.tag",
-					"when": "view == dockerExplorer && viewItem == dockerImagesLabel"
-				},
-				{
-					"command": "vscode-docker.container.stop",
-					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
+        },
+        {
+          "command": "vscode-docker.system.prune",
+          "when": "view == dockerExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vscode-docker.container.start",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.container.start",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.container.start.interactive",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.container.start.interactive",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.image.push",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.image.push",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.image.remove",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.image.remove",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.image.inspect",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.image.inspect",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.image.tag",
+          "when": "view == dockerExplorer && viewItem == dockerImage"
+        },
+        {
+          "command": "vscode-docker.image.tag",
+          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+        },
+        {
+          "command": "vscode-docker.container.stop",
+          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+        },
         {
           "command": "vscode-docker.container.stop",
           "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
         },
-				{
-					"command": "vscode-docker.container.show-logs",
-					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
-				{
-					"command": "vscode-docker.container.show-logs",
-					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
-				},
-				{
-					"command": "vscode-docker.container.open-shell",
-					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
-				{
-					"command": "vscode-docker.container.open-shell",
-					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
-				},
-				{
-					"command": "vscode-docker.container.remove",
-					"when": "view == dockerExplorer && viewItem == dockerContainerStopped"
-				},
-				{
-					"command": "vscode-docker.container.remove",
-					"when": "view == dockerExplorer && viewItem == dockerContainerRunning"
-				},
-				{
-					"command": "vscode-docker.container.remove",
-					"when": "view == dockerExplorer && viewItem == dockerContainersLabel"
-				}
-			]
+        {
+          "command": "vscode-docker.container.show-logs",
+          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+        },
+        {
+          "command": "vscode-docker.container.show-logs",
+          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+        },
+        {
+          "command": "vscode-docker.container.open-shell",
+          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+        },
+        {
+          "command": "vscode-docker.container.open-shell",
+          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+        },
+        {
+          "command": "vscode-docker.container.remove",
+          "when": "view == dockerExplorer && viewItem == dockerContainerStopped"
+        },
+        {
+          "command": "vscode-docker.container.remove",
+          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+        },
+        {
+          "command": "vscode-docker.container.remove",
+          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+        }
+      ]
     },
     "debuggers": [
       {
@@ -318,7 +318,7 @@
         "title": "System Prune",
         "description": "Removes unused data",
         "category": "Docker",
-        "icon":{
+        "icon": {
           "light": "images/light/scissors.png",
           "dark": "images/dark/scissors.png"
         }
@@ -327,7 +327,7 @@
         "command": "dockerExplorer.refreshExplorer",
         "title": "Refresh",
         "category": "Docker",
-        "icon":{
+        "icon": {
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
         }
