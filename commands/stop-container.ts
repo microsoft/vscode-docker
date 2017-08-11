@@ -35,7 +35,7 @@ export async function stopContainer(context?: DockerNode) {
         const numContainers: number = containersToStop.length;
         let containerCounter: number = 0;
 
-        vscode.window.setStatusBarMessage("Docker: Stopping Containers...", new Promise((resolve, reject) => {
+        vscode.window.setStatusBarMessage("Docker: Stopping Container(s)...", new Promise((resolve, reject) => {
             containersToStop.forEach((c) => {
                 docker.getContainer(c.Id).stop(function (err: Error, data: any) {
                     containerCounter++;

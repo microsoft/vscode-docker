@@ -28,7 +28,7 @@ export async function removeImage(context?: DockerNode) {
         const numImages: number = imagesToRemove.length;
         let imageCounter: number = 0;
         
-        vscode.window.setStatusBarMessage("Docker: Removing Images...", new Promise((resolve, reject) => {
+        vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
                 docker.getImage(img.Id).remove({ force: true }, function (err, data: any) {
                     imageCounter++;
