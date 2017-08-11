@@ -9,7 +9,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
     private _containersNode: DockerNode;
-    private _registriesNode: DockerNode;
+    // private _registriesNode: DockerNode;
     private _debounceTimer: NodeJS.Timer;
     
     constructor() {
