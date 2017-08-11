@@ -10,7 +10,7 @@ export async function pushImage(context?: DockerNode) {
 
     // if invokde from the explorer we have the name of the image
     // otherwise open a quick pick list
-    if (context) {
+    if (context && context.imageDesc) {
         imageToPush = context.imageDesc;
         imageName = context.label;
     } else {

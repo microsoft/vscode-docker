@@ -12,7 +12,7 @@ export async function startContainer(context?:DockerNode, interactive?: boolean)
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
-    if (context) {
+    if (context && context.imageDesc) {
         imageToStart = context.imageDesc;
         imageName = context.label;
     } else {

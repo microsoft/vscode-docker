@@ -11,7 +11,7 @@ export async function removeContainer(context?: DockerNode) {
 
     let containersToRemove: Docker.ContainerDesc[];
 
-    if (context.containerDesc) {
+    if (context && context.containerDesc) {
         containersToRemove = [context.containerDesc];
     } else {
         const opts = {

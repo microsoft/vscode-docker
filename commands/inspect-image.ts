@@ -7,7 +7,7 @@ export default async function inspectImage(context?: DockerNode) {
 
     let imageToInspect: Docker.ImageDesc;
 
-    if (context) {
+    if (context && context.imageDesc) {
         imageToInspect = context.imageDesc;
     } else {
         const selectedImage = await quickPickImage();

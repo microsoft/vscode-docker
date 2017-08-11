@@ -11,7 +11,7 @@ export async function removeImage(context?: DockerNode) {
 
     let imagesToRemove: Docker.ImageDesc[];
 
-    if (context) {
+    if (context && context.imageDesc) {
         imagesToRemove = [context.imageDesc];
     } else {
         const selectedItem: ImageItem = await quickPickImage(true);

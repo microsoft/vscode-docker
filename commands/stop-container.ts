@@ -12,7 +12,7 @@ export async function stopContainer(context?: DockerNode) {
 
     let containersToStop: Docker.ContainerDesc[];
 
-    if (context) {
+    if (context && context.containerDesc) {
         containersToStop = [context.containerDesc];
     } else {
         const opts = {
