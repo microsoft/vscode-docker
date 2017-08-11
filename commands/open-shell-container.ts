@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { DockerEngineType, docker } from './utils/docker-endpoint';
+import { DockerNode } from '../explorer/dockerExplorer';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
@@ -9,14 +10,27 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: "powershell"
 }
 
-export async function openShellContainer() {
+export async function openShellContainer(context?: DockerNode) {
+    let containerToAttach: Docker.ContainerDesc;
 
-    const selectedItem: ContainerItem = await quickPickContainer();
-    
-    if (selectedItem) {
+    if (context && context.containerDesc) {
+        containerToAttach = context.containerDesc;
+    } else {
+        const opts = {
+            "filters": {
+                "status": ["running"]
+            }
+        };
+        const selectedItem: ContainerItem = await quickPickContainer(false, opts);
+        if (selectedItem) {
+            containerToAttach = selectedItem.containerDesc;
+        }
+    }
+
+    if (containerToAttach) {
         docker.getEngineType().then((engineType: DockerEngineType) => {
-            const terminal = vscode.window.createTerminal(`Shell: ${selectedItem.label}`);
-            terminal.sendText(`docker exec -it ${selectedItem.ids[0]} ${engineTypeShellCommands[engineType]}`);
+            const terminal = vscode.window.createTerminal(`Shell: ${containerToAttach.Image}`);
+            terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
             terminal.show();
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {

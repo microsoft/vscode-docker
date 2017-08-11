@@ -25,13 +25,15 @@ import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
+import { DockerExplorerProvider } from './explorer/dockerExplorer';
+import { removeContainer } from './commands/remove-container';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
-
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
+export var dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string; };
 
@@ -45,6 +47,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     
     ctx.subscriptions.push(new Reporter(ctx));
+
+
+    dockerExplorerProvider = new DockerExplorerProvider();
+    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
+    vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
+    vscode.commands.registerCommand('dockerExplorer.systemPrune', () => systemPrune());
 
     var dockerHoverProvider = new DockerHoverProvider(new DockerfileParser(), DOCKERFILE_KEY_INFO);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(DOCKERFILE_MODE_ID, dockerHoverProvider));
@@ -70,6 +78,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.remove', removeContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
@@ -83,4 +92,5 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.workspace.textDocuments.forEach((doc) => scheduleValidate(doc));
     vscode.workspace.onDidOpenTextDocument((doc) => scheduleValidate(doc), ctx.subscriptions);
     vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri), ctx.subscriptions);
+
 }

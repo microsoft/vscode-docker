@@ -2,56 +2,51 @@ import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
+import { DockerNode } from '../explorer/dockerExplorer';
+import { dockerExplorerProvider } from '../dockerExtension';
+
 const teleCmdId: string = 'vscode-docker.image.remove';
 
-export async function removeImage() {
+export async function removeImage(context?: DockerNode) {
 
-    const selectedItem: ImageItem = await quickPickImage();
+    let imagesToRemove: Docker.ImageDesc[];
 
+    if (context && context.imageDesc) {
+        imagesToRemove = [context.imageDesc];
+    } else {
+        const selectedItem: ImageItem = await quickPickImage(true);
         if (selectedItem) {
-
-        // if we're removing all images, remove duplicate IDs, a result of tagging
-        if (selectedItem.label.toLowerCase().includes('all images')) {
-            selectedItem.ids = Array.from(new Set(selectedItem.ids));
-        }
-
-        for (let i = 0; i < selectedItem.ids.length; i++) {
-            const image = docker.getImage(selectedItem.ids[i]);
-
-            // image.remove removes by ID, so to remove a single *tagged* image we
-            // just overwrite the name. this is a hack around the dockerode api
-            if (selectedItem.ids.length === 1) {
-                if (!selectedItem.label.toLowerCase().includes('<none>')) {
-                    image.name = selectedItem.label;
-                }
+            if (selectedItem.label.toLowerCase().includes('all containers')) {
+                imagesToRemove = await docker.getImageDescriptors();
+            } else {
+                imagesToRemove = [selectedItem.imageDesc];
             }
+        }
+    }
 
-            image.remove({ force: true }, function (err, data: any) {
-
-                if (data) {
-                    for (i = 0; i < data.length; i++) {
-                        if (data[i].Untagged) {
-                            console.log(data[i].Untagged);
-                        } else if (data[i].Deleted) {
-                            console.log(data[i].Deleted);
-                        }
+    if (imagesToRemove) {
+        const numImages: number = imagesToRemove.length;
+        let imageCounter: number = 0;
+        
+        vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
+            imagesToRemove.forEach((img) => {
+                docker.getImage(img.Id).remove({ force: true }, function (err, data: any) {
+                    imageCounter++;
+                    if (err) {
+                        vscode.window.showErrorMessage(err.message);
+                        reject();
                     }
-
-                    vscode.window.showInformationMessage(selectedItem.label + ' successfully removed');
-
-                    if (reporter) {
-                        reporter.sendTelemetryEvent('command', {
-                            command: teleCmdId
-                        });
+                    if (imageCounter === numImages) {
+                        resolve();
                     }
-                }
+                });
             });
-        }
-
-        // show the list again unless the user just did a 'remove all images'
-        // if (!selectedItem.label.toLowerCase().includes('all images')) {
-        //     setInterval(removeImage, 1000);
-        // }
-
-        }
+        }));
+    }
+    
+    if (reporter) {
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
+        });
+    }
 }

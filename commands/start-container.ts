@@ -4,22 +4,35 @@ import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
+import { DockerNode } from '../explorer/dockerExplorer';
+
 const teleCmdId: string = 'vscode-docker.container.start';
 
-async function doStartContainer(interactive: boolean) {
+export async function startContainer(context?:DockerNode, interactive?: boolean) {
+    let imageName: string;
+    let imageToStart: Docker.ImageDesc;
 
-    const selectedItem: ImageItem = await quickPickImage(false);
+    if (context && context.imageDesc) {
+        imageToStart = context.imageDesc;
+        imageName = context.label;
+    } else {
+        const selectedItem: ImageItem = await quickPickImage(false)
+        if (selectedItem) {
+            imageToStart = selectedItem.imageDesc;
+            imageName = selectedItem.label;
+        }
+    }
 
-    if (selectedItem) {
-        docker.getExposedPorts(selectedItem.label).then((ports: string[]) => {
+    if (imageToStart) {
+        docker.getExposedPorts(imageToStart.Id).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
                 const portMappings = ports.map((port) => `-p ${port}:${port}`);
                 options += ` ${portMappings.join(' ')}`;
             }
             
-            const terminal = vscode.window.createTerminal(selectedItem.label);                                
-            terminal.sendText(`docker run ${options} ${selectedItem.label}`);
+            const terminal = vscode.window.createTerminal(imageName);
+            terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
             if (reporter) {
@@ -31,12 +44,8 @@ async function doStartContainer(interactive: boolean) {
     }
 }
 
-export function startContainer() {
-    doStartContainer(false);
-}
-
-export function startContainerInteractive() {
-    doStartContainer(true);
+export async function startContainerInteractive(context: DockerNode) {
+    await startContainer(context, true);
 }
 
 export async function startAzureCLI() {
