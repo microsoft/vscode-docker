@@ -1,18 +1,17 @@
 # Docker Support for Visual Studio Code
 The Docker extension makes it easy to build and deploy containerized applications from Visual Studio Code. 
 
-* Automatic dockerfile and docker-compose.yml file generation 
-* Syntax highlighting and hover tips for docker-compose.yml and dockerfile files
-* Snippets for dockerfile files
-* IntelliSense (completions) on image names from Dockerhub.com
-* Linting (errors and warnings) for dockerfile files
+* Automatic Dockerfile and docker-compose.yml file generation 
+* Syntax highlighting and hover tips for docker-compose.yml and Dockerfile files
+* IntelliSense (completions) for Dockerfile files
+* Linting (errors and warnings) for Dockerfile files
 * Command Palette (F1) integration for the most common Docker commands (e.g. Build, Push)
 * Deploy images to the cloud by running the [Azure CLI](https://github.com/azure/azure-cli) in a container 
 
 ## Generating Dockerfile, docker-compose.yml, and docker-compose.debug.yml
 ![dockerfile](images/generateFiles.gif)
 
-IntelliSense (completions) for Dockerfile and docker-compose.yml files, including listing images from Dockerhub.com.
+IntelliSense (completions) for Dockerfile and docker-compose.yml files.
 
 ![intelliSense](images/intelliSense.gif)
 
