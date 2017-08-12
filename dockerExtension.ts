@@ -84,16 +84,6 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
-    diagnosticCollection = vscode.languages.createDiagnosticCollection('docker-diagnostics');
-    
-	ctx.subscriptions.push(diagnosticCollection);
-
-    vscode.workspace.onDidChangeTextDocument((e) => scheduleValidate(e.document), ctx.subscriptions);
-
-    vscode.workspace.textDocuments.forEach((doc) => scheduleValidate(doc));
-    vscode.workspace.onDidOpenTextDocument((doc) => scheduleValidate(doc), ctx.subscriptions);
-    vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri), ctx.subscriptions);
-
     activateLanguageClient(ctx);
 }
 
