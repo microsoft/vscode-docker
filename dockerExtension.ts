@@ -22,7 +22,6 @@ import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
 import { configure, configureLaunchJson } from './configureWorkspace/configure';
-import { scheduleValidate } from './linting/dockerLinting';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
