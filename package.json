@@ -3,7 +3,7 @@
   "version": "0.0.16",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
-  "description": "Adds syntax highlighting, snippets, commands, hover tips, and linting for Dockerfile and docker-compose files.",
+  "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
   "icon": "images/docker_icon.png",
   "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -13,7 +13,7 @@
   },
   "categories": [
     "Languages",
-    "Snippets"
+    "Linters"
   ],
   "keywords": [
     "docker",
@@ -47,12 +47,6 @@
   ],
   "main": "./out/dockerExtension",
   "contributes": {
-    "snippets": [
-      {
-        "language": "dockerfile",
-        "path": "./snippets/dockerfile.json"
-      }
-    ],
     "menus": {
       "editor/context": [
         {
