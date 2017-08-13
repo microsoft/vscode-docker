@@ -194,16 +194,6 @@
           "default": "",
           "description": "Path within registry to push to."
         },
-        "docker.enableLinting": {
-          "type": "boolean",
-          "default": false,
-          "description": "Turn linting of Dockerfiles on or off."
-        },
-        "docker.linterRuleFile": {
-          "type": "string",
-          "default": "",
-          "description": "Full path to the linting rules file to use. See https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) for sample files and how to create your own."
-        },
         "docker.showExplorer": {
           "type": "boolean",
           "default": true,
@@ -391,7 +381,6 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
-    "dockerfile_lint": "^0.2.6",
     "dockerfile-language-server-nodejs": "^0.0.6",
     "dockerode": "^2.3.2",
     "vscode-extension-telemetry": "^0.0.6",

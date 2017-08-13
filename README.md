@@ -1,29 +1,32 @@
 # Docker Support for Visual Studio Code
 The Docker extension makes it easy to build and deploy containerized applications from Visual Studio Code. 
 
-* Automatic Dockerfile and docker-compose.yml file generation 
-* Syntax highlighting and hover tips for docker-compose.yml and Dockerfile files
-* IntelliSense (completions) for Dockerfile files
-* Linting (errors and warnings) for Dockerfile files
-* Command Palette (F1) integration for the most common Docker commands (e.g. Build, Push)
+* Automatic `Dockerfile` and `docker-compose.yml` file generation 
+* Syntax highlighting and hover tips for `docker-compose.yml` and `Dockerfile files`
+* IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files
+* Linting (errors and warnings) for `Dockerfile` files
+* Command Palette (`F1`) integration for the most common Docker commands (e.g. Build, Push)
+* Explorer integration for managing Images and Containers
 * Deploy images to the cloud by running the [Azure CLI](https://github.com/azure/azure-cli) in a container 
 
-## Generating Dockerfile, docker-compose.yml, and docker-compose.debug.yml
+## Generating `Dockerfile`, `docker-compose.yml`, and `docker-compose.debug.yml`
 ![dockerfile](images/generateFiles.gif)
 
-IntelliSense (completions) for Dockerfile and docker-compose.yml files.
+## IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files.
 
 ![intelliSense](images/intelliSense.gif)
 
 ## Docker commands
-Many of the most common Docker and docker-compose commands are built right into the Command Palette (F1).
+Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
 
 ![intelliSense](images/commands.gif)
 
-## Dockerfile linting
-You can enable linting of Dockerfile files through the `docker.enableLinting` setting (CMD+, on MacOS, or Ctrl+, on Windows and Linux). The extension uses the awesome [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) rules based linter to analyze the Dockerfile. You can provide your own customized rules file by setting the `docker.linterRuleFile` setting. You can find [more information](https://github.com/projectatomic/dockerfile_lint#extending-and-customizing-rule-files) on how to create rules files as well as [sample rules files](https://github.com/projectatomic/dockerfile_lint/tree/master/sample_rules) in the [dockerfile_lint](https://github.com/projectatomic/dockerfile_lint) project. 
+## Explorer Integration
+The Docker Explorer lets you view and manage your Images and Containers. The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
 
-![linting](images/linting.gif)
+![explorer integration](images/explorer.gif)
+
+> Note: You can move the Explorer up or down by dragging the `DOCKER` sash, you can hide the Explorer by right clicking on the `DOCKER` sash and choosing `Remove from side bar`. To bring it back, right click on the `EXPLORER` title at the top of the side bar.
 
 ## Azure CLI
 Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. 

@@ -31,7 +31,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     }
 
     private setAutoRefresh(): void {
-
+        // from https://github.com/formulahendry/vscode-docker-explorer/blob/master/src/dockerTreeBase.ts  
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const interval = configOptions.get('explorerRefreshInterval', 1000);
 
