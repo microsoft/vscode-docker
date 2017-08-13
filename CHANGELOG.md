@@ -1,6 +1,9 @@
 ## 0.0.17 - XX XXXX 2017
 
 * Add `docker inspect` command
+* Add Explorer contribution, letting you view Images and Containers in the Explorer viewlet.
+* Thanks to @rcjsuen, moved to the [Dockerfile Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs) 
+* Update thirdpartynotices.txt, README.md to reflect changes
 
 ## 0.0.16 - 09 June 2017
 
