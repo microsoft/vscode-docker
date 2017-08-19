@@ -397,8 +397,7 @@
   },
   "extensionDependencies": [
     "vscode.docker",
-    "vscode.yaml",
-    "vscode.azure-account"
+    "vscode.yaml"
   ],
   "devDependencies": {
     "vscode": "^1.0.0",

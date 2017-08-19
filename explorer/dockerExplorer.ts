@@ -130,32 +130,36 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
             if (element.contextValue === 'dockerRegistriesLabel') {
                 // get all registries from $HOMEPATH/.docker/config.json
-                var dockerConfigJson = require('c:\\users\\chris\\.docker\\config.json');
-                console.log(dockerConfigJson);
-                for (var auth in dockerConfigJson.auths) {
-                    contextValue = "dockerRegistryLabel";
-                    nodes.push(new DockerNode(`${auth}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-                }
+                // var dockerConfigJson = require('c:\\users\\chris\\.docker\\config.json');
+                // console.log(dockerConfigJson);
+                // for (var auth in dockerConfigJson.auths) {
+                //     contextValue = "dockerRegistryLabel";
+                //     nodes.push(new DockerNode(`${auth}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                // }
 
-                const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
+                // const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
                 
-                azureAccount.credentials.writeSecret("cdias-service", "cdias-account", "cdias-secret");
-                const secret: string = await azureAccount.credentials.readSecret("cdias-service", "cdias-account");
-                console.log(secret);
-                
+                // azureAccount.credentials.writeSecret("cdias-service", "cdias-account", "cdias-secret");
+                // const secret: string = await azureAccount.credentials.readSecret("cdias-service", "cdias-account");
+                // console.log(secret);
+
                 // get user names from credentials store
                 // get password from credentials store
 
-                // contextValue = "dockerHubRegistryLabel";
-                // nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                contextValue = "dockerHubRegistryLabel";
+                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
 
-                // contextValue = "azureRegistryLabel";
-                // nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                contextValue = "azureRegistryLabel";
+                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
             }
 
 
             if (element.contextValue === 'dockerHubRegistryLabel') {
-                let myRepos = await dockerHubAPI.repositories("chrisdias");
+
+                let token = await dockerHubAPI.loggedInUser();
+                console.log(token);
+
+                let myRepos = await dockerHubAPI.repositories("cdias");
                 for (let i = 0; i < myRepos.length; i++) {
                     let myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
                     contextValue = 'dockerHubRegistryImage';
