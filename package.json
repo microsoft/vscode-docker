@@ -207,37 +207,61 @@
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction."
         },
         "docker.languageserver.diagnostics.directiveCasing": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for parser directives that are not written in lowercase."
         },
         "docker.languageserver.diagnostics.instructionCasing": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for instructions that are not written in uppercase."
         },
         "docker.languageserver.diagnostics.instructionCmdMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions."
         },
         "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions."
         },
         "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
         }
       }
@@ -373,7 +397,8 @@
   },
   "extensionDependencies": [
     "vscode.docker",
-    "vscode.yaml"
+    "vscode.yaml",
+    "vscode.azure-account"
   ],
   "devDependencies": {
     "vscode": "^1.0.0",
@@ -381,9 +406,13 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
+    "docker-hub-api": "^0.5.1",
     "dockerfile-language-server-nodejs": "^0.0.6",
     "dockerode": "^2.3.2",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.1.0"
+    "vscode-languageclient": "^3.1.0",
+    "ms-rest": "^2.2.1",
+    "ms-rest-azure": "^2.2.3",
+    "azure-arm-resource": "^2.0.0-preview"
   }
 }

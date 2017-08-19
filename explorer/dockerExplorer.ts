@@ -2,32 +2,34 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { docker } from '../commands/utils/docker-endpoint';
+import * as dockerHubAPI from 'docker-hub-api';
+import { AzureAccount, AzureSession } from './azure-account.api';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNode> {
-
+    
     private _onDidChangeTreeData: vscode.EventEmitter<DockerNode | undefined> = new vscode.EventEmitter<DockerNode | undefined>();
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
     private _containersNode: DockerNode;
-    // private _registriesNode: DockerNode;
+    private _registriesNode: DockerNode;
     private _debounceTimer: NodeJS.Timer;
-    
-     refresh(): void {
+
+    refresh(): void {
         this.refreshImages()
         this.refreshContainers()
-        //this.refreshRegistries()
+        this.refreshRegistries()
     }
 
     refreshImages(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
     }
-    
+
     refreshContainers(): void {
         this._onDidChangeTreeData.fire(this._containersNode);
     }
 
     refreshRegistries(): void {
-        //     this._onDidChangeTreeData.fire(this._registriesNode);
+        this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
     private setAutoRefresh(): void {
@@ -62,13 +64,13 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         if (!element) {
             this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "dockerImagesLabel", null, null);
             this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "dockerContainersLabel", null, null);
-            // this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "dockerLabelRegistries", null, null);
+            this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "dockerRegistriesLabel", null, null);
             nodes.push(this._imagesNode);
             nodes.push(this._containersNode);
-            // nodes.push(this._registriesNode);
+            nodes.push(this._registriesNode);
         } else {
 
-            if (element.label === 'Images') {
+            if (element.contextValue === 'dockerImagesLabel') {
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
                 if (!images || images.length == 0) {
                     return [];
@@ -90,7 +92,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 }
             }
 
-            if (element.label === 'Containers') {
+            if (element.contextValue === 'dockerContainersLabel') {
 
                 opts = {
                     "filters": {
@@ -126,15 +128,54 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 }
             }
 
-            if (element.label === 'Registries') {
-                contextValue = "dockerLabel";
-                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+            if (element.contextValue === 'dockerRegistriesLabel') {
+                // get all registries from $HOMEPATH/.docker/config.json
+                var dockerConfigJson = require('c:\\users\\chris\\.docker\\config.json');
+                console.log(dockerConfigJson);
+                for (var auth in dockerConfigJson.auths) {
+                    contextValue = "dockerRegistryLabel";
+                    nodes.push(new DockerNode(`${auth}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                }
+
+                const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
+                
+                azureAccount.credentials.writeSecret("cdias-service", "cdias-account", "cdias-secret");
+                const secret: string = await azureAccount.credentials.readSecret("cdias-service", "cdias-account");
+                console.log(secret);
+                
+                // get user names from credentials store
+                // get password from credentials store
+
+                // contextValue = "dockerHubRegistryLabel";
+                // nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+
+                // contextValue = "azureRegistryLabel";
+                // nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
             }
 
+
+            if (element.contextValue === 'dockerHubRegistryLabel') {
+                let myRepos = await dockerHubAPI.repositories("chrisdias");
+                for (let i = 0; i < myRepos.length; i++) {
+                    let myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+                    contextValue = 'dockerHubRegistryImage';
+                    let node = new DockerNode(`${myRepo.namespace}/${myRepo.name} [${myRepo.pull_count} pulls]`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                    node.repository = myRepo;
+                    nodes.push(node);
+                }
+            }
+
+            if (element.contextValue === 'dockerHubRegistryImage') {
+                let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
+                for (let i = 0; i < myTags.length; i++) {
+                    contextValue = 'dockerHubRegistryImageTag';
+                    nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null, null));
+                }
+            }
         }
 
         this.setAutoRefresh();
+        console.log(nodes.length);
         return nodes;
     }
 }
@@ -156,5 +197,6 @@ export class DockerNode extends vscode.TreeItem {
     public containerDesc: Docker.ContainerDesc;
     public imageDesc: Docker.ImageDesc;
     public registry: string;
+    public repository: any = {};
 
 }
