@@ -4,9 +4,12 @@ import * as path from 'path';
 import { docker } from '../commands/utils/docker-endpoint';
 import * as dockerHubAPI from 'docker-hub-api';
 import { AzureAccount, AzureSession } from './azure-account.api';
+import * as os from 'os';
+import { dockerHubLogin } from './utils/dockerLogin';
+const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNode> {
-    
+
     private _onDidChangeTreeData: vscode.EventEmitter<DockerNode | undefined> = new vscode.EventEmitter<DockerNode | undefined>();
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
@@ -40,7 +43,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         if (interval > 0) {
             clearTimeout(this._debounceTimer);
             this._debounceTimer = setTimeout(() => {
-                this.refresh();
+                this.refreshImages();
+                this.refreshContainers();
             }, interval);
         }
     }
@@ -130,42 +134,90 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
             if (element.contextValue === 'dockerRegistriesLabel') {
                 // get all registries from $HOMEPATH/.docker/config.json
-                // var dockerConfigJson = require('c:\\users\\chris\\.docker\\config.json');
-                // console.log(dockerConfigJson);
-                // for (var auth in dockerConfigJson.auths) {
-                //     contextValue = "dockerRegistryLabel";
-                //     nodes.push(new DockerNode(`${auth}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-                // }
+                const dockerConfigJson = require(os.homedir() + '/.docker/config.json');
 
-                // const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
-                
-                // azureAccount.credentials.writeSecret("cdias-service", "cdias-account", "cdias-secret");
-                // const secret: string = await azureAccount.credentials.readSecret("cdias-service", "cdias-account");
-                // console.log(secret);
-
-                // get user names from credentials store
-                // get password from credentials store
-
-                contextValue = "dockerHubRegistryLabel";
-                nodes.push(new DockerNode("DockerHub", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
-
-                contextValue = "azureRegistryLabel";
-                nodes.push(new DockerNode("Azure", vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null));
+                for (var auth in dockerConfigJson.auths) {
+                    contextValue = "dockerRegistryLabel";
+                    if (auth.includes('index.docker.io')) {
+                        node = new DockerNode(`Docker Hub (${auth})`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                        node.registry = new Registry;
+                        node.registry.registryType = RegistryType.Docker;
+                        node.registry.url = auth;
+                        node.registry.friendlyName = "Docker Hub"
+                    } else if (auth.includes('azurecr.io')) {
+                        node = new DockerNode(`Azure (${auth})`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                        node.registry = new Registry;
+                        node.registry.registryType = RegistryType.Azure;
+                        node.registry.url = auth;
+                        node.registry.friendlyName = "Azure"
+                    } else {
+                        node = new DockerNode(`${auth}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                        node.registry = new Registry;
+                        node.registry.registryType = RegistryType.Unknown;
+                        node.registry.url = auth;
+                        node.registry.friendlyName = ""
+                    }
+                    nodes.push(node);
+                }
             }
 
+            if (element.contextValue === 'dockerRegistryLabel') {
 
-            if (element.contextValue === 'dockerHubRegistryLabel') {
+                if (element.registry.registryType === RegistryType.Docker) {
+                    if (element.registry.token) {
+                        // user should be logged in already
+                        dockerHubAPI.setToken(element.registry.token);
+                    } else {
 
-                let token = await dockerHubAPI.loggedInUser();
-                console.log(token);
+                        // see if we've saved off the token
+                        let token: string = await azureAccount.credentials.readSecret('vscode-docker', element.registry.url)
+                        if (!token) {
+                            token = await dockerHubLogin();
+                            if (token) {
+                                element.registry.token = token;
+                                azureAccount.credentials.writeSecret('vscode-docker', element.registry.url, token);
+                                dockerHubAPI.setLoginToken(token);
+                            } else {
+                                return [];
+                            }
+                        } else {
+                            element.registry.token = token;
+                            dockerHubAPI.setLoginToken(token);
+                        }
+                    }
 
-                let myRepos = await dockerHubAPI.repositories("cdias");
-                for (let i = 0; i < myRepos.length; i++) {
-                    let myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
-                    contextValue = 'dockerHubRegistryImage';
-                    let node = new DockerNode(`${myRepo.namespace}/${myRepo.name} [${myRepo.pull_count} pulls]`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                    node.repository = myRepo;
-                    nodes.push(node);
+                    const user: any = await dockerHubAPI.loggedInUser();
+
+                    const myRepos = await dockerHubAPI.repositories(user.username);
+                    for (let i = 0; i < myRepos.length; i++) {
+                        const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+                        contextValue = 'dockerHubRegistryImage';
+                        let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                        node.repository = myRepo;
+                        nodes.push(node);
+                    }
+                }
+
+                if (element.registry.registryType === RegistryType.Azure) {
+                    // get azure credentials (or login)
+                    // somehow find this registry
+                    // enumerate...
+
+                    // if (azureAccount.status === "LoggedIn") {
+                    //     let creds = azureAccount.credentials;
+                    //     azureAccount.sessions.length
+                    // } else {
+                    //     console.log("not logged in");
+                    // }
+
+                    // const ContainerRegistryManagement = require("azure-arm-containerregistry");
+
+                    // let client = new ContainerRegistryManagement(credentials, 'subscription-id');
+                    // client.registries.list().then((registries) => {
+                    //     console.log('List of registries:');
+                    //     console.dir(registries, { depth: null, colors: true });
+                    // });
+
                 }
             }
 
@@ -200,7 +252,22 @@ export class DockerNode extends vscode.TreeItem {
 
     public containerDesc: Docker.ContainerDesc;
     public imageDesc: Docker.ImageDesc;
-    public registry: string;
+    public registry: Registry;
     public repository: any = {};
 
+}
+
+enum RegistryType {
+    Docker,
+    Azure,
+    Unknown
+}
+
+class Registry {
+    url: string;
+    registryType: RegistryType;
+    userName: string;
+    password: string;
+    token: string;
+    friendlyName: string;
 }
