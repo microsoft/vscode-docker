@@ -203,13 +203,21 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     // somehow find this registry
                     // enumerate...
 
-                    // if (azureAccount.status === "LoggedIn") {
-                    //     let creds = azureAccount.credentials;
-                    //     azureAccount.sessions.length
-                    // } else {
-                    //     console.log("not logged in");
-                    // }
+                    if (azureAccount.status === "LoggedIn") {
+                        let creds = azureAccount.credentials;
+                        console.log(azureAccount.sessions.length);
+                    } else {
+                        vscode.commands.executeCommand('azure-account.askForLogin').then((value) => {
+                            if (value) {
+                                console.log("now logged in");
+                            } else {
+                                console.log("log in failed");
+                            }
+                        })
+                    }
 
+                    console.log("end of azure");
+                    
                     // const ContainerRegistryManagement = require("azure-arm-containerregistry");
 
                     // let client = new ContainerRegistryManagement(credentials, 'subscription-id');
