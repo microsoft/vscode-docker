@@ -182,7 +182,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         }
 
         this.setAutoRefresh();
-        console.log(nodes.length);
         return nodes;
     }
 
