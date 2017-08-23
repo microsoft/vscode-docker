@@ -13,7 +13,8 @@
   },
   "categories": [
     "Languages",
-    "Linters"
+    "Linters",
+    "Azure"
   ],
   "keywords": [
     "docker",
@@ -207,37 +208,61 @@
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction."
         },
         "docker.languageserver.diagnostics.directiveCasing": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for parser directives that are not written in lowercase."
         },
         "docker.languageserver.diagnostics.instructionCasing": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for instructions that are not written in uppercase."
         },
         "docker.languageserver.diagnostics.instructionCmdMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions."
         },
         "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions."
         },
         "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
           "type": "string",
           "default": "warning",
-          "enum": [ "ignore", "warning", "error" ],
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
         }
       }
