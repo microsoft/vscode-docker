@@ -6,7 +6,9 @@ import * as dockerHubAPI from 'docker-hub-api';
 import { AzureAccount, AzureSession } from './azure-account.api';
 import * as os from 'os';
 import { dockerHubLogin } from './utils/dockerLogin';
-const azureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
+const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
+import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNode> {
 
@@ -48,6 +50,36 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             }, interval);
         }
     }
+
+    private async getSubscriptions(api: AzureAccount): Promise<SubscriptionItem[]> {
+
+        const subscriptionItems: SubscriptionItem[] = [];
+        for (const session of api.sessions) {
+            const credentials = session.credentials;
+            const subscriptionClient = new SubscriptionClient(credentials);
+            const subscriptions = await this.listAll(subscriptionClient.subscriptions, subscriptionClient.subscriptions.list());
+            subscriptionItems.push(...subscriptions.map(subscription => ({
+                label: subscription.displayName || '',
+                description: subscription.subscriptionId || '',
+                session,
+                subscription
+            })));
+        }
+        subscriptionItems.sort((a, b) => a.label.localeCompare(b.label));
+
+        return subscriptionItems;
+
+    }
+
+
+    private async listAll<T>(client: { listNext(nextPageLink: string): Promise<PartialList<T>>; }, first: Promise<PartialList<T>>): Promise<T[]> {
+        const all: T[] = [];
+        for (let list = await first; list.length || list.nextLink; list = list.nextLink ? await client.listNext(list.nextLink) : []) {
+            all.push(...list);
+        }
+        return all;
+    }
+
 
     getTreeItem(element: DockerNode): vscode.TreeItem {
         return element;
@@ -137,10 +169,13 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 contextValue = "dockerRegistryLabel";
                 node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
                 nodes.push(node);
-                // node = new DockerNode(`Azure`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                // nodes.push(node);
 
+                contextValue = "dockerRegistryLabel";
+                node = new DockerNode(`Azure`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                nodes.push(node);
             }
+
+
 
             if (element.contextValue === 'dockerRegistryLabel') {
 
@@ -158,17 +193,31 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     } else {
                         dockerHubAPI.setLoginToken(token);
                     }
-                }
 
-                const user: any = await dockerHubAPI.loggedInUser();
+                    const user: any = await dockerHubAPI.loggedInUser();
 
-                const myRepos = await dockerHubAPI.repositories(user.username);
-                for (let i = 0; i < myRepos.length; i++) {
-                    const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
-                    contextValue = 'dockerHubRegistryImage';
-                    let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                    node.repository = myRepo;
-                    nodes.push(node);
+                    const myRepos = await dockerHubAPI.repositories(user.username);
+                    for (let i = 0; i < myRepos.length; i++) {
+                        const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+                        contextValue = 'dockerHubRegistryImage';
+                        let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                        node.repository = myRepo;
+                        nodes.push(node);
+                    }
+                } else if (element.label.includes('Azure')) {
+
+                    if (azureAccount.status === "LoggedIn") {
+                        //let creds = azureAccount.credentials;
+                        const subs = await this.getSubscriptions(azureAccount);
+
+                        for (let i = 0; i < subs.length; i++) {
+                            contextValue = 'dockerRegistryAzureSubscription';
+                            node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                            node.subscription = subs[i];
+                            nodes.push(node);
+                        }
+                    }
+                    
                 }
             }
 
@@ -179,6 +228,17 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null, null));
                 }
             }
+
+            if (element.contextValue === 'dockerRegistryAzureSubscription') {
+                const client = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
+                const registries = await client.registries.list();
+                for (let i = 0; i < registries.length; i++) {
+                    contextValue = 'dockerRegistryAzureRegistry';
+                    node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+                    nodes.push(node);
+                }
+            }
+            
         }
 
         this.setAutoRefresh();
@@ -205,6 +265,7 @@ export class DockerNode extends vscode.TreeItem {
     public containerDesc: Docker.ContainerDesc;
     public imageDesc: Docker.ImageDesc;
     public repository: any = {};
+    public subscription: SubscriptionItem;
 
 }
 
@@ -213,4 +274,26 @@ enum RegistryType {
     Azure,
     Unknown
 }
+
+
+class Registry {
+    url: string;
+    registryType: RegistryType;
+    userName: string;
+    password: string;
+    token: string;
+    friendlyName: string;
+}
+
+interface SubscriptionItem {
+    label: string;
+    description: string;
+    session: AzureSession;
+    subscription: SubscriptionModels.Subscription;
+}
+
+interface PartialList<T> extends Array<T> {
+    nextLink?: string;
+}
+
 
