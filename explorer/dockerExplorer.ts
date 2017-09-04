@@ -6,9 +6,12 @@ import * as dockerHubAPI from 'docker-hub-api';
 import { AzureAccount, AzureSession } from './azure-account.api';
 import * as os from 'os';
 import { dockerHubLogin } from './utils/dockerLogin';
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('vscode.azure-account')!.exports;
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import * as keytarType from 'keytar';
+
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
+const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
+
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNode> {
 
@@ -18,6 +21,15 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     private _containersNode: DockerNode;
     private _registriesNode: DockerNode;
     private _debounceTimer: NodeJS.Timer;
+    private _keytar: typeof keytarType;
+
+    constructor() {
+		try {
+			this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
+		} catch (e) {
+			// unable to find keytar
+		}	
+    }
 
     refresh(): void {
         this.refreshImages()
@@ -181,12 +193,20 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
                 if (element.label.includes('Docker')) {
                     // see if we've saved off the token
-                    let token: string = await azureAccount.credentials.readSecret('vscode-docker', 'dockerhub')
+
+                    let token: string;
+
+                    if (this._keytar) {
+                        token = await this._keytar.getPassword('vscode-docker', 'dockerhub');
+                        this._keytar.
+                    }
                     if (!token) {
                         token = await dockerHubLogin();
                         if (token) {
-                            azureAccount.credentials.writeSecret('vscode-docker', 'dockerhub', token);
                             dockerHubAPI.setLoginToken(token);
+                            if (this._keytar) {
+                                this._keytar.setPassword('vscode-docker', 'dockerhub', token);
+                            }
                         } else {
                             return [];
                         }

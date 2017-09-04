@@ -388,7 +388,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.13.0"
+    "vscode": "^1.16.0"
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
@@ -398,12 +398,13 @@
   "extensionDependencies": [
     "vscode.docker",
     "vscode.yaml",
-    "vscode.azure-account"
+    "ms-vscode.azure-account"
   ],
   "devDependencies": {
     "vscode": "^1.0.0",
     "typescript": "^2.1.5",
-    "@types/node": "^6.0.40"
+    "@types/node": "^6.0.40",
+    "@types/keytar": "4.0.1"    
   },
   "dependencies": {
     "azure-arm-containerregistry": "^1.0.0-preview",
