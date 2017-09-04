@@ -198,8 +198,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
                     if (this._keytar) {
                         token = await this._keytar.getPassword('vscode-docker', 'dockerhub');
-                        this._keytar.
                     }
+                    
                     if (!token) {
                         token = await dockerHubLogin();
                         if (token) {
