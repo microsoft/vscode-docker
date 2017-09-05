@@ -415,6 +415,7 @@
     "ms-rest": "^2.2.1",
     "ms-rest-azure": "^2.2.3",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.1.0"
+    "vscode-languageclient": "^3.1.0",
+    "request-promise": "^4.2.1"
   }
 }

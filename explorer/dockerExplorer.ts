@@ -8,6 +8,7 @@ import * as os from 'os';
 import { dockerHubLogin } from './utils/dockerLogin';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import * as keytarType from 'keytar';
+import request = require('request-promise');
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
@@ -258,17 +259,165 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             const registries = await client.registries.list();
             for (let i = 0; i < registries.length; i++) {
                 contextValue = 'azureRegistry';
-                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                node.subscription = element.subscription;
                 nodes.push(node);
             }
 
             return nodes;
         }
 
+        if (element.contextValue === 'azureRegistry') {
+
+            const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
+
+            if (accessToken && refreshToken) {
+                const tenantId = element.subscription.subscription.tenantId;
+                let refreshTokenARC;
+                let accessTokenARC;
+
+                await request.post('https://' + element.label + '/oauth2/exchange', {
+                    form: {
+                        grant_type: 'access_token_refresh_token',
+                        service: element.label,
+                        tenant: tenantId,
+                        refresh_token: refreshToken,
+                        access_token: accessToken
+                    }
+                }, (err, httpResponse, body) => {
+                    if (body.length > 0) {
+                        refreshTokenARC = JSON.parse(body).refresh_token;
+                    } else {
+                        return [];
+                    }
+                });
+
+                await request.post('https://' + element.label + '/oauth2/token', {
+                    form: {
+                        grant_type: 'refresh_token',
+                        service: element.label,
+                        scope: 'registry:catalog:*',
+                        refresh_token: refreshTokenARC
+                    }
+                }, (err, httpResponse, body) => {
+                    if (body.length > 0) {
+                        accessTokenARC = JSON.parse(body).access_token;
+                    } else {
+                        return [];
+                    }
+                });
+
+                await request.get('https://' + element.label + '/v2/_catalog', {
+                    auth: {
+                        bearer: accessTokenARC
+                    }
+                }, (err, httpResponse, body) => {
+                    if (body.length > 0) {
+                        const repositories = JSON.parse(body).repositories;
+                        for (let i = 0; i < repositories.length; i++) {
+                            contextValue = "azureRepository";
+                            node = new DockerNode(repositories[i], vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                            node.repository = element.label;
+                            node.subscription = element.subscription;
+                            node.accessTokenARC = accessTokenARC;
+                            node.refreshTokenARC = refreshTokenARC;
+                            nodes.push(node);
+                        }
+                    } else {
+                        vscode.window.showWarningMessage("no repos");
+                    }
+                });
+
+                return nodes;
+
+            }
+
+        }
+
+        if (element.contextValue === 'azureRepository') {
+
+            const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
+
+            if (accessToken && refreshToken) {
+                const tenantId = element.subscription.subscription.tenantId;
+                let refreshTokenARC;
+                let accessTokenARC;
+
+                await request.post('https://' + element.repository + '/oauth2/exchange', {
+                    form: {
+                        grant_type: 'access_token_refresh_token',
+                        service: element.repository,
+                        tenant: tenantId,
+                        refresh_token: refreshToken,
+                        access_token: accessToken
+                    }
+                }, (err, httpResponse, body) => {
+                    if (body.length > 0) {
+                        refreshTokenARC = JSON.parse(body).refresh_token;
+                    } else {
+                        return [];
+                    }
+                });
+
+                await request.post('https://' + element.repository + '/oauth2/token', {
+                    form: {
+                        grant_type: 'refresh_token',
+                        service: element.repository,
+                        scope: 'repository:' + element.label + ':pull',
+                        refresh_token: refreshTokenARC
+                    }
+                }, (err, httpResponse, body) => {
+                    if (body.length > 0) {
+                        accessTokenARC = JSON.parse(body).access_token;
+                    } else {
+                        return [];
+                    }
+                });
+
+                await request.get('https://' + element.repository + '/v2/' + element.label + '/tags/list', {
+                    auth: {
+                        bearer: accessTokenARC
+                    }
+                }, (err, httpResponse, body) => {
+                    if (err) { return []; }
+                    if (body.length > 0) {
+                        const tags = JSON.parse(body).tags;
+                        for (let i = 0; i < tags.length; i++) {
+                            contextValue = "azureRepositoryTag";
+                            node = new DockerNode(element.label + ':' + tags[i], vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+                            node.repository = element.repository;
+                            node.subscription = element.subscription;
+                            node.accessTokenARC = accessTokenARC;
+                            node.refreshTokenARC = element.refreshTokenARC;
+                            nodes.push(node);
+                        }
+                    }
+                });
+
+                return nodes;
+            }
+        }
     }
-
-
 }
+
+
+async function acquireToken(session: AzureSession) {
+    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
+        const credentials: any = session.credentials;
+        const environment: any = session.environment;
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    accessToken: result.accessToken,
+                    refreshToken: result.refreshToken
+                });
+            }
+        });
+    });
+}
+
 
 export class DockerNode extends vscode.TreeItem {
 
@@ -288,7 +437,8 @@ export class DockerNode extends vscode.TreeItem {
     public imageDesc: Docker.ImageDesc;
     public repository: any = {};
     public subscription: SubscriptionItem;
-
+    public refreshTokenARC: string;
+    public accessTokenARC: string;
 }
 
 enum RegistryType {
