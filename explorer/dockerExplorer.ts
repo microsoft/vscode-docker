@@ -24,11 +24,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     private _keytar: typeof keytarType;
 
     constructor() {
-		try {
-			this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
-		} catch (e) {
-			// unable to find keytar
-		}	
+        try {
+            this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
+        } catch (e) {
+            // unable to find keytar
+        }
     }
 
     refresh(): void {
@@ -110,159 +110,161 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         const nodes: DockerNode[] = [];
 
         if (!element) {
-            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "dockerImagesLabel", null, null);
-            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "dockerContainersLabel", null, null);
-            this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "dockerRegistriesLabel", null, null);
+            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "imagesLabel", null, null);
+            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "containersLabel", null, null);
+            this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "registriesLabel", null, null);
             nodes.push(this._imagesNode);
             nodes.push(this._containersNode);
             nodes.push(this._registriesNode);
-        } else {
+            return nodes;
+        }
 
-            if (element.contextValue === 'dockerImagesLabel') {
-                const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
-                if (!images || images.length == 0) {
-                    return [];
-                } else {
-                    for (let i = 0; i < images.length; i++) {
-                        contextValue = "dockerImage";
-                        if (!images[i].RepoTags) {
-                            let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue);
-                            node.imageDesc = images[i];
-                            nodes.push(node);
-                        } else {
-                            for (let j = 0; j < images[i].RepoTags.length; j++) {
-                                let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue);
-                                node.imageDesc = images[i];
-                                nodes.push(node);
-                            }
-                        }
-                    }
-                }
+        if (element.contextValue === 'imagesLabel') {
+            const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
+
+            if (!images || images.length === 0) {
+                return [];
             }
 
-            if (element.contextValue === 'dockerContainersLabel') {
-
-                opts = {
-                    "filters": {
-                        "status": ["created", "restarting", "running", "paused", "exited", "dead"]
-                    }
-                };
-
-                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
-                if (!containers || containers.length == 0) {
-                    return [];
+            for (let i = 0; i < images.length; i++) {
+                contextValue = "image";
+                if (!images[i].RepoTags) {
+                    let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue);
+                    node.imageDesc = images[i];
+                    nodes.push(node);
                 } else {
-                    for (let i = 0; i < containers.length; i++) {
-                        if (['exited', 'dead'].includes(containers[i].State)) {
-                            contextValue = "dockerContainerStopped";
-                            iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-                            };
-                        } else {
-                            contextValue = "dockerContainerRunning";
-                            iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
-                            };
-                        }
-
-                        const containerName = containers[i].Names[0].substring(1);
-                        let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath);
-                        node.containerDesc = containers[i];
+                    for (let j = 0; j < images[i].RepoTags.length; j++) {
+                        let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue);
+                        node.imageDesc = images[i];
                         nodes.push(node);
-
                     }
                 }
             }
 
-            if (element.contextValue === 'dockerRegistriesLabel') {
+            return nodes;
 
-                contextValue = "dockerRegistryLabel";
-                node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                nodes.push(node);
+        }
 
-                contextValue = "dockerRegistryLabel";
-                node = new DockerNode(`Azure`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                nodes.push(node);
-            }
+        if (element.contextValue === 'containersLabel') {
 
+            opts = {
+                "filters": {
+                    "status": ["created", "restarting", "running", "paused", "exited", "dead"]
+                }
+            };
 
-
-            if (element.contextValue === 'dockerRegistryLabel') {
-
-                if (element.label.includes('Docker')) {
-                    // see if we've saved off the token
-
-                    let token: string;
-
-                    if (this._keytar) {
-                        token = await this._keytar.getPassword('vscode-docker', 'dockerhub');
-                    }
-                    
-                    if (!token) {
-                        token = await dockerHubLogin();
-                        if (token) {
-                            dockerHubAPI.setLoginToken(token);
-                            if (this._keytar) {
-                                this._keytar.setPassword('vscode-docker', 'dockerhub', token);
-                            }
-                        } else {
-                            return [];
-                        }
+            const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+            if (!containers || containers.length == 0) {
+                return [];
+            } else {
+                for (let i = 0; i < containers.length; i++) {
+                    if (['exited', 'dead'].includes(containers[i].State)) {
+                        contextValue = "stoppedContainer";
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
+                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+                        };
                     } else {
-                        dockerHubAPI.setLoginToken(token);
+                        contextValue = "runningContainer";
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
+                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
+                        };
                     }
 
-                    const user: any = await dockerHubAPI.loggedInUser();
+                    const containerName = containers[i].Names[0].substring(1);
+                    let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath);
+                    node.containerDesc = containers[i];
+                    nodes.push(node);
 
-                    const myRepos = await dockerHubAPI.repositories(user.username);
-                    for (let i = 0; i < myRepos.length; i++) {
-                        const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
-                        contextValue = 'dockerHubRegistryImage';
-                        let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                        node.repository = myRepo;
-                        nodes.push(node);
-                    }
-                } else if (element.label.includes('Azure')) {
-
-                    if (azureAccount.status === "LoggedIn") {
-                        //let creds = azureAccount.credentials;
-                        const subs = await this.getSubscriptions(azureAccount);
-
-                        for (let i = 0; i < subs.length; i++) {
-                            contextValue = 'dockerRegistryAzureSubscription';
-                            node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
-                            node.subscription = subs[i];
-                            nodes.push(node);
-                        }
-                    }
-                    
                 }
             }
 
-            if (element.contextValue === 'dockerHubRegistryImage') {
-                let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
-                for (let i = 0; i < myTags.length; i++) {
-                    contextValue = 'dockerHubRegistryImageTag';
-                    nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null, null));
-                }
-            }
+            return nodes;
 
-            if (element.contextValue === 'dockerRegistryAzureSubscription') {
-                const client = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
-                const registries = await client.registries.list();
-                for (let i = 0; i < registries.length; i++) {
-                    contextValue = 'dockerRegistryAzureRegistry';
-                    node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+        }
+
+        if (element.contextValue === 'registriesLabel') {
+
+            contextValue = "dockerHubRegistry";
+            node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+            nodes.push(node);
+
+            const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
+
+            if (loggedIntoAzure) {
+                const subs = await this.getSubscriptions(azureAccount);
+
+                for (let i = 0; i < subs.length; i++) {
+                    contextValue = 'azureSubscription';
+                    node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                    node.subscription = subs[i];
                     nodes.push(node);
                 }
             }
-            
+
+            return nodes;
+
         }
 
-        this.setAutoRefresh();
-        return nodes;
+        if (element.contextValue === 'dockerHubRegistry') {
+
+            let token: string;
+
+            if (this._keytar) {
+                token = await this._keytar.getPassword('vscode-docker', 'dockerhub');
+            }
+
+            if (!token) {
+                token = await dockerHubLogin();
+                if (token) {
+                    dockerHubAPI.setLoginToken(token);
+                    if (this._keytar) {
+                        this._keytar.setPassword('vscode-docker', 'dockerhub', token);
+                    }
+                } else {
+                    return [];
+                }
+            } else {
+                dockerHubAPI.setLoginToken(token);
+            }
+
+            const user: any = await dockerHubAPI.loggedInUser();
+
+            const myRepos = await dockerHubAPI.repositories(user.username);
+            for (let i = 0; i < myRepos.length; i++) {
+                const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+                contextValue = 'dockerHubRegistryImage';
+                let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                node.repository = myRepo;
+                nodes.push(node);
+            }
+
+            return nodes;
+        }
+
+        if (element.contextValue === 'dockerHubRegistryImage') {
+            let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
+            for (let i = 0; i < myTags.length; i++) {
+                contextValue = 'dockerHubRegistryImageTag';
+                nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null, null));
+            }
+
+            return nodes;
+        }
+
+        if (element.contextValue === 'azureSubscription') {
+            const client = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
+            const registries = await client.registries.list();
+            for (let i = 0; i < registries.length; i++) {
+                contextValue = 'azureRegistry';
+                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+                nodes.push(node);
+            }
+
+            return nodes;
+        }
+
     }
 
 
