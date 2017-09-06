@@ -188,7 +188,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         if (element.contextValue === 'registriesLabel') {
 
             contextValue = "dockerHubRegistry";
-            node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+            iconPath = {
+                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+            };
+            node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
             nodes.push(node);
 
             const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
@@ -198,7 +202,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
                 for (let i = 0; i < subs.length; i++) {
                     contextValue = 'azureSubscription';
-                    node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'AzureSubscription.svg'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'AzureSubscription.svg')
+                    };
+                    node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
                     node.subscription = subs[i];
                     nodes.push(node);
                 }
@@ -236,7 +244,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             for (let i = 0; i < myRepos.length; i++) {
                 const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
                 contextValue = 'dockerHubRegistryImage';
-                let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                iconPath = {
+                    light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
+                    dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+                };
+                let node = new DockerNode(`${myRepo.namespace}/${myRepo.name}`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
                 node.repository = myRepo;
                 nodes.push(node);
             }
@@ -248,7 +260,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
             for (let i = 0; i < myTags.length; i++) {
                 contextValue = 'dockerHubRegistryImageTag';
-                nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null, null));
+                nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null));
             }
 
             return nodes;
@@ -259,7 +271,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             const registries = await client.registries.list();
             for (let i = 0; i < registries.length; i++) {
                 contextValue = 'azureRegistry';
-                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                iconPath = {
+                    light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                    dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                };
+                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
                 node.subscription = element.subscription;
                 nodes.push(node);
             }
@@ -316,7 +332,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         const repositories = JSON.parse(body).repositories;
                         for (let i = 0; i < repositories.length; i++) {
                             contextValue = "azureRepository";
-                            node = new DockerNode(repositories[i], vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, null);
+                            iconPath = {
+                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
+                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+                            };
+                            node = new DockerNode(repositories[i], vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
                             node.repository = element.label;
                             node.subscription = element.subscription;
                             node.accessTokenARC = accessTokenARC;
@@ -384,7 +404,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         const tags = JSON.parse(body).tags;
                         for (let i = 0; i < tags.length; i++) {
                             contextValue = "azureRepositoryTag";
-                            node = new DockerNode(element.label + ':' + tags[i], vscode.TreeItemCollapsibleState.None, contextValue, null, null);
+                            node = new DockerNode(element.label + ':' + tags[i], vscode.TreeItemCollapsibleState.None, contextValue, null);
                             node.repository = element.repository;
                             node.subscription = element.subscription;
                             node.accessTokenARC = accessTokenARC;
