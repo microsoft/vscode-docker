@@ -32,6 +32,7 @@ import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, T
 import { WebAppCreator } from './explorer/webAppCreator';
 import * as util from "./explorer/util";
 import { AzureAccountWrapper } from './explorer/azureAccountWrapper';
+import { DockerNode } from './explorer/DockerExplorer';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -91,12 +92,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.CreateWebApp', async () => {
-        const wizard = new WebAppCreator(outputChannel, azureAccount);
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: DockerNode) => {
+        const wizard = new WebAppCreator(outputChannel, azureAccount, context);
         const result = await wizard.run();
 
         if (result.status === 'Completed') {
-            vscode.commands.executeCommand('appService.Refresh');
+            //vscode.commands.executeCommand('appService.Refresh');
         }
     }));
     activateLanguageClient(ctx);

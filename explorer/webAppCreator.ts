@@ -10,14 +10,16 @@ import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'az
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from '../node_modules/azure-arm-website/lib/models';
 import * as util from './util';
+import { DockerNode } from './dockerExplorer';
 
 export class WebAppCreator extends WizardBase {
-    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, subscription?: SubscriptionModels.Subscription) {
+    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: DockerNode, subscription?: SubscriptionModels.Subscription ) {
         super(output);
         this.steps.push(new SubscriptionStep(this, azureAccount, subscription));
         this.steps.push(new ResourceGroupStep(this, azureAccount));
         this.steps.push(new AppServicePlanStep(this, azureAccount));
-        this.steps.push(new WebsiteStep(this, azureAccount));
+        //this.steps.push(new WebsiteStep(this, azureAccount));
+        this.steps.push(new WebsiteStep(this, azureAccount, context));
     }
 
     async run(promptOnly = false): Promise<WizardResult> {
@@ -301,6 +303,7 @@ class AppServicePlanStep extends SubscriptionBasedWizardStep {
         const rg = this.getSelectedResourceGroup();
         const websiteClient = new WebSiteManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
         this._plan = await websiteClient.appServicePlans.createOrUpdate(rg.name, this._plan.appServicePlanName, this._plan);
+        
         this.wizard.writeline(`App Service Plan created.`);
     }
 
@@ -362,9 +365,19 @@ class AppServicePlanStep extends SubscriptionBasedWizardStep {
 
 class WebsiteStep extends SubscriptionBasedWizardStep {
     private _website: WebSiteModels.Site;
+    private _serverUrl: string;
+    private _serverUserName: string;
+    private _serverPassword: string;
+    private _imageName: string;
 
-    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper) {
+    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: DockerNode) {
         super(wizard, 'Create Web App', azureAccount);
+
+        
+        // this._serverPassword = serverPassword;
+        // this._serverUrl = serverUrl;
+        // this._serverUserName = serverUserName;
+        // this._imageName = imageName;
     }
 
     async prompt(): Promise<void> {
@@ -382,19 +395,19 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
                 return null;
             }
         });
-        const runtimeItems: QuickPickItemWithData<LinuxRuntimeStack>[] = [];
-        const linuxRuntimeStacks = this.getLinuxRuntimeStack();
+        // const runtimeItems: QuickPickItemWithData<LinuxRuntimeStack>[] = [];
+        // const linuxRuntimeStacks = this.getLinuxRuntimeStack();
 
-        linuxRuntimeStacks.forEach(rt => {
-            runtimeItems.push({
-                label: rt.displayName,
-                description: '',
-                data: rt
-            });
-        });
+        // linuxRuntimeStacks.forEach(rt => {
+        //     runtimeItems.push({
+        //         label: rt.displayName,
+        //         description: '',
+        //         data: rt
+        //     });
+        // });
 
-        const pickedItem = await this.showQuickPick(runtimeItems, { placeHolder: 'Select runtime stack.' });
-        const runtimeStack = pickedItem.data.name;
+        // const pickedItem = await this.showQuickPick(runtimeItems, { placeHolder: 'Select runtime stack.' });
+        // const runtimeStack = pickedItem.data.name;
         const rg = this.getSelectedResourceGroup();
         const plan = this.getSelectedAppServicePlan();
 
@@ -402,10 +415,11 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
             name: siteName,
             kind: 'app,linux',
             location: rg.location,
-            serverFarmId: plan.id,
-            siteConfig: {
-                linuxFxVersion: runtimeStack
-            }
+            serverFarmId: plan.id
+            //,
+            // siteConfig: {
+            //     linuxFxVersion: runtimeStack
+            // }
         }
     }
 
@@ -421,8 +435,20 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
         }
 
         this._website = await websiteClient.webApps.createOrUpdate(rg.name, this._website.name, this._website);
+        
+        this.wizard.writeline(`Writing Settings...`);
+        let siteConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.getConfiguration(rg.name, this._website.name);
+        siteConfig.linuxFxVersion = 'DOCKER|' + this._serverUrl + '/' + this._imageName;
+        let updatedConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.createOrUpdateConfiguration(rg.name, this._website.name, siteConfig);
+        console.log(updatedConfig);
+
+        let appSettings: WebSiteModels.StringDictionary = { "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
+            "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl, "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
+        }};
+        
         this.wizard.writeline(`Web App "${this._website.name}" created: https://${this._website.defaultHostName}`);
         this.wizard.writeline('');
+    
     }
 
     get website(): WebSiteModels.Site {
