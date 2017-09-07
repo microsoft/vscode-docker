@@ -224,23 +224,28 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         if (element.contextValue === 'dockerHubRegistry') {
 
             let token: string;
+            let username: string;
+            let password: string;
+            let id: { username: string, password: string, token: string} = {username: null, password: null, token: null};
 
             if (this._keytar) {
-                token = await this._keytar.getPassword('vscode-docker', 'dockerhub');
+                id.token = await this._keytar.getPassword('vscode-docker', 'dockerhub.token');
             }
 
-            if (!token) {
-                token = await dockerHubLogin();
-                if (token) {
-                    dockerHubAPI.setLoginToken(token);
+            if (!id.token) {
+                id = await dockerHubLogin();
+                if (id.token) {
+                    dockerHubAPI.setLoginToken(id.token);
                     if (this._keytar) {
-                        this._keytar.setPassword('vscode-docker', 'dockerhub', token);
+                        this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
+                        this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
+                        this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
                     }
                 } else {
                     return [];
                 }
             } else {
-                dockerHubAPI.setLoginToken(token);
+                dockerHubAPI.setLoginToken(id.token);
             }
 
             const user: any = await dockerHubAPI.loggedInUser();
@@ -265,7 +270,11 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
             for (let i = 0; i < myTags.length; i++) {
                 contextValue = 'dockerHubRegistryImageTag';
-                nodes.push(new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null));
+                node = new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null);
+                node.registryPassword = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
+                node.registryUserName = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
+                node.repository = "";
+                nodes.push(node);
             }
 
             return nodes;
@@ -357,6 +366,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                             node.subscription = element.subscription;
                             node.accessTokenARC = accessTokenARC;
                             node.refreshTokenARC = refreshTokenARC;
+                            node.registryUserName = element.registryUserName;
+                            node.registryPassword = element.registryPassword;
                             nodes.push(node);
                         }
                     } else {
@@ -425,6 +436,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                             node.subscription = element.subscription;
                             node.accessTokenARC = accessTokenARC;
                             node.refreshTokenARC = element.refreshTokenARC;
+                            node.registryUserName = element.registryUserName;
+                            node.registryPassword = element.registryPassword;
                             nodes.push(node);
                         }
                     }
