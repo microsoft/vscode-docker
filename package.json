@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -78,87 +78,87 @@
       "view/item/context": [
         {
           "command": "vscode-docker.container.start",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.container.start",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == image"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "view == dockerExplorer && viewItem == dockerImagesLabel"
+          "when": "view == dockerExplorer && viewItem == imagesLabel"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningContainer"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersLabel"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningContainer"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersLabel"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningContainer"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersLabel"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == dockerContainerStopped"
+          "when": "view == dockerExplorer && viewItem == stoppedContainer"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningContainer"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersLabel"
         },
         {
           "command": "vscode-docker.createWebApp",
