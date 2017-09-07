@@ -9,7 +9,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
     private _containersNode: DockerNode;
-    // private _registriesNode: DockerNode;
+    private _registriesNode: DockerNode;
     private _debounceTimer: NodeJS.Timer;
     
      refresh(): void {
@@ -27,20 +27,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     }
 
     refreshRegistries(): void {
-        //     this._onDidChangeTreeData.fire(this._registriesNode);
-    }
-
-    private setAutoRefresh(): void {
-        // from https://github.com/formulahendry/vscode-docker-explorer/blob/master/src/dockerTreeBase.ts  
-        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-        const interval = configOptions.get('explorerRefreshInterval', 1000);
-
-        if (interval > 0) {
-            clearTimeout(this._debounceTimer);
-            this._debounceTimer = setTimeout(() => {
-                this.refresh();
-            }, interval);
-        }
+        this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
     getTreeItem(element: DockerNode): vscode.TreeItem {
@@ -134,7 +121,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
 
         }
 
-        this.setAutoRefresh();
         return nodes;
     }
 }

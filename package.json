@@ -195,16 +195,6 @@
           "default": "",
           "description": "Path within registry to push to."
         },
-        "docker.showExplorer": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show or hide the image and container Explorer."
-        },
-        "docker.explorerRefreshInterval": {
-          "type": "number",
-          "default": 1000,
-          "description": "Docker explorer refresh interval (default 1000ms)"
-        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "type": "string",
           "default": "warning",
