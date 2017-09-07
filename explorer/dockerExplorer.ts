@@ -10,6 +10,11 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import * as keytarType from 'keytar';
 import request = require('request-promise');
 
+import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
+import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
+import * as ContainerOps from '../node_modules/azure-arm-containerregistry/lib/operations';
+
+
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
 
@@ -267,17 +272,28 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         }
 
         if (element.contextValue === 'azureSubscription') {
-            const client = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
-            const registries = await client.registries.list();
+
+            const client: ContainerRegistryManagementClient = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
+            const registries: ContainerModels.RegistryListResult = await client.registries.list();
+
             for (let i = 0; i < registries.length; i++) {
-                contextValue = 'azureRegistry';
-                iconPath = {
-                    light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                    dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                };
-                node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
-                node.subscription = element.subscription;
-                nodes.push(node);
+
+                if (registries[i].adminUserEnabled && registries[i].sku.tier.includes('Managed')) {
+                    const resourceGroup: string = registries[i].id.slice(registries[i].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[i].id.search('/providers/'));
+                    const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[i].name);
+
+                    contextValue = 'azureRegistry';
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                    };
+                    node = new DockerNode(registries[i].loginServer, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
+                    node.registryPassword = creds.passwords[0].value;
+                    node.registryUserName = creds.username;
+                    node.subscription = element.subscription;
+                    nodes.push(node);
+                }
+
             }
 
             return nodes;
@@ -459,6 +475,8 @@ export class DockerNode extends vscode.TreeItem {
     public subscription: SubscriptionItem;
     public refreshTokenARC: string;
     public accessTokenARC: string;
+    public registryUserName: string;
+    public registryPassword: string;
 }
 
 enum RegistryType {
@@ -468,7 +486,7 @@ enum RegistryType {
 }
 
 
-class Registry {
+interface Registry {
     url: string;
     registryType: RegistryType;
     userName: string;
