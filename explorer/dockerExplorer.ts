@@ -13,98 +13,53 @@ import request = require('request-promise');
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../node_modules/azure-arm-containerregistry/lib/operations';
-
+import { execAzCLI } from './utils/runAzCLI'
+import { ServiceClientCredentials } from 'ms-rest';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
 
 
-export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNode> {
+export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
-    private _onDidChangeTreeData: vscode.EventEmitter<DockerNode | undefined> = new vscode.EventEmitter<DockerNode | undefined>();
-    readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
+    private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
+    readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
     private _containersNode: DockerNode;
     private _registriesNode: DockerNode;
     private _debounceTimer: NodeJS.Timer;
-    private _keytar: typeof keytarType;
 
-    constructor() {
-        try {
-            this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
-        } catch (e) {
-            // unable to find keytar
-        }
-    }
 
     refresh(): void {
-        this.refreshImages()
-        this.refreshContainers()
-        this.refreshRegistries()
-    }
-
-    refreshImages(): void {
-        this._onDidChangeTreeData.fire(this._imagesNode);
-    }
-
-    refreshContainers(): void {
-        this._onDidChangeTreeData.fire(this._containersNode);
+        this._onDidChangeTreeData.fire();
+        //     this.refreshImages()
+        //     this.refreshContainers()
+        //     this.refreshRegistries()
     }
 
     refreshRegistries(): void {
-        this._onDidChangeTreeData.fire(this._registriesNode);
+        this._onDidChangeTreeData.fire()
+    }
+    getTreeItem(element: NodeBase): vscode.TreeItem {
+        return element.getTreeItem();
     }
 
-    private setAutoRefresh(): void {
-        // from https://github.com/formulahendry/vscode-docker-explorer/blob/master/src/dockerTreeBase.ts  
-        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-        const interval = configOptions.get('explorerRefreshInterval', 1000);
+    async getChildren(element?: NodeBase): Promise<NodeBase[]> {
 
-        if (interval > 0) {
-            clearTimeout(this._debounceTimer);
-            this._debounceTimer = setTimeout(() => {
-                this.refreshImages();
-                this.refreshContainers();
-            }, interval);
+        if (!element) {
+            return this.getRootNodes();
         }
-    }
 
-    private async getSubscriptions(api: AzureAccount): Promise<SubscriptionItem[]> {
-
-        const subscriptionItems: SubscriptionItem[] = [];
-        for (const session of api.sessions) {
-            const credentials = session.credentials;
-            const subscriptionClient = new SubscriptionClient(credentials);
-            const subscriptions = await this.listAll(subscriptionClient.subscriptions, subscriptionClient.subscriptions.list());
-            subscriptionItems.push(...subscriptions.map(subscription => ({
-                label: subscription.displayName || '',
-                description: subscription.subscriptionId || '',
-                session,
-                subscription
-            })));
-        }
-        subscriptionItems.sort((a, b) => a.label.localeCompare(b.label));
-
-        return subscriptionItems;
+        return element.getChildren(element);
 
     }
 
-
-    private async listAll<T>(client: { listNext(nextPageLink: string): Promise<PartialList<T>>; }, first: Promise<PartialList<T>>): Promise<T[]> {
-        const all: T[] = [];
-        for (let list = await first; list.length || list.nextLink; list = list.nextLink ? await client.listNext(list.nextLink) : []) {
-            all.push(...list);
-        }
-        return all;
-    }
-
-
-    getTreeItem(element: DockerNode): vscode.TreeItem {
-        return element;
-    }
-
-    async getChildren(element?: DockerNode): Promise<DockerNode[]> {
-        return this.getDockerNodes(element);
+    private async getRootNodes(): Promise<RootNode[]> {
+        const rootNodes: RootNode[] = [];
+        rootNodes.push(new RootNode("Images", "imagesRootNode"));
+        rootNodes.push(new RootNode("Containers", "containersRootNode"));
+        rootNodes.push(new RootNode("Registries", "registriesRootNode"));
+        return rootNodes;
     }
 
     private async getDockerNodes(element?: DockerNode): Promise<DockerNode[]> {
@@ -115,138 +70,32 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         let node: DockerNode;
         const nodes: DockerNode[] = [];
 
-        if (!element) {
-            this._imagesNode = new DockerNode("Images", vscode.TreeItemCollapsibleState.Collapsed, "imagesLabel", null, null);
-            this._containersNode = new DockerNode("Containers", vscode.TreeItemCollapsibleState.Collapsed, "containersLabel", null, null);
-            this._registriesNode = new DockerNode("Registries", vscode.TreeItemCollapsibleState.Collapsed, "registriesLabel", null, null);
-            nodes.push(this._imagesNode);
-            nodes.push(this._containersNode);
-            nodes.push(this._registriesNode);
-            return nodes;
-        }
-
-        if (element.contextValue === 'imagesLabel') {
-            const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
-
-            if (!images || images.length === 0) {
-                return [];
-            }
-
-            for (let i = 0; i < images.length; i++) {
-                contextValue = "image";
-                if (!images[i].RepoTags) {
-                    let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue);
-                    node.imageDesc = images[i];
-                    nodes.push(node);
-                } else {
-                    for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue);
-                        node.imageDesc = images[i];
-                        nodes.push(node);
-                    }
-                }
-            }
-
-            return nodes;
-
-        }
-
-        if (element.contextValue === 'containersLabel') {
-
-            opts = {
-                "filters": {
-                    "status": ["created", "restarting", "running", "paused", "exited", "dead"]
-                }
-            };
-
-            const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
-            if (!containers || containers.length == 0) {
-                return [];
-            } else {
-                for (let i = 0; i < containers.length; i++) {
-                    if (['exited', 'dead'].includes(containers[i].State)) {
-                        contextValue = "stoppedContainer";
-                        iconPath = {
-                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
-                        };
-                    } else {
-                        contextValue = "runningContainer";
-                        iconPath = {
-                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
-                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
-                        };
-                    }
-
-                    const containerName = containers[i].Names[0].substring(1);
-                    let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, null, iconPath);
-                    node.containerDesc = containers[i];
-                    nodes.push(node);
-
-                }
-            }
-
-            return nodes;
-
-        }
-
-        if (element.contextValue === 'registriesLabel') {
-
-            contextValue = "dockerHubRegistry";
-            iconPath = {
-                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-            };
-            node = new DockerNode(`Docker Hub`, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
-            nodes.push(node);
-
-            const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
-
-            if (loggedIntoAzure) {
-                const subs = await this.getSubscriptions(azureAccount);
-
-                for (let i = 0; i < subs.length; i++) {
-                    contextValue = 'azureSubscription';
-                    iconPath = {
-                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'AzureSubscription.svg'),
-                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'AzureSubscription.svg')
-                    };
-                    node = new DockerNode(subs[i].label, vscode.TreeItemCollapsibleState.Collapsed, contextValue, null, iconPath);
-                    node.subscription = subs[i];
-                    nodes.push(node);
-                }
-            }
-
-            return nodes;
-
-        }
-
         if (element.contextValue === 'dockerHubRegistry') {
 
             let token: string;
             let username: string;
             let password: string;
-            let id: { username: string, password: string, token: string} = {username: null, password: null, token: null};
+            let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
 
-            if (this._keytar) {
-                id.token = await this._keytar.getPassword('vscode-docker', 'dockerhub.token');
-            }
+            // if (this._keytar) {
+            //     id.token = await this._keytar.getPassword('vscode-docker', 'dockerhub.token');
+            // }
 
-            if (!id.token) {
-                id = await dockerHubLogin();
-                if (id.token) {
-                    dockerHubAPI.setLoginToken(id.token);
-                    if (this._keytar) {
-                        this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
-                        this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
-                        this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
-                    }
-                } else {
-                    return [];
-                }
-            } else {
-                dockerHubAPI.setLoginToken(id.token);
-            }
+            // if (!id.token) {
+            //     id = await dockerHubLogin();
+            //     if (id.token) {
+            //         dockerHubAPI.setLoginToken(id.token);
+            //         if (this._keytar) {
+            //             this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
+            //             this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
+            //             this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
+            //         }
+            //     } else {
+            //         return [];
+            //     }
+            // } else {
+            //     dockerHubAPI.setLoginToken(id.token);
+            // }
 
             const user: any = await dockerHubAPI.loggedInUser();
 
@@ -271,8 +120,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
             for (let i = 0; i < myTags.length; i++) {
                 contextValue = 'dockerHubRegistryImageTag';
                 node = new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null);
-                node.registryPassword = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
-                node.registryUserName = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
+                // node.registryPassword = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
+                // node.registryUserName = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
                 node.repository = "";
                 nodes.push(node);
             }
@@ -281,6 +130,9 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         }
 
         if (element.contextValue === 'azureSubscription') {
+
+            //var res: string = await execAzCLI("docker run -it -v %HOMEPATH%:/root azuresdk/azure-cli-python:latest az account list");
+
 
             const client: ContainerRegistryManagementClient = new ContainerRegistryManagement(element.subscription.session.credentials, element.subscription.subscription.subscriptionId);
             const registries: ContainerModels.RegistryListResult = await client.registries.list();
@@ -468,6 +320,295 @@ async function acquireToken(session: AzureSession) {
 }
 
 
+export class NodeBase {
+    readonly label: string;
+
+    protected constructor(label: string) {
+        this.label = label;
+    }
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None
+        };
+    }
+
+    async getChildren(element): Promise<NodeBase[]> {
+        return [];
+    }
+}
+
+
+export class RootNode extends NodeBase {
+
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string,
+    ) {
+        super(label)
+    }
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed
+        }
+
+    }
+
+    async getChildren(element): Promise<NodeBase[]> {
+
+        if (element.contextValue === 'imagesRootNode') {
+            return this.getImages();
+        }
+        if (element.contextValue === 'containersRootNode') {
+            return this.getContainers();
+        }
+        if (element.contextValue === 'registriesRootNode') {
+            return this.getRegistries()
+        }
+
+    }
+
+    private async getImages(): Promise<ImageNode[]> {
+        const imageNodes: ImageNode[] = [];
+        const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
+
+        if (!images || images.length === 0) {
+            return [];
+        }
+
+        for (let i = 0; i < images.length; i++) {
+            if (!images[i].RepoTags) {
+                let node = new ImageNode("<none>:<none>", "localImageNode");
+                node.imageDesc = images[i];
+                imageNodes.push(node);
+            } else {
+                for (let j = 0; j < images[i].RepoTags.length; j++) {
+                    let node = new ImageNode(images[i].RepoTags[j], "localImageNode");
+                    node.imageDesc = images[i];
+                    imageNodes.push(node);
+                }
+            }
+        }
+
+        return imageNodes;
+    }
+
+    private async getContainers(): Promise<ContainerNode[]> {
+        const containerNodes: ContainerNode[] = [];
+        let contextValue: string;
+        let iconPath: any = {};
+
+        const opts = {
+            "filters": {
+                "status": ["created", "restarting", "running", "paused", "exited", "dead"]
+            }
+        };
+
+        const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+
+        if (!containers || containers.length == 0) {
+            return [];
+        } else {
+            for (let i = 0; i < containers.length; i++) {
+                if (['exited', 'dead'].includes(containers[i].State)) {
+                    contextValue = "stoppedLocalContainerNode";
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+                    };
+                } else {
+                    contextValue = "runningLocalContainerNode";
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
+                    };
+                }
+
+                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) [${containers[i].Status}]`, contextValue, iconPath);
+                containerNode.containerDesc = containers[i];
+                containerNodes.push(containerNode);
+
+            }
+        }
+        return containerNodes;
+    }
+
+    private async getRegistries(): Promise<RegistryNode[]> {
+        const registryNodes: RegistryNode[] = [];
+        let contextValue: string = "";
+        let iconPath: any = {};
+        let node: RegistryNode;
+
+        // DockerHub
+        iconPath = {
+            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        };
+        node = new RegistryNode('Docker Hub', "registry", iconPath);
+        node.type = RegistryType.DockerHub;
+        registryNodes.push(node);
+
+
+        // Azure Container Registries
+        const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
+
+        if (loggedIntoAzure) {
+
+            await azureAccount.onFiltersChanged(() => { });
+            
+            console.log(azureAccount.filters);
+
+            const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
+
+            for (let i = 0; i < subs.length; i++) {
+
+                const client: ContainerRegistryManagementClient = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].id);
+                const registries: ContainerModels.RegistryListResult = await client.registries.list();
+
+                for (let j = 0; j < registries.length; j++) {
+
+                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
+                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                        const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
+
+                        contextValue = 'registry';
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                        };
+                        node = new RegistryNode(registries[j].loginServer, 'registry', iconPath);
+                        node.type = RegistryType.Azure;
+                        node.userName = creds.passwords[0].value;
+                        node.password = creds.username;
+                        node.subscription = subs[i];
+                        registryNodes.push(node);
+                    }
+
+                }
+            }
+
+        }
+
+        return registryNodes;
+
+    }
+
+    private onSubChanged() {
+
+    }
+    private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
+        const session = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+
+        if (session) {
+            return session.credentials;
+        }
+
+        throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
+    }
+
+    private getFilteredSubscriptions(): SubscriptionModels.Subscription[] {
+        return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
+            return {
+                id: filter.subscription.id,
+                session: filter.session,
+                subscriptionId: filter.subscription.subscriptionId,
+                tenantId: filter.session.tenantId,
+                displayName: filter.subscription.displayName,
+                state: filter.subscription.state,
+                subscriptionPolicies: filter.subscription.subscriptionPolicies,
+                authorizationSource: filter.subscription.authorizationSource
+            };
+        });
+    }
+}
+
+export class ImageNode extends NodeBase {
+
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string,
+    ) {
+        super(label)
+    }
+
+    public imageDesc: Docker.ImageDesc
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None,
+            contextValue: "localImageNode",
+            iconPath: {
+                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
+                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+            }
+        }
+    }
+
+}
+
+export class ContainerNode extends NodeBase {
+
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string,
+        public readonly iconPath: any = {}
+    ) {
+        super(label)
+    }
+
+    public containerDesc: Docker.ContainerDesc;
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None,
+            contextValue: this.contextValue,
+            iconPath: this.iconPath
+        }
+    }
+
+}
+
+export class RegistryNode extends vscode.TreeItem {
+    private keytar: typeof keytarType;
+
+    // try {
+    //     keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
+    // } catch (e) {
+    //     // unable to find keytar
+    // }
+
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string,
+        public readonly iconPath: any = {}
+    ) {
+        super(label)
+    }
+
+    public type: RegistryType;
+    public subscription: SubscriptionModels.Subscription;
+    public userName: string;
+    public password: string;
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+            contextValue: this.contextValue,
+            iconPath: this.iconPath
+        }
+    }
+
+    async getChildren(element): Promise<NodeBase[]> {
+        return [];
+    }
+}
+
 export class DockerNode extends vscode.TreeItem {
 
     constructor(public readonly label: string,
@@ -493,7 +634,7 @@ export class DockerNode extends vscode.TreeItem {
 }
 
 enum RegistryType {
-    Docker,
+    DockerHub,
     Azure,
     Unknown
 }
