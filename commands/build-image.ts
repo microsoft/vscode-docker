@@ -99,6 +99,6 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
         });
     }
 
-    dockerExplorerProvider.refreshImages();
+    dockerExplorerProvider.refreshImages(false);
     
 }

@@ -10,10 +10,10 @@ import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'az
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from '../node_modules/azure-arm-website/lib/models';
 import * as util from './util';
-import { DockerNode } from './dockerExplorer';
+import { AzureImageNode, DockerHubImageNode } from './dockerExplorer';
 
 export class WebAppCreator extends WizardBase {
-    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: DockerNode, subscription?: SubscriptionModels.Subscription) {
+    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode, subscription?: SubscriptionModels.Subscription) {
         super(output);
         this.steps.push(new SubscriptionStep(this, azureAccount, subscription));
         this.steps.push(new ResourceGroupStep(this, azureAccount));
@@ -370,19 +370,14 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
     private _serverPassword: string;
     private _imageName: string;
 
-    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: DockerNode) {
+    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode) {
         super(wizard, 'Create Web App', azureAccount);
 
-        //console.log(context);
-        this._serverUrl = context.repository;
-        this._serverPassword = context.registryPassword;
-        this._serverUserName = context.registryUserName;
+        this._serverUrl = context.serverUrl;
+        this._serverPassword = context.password;
+        this._serverUserName = context.userName;
         this._imageName = context.label;
 
-        // this._serverPassword = serverPassword;
-        // this._serverUrl = serverUrl;
-        // this._serverUserName = serverUserName;
-        // this._imageName = imageName;
     }
 
     async prompt(): Promise<void> {
@@ -400,19 +395,7 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
                 return null;
             }
         });
-        // const runtimeItems: QuickPickItemWithData<LinuxRuntimeStack>[] = [];
-        // const linuxRuntimeStacks = this.getLinuxRuntimeStack();
 
-        // linuxRuntimeStacks.forEach(rt => {
-        //     runtimeItems.push({
-        //         label: rt.displayName,
-        //         description: '',
-        //         data: rt
-        //     });
-        // });
-
-        // const pickedItem = await this.showQuickPick(runtimeItems, { placeHolder: 'Select runtime stack.' });
-        // const runtimeStack = pickedItem.data.name;
         const rg = this.getSelectedResourceGroup();
         const plan = this.getSelectedAppServicePlan();
 
@@ -421,10 +404,6 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
             kind: 'app,linux',
             location: rg.location,
             serverFarmId: plan.id
-            //,
-            // siteConfig: {
-            //     linuxFxVersion: runtimeStack
-            // }
         }
     }
 
@@ -443,23 +422,27 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
 
         this.wizard.writeline(`Writing Container Information...`);
         let siteConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.getConfiguration(rg.name, this._website.name);
+
         if (this._serverUrl.length > 0) {
+            // azure container registry
             siteConfig.linuxFxVersion = 'DOCKER|' + this._serverUrl + '/' + this._imageName;
         } else {
+            // dockerhub
             siteConfig.linuxFxVersion = 'DOCKER|' + this._serverUserName + '/' + this._imageName;
         }
         let updatedConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.createOrUpdateConfiguration(rg.name, this._website.name, siteConfig);
-        //console.log(updatedConfig);
 
         let appSettings: WebSiteModels.StringDictionary;;
 
         if (this._serverUrl.length > 0) {
+            // azure container registry
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
                     "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl, "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
         } else {
+            // dockerhub - dont set docker_registry_server_url
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
                     "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
@@ -467,13 +450,14 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
             };
 
         }
+
         await websiteClient.webApps.updateApplicationSettings(rg.name, this._website.name, appSettings);
 
         this.wizard.writeline(`Restarting Site...`);
         await websiteClient.webApps.stop(rg.name, this._website.name);
         await websiteClient.webApps.start(rg.name, this._website.name);
 
-        this.wizard.writeline(`Web App "${this._website.name}" created: https://${this._website.defaultHostName}`);
+        this.wizard.writeline(`Web App "${this._website.name}" ready: https://${this._website.defaultHostName}`);
         this.wizard.writeline('');
 
     }

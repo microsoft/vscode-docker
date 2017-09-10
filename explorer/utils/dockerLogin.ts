@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as dockerHubAPI from 'docker-hub-api';
+import * as keytarType from 'keytar';
 
 export async function dockerHubLogin(): Promise<{username:string, password:string, token:string}> {
 
@@ -16,4 +17,12 @@ export async function dockerHubLogin(): Promise<{username:string, password:strin
 
     return Promise.reject(null);
 
+}
+
+export function dockerHubLogout(): void {
+    const keytar: typeof keytarType = require(`${vscode.env.appRoot}/node_modules/keytar`);
+    keytar.deletePassword('vscode-docker', 'dockerhub.token');
+    keytar.deletePassword('vscode-docker', 'dockerhub.password');
+    keytar.deletePassword('vscode-docker', 'dockerhub.username');
+    dockerHubAPI.setToken('');
 }

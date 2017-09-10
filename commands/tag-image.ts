@@ -63,7 +63,7 @@ export async function tagImage(context?: ImageNode) {
                 }
             });
 
-            dockerExplorerProvider.refreshImages();
+            dockerExplorerProvider.refreshImages(true);
             
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {

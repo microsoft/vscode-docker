@@ -56,7 +56,7 @@ export async function compose(command: string, message: string) {
                     command: teleCmdId + command
                 });
             }
-            dockerExplorerProvider.refreshContainers();
+            dockerExplorerProvider.refreshContainers(false);
         }
     }
 }

@@ -1,5 +1,7 @@
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
+import { dockerExplorerProvider } from '../dockerExtension';
+
 const teleCmdId: string = 'vscode-docker.system.prune';
 
 export async function systemPrune() {
@@ -12,4 +14,8 @@ export async function systemPrune() {
             command: teleCmdId
         });
     }
+
+    dockerExplorerProvider.refreshContainers(false);
+    dockerExplorerProvider.refreshImages(false);
+    
 }

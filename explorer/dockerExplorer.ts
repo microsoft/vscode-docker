@@ -31,20 +31,28 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         this._onDidChangeTreeData.fire();
     }
 
-    refreshImages(): void {
+    refreshImages(immediate: boolean): void {
         if (this._imagesNode) {
-            setTimeout(() => {
+            if (immediate) {
                 this._onDidChangeTreeData.fire(this._imagesNode);
-            },3000);
+            } else {
+                setTimeout(() => {
+                    this._onDidChangeTreeData.fire(this._imagesNode);
+                }, 3000);
+            }
         }
     }
 
-    refreshContainers(): void {
+    refreshContainers(immediate: boolean): void {
         if (this._containersNode) {
-            // give time for containers to stop (e.g. compose down)
-            setTimeout(() => {
+            if (immediate) {
                 this._onDidChangeTreeData.fire(this._containersNode);
-            },5000);
+            } else {
+                // give time for containers to stop (e.g. compose down)
+                setTimeout(() => {
+                    this._onDidChangeTreeData.fire(this._containersNode);
+                }, 5000);
+            }
         }
     }
 
@@ -306,6 +314,8 @@ export class RegistryRootNode extends NodeBase {
 
         if (this._keytar) {
             id.token = await this._keytar.getPassword('vscode-docker', 'dockerhub.token');
+            id.username = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
+            id.password = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
         }
 
         if (!id.token) {
@@ -367,8 +377,8 @@ export class RegistryRootNode extends NodeBase {
                         };
                         let node = new AzureRegistryNode(registries[j].loginServer, 'registry', iconPath);
                         node.type = RegistryType.Azure;
-                        node.userName = creds.passwords[0].value;
-                        node.password = creds.username;
+                        node.password = creds.passwords[0].value;
+                        node.userName = creds.username;
                         node.subscription = subs[i];
                         azureRegistryNodes.push(node);
                     }
@@ -664,13 +674,10 @@ export class AzureRepositoryNode extends NodeBase {
                 if (body.length > 0) {
                     const tags = JSON.parse(body).tags;
                     for (let i = 0; i < tags.length; i++) {
-                        node = new AzureImageNode(element.label + ':' + tags[i], 'azureRepositoryTag');
-                        // node.repository = element.repository;
-                        // node.subscription = element.subscription;
-                        // node.accessTokenARC = accessTokenARC;
-                        // node.refreshTokenARC = element.refreshTokenARC;
-                        // node.registryUserName = element.registryUserName;
-                        // node.registryPassword = element.registryPassword;
+                        node = new AzureImageNode(element.label + ':' + tags[i], 'azureImageTag');
+                        node.serverUrl = element.repository;
+                        node.userName = element.userName;
+                        node.password = element.password;
                         imageNodes.push(node);
                     }
                 }
@@ -687,6 +694,10 @@ export class AzureImageNode extends NodeBase {
     ) {
         super(label);
     }
+
+    public serverUrl: string;
+    public userName: string;
+    public password: string;
 
     getTreeItem(): vscode.TreeItem {
         return {
@@ -705,6 +716,8 @@ export class DockerHubImageNode extends NodeBase {
         super(label);
     }
 
+    // this needs to be empty string for DockerHub
+    public serverUrl: string = '';
     public userName: string;
     public password: string;
 
