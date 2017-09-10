@@ -1,14 +1,14 @@
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { reporter } from '../telemetry/telemetry';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ContainerNode } from '../explorer/dockerExplorer';
 import { dockerExplorerProvider } from '../dockerExtension';
 
 import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.stop';
 
-export async function stopContainer(context?: DockerNode) {
+export async function stopContainer(context?: ContainerNode) {
 
     let containersToStop: Docker.ContainerDesc[];
 
@@ -41,9 +41,11 @@ export async function stopContainer(context?: DockerNode) {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
+                        dockerExplorerProvider.refreshContainers();
                         reject();
                     }
                     if (containerCounter === numContainers) {
+                        dockerExplorerProvider.refreshContainers();
                         resolve();
                     }
                 });

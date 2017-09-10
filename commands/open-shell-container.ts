@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { DockerEngineType, docker } from './utils/docker-endpoint';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ContainerNode } from '../explorer/dockerExplorer';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
@@ -10,7 +10,7 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: "powershell"
 }
 
-export async function openShellContainer(context?: DockerNode) {
+export async function openShellContainer(context?: ContainerNode) {
     let containerToAttach: Docker.ContainerDesc;
 
     if (context && context.containerDesc) {

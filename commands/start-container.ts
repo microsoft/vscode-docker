@@ -4,11 +4,12 @@ import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ImageNode } from '../explorer/dockerExplorer';
+import { dockerExplorerProvider } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
-export async function startContainer(context?:DockerNode, interactive?: boolean) {
+export async function startContainer(context?:ImageNode, interactive?: boolean) {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
@@ -40,11 +41,14 @@ export async function startContainer(context?:DockerNode, interactive?: boolean)
                     command: interactive ? teleCmdId + '.interactive' : teleCmdId
                 });
             }
+
+            dockerExplorerProvider.refreshContainers();
+
         });
     }
 }
 
-export async function startContainerInteractive(context: DockerNode) {
+export async function startContainerInteractive(context: ImageNode) {
     await startContainer(context, true);
 }
 
@@ -83,5 +87,7 @@ export async function startAzureCLI() {
                 command: teleCmdId + '.azurecli'
             });
         }
+        dockerExplorerProvider.refreshImages();        
+        dockerExplorerProvider.refreshContainers();
     }
 }

@@ -1,9 +1,9 @@
-import { DockerNode } from "../explorer/dockerExplorer";
+import { ImageNode } from "../explorer/dockerExplorer";
 import DockerInspectDocumentContentProvider from "../documentContentProviders/dockerInspect";
 import { quickPickImage } from "./utils/quick-pick-image";
 import { reporter } from "../telemetry/telemetry";
 
-export default async function inspectImage(context?: DockerNode) {
+export default async function inspectImage(context?: ImageNode) {
 
     let imageToInspect: Docker.ImageDesc;
 

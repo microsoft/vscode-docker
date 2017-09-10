@@ -13,7 +13,6 @@ import request = require('request-promise');
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../node_modules/azure-arm-containerregistry/lib/operations';
-import { execAzCLI } from './utils/runAzCLI'
 import { ServiceClientCredentials } from 'ms-rest';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
@@ -24,175 +23,62 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
     private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
     readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
-    private _imagesNode: DockerNode;
-    private _containersNode: DockerNode;
-    private _registriesNode: DockerNode;
-    private _debounceTimer: NodeJS.Timer;
 
+    private _imagesNode: RootNode;
+    private _containersNode: RootNode;
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
-        //     this.refreshImages()
-        //     this.refreshContainers()
-        //     this.refreshRegistries()
     }
 
-    refreshRegistries(): void {
-        this._onDidChangeTreeData.fire()
+    refreshImages(): void {
+        if (this._imagesNode) {
+            setTimeout(() => {
+                this._onDidChangeTreeData.fire(this._imagesNode);
+            },3000);
+        }
     }
+
+    refreshContainers(): void {
+        if (this._containersNode) {
+            // give time for containers to stop (e.g. compose down)
+            setTimeout(() => {
+                this._onDidChangeTreeData.fire(this._containersNode);
+            },5000);
+        }
+    }
+
     getTreeItem(element: NodeBase): vscode.TreeItem {
         return element.getTreeItem();
     }
 
     async getChildren(element?: NodeBase): Promise<NodeBase[]> {
-
         if (!element) {
             return this.getRootNodes();
         }
-
         return element.getChildren(element);
-
     }
 
     private async getRootNodes(): Promise<RootNode[]> {
         const rootNodes: RootNode[] = [];
-        rootNodes.push(new RootNode("Images", "imagesRootNode", null));
-        rootNodes.push(new RootNode("Containers", "containersRootNode", null));
-        rootNodes.push(new RootNode("Registries", "registriesRootNode", this._onDidChangeTreeData));
+        let node: RootNode;
+
+        node = new RootNode('Images', 'imagesRootNode', null);
+        this._imagesNode = node;
+        rootNodes.push(node);
+
+        node = new RootNode('Containers', 'containersRootNode', null);
+        this._containersNode = node;
+        rootNodes.push(node);
+
+        node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData);
+        rootNodes.push(node);
+
         return rootNodes;
     }
-
-    private async getDockerNodes(element?: DockerNode): Promise<DockerNode[]> {
-
-        let opts = {};
-        let iconPath: any = {};
-        let contextValue: string = "";
-        let node: DockerNode;
-        const nodes: DockerNode[] = [];
-
-        if (element.contextValue === 'dockerHubRegistry') {
-
-
-        }
-
-        if (element.contextValue === 'dockerHubRegistryImage') {
-            let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
-            for (let i = 0; i < myTags.length; i++) {
-                contextValue = 'dockerHubRegistryImageTag';
-                node = new DockerNode(`${element.repository.name}:${myTags[i].name}`, vscode.TreeItemCollapsibleState.None, contextValue, null);
-                // node.registryPassword = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
-                // node.registryUserName = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
-                node.repository = "";
-                nodes.push(node);
-            }
-
-            return nodes;
-        }
-
-        if (element.contextValue === 'azureSubscription') {
-
-            //var res: string = await execAzCLI("docker run -it -v %HOMEPATH%:/root azuresdk/azure-cli-python:latest az account list");
-
-
-
-        }
-
-        if (element.contextValue === 'azureRegistry') {
-
-
-
-
-
-        }
-
-        if (element.contextValue === 'azureRepository') {
-
-            const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
-
-            if (accessToken && refreshToken) {
-                const tenantId = element.subscription.subscription.tenantId;
-                let refreshTokenARC;
-                let accessTokenARC;
-
-                await request.post('https://' + element.repository + '/oauth2/exchange', {
-                    form: {
-                        grant_type: 'access_token_refresh_token',
-                        service: element.repository,
-                        tenant: tenantId,
-                        refresh_token: refreshToken,
-                        access_token: accessToken
-                    }
-                }, (err, httpResponse, body) => {
-                    if (body.length > 0) {
-                        refreshTokenARC = JSON.parse(body).refresh_token;
-                    } else {
-                        return [];
-                    }
-                });
-
-                await request.post('https://' + element.repository + '/oauth2/token', {
-                    form: {
-                        grant_type: 'refresh_token',
-                        service: element.repository,
-                        scope: 'repository:' + element.label + ':pull',
-                        refresh_token: refreshTokenARC
-                    }
-                }, (err, httpResponse, body) => {
-                    if (body.length > 0) {
-                        accessTokenARC = JSON.parse(body).access_token;
-                    } else {
-                        return [];
-                    }
-                });
-
-                await request.get('https://' + element.repository + '/v2/' + element.label + '/tags/list', {
-                    auth: {
-                        bearer: accessTokenARC
-                    }
-                }, (err, httpResponse, body) => {
-                    if (err) { return []; }
-                    if (body.length > 0) {
-                        const tags = JSON.parse(body).tags;
-                        for (let i = 0; i < tags.length; i++) {
-                            contextValue = "azureRepositoryTag";
-                            node = new DockerNode(element.label + ':' + tags[i], vscode.TreeItemCollapsibleState.None, contextValue, null);
-                            node.repository = element.repository;
-                            node.subscription = element.subscription;
-                            node.accessTokenARC = accessTokenARC;
-                            node.refreshTokenARC = element.refreshTokenARC;
-                            node.registryUserName = element.registryUserName;
-                            node.registryPassword = element.registryPassword;
-                            nodes.push(node);
-                        }
-                    }
-                });
-
-                return nodes;
-            }
-        }
-    }
 }
 
-
-async function acquireToken(session: AzureSession) {
-    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
-        const credentials: any = session.credentials;
-        const environment: any = session.environment;
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken
-                });
-            }
-        });
-    });
-}
-
-
-class NodeBase {
+export class NodeBase {
     readonly label: string;
 
     protected constructor(label: string) {
@@ -210,11 +96,9 @@ class NodeBase {
     async getChildren(element): Promise<NodeBase[]> {
         return [];
     }
-
-
 }
 
-class RootNode extends NodeBase {
+export class RootNode extends NodeBase {
 
     constructor(
         public readonly label: string,
@@ -222,24 +106,13 @@ class RootNode extends NodeBase {
         public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
-        // if (this.eventEmitter) {
-        //     azureAccount.onFiltersChanged((e) => {
-        //         this.eventEmitter.fire(this);
-        //     });
-        //     azureAccount.onStatusChanged((e) => {
-        //         this.eventEmitter.fire(this);
-        //     });
-        //     azureAccount.onSessionsChanged((e) => {
-        //         this.eventEmitter.fire(this);
-        //     });
-        // }
     }
-
 
     getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
-            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+            contextValue: this.contextValue
         }
 
     }
@@ -253,7 +126,7 @@ class RootNode extends NodeBase {
             return this.getContainers();
         }
         if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries2()
+            return this.getRegistries()
         }
 
     }
@@ -268,12 +141,12 @@ class RootNode extends NodeBase {
 
         for (let i = 0; i < images.length; i++) {
             if (!images[i].RepoTags) {
-                let node = new ImageNode("<none>:<none>", "localImageNode");
+                let node = new ImageNode("<none>:<none>", "localImageNode", this.eventEmitter);
                 node.imageDesc = images[i];
                 imageNodes.push(node);
             } else {
                 for (let j = 0; j < images[i].RepoTags.length; j++) {
-                    let node = new ImageNode(images[i].RepoTags[j], "localImageNode");
+                    let node = new ImageNode(images[i].RepoTags[j], "localImageNode", this.eventEmitter);
                     node.imageDesc = images[i];
                     imageNodes.push(node);
                 }
@@ -323,74 +196,20 @@ class RootNode extends NodeBase {
         return containerNodes;
     }
 
-    private async getRegistries2(): Promise<RegistryRootNode[]> {
+    private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
-
         registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", null));
         registryRootNodes.push(new RegistryRootNode('Azure', "azureRootNode", this.eventEmitter));
         return registryRootNodes;
-
     }
-
-    // private async getRegistries(): Promise<RegistryNode[]> {
-    //     const registryNodes: RegistryNode[] = [];
-    //     let iconPath: any = {};
-    //     let node: RegistryNode;
-
-    //     // DockerHub
-    //     iconPath = {
-    //         light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-    //         dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-    //     };
-    //     node = new RegistryNode('Docker Hub', "registry", iconPath);
-    //     node.type = RegistryType.DockerHub;
-    //     registryNodes.push(node);
-
-    //     // Azure Container Registries
-    //     const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
-
-    //     if (loggedIntoAzure) {
-
-    //         const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
-
-    //         for (let i = 0; i < subs.length; i++) {
-
-    //             const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-    //             const registries: ContainerModels.RegistryListResult = await client.registries.list();
-
-    //             for (let j = 0; j < registries.length; j++) {
-
-    //                 if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-    //                     const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-    //                     const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
-
-    //                     iconPath = {
-    //                         light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-    //                         dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-    //                     };
-    //                     node = new RegistryNode(registries[j].loginServer, 'registry', iconPath);
-    //                     node.type = RegistryType.Azure;
-    //                     node.userName = creds.passwords[0].value;
-    //                     node.password = creds.username;
-    //                     node.subscription = subs[i];
-    //                     registryNodes.push(node);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return registryNodes;
-
-    // }
-
-
 }
 
-class ImageNode extends NodeBase {
+export class ImageNode extends NodeBase {
 
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
+        public readonly eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label)
     }
@@ -409,9 +228,10 @@ class ImageNode extends NodeBase {
         }
     }
 
+    // no children
 }
 
-class ContainerNode extends NodeBase {
+export class ContainerNode extends NodeBase {
 
     constructor(
         public readonly label: string,
@@ -431,10 +251,9 @@ class ContainerNode extends NodeBase {
             iconPath: this.iconPath
         }
     }
-
 }
 
-class RegistryRootNode extends NodeBase {
+export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
 
     constructor(
@@ -448,6 +267,7 @@ class RegistryRootNode extends NodeBase {
         } catch (e) {
             // unable to find keytar
         }
+
         if (this.eventEmitter && this.contextValue === 'azureRootNode') {
             azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
@@ -473,16 +293,14 @@ class RegistryRootNode extends NodeBase {
         if (element.contextValue === 'azureRootNode') {
             return this.getAzureRegistries();
         } else if (element.contextValue === 'dockerHubRootNode') {
-            // let res: NodeBase[] = [];
-            // res.push(new NodeBase("test"));
-            // return res;
-
-            return this.getDockerHubNamespaces();
+            return this.getDockerHubOrgs();
+        } else {
+            return [];
         }
     }
 
-    private async getDockerHubNamespaces(): Promise<DockerHubNamespaceNode[]> {
-        const namespaceNodes: DockerHubNamespaceNode[] = [];
+    private async getDockerHubOrgs(): Promise<DockerHubOrgNode[]> {
+        const orgNodes: DockerHubOrgNode[] = [];
 
         let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
 
@@ -500,30 +318,28 @@ class RegistryRootNode extends NodeBase {
                     this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
                 }
             } else {
-                return namespaceNodes;
+                return orgNodes;
             }
         } else {
             dockerHubAPI.setLoginToken(id.token);
         }
 
         const user: any = await dockerHubAPI.loggedInUser();
-        const myRepos = await dockerHubAPI.repositories(user.username);
-
-        for (let i = 0; i < myRepos.length; i++) {
-            const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+        const myRepos: { namespace, name }[] = await dockerHubAPI.repositories(user.username);
+        const namespaces = [...new Set(myRepos.map(item => item.namespace))];
+        namespaces.forEach((namespace) => {
             let iconPath = {
                 light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                 dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
             };
-            //node = new DockerHubNamespaceNode(`${myRepo.namespace}/${myRepo.name}`, 'dockerHubRepository', iconPath);
-            let node = new DockerHubNamespaceNode(`${myRepos[0].namespace}`, 'dockerHubNamespace', iconPath);
+            let node = new DockerHubOrgNode(`${namespace}`, 'dockerHubNamespace', iconPath);
+            node.userName = id.username;
+            node.password = id.password;
+            node.token = id.token;
+            orgNodes.push(node);
+        });
 
-            //node.repository = myRepos[0];
-            namespaceNodes.push(node);
-        }
-
-        //return namespaceNodes;
-        return namespaceNodes;
+        return orgNodes;
     }
 
     private async getAzureRegistries(): Promise<AzureRegistryNode[]> {
@@ -589,7 +405,7 @@ class RegistryRootNode extends NodeBase {
     }
 }
 
-class DockerHubNamespaceNode extends NodeBase {
+export class DockerHubOrgNode extends NodeBase {
 
     constructor(
         public readonly label: string,
@@ -599,44 +415,44 @@ class DockerHubNamespaceNode extends NodeBase {
         super(label);
     }
 
-    // public repository: string;
-    // public userName: string;
-    // public password: string;
-
-    getTreeItem(): vscode.TreeItem {
-        let res =
-            {
-                label: this.label,
-                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                contextValue: this.contextValue,
-                iconPath: this.iconPath
-            }
-
-        return res;
-    }
-}
-
-class fooNode extends NodeBase {
-    constructor(
-        public readonly label: string,
-        public readonly contextValue: string,
-        public readonly iconPath: any = {}
-    ) {
-        super(label);
-    }
+    public repository: string;
+    public userName: string;
+    public password: string;
+    public token: string;
 
     getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-            contextValue: this.contextValue
-            , iconPath: this.iconPath
+            contextValue: this.contextValue,
+            iconPath: this.iconPath
         }
+    }
+
+    async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
+        const repoNodes: DockerHubRepositoryNode[] = [];
+        let node: DockerHubRepositoryNode;
+
+        const user: any = await dockerHubAPI.loggedInUser();
+        const myRepos: { namespace, name }[] = await dockerHubAPI.repositories(user.username);
+
+        for (let i = 0; i < myRepos.length; i++) {
+            const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+            let iconPath = {
+                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
+                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+            };
+            node = new DockerHubRepositoryNode(myRepo.name, 'dockerHubRepository', iconPath);
+            node.repository = myRepo;
+            node.userName = element.userName;
+            node.password = element.password;
+            repoNodes.push(node);
+        }
+        return repoNodes;
     }
 }
 
-class AzureRegistryNode extends NodeBase {
-    private _keytar: typeof keytarType;
+export class DockerHubRepositoryNode extends NodeBase {
 
     constructor(
         public readonly label: string,
@@ -644,11 +460,46 @@ class AzureRegistryNode extends NodeBase {
         public readonly iconPath: any = {}
     ) {
         super(label);
-        try {
-            this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
-        } catch (e) {
-            // unable to find keytar
+    }
+
+    public repository: any;
+    public userName: string;
+    public password: string;
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+            contextValue: this.contextValue,
+            iconPath: this.iconPath
         }
+    }
+
+    async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
+        const imageNodes: DockerHubImageNode[] = [];
+        let node: DockerHubImageNode;
+
+        let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
+        for (let i = 0; i < myTags.length; i++) {
+            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
+            node.password = element.password;
+            node.userName = element.userName;
+            imageNodes.push(node);
+        }
+
+        return imageNodes;
+
+    }
+}
+
+export class AzureRegistryNode extends NodeBase {
+
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string,
+        public readonly iconPath: any = {}
+    ) {
+        super(label);
     }
 
     public type: RegistryType;
@@ -665,9 +516,9 @@ class AzureRegistryNode extends NodeBase {
         }
     }
 
-    async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
-        const repoNodes: RepositoryNode[] = [];
-        let node: RepositoryNode;
+    async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
+        const repoNodes: AzureRepositoryNode[] = [];
+        let node: AzureRepositoryNode;
 
         const tenantId: string = element.subscription.tenantId;
         const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
@@ -716,7 +567,7 @@ class AzureRegistryNode extends NodeBase {
                 if (body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
                     for (let i = 0; i < repositories.length; i++) {
-                        node = new RepositoryNode(repositories[i], "azureRepository");
+                        node = new AzureRepositoryNode(repositories[i], "azureRepository");
                         node.repository = element.label;
                         node.subscription = element.subscription;
                         node.accessTokenARC = accessTokenARC;
@@ -731,27 +582,9 @@ class AzureRegistryNode extends NodeBase {
 
         return repoNodes;
     }
-
-    async acquireToken(session: AzureSession) {
-        return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
-            const credentials: any = session.credentials;
-            const environment: any = session.environment;
-            credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({
-                        accessToken: result.accessToken,
-                        refreshToken: result.refreshToken
-                    });
-                }
-            });
-        });
-    }
 }
 
-
-class RepositoryNode extends NodeBase {
+export class AzureRepositoryNode extends NodeBase {
 
     constructor(
         public readonly label: string,
@@ -777,6 +610,109 @@ class RepositoryNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: this.contextValue,
             iconPath: this.iconPath
+        }
+    }
+
+    async getChildren(element: AzureRepositoryNode): Promise<AzureImageNode[]> {
+        const imageNodes: AzureImageNode[] = [];
+        let node: AzureImageNode;
+
+        const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
+
+        if (accessToken && refreshToken) {
+            const tenantId = element.subscription.tenantId;
+            let refreshTokenARC;
+            let accessTokenARC;
+
+            await request.post('https://' + element.repository + '/oauth2/exchange', {
+                form: {
+                    grant_type: 'access_token_refresh_token',
+                    service: element.repository,
+                    tenant: tenantId,
+                    refresh_token: refreshToken,
+                    access_token: accessToken
+                }
+            }, (err, httpResponse, body) => {
+                if (body.length > 0) {
+                    refreshTokenARC = JSON.parse(body).refresh_token;
+                } else {
+                    return [];
+                }
+            });
+
+            await request.post('https://' + element.repository + '/oauth2/token', {
+                form: {
+                    grant_type: 'refresh_token',
+                    service: element.repository,
+                    scope: 'repository:' + element.label + ':pull',
+                    refresh_token: refreshTokenARC
+                }
+            }, (err, httpResponse, body) => {
+                if (body.length > 0) {
+                    accessTokenARC = JSON.parse(body).access_token;
+                } else {
+                    return [];
+                }
+            });
+
+            await request.get('https://' + element.repository + '/v2/' + element.label + '/tags/list', {
+                auth: {
+                    bearer: accessTokenARC
+                }
+            }, (err, httpResponse, body) => {
+                if (err) { return []; }
+                if (body.length > 0) {
+                    const tags = JSON.parse(body).tags;
+                    for (let i = 0; i < tags.length; i++) {
+                        node = new AzureImageNode(element.label + ':' + tags[i], 'azureRepositoryTag');
+                        // node.repository = element.repository;
+                        // node.subscription = element.subscription;
+                        // node.accessTokenARC = accessTokenARC;
+                        // node.refreshTokenARC = element.refreshTokenARC;
+                        // node.registryUserName = element.registryUserName;
+                        // node.registryPassword = element.registryPassword;
+                        imageNodes.push(node);
+                    }
+                }
+            });
+        }
+        return imageNodes;
+    }
+}
+
+export class AzureImageNode extends NodeBase {
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string
+    ) {
+        super(label);
+    }
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None,
+            contextValue: this.contextValue
+        }
+    }
+}
+
+export class DockerHubImageNode extends NodeBase {
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string
+    ) {
+        super(label);
+    }
+
+    public userName: string;
+    public password: string;
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None,
+            contextValue: this.contextValue
         }
     }
 }
@@ -833,3 +769,19 @@ interface PartialList<T> extends Array<T> {
 }
 
 
+async function acquireToken(session: AzureSession) {
+    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
+        const credentials: any = session.credentials;
+        const environment: any = session.environment;
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    accessToken: result.accessToken,
+                    refreshToken: result.refreshToken
+                });
+            }
+        });
+    });
+}

@@ -1,13 +1,13 @@
 import vscode = require('vscode');
 import { docker } from './utils/docker-endpoint';
 import { reporter } from '../telemetry/telemetry';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ContainerNode } from '../explorer/dockerExplorer';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
-export async function removeContainer(context?: DockerNode) {
+export async function removeContainer(context?: ContainerNode) {
 
     let containersToRemove: Docker.ContainerDesc[];
 
@@ -40,9 +40,11 @@ export async function removeContainer(context?: DockerNode) {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
+                        dockerExplorerProvider.refreshContainers();
                         reject();
                     }
                     if (containerCounter === numContainers) {
+                        dockerExplorerProvider.refreshContainers();
                         resolve();
                     }
                 });

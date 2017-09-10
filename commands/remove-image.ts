@@ -2,12 +2,12 @@ import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ImageNode } from '../explorer/dockerExplorer';
 import { dockerExplorerProvider } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.image.remove';
 
-export async function removeImage(context?: DockerNode) {
+export async function removeImage(context?: ImageNode) {
 
     let imagesToRemove: Docker.ImageDesc[];
 
@@ -34,9 +34,11 @@ export async function removeImage(context?: DockerNode) {
                     imageCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
+                        dockerExplorerProvider.refreshImages();
                         reject();
                     }
                     if (imageCounter === numImages) {
+                        dockerExplorerProvider.refreshImages();
                         resolve();
                     }
                 });
