@@ -372,8 +372,7 @@
       "explorer": [
         {
           "id": "dockerExplorer",
-          "name": "Docker",
-          "when": "config.docker.showExplorer == true"
+          "name": "Docker"
         }
       ]
     }
