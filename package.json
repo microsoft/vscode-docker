@@ -395,7 +395,7 @@
     "@types/node": "^6.0.40"
   },
   "dependencies": {
-    "dockerfile-language-server-nodejs": "^0.0.6",
+    "dockerfile-language-server-nodejs": "^0.0.7",
     "dockerode": "^2.3.2",
     "vscode-extension-telemetry": "^0.0.6",
     "vscode-languageclient": "^3.1.0"
