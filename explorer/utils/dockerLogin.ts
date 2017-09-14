@@ -24,5 +24,5 @@ export function dockerHubLogout(): void {
     keytar.deletePassword('vscode-docker', 'dockerhub.token');
     keytar.deletePassword('vscode-docker', 'dockerhub.password');
     keytar.deletePassword('vscode-docker', 'dockerhub.username');
-    dockerHubAPI.setToken('');
+    dockerHubAPI.setLoginToken('');
 }
