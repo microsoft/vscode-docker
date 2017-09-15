@@ -2,6 +2,7 @@
 
 * Add `docker inspect` command
 * Add Explorer contribution, letting you view Images and Containers in the Explorer viewlet.
+* Add `--rm` to `docker build` to remove intermediate images
 * Thanks to @rcjsuen, moved to the [Dockerfile Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs) 
 * Update thirdpartynotices.txt, README.md to reflect changes
 

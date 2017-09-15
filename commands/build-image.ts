@@ -90,7 +90,7 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
     if (!value) return;
 
     const terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-    terminal.sendText(`docker build -f ${uri.file} -t ${value} ${uri.path}`);
+    terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${uri.path}`);
     terminal.show();
 
     dockerExplorerProvider.refreshImages(true);
