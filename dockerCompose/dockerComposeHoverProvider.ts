@@ -5,12 +5,12 @@
 'use strict';
 
 import { Range, TextDocument, Position, CancellationToken, HoverProvider, Hover, MarkedString } from 'vscode';
-import { KeyInfo } from "./dockerExtension";
-import parser = require('./parser');
-import hub = require('./dockerHubApi');
-import suggestHelper = require('./helpers/suggestSupportHelper');
+import { KeyInfo } from "../dockerExtension";
+import parser = require('../parser');
+import hub = require('../dockerHubApi');
+import suggestHelper = require('../helpers/suggestSupportHelper');
 
-export class DockerHoverProvider implements HoverProvider {
+export class DockerComposeHoverProvider implements HoverProvider {
     _parser: parser.Parser;
     _keyInfo: KeyInfo;
 
