@@ -9,8 +9,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
     readonly onDidChangeTreeData: vscode.Event<DockerNode | undefined> = this._onDidChangeTreeData.event;
     private _imagesNode: DockerNode;
     private _containersNode: DockerNode;
-    
-     refresh(): void {
+
+    refresh(): void {
         this.refreshImages(false)
         this.refreshContainers(false)
     }
@@ -21,10 +21,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 this._onDidChangeTreeData.fire(this._imagesNode);
             }, 5000);
         } else {
-        this._onDidChangeTreeData.fire(this._imagesNode);
+            this._onDidChangeTreeData.fire(this._imagesNode);
         }
     }
-    
+
     refreshContainers(delay: boolean): void {
         if (delay) {
             setTimeout(() => {
@@ -57,28 +57,43 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
         } else {
 
             if (element.contextValue === 'rootImages') {
-                const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
-                if (!images || images.length == 0) {
-                    return [];
-                } else {
-                    iconPath = {
-                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'application.svg'),
-                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'application.svg')
-                    };
-                    for (let i = 0; i < images.length; i++) {
-                        contextValue = "dockerImage";
-                        if (!images[i].RepoTags) {
-                            let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
-                            node.imageDesc = images[i];
-                            nodes.push(node);
-                        } else {
-                            for (let j = 0; j < images[i].RepoTags.length; j++) {
-                                let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
+
+                let opts = {
+                    "filters": {
+                        "dangling": ["false"]
+                    }
+                };
+
+                try {
+                    const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
+
+                    if (!images || images.length == 0) {
+                        return [];
+                    } else {
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', 'images', 'light', 'application.svg'),
+                            dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'application.svg')
+                        };
+                        for (let i = 0; i < images.length; i++) {
+                            contextValue = "dockerImage";
+                            if (!images[i].RepoTags) {
+                                let node = new DockerNode("<none>:<none>", vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
                                 node.imageDesc = images[i];
                                 nodes.push(node);
+                            } else {
+                                for (let j = 0; j < images[i].RepoTags.length; j++) {
+                                    let node = new DockerNode(images[i].RepoTags[j], vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
+                                    node.imageDesc = images[i];
+                                    nodes.push(node);
+                                }
                             }
                         }
                     }
+                } catch (error) {
+                    if (error.code === "ENOENT") {
+                        vscode.window.showErrorMessage('Unable to connect to Docker, is the service running?');
+                    }
+                    console.log(error);
                 }
             }
 
@@ -90,31 +105,39 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                     }
                 };
 
-                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
-                if (!containers || containers.length == 0) {
-                    return [];
-                } else {
-                    for (let i = 0; i < containers.length; i++) {
-                        if (['exited', 'dead'].includes(containers[i].State)) {
-                            contextValue = "dockerContainerStopped";
-                            iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
-                            };
-                        } else {
-                            contextValue = "dockerContainerRunning";
-                            iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
-                            };
+                try {
+                    
+                    const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+                    if (!containers || containers.length == 0) {
+                        return [];
+                    } else {
+                        for (let i = 0; i < containers.length; i++) {
+                            if (['exited', 'dead'].includes(containers[i].State)) {
+                                contextValue = "dockerContainerStopped";
+                                iconPath = {
+                                    light: path.join(__filename, '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
+                                    dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
+                                };
+                            } else {
+                                contextValue = "dockerContainerRunning";
+                                iconPath = {
+                                    light: path.join(__filename, '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
+                                    dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
+                                };
+                            }
+    
+                            const containerName = containers[i].Names[0].substring(1);
+                            let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
+                            node.containerDesc = containers[i];
+                            nodes.push(node);
+    
                         }
-
-                        const containerName = containers[i].Names[0].substring(1);
-                        let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
-                        node.containerDesc = containers[i];
-                        nodes.push(node);
-
                     }
+                } catch (error) {
+                    if (error.code === "ENOENT") {
+                        vscode.window.showErrorMessage('Unable to connect to Docker, is the service running?');
+                    }
+                    console.log(error);                    
                 }
             }
         }

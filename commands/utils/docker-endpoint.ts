@@ -28,9 +28,12 @@ class DockerClient {
         });
     };
 
-    public getImageDescriptors(): Thenable<Docker.ImageDesc[]>{
+    public getImageDescriptors(opts?: {}): Thenable<Docker.ImageDesc[]>{
         return new Promise((resolve, reject) => {
-            this.endPoint.listImages((err, images) => {
+            if (!opts) {
+                let opts = {}
+            }
+            this.endPoint.listImages(opts, (err, images) => {
                 if (err) {
                     return reject(err); 
                 }
