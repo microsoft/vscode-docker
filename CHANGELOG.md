@@ -1,4 +1,4 @@
-## 0.0.17 - XX XXXX 2017
+## 0.0.17 - 16 Sept 2017
 
 * Add `docker inspect` command
 * Gracefully handle when Docker is not running
