@@ -1,6 +1,7 @@
 ## 0.0.17 - XX XXXX 2017
 
 * Add `docker inspect` command
+* Gracefully handle when Docker is not running
 * Add Explorer contribution, letting you view Images and Containers in the Explorer viewlet.
 * Add `--rm` to `docker build` to remove intermediate images
 * Thanks to @rcjsuen, moved to the [Dockerfile Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs) 
