@@ -24,7 +24,7 @@ Many of the most common Docker and docker compose commands are built right into 
 ## Explorer Integration
 The Docker Explorer lets you view and manage your Images and Containers. The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
 
-![explorer integration](images/explorer.gif)
+![explorer integration](images/explorer.png)
 
 > Note: You can move the Explorer up or down by dragging the `DOCKER` sash, you can hide the Explorer by right clicking on the `DOCKER` sash and choosing `Remove from side bar`. To bring it back, right click on the `EXPLORER` title at the top of the side bar.
 
