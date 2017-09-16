@@ -98,14 +98,14 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         if (['exited', 'dead'].includes(containers[i].State)) {
                             contextValue = "dockerContainerStopped";
                             iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'breakpointWindow.svg'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'breakpointWindow.svg')
+                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
+                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
                             };
                         } else {
                             contextValue = "dockerContainerRunning";
                             iconPath = {
-                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'applicationRunning.svg'),
-                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'applicationRunning.svg')
+                                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
+                                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
                             };
                         }
 

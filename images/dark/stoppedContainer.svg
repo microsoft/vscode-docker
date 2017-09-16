@@ -1,0 +1,9 @@
+<svg 
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+    <style>.icon-canvas-transparent{opacity:0;fill:#f6f6f6}.icon-vs-out{fill:#f6f6f6}.icon-vs-bg{fill:#424242}.icon-vs-fg{fill:#f0eff1}.icon-vs-red{fill:#e51400}.icon-white{fill:#fff}</style>
+    <path class="icon-canvas-transparent" d="M16 16H0V0h16v16z" id="canvas"/>
+    <path class="icon-vs-out" d="M16 1v14h-1.382c-.703.615-1.612 1-2.618 1a3.966 3.966 0 0 1-2.618-1H0V1h16z" id="outline"/>
+    <path class="icon-vs-bg" d="M8.556 14H1V2h14v7.382a4.001 4.001 0 0 0-1-.826V5H2v8h6.142c.092.356.233.69.414 1z" id="iconBg"/>
+    <path class="icon-vs-fg" d="M8.142 13H2V5h12v3.556A3.959 3.959 0 0 0 12 8c-2.206 0-4 1.794-4 4 0 .347.058.679.142 1z" id="iconFg"/>
+    <circle class="icon-vs-red" id="notificationFg" r="3" cy="12" cx="12"/>
+</svg>
