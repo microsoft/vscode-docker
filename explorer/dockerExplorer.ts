@@ -90,9 +90,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                         }
                     }
                 } catch (error) {
-                    if (error.code === "ENOENT") {
-                        vscode.window.showErrorMessage('Unable to connect to Docker, is the service running?');
-                    }
+                    vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
                     console.log(error);
                 }
             }
@@ -106,7 +104,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                 };
 
                 try {
-                    
+
                     const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
                     if (!containers || containers.length == 0) {
                         return [];
@@ -125,19 +123,17 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<DockerNod
                                     dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
                                 };
                             }
-    
+
                             const containerName = containers[i].Names[0].substring(1);
                             let node = new DockerNode(`${containers[i].Image} (${containerName}) [${containers[i].Status}]`, vscode.TreeItemCollapsibleState.None, contextValue, iconPath);
                             node.containerDesc = containers[i];
                             nodes.push(node);
-    
+
                         }
                     }
                 } catch (error) {
-                    if (error.code === "ENOENT") {
-                        vscode.window.showErrorMessage('Unable to connect to Docker, is the service running?');
-                    }
-                    console.log(error);                    
+                    vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
+                    console.log(error);
                 }
             }
         }
