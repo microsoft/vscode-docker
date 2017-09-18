@@ -26,7 +26,13 @@ The Docker Explorer lets you view and manage your Images and Containers. The rig
 
 ![explorer integration](images/explorer.png)
 
-> Note: You can move the Explorer up or down by dragging the `DOCKER` sash, you can hide the Explorer by right clicking on the `DOCKER` sash and choosing `Remove from side bar`. To bring it back, right click on the `EXPLORER` title at the top of the side bar.
+You can move the Explorer up or down by dragging the `DOCKER` sash, you can hide the Explorer by right clicking on the `DOCKER` sash and choosing `Remove from side bar`. To bring it back, right click on the `EXPLORER` title at the top of the side bar. This state is persisted on a _per-workspace_ basis. 
+
+If you want to turn the Explorer off for all workspaces, set the `showExplorer` configuration setting to `false`. Press `CMD+,` (or `CTRL+,` on Windows/Linux) to bring up the user level settings and add this to the right side:
+
+``` json
+"docker.showExplorer": false
+```
 
 ## Azure CLI
 Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. 

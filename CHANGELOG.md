@@ -1,3 +1,8 @@
+
+## 0.0.18 - 18 Sept 2017
+
+* Add configuration option (`"docker.showExplorer": false`) to globally turn off or on the Explorer contribution
+
 ## 0.0.17 - 16 Sept 2017
 
 * Add `docker inspect` command
