@@ -2,6 +2,7 @@
 ## 0.0.18 - 18 Sept 2017
 
 * Add configuration option (`"docker.showExplorer": false`) to globally turn off or on the Explorer contribution
+* Prompt for confirmation when running `docker system prune` command, improve icon
 
 ## 0.0.17 - 16 Sept 2017
 
