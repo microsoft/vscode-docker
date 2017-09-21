@@ -217,21 +217,14 @@ interface PackageJson {
     version: string
 }
 
-function hasWorkspaceFolder(): boolean {
-    return vscode.workspace.rootPath ? true : false;
-}
-
-async function getPackageJson(): Promise<vscode.Uri[]> {
-    if (!hasWorkspaceFolder()) {
-        return;
-    }
-
+async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
+    // TODO@Ben use relative pattern support
     return vscode.workspace.findFiles('package.json', null, 1, null);
 }
 
-async function readPackageJson(): Promise<PackageJson> {
+async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
     // open package.json and look for main, scripts start
-    const uris: vscode.Uri[] = await getPackageJson();
+    const uris: vscode.Uri[] = await getPackageJson(folder);
     var pkg: PackageJson = {
         npmStart: true,
         fullCommand: 'npm start',
@@ -286,7 +279,9 @@ const YES_OR_NO_PROMPT: vscode.MessageItem[] = [
 ];
 
 export async function configure(): Promise<void> {
-    if (!hasWorkspaceFolder()) {
+    // TODO need the workspace folder picker here
+    let folder: vscode.WorkspaceFolder = void 0;
+    if (!folder) {
         vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
         return;
     }
@@ -297,8 +292,8 @@ export async function configure(): Promise<void> {
     const port = await promptForPort();
     if (!port) return;
 
-    const serviceName = path.basename(vscode.workspace.rootPath).toLowerCase();
-    const pkg = await readPackageJson();
+    const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
+    const pkg = await readPackageJson(folder);
     
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
@@ -310,7 +305,7 @@ export async function configure(): Promise<void> {
     });
 
     async function createWorkspaceFileIfNotExists(fileName, writerFunction) {
-        const workspacePath = path.join(vscode.workspace.rootPath, fileName);
+        const workspacePath = path.join(folder.uri.fsPath, fileName);
         if (fs.existsSync(workspacePath)) {
             const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
             if (item.title.toLowerCase() === 'yes') {
