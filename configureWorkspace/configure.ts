@@ -218,8 +218,7 @@ interface PackageJson {
 }
 
 async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    // TODO@Ben use relative pattern support
-    return vscode.workspace.findFiles('package.json', null, 1, null);
+    return vscode.workspace.findFiles(new vscode.RelativePattern('package.json', folder), null, 1, null);
 }
 
 async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
@@ -279,10 +278,19 @@ const YES_OR_NO_PROMPT: vscode.MessageItem[] = [
 ];
 
 export async function configure(): Promise<void> {
-    // TODO need the workspace folder picker here
-    let folder: vscode.WorkspaceFolder = void 0;
+    let folder: vscode.WorkspaceFolder;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+        folder = vscode.workspace.workspaceFolders[0];
+    } else {
+        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+    }
+
     if (!folder) {
-        vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
+        if (!vscode.workspace.workspaceFolders) {
+            vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
+        } else {
+            vscode.window.showErrorMessage('Docker files can only be generated if a workspace folder is picked in VS Code.');
+        }
         return;
     }
 

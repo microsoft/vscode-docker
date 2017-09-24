@@ -5,8 +5,7 @@ import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    // TODO@Ben use relative pattern support
-    return await vscode.workspace.findFiles(COMPOSE_FILE_GLOB_PATTERN, null, 9999, null);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(COMPOSE_FILE_GLOB_PATTERN, folder), null, 9999, null);
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -14,7 +13,7 @@ interface Item extends vscode.QuickPickItem {
     file: string
 }
 
-function createItem(uri: vscode.Uri, folder?: vscode.WorkspaceFolder): Item {
+function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
     const filePath = folder ? path.join('.', uri.fsPath.substr(folder.uri.fsPath.length)) : uri.fsPath;
 
     return <Item>{
@@ -25,19 +24,28 @@ function createItem(uri: vscode.Uri, folder?: vscode.WorkspaceFolder): Item {
     };
 }
 
-function computeItems(uris: vscode.Uri[], folder?: vscode.WorkspaceFolder): vscode.QuickPickItem[] {
+function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscode.QuickPickItem[] {
     const items: vscode.QuickPickItem[] = [];
     for (let i = 0; i < uris.length; i++) {
-        items.push(createItem(uris[i], folder));
+        items.push(createItem(folder, uris[i]));
     }
     return items;
 }
 
 export async function compose(command: string, message: string) {
-    // TODO@Ben need the workspace folder picker here
-    let folder: vscode.WorkspaceFolder = void 0;
+    let folder: vscode.WorkspaceFolder;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+        folder = vscode.workspace.workspaceFolders[0];
+    } else {
+        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+    }
+
     if (!folder) {
-        vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
+        if (!vscode.workspace.workspaceFolders) {
+            vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
+        } else {
+            vscode.window.showErrorMessage('Docker compose can only run if a workspace folder is picked in VS Code.');
+        }
         return;
     }
 
@@ -45,7 +53,7 @@ export async function compose(command: string, message: string) {
     if (!uris || uris.length == 0) {
         vscode.window.showInformationMessage('Couldn\'t find any docker-compose file in your workspace.');
     } else {
-        const items: vscode.QuickPickItem[] = computeItems(uris, folder);
+        const items: vscode.QuickPickItem[] = computeItems(folder, uris);
         const selectedItem: Item = <Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` });
         if (selectedItem) {
             const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
