@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { COMPOSE_FILE_GLOB_PATTERN, dockerExplorerProvider } from '../dockerExtension';
+import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
@@ -51,7 +51,6 @@ export async function compose(command: string, message: string) {
             const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
             terminal.sendText(`docker-compose -f ${selectedItem.file} ${command}`);
             terminal.show();
-            dockerExplorerProvider.refreshContainers(true);
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
                     command: teleCmdId + command

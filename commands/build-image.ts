@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { reporter } from '../telemetry/telemetry';
-import { DOCKERFILE_GLOB_PATTERN, dockerExplorerProvider } from '../dockerExtension';
+import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.image.build';
 
@@ -93,8 +93,6 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
     terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${uri.path}`);
     terminal.show();
 
-    dockerExplorerProvider.refreshImages(true);
-    
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId
