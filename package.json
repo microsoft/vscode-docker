@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -199,6 +199,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show or hide the Explorer."
+        },
+        "docker.explorerRefreshInterval": {
+          "type": "number",
+          "default": 1000,
+          "description": "Explorer refresh interval, default is 1000ms."
         },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "type": "string",

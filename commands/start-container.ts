@@ -5,7 +5,6 @@ import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
 import { DockerNode } from '../explorer/dockerExplorer';
-import { dockerExplorerProvider } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
@@ -36,8 +35,6 @@ export async function startContainer(context?:DockerNode, interactive?: boolean)
             terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
-            dockerExplorerProvider.refreshContainers(true);
-            
             if (reporter) {
                 reporter.sendTelemetryEvent('command', {
                     command: interactive ? teleCmdId + '.interactive' : teleCmdId

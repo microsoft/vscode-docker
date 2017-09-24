@@ -1,6 +1,5 @@
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
-import { dockerExplorerProvider } from '../dockerExtension';
 import { docker } from './utils/docker-endpoint';
 
 const teleCmdId: string = 'vscode-docker.system.prune';
@@ -21,8 +20,6 @@ export async function systemPrune() {
         }
 
         terminal.show();
-        dockerExplorerProvider.refreshContainers(true);
-        dockerExplorerProvider.refreshImages(true);
 
     } catch (error) {
         vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');

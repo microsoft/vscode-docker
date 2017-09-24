@@ -34,11 +34,11 @@ export async function removeImage(context?: DockerNode) {
                     imageCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshImages(false);
+                        dockerExplorerProvider.refreshImages();
                         reject();
                     }
                     if (imageCounter === numImages) {
-                        dockerExplorerProvider.refreshImages(false);
+                        dockerExplorerProvider.refreshImages();
                         resolve();
                     }
                 });
