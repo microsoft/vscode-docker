@@ -5,7 +5,7 @@ import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(COMPOSE_FILE_GLOB_PATTERN, folder), null, 9999, null);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, null);
 }
 
 interface Item extends vscode.QuickPickItem {

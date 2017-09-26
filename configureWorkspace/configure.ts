@@ -218,7 +218,7 @@ interface PackageJson {
 }
 
 async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return vscode.workspace.findFiles(new vscode.RelativePattern('package.json', folder), null, 1, null);
+    return vscode.workspace.findFiles(new vscode.RelativePattern(folder, 'package.json'), null, 1, null);
 }
 
 async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {

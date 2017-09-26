@@ -6,7 +6,7 @@ import { DOCKERFILE_GLOB_PATTERN, dockerExplorerProvider } from '../dockerExtens
 const teleCmdId: string = 'vscode-docker.image.build';
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(DOCKERFILE_GLOB_PATTERN, folder), null, 1000, null);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), null, 1000, null);
 }
 
 interface Item extends vscode.QuickPickItem {
