@@ -389,7 +389,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.16.0"
+    "vscode": "^1.17.0"
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
