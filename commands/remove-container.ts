@@ -40,11 +40,11 @@ export async function removeContainer(context?: ContainerNode) {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers(true);
+                        dockerExplorerProvider.refreshContainers();
                         reject();
                     }
                     if (containerCounter === numContainers) {
-                        dockerExplorerProvider.refreshContainers(true);
+                        dockerExplorerProvider.refreshContainers();
                         resolve();
                     }
                 });

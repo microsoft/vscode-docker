@@ -15,7 +15,4 @@ export async function systemPrune() {
         });
     }
 
-    dockerExplorerProvider.refreshContainers(false);
-    dockerExplorerProvider.refreshImages(false);
-    
 }

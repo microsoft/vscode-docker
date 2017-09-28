@@ -42,8 +42,6 @@ export async function startContainer(context?:ImageNode, interactive?: boolean) 
                 });
             }
 
-            dockerExplorerProvider.refreshContainers(false);
-
         });
     }
 }
@@ -87,7 +85,5 @@ export async function startAzureCLI() {
                 command: teleCmdId + '.azurecli'
             });
         }
-        dockerExplorerProvider.refreshImages(false);        
-        dockerExplorerProvider.refreshContainers(false);
     }
 }

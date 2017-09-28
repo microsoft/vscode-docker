@@ -23,38 +23,142 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
     private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
     readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
-
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
+    private _imageCache: Docker.ImageDesc[];
+    private _containerCache: Docker.ContainerDesc[];
+    private _imageDebounceTimer: NodeJS.Timer;
+    private _containerDebounceTimer: NodeJS.Timer;
 
     refresh(): void {
-        this._onDidChangeTreeData.fire();
+        this._onDidChangeTreeData.fire(this._imagesNode);
+        this._onDidChangeTreeData.fire(this._containersNode);
     }
 
-    refreshImages(immediate: boolean): void {
-        if (this._imagesNode) {
-            if (immediate) {
-                this._onDidChangeTreeData.fire(this._imagesNode);
-            } else {
-                setTimeout(() => {
+    refreshImages(): void {
+        this._onDidChangeTreeData.fire(this._imagesNode);
+    }
+
+    refreshContainers(): void {
+        this._onDidChangeTreeData.fire(this._imagesNode);
+    }
+
+    autoRefreshImages(): void {
+
+        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+        const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
+
+        // https://github.com/Microsoft/vscode/issues/30535
+        // if (this._imagesNode.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed) {
+        //     clearInterval(this._imageDebounceTimer);
+        //     return;
+        // }
+
+        clearInterval(this._imageDebounceTimer);
+
+        if (refreshInterval > 0) {
+            this._imageDebounceTimer = setInterval(async () => {
+
+                const opts = {
+                    "filters": {
+                        "dangling": ["false"]
+                    }
+                };
+
+                let needToRefresh: boolean = false;
+                let found: boolean = false;
+
+                const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
+
+                if (this._imageCache.length !== images.length) {
+                    needToRefresh = true;
+                } else {
+                    for (let i: number = 0; i < this._imageCache.length; i++) {
+                        let before: string = JSON.stringify(this._imageCache[i]);
+                        for (let j: number = 0; j < images.length; j++) {
+                            let after: string = JSON.stringify(images[j]);
+                            if (before === after) {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            needToRefresh = true;
+                            break
+                        }
+                    }
+                }
+
+                if (needToRefresh) {
                     this._onDidChangeTreeData.fire(this._imagesNode);
-                }, 3000);
-            }
+                    this._imageCache = images;
+                }
+
+            }, refreshInterval);
         }
+
     }
 
-    refreshContainers(immediate: boolean): void {
-        if (this._containersNode) {
-            if (immediate) {
-                this._onDidChangeTreeData.fire(this._containersNode);
-            } else {
-                // give time for containers to stop (e.g. compose down)
-                setTimeout(() => {
+    containersAutoRefresh(): void {
+        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+        const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
+
+        // https://github.com/Microsoft/vscode/issues/30535
+        // if (this._containersNode.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed) {
+        //     clearInterval(this._containerDebounceTimer);
+        //     return;
+        // }
+
+        clearInterval(this._containerDebounceTimer);
+
+        if (refreshInterval > 0) {
+            this._containerDebounceTimer = setInterval(async () => {
+
+                const opts = {
+                    "filters": {
+                        "status": ["created", "restarting", "running", "paused", "exited", "dead"]
+                    }
+                };
+
+                let needToRefresh: boolean = false;
+                let found: boolean = false;
+
+                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+
+                if (this._containerCache.length !== containers.length) {
+                    needToRefresh = true;
+                } else {
+                    for (let i = 0; i < this._containerCache.length; i++) {
+                        let img: Docker.ContainerDesc = this._containerCache[i];
+                        for (let j = 0; j < containers.length; j++) {
+                            // can't do a full object compare because "Status" keeps changing for running containers
+                            if (img.Id === containers[j].Id &&
+                                img.Image === containers[j].Image &&
+                                img.State === containers[j].State) {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            needToRefresh = true;
+                            break
+                        }
+                    }
+                }
+
+                if (needToRefresh) {
                     this._onDidChangeTreeData.fire(this._containersNode);
-                }, 5000);
-            }
+                    this._containerCache = containers;
+                }
+
+            }, refreshInterval);
+
         }
+
     }
+
 
     getTreeItem(element: NodeBase): vscode.TreeItem {
         return element.getTreeItem();
