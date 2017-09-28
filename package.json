@@ -412,7 +412,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.16.0"
+    "vscode": "^1.17.0"
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
@@ -428,14 +428,14 @@
     "vscode": "^1.0.0",
     "typescript": "^2.1.5",
     "@types/node": "^6.0.40",
-    "@types/keytar": "4.0.1"    
+    "@types/keytar": "4.0.1"
   },
   "dependencies": {
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "docker-hub-api": "^0.5.1",
-    "dockerfile-language-server-nodejs": "^0.0.6",
-    "dockerode": "^2.3.2",
+    "dockerfile-language-server-nodejs": "^0.0.7",
+    "dockerode": "^2.5.1",
     "ms-rest": "^2.2.1",
     "ms-rest-azure": "^2.2.3",
     "vscode-extension-telemetry": "^0.0.6",
