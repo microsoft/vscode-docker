@@ -1,3 +1,6 @@
+## 0.0.19 - 24 Sept 2017
+
+* Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
 
 ## 0.0.18 - 18 Sept 2017
 
