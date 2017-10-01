@@ -70,6 +70,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
 
+                if (!this._imageCache) {
+                    this._imageCache = images;
+                }
+
                 if (this._imageCache.length !== images.length) {
                     needToRefresh = true;
                 } else {
@@ -126,6 +130,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
                 const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
 
+                if (!this._containerCache) {
+                    this._containerCache = containers;
+                }
+                
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
@@ -178,10 +186,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         node = new RootNode('Images', 'imagesRootNode', null);
         this._imagesNode = node;
         rootNodes.push(node);
+        this.autoRefreshImages();
 
         node = new RootNode('Containers', 'containersRootNode', null);
         this._containersNode = node;
         rootNodes.push(node);
+        this.containersAutoRefresh();
 
         node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData);
         rootNodes.push(node);
