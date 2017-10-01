@@ -298,14 +298,14 @@ export class RootNode extends NodeBase {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";
                     iconPath = {
-                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'stoppedContainersvg'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'stoppedContainersvg')
                     };
                 } else {
                     contextValue = "runningLocalContainerNode";
                     iconPath = {
-                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'moby_small.png'),
-                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'moby_small.png')
+                        light: path.join(__filename, '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
+                        dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
                     };
                 }
 
@@ -344,8 +344,8 @@ export class ImageNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: "localImageNode",
             iconPath: {
-                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'mono_moby_small.png'),
-                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'mono_moby_small.png')
+                light: path.join(__filename, '..', '..', '..', 'images', 'light', 'application.svg'),
+                dark: path.join(__filename, '..', '..', '..', 'images', 'dark', 'application.svg')
             }
         }
     }
