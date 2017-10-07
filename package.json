@@ -45,6 +45,7 @@
     "onCommand:vscode-docker.createWebApp",
     "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
+    "onCommand:vscode-docker.dockerHubLogout",
     "onView:dockerExplorer"
   ],
   "main": "./out/dockerExtension",
@@ -168,6 +169,10 @@
         {
           "command": "vscode-docker.createWebApp",
           "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.dockerHubLogout",
+          "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
         }
       ]
     },
@@ -390,6 +395,11 @@
         "command": "vscode-docker.createWebApp",
         "title": "Deploy Image to Azure App Service",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.dockerHubLogout",
+        "title": "DockerHub Logout",
+        "category": "Docker"
       }
     ],
     "views": {
@@ -424,6 +434,11 @@
     "dockerfile-language-server-nodejs": "^0.0.7",
     "dockerode": "^2.5.1",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.1.0"
+    "vscode-languageclient": "^3.1.0",
+    "azure-arm-containerregistry": "^2.0.0-preview",
+    "azure-arm-resource": "^3.0.0-preview",
+    "azure-arm-website": "^2.0.0-preview",
+    "docker-hub-api": "^0.5.1",
+    "request-promise": "^4.2.2"
   }
 }

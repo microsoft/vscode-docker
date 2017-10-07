@@ -26,11 +26,12 @@ import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME }
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
-import { WebAppCreator } from './explorer/create/webAppCreator';
+import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { AzureImageNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode } from './explorer/models/dockerHubNodes';
-import { AzureAccountWrapper } from './explorer/create/azureAccountWrapper';
-import * as util from "./explorer/create/util";
+import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
+import * as util from "./explorer/deploy/util";
+import { dockerHubLogout } from './explorer/models/utils';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -95,6 +96,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
             //vscode.commands.executeCommand('appService.Refresh');
         }
     }));
+
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
 
     activateLanguageClient(ctx);
 }

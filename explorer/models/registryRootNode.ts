@@ -6,12 +6,13 @@ import * as ContainerModels from '../../node_modules/azure-arm-containerregistry
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
-import { AzureRegistryNode } from './azureRegistryNodes';
+import { AzureRegistryNode, AzureLoadingNode, AzureNotSignedInNode } from './azureRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { dockerHubLogin } from './utils';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
@@ -33,6 +34,7 @@ export class RegistryRootNode extends NodeBase {
         }
 
         if (this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
+            
             azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
             });
@@ -76,7 +78,7 @@ export class RegistryRootNode extends NodeBase {
 
         if (!id.token) {
             id = await dockerHubLogin();
-            if (id.token) {
+            if (id && id.token) {
                 dockerHubAPI.setLoginToken(id.token);
                 if (this._keytar) {
                     this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
@@ -108,9 +110,17 @@ export class RegistryRootNode extends NodeBase {
         return orgNodes;
     }
 
-    private async getAzureRegistries(): Promise<AzureRegistryNode[]> {
+    private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
         const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
         const azureRegistryNodes: AzureRegistryNode[] = [];
+
+        if (azureAccount.status === 'Initializing' || azureAccount.status === 'LoggingIn') {
+            return [new AzureLoadingNode()];
+        }
+
+        if (azureAccount.status === 'LoggedOut') {
+            return [new AzureNotSignedInNode()];
+        }
 
         if (loggedIntoAzure) {
 
@@ -140,7 +150,7 @@ export class RegistryRootNode extends NodeBase {
                     }
                 }
             }
-        }
+        } 
 
         return azureRegistryNodes;
     }
@@ -171,27 +181,4 @@ export class RegistryRootNode extends NodeBase {
     }
 }
 
-async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
 
-    const username: string = await vscode.window.showInputBox({ prompt: 'Username' });
-    if (username) {
-        const password: string = await vscode.window.showInputBox({ prompt: 'Password', password: true });
-        if (password) {
-            const token: any = await dockerHubAPI.login(username, password);
-            if (token) {
-                return Promise.resolve({ username: username, password: password, token: <string>token.token });
-            }
-        }
-    }
-
-    return Promise.reject(null);
-
-}
-
-function dockerHubLogout(): void {
-    const keytar: typeof keytarType = require(`${vscode.env.appRoot}/node_modules/keytar`);
-    keytar.deletePassword('vscode-docker', 'dockerhub.token');
-    keytar.deletePassword('vscode-docker', 'dockerhub.password');
-    keytar.deletePassword('vscode-docker', 'dockerhub.username');
-    dockerHubAPI.setLoginToken('');
-}

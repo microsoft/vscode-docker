@@ -216,6 +216,36 @@ export class AzureImageNode extends NodeBase {
     }
 }
 
+export class AzureNotSignedInNode extends NodeBase {
+    constructor() {
+        super('Sign in to Azure...');
+    }
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            command: {
+                title: this.label,
+                command: 'azure-account.login'
+            },
+            collapsibleState: vscode.TreeItemCollapsibleState.None
+        }
+    }
+}
+
+export class AzureLoadingNode extends NodeBase {
+    constructor() {
+        super('Loading...');
+    }
+
+    getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            collapsibleState: vscode.TreeItemCollapsibleState.None
+        }
+    }
+}
+
 async function acquireToken(session: AzureSession) {
     return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
         const credentials: any = session.credentials;

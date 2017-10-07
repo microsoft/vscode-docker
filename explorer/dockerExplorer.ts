@@ -8,10 +8,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
+    private _registriesNode: RootNode
 
     refresh(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
         this._onDidChangeTreeData.fire(this._containersNode);
+        this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
     refreshImages(): void {
@@ -20,6 +22,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
     refreshContainers(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
+    }
+
+    refreshRegistries(): void {
+        this._onDidChangeTreeData.fire(this._registriesNode);
     }
     
     getTreeItem(element: NodeBase): vscode.TreeItem {
@@ -46,6 +52,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         rootNodes.push(node);
 
         node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData);
+        this._registriesNode = node;
         rootNodes.push(node);
 
         return rootNodes;
