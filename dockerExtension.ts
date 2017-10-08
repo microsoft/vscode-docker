@@ -31,7 +31,7 @@ import { AzureImageNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode } from './explorer/models/dockerHubNodes';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
-import { dockerHubLogout } from './explorer/models/utils';
+import { dockerHubLogout } from './explorer/models/dockerHubUtils';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';

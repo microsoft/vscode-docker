@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as dockerHubAPI from 'docker-hub-api';
+import * as dockerHub from './dockerHubUtils';
 import { NodeBase } from './nodeBase';
 
+
 export class DockerHubOrgNode extends NodeBase {
+
 
     constructor(
         public readonly label: string,
@@ -31,11 +33,11 @@ export class DockerHubOrgNode extends NodeBase {
         const repoNodes: DockerHubRepositoryNode[] = [];
         let node: DockerHubRepositoryNode;
 
-        const user: any = await dockerHubAPI.loggedInUser();
-        const myRepos: { namespace, name }[] = await dockerHubAPI.repositories(user.username);
+        const user: dockerHub.User = await dockerHub.getUser();
+        const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
 
         for (let i = 0; i < myRepos.length; i++) {
-            const myRepo = await dockerHubAPI.repository(myRepos[i].namespace, myRepos[i].name);
+            const myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
             let iconPath = {
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
@@ -77,7 +79,7 @@ export class DockerHubRepositoryNode extends NodeBase {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
 
-        let myTags = await dockerHubAPI.tags(element.repository.namespace, element.repository.name);
+        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({namespace: element.repository.namespace, name: element.repository.name});
         for (let i = 0; i < myTags.length; i++) {
             node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;

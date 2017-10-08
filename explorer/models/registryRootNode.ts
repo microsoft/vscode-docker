@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as dockerHub from './dockerHubUtils'
 import * as keytarType from 'keytar';
-import * as dockerHubAPI from 'docker-hub-api';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
@@ -12,7 +12,6 @@ import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
-import { dockerHubLogin } from './utils';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
@@ -77,9 +76,8 @@ export class RegistryRootNode extends NodeBase {
         }
 
         if (!id.token) {
-            id = await dockerHubLogin();
+            id = await dockerHub.dockerHubLogin();
             if (id && id.token) {
-                dockerHubAPI.setLoginToken(id.token);
                 if (this._keytar) {
                     this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
                     this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
@@ -89,11 +87,11 @@ export class RegistryRootNode extends NodeBase {
                 return orgNodes;
             }
         } else {
-            dockerHubAPI.setLoginToken(id.token);
+            dockerHub.setDockerHubToken(id.token);
         }
 
-        const user: any = await dockerHubAPI.loggedInUser();
-        const myRepos: { namespace, name }[] = await dockerHubAPI.repositories(user.username);
+        const user: dockerHub.User = await dockerHub.getUser();
+        const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
         const namespaces = [...new Set(myRepos.map(item => item.namespace))];
         namespaces.forEach((namespace) => {
             let iconPath = {
