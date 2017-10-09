@@ -12,6 +12,8 @@ import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models'
 import * as util from './util';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export class WebAppCreator extends WizardBase {
     constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode, subscription?: SubscriptionModels.Subscription) {
@@ -19,8 +21,9 @@ export class WebAppCreator extends WizardBase {
         this.steps.push(new SubscriptionStep(this, azureAccount, subscription));
         this.steps.push(new ResourceGroupStep(this, azureAccount));
         this.steps.push(new AppServicePlanStep(this, azureAccount));
-        //this.steps.push(new WebsiteStep(this, azureAccount));
         this.steps.push(new WebsiteStep(this, azureAccount, context));
+        this.steps.push(new ShellScriptStep(this, azureAccount));
+        
     }
 
     async run(promptOnly = false): Promise<WizardResult> {
@@ -60,7 +63,7 @@ export class WebAppCreator extends WizardBase {
     }
 }
 
-class SubscriptionBasedWizardStep extends WizardStep {
+class WebAppCreatorStepBase extends WizardStep {
     protected constructor(wizard: WizardBase, stepTitle: string, readonly azureAccount: AzureAccountWrapper) {
         super(wizard, stepTitle);
     }
@@ -83,6 +86,35 @@ class SubscriptionBasedWizardStep extends WizardStep {
         }
 
         return resourceGroupStep.resourceGroup;
+    }
+
+    protected getSelectedAppServicePlan(): WebSiteModels.AppServicePlan {
+        const appServicePlanStep = <AppServicePlanStep>this.wizard.findStep(step => step instanceof AppServicePlanStep, 'The Wizard must have a AppServicePlanStep.');
+
+        if (!appServicePlanStep.servicePlan) {
+            throw new Error('An App Service Plan must be selected first.');
+        }
+
+        return appServicePlanStep.servicePlan;
+    }
+
+    protected getWebSite(): WebSiteModels.Site {
+        const websiteStep = <WebsiteStep>this.wizard.findStep(step => step instanceof WebsiteStep, 'The Wizard must have a WebsiteStep.');
+
+        if (!websiteStep.website) {
+            throw new Error('A website must be created first.');
+        }
+
+        return websiteStep.website;
+    }
+
+    protected getImageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
+        const websiteStep = <WebsiteStep>this.wizard.findStep(step => step instanceof WebsiteStep, 'The Wizard must have a WebsiteStep.');
+        if (!websiteStep.website) {
+            throw new Error('A website must be created first.');
+        }
+
+        return websiteStep.imageInfo;
     }
 }
 
@@ -108,7 +140,7 @@ class SubscriptionStep extends SubscriptionStepBase {
     }
 }
 
-class ResourceGroupStep extends SubscriptionBasedWizardStep {
+class ResourceGroupStep extends WebAppCreatorStepBase {
     private _createNew: boolean;
     private _rg: ResourceModels.ResourceGroup;
 
@@ -209,7 +241,7 @@ class ResourceGroupStep extends SubscriptionBasedWizardStep {
     }
 }
 
-class AppServicePlanStep extends SubscriptionBasedWizardStep {
+class AppServicePlanStep extends WebAppCreatorStepBase {
     private _createNew: boolean;
     private _plan: WebSiteModels.AppServicePlan;
 
@@ -364,7 +396,7 @@ class AppServicePlanStep extends SubscriptionBasedWizardStep {
     }
 }
 
-class WebsiteStep extends SubscriptionBasedWizardStep {
+class WebsiteStep extends WebAppCreatorStepBase {
     private _website: WebSiteModels.Site;
     private _serverUrl: string;
     private _serverUserName: string;
@@ -384,27 +416,52 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
     async prompt(): Promise<void> {
         const subscription = this.getSelectedSubscription();
         const client = new WebSiteManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-        const siteName = await this.showInputBox({
-            prompt: `Enter the name of the new Web App. (${this.stepProgressText})`,
-            validateInput: (value: string) => {
-                value = value.trim();
+        let siteName: string;
+        let siteNameOkay = false;
 
-                if (!value.match(/^[a-z0-9\-]{0,59}$/ig)) {
-                    return 'App name should be 1-60 characters long and can only include alphanumeric characters and hyphens.';
+        while (!siteNameOkay) {
+            siteName = await this.showInputBox({
+                prompt: `Enter a globally unique name for the new Web App. (${this.stepProgressText})`,
+                validateInput: (value: string) => {
+                    value = value ? value.trim() : '';
+
+                    if (!value.match(/^[a-z0-9\-]{1,60}$/ig)) {
+                        return 'App name should be 1-60 characters long and can only include alphanumeric characters and hyphens.';
+                    }
+
+                    return null;
                 }
+            });
 
-                return null;
+            // Check if the name has already been taken...
+            const nameAvailability = await client.checkNameAvailability(siteName, 'site');
+            siteNameOkay = nameAvailability.nameAvailable;
+
+            if (!siteNameOkay) {
+                await vscode.window.showWarningMessage(nameAvailability.message);
             }
-        });
+        }
+
+        let linuxFXVersion: string;
+        if (this._serverUrl.length > 0) {
+            // azure container registry
+            linuxFXVersion = 'DOCKER|' + this._serverUrl + '/' + this._imageName;
+        } else {
+            // dockerhub
+            linuxFXVersion = 'DOCKER|' + this._serverUserName + '/' + this._imageName;
+        }
 
         const rg = this.getSelectedResourceGroup();
         const plan = this.getSelectedAppServicePlan();
 
         this._website = {
-            name: siteName,
+            name: siteName.trim(),
             kind: 'app,linux',
             location: rg.location,
-            serverFarmId: plan.id
+            serverFarmId: plan.id,
+            siteConfig: {
+                linuxFxVersion: linuxFXVersion
+            }
         }
     }
 
@@ -420,21 +477,10 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
         }
 
         this._website = await websiteClient.webApps.createOrUpdate(rg.name, this._website.name, this._website);
-
-        this.wizard.writeline(`Writing Container Information...`);
-        let siteConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.getConfiguration(rg.name, this._website.name);
-
-        if (this._serverUrl.length > 0) {
-            // azure container registry
-            siteConfig.linuxFxVersion = 'DOCKER|' + this._serverUrl + '/' + this._imageName;
-        } else {
-            // dockerhub
-            siteConfig.linuxFxVersion = 'DOCKER|' + this._serverUserName + '/' + this._imageName;
-        }
-        let updatedConfig: WebSiteModels.SiteConfigResource = await websiteClient.webApps.createOrUpdateConfiguration(rg.name, this._website.name, siteConfig);
-
-        let appSettings: WebSiteModels.StringDictionary;;
-
+        
+        this.wizard.writeline('Updating Application Settings...');
+        let appSettings: WebSiteModels.StringDictionary;
+        
         if (this._serverUrl.length > 0) {
             // azure container registry
             appSettings = {
@@ -449,10 +495,11 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
                     "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
-
+            
         }
-
+        
         await websiteClient.webApps.updateApplicationSettings(rg.name, this._website.name, appSettings);
+        this._website.siteConfig = await websiteClient.webApps.getConfiguration(rg.name, this._website.name);
 
         this.wizard.writeline(`Restarting Site...`);
         await websiteClient.webApps.stop(rg.name, this._website.name);
@@ -467,55 +514,64 @@ class WebsiteStep extends SubscriptionBasedWizardStep {
         return this._website;
     }
 
-    private getSelectedAppServicePlan(): WebSiteModels.AppServicePlan {
-        const appServicePlanStep = <AppServicePlanStep>this.wizard.findStep(step => step instanceof AppServicePlanStep, 'The Wizard must have a AppServicePlanStep.');
-
-        if (!appServicePlanStep.servicePlan) {
-            throw new Error('An App Service Plan must be selected first.');
+    get imageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
+        return  { 
+            serverUrl: this._serverUrl, 
+            serverUser: this._serverUserName, 
+            serverPassword: this._serverPassword 
         }
-
-        return appServicePlanStep.servicePlan;
     }
 
-    private getLinuxRuntimeStack(): LinuxRuntimeStack[] {
-        return [
-            {
-                name: 'node|4.4',
-                displayName: 'Node.js 4.4'
-            },
-            {
-                name: 'node|4.5',
-                displayName: 'Node.js 4.5'
-            },
-            {
-                name: 'node|6.2',
-                displayName: 'Node.js 6.2'
-            },
-            {
-                name: 'node|6.6',
-                displayName: 'Node.js 6.6'
-            },
-            {
-                name: 'node|6.9',
-                displayName: 'Node.js 6.9'
-            },
-            {
-                name: 'node|6.10',
-                displayName: 'Node.js 6.10'
-            },
-            {
-                name: 'node|6.11',
-                displayName: 'Node.js 6.11'
-            },
-            {
-                name: 'node|8.0',
-                displayName: 'Node.js 8.0'
-            },
-            {
-                name: 'node|8.1',
-                displayName: 'Node.js 8.1'
+}
+
+class ShellScriptStep extends WebAppCreatorStepBase {
+    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper) {
+        super(wizard, 'Create Web App', azureAccount);
+    }
+
+    async execute(): Promise<void> {
+        const subscription = this.getSelectedSubscription();
+        const rg = this.getSelectedResourceGroup();
+        const plan = this.getSelectedAppServicePlan();
+        const site = this.getWebSite();
+        const imageInfo = this.getImageInfo();
+
+        const script = scriptTemplate.replace('%SUBSCRIPTION_NAME%', subscription.displayName)
+            .replace('%RG_NAME%', rg.name)
+            .replace('%LOCATION%', rg.location)
+            .replace('%PLAN_NAME%', plan.name)
+            .replace('%PLAN_SKU%', plan.sku.name)
+            .replace('%SITE_NAME%', site.name)
+            .replace('%IMAGENAME%', site.siteConfig.linuxFxVersion)
+            .replace('%SERVERPASSWORD%','********')
+            .replace('%SERVERURL%', imageInfo.serverUrl)
+            .replace('%SERVERUSER%', imageInfo.serverUser);
+
+        let uri: vscode.Uri;
+        if (vscode.workspace.rootPath) {
+            let count = 0;
+            const maxCount = 1024;
+
+            while (count < maxCount) {
+                uri = vscode.Uri.file(path.join(vscode.workspace.rootPath, `deploy-${site.name}${count === 0 ? '' : count.toString()}.sh`));
+                if (!vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uri.fsPath) && !fs.existsSync(uri.fsPath)) {
+                    uri = uri.with({ scheme: 'untitled' });
+                    break;
+                } else {
+                    uri = null;
+                }
+                count++;
             }
-        ];
+        }
+
+        if (uri) {
+            const doc = await vscode.workspace.openTextDocument(uri);
+            const editor = await vscode.window.showTextDocument(doc);
+            await editor.edit(editorBuilder => editorBuilder.insert(new vscode.Position(0, 0), script));
+        } else {
+            const doc = await vscode.workspace.openTextDocument({ content: script, language: 'shellscript' });
+            await vscode.window.showTextDocument(doc);
+        }
     }
 }
 
@@ -523,3 +579,36 @@ interface LinuxRuntimeStack {
     name: string;
     displayName: string;
 }
+
+const scriptTemplate = 'SUBSCRIPTION="%SUBSCRIPTION_NAME%"\n\
+RESOURCEGROUP="%RG_NAME%"\n\
+LOCATION="%LOCATION%"\n\
+PLANNAME="%PLAN_NAME%"\n\
+PLANSKU="%PLAN_SKU%"\n\
+SITENAME="%SITE_NAME%"\n\
+IMAGENAME="%IMAGENAME%"\n\
+SERVERPASSWORD="%SERVERPASSWORD%"\n\
+SERVERURL="%SERVERURL%"\n\
+SERVERUSER="%SERVERUSER%"\n\
+\n\
+# login supports device login, username/password, and service principals\n\
+# see https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest#az_login\n\
+az login\n\
+# list all of the available subscriptions\n\
+az account list -o table\n\
+# set the default subscription for subsequent operations\n\
+az account set --subscription $SUBSCRIPTION\n\
+# create a resource group for your application\n\
+az group create --name $RESOURCEGROUP --location $LOCATION\n\
+# create an appservice plan (a machine) where your site will run\n\
+az appservice plan create --name $PLANNAME --location $LOCATION --is-linux --sku $PLANSKU --resource-group $RESOURCEGROUP\n\
+# create the web application on the plan\n\
+az webapp create --name $SITENAME --plan $PLANNAME --deployment-container-image-name $IMAGENAME --resource-group $RESOURCEGROUP\n\
+\n\
+# configure the container information\n\
+az webapp config container set --docker-custom-image-name $IMAGENAME --docker-registry-server-url $SERVERURL --docker-registry-server-user $SERVERUSER --docker-registry-server-password $SERVERPASSWORD --name $SITENAME\n\
+\n\
+# restart and browse to the site\n\
+az webapp restart --name $SITENAME --resource-group $RESOURCEGROUP\n\
+az webapp browse --name $SITENAME --resource-group $RESOURCEGROUP\n\
+';
