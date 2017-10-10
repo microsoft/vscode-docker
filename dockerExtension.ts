@@ -26,6 +26,12 @@ import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME }
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { WebAppCreator } from './explorer/deploy/webAppCreator';
+import { AzureImageNode } from './explorer/models/azureRegistryNodes';
+import { DockerHubImageNode } from './explorer/models/dockerHubNodes';
+import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
+import * as util from "./explorer/deploy/util";
+import { dockerHubLogout } from './explorer/models/dockerHubUtils';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -47,6 +53,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
     
     ctx.subscriptions.push(new Reporter(ctx));
 
+    const outputChannel = util.getOutputChannel();
+    const azureAccount = new AzureAccountWrapper(ctx);
 
     dockerExplorerProvider = new DockerExplorerProvider();
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
@@ -79,6 +87,13 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
+
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
+        const wizard = new WebAppCreator(outputChannel, azureAccount, context);
+        const result = await wizard.run();
+    }));
+
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
 
     activateLanguageClient(ctx);
 }

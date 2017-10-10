@@ -42,8 +42,10 @@
     "onCommand:vscode-docker.compose.up",
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
+    "onCommand:vscode-docker.createWebApp",
     "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
+    "onCommand:vscode-docker.dockerHubLogout",
     "onView:dockerExplorer"
   ],
   "main": "./out/dockerExtension",
@@ -78,87 +80,99 @@
       "view/item/context": [
         {
           "command": "vscode-docker.container.start",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.container.start",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "view == dockerExplorer && viewItem == dockerImage"
+          "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "view == dockerExplorer && viewItem == rootImages"
+          "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "view == dockerExplorer && viewItem == dockerContainersLabel"
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == dockerContainerStopped"
+          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == dockerContainerRunning"
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem == rootContainers"
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
+        },
+        {
+          "command": "vscode-docker.createWebApp",
+          "when": "view == dockerExplorer && viewItem == azureImageTag"
+        },
+        {
+          "command": "vscode-docker.createWebApp",
+          "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.dockerHubLogout",
+          "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
         }
       ]
     },
@@ -376,6 +390,16 @@
           "light": "images/light/refresh.svg",
           "dark": "images/dark/refresh.svg"
         }
+      },
+      {
+        "command": "vscode-docker.createWebApp",
+        "title": "Deploy Image to Azure App Service",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.dockerHubLogout",
+        "title": "DockerHub Logout",
+        "category": "Docker"
       }
     ],
     "views": {
@@ -398,17 +422,23 @@
   },
   "extensionDependencies": [
     "vscode.docker",
-    "vscode.yaml"
+    "vscode.yaml",
+    "ms-vscode.azure-account"
   ],
   "devDependencies": {
     "vscode": "^1.0.0",
     "typescript": "^2.1.5",
-    "@types/node": "^6.0.40"
+    "@types/node": "^6.0.40",
+    "@types/keytar": "^4.0.1"
   },
   "dependencies": {
     "dockerfile-language-server-nodejs": "^0.0.7",
     "dockerode": "^2.5.1",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.1.0"
+    "vscode-languageclient": "^3.1.0",
+    "azure-arm-containerregistry": "^1.0.0-preview",
+    "azure-arm-resource": "^2.0.0-preview",
+    "azure-arm-website": "^1.0.0-preview",
+    "request-promise": "^4.2.2"
   }
 }

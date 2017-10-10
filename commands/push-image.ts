@@ -1,10 +1,10 @@
 import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { reporter } from '../telemetry/telemetry';
-import { DockerNode } from '../explorer/dockerExplorer';
+import { ImageNode } from '../explorer/models/imageNode';
 const teleCmdId: string = 'vscode-docker.image.push';
 
-export async function pushImage(context?: DockerNode) {
+export async function pushImage(context?: ImageNode) {
     let imageToPush: Docker.ImageDesc;
     let imageName: string = "";
 

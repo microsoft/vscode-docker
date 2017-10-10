@@ -1,6 +1,10 @@
-## 0.0.19 - 24 Sept 2017
+## 0.0.19 - 10 Oct 2017
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
+* Add support fro Multi-Root Workspaces
+* Add support for DockerHub and Azure Container Registries
+* `docker-compose` now runs detached and always invokes a build (e.g. `docker-compose -f docker-compose.yml -d --build`)
+* `docker system prune` command no longer prompts for confirmation
 
 ## 0.0.18 - 18 Sept 2017
 
