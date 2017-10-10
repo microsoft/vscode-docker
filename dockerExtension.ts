@@ -91,10 +91,6 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         const wizard = new WebAppCreator(outputChannel, azureAccount, context);
         const result = await wizard.run();
-
-        if (result.status === 'Completed') {
-            //vscode.commands.executeCommand('appService.Refresh');
-        }
     }));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
