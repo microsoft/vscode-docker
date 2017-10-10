@@ -128,8 +128,6 @@ services:
     ports:
       - ${port}:${port}
       - 9229:9229
-    volumes:
-      - .:/usr/src/app
     ${cmd}`;
 
         case 'go':
