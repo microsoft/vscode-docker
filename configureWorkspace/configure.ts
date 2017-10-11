@@ -70,6 +70,8 @@ services:
   ${serviceName}:
     image: ${serviceName}
     build: .
+    environment:
+      NODE_ENV: production
     ports:
       - ${port}:${port}`;
 
