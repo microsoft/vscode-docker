@@ -439,6 +439,7 @@
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "child-process-es6-promise": "^1.1.0"
   }
 }

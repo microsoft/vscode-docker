@@ -214,7 +214,8 @@ interface PackageJson {
     cmd: string,
     fullCommand: string, //full command
     author: string,
-    version: string
+    version: string,
+    nodeVersion: string
 }
 
 async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
@@ -229,7 +230,8 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
         fullCommand: 'npm start',
         cmd: 'npm start',
         author: 'author',
-        version: '0.0.1'
+        version: '0.0.1',
+        nodeVersion: null
     }; //default
 
     if (uris && uris.length > 0) {
@@ -254,9 +256,34 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
         if (json.version) {
             pkg.version = json.version;
         }
+        
+        if (json.engines && json.engines.node) {
+            // can be a range... must clean this up
+            // { "engines" : { "node" : ">=0.10.3 <0.12" } } // greater than or equal  and less than
+            // { "engines" : { "node" : ">=0.10.3" } }       // greater than or equal
+            // { "engines" : { "node" : ">0.10.3" } }        // greater than
+            // { "engines" : { "node" : "~0.10.3" } }        // around
+            // { "engines" : { "node" : "0.10.3" } }         // exactly
+            pkg.nodeVersion = json.engines.node;
+        }
     }
 
     return pkg;
+}
+
+async function getInstalledNodeVersion(): Promise<any> {
+    const cp = require('child-process-es6-promise');
+    const ver = await cp.spawn('node', ['--version']);
+    //object {code: 0, signal: null, stderr: "", stdout: "v6.10.1\r\n"}
+    if (ver.stdout) {
+        // clean "v6.10.1\r\n"
+        let str: string = ver.stdout;
+        str = str.replace(/^\s+|\s+$/g, '');
+        str = str.replace('v', '');
+        return str;
+    } else {
+        return;
+    }
 }
 
 const DOCKER_FILE_TYPES = {
@@ -302,6 +329,10 @@ export async function configure(): Promise<void> {
 
     const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
     const pkg = await readPackageJson(folder);
+
+    if (!pkg.nodeVersion) {
+        pkg.nodeVersion = await getInstalledNodeVersion();
+    }
     
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
