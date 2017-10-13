@@ -14,12 +14,17 @@ The Docker extension makes it easy to build and deploy containerized application
 
 ## IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files.
 
-![intelliSense](images/intelliSense.gif)
+![intelliSense for DockerFiles](images/intelliSense.gif)
+
+## IntelliSense (completions) for images
+
+![intelliSense for Images](images/intelliSense2.gif)
+
 
 ## Docker commands
 Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
 
-![intelliSense](images/commands.gif)
+![intelliSense](images/commands.gif) 
 
 ## Explorer Integration
 The Docker Explorer lets you view and manage your Images and Containers. The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
