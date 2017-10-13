@@ -2,9 +2,11 @@
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
 * Add support fro Multi-Root Workspaces
-* Add support for DockerHub and Azure Container Registries
+* Add support for browsing DockerHub and Azure Container Registries
+* Add support for deploying images from DockerHub and Azure Container Registries to Azure App Service
 * `docker-compose` now runs detached and always invokes a build (e.g. `docker-compose -f docker-compose.yml -d --build`)
 * `docker system prune` command no longer prompts for confirmation
+* `docker-compose.debuy.yml` no longer contains a volume mapping
 
 ## 0.0.18 - 18 Sept 2017
 

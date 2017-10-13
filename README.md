@@ -7,7 +7,7 @@ The Docker extension makes it easy to build and deploy containerized application
 * Linting (errors and warnings) for `Dockerfile` files
 * Command Palette (`F1`) integration for the most common Docker commands (e.g. Build, Push)
 * Explorer integration for managing Images and Containers
-* Deploy images to the cloud by running the [Azure CLI](https://github.com/azure/azure-cli) in a container 
+* Deploy images from DockerHub and Azure Container Registries to Azure App Service
 
 ## Generating `Dockerfile`, `docker-compose.yml`, and `docker-compose.debug.yml`
 ![dockerfile](images/generateFiles.gif)
