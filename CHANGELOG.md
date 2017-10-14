@@ -1,7 +1,7 @@
 ## 0.0.19 - 10 Oct 2017
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
-* Add support fro Multi-Root Workspaces
+* Add support for Multi-Root Workspaces
 * Add support for browsing DockerHub and Azure Container Registries
 * Add support for deploying images from DockerHub and Azure Container Registries to Azure App Service
 * `docker-compose` now runs detached and always invokes a build (e.g. `docker-compose -f docker-compose.yml -d --build`)
