@@ -15,7 +15,7 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
+const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('bradygaster.azuretoolsforvscode')!.exports;
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
