@@ -423,7 +423,7 @@
   "extensionDependencies": [
     "vscode.docker",
     "vscode.yaml",
-    "ms-vscode.azure-account"
+    "bradygaster.azuretoolsforvscode"
   ],
   "devDependencies": {
     "vscode": "^1.0.0",

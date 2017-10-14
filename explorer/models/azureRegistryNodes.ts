@@ -8,7 +8,7 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
 
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
+const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('bradygaster.azuretoolsforvscode')!.exports;
 
 export class AzureRegistryNode extends NodeBase {
 
