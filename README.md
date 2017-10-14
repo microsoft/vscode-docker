@@ -39,6 +39,28 @@ If you want to turn the Explorer off for all workspaces, set the `showExplorer` 
 "docker.showExplorer": false
 ```
 
+## Deploying images to Azure App Service
+
+With the Docker Explorer you can now browse DockerHub and any Azure Container Registries you may have access to. The first time you expand the DockerHub node you'll be prompted to log into your DockerHub account.
+
+![DockerHub Login](images/dockerHubLogin.gif)
+
+Your user name and password are stored in your operating system credentials vault (e.g. MacOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of DockerHub by right clicking on the DockerHub label and choosing log out. This will delete the credentials from the OS store.
+
+If you have an Azure Account you can sign in using the Device Login flow. Click on "Copy & Open" to open your default browser.
+
+![Azure Login](images/devicelogin.png)
+
+Paste in the access code and continue the sign in process.
+
+![Azure Login](images/devicelogin2.png)
+
+You can now right click on an image in DockerHub or an Azure Container Registry and choose "Deploy Image to Azure App Service".
+
+![Deploy to Azure](images/deploytoazure.png)
+
+From here you will be prompted for a Resource Group, an App Service Plan, and a website name which must be globally unique.
+
 ## Azure CLI
 Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container. 
 
