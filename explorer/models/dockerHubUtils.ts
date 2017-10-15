@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as keytarType from 'keytar';
+import * as opn from 'opn';
 import request = require('request-promise');
+import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from './dockerHubNodes';
 
 let _token: Token;
 
@@ -88,9 +90,9 @@ export function dockerHubLogout(): void {
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
 
-    const username: string = await vscode.window.showInputBox( {ignoreFocusOut: true, prompt: 'Username'} );
+    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Username' });
     if (username) {
-        const password: string = await vscode.window.showInputBox( {ignoreFocusOut: true, prompt: 'Password', password: true} );
+        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Password', password: true });
         if (password) {
             _token = await login(username, password);
             if (_token) {
@@ -104,7 +106,7 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
 }
 
 export function setDockerHubToken(token: string) {
-     _token = { token: token };
+    _token = { token: token };
 }
 
 async function login(username: string, password: string): Promise<Token> {
@@ -222,3 +224,22 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
 }
 
+export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) {
+
+    if (context) {
+        let url: string = 'https://hub.docker.com/';
+        const repo: RepositoryInfo = context.repository;
+        switch (context.contextValue) {
+            case 'dockerHubNamespace':
+                url = `${url}u/${context.userName}`;
+                break;
+            case 'dockerHubRepository':
+                url = `${url}r/${context.repository.namespace}/${context.repository.name}`;
+                break;
+            case 'dockerHubImageTag':
+                url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
+                break;
+        }
+        opn(url);
+    }
+}

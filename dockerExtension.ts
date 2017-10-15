@@ -28,10 +28,10 @@ import { removeContainer } from './commands/remove-container';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { AzureImageNode } from './explorer/models/azureRegistryNodes';
-import { DockerHubImageNode } from './explorer/models/dockerHubNodes';
+import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
-import { dockerHubLogout } from './explorer/models/dockerHubUtils';
+import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -50,7 +50,7 @@ export interface ComposeVersionKeys {
 
 export function activate(ctx: vscode.ExtensionContext): void {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
-    
+
     ctx.subscriptions.push(new Reporter(ctx));
 
     const outputChannel = util.getOutputChannel();
@@ -67,7 +67,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     var yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
-    
+
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
@@ -89,11 +89,16 @@ export function activate(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
-        const wizard = new WebAppCreator(outputChannel, azureAccount, context);
-        const result = await wizard.run();
+        if (context) {
+            const wizard = new WebAppCreator(outputChannel, azureAccount, context);
+            const result = await wizard.run();
+        }
     }));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+        browseDockerHub(context);
+    }));
 
     activateLanguageClient(ctx);
 }

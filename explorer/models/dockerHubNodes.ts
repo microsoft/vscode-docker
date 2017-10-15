@@ -84,6 +84,7 @@ export class DockerHubRepositoryNode extends NodeBase {
             node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;
             node.userName = element.userName;
+            node.repository = element.repository;
             imageNodes.push(node);
         }
 
@@ -104,6 +105,7 @@ export class DockerHubImageNode extends NodeBase {
     public serverUrl: string = '';
     public userName: string;
     public password: string;
+    public repository: any;
 
     getTreeItem(): vscode.TreeItem {
         return {

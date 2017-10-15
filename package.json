@@ -46,11 +46,22 @@
     "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
+    "onCommand:vscode-docker.browseDockerHub",
     "onView:dockerExplorer"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
     "menus": {
+      "commandPalette": [
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "false"
+        },
+        {
+          "command": "vscode-docker.createWebApp",
+          "when": "false"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == dockerfile",
@@ -173,6 +184,18 @@
         {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
+        },
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "view == dockerExplorer && viewItem == dockerHubRepository"
+        },
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "view == dockerExplorer && viewItem == dockerHubNamespace"
         }
       ]
     },
@@ -410,6 +433,11 @@
         "command": "vscode-docker.dockerHubLogout",
         "title": "DockerHub Logout",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.browseDockerHub",
+        "title": "Browse in DockerHub",
+        "category": "Docker"
       }
     ],
     "views": {
@@ -449,6 +477,7 @@
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "opn": "^5.1.0"
   }
 }
