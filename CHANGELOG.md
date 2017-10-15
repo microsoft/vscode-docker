@@ -1,4 +1,4 @@
-## 0.0.19 - 10 Oct 2017
+## 0.0.19 - 14 Oct 2017
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
 * Add support for Multi-Root Workspaces
@@ -7,6 +7,7 @@
 * `docker-compose` now runs detached and always invokes a build (e.g. `docker-compose -f docker-compose.yml -d --build`)
 * `docker system prune` command no longer prompts for confirmation
 * `docker-compose.debuy.yml` no longer contains a volume mapping
+* Adopt 0.0.9 release of the [Docker Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs)
 
 ## 0.0.18 - 18 Sept 2017
 
