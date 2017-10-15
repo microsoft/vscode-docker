@@ -88,9 +88,9 @@ export function dockerHubLogout(): void {
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
 
-    const username: string = await vscode.window.showInputBox({ prompt: 'Username' });
+    const username: string = await vscode.window.showInputBox( {ignoreFocusOut: true, prompt: 'Username'} );
     if (username) {
-        const password: string = await vscode.window.showInputBox({ prompt: 'Password', password: true });
+        const password: string = await vscode.window.showInputBox( {ignoreFocusOut: true, prompt: 'Password', password: true} );
         if (password) {
             _token = await login(username, password);
             if (_token) {
