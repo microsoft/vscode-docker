@@ -33,6 +33,7 @@ import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
 import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
 import { AzureAccount } from './typings/azure-account.api';
+import * as opn from 'opn';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -101,8 +102,16 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
-            const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
-            const result = await wizard.run();
+            if (azureAccount) {
+                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
+                const result = await wizard.run();
+            } else {
+                const open: vscode.MessageItem = { title: "View in Marketplace" };
+                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+                if (response === open) {
+                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+                }
+            }
         }
     }));
 
