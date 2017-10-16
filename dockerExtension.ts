@@ -32,6 +32,7 @@ import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from '.
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
 import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
+import { AzureAccount } from './typings/azure-account.api';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -39,6 +40,7 @@ export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 export var dockerExplorerProvider: DockerExplorerProvider;
+export var azureAccount: AzureAccount;
 
 export type KeyInfo = { [keyName: string]: string; };
 
@@ -48,14 +50,23 @@ export interface ComposeVersionKeys {
     v2: KeyInfo
 };
 
-export function activate(ctx: vscode.ExtensionContext): void {
+export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
+    const installedExtensions: any[] = vscode.extensions.all;
+    const outputChannel = util.getOutputChannel();
+
+    for (var i = 0; i < installedExtensions.length; i++) {
+        const ext = installedExtensions[i];
+        if (ext.id === 'ms-vscode.azure-account') {
+            azureAccount = await ext.activate();
+            break;
+        }
+    }
 
     ctx.subscriptions.push(new Reporter(ctx));
-
-    const outputChannel = util.getOutputChannel();
-    const azureAccount = new AzureAccountWrapper(ctx);
-
+    
+    const azureAccountWrapper = new AzureAccountWrapper(ctx);
+    
     dockerExplorerProvider = new DockerExplorerProvider();
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
@@ -90,7 +101,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
-            const wizard = new WebAppCreator(outputChannel, azureAccount, context);
+            const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
             const result = await wizard.run();
         }
     }));

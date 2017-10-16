@@ -12,10 +12,9 @@ import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { azureAccount } from '../../dockerExtension';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
-
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
@@ -32,8 +31,8 @@ export class RegistryRootNode extends NodeBase {
             // unable to find keytar
         }
 
-        if (this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
-            
+        if (azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
+
             azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
             });
@@ -109,6 +108,11 @@ export class RegistryRootNode extends NodeBase {
     }
 
     private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
+
+        if (!azureAccount) {
+            return [];
+        }
+
         const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
         const azureRegistryNodes: AzureRegistryNode[] = [];
 
@@ -148,12 +152,13 @@ export class RegistryRootNode extends NodeBase {
                     }
                 }
             }
-        } 
+        }
 
         return azureRegistryNodes;
     }
 
     private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
+
         const session = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
@@ -164,18 +169,23 @@ export class RegistryRootNode extends NodeBase {
     }
 
     private getFilteredSubscriptions(): SubscriptionModels.Subscription[] {
-        return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
-            return {
-                id: filter.subscription.id,
-                session: filter.session,
-                subscriptionId: filter.subscription.subscriptionId,
-                tenantId: filter.session.tenantId,
-                displayName: filter.subscription.displayName,
-                state: filter.subscription.state,
-                subscriptionPolicies: filter.subscription.subscriptionPolicies,
-                authorizationSource: filter.subscription.authorizationSource
-            };
-        });
+
+        if (azureAccount) {
+            return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
+                return {
+                    id: filter.subscription.id,
+                    session: filter.session,
+                    subscriptionId: filter.subscription.subscriptionId,
+                    tenantId: filter.session.tenantId,
+                    displayName: filter.subscription.displayName,
+                    state: filter.subscription.state,
+                    subscriptionPolicies: filter.subscription.subscriptionPolicies,
+                    authorizationSource: filter.subscription.authorizationSource
+                };
+            });
+        } else {
+            return [];
+        }
     }
 }
 

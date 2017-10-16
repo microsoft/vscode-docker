@@ -7,8 +7,7 @@ import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
-
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
+import { azureAccount } from '../../dockerExtension';
 
 export class AzureRegistryNode extends NodeBase {
 
@@ -39,6 +38,10 @@ export class AzureRegistryNode extends NodeBase {
         let node: AzureRepositoryNode;
 
         const tenantId: string = element.subscription.tenantId;
+        if (!azureAccount) {
+            return [];
+        }
+        
         const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
 

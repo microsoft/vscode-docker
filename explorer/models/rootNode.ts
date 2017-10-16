@@ -5,6 +5,8 @@ import { docker } from '../../commands/utils/docker-endpoint';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
+import { AzureAccount } from '../../typings/azure-account.api';
+import { azureAccount } from '../../dockerExtension';
 
 export class RootNode extends NodeBase {
     private _imageCache: Docker.ImageDesc[];
@@ -243,8 +245,13 @@ export class RootNode extends NodeBase {
 
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
+
         registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", null));
-        registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter));
+
+        if (azureAccount) {
+            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter));
+        }
+
         return registryRootNodes;
     }
 }
