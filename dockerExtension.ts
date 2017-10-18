@@ -41,7 +41,6 @@ export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 export var dockerExplorerProvider: DockerExplorerProvider;
-export var azureAccount: AzureAccount;
 
 export type KeyInfo = { [keyName: string]: string; };
 
@@ -55,6 +54,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
+    let azureAccount: AzureAccount;
 
     for (var i = 0; i < installedExtensions.length; i++) {
         const ext = installedExtensions[i];
@@ -66,9 +66,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(new Reporter(ctx));
     
-    const azureAccountWrapper = new AzureAccountWrapper(ctx);
-    
-    dockerExplorerProvider = new DockerExplorerProvider();
+    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
     vscode.commands.registerCommand('dockerExplorer.systemPrune', () => systemPrune());
@@ -103,6 +101,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
+                const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
                 const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
             } else {

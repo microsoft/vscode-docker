@@ -12,17 +12,18 @@ import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
-import { azureAccount } from '../../dockerExtension';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
-
+    private _azureAccount: AzureAccount;
+    
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly eventEmitter: vscode.EventEmitter<NodeBase>
+        public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
+        public readonly azureAccount?: AzureAccount 
     ) {
         super(label);
         try {
@@ -31,15 +32,17 @@ export class RegistryRootNode extends NodeBase {
             // unable to find keytar
         }
 
-        if (azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
+        this._azureAccount = azureAccount;
 
-            azureAccount.onFiltersChanged((e) => {
+        if (this._azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
+
+            this._azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
             });
-            azureAccount.onStatusChanged((e) => {
+            this._azureAccount.onStatusChanged((e) => {
                 this.eventEmitter.fire(this);
             });
-            azureAccount.onSessionsChanged((e) => {
+            this._azureAccount.onSessionsChanged((e) => {
                 this.eventEmitter.fire(this);
             });
         }
@@ -109,18 +112,18 @@ export class RegistryRootNode extends NodeBase {
 
     private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
 
-        if (!azureAccount) {
+        if (!this._azureAccount) {
             return [];
         }
 
-        const loggedIntoAzure: boolean = await azureAccount.waitForLogin()
+        const loggedIntoAzure: boolean = await this._azureAccount.waitForLogin()
         const azureRegistryNodes: AzureRegistryNode[] = [];
 
-        if (azureAccount.status === 'Initializing' || azureAccount.status === 'LoggingIn') {
+        if (this._azureAccount.status === 'Initializing' || this._azureAccount.status === 'LoggingIn') {
             return [new AzureLoadingNode()];
         }
 
-        if (azureAccount.status === 'LoggedOut') {
+        if (this._azureAccount.status === 'LoggedOut') {
             return [new AzureNotSignedInNode()];
         }
 
@@ -143,7 +146,7 @@ export class RegistryRootNode extends NodeBase {
                             light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                             dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
                         };
-                        let node = new AzureRegistryNode(registries[j].loginServer, 'registry', iconPath);
+                        let node = new AzureRegistryNode(registries[j].loginServer, 'registry', iconPath, this._azureAccount);
                         node.type = RegistryType.Azure;
                         node.password = creds.passwords[0].value;
                         node.userName = creds.username;
@@ -159,7 +162,7 @@ export class RegistryRootNode extends NodeBase {
 
     private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
 
-        const session = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
             return session.credentials;
@@ -170,8 +173,8 @@ export class RegistryRootNode extends NodeBase {
 
     private getFilteredSubscriptions(): SubscriptionModels.Subscription[] {
 
-        if (azureAccount) {
-            return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
+        if (this._azureAccount) {
+            return this._azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
                 return {
                     id: filter.subscription.id,
                     session: filter.session,
