@@ -1,3 +1,7 @@
+## 0.0.20 - 18 Oct 2017
+
+* No longer take a hard dependency on the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension.
+
 ## 0.0.19 - 14 Oct 2017
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
