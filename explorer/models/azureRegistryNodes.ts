@@ -8,16 +8,17 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
 
-const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
-
 export class AzureRegistryNode extends NodeBase {
+    private _azureAccount: AzureAccount;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly iconPath: any = {}
+        public readonly iconPath: any = {},
+        public readonly azureAccount?: AzureAccount
     ) {
         super(label);
+        this._azureAccount = azureAccount;
     }
 
     public type: RegistryType;
@@ -39,7 +40,11 @@ export class AzureRegistryNode extends NodeBase {
         let node: AzureRepositoryNode;
 
         const tenantId: string = element.subscription.tenantId;
-        const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        if (!this._azureAccount) {
+            return [];
+        }
+        
+        const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
 
         if (accessToken && refreshToken) {

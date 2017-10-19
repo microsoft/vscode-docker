@@ -8,6 +8,7 @@ import { ServiceClientCredentials } from 'ms-rest';
 import { AzureEnvironment } from 'ms-rest-azure';
 import { SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession, AzureLoginStatus } from '../../typings/azure-account.api';
+
 import * as util from './util';
 
 export class NotSignedInError extends Error { }
@@ -17,8 +18,8 @@ export class CredentialError extends Error { }
 export class AzureAccountWrapper {
     readonly accountApi: AzureAccount;
 
-    constructor(readonly extensionConext: ExtensionContext) {
-        this.accountApi = extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
+    constructor(readonly extensionConext: ExtensionContext, azureAccount: AzureAccount) {
+        this.accountApi = azureAccount;
     }
 
     getAzureSessions(): AzureSession[] {

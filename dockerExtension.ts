@@ -32,6 +32,8 @@ import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from '.
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
 import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
+import { AzureAccount } from './typings/azure-account.api';
+import * as opn from 'opn';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -48,15 +50,23 @@ export interface ComposeVersionKeys {
     v2: KeyInfo
 };
 
-export function activate(ctx: vscode.ExtensionContext): void {
+export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
+    const installedExtensions: any[] = vscode.extensions.all;
+    const outputChannel = util.getOutputChannel();
+    let azureAccount: AzureAccount;
+
+    for (var i = 0; i < installedExtensions.length; i++) {
+        const ext = installedExtensions[i];
+        if (ext.id === 'ms-vscode.azure-account') {
+            azureAccount = await ext.activate();
+            break;
+        }
+    }
 
     ctx.subscriptions.push(new Reporter(ctx));
-
-    const outputChannel = util.getOutputChannel();
-    const azureAccount = new AzureAccountWrapper(ctx);
-
-    dockerExplorerProvider = new DockerExplorerProvider();
+    
+    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
     vscode.commands.registerCommand('dockerExplorer.systemPrune', () => systemPrune());
@@ -90,8 +100,17 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
-            const wizard = new WebAppCreator(outputChannel, azureAccount, context);
-            const result = await wizard.run();
+            if (azureAccount) {
+                const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
+                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
+                const result = await wizard.run();
+            } else {
+                const open: vscode.MessageItem = { title: "View in Marketplace" };
+                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+                if (response === open) {
+                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+                }
+            }
         }
     }));
 

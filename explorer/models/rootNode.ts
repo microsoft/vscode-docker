@@ -5,6 +5,7 @@ import { docker } from '../../commands/utils/docker-endpoint';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
+import { AzureAccount } from '../../typings/azure-account.api';
 
 export class RootNode extends NodeBase {
     private _imageCache: Docker.ImageDesc[];
@@ -13,11 +14,13 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[];
     private _containerDebounceTimer: NodeJS.Timer;
     private _containersNode: RootNode;
+    private _azureAccount: AzureAccount;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public eventEmitter: vscode.EventEmitter<NodeBase>
+        public eventEmitter: vscode.EventEmitter<NodeBase>,
+        public azureAccount?: AzureAccount
     ) {
         super(label);
         if (this.contextValue === 'imagesRootNode') {
@@ -25,6 +28,7 @@ export class RootNode extends NodeBase {
         } else if (this.contextValue === 'containersRootNode') {
             this._containersNode = this;
         }
+        this._azureAccount = azureAccount;
     }
 
     autoRefreshImages(): void {
@@ -243,8 +247,13 @@ export class RootNode extends NodeBase {
 
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
+
         registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", null));
-        registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter));
+
+        if (this._azureAccount) {
+            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
+        }
+
         return registryRootNodes;
     }
 }
