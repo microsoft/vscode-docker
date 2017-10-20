@@ -15,6 +15,7 @@ import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
 import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
 import { stopContainer } from './commands/stop-container';
+import { restartContainer } from './commands/restart-container';
 import { showLogsContainer } from './commands/showlogs-container';
 import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
@@ -91,6 +92,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.azurecli', startAzureCLI));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.restart', restartContainer));    
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.remove', removeContainer));
