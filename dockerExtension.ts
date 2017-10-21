@@ -37,7 +37,7 @@ import * as opn from 'opn';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
-export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 export var dockerExplorerProvider: DockerExplorerProvider;
