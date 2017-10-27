@@ -6,7 +6,7 @@ import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const engineTypeShellCommands = {
-    [DockerEngineType.Linux]: "/bin/sh",
+    [DockerEngineType.Linux]: "sh",
     [DockerEngineType.Windows]: "powershell"
 }
 
