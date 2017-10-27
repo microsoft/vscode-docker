@@ -242,6 +242,11 @@
           "default": 1000,
           "description": "Explorer refresh interval, default is 1000ms."
         },
+        "docker.imageBuildContextPath": {
+          "type": "string",
+          "default": "",
+          "description": "Build context PATH to pass to Docker build command."
+        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "type": "string",
           "default": "warning",
