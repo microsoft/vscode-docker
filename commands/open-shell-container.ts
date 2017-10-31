@@ -7,8 +7,8 @@ const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
 const engineTypeShellCommands = {
-    [DockerEngineType.Linux]: configOptions.get('docker.attachShellCommand.linuxContainer', '/bin/sh'),
-    [DockerEngineType.Windows]: configOptions.get('docker.attachShellCommand.windowsContainer', 'powershell')
+    [DockerEngineType.Linux]: configOptions.get('attachShellCommand.linuxContainer', '/bin/sh'),
+    [DockerEngineType.Windows]: configOptions.get('attachShellCommand.windowsContainer', 'powershell')
 }
 
 export async function openShellContainer(context?: ContainerNode) {
