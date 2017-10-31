@@ -311,6 +311,16 @@
             "error"
           ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
+        },
+        "docker.attachCommand.linuxContainer": {
+          "type": "string",
+          "default": "/bin/sh",
+          "description": "Attach command to use for Linux containers"
+        },
+        "docker.attachCommand.windowsContainer": {
+          "type": "string",
+          "default": "powershell",
+          "description": "Attach command to use for Windows containers"
         }
       }
     },

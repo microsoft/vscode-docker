@@ -5,9 +5,10 @@ import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
+const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
 const engineTypeShellCommands = {
-    [DockerEngineType.Linux]: "/bin/sh",
-    [DockerEngineType.Windows]: "powershell"
+    [DockerEngineType.Linux]: configOptions.get('docker.attachCommand.linuxContainer', '/bin/sh'),
+    [DockerEngineType.Windows]: configOptions.get('docker.attachCommand.windowsContainer', 'powershell')
 }
 
 export async function openShellContainer(context?: ContainerNode) {
