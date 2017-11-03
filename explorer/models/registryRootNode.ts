@@ -133,7 +133,7 @@ export class RegistryRootNode extends NodeBase {
 
             for (let i = 0; i < subs.length; i++) {
 
-                const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                const client: ContainerRegistryManagementClient = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
                 const registries: ContainerModels.RegistryListResult = await client.registries.list();
 
                 for (let j = 0; j < registries.length; j++) {

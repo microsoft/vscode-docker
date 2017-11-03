@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureAccountWrapper } from './azureAccountWrapper';
-import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from './wizard';
+import { AzureAccountWrapper } from '../deploy/azureAccountWrapper';
+import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from '../deploy/wizard';
 import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'azure-arm-resource';
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
-import * as util from './util';
+import * as util from '../deploy/util';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
 import * as path from 'path';
@@ -24,6 +24,14 @@ export class WebAppCreator extends WizardBase {
         this.steps.push(new WebsiteStep(this, azureAccount, context));
         this.steps.push(new ShellScriptStep(this, azureAccount));
 
+
+                // pick registry name
+        // pick subscription
+        // pick resource group
+        // location
+        // admin user (y/n)
+        // sku (std, basic, premium)
+        
     }
 
     async run(promptOnly = false): Promise<WizardResult> {
@@ -426,7 +434,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         while (!siteNameOkay) {
             siteName = await this.showInputBox({
-                prompt: `Enter a globally unique name for the new Web App. (${this.stepProgressText})`,
+                prompt: `Enter a globally unique name for the new Registry. (${this.stepProgressText})`,
                 validateInput: (value: string) => {
                     value = value ? value.trim() : '';
 
