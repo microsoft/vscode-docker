@@ -130,9 +130,13 @@ class SubscriptionStep extends SubscriptionStepBase {
         }
 
         const quickPickItems = await this.getSubscriptionsAsQuickPickItems();
-        const quickPickOptions = { placeHolder: `Select the subscription where the new Web App will be created in. (${this.stepProgressText})` };
-        const result = await this.showQuickPick(quickPickItems, quickPickOptions);
-        this._subscription = result.data;
+        if (quickPickItems.length === 1) {
+            this._subscription = quickPickItems[0].data;
+        } else {
+            const quickPickOptions = { placeHolder: `Select the subscription where the new Web App will be created in. (${this.stepProgressText})` };
+            const result = await this.showQuickPick(quickPickItems, quickPickOptions);
+            this._subscription = result.data;
+        }
     }
 
     async execute(): Promise<void> {
