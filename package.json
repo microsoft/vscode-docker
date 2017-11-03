@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -19,7 +19,8 @@
   "keywords": [
     "docker",
     "compose",
-    "container"
+    "container",
+    "multi-root ready"
   ],
   "repository": {
     "url": "https://github.com/microsoft/vscode-docker.git"
