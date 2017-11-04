@@ -22,8 +22,7 @@ export class WebAppCreator extends WizardBase {
         this.steps.push(new ResourceGroupStep(this, azureAccount));
         this.steps.push(new AppServicePlanStep(this, azureAccount));
         this.steps.push(new WebsiteStep(this, azureAccount, context));
-        this.steps.push(new ShellScriptStep(this, azureAccount));
-        
+       
     }
 
     async run(promptOnly = false): Promise<WizardResult> {
@@ -527,92 +526,3 @@ class WebsiteStep extends WebAppCreatorStepBase {
     }
 
 }
-
-class ShellScriptStep extends WebAppCreatorStepBase {
-    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper) {
-        super(wizard, 'Create Web App', azureAccount);
-    }
-
-    async execute(): Promise<void> {
-        const subscription = this.getSelectedSubscription();
-        const rg = this.getSelectedResourceGroup();
-        const plan = this.getSelectedAppServicePlan();
-        const site = this.getWebSite();
-        const imageInfo = this.getImageInfo();
-
-        const script = scriptTemplate.replace('%SUBSCRIPTION_NAME%', subscription.displayName)
-            .replace('%RG_NAME%', rg.name)
-            .replace('%LOCATION%', rg.location)
-            .replace('%PLAN_NAME%', plan.name)
-            .replace('%PLAN_SKU%', plan.sku.name)
-            .replace('%SITE_NAME%', site.name)
-            .replace('%IMAGENAME%', site.siteConfig.linuxFxVersion)
-            .replace('%SERVERPASSWORD%','********')
-            .replace('%SERVERURL%', imageInfo.serverUrl)
-            .replace('%SERVERUSER%', imageInfo.serverUser);
-
-        let uri: vscode.Uri;
-        if (vscode.workspace.rootPath) {
-            let count = 0;
-            const maxCount = 1024;
-
-            while (count < maxCount) {
-                uri = vscode.Uri.file(path.join(vscode.workspace.rootPath, `deploy-${site.name}${count === 0 ? '' : count.toString()}.sh`));
-                if (!vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uri.fsPath) && !fs.existsSync(uri.fsPath)) {
-                    uri = uri.with({ scheme: 'untitled' });
-                    break;
-                } else {
-                    uri = null;
-                }
-                count++;
-            }
-        }
-
-        if (uri) {
-            const doc = await vscode.workspace.openTextDocument(uri);
-            const editor = await vscode.window.showTextDocument(doc);
-            await editor.edit(editorBuilder => editorBuilder.insert(new vscode.Position(0, 0), script));
-        } else {
-            const doc = await vscode.workspace.openTextDocument({ content: script, language: 'shellscript' });
-            await vscode.window.showTextDocument(doc);
-        }
-    }
-}
-
-interface LinuxRuntimeStack {
-    name: string;
-    displayName: string;
-}
-
-const scriptTemplate = 'SUBSCRIPTION="%SUBSCRIPTION_NAME%"\n\
-RESOURCEGROUP="%RG_NAME%"\n\
-LOCATION="%LOCATION%"\n\
-PLANNAME="%PLAN_NAME%"\n\
-PLANSKU="%PLAN_SKU%"\n\
-SITENAME="%SITE_NAME%"\n\
-IMAGENAME="%IMAGENAME%"\n\
-SERVERPASSWORD="%SERVERPASSWORD%"\n\
-SERVERURL="%SERVERURL%"\n\
-SERVERUSER="%SERVERUSER%"\n\
-\n\
-# login supports device login, username/password, and service principals\n\
-# see https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest#az_login\n\
-az login\n\
-# list all of the available subscriptions\n\
-az account list -o table\n\
-# set the default subscription for subsequent operations\n\
-az account set --subscription $SUBSCRIPTION\n\
-# create a resource group for your application\n\
-az group create --name $RESOURCEGROUP --location $LOCATION\n\
-# create an appservice plan (a machine) where your site will run\n\
-az appservice plan create --name $PLANNAME --location $LOCATION --is-linux --sku $PLANSKU --resource-group $RESOURCEGROUP\n\
-# create the web application on the plan\n\
-az webapp create --name $SITENAME --plan $PLANNAME --deployment-container-image-name $IMAGENAME --resource-group $RESOURCEGROUP\n\
-\n\
-# configure the container information\n\
-az webapp config container set --docker-custom-image-name $IMAGENAME --docker-registry-server-url $SERVERURL --docker-registry-server-user $SERVERUSER --docker-registry-server-password $SERVERPASSWORD --name $SITENAME\n\
-\n\
-# restart and browse to the site\n\
-az webapp restart --name $SITENAME --resource-group $RESOURCEGROUP\n\
-az webapp browse --name $SITENAME --resource-group $RESOURCEGROUP\n\
-';
