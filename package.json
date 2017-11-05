@@ -44,11 +44,11 @@
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
-    "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.browseDockerHub",
-    "onView:dockerExplorer"
+    "onView:dockerExplorer",
+    "onDebug"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -203,8 +203,23 @@
     "debuggers": [
       {
         "type": "docker",
-        "label": "Docker Attach",
-        "initialConfigurations": "vscode-docker.debug.configureLaunchJson"
+        "label": "Docker",
+        "configurationSnippets": [
+					{
+						"label": "Docker: Attach to Node",
+						"description": "Docker: Attach to Node",
+						"body": {
+							"type": "node",
+							"request": "attach",
+							"name": "Docker: Attach to Node",
+              "port": 9229,
+              "address": "localhost",
+              "localRoot": "^\"\\${workspaceFolder}\"",
+              "remoteRoot": "/usr/src/app",
+              "protocol": "inspector"
+						}
+          }
+        ]
       }
     ],
     "languages": [

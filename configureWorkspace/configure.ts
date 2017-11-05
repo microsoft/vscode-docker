@@ -179,22 +179,6 @@ services:
     }
 }
 
-const launchJsonTemplate: string =
-    `{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Docker: Attach to Node",
-            "type": "node",
-            "request": "attach",
-            "port": 9229,
-            "address": "localhost",
-            "localRoot": "\${workspaceRoot}",
-            "remoteRoot": "/usr/src/app"
-        }
-    ]
-}`;
-
 function genDockerIgnoreFile(service, platformType, port) {
     // TODO: Add support for other platform types
     return `node_modules
@@ -323,9 +307,4 @@ export async function configure(): Promise<void> {
             fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
         }
     }
-}
-
-export function configureLaunchJson(): string {
-    // contribute a launch.json configuration
-    return launchJsonTemplate;
 }
