@@ -113,7 +113,7 @@ function genDockerComposeDebug(serviceName: string, platform: string, port: stri
 
             const cmdArray: string[] = cmd.split(' ');
             if (cmdArray[0].toLowerCase() === 'node') {
-                cmdArray.splice(1, 0, '--inspect');
+                cmdArray.splice(1, 0, '--inspect=0.0.0.0:9229');  
                 cmd = `command: ${cmdArray.join(' ')}`;
             } else {
                 cmd = '## set your startup file here\n    command: node --inspect app.js';
@@ -178,22 +178,6 @@ services:
 `;
     }
 }
-
-const launchJsonTemplate: string =
-    `{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Docker: Attach to Node",
-            "type": "node",
-            "request": "attach",
-            "port": 9229,
-            "address": "localhost",
-            "localRoot": "\${workspaceRoot}",
-            "remoteRoot": "/usr/src/app"
-        }
-    ]
-}`;
 
 function genDockerIgnoreFile(service, platformType, port) {
     // TODO: Add support for other platform types
@@ -323,9 +307,4 @@ export async function configure(): Promise<void> {
             fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
         }
     }
-}
-
-export function configureLaunchJson(): string {
-    // contribute a launch.json configuration
-    return launchJsonTemplate;
 }

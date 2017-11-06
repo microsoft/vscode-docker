@@ -1,3 +1,10 @@
+## 0.0.21 - 05 Nov 2017
+
+* Update `docker-compose.debug.yml` command to include full the URI to the debug port (fix for [vscode: 36192](https://github.com/Microsoft/vscode/issues/36192))
+* Filter the subscriptions presented when deploying to Azure based on the Azure Account subscription filter
+* Mark as multi-root ready
+* Fix debug configuration generation [VSCode #37648](https://github.com/Microsoft/vscode/issues/37648)
+
 ## 0.0.20 - 18 Oct 2017
 
 * No longer take a hard dependency on the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension.

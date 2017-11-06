@@ -174,7 +174,7 @@ export class SubscriptionStepBase extends WizardStep {
                 }
 
                 const item = {
-                    label: `📌 ${s.displayName}`,
+                    label: `${s.displayName}`,
                     description: '',
                     detail: s.subscriptionId,
                     data: s
@@ -183,16 +183,6 @@ export class SubscriptionStepBase extends WizardStep {
                 quickPickItems.push(item);
             });
 
-            otherSubscriptions.forEach(s => {
-                const item = {
-                    label: s.displayName,
-                    description: '',
-                    detail: s.subscriptionId,
-                    data: s
-                };
-
-                quickPickItems.push(item);
-            });
         });
 
         return quickPickItems;

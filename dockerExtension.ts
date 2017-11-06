@@ -19,7 +19,7 @@ import { showLogsContainer } from './commands/showlogs-container';
 import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
 import { composeUp, composeDown } from './commands/docker-compose';
-import { configure, configureLaunchJson } from './configureWorkspace/configure';
+import { configure } from './configureWorkspace/configure';
 import { systemPrune } from './commands/system-prune';
 import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
@@ -34,6 +34,8 @@ import * as util from "./explorer/deploy/util";
 import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
 import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
+import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
+
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -81,7 +83,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.debug.configureLaunchJson', configureLaunchJson));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImageCommand));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
@@ -119,6 +120,8 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         browseDockerHub(context);
     }));
 
+    ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
+    
     activateLanguageClient(ctx);
 }
 
