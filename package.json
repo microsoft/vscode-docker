@@ -38,6 +38,7 @@
     "onCommand:vscode-docker.container.start.interactive",
     "onCommand:vscode-docker.container.start.azurecli",
     "onCommand:vscode-docker.container.stop",
+    "onCommand:vscode-docker.container.restart",
     "onCommand:vscode-docker.container.show-logs",
     "onCommand:vscode-docker.container.open-shell",
     "onCommand:vscode-docker.compose.up",
@@ -144,6 +145,18 @@
         },
         {
           "command": "vscode-docker.container.stop",
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
+        },
+        {
+          "command": "vscode-docker.container.restart",
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
+        },
+        {
+          "command": "vscode-docker.container.restart",
+          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
+        },
+        {
+          "command": "vscode-docker.container.restart",
           "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
@@ -383,6 +396,12 @@
         "command": "vscode-docker.container.stop",
         "title": "Stop Container",
         "description": "Stop a running container",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.container.restart",
+        "title": "Restart Container",
+        "description": "Restart one or more containers",
         "category": "Docker"
       },
       {
