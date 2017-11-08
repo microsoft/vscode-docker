@@ -242,8 +242,8 @@
           "Dockerfile"
         ],
         "filenamePatterns": [
-          "dockerfile*",
-          "Dockerfile*"
+          "*.dockerfile",
+          "Dockerfile"
         ]
       }
     ],
