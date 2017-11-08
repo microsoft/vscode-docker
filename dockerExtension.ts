@@ -64,7 +64,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     for (var i = 0; i < installedExtensions.length; i++) {
         const ext = installedExtensions[i];
         if (ext.id === 'ms-vscode.azure-account') {
-            azureAccount = await ext.activate();
+            try {
+                azureAccount = await ext.activate();
+            } catch (error) {
+                console.log('Failed to activate the Azure Account Extension: ' + error);
+            }
             break;
         }
     }
