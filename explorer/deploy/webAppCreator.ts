@@ -488,14 +488,18 @@ class WebsiteStep extends WebAppCreatorStepBase {
             // azure container registry
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
-                    "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl, "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
+                    "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl, 
+                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, 
+                    "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword,
+                    "DOCKER_ENABLE_CI": "true"
                 }
             };
         } else {
             // dockerhub - dont set docker_registry_server_url
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
-                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
+                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, 
+                    "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
             
