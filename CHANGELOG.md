@@ -1,3 +1,7 @@
+## 0.0.22 - 10 Nov 2017
+
+* Enable CI if deploying image from Azure Container Registry
+
 ## 0.0.21 - 08 Nov 2017
 
 * Update `docker-compose.debug.yml` command to include full the URI to the debug port (fix for [vscode: 36192](https://github.com/Microsoft/vscode/issues/36192))
