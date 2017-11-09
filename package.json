@@ -38,6 +38,7 @@
     "onCommand:vscode-docker.container.start.interactive",
     "onCommand:vscode-docker.container.start.azurecli",
     "onCommand:vscode-docker.container.stop",
+    "onCommand:vscode-docker.container.restart",
     "onCommand:vscode-docker.container.show-logs",
     "onCommand:vscode-docker.container.open-shell",
     "onCommand:vscode-docker.compose.up",
@@ -147,6 +148,18 @@
           "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
+          "command": "vscode-docker.container.restart",
+          "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
+        },
+        {
+          "command": "vscode-docker.container.restart",
+          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
+        },
+        {
+          "command": "vscode-docker.container.restart",
+          "when": "view == dockerExplorer && viewItem == containersRootNode"
+        },
+        {
           "command": "vscode-docker.container.show-logs",
           "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
         },
@@ -205,19 +218,19 @@
         "type": "docker",
         "label": "Docker",
         "configurationSnippets": [
-					{
-						"label": "Docker: Attach to Node",
-						"description": "Docker: Attach to Node",
-						"body": {
-							"type": "node",
-							"request": "attach",
-							"name": "Docker: Attach to Node",
+          {
+            "label": "Docker: Attach to Node",
+            "description": "Docker: Attach to Node",
+            "body": {
+              "type": "node",
+              "request": "attach",
+              "name": "Docker: Attach to Node",
               "port": 9229,
               "address": "localhost",
               "localRoot": "^\"\\${workspaceFolder}\"",
               "remoteRoot": "/usr/src/app",
               "protocol": "inspector"
-						}
+            }
           }
         ]
       }
@@ -229,8 +242,8 @@
           "Dockerfile"
         ],
         "filenamePatterns": [
-          "dockerfile*",
-          "Dockerfile*"
+          "*.dockerfile",
+          "Dockerfile"
         ]
       }
     ],
@@ -258,7 +271,13 @@
           "default": 1000,
           "description": "Explorer refresh interval, default is 1000ms."
         },
+        "docker.imageBuildContextPath": {
+          "type": "string",
+          "default": "",
+          "description": "Build context PATH to pass to Docker build command."
+        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -269,6 +288,7 @@
           "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction."
         },
         "docker.languageserver.diagnostics.emptyContinuationLine": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -279,6 +299,7 @@
           "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines."
         },
         "docker.languageserver.diagnostics.directiveCasing": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -289,6 +310,7 @@
           "description": "Controls the diagnostic severity for parser directives that are not written in lowercase."
         },
         "docker.languageserver.diagnostics.instructionCasing": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -299,6 +321,7 @@
           "description": "Controls the diagnostic severity for instructions that are not written in uppercase."
         },
         "docker.languageserver.diagnostics.instructionCmdMultiple": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -309,6 +332,7 @@
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions."
         },
         "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -319,6 +343,7 @@
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions."
         },
         "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
+          "scope": "resource",
           "type": "string",
           "default": "warning",
           "enum": [
@@ -393,6 +418,12 @@
         "command": "vscode-docker.container.stop",
         "title": "Stop Container",
         "description": "Stop a running container",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.container.restart",
+        "title": "Restart Container",
+        "description": "Restart one or more containers",
         "category": "Docker"
       },
       {
@@ -495,10 +526,10 @@
     "@types/keytar": "^4.0.1"
   },
   "dependencies": {
-    "dockerfile-language-server-nodejs": "^0.0.9",
+    "dockerfile-language-server-nodejs": "^0.0.10",
     "dockerode": "^2.5.1",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "3.3.0",
+    "vscode-languageclient": "^3.5.0-next.4",
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",

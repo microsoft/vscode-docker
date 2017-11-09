@@ -1,9 +1,17 @@
-## 0.0.21 - 05 Nov 2017
+## 0.0.22 - 10 Nov 2017
+
+* Enable CI if deploying image from Azure Container Registry
+
+## 0.0.21 - 08 Nov 2017
 
 * Update `docker-compose.debug.yml` command to include full the URI to the debug port (fix for [vscode: 36192](https://github.com/Microsoft/vscode/issues/36192))
 * Filter the subscriptions presented when deploying to Azure based on the Azure Account subscription filter
 * Mark as multi-root ready
 * Fix debug configuration generation [VSCode #37648](https://github.com/Microsoft/vscode/issues/37648)
+* Add `restart` command for containers (thanks @orfevr) [#152](https://github.com/Microsoft/vscode-docker/pull/152)
+* Less aggressive matching for `dockerfile` (thanks @dlech) [#155](https://github.com/Microsoft/vscode-docker/pull/155)
+* Support workspace folders for language server settings (thanks @rcjsuen) [#156](https://github.com/Microsoft/vscode-docker/pull/156)
+* Add config option for docker build path (thanks @nyamakawa) [#158](https://github.com/Microsoft/vscode-docker/pull/158)
 
 ## 0.0.20 - 18 Oct 2017
 

@@ -15,6 +15,7 @@ import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
 import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
 import { stopContainer } from './commands/stop-container';
+import { restartContainer } from './commands/restart-container';
 import { showLogsContainer } from './commands/showlogs-container';
 import { openShellContainer } from './commands/open-shell-container';
 import { tagImage } from './commands/tag-image';
@@ -25,7 +26,7 @@ import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
-import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, Proposed, ProposedFeatures, DidChangeConfigurationNotification } from 'vscode-languageclient';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { AzureImageNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
@@ -39,7 +40,7 @@ import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvi
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
-export const DOCKERFILE_GLOB_PATTERN = '**/[dD]ocker[fF]ile*';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
 export var diagnosticCollection: vscode.DiagnosticCollection;
 export var dockerExplorerProvider: DockerExplorerProvider;
@@ -52,6 +53,8 @@ export interface ComposeVersionKeys {
     v2: KeyInfo
 };
 
+let client: LanguageClient;
+
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     const installedExtensions: any[] = vscode.extensions.all;
@@ -61,7 +64,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     for (var i = 0; i < installedExtensions.length; i++) {
         const ext = installedExtensions[i];
         if (ext.id === 'ms-vscode.azure-account') {
-            azureAccount = await ext.activate();
+            try {
+                azureAccount = await ext.activate();
+            } catch (error) {
+                console.log('Failed to activate the Azure Account Extension: ' + error);
+            }
             break;
         }
     }
@@ -92,6 +99,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.azurecli', startAzureCLI));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.restart', restartContainer));    
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.remove', removeContainer));
@@ -125,6 +133,52 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     activateLanguageClient(ctx);
 }
 
+export function deactivate(): Thenable<void> {
+    if (!client) {
+        return undefined;
+    }
+    // perform cleanup
+    Configuration.dispose();
+    return client.stop();
+}
+
+namespace Configuration {
+
+    let configurationListener: vscode.Disposable;
+
+    export function computeConfiguration(params: Proposed.ConfigurationParams): vscode.WorkspaceConfiguration[] {
+        if (!params.items) {
+            return null;
+        }
+        let result: vscode.WorkspaceConfiguration[] = [];
+        for (let item of params.items) {
+            let config = null;
+
+            if (item.scopeUri) {
+                config = vscode.workspace.getConfiguration(item.section, client.protocol2CodeConverter.asUri(item.scopeUri));
+            } else {
+                config = vscode.workspace.getConfiguration(item.section);
+            }
+            result.push(config);
+        }
+        return result;
+    }
+
+    export function initialize() {
+        configurationListener = vscode.workspace.onDidChangeConfiguration(() => {
+            // notify the language server that settings have change
+            client.sendNotification(DidChangeConfigurationNotification.type, { settings: null });
+        });
+    }
+
+    export function dispose() {
+        if (configurationListener) {
+            // remove this listener when disposed
+            configurationListener.dispose();
+        }
+    }
+}
+
 function activateLanguageClient(ctx: vscode.ExtensionContext) {
     let serverModule = ctx.asAbsolutePath(path.join("node_modules", "dockerfile-language-server-nodejs", "lib", "server.js"));
     let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
@@ -134,15 +188,26 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
         debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
     }
 
+    let middleware: ProposedFeatures.ConfigurationMiddleware | Middleware = {
+        workspace: {
+            configuration: Configuration.computeConfiguration
+        }
+    };
+
     let clientOptions: LanguageClientOptions = {
         documentSelector: ['dockerfile'],
         synchronize: {
-            configurationSection: 'docker.languageserver',
-            // detect configuration changes
             fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
-        }
+        },
+        middleware: middleware as Middleware
     }
 
-    let disposable = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions).start();
-    ctx.subscriptions.push(disposable);
+    client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);
+    // enable the proposed workspace/configuration feature
+    client.registerProposedFeatures();
+    client.onReady().then(() => {
+        // attach the VS Code settings listener
+        Configuration.initialize();
+    });
+    client.start();
 }
