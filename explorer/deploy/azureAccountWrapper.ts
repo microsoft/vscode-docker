@@ -59,34 +59,7 @@ export class AzureAccountWrapper {
     }
 
     async getAllSubscriptions(): Promise<SubscriptionModels.Subscription[]> {
-        const tasks = new Array<Promise<SubscriptionModels.Subscription[]>>();
-
-        this.getAzureSessions().forEach((s, i, array) => {
-            const client = new SubscriptionClient(s.credentials);
-            const tenantId = s.tenantId;
-            tasks.push(util.listAll(client.subscriptions, client.subscriptions.list()).then(result => {
-                return result.map<SubscriptionModels.Subscription>((value) => {
-                    // The list() API doesn't include tenantId information in the subscription object, 
-                    // however many places that uses subscription objects will be needing it, so we just create 
-                    // a copy of the subscription object with the tenantId value.
-                    return {
-                        id: value.id,
-                        subscriptionId: value.subscriptionId,
-                        tenantId: tenantId,
-                        displayName: value.displayName,
-                        state: value.state,
-                        subscriptionPolicies: value.subscriptionPolicies,
-                        authorizationSource: value.authorizationSource
-                    };
-                });
-            }));
-        });
-
-        const results = await Promise.all(tasks);
-        const subscriptions = new Array<SubscriptionModels.Subscription>();
-
-        results.forEach((result) => result.forEach((subscription) => subscriptions.push(subscription)));
-        return subscriptions;
+        return this.accountApi.subscriptions.map(({ session, subscription }) => ({ tenantId: session.tenantId, ...subscription }));
     }
 
     async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
