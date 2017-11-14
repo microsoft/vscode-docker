@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -526,14 +526,14 @@
     "@types/keytar": "^4.0.1"
   },
   "dependencies": {
-    "dockerfile-language-server-nodejs": "^0.0.10",
-    "dockerode": "^2.5.1",
-    "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.5.0-next.4",
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
+    "dockerfile-language-server-nodejs": "^0.0.10",
+    "dockerode": "^2.5.1",
+    "opn": "^5.1.0",
     "request-promise": "^4.2.2",
-    "opn": "^5.1.0"
+    "vscode-extension-telemetry": "^0.0.6",
+    "vscode-languageclient": "^3.5.0-next.4"
   }
 }

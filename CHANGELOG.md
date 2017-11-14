@@ -1,6 +1,8 @@
-## 0.0.22 - 10 Nov 2017
+## 0.0.22 - 13 Nov 2017
 
 * Enable CI if deploying image from Azure Container Registry
+* Update usage of Azure Account API to speed up deployment to Azure App Services
+* Make shell commands configurable (thanks @FredrikFolkesson) [#160](https://github.com/Microsoft/vscode-docker/pull/160)
 
 ## 0.0.21 - 08 Nov 2017
 
