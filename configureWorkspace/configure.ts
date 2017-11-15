@@ -8,7 +8,7 @@ function genDockerFile(serviceName: string, platform: string, port: string, { cm
     switch (platform.toLowerCase()) {
         case 'node.js':
 
-            return `FROM node:6-alpine
+            return `FROM node:8.9-alpine
 ENV NODE_ENV production
 WORKDIR /usr/src/app
 COPY ["package.json", "npm-shrinkwrap.json*", "./"]
