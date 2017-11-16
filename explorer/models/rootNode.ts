@@ -7,6 +7,12 @@ import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 import { AzureAccount } from '../../typings/azure-account.api';
 
+const noDanglingOption = {
+    "filters": {
+        "dangling": ["false"]
+    }
+};
+
 export class RootNode extends NodeBase {
     private _imageCache: Docker.ImageDesc[];
     private _imageDebounceTimer: NodeJS.Timer;
@@ -32,7 +38,6 @@ export class RootNode extends NodeBase {
     }
 
     autoRefreshImages(): void {
-
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
 
@@ -46,12 +51,7 @@ export class RootNode extends NodeBase {
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
-
-                const opts = {
-                    "filters": {
-                        "dangling": ["false"]
-                    }
-                };
+                const opts = Object.assign({}, noDanglingOption);
 
                 let needToRefresh: boolean = false;
                 let found: boolean = false;
@@ -116,10 +116,11 @@ export class RootNode extends NodeBase {
         }
 
     }
-
+    
     private async getImages(): Promise<ImageNode[]> {
         const imageNodes: ImageNode[] = [];
-        const images: Docker.ImageDesc[] = await docker.getImageDescriptors();
+        const opts = Object.assign({}, noDanglingOption);
+        const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
 
         if (!images || images.length === 0) {
             return [];
