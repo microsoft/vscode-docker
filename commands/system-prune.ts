@@ -27,7 +27,12 @@ export async function systemPrune() {
     }
 
     if (reporter) {
-        reporter.sendTelemetryEvent('command', {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
+            reporter.sendTelemetryEvent('command', {
             command: teleCmdId
         });
     }

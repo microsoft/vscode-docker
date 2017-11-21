@@ -60,6 +60,11 @@ export async function compose(command: string, message: string) {
             terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} -d --build` : `docker-compose -f ${selectedItem.file} ${command}`);
             terminal.show();
             if (reporter) {
+                /* __GDPR__
+                   "command" : {
+                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+                   }
+                 */
                 reporter.sendTelemetryEvent('command', {
                     command: teleCmdId + command
                 });

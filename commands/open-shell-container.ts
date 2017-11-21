@@ -34,6 +34,12 @@ export async function openShellContainer(context?: ContainerNode) {
             terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
             terminal.show();
             if (reporter) {
+                /* __GDPR__
+                   "command" : {
+                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
+                      "dockerEngineType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+                   }
+                 */
                 reporter.sendTelemetryEvent('command', {
                     command: teleCmdId,
                     dockerEngineType: engineTypeShellCommands[engineType]

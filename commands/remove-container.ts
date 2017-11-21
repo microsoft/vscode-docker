@@ -52,6 +52,11 @@ export async function removeContainer(context?: ContainerNode) {
         }));
     }
 
+    /* __GDPR__
+       "command" : {
+          "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+       }
+     */
     reporter && reporter.sendTelemetryEvent("command", { command: teleCmdId });
 
 }
