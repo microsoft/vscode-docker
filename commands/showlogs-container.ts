@@ -27,6 +27,11 @@ export async function showLogsContainer(context?: ContainerNode) {
         terminal.sendText(`docker logs -f ${containerToLog.Id}`);
         terminal.show();
         if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
             reporter.sendTelemetryEvent('command', {
                 command: teleCmdId
             });

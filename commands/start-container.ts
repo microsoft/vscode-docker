@@ -36,6 +36,11 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
             terminal.show();
 
             if (reporter) {
+                /* __GDPR__
+                   "command" : {
+                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+                   }
+                 */
                 reporter.sendTelemetryEvent('command', {
                     command: interactive ? teleCmdId + '.interactive' : teleCmdId
                 });
@@ -79,6 +84,11 @@ export async function startAzureCLI() {
         terminal.sendText(cmd);
         terminal.show();
         if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
             reporter.sendTelemetryEvent('command', {
                 command: teleCmdId + '.azurecli'
             });

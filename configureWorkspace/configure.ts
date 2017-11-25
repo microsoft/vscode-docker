@@ -291,6 +291,12 @@ export async function configure(): Promise<void> {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
+    /* __GDPR__
+       "command" : {
+          "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
+          "platformType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+       }
+     */
     reporter && reporter.sendTelemetryEvent('command', {
         command: 'vscode-docker.configure',
         platformType

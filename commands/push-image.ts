@@ -24,6 +24,11 @@ export async function pushImage(context?: ImageNode) {
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();
         if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
             reporter.sendTelemetryEvent('command', {
                 command: teleCmdId
             });

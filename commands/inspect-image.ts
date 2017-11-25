@@ -18,6 +18,11 @@ export default async function inspectImage(context?: ImageNode) {
 
     if (imageToInspect) {
         await DockerInspectDocumentContentProvider.openImageInspectDocument(imageToInspect);
+        /* __GDPR__
+           "command" : {
+              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+           }
+         */
         reporter && reporter.sendTelemetryEvent("command", { command: "vscode-docker.image.inspect" });
     }
 };
