@@ -165,6 +165,10 @@
         },
         {
           "command": "vscode-docker.container.show-logs",
+          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
+        },
+        {
+          "command": "vscode-docker.container.show-logs",
           "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
