@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -366,6 +366,11 @@
           "type": "string",
           "default": "powershell",
           "description": "Attach command to use for Windows containers"
+        },
+        "docker.promptOnSystemPrune": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prompt for confirmation when running System Prune command"
         }
       }
     },
