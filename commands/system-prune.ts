@@ -5,11 +5,23 @@ import { docker } from './utils/docker-endpoint';
 const teleCmdId: string = 'vscode-docker.system.prune';
 
 export async function systemPrune() {
-
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = vscode.window.createTerminal("docker system prune");
     const semver = require(`${vscode.env.appRoot}/node_modules/semver`);
 
     try {
+
+        if (configOptions.get('promptOnSystemPrune', false)) {
+            var res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
+                { title: 'Yes' },
+                { title: 'Cancel', isCloseAffordance: true }
+            );
+
+            if (!res || res.isCloseAffordance) {
+                return;
+            }
+        }
+
         const info = await docker.getEngineInfo();
 
         // in docker 17.06.1 and higher you must specify the --volumes flag
@@ -27,12 +39,12 @@ export async function systemPrune() {
     }
 
     if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
+        /* __GDPR__
+           "command" : {
+              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+           }
+         */
+        reporter.sendTelemetryEvent('command', {
             command: teleCmdId
         });
     }
