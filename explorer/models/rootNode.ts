@@ -7,9 +7,15 @@ import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 import { AzureAccount } from '../../typings/azure-account.api';
 
-const noDanglingOption = {
+const imageFilters = {
     "filters": {
         "dangling": ["false"]
+    }
+};
+
+const containerFilters = {
+    "filters": {
+        "status": ["created", "restarting", "running", "paused", "exited", "dead"]
     }
 };
 
@@ -51,12 +57,10 @@ export class RootNode extends NodeBase {
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
-                const opts = Object.assign({}, noDanglingOption);
-
                 let needToRefresh: boolean = false;
                 let found: boolean = false;
 
-                const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
+                const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
 
                 if (!this._imageCache) {
                     this._imageCache = images;
@@ -119,8 +123,7 @@ export class RootNode extends NodeBase {
     
     private async getImages(): Promise<ImageNode[]> {
         const imageNodes: ImageNode[] = [];
-        const opts = Object.assign({}, noDanglingOption);
-        const images: Docker.ImageDesc[] = await docker.getImageDescriptors(opts);
+        const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
 
         if (!images || images.length === 0) {
             return [];
@@ -158,16 +161,10 @@ export class RootNode extends NodeBase {
         if (refreshInterval > 0) {
             this._containerDebounceTimer = setInterval(async () => {
 
-                const opts = {
-                    "filters": {
-                        "status": ["created", "restarting", "running", "paused", "exited", "dead"]
-                    }
-                };
-
                 let needToRefresh: boolean = false;
                 let found: boolean = false;
 
-                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(containerFilters);
 
                 if (!this._containerCache) {
                     this._containerCache = containers;
@@ -211,13 +208,7 @@ export class RootNode extends NodeBase {
         let contextValue: string;
         let iconPath: any = {};
 
-        const opts = {
-            "filters": {
-                "status": ["created", "restarting", "running", "paused", "exited", "dead"]
-            }
-        };
-
-        const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(opts);
+        const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(containerFilters);
 
         if (!containers || containers.length == 0) {
             return [];
