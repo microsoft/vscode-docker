@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-
-import request = require('request-promise');
+import * as moment from 'moment';
+import * as request from 'request-promise';
 
 import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
@@ -43,7 +43,7 @@ export class AzureRegistryNode extends NodeBase {
         if (!this._azureAccount) {
             return [];
         }
-        
+
         const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
 
@@ -139,13 +139,15 @@ export class AzureRepositoryNode extends NodeBase {
     async getChildren(element: AzureRepositoryNode): Promise<AzureImageNode[]> {
         const imageNodes: AzureImageNode[] = [];
         let node: AzureImageNode;
+        let created: string = '';
+        let refreshTokenARC;
+        let accessTokenARC;
+        let tags;
 
         const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
 
         if (accessToken && refreshToken) {
             const tenantId = element.subscription.tenantId;
-            let refreshTokenARC;
-            let accessTokenARC;
 
             await request.post('https://' + element.repository + '/oauth2/exchange', {
                 form: {
@@ -185,16 +187,25 @@ export class AzureRepositoryNode extends NodeBase {
             }, (err, httpResponse, body) => {
                 if (err) { return []; }
                 if (body.length > 0) {
-                    const tags = JSON.parse(body).tags;
-                    for (let i = 0; i < tags.length; i++) {
-                        node = new AzureImageNode(element.label + ':' + tags[i], 'azureImageTag');
-                        node.serverUrl = element.repository;
-                        node.userName = element.userName;
-                        node.password = element.password;
-                        imageNodes.push(node);
-                    }
+                    tags = JSON.parse(body).tags;
                 }
             });
+
+            for (let i = 0; i < tags.length; i++) {
+                created = '';
+                let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
+                    auth: { bearer: accessTokenARC }
+                }));
+                created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
+
+                node = new AzureImageNode(`${element.label}:${tags[i]} (${created})`, 'azureImageTag');
+                node.serverUrl = element.repository;
+                node.userName = element.userName;
+                node.password = element.password;
+                imageNodes.push(node);
+
+            }
+
         }
         return imageNodes;
     }

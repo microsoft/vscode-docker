@@ -540,6 +540,7 @@
     "azure-arm-website": "^1.0.0-preview",
     "dockerfile-language-server-nodejs": "^0.0.11",
     "dockerode": "^2.5.1",
+    "moment": "^2.19.3",
     "opn": "^5.1.0",
     "request-promise": "^4.2.2",
     "vscode-extension-telemetry": "^0.0.6",

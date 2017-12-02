@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as moment from 'moment';
 import * as dockerHub from './dockerHubUtils';
 import { NodeBase } from './nodeBase';
 
@@ -78,10 +79,12 @@ export class DockerHubRepositoryNode extends NodeBase {
     async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
+        let created: string = '';
 
         const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({namespace: element.repository.namespace, name: element.repository.name});
         for (let i = 0; i < myTags.length; i++) {
-            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
+            created = moment(new Date(myTags[i].last_updated)).fromNow();
+            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name} (${created})`, 'dockerHubImageTag');
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
