@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as moment from 'moment';
 import { NodeBase } from './nodeBase';
 
 export class ImageNode extends NodeBase {
@@ -16,7 +17,7 @@ export class ImageNode extends NodeBase {
 
     getTreeItem(): vscode.TreeItem {
         return {
-            label: this.label,
+            label: `${this.label} (${moment(new Date(this.imageDesc.Created * 1000)).fromNow()})`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: "localImageNode",
             iconPath: {

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+
 import { ContainerNode } from './containerNode';
 import { docker } from '../../commands/utils/docker-endpoint';
 import { ImageNode } from './imageNode';
@@ -131,12 +132,12 @@ export class RootNode extends NodeBase {
 
         for (let i = 0; i < images.length; i++) {
             if (!images[i].RepoTags) {
-                let node = new ImageNode("<none>:<none>", "localImageNode", this.eventEmitter);
+                let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
                 node.imageDesc = images[i];
                 imageNodes.push(node);
             } else {
                 for (let j = 0; j < images[i].RepoTags.length; j++) {
-                    let node = new ImageNode(images[i].RepoTags[j], "localImageNode", this.eventEmitter);
+                    let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
                     node.imageDesc = images[i];
                     imageNodes.push(node);
                 }
@@ -228,7 +229,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) [${containers[i].Status}]`, contextValue, iconPath);
+                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, contextValue, iconPath);
                 containerNode.containerDesc = containers[i];
                 containerNodes.push(containerNode);
 

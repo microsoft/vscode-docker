@@ -92,7 +92,7 @@ declare module Docker {
 	}
 
 	interface ImageDesc {
-		Created: Date;
+		Created: number;
 		Id: string;
 		ParentId: string;
 		RepoTags: string[];
