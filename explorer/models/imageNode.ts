@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
 import { NodeBase } from './nodeBase';
+import { trimWithElipsis } from './utils';
 
 export class ImageNode extends NodeBase {
 
@@ -16,8 +17,19 @@ export class ImageNode extends NodeBase {
     public imageDesc: Docker.ImageDesc
 
     getTreeItem(): vscode.TreeItem {
+        let displayName: string = this.label;
+
+        if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {
+            if (/\//.test(displayName)) {
+                let parts: string[] = this.label.split(/\//);
+                displayName = trimWithElipsis(parts[0], vscode.workspace.getConfiguration('docker').get('truncateMaxLength', 10)) + '/' + parts[1];
+            }
+        }
+
+        displayName = `${displayName} (${moment(new Date(this.imageDesc.Created * 1000)).fromNow()})`;
+
         return {
-            label: `${this.label} (${moment(new Date(this.imageDesc.Created * 1000)).fromNow()})`,
+            label: `${displayName}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: "localImageNode",
             iconPath: {

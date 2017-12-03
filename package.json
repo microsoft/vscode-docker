@@ -280,6 +280,16 @@
           "default": "",
           "description": "Build context PATH to pass to Docker build command."
         },
+        "docker.truncateLongRegistryPaths": {
+          "type": "boolean",
+          "default": false,
+          "description": "Truncate long Image and Container registry paths in the Explorer."
+        },
+        "docker.truncateMaxLength": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis."
+        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",
           "type": "string",

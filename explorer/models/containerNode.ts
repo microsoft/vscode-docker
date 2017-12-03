@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { NodeBase } from './nodeBase';
+import { trimWithElipsis } from './utils';
 
 export class ContainerNode extends NodeBase {
 
@@ -14,8 +15,17 @@ export class ContainerNode extends NodeBase {
     public containerDesc: Docker.ContainerDesc;
 
     getTreeItem(): vscode.TreeItem {
+        let displayName: string = this.label;
+
+        if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {
+            if (/\//.test(displayName)) {
+                let parts: string[] = this.label.split(/\//);
+                displayName = trimWithElipsis(parts[0], vscode.workspace.getConfiguration('docker').get('truncateMaxLength', 10)) + '/' + parts[1];
+            }
+        }
+
         return {
-            label: this.label,
+            label: `${displayName}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: this.contextValue,
             iconPath: this.iconPath
