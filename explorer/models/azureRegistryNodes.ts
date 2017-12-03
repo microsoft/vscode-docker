@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as request from 'request-promise';
-
+import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
@@ -25,6 +25,7 @@ export class AzureRegistryNode extends NodeBase {
     public subscription: SubscriptionModels.Subscription;
     public userName: string;
     public password: string;
+    public registry: ContainerModels.Registry;
 
     getTreeItem(): vscode.TreeItem {
         return {
@@ -107,6 +108,8 @@ export class AzureRegistryNode extends NodeBase {
     }
 }
 
+
+
 export class AzureRepositoryNode extends NodeBase {
 
     constructor(
@@ -121,7 +124,7 @@ export class AzureRepositoryNode extends NodeBase {
     }
 
     public repository: string;
-    public subscription: any;
+    public subscription: SubscriptionModels.Subscription;
     public accessTokenARC: string;
     public refreshTokenARC: string;
     public userName: string;
@@ -219,6 +222,7 @@ export class AzureImageNode extends NodeBase {
         super(label);
     }
 
+    public subscription: SubscriptionModels.Subscription;
     public serverUrl: string;
     public userName: string;
     public password: string;
