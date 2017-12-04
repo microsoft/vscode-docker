@@ -194,7 +194,7 @@
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem == azureImageTag"
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
           "command": "vscode-docker.createWebApp",
@@ -219,6 +219,14 @@
         {
           "command": "vscode-docker.browseAzurePortal",
           "when": "view == dockerExplorer && viewItem == azureRegistryNode"
+        },
+        {
+          "command": "vscode-docker.browseAzurePortal",
+          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
+        },
+        {
+          "command": "vscode-docker.browseAzurePortal",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         }
       ]
     },

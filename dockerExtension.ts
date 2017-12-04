@@ -32,11 +32,11 @@ import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explor
 import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
-import { dockerHubLogout, browseDockerHub } from './explorer/models/dockerHubUtils';
+import { dockerHubLogout, browseDockerHub } from './explorer/utils/dockerHubUtils';
 import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
-import { browseAzurePortal } from './explorer/models/azureUtils';
+import { browseAzurePortal } from './explorer/utils/azureUtils';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -128,12 +128,12 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     }));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode ) => {
+        browseAzurePortal(context);
+    }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
     
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode /* | AzureRepositoryNode | AzureImageNode */) => {
-        browseAzurePortal(context);
-    }));
 
     activateLanguageClient(ctx);
 }
