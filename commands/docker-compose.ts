@@ -32,14 +32,14 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-export async function compose(command: string, message: string) {
+async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri) {
     let folder: vscode.WorkspaceFolder;
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
         folder = vscode.workspace.workspaceFolders[0];
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
-
+    
     if (!folder) {
         if (!vscode.workspace.workspaceFolders) {
             vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
@@ -48,36 +48,44 @@ export async function compose(command: string, message: string) {
         }
         return;
     }
-
-    const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
-    if (!uris || uris.length == 0) {
-        vscode.window.showInformationMessage('Couldn\'t find any docker-compose file in your workspace.');
+    
+    let selectedItem: Item;
+    if (dockerComposeFileUri) {
+        selectedItem = createItem(folder, dockerComposeFileUri);
     } else {
-        const items: vscode.QuickPickItem[] = computeItems(folder, uris);
-        const selectedItem: Item = <Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` });
-        if (selectedItem) {
-            const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
-            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} -d --build` : `docker-compose -f ${selectedItem.file} ${command}`);
-            terminal.show();
-            if (reporter) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleCmdId + command
-                });
-            }
-
+        const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
+        if (!uris || uris.length == 0) {
+            vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
+            return;
         }
+        
+        const items: vscode.QuickPickItem[] = computeItems(folder, uris);
+        selectedItem = <Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` });
     }
+
+    if (selectedItem) {
+        const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
+        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} -d --build` : `docker-compose -f ${selectedItem.file} ${command}`);
+        terminal.show();
+        if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
+            reporter.sendTelemetryEvent('command', {
+                command: teleCmdId + command
+            });
+        }
+
+    }
+
 }
 
-export function composeUp() {
-    compose('up', 'to bring up');
+export function composeUp(dockerComposeFileUri?: vscode.Uri) {
+    compose('up', 'to bring up', dockerComposeFileUri);
 }
 
-export function composeDown() {
-    compose('down', 'to take down');
+export function composeDown(dockerComposeFileUri?: vscode.Uri) {
+    compose('down', 'to take down', dockerComposeFileUri);
 }

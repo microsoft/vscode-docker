@@ -50,7 +50,7 @@ async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: 
 
 }
 
-export async function buildImage(dockerFileUri?: vscode.Uri, ) {
+export async function buildImage(dockerFileUri?: vscode.Uri) {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 
@@ -71,12 +71,12 @@ export async function buildImage(dockerFileUri?: vscode.Uri, ) {
     }
 
     const uri: Item = await resolveImageItem(folder, dockerFileUri);
+    if (!uri) return;
+
     let contextPath: string = uri.path;
     if (defaultContextPath && defaultContextPath != '') {
         contextPath = defaultContextPath;
     }
-
-    if (!uri) return;
 
     let imageName: string;
     if (process.platform === 'win32') {
