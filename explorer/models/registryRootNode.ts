@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as dockerHub from './dockerHubUtils'
+import * as dockerHub from '../utils/dockerHubUtils'
 import * as keytarType from 'keytar';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
