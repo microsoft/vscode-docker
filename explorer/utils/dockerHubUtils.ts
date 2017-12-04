@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
-import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from './dockerHubNodes';
+import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
 
 let _token: Token;
 

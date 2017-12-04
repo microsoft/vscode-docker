@@ -48,6 +48,7 @@
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.browseDockerHub",
+    "onCommand:vscode-docker.browseAzurePortal",
     "onView:dockerExplorer",
     "onDebug"
   ],
@@ -193,7 +194,7 @@
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem == azureImageTag"
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
           "command": "vscode-docker.createWebApp",
@@ -214,6 +215,18 @@
         {
           "command": "vscode-docker.browseDockerHub",
           "when": "view == dockerExplorer && viewItem == dockerHubNamespace"
+        },
+        {
+          "command": "vscode-docker.browseAzurePortal",
+          "when": "view == dockerExplorer && viewItem == azureRegistryNode"
+        },
+        {
+          "command": "vscode-docker.browseAzurePortal",
+          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
+        },
+        {
+          "command": "vscode-docker.browseAzurePortal",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         }
       ]
     },
@@ -513,6 +526,11 @@
       {
         "command": "vscode-docker.browseDockerHub",
         "title": "Browse in DockerHub",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.browseAzurePortal",
+        "title": "Browse in the Azure Portal",
         "category": "Docker"
       }
     ],

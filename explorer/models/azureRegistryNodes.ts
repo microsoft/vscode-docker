@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as request from 'request-promise';
-
+import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
@@ -21,10 +21,11 @@ export class AzureRegistryNode extends NodeBase {
         this._azureAccount = azureAccount;
     }
 
-    public type: RegistryType;
-    public subscription: SubscriptionModels.Subscription;
-    public userName: string;
     public password: string;
+    public registry: ContainerModels.Registry;
+    public subscription: SubscriptionModels.Subscription;
+    public type: RegistryType;
+    public userName: string;
 
     getTreeItem(): vscode.TreeItem {
         return {
@@ -90,13 +91,15 @@ export class AzureRegistryNode extends NodeBase {
                 if (body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
                     for (let i = 0; i < repositories.length; i++) {
-                        node = new AzureRepositoryNode(repositories[i], "azureRepository");
+                        node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
+                        node.accessTokenARC = accessTokenARC;
+                        node.azureAccount = element.azureAccount;
+                        node.password = element.password;
+                        node.refreshTokenARC = refreshTokenARC;
+                        node.registry = element.registry;
                         node.repository = element.label;
                         node.subscription = element.subscription;
-                        node.accessTokenARC = accessTokenARC;
-                        node.refreshTokenARC = refreshTokenARC;
                         node.userName = element.userName;
-                        node.password = element.password;
                         repoNodes.push(node);
                     }
                 }
@@ -106,6 +109,8 @@ export class AzureRegistryNode extends NodeBase {
         return repoNodes;
     }
 }
+
+
 
 export class AzureRepositoryNode extends NodeBase {
 
@@ -120,12 +125,14 @@ export class AzureRepositoryNode extends NodeBase {
         super(label);
     }
 
-    public repository: string;
-    public subscription: any;
     public accessTokenARC: string;
-    public refreshTokenARC: string;
-    public userName: string;
+    public azureAccount: AzureAccount
     public password: string;
+    public refreshTokenARC: string;
+    public registry: ContainerModels.Registry;
+    public repository: string;
+    public subscription: SubscriptionModels.Subscription;
+    public userName: string;
 
     getTreeItem(): vscode.TreeItem {
         return {
@@ -144,7 +151,9 @@ export class AzureRepositoryNode extends NodeBase {
         let accessTokenARC;
         let tags;
 
-        const { accessToken, refreshToken } = await acquireToken(element.subscription.session);
+        const tenantId: string = element.subscription.tenantId;
+        const session: AzureSession = element.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const { accessToken, refreshToken } = await acquireToken(session);
 
         if (accessToken && refreshToken) {
             const tenantId = element.subscription.tenantId;
@@ -198,10 +207,13 @@ export class AzureRepositoryNode extends NodeBase {
                 }));
                 created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
 
-                node = new AzureImageNode(`${element.label}:${tags[i]} (${created})`, 'azureImageTag');
-                node.serverUrl = element.repository;
-                node.userName = element.userName;
+                node = new AzureImageNode(`${element.label}:${tags[i]} (${created})`, 'azureImageNode');
+                node.azureAccount = element.azureAccount;
                 node.password = element.password;
+                node.registry = element.registry;
+                node.serverUrl = element.repository;
+                node.subscription = element.subscription;
+                node.userName = element.userName;
                 imageNodes.push(node);
 
             }
@@ -219,9 +231,12 @@ export class AzureImageNode extends NodeBase {
         super(label);
     }
 
-    public serverUrl: string;
-    public userName: string;
+    public azureAccount: AzureAccount
     public password: string;
+    public registry: ContainerModels.Registry;
+    public serverUrl: string;
+    public subscription: SubscriptionModels.Subscription;
+    public userName: string;
 
     getTreeItem(): vscode.TreeItem {
         return {
