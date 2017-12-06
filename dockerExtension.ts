@@ -27,16 +27,10 @@ import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME }
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, Proposed, ProposedFeatures, DidChangeConfigurationNotification } from 'vscode-languageclient';
-import { WebAppCreator } from './explorer/deploy/webAppCreator';
-import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
-import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
-import * as util from "./explorer/deploy/util";
 import { dockerHubLogout, browseDockerHub } from './explorer/utils/dockerHubUtils';
-import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
-import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { APIImpl, API } from './api/extension-api';
 import { DockerExtensionAPI, IExplorerRegistryProvider } from './api/docker-api';
 
@@ -61,8 +55,6 @@ let client: LanguageClient;
 export function activate(ctx: vscode.ExtensionContext) {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     const installedExtensions: any[] = vscode.extensions.all;
-    const outputChannel = util.getOutputChannel();
-    let azureAccount: AzureAccount;
 
     ctx.subscriptions.push(new Reporter(ctx));
 
@@ -98,28 +90,9 @@ export function activate(ctx: vscode.ExtensionContext) {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
-        if (context) {
-            if (azureAccount) {
-                const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
-                const result = await wizard.run();
-            } else {
-                const open: vscode.MessageItem = { title: "View in Marketplace" };
-                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
-                if (response === open) {
-                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
-                }
-            }
-        }
-    }));
-
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
-    }));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
-        browseAzurePortal(context);
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));

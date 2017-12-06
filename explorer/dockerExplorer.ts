@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
-import { AzureAccount } from '../typings/azure-account.api';
 import { API } from '../api/extension-api';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {

@@ -6,7 +6,6 @@ import { docker } from '../../commands/utils/docker-endpoint';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
-import { AzureAccount } from '../../typings/azure-account.api';
 import { API } from '../../api/extension-api';
 import { IRegistryRootNode } from '../../api/docker-api';
 

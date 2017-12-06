@@ -233,14 +233,6 @@
           "when": "view == dockerExplorer && viewItem == containersRootNode"
         },
         {
-          "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem == azureImageNode"
-        },
-        {
-          "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
-        },
-        {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
         },
@@ -255,18 +247,6 @@
         {
           "command": "vscode-docker.browseDockerHub",
           "when": "view == dockerExplorer && viewItem == dockerHubNamespace"
-        },
-        {
-          "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem == azureRegistryNode"
-        },
-        {
-          "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
-        },
-        {
-          "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem == azureImageNode"
         }
       ]
     },
@@ -554,11 +534,6 @@
         }
       },
       {
-        "command": "vscode-docker.createWebApp",
-        "title": "Deploy Image to Azure App Service",
-        "category": "Docker"
-      },
-      {
         "command": "vscode-docker.dockerHubLogout",
         "title": "DockerHub Logout",
         "category": "Docker"
@@ -566,11 +541,6 @@
       {
         "command": "vscode-docker.browseDockerHub",
         "title": "Browse in DockerHub",
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.browseAzurePortal",
-        "title": "Browse in the Azure Portal",
         "category": "Docker"
       }
     ],
@@ -603,9 +573,6 @@
     "@types/keytar": "^4.0.1"
   },
   "dependencies": {
-    "azure-arm-containerregistry": "^1.0.0-preview",
-    "azure-arm-resource": "^2.0.0-preview",
-    "azure-arm-website": "^1.0.0-preview",
     "dockerfile-language-server-nodejs": "^0.0.11",
     "dockerode": "^2.5.1",
     "moment": "^2.19.3",
