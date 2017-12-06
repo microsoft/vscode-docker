@@ -5,5 +5,7 @@
 	},
 	"search.exclude": {
 		"out": true
-	}
+	},
+	"files.insertFinalNewline": true,
+	"files.trimFinalNewlines": true
 }

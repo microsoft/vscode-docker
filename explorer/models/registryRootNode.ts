@@ -17,34 +17,17 @@ const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
-    private _azureAccount: AzureAccount;
-    
+
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
-        public readonly azureAccount?: AzureAccount 
+        public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
         try {
             this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
         } catch (e) {
             // unable to find keytar
-        }
-
-        this._azureAccount = azureAccount;
-
-        if (this._azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
-
-            this._azureAccount.onFiltersChanged((e) => {
-                this.eventEmitter.fire(this);
-            });
-            this._azureAccount.onStatusChanged((e) => {
-                this.eventEmitter.fire(this);
-            });
-            this._azureAccount.onSessionsChanged((e) => {
-                this.eventEmitter.fire(this);
-            });
         }
     }
 
@@ -57,9 +40,7 @@ export class RegistryRootNode extends NodeBase {
     }
 
     async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
-        if (element.contextValue === 'azureRegistryRootNode') {
-            return this.getAzureRegistries();
-        } else if (element.contextValue === 'dockerHubRootNode') {
+        if (element.contextValue === 'dockerHubRootNode') {
             return this.getDockerHubOrgs();
         } else {
             return [];
@@ -110,87 +91,4 @@ export class RegistryRootNode extends NodeBase {
         return orgNodes;
     }
 
-    private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
-
-        if (!this._azureAccount) {
-            return [];
-        }
-
-        const loggedIntoAzure: boolean = await this._azureAccount.waitForLogin()
-        const azureRegistryNodes: AzureRegistryNode[] = [];
-
-        if (this._azureAccount.status === 'Initializing' || this._azureAccount.status === 'LoggingIn') {
-            return [new AzureLoadingNode()];
-        }
-
-        if (this._azureAccount.status === 'LoggedOut') {
-            return [new AzureNotSignedInNode()];
-        }
-
-        if (loggedIntoAzure) {
-
-            const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
-
-            for (let i = 0; i < subs.length; i++) {
-
-                const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                const registries: ContainerModels.RegistryListResult = await client.registries.list();
-
-                for (let j = 0; j < registries.length; j++) {
-
-                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-                        const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
-
-                        let iconPath = {
-                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                        };
-                        let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                        node.type = RegistryType.Azure;
-                        node.password = creds.passwords[0].value;
-                        node.userName = creds.username;
-                        node.subscription = subs[i];
-                        node.registry = registries[j];
-                        azureRegistryNodes.push(node);
-                    }
-                }
-            }
-        }
-
-        return azureRegistryNodes;
-    }
-
-    private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
-
-        const session = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-
-        if (session) {
-            return session.credentials;
-        }
-
-        throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
-    }
-
-    private getFilteredSubscriptions(): SubscriptionModels.Subscription[] {
-
-        if (this._azureAccount) {
-            return this._azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
-                return {
-                    id: filter.subscription.id,
-                    session: filter.session,
-                    subscriptionId: filter.subscription.subscriptionId,
-                    tenantId: filter.session.tenantId,
-                    displayName: filter.subscription.displayName,
-                    state: filter.subscription.state,
-                    subscriptionPolicies: filter.subscription.subscriptionPolicies,
-                    authorizationSource: filter.subscription.authorizationSource
-                };
-            });
-        } else {
-            return [];
-        }
-    }
 }
-
-

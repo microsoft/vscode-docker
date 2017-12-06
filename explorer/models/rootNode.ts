@@ -7,6 +7,8 @@ import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 import { AzureAccount } from '../../typings/azure-account.api';
+import { API } from '../../api/extension-api';
+import { IRegistryRootNode } from '../../api/docker-api';
 
 const imageFilters = {
     "filters": {
@@ -27,13 +29,11 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[];
     private _containerDebounceTimer: NodeJS.Timer;
     private _containersNode: RootNode;
-    private _azureAccount: AzureAccount;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public eventEmitter: vscode.EventEmitter<NodeBase>,
-        public azureAccount?: AzureAccount
+        public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
         if (this.contextValue === 'imagesRootNode') {
@@ -41,7 +41,6 @@ export class RootNode extends NodeBase {
         } else if (this.contextValue === 'containersRootNode') {
             this._containersNode = this;
         }
-        this._azureAccount = azureAccount;
     }
 
     autoRefreshImages(): void {
@@ -238,15 +237,15 @@ export class RootNode extends NodeBase {
         return containerNodes;
     }
 
-    private async getRegistries(): Promise<RegistryRootNode[]> {
-        const registryRootNodes: RegistryRootNode[] = [];
+    private async getRegistries(): Promise<IRegistryRootNode[]> {
+        let registryRootNodes: IRegistryRootNode[] = [];
+        registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", this.eventEmitter));
 
-        registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", null));
+        const contributedRegistries = await Promise.all(
+            API.registry.map((participant) => participant.getRootNode())
+        );
 
-        if (this._azureAccount) {
-            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
-        }
-
+        registryRootNodes = registryRootNodes.concat(contributedRegistries);
         return registryRootNodes;
     }
 }

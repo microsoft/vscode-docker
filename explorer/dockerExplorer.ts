@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
 import { AzureAccount } from '../typings/azure-account.api';
+import { API } from '../api/extension-api';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
@@ -10,10 +11,14 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
     private _registriesNode: RootNode
-    private _azureAccount: AzureAccount;
-
-    constructor(azureAccount) {
-        this._azureAccount = azureAccount;
+    
+    constructor() {
+        API.onDidRegister((provider) => {
+            // When another extension registers a explorer registry provider,
+            // we will hook up eventing to it, and fire an event on our "Registry" node.
+            provider.onDidChangeTreeData((node) => this._onDidChangeTreeData.fire(node));
+            this._onDidChangeTreeData.fire(this._registriesNode);
+        });
     }
 
     refresh(): void {
@@ -57,7 +62,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         this._containersNode = node;
         rootNodes.push(node);
 
-        node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData, this._azureAccount);
+        node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData);
         this._registriesNode = node;
         rootNodes.push(node);
 

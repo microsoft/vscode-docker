@@ -37,6 +37,8 @@ import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { APIImpl, API } from './api/extension-api';
+import { DockerExtensionAPI, IExplorerRegistryProvider } from './api/docker-api';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -56,27 +58,15 @@ export interface ComposeVersionKeys {
 
 let client: LanguageClient;
 
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+export function activate(ctx: vscode.ExtensionContext) {
     const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
-    for (var i = 0; i < installedExtensions.length; i++) {
-        const ext = installedExtensions[i];
-        if (ext.id === 'ms-vscode.azure-account') {
-            try {
-                azureAccount = await ext.activate();
-            } catch (error) {
-                console.log('Failed to activate the Azure Account Extension: ' + error);
-            }
-            break;
-        }
-    }
-
     ctx.subscriptions.push(new Reporter(ctx));
-    
-    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
+
+    dockerExplorerProvider = new DockerExplorerProvider();
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('dockerExplorer.refreshExplorer', () => dockerExplorerProvider.refresh());
     vscode.commands.registerCommand('dockerExplorer.systemPrune', () => systemPrune());
@@ -100,7 +90,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.interactive', startContainerInteractive));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.start.azurecli', startAzureCLI));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.stop', stopContainer));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.restart', restartContainer));    
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.restart', restartContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.show-logs', showLogsContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.open-shell', openShellContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.remove', removeContainer));
@@ -128,14 +118,28 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     }));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode ) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
         browseAzurePortal(context);
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-    
+
 
     activateLanguageClient(ctx);
+
+    // Kick off activation of other extensions that use my API, 
+    // but do not wait for them to activate, as they might wait
+    // on my activation.
+    API.activateContributingExtensions().catch((err) => {
+        console.error(err);
+    });
+
+    const facadeAPI: DockerExtensionAPI = {
+        registerExplorerRegistryProvider: (provider: IExplorerRegistryProvider): void => {
+            API.registerExplorerRegistryProvider(provider);
+        }
+    }
+    return Promise.resolve(facadeAPI);
 }
 
 export function deactivate(): Thenable<void> {
