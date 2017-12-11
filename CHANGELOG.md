@@ -4,6 +4,10 @@
 * Upgrade to new language server (thanks @rcjsuen) [#173](https://github.com/Microsoft/vscode-docker/pull/173)
 * Adding show logs command to dead containers (thanks @FredrikFolkesson) [#178](https://github.com/Microsoft/vscode-docker/pull/178)
 * Default to Node 8.9 when generating Dockerfile (thanks @johnpapa) [#174](https://github.com/Microsoft/vscode-docker/pull/174)
+* Add `compose up` and `compose down` context menus for files explicitly named `docker-compose.yml` or `docker-compose.debug.yml`
+* Browse to the Azure portal context menu, fixes [#151](https://github.com/Microsoft/vscode-docker/issues/151)
+* Add `docker.truncateLongRegistryPaths` and `docker.truncateMaxLength` configuration options enable truncation of long image and container names in the Explorer, fixes [#180](https://github.com/Microsoft/vscode-docker/issues/180)
+* Images in the Explorer now show age (e.g. '22 days ago')
 
 ## 0.0.22 - 13 Nov 2017
 
