@@ -149,7 +149,9 @@ export async function getUser(): Promise<User> {
         u = await request(options);
     } catch (error) {
         console.log(error);
-        vscode.window.showErrorMessage('Docker: Unable to retrieve User information');
+        if (error.statusCode === 401) {
+            vscode.window.showErrorMessage('Docker: Please logout of DockerHub and then log in again.');
+        }
     }
 
     return u;
