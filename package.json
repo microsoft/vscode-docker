@@ -45,6 +45,8 @@
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
+    "onCommand:vscode-docker.createContainerInstance",
+    "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.browseDockerHub",
@@ -62,6 +64,10 @@
         },
         {
           "command": "vscode-docker.createWebApp",
+          "when": "false"
+        },
+        {
+          "command": "vscode-docker.createContainerInstance",
           "when": "false"
         }
       ],
@@ -238,6 +244,14 @@
         },
         {
           "command": "vscode-docker.createWebApp",
+          "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.createContainerInstance",
+          "when": "view == dockerExplorer && viewItem == azureImageTag"
+        },
+        {
+          "command": "vscode-docker.createContainerInstance",
           "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
         },
         {
@@ -559,6 +573,11 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.createContainerInstance",
+        "title": "Deploy Image to Azure Container Instance",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.dockerHubLogout",
         "title": "DockerHub Logout",
         "category": "Docker"
@@ -610,6 +629,7 @@
     "dockerode": "^2.5.1",
     "moment": "^2.19.3",
     "opn": "^5.1.0",
+    "azure-arm-containerinstance": "^1.0.0-preview",
     "request-promise": "^4.2.2",
     "vscode-extension-telemetry": "^0.0.6",
     "vscode-languageclient": "^3.5.0-next.4"
