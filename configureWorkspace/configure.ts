@@ -20,29 +20,25 @@ CMD ${cmd}`;
         case 'go':
 
             return `
-# golang:onbuild automatically copies the package source, 
-# fetches the application dependencies, builds the program, 
-# and configures it to run on startup 
-FROM golang:onbuild
-LABEL Name=${serviceName} Version=${version} 
+# golang:alpine is based on Alpine Linux and as a result contains a very
+# slim base image. This dockerfile configures ssh, bash for remote access
+# and git for running go. Customize the Dockerfile as required.
+FROM golang:alpine
+WORKDIR /go/src/app
+COPY . .
+RUN apk update && apk upgrade && apk add --no-cache bash git openssh
+RUN go-wrapper download   # "go get -d -v ./..."
+RUN go-wrapper install    # "go install -v ./..."
+CMD ["go-wrapper", "run"] # ["app"]
+LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
-
-# For more control, you can copy and build manually
-# FROM golang:latest 
-# LABEL Name=${serviceName} Version=${version} 
-# RUN mkdir /app 
-# ADD . /app/ 
-# WORKDIR /app 
-# RUN go build -o main .
-# EXPOSE ${port} 
-# CMD ["/app/main"]
 `;
 
         case '.net core':
 
             return `
 FROM microsoft/aspnetcore:1
-LABEL Name=${serviceName} Version=${version} 
+LABEL Name=${serviceName} Version=${version}
 ARG source=.
 WORKDIR /app
 EXPOSE ${port}
@@ -54,7 +50,7 @@ ENTRYPOINT dotnet ${serviceName}.dll
 
             return `
 FROM docker/whalesay:latest
-LABEL Name=${serviceName} Version=${version} 
+LABEL Name=${serviceName} Version=${version}
 RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay
 `;
@@ -113,7 +109,7 @@ function genDockerComposeDebug(serviceName: string, platform: string, port: stri
 
             const cmdArray: string[] = cmd.split(' ');
             if (cmdArray[0].toLowerCase() === 'node') {
-                cmdArray.splice(1, 0, '--inspect=0.0.0.0:9229');  
+                cmdArray.splice(1, 0, '--inspect=0.0.0.0:9229');
                 cmd = `command: ${cmdArray.join(' ')}`;
             } else {
                 cmd = '## set your startup file here\n    command: node --inspect index.js';
@@ -286,7 +282,7 @@ export async function configure(): Promise<void> {
 
     const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
     const pkg = await readPackageJson(folder);
-    
+
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
