@@ -272,17 +272,20 @@ class PortsStep extends WizardStep {
     async prompt(): Promise<void> {
         const inputBoxOptions = {
             prompt: `Enter ports to open separeted by ',' or just Enter to skip. (${this.stepProgressText})`,
+            value: " ",
             validateInput: (value: string) => {
-                let portsStr = value.split(',');
+                if (!value || value.trim().length == 0) return null;
+
+                let portsStr = value.trim().split(',');
 
                 if (portsStr.length > 5) {
                     return 'Can only open up to 5 ports';
                 }
 
-                for (let portStr in portsStr) {
-                    let port = Number(portStr);
-                    if (!Number.isInteger(port) || port <= 0 || port > 65535) {
-                        return `Port ${port} is invalid`;
+                for (let portStr of portsStr) {
+                    let port = Number.parseInt(portStr);
+                    if (Number.isNaN(port) || port <= 0 || port > 65535) {
+                        return `${portStr} is an invalid port`;
                     }
                 }
 
@@ -290,12 +293,10 @@ class PortsStep extends WizardStep {
             }
         };
 
-        this._ports = [];
-
         let input = await this.showInputBox(inputBoxOptions);
         input = input.trim();
 
-        if (!input) {
+        if (input && input.length > 0) {
             this._ports = input.split(',').map<number>(portStr => {
                 return Number(portStr);
             });
@@ -303,7 +304,9 @@ class PortsStep extends WizardStep {
     }
 
     async execute(): Promise<void> {
-        this.wizard.writeline(`The container will be created with a public IP and ports "${this.ports}".`);
+        if (this._ports) {
+            this.wizard.writeline(`The container will be created with a public IP and ports "${this.ports}".`);
+        }
     }
 
     get ports(): number[] {
@@ -312,6 +315,7 @@ class PortsStep extends WizardStep {
 }
 
 class ContainerInstanceStep extends ContainerInstanceCreatorStepBase {
+    private _containerGroup: ContainerInstanceModels.ContainerGroup;
     private _command: string;
     private _serverUrl: string;
     private _serverUserName: string;
@@ -324,14 +328,90 @@ class ContainerInstanceStep extends ContainerInstanceCreatorStepBase {
         this._serverUrl = context.serverUrl;
         this._serverPassword = context.password;
         this._serverUserName = context.userName;
-        this._imageName = context.label;
+        this._imageName = context.label.split(" ")[0];
     }
 
     async prompt(): Promise<void> {
-        this._command = `az container create -g ${this.getSelectedResourceGroup} -n name --image ${this._imageName} --os-type ${this.getSelectedOsType} --ip-address Public --ports ${this.getInputPorts}`;
+        const rg = this.getSelectedResourceGroup();
+        let location = rg.location;
+        const osType = this.getSelectedOsType();
+        const ports = this.getInputPorts();
+
+        let containerGroupName = await this.showInputBox({
+            prompt: `Enter a unique name for the new container instance. (${this.stepProgressText})`,
+            validateInput: (value: string) => {
+                value = value ? value.trim() : '';
+
+                if (!value.match(/^[a-z0-9\-]{1,60}$/ig)) {
+                    return 'App name should be 1-60 characters long and can only include alphanumeric characters and hyphens.';
+                }
+
+                return null;
+            }
+        });
+
+        let imageRegistryCredential: ContainerInstanceModels.ImageRegistryCredential;
+        if (this._serverUrl.length > 0) {
+            imageRegistryCredential = {
+                server: this._serverUrl,
+                username: this._serverUserName,
+                password: this._serverPassword
+            };
+            this._imageName = `${this._serverUrl}/${this._imageName}`;
+        }
+
+        if (this._serverUserName.length > 0) {
+            this._imageName = `${this._serverUserName}/${this._imageName}`;
+        }
+
+        let container = {
+            name: containerGroupName.trim(),
+            image: this._imageName,
+            ports: ports ?
+                ports.map<ContainerInstanceModels.ContainerPort>(p => {
+                    return {
+                        protocol: "TCP",
+                        port: p
+                    };
+                })
+                : undefined,
+            resources: {
+                requests: {
+                    memoryInGB: 1.5,
+                    cpu: 1.0
+                }
+            }
+        };
+
+        this._containerGroup = {
+            name: containerGroupName.trim(),
+            location: location,
+            containers: [container],
+            restartPolicy: "Never",
+            osType: osType,
+            ipAddress: ports ?
+                {
+                    ports: ports.map<ContainerInstanceModels.Port>(p => {
+                        return {
+                            port: p,
+                            protocol: "TCP"
+                        };
+                    })
+                }
+                : undefined,
+            imageRegistryCredentials: imageRegistryCredential ? [imageRegistryCredential] : undefined
+        };
     }
 
     async execute(): Promise<void> {
-        this.wizard.writeline(`Generated command: "${this._command}".`);
+        this.wizard.writeline(`Creating new container instance "${this._containerGroup.name}"...`);
+        const subscription = this.getSelectedSubscription();
+        const rg = this.getSelectedResourceGroup();
+        const containerInstanceClient = new ContainerInstanceManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+
+        this._containerGroup = await containerInstanceClient.containerGroups.createOrUpdate(rg.name, this._containerGroup.name, this._containerGroup);
+        this.wizard.writeline(`Created new container intance:\n${this._containerGroup.id}`);
+        this.wizard.writeline(`Use command "az container logs -g ${rg.name} -n ${this._containerGroup.name}" to get logs.`)
+        this.wizard.writeline(`Use command "az container delete -g ${rg.name} -n ${this._containerGroup.name}" to delete the container instance.`)
     }
 }

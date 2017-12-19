@@ -248,7 +248,7 @@
         },
         {
           "command": "vscode-docker.createContainerInstance",
-          "when": "view == dockerExplorer && viewItem == azureImageTag"
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
           "command": "vscode-docker.createContainerInstance",
@@ -629,7 +629,7 @@
     "dockerode": "^2.5.1",
     "moment": "^2.19.3",
     "opn": "^5.1.0",
-    "azure-arm-containerinstance": "^1.0.0-preview",
+    "azure-arm-containerinstance": "^1.1.0-preview",
     "request-promise": "^4.2.2",
     "vscode-extension-telemetry": "^0.0.6",
     "vscode-languageclient": "^3.5.0-next.4"
