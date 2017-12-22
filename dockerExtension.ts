@@ -38,6 +38,9 @@ import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { ContainerInstanceCreator } from './explorer/deploy/containerInstanceCreator';
+import { deleteContainerInstance } from './commands/delete-containerinstance';
+import { showContainerInstanceLogs } from './commands/showlogs-containerinstance';
+import { AzureContainerGroupNode, AzureContainerNode } from './explorer/models/azureContainerInstanceNodes';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -125,11 +128,40 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         }
     }));
 
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createContainerInstance', async (context?: AzureImageNode | DockerHubImageNode) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.containerinstance.delete', async (context?: AzureContainerGroupNode) => {
+        if (context) {
+            if (azureAccount) {
+                await deleteContainerInstance(azureAccount, context);
+            } else {
+                const open: vscode.MessageItem = { title: "View in Marketplace" };
+                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+                if (response === open) {
+                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+                }
+            }
+        }
+    }));
+
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.containerinstance.show-logs', async (context?: AzureContainerNode) => {
+        if (context) {
+            if (azureAccount) {
+                await showContainerInstanceLogs(azureAccount, context);
+            } else {
+                const open: vscode.MessageItem = { title: "View in Marketplace" };
+                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+                if (response === open) {
+                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+                }
+            }
+        }
+    }));
+
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.containerinstance.create', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new ContainerInstanceCreator(outputChannel, azureAccountWrapper, context);
+                const containerInstanceOutputChannel = vscode.window.createOutputChannel('AzureContainerInstance');
+                const wizard = new ContainerInstanceCreator(containerInstanceOutputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
             } else {
                 const open: vscode.MessageItem = { title: "View in Marketplace" };

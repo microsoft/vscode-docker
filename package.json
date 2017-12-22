@@ -45,7 +45,9 @@
     "onCommand:vscode-docker.compose.down",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
-    "onCommand:vscode-docker.createContainerInstance",
+    "onCommand:vscode-docker.containerinstance.create",
+    "onCommand:vscode-docker.containerinstance.delete",
+    "onCommand:vscode-docker.containerinstance.show-logs",
     "onCommand:vscode-docker.debug.configureLaunchJson",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
@@ -67,7 +69,15 @@
           "when": "false"
         },
         {
-          "command": "vscode-docker.createContainerInstance",
+          "command": "vscode-docker.containerinstance.create",
+          "when": "false"
+        },
+        {
+          "command": "vscode-docker.containerinstance.delete",
+          "when": "false"
+        },
+        {
+          "command": "vscode-docker.containerinstance.show-logs",
           "when": "false"
         }
       ],
@@ -247,12 +257,24 @@
           "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
         },
         {
-          "command": "vscode-docker.createContainerInstance",
+          "command": "vscode-docker.containerinstance.create",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
-          "command": "vscode-docker.createContainerInstance",
+          "command": "vscode-docker.containerinstance.create",
           "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.containerinstance.delete",
+          "when": "view == dockerExplorer && viewItem == azureContainerGroupNode"
+        },
+        {
+          "command": "vscode-docker.containerinstance.show-logs",
+          "when": "view == dockerExplorer && viewItem == runningAzureContainerNode"
+        },
+        {
+          "command": "vscode-docker.containerinstance.show-logs",
+          "when": "view == dockerExplorer && viewItem == stoppedAzureContainerNode"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
@@ -573,8 +595,18 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.createContainerInstance",
+        "command": "vscode-docker.containerinstance.create",
         "title": "Deploy Image to Azure Container Instance",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.containerinstance.delete",
+        "title": "Delete the Azure Container Instance",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.containerinstance.show-logs",
+        "title": "Get the container instance logs",
         "category": "Docker"
       },
       {

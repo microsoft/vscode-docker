@@ -9,7 +9,8 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
-    private _registriesNode: RootNode
+    private _registriesNode: RootNode;
+    private _deploymentsNode: RootNode;
     private _azureAccount: AzureAccount;
 
     constructor(azureAccount) {
@@ -20,6 +21,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         this._onDidChangeTreeData.fire(this._imagesNode);
         this._onDidChangeTreeData.fire(this._containersNode);
         this._onDidChangeTreeData.fire(this._registriesNode);
+        this._onDidChangeTreeData.fire(this._deploymentsNode);
     }
 
     refreshImages(): void {
@@ -32,6 +34,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
     refreshRegistries(): void {
         this._onDidChangeTreeData.fire(this._registriesNode);
+    }
+
+    refreshDeployments(): void {
+        this._onDidChangeTreeData.fire(this._deploymentsNode);
     }
     
     getTreeItem(element: NodeBase): vscode.TreeItem {
@@ -59,6 +65,10 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
 
         node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData, this._azureAccount);
         this._registriesNode = node;
+        rootNodes.push(node);
+
+        node = new RootNode('Deployments', 'deploymentsRootNode', this._onDidChangeTreeData, this._azureAccount);
+        this._deploymentsNode = node;
         rootNodes.push(node);
 
         return rootNodes;

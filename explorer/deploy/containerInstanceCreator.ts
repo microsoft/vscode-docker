@@ -411,7 +411,5 @@ class ContainerInstanceStep extends ContainerInstanceCreatorStepBase {
 
         this._containerGroup = await containerInstanceClient.containerGroups.createOrUpdate(rg.name, this._containerGroup.name, this._containerGroup);
         this.wizard.writeline(`Created new container intance:\n${this._containerGroup.id}`);
-        this.wizard.writeline(`Use command "az container logs -g ${rg.name} -n ${this._containerGroup.name}" to get logs.`)
-        this.wizard.writeline(`Use command "az container delete -g ${rg.name} -n ${this._containerGroup.name}" to delete the container instance.`)
     }
 }

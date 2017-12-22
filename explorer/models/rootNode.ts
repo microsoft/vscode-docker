@@ -6,6 +6,7 @@ import { docker } from '../../commands/utils/docker-endpoint';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
+import { DeploymentRootNode } from './deploymentRootNode';
 import { AzureAccount } from '../../typings/azure-account.api';
 
 const imageFilters = {
@@ -117,7 +118,10 @@ export class RootNode extends NodeBase {
             return this.getContainers();
         }
         if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries()
+            return this.getRegistries();
+        }
+        if (element.contextValue === 'deploymentsRootNode') {
+            return this.getDeployments();
         }
 
     }
@@ -248,5 +252,14 @@ export class RootNode extends NodeBase {
         }
 
         return registryRootNodes;
+    }
+
+    private async getDeployments(): Promise<DeploymentRootNode[]> {
+        const deploymentRootNodes: DeploymentRootNode[] = [];
+        if (this._azureAccount) {
+            deploymentRootNodes.push(new DeploymentRootNode('AzureContainerInstance', 'azureContainerInstanceRootNode', this.eventEmitter, this._azureAccount));
+        }
+
+        return deploymentRootNodes;
     }
 }
