@@ -20,16 +20,19 @@ CMD ${cmd}`;
         case 'go':
 
             return `
-# golang:alpine is based on Alpine Linux and as a result contains a very
-# slim base image. This dockerfile configures ssh, bash for remote access
-# and git for running go. Customize the Dockerfile as required.
-FROM golang:alpine
+#build stage
+FROM golang:alpine AS builder
 WORKDIR /go/src/app
 COPY . .
-RUN apk update && apk upgrade && apk add --no-cache bash git openssh
+RUN apk add --no-cache git
 RUN go-wrapper download   # "go get -d -v ./..."
 RUN go-wrapper install    # "go install -v ./..."
-CMD ["go-wrapper", "run"] # ["app"]
+
+#final stage
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /go/bin/app /app
+ENTRYPOINT ./app
 LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
 `;
