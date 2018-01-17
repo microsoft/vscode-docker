@@ -63,9 +63,9 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
 
     if (!folder) {
         if (!vscode.workspace.workspaceFolders) {
-            vscode.window.showErrorMessage('Docker files can only be build if VS Code is opened on a folder.');
+            vscode.window.showErrorMessage('Docker files can only be built if VS Code is opened on a folder.');
         } else {
-            vscode.window.showErrorMessage('Docker files can only be build if a workspace folder is picked in VS Code.');
+            vscode.window.showErrorMessage('Docker files can only be built if a workspace folder is picked in VS Code.');
         }
         return;
     }
