@@ -50,7 +50,7 @@
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onView:dockerExplorer",
-    "onDebug"
+    "onDebugInitialConfigurations"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
