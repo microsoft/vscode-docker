@@ -1,6 +1,7 @@
 import * as Docker from 'dockerode';
 import {docker} from './docker-endpoint';
 import vscode = require('vscode');
+import { ContainerDesc } from 'dockerode';
 
 
 export interface ContainerItem extends vscode.QuickPickItem {
@@ -32,6 +33,7 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean) :
 }
 
 export async function quickPickContainer(includeAll: boolean = false, opts?: {}) : Promise<ContainerItem>{
+    let containers: ContainerDesc[];
 
     // "status": ["created", "restarting", "running", "paused", "exited", "dead"]
     if (!opts) {
@@ -42,13 +44,18 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
         };
     };
 
-    const containers = await docker.getContainerDescriptors(opts);
-
-    if (!containers || containers.length == 0) {
-        vscode.window.showInformationMessage('There are no Docker Containers.');
+    try {
+        containers = await docker.getContainerDescriptors(opts);
+        if (!containers || containers.length == 0) {
+            vscode.window.showInformationMessage('There are no Docker Containers.');
+            return;
+        } else {
+            const items: ContainerItem[] = computeItems(containers, includeAll);
+            return vscode.window.showQuickPick(items, { placeHolder: 'Choose container...' });
+        }
+    } catch (error) {
+        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
         return;
-    } else {
-        const items: ContainerItem[] = computeItems(containers, includeAll);
-        return vscode.window.showQuickPick(items, { placeHolder: 'Choose container...' });
     }
+
 }
