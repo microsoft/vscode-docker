@@ -65,7 +65,11 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
 
     if (selectedItem) {
         const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
-        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} -d --build` : `docker-compose -f ${selectedItem.file} ${command}`);
+        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+        const build: string = configOptions.get('dockerComposeBuild', true) ? '--build': '';
+        const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
+
+        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} ${detached} ${build}` : `docker-compose -f ${selectedItem.file} ${command}`);
         terminal.show();
         if (reporter) {
             /* __GDPR__

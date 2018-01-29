@@ -434,6 +434,16 @@
           "type": "boolean",
           "default": false,
           "description": "Prompt for confirmation when running System Prune command"
+        },
+        "docker.dockerComposeBuild": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run docker-compose with the --build argument, defaults to true"
+        },
+        "docker.dockerComposeDetached": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run docker-compose with the --d (detached) argument, defaults to true"
         }
       }
     },
