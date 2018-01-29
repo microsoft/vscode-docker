@@ -42,15 +42,26 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
 }
 
 export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
+    let images: Docker.ImageDesc[];
 
-    const images = await docker.getImageDescriptors();
+    const imageFilters = {
+        "filters": {
+            "dangling": ["false"]
+        }
+    };
 
+    try {
+        images = await docker.getImageDescriptors(imageFilters);
     if (!images || images.length == 0) {
         vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
         return;
     } else {
         const items: ImageItem[] = computeItems(images, includeAll);
         return vscode.window.showQuickPick(items, { placeHolder: 'Choose image...' });
+    }
+    } catch (error) {
+        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
+        return;
     }
 
 }

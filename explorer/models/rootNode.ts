@@ -109,11 +109,9 @@ export class RootNode extends NodeBase {
     async getChildren(element): Promise<NodeBase[]> {
 
         if (element.contextValue === 'imagesRootNode') {
-            this.autoRefreshImages();
             return this.getImages();
         }
         if (element.contextValue === 'containersRootNode') {
-            this.autoRefreshContainers();
             return this.getContainers();
         }
         if (element.contextValue === 'registriesRootNode') {
@@ -121,28 +119,36 @@ export class RootNode extends NodeBase {
         }
 
     }
-    
+
     private async getImages(): Promise<ImageNode[]> {
         const imageNodes: ImageNode[] = [];
-        const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
+        let images: Docker.ImageDesc[];
 
-        if (!images || images.length === 0) {
+        try {
+            images = await docker.getImageDescriptors(imageFilters);
+            if (!images || images.length === 0) {
+                return [];
+            }
+
+            for (let i = 0; i < images.length; i++) {
+                if (!images[i].RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
+                    node.imageDesc = images[i];
+                    imageNodes.push(node);
+                } else {
+                    for (let j = 0; j < images[i].RepoTags.length; j++) {
+                        let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
+                        node.imageDesc = images[i];
+                        imageNodes.push(node);
+                    }
+                }
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
             return [];
         }
 
-        for (let i = 0; i < images.length; i++) {
-            if (!images[i].RepoTags) {
-                let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
-                node.imageDesc = images[i];
-                imageNodes.push(node);
-            } else {
-                for (let j = 0; j < images[i].RepoTags.length; j++) {
-                    let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
-                    node.imageDesc = images[i];
-                    imageNodes.push(node);
-                }
-            }
-        }
+        this.autoRefreshImages();
 
         return imageNodes;
     }
@@ -206,14 +212,16 @@ export class RootNode extends NodeBase {
 
     private async getContainers(): Promise<ContainerNode[]> {
         const containerNodes: ContainerNode[] = [];
+        let containers: Docker.ContainerDesc[];
         let contextValue: string;
         let iconPath: any = {};
 
-        const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(containerFilters);
-
-        if (!containers || containers.length == 0) {
-            return [];
-        } else {
+        try {
+            containers = await docker.getContainerDescriptors(containerFilters);
+            if (!containers || containers.length == 0) {
+                return [];
+            }
+            
             for (let i = 0; i < containers.length; i++) {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";
@@ -232,9 +240,15 @@ export class RootNode extends NodeBase {
                 let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, contextValue, iconPath);
                 containerNode.containerDesc = containers[i];
                 containerNodes.push(containerNode);
-
             }
+
+        } catch (error) {
+            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
+            return [];
         }
+
+        this.autoRefreshContainers();
+
         return containerNodes;
     }
 
