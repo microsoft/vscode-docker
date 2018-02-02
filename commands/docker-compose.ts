@@ -71,7 +71,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
         const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
 
         
-        terminal.sendText(`cd ${folder.uri.fsPath}`);
+        terminal.sendText(`cd "${folder.uri.fsPath}"`);
         terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} ${detached} ${build}` : `docker-compose -f ${selectedItem.file} ${command}`);
         terminal.show();
         if (reporter) {
