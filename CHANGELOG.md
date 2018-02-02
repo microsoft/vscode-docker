@@ -1,3 +1,11 @@
+## 0.0.24 - 02 Feb 2018
+* Fixes [#189](https://github.com/Microsoft/vscode-docker/issues/189) to provide friendly errors when Docker is not running 
+* Fixes [#200](https://github.com/Microsoft/vscode-docker/issues/200) to provide two new options `dockerComposeBuild` and `dockerComposeDetached` control how `docker-compose` is launched
+* Fixes [#208](https://github.com/Microsoft/vscode-docker/issues/208) where an incorrect repository name was being passed to Azure App Services
+* Update to `v0.0.13` of the Docker Language Server (thanks @rcjsuen) [#198](https://github.com/Microsoft/vscode-docker/pull/198)
+* Activate on `onDebugInitialConfigurations` insted of `onDebug` to delay loading (thanks @gregvanl)
+* Thank you to @DovydasNavickas for [PR #202](https://github.com/Microsoft/vscode-docker/pull/202) to fix grammatical errors
+
 ## 0.0.23 - 05 Jan 2018
 * Do not show dangling images in explorer (thanks @johnpapa) [#175](https://github.com/Microsoft/vscode-docker/pull/175)
 * Add configuration to prompt on System Prune, fixes [#183](https://github.com/Microsoft/vscode-docker/issues/183)
