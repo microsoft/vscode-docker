@@ -34,18 +34,19 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
 
 async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri) {
     let folder: vscode.WorkspaceFolder;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+
+    if (!vscode.workspace.workspaceFolders) {
+        vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
+        return;        
+    }
+
+    if (vscode.workspace.workspaceFolders.length === 1) {
         folder = vscode.workspace.workspaceFolders[0];
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
     
     if (!folder) {
-        if (!vscode.workspace.workspaceFolders) {
-            vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
-        } else {
-            vscode.window.showErrorMessage('Docker compose can only run if a workspace folder is picked in VS Code.');
-        }
         return;
     }
     
@@ -69,6 +70,8 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
         const build: string = configOptions.get('dockerComposeBuild', true) ? '--build': '';
         const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
 
+        
+        terminal.sendText(`cd ${folder.uri.fsPath}`);
         terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} ${detached} ${build}` : `docker-compose -f ${selectedItem.file} ${command}`);
         terminal.show();
         if (reporter) {

@@ -201,19 +201,19 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             for (let i = 0; i < tags.length; i++) {
-                created = '';
+                
                 let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
                     auth: { bearer: accessTokenARC }
                 }));
-                created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
 
-                node = new AzureImageNode(`${element.label}:${tags[i]} (${created})`, 'azureImageNode');
+                node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
                 node.azureAccount = element.azureAccount;
                 node.password = element.password;
                 node.registry = element.registry;
                 node.serverUrl = element.repository;
                 node.subscription = element.subscription;
                 node.userName = element.userName;
+                node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
                 imageNodes.push(node);
 
             }
@@ -230,8 +230,9 @@ export class AzureImageNode extends NodeBase {
     ) {
         super(label);
     }
-
+    
     public azureAccount: AzureAccount
+    public created: string;
     public password: string;
     public registry: ContainerModels.Registry;
     public serverUrl: string;
@@ -239,8 +240,12 @@ export class AzureImageNode extends NodeBase {
     public userName: string;
 
     getTreeItem(): vscode.TreeItem {
+        let displayName: string = this.label;
+
+        displayName = `${displayName} (${this.created})`;
+
         return {
-            label: this.label,
+            label: `${displayName}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: this.contextValue
         }
@@ -249,7 +254,7 @@ export class AzureImageNode extends NodeBase {
 
 export class AzureNotSignedInNode extends NodeBase {
     constructor() {
-        super('Sign in to Azure...');
+        super('Click here to sign in to Azure...');
     }
 
     getTreeItem(): vscode.TreeItem {
