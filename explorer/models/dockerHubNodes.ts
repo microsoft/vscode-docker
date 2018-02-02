@@ -79,15 +79,14 @@ export class DockerHubRepositoryNode extends NodeBase {
     async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
-        let created: string = '';
 
         const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({namespace: element.repository.namespace, name: element.repository.name});
         for (let i = 0; i < myTags.length; i++) {
-            created = moment(new Date(myTags[i].last_updated)).fromNow();
-            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name} (${created})`, 'dockerHubImageTag');
+            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
+            node.created = moment(new Date(myTags[i].last_updated)).fromNow();;
             imageNodes.push(node);
         }
 
@@ -109,10 +108,15 @@ export class DockerHubImageNode extends NodeBase {
     public userName: string;
     public password: string;
     public repository: any;
+    public created: string;
 
     getTreeItem(): vscode.TreeItem {
+        let displayName: string = this.label;
+
+        displayName = `${displayName} (${this.created})`;
+
         return {
-            label: this.label,
+            label: `${displayName}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: this.contextValue
         }
