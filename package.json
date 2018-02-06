@@ -302,7 +302,7 @@
         "docker.defaultRegistry": {
           "type": "string",
           "default": "",
-          "description": "Default registry to push to, empty string will push to Dockerhub."
+          "description": "Default registry when tagging an image, empty string will target Dockerhub when pushing."
         },
         "docker.defaultRegistryPath": {
           "type": "string",
@@ -423,7 +423,7 @@
         },
         "docker.promptOnSystemPrune": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Prompt for confirmation when running System Prune command"
         },
         "docker.dockerComposeBuild": {
