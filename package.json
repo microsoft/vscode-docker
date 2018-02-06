@@ -423,7 +423,7 @@
         },
         "docker.promptOnSystemPrune": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Prompt for confirmation when running System Prune command"
         },
         "docker.dockerComposeBuild": {
