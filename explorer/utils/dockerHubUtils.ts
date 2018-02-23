@@ -3,6 +3,7 @@ import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
 import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
+import { getCoreNodeModule } from './utils';
 
 let _token: Token;
 
@@ -79,7 +80,7 @@ export interface Image {
 
 export function dockerHubLogout(): void {
 
-    const keytar: typeof keytarType = require(`${vscode.env.appRoot}/node_modules/keytar`);
+    const keytar: typeof keytarType = getCoreNodeModule(`keytar`);
     if (keytar) {
         keytar.deletePassword('vscode-docker', 'dockerhub.token');
         keytar.deletePassword('vscode-docker', 'dockerhub.password');
