@@ -12,6 +12,7 @@ import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { getCoreNodeModule } from '../utils/utils';
 
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
@@ -26,11 +27,7 @@ export class RegistryRootNode extends NodeBase {
         public readonly azureAccount?: AzureAccount 
     ) {
         super(label);
-        try {
-            this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
-        } catch (e) {
-            // unable to find keytar
-        }
+        this._keytar = getCoreNodeModule(`keytar`);
 
         this._azureAccount = azureAccount;
 
