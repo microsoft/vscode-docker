@@ -1,13 +1,14 @@
 import vscode = require('vscode');
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
+import { getCoreNodeModule } from '../explorer/utils/utils';
 
 const teleCmdId: string = 'vscode-docker.system.prune';
 
 export async function systemPrune() {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = vscode.window.createTerminal("docker system prune");
-    const semver = require(`${vscode.env.appRoot}/node_modules/semver`);
+    const semver = getCoreNodeModule(`semver`);
 
     try {
 
