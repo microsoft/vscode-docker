@@ -32,7 +32,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri) {
+async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
     let folder: vscode.WorkspaceFolder;
 
     if (!vscode.workspace.workspaceFolders) {
@@ -49,10 +49,13 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     if (!folder) {
         return;
     }
-    
-    let selectedItem: Item;
+
+    let selectedItems: Item[] = [];
+
     if (dockerComposeFileUri) {
-        selectedItem = createItem(folder, dockerComposeFileUri);
+        for (let i:number = 0; i < selectedComposeFileUris.length; i++) {
+            selectedItems.push(createItem(folder, selectedComposeFileUris[i]));
+        }
     } else {
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length == 0) {
@@ -61,18 +64,19 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
         }
         
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
-        selectedItem = <Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` });
+        selectedItems.push(<Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }));
     }
 
-    if (selectedItem) {
+    if (selectedItems.length > 0) {
         const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const build: string = configOptions.get('dockerComposeBuild', true) ? '--build': '';
         const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
-
         
         terminal.sendText(`cd "${folder.uri.fsPath}"`);
-        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${selectedItem.file} ${command} ${detached} ${build}` : `docker-compose -f ${selectedItem.file} ${command}`);
+        selectedItems.forEach((item: Item) => {
+            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${item.file} ${command} ${detached} ${build}` : `docker-compose -f ${item.file} ${command}`);
+        });
         terminal.show();
         if (reporter) {
             /* __GDPR__
@@ -89,10 +93,10 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
 
 }
 
-export function composeUp(dockerComposeFileUri?: vscode.Uri) {
-    compose('up', 'to bring up', dockerComposeFileUri);
+export function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
+    compose('up', 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export function composeDown(dockerComposeFileUri?: vscode.Uri) {
-    compose('down', 'to take down', dockerComposeFileUri);
+export function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
+    compose('down', 'to take down', dockerComposeFileUri, selectedComposeFileUris);
 }

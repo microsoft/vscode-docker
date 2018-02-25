@@ -80,7 +80,7 @@ export interface Image {
 
 export function dockerHubLogout(): void {
 
-    const keytar: typeof keytarType = getCoreNodeModule(`keytar`);
+    const keytar: typeof keytarType = getCoreNodeModule('keytar');
     if (keytar) {
         keytar.deletePassword('vscode-docker', 'dockerhub.token');
         keytar.deletePassword('vscode-docker', 'dockerhub.password');

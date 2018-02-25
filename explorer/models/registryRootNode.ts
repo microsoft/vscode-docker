@@ -27,7 +27,7 @@ export class RegistryRootNode extends NodeBase {
         public readonly azureAccount?: AzureAccount 
     ) {
         super(label);
-        this._keytar = getCoreNodeModule(`keytar`);
+        this._keytar = getCoreNodeModule('keytar');
 
         this._azureAccount = azureAccount;
 
