@@ -8,7 +8,7 @@ const teleCmdId: string = 'vscode-docker.system.prune';
 export async function systemPrune() {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = vscode.window.createTerminal("docker system prune");
-    const semver = getCoreNodeModule(`semver`);
+    const semver = getCoreNodeModule('semver');
 
     try {
 

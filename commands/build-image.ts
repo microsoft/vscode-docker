@@ -50,7 +50,7 @@ async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: 
 
 }
 
-export async function buildImage(dockerFileUri?: vscode.Uri, selectedDockerFileUris?: vscode.Uri[]) {
+export async function buildImage(dockerFileUri?: vscode.Uri) {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 
@@ -71,22 +71,6 @@ export async function buildImage(dockerFileUri?: vscode.Uri, selectedDockerFileU
     }
 
     const uri: Item = await resolveImageItem(folder, dockerFileUri);
-
-    if (dockerFileUri) {
-        return createItem(folder, dockerFileUri);
-    };
-
-    const uris: vscode.Uri[] = await getDockerFileUris(folder);
-
-    if (!uris || uris.length == 0) {
-        vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
-        return;
-    } else {
-        const res: vscode.QuickPickItem = await vscode.window.showQuickPick(computeItems(folder, uris), { placeHolder: 'Choose Dockerfile to build' });
-        return <Item>res;
-    }
-
-    
     if (!uri) return;
 
     let contextPath: string = uri.path;
