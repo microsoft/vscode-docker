@@ -1,5 +1,8 @@
-## 0.0.25 - 23 Feb 2018
+## 0.0.25 - 27 Feb 2018
 * Fixes [#217](https://github.com/Microsoft/vscode-docker/issues/217) to adopt the usage of ASAR in VS Code
+* Support for multi-select of `docker-compose` files and then issuing the `compose up` or `compose down` commands.
+* Changed the default of `promptOnSystemPrune` setting to `true`, meaning you will get a confirmation when running the `System Prune` prune command by default. You can change this by setting `docker.promptOnSystemPrune: false` in your `settings.json`. Thanks to [@driskell](https://github.com/driskell) for [PR #213](https://github.com/Microsoft/vscode-docker/pull/213).
+* Right click commands on `dockerfile` and `docker-compose.yml` files are now enabled based on a regular expression over the file name rather than being hard coded. 
 
 ## 0.0.24 - 02 Feb 2018
 * Fixes [#189](https://github.com/Microsoft/vscode-docker/issues/189) to provide friendly errors when Docker is not running 
