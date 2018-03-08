@@ -77,7 +77,7 @@ CMD ["python3", "-m", "${serviceName}"]
 #RUN pipenv install --ignore-pipfile
 #CMD ["pipenv", "run", "python3", "-m", "${serviceName}"]
 
-# Using miniconda (make sure to replace `myenv` w/ your environment name):
+# Using miniconda (make sure to replace 'myenv' w/ your environment name):
 #RUN conda env create -f environment.yml
 #CMD /bin/bash -c "source activate myenv && python3 -m ${serviceName}"
 `;
