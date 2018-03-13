@@ -347,7 +347,7 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
     return pkg;
 }
 
-async function readPomAndGradle(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
+async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
     var pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (fs.existsSync(path.join(folder.uri.fsPath, 'pom.xml'))) {
@@ -374,7 +374,7 @@ async function readPomAndGradle(folder: vscode.WorkspaceFolder): Promise<Package
         const json = await gradleParser.parseFile(path.join(folder.uri.fsPath, 'build.gradle'));
 
         if (json.jar && json.jar.version) {
-            pkg.version =json.jar.version;
+            pkg.version = json.jar.version;
         } else if (json.version) {
             pkg.version = json.version;
         }
@@ -434,7 +434,7 @@ export async function configure(): Promise<void> {
     const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
     let pkg: PackageJson = getDefaultPackageJson();
     if (platformType.toLowerCase() === 'java') {
-        pkg = await readPomAndGradle(folder);
+        pkg = await readPomOrGradle(folder);
     } else {
         pkg = await readPackageJson(folder);
     }
