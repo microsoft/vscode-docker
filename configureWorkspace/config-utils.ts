@@ -19,6 +19,7 @@ export async function quickPickPlatform(): Promise<string>{
 
     const items: string[] = [];
     items.push('Go');
+    items.push('Java');
     items.push('.NET Core');
     items.push('Node.js');
     items.push('Python');
