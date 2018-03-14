@@ -1,10 +1,12 @@
 import vscode = require('vscode');
 import * as path from 'path';
 import * as fs from 'fs';
+import * as pomParser from 'pom-parser';
+import * as gradleParser from 'gradle-to-js/lib/parser';
 import { promptForPort, quickPickPlatform } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
 
-function genDockerFile(serviceName: string, platform: string, port: string, { cmd, author, version }: PackageJson): string {
+function genDockerFile(serviceName: string, platform: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -82,6 +84,20 @@ CMD ["python3", "-m", "${serviceName}"]
 #CMD /bin/bash -c "source activate myenv && python3 -m ${serviceName}"
 `;
 
+        case 'java':
+            const artifact = artifactName ? artifactName : `${serviceName}.jar`;
+            return `
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ARG JAVA_OPTS
+ENV JAVA_OPTS=$JAVA_OPTS
+ADD ${artifact} ${serviceName}.jar
+EXPOSE ${port}
+ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceName}.jar
+# For Spring-Boot project, use the entrypoint below to reduce Tomcat startup time.
+#ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar ${serviceName}.jar
+`;
+
         default:
 
             return `
@@ -137,6 +153,15 @@ build: .
 ports:
   - ${port}:${port}`;
 
+        case 'java':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
 
         default:
             return `version: '2.1'
@@ -221,6 +246,22 @@ services:
         - ${port}:${port}
 `;
 
+        case 'java':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
+    ports:
+      - ${port}:${port}
+      - 5005:5005
+    `;
+
         default:
             return `version: '2.1'
 
@@ -255,23 +296,29 @@ interface PackageJson {
     cmd: string,
     fullCommand: string, //full command
     author: string,
-    version: string
+    version: string,
+    artifactName: string
 }
 
 async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return vscode.workspace.findFiles(new vscode.RelativePattern(folder, 'package.json'), null, 1, null);
 }
 
-async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
-    // open package.json and look for main, scripts start
-    const uris: vscode.Uri[] = await getPackageJson(folder);
-    var pkg: PackageJson = {
+function getDefaultPackageJson(): PackageJson {
+    return {
         npmStart: true,
         fullCommand: 'npm start',
         cmd: 'npm start',
         author: 'author',
-        version: '0.0.1'
-    }; //default
+        version: '0.0.1',
+        artifactName: ''
+    };
+}
+
+async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
+    // open package.json and look for main, scripts start
+    const uris: vscode.Uri[] = await getPackageJson(folder);
+    var pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (uris && uris.length > 0) {
         const json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
@@ -294,6 +341,49 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
 
         if (json.version) {
             pkg.version = json.version;
+        }
+    }
+
+    return pkg;
+}
+
+async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
+    var pkg: PackageJson = getDefaultPackageJson(); //default
+
+    if (fs.existsSync(path.join(folder.uri.fsPath, 'pom.xml'))) {
+        const json = await new Promise<any>((resolve, reject) => {
+            pomParser.parse({
+                filePath: path.join(folder.uri.fsPath, 'pom.xml')
+            }, (error, response) => {
+                if (error) {
+                    reject(`Failed to parse pom.xml: ${error}`);
+                    return;
+                }
+                resolve(response.pomObject);
+            });
+        });
+
+        if (json.project.version) {
+            pkg.version = json.project.version;
+        }
+
+        if (json.project.artifactid) {
+            pkg.artifactName = `target/${json.project.artifactid}-${pkg.version}.jar`;
+        }
+    } else if (fs.existsSync(path.join(folder.uri.fsPath, 'build.gradle'))) {
+        const json = await gradleParser.parseFile(path.join(folder.uri.fsPath, 'build.gradle'));
+
+        if (json.jar && json.jar.version) {
+            pkg.version = json.jar.version;
+        } else if (json.version) {
+            pkg.version = json.version;
+        }
+
+        if (json.jar && json.jar.archiveName) {
+            pkg.artifactName = `build/libs/${json.jar.archiveName}`;
+        } else {
+            const baseName = json.jar && json.jar.baseName ? json.jar.baseName : json.archivesBaseName || folder.name;
+            pkg.artifactName = `build/libs/${baseName}-${pkg.version}.jar`;
         }
     }
 
@@ -342,7 +432,12 @@ export async function configure(): Promise<void> {
     if (!port) return;
 
     const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
-    const pkg = await readPackageJson(folder);
+    let pkg: PackageJson = getDefaultPackageJson();
+    if (platformType.toLowerCase() === 'java') {
+        pkg = await readPomOrGradle(folder);
+    } else {
+        pkg = await readPackageJson(folder);
+    }
 
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
