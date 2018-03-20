@@ -3,6 +3,7 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { reporter } from '../telemetry/telemetry';
 import { ImageNode } from '../explorer/models/imageNode';
 const teleCmdId: string = 'vscode-docker.image.push';
+const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode) {
     let imageToPush: Docker.ImageDesc;
@@ -32,6 +33,18 @@ export async function pushImage(context?: ImageNode) {
             reporter.sendTelemetryEvent('command', {
                 command: teleCmdId
             });
+
+            if (imageName.toLowerCase().indexOf('azurecr.io')) {
+                /* __GDPR__
+                   "command" : {
+                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+                   }
+                 */
+                reporter.sendTelemetryEvent('vscode', {
+                    command: teleAzureId
+                });
+
+            }
         }
     };
 }

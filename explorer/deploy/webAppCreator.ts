@@ -5,15 +5,18 @@
 
 import * as vscode from 'vscode';
 import { AzureAccountWrapper } from './azureAccountWrapper';
-import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from './wizard';
-import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'azure-arm-resource';
-import WebSiteManagementClient = require('azure-arm-website');
-import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
-import * as util from './util';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
-import * as path from 'path';
+import { reporter } from '../../telemetry/telemetry';
+import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'azure-arm-resource';
+import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from './wizard';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as util from './util';
+import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
+import WebSiteManagementClient = require('azure-arm-website');
+
+const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
 
 export class WebAppCreator extends WizardBase {
     constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode, subscription?: SubscriptionModels.Subscription) {
@@ -514,6 +517,17 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         this.wizard.writeline(`Web App "${this._website.name}" ready: https://${this._website.defaultHostName}`);
         this.wizard.writeline('');
+
+        if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
+            reporter.sendTelemetryEvent('command', {
+                command: teleCmdId
+            });
+        }
 
     }
 
