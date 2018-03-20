@@ -1,3 +1,9 @@
+## 0.0.26 - 07 Mar 2018
+
+* Adopt latest Docker language server (thanks @rcjsuen) [#233](https://github.com/Microsoft/vscode-docker/pull/233) 
+* Support generating Java Dockerfiles (thanks @testforstephen) [#235](https://github.com/Microsoft/vscode-docker/pull/235)
+* Support generating Python Dockerfiles (thanks @brettcannon) [#219](https://github.com/Microsoft/vscode-docker/pull/219)
+
 ## 0.0.25 - 27 Feb 2018
 * Fixes [#217](https://github.com/Microsoft/vscode-docker/issues/217) to adopt the usage of ASAR in VS Code
 * Support for multi-select of `docker-compose` files and then issuing the `compose up` or `compose down` commands.
