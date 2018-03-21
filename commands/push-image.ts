@@ -40,7 +40,7 @@ export async function pushImage(context?: ImageNode) {
                       "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
                    }
                  */
-                reporter.sendTelemetryEvent('vscode', {
+                reporter.sendTelemetryEvent('command', {
                     command: teleAzureId
                 });
 
