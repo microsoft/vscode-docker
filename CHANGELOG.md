@@ -1,6 +1,4 @@
 ## 0.0.26 - 30 Mar 2018
-
-* Adopt latest Docker language server (thanks @rcjsuen) [#233](https://github.com/Microsoft/vscode-docker/pull/233) 
 * Support generating Java Dockerfiles (thanks @testforstephen) [#235](https://github.com/Microsoft/vscode-docker/pull/235)
 * Support generating Python Dockerfiles (thanks @brettcannon) [#219](https://github.com/Microsoft/vscode-docker/pull/219)
 
