@@ -147,11 +147,11 @@ services:
             return `version: '2.1'
 
 services:
-${serviceName}:
-image: ${serviceName}
-build: .
-ports:
-  - ${port}:${port}`;
+  ${serviceName}:
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
 
         case 'java':
             return `version: '2.1'
