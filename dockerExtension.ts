@@ -56,8 +56,9 @@ export interface ComposeVersionKeys {
 
 let client: LanguageClient;
 
+const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
+
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
@@ -199,7 +200,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
     };
 
     let clientOptions: LanguageClientOptions = {
-        documentSelector: ['dockerfile'],
+        documentSelector: [DOCKERFILE_MODE_ID],
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
         },
