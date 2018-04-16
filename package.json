@@ -411,6 +411,17 @@
           ],
           "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
         },
+        "docker.languageserver.diagnostics.instructionJSONInSingleQuotes": {
+          "scope": "resource",
+          "type": "string",
+          "default": "warning",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes."
+        },
         "docker.attachShellCommand.linuxContainer": {
           "type": "string",
           "default": "/bin/sh",
@@ -606,7 +617,7 @@
     "azure-arm-containerregistry": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
-    "dockerfile-language-server-nodejs": "^0.0.13",
+    "dockerfile-language-server-nodejs": "^0.0.17",
     "dockerode": "^2.5.1",
     "gradle-to-js": "^1.0.1",
     "moment": "^2.19.3",
@@ -614,6 +625,6 @@
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^3.5.0-next.4"
+    "vscode-languageclient": "^4.0.0"
   }
 }
