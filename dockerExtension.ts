@@ -26,7 +26,7 @@ import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
-import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, Proposed, ProposedFeatures, DidChangeConfigurationNotification } from 'vscode-languageclient';
+import { DocumentSelector, LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, Proposed, ProposedFeatures, DidChangeConfigurationNotification } from 'vscode-languageclient';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
@@ -56,7 +56,9 @@ export interface ComposeVersionKeys {
 
 let client: LanguageClient;
 
-const DOCKERFILE_MODE_ID: vscode.DocumentFilter = { language: 'dockerfile', scheme: 'file' };
+const DOCUMENT_SELECTOR: DocumentSelector = [
+    { language: 'dockerfile', scheme: 'file' }
+];
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const installedExtensions: any[] = vscode.extensions.all;
@@ -81,7 +83,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
 
-    ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCKERFILE_MODE_ID, new DockerfileCompletionItemProvider(), '.'));
+    ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
     var yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
@@ -200,7 +202,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
     };
 
     let clientOptions: LanguageClientOptions = {
-        documentSelector: [DOCKERFILE_MODE_ID],
+        documentSelector: DOCUMENT_SELECTOR,
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
         },
