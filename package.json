@@ -575,12 +575,22 @@
       }
     ],
     "views": {
-      "explorer": [
+      "dockerView": [
         {
           "id": "dockerExplorer",
           "name": "Docker",
           "when": "config.docker.showExplorer == true"
         }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "icon": "images/docker_icon.png",
+          "id": "dockerView",
+          "title": "Docker"
+        }
+        
       ]
     }
   },
