@@ -26,7 +26,7 @@ import { Reporter } from './telemetry/telemetry';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { removeContainer } from './commands/remove-container';
-import { DocumentSelector, LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, Proposed, ProposedFeatures, DidChangeConfigurationNotification } from 'vscode-languageclient';
+import { DocumentSelector, LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, ConfigurationParams, DidChangeConfigurationNotification } from 'vscode-languageclient';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
@@ -153,7 +153,7 @@ namespace Configuration {
 
     let configurationListener: vscode.Disposable;
 
-    export function computeConfiguration(params: Proposed.ConfigurationParams): vscode.WorkspaceConfiguration[] {
+    export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         if (!params.items) {
             return null;
         }
@@ -195,7 +195,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
         debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
     }
 
-    let middleware: ProposedFeatures.ConfigurationMiddleware | Middleware = {
+    let middleware: Middleware = {
         workspace: {
             configuration: Configuration.computeConfiguration
         }
@@ -210,8 +210,6 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
     }
 
     client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);
-    // enable the proposed workspace/configuration feature
-    client.registerProposedFeatures();
     client.onReady().then(() => {
         // attach the VS Code settings listener
         Configuration.initialize();
