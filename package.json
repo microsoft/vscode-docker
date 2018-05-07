@@ -586,7 +586,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "icon": "images/docker_icon.png",
+          "icon": "images/docker.svg",
           "id": "dockerView",
           "title": "Docker"
         }
