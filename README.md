@@ -1,45 +1,51 @@
 # Docker Support for Visual Studio Code
-The Docker extension makes it easy to build and deploy containerized applications from Visual Studio Code. 
+The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for exmaple: 
 
-* Automatic `Dockerfile` and `docker-compose.yml` file generation 
-* Syntax highlighting and hover tips for `docker-compose.yml` and `Dockerfile files`
-* IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files
+* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press `F1` and search for `Docker: Add Docker files to Workspace`)
+* Syntax highlighting, hover tips, IntelliSense (completions) for `docker-compose.yml` and `Dockerfile` files
 * Linting (errors and warnings) for `Dockerfile` files
-* Command Palette (`F1`) integration for the most common Docker commands (e.g. Build, Push)
-* Explorer integration for managing Images and Containers
-* Deploy images from DockerHub and Azure Container Registries to Azure App Service
+* Command Palette (`F1`) integration for the most common Docker commands (e.g. `docker build`, `docker push`, etc.)
+* Explorer integration for managing Images, running Containers, and DockerHub registries
+* Deploy images from DockerHub and Azure Container Registries directly to Azure App Service
 
-## Generating `Dockerfile`, `docker-compose.yml`, and `docker-compose.debug.yml`
+## Generating Docker Files
+
+Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, and `docker-compose.debug.yml` files for your workspace type:
+
 ![dockerfile](images/generateFiles.gif)
 
-## IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files.
+## Editing
+
+Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ![intelliSense for DockerFiles](images/intelliSense.gif)
-
-## IntelliSense (completions) for images
-
-![intelliSense for Images](images/intelliSense2.gif)
-
 
 ## Docker commands
 Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
 
 ![intelliSense](images/commands.gif) 
 
-## Explorer Integration
-The Docker Explorer lets you view and manage your Images, Containers, and browse your DockerHub registry. If the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension is installed, you can browse your Azure Container Registries as well. 
+## Docker View 
+
+The Docker extension contributes a new `Docker` View to VS Code. Within the View, the Explorer lets you view and manage your Images, Containers, and browse your DockerHub registry. If the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension is installed, you can browse your [Azure Container Registries](https://docs.microsoft.com/en-us/azure/container-registry/) as well. 
 
 The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
 
+
 ![explorer integration](images/explorer.png)
 
-You can move the Explorer up or down by dragging the `DOCKER` sash, you can hide the Explorer by right clicking on the `DOCKER` sash and choosing `Remove from side bar`. To bring it back, right click on the `EXPLORER` title at the top of the side bar. This state is persisted on a _per-workspace_ basis. 
 
-If you want to turn the Explorer off for all workspaces, set the `showExplorer` configuration setting to `false`. Press `CMD+,` (or `CTRL+,` on Windows/Linux) to bring up the user level settings and add this to the right side:
+You can move the View up or down by dragging the Docker icon and you can hide the View by right clicking on the icon and choosing `Hide`. To bring it back, right click on the Activity Bar area and check the `Docker` item. 
+
+![show and hide the view](images/viewRightClick.png)
+
+The `showExplorer` configuration setting controls the visibility of the Explorer within the Docker View.
 
 ``` json
 "docker.showExplorer": false
 ```
+
+> Note: This setting was introduced prior to the View. Setting it to `false` will hide the Explorer within the Docker View. It does not control whether or not the View itself is visible. Future releases of the extension may be able to support a setting to toggle the visibility of the view [48704](https://github.com/Microsoft/vscode/issues/48704). 
 
 ## Deploying images to Azure App Service
 
@@ -51,7 +57,7 @@ The first time you expand the DockerHub node you'll be prompted to log into your
 
 Your user name and password are stored in your operating system credentials vault (e.g. MacOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of DockerHub by right clicking on the DockerHub label and choosing log out. This will delete the credentials from the OS store.
 
-To log into Azure, press `F1` and search for `Azure Login`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
+To log into Azure, press `F1` and search for `Azure Sign In`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
 
 ![Azure Login](images/devicelogin.png)
 
@@ -70,15 +76,43 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container becasue the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder. 
 
-## Installation
-In VS Code, press F1 and type in `ext install vscode-docker`. Once the extension is installed you will be prompted to restart Visual Studio Code which will only take (literally) a couple of seconds. 
+## Configuration Settings
 
-Of course, you will want to have Docker installed on your computer in order to run commands from the Command Palette (F1, type in `Docker`).  
+The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
+
+| Setting | Description | Default Value |
+| --- |---|---|
+| `attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
+| `attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
+| `dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
+| `dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
+| `defaultRegistry` | Default registry when tagging an image, empty string will target Dockerhub when pushing. | `""`
+| `defaultRegistryPath` | Path within registry to push to. | `""`
+| `explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
+|` imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
+| `languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
+| `languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
+| `languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines. | `warning`
+| `languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase. | `warning`
+| `languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions. | `warning`
+| `languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
+| `languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
+| `languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
+| `promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
+| `showExplorer` | Show or hide the Explorer. | `true`
+|` truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
+|` truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
+
+
+## Installation
+In VS Code, open the Extension Viewlet, type in `Docker`, locate the extension and click on `Install`. Once the extension is installed you will be prompted to restart Visual Studio Code which will only take (literally) a couple of seconds. 
+
+Of course, you will need to have Docker installed on your computer in order to run commands from the Command Palette (F1, type in `Docker`).  
 
 ## Running commands on Linux
 By default, Docker runs as the root user, requiring other users to access it with `sudo`. This extension does not assume root access, so you will need to create a Unix group called docker and add users to it. Instructions can be found here: [Create a Docker group](https://docs.docker.com/engine/installation/linux/linux-postinstall/)
 
-## Connecting to docker-machine
+## Connecting to `docker-machine`
 The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host.
 
 ## Contributing
