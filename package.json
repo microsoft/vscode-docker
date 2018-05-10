@@ -589,7 +589,7 @@
       "dockerView": [
         {
           "id": "dockerExplorer",
-          "name": "Docker",
+          "name": "Explorer",
           "when": "config.docker.showExplorer == true"
         }
       ]
