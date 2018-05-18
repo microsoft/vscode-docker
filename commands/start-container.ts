@@ -5,6 +5,7 @@ import * as cp from 'child_process';
 import os = require('os');
 import { reporter } from '../telemetry/telemetry';
 import { ImageNode } from '../explorer/models/imageNode';
+import * as fs from 'fs';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
@@ -77,9 +78,19 @@ export async function startAzureCLI() {
 
         // volume map .azure folder so don't have to log in every time
         const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
-        const vol: string = `-v ${homeDir}/.azure:/root/.azure -v ${homeDir}/.ssh:/root/.ssh -v ${homeDir}/.kube:/root/.kube`;
-        const cmd: string = `docker run ${option} ${vol} -it --rm azuresdk/azure-cli-python:latest`;
+        var vol: string = '';
 
+        if (fs.existsSync(`${homeDir}/.azure`)) {
+            vol += ` -v ${homeDir}/.azure:/root/.azure`;
+        }
+        if (fs.existsSync(`${homeDir}/.ssh`)) {
+            vol += ` -v ${homeDir}/.ssh:/root/.ssh`;
+        }
+        if (fs.existsSync(`${homeDir}/.kube`)) {
+            vol += ` -v ${homeDir}/.kube:/root/.kube`;
+        }
+
+        const cmd: string = `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`;
         const terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
         terminal.sendText(cmd);
         terminal.show();
