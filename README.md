@@ -82,26 +82,26 @@ The Docker extension comes with a number of useful configuration settings allowi
 
 | Setting | Description | Default Value |
 | --- |---|---|
-| `attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
-| `attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
-| `dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
-| `dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
-| `defaultRegistry` | Default registry when tagging an image, empty string will target Dockerhub when pushing. | `""`
-| `defaultRegistryPath` | Path within registry to push to. | `""`
-| `explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
-|` imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
-| `languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
-| `languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
-| `languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines. | `warning`
-| `languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase. | `warning`
-| `languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions. | `warning`
-| `languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
-| `languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
-| `languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
-| `promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
-| `showExplorer` | Show or hide the Explorer. | `true`
-|` truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
-|` truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
+| `docker.attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
+| `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
+| `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
+| `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
+| `docker.defaultRegistry` | Default registry when tagging an image, empty string will target Dockerhub when pushing. | `""`
+| `docker.defaultRegistryPath` | Path within registry to push to. | `""`
+| `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
+|` docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
+| `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
+| `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
+| `docker.languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines. | `warning`
+| `docker.languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase. | `warning`
+| `docker.languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions. | `warning`
+| `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
+| `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
+| `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
+| `docker.promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
+| `docker.showExplorer` | Show or hide the Explorer. | `true`
+| `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
+| `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
 
 
 ## Installation
