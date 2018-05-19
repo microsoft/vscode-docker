@@ -1,4 +1,4 @@
-## 0.0.27 - 00 May 2018
+## 0.0.27 - 19 May 2018
 * Fixes indentation problem with Python docker-compose.yml files (thanks @brettcannon) [#242](https://github.com/Microsoft/vscode-docker/pull/242)
 * Adds support for showing the Docker explorer in a new viewlet
 * Adopt v0.0.17 of the language server (thanks @rcjsuen!) [#249](https://github.com/Microsoft/vscode-docker/pull/249)
