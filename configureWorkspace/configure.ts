@@ -3,10 +3,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as pomParser from 'pom-parser';
 import * as gradleParser from 'gradle-to-js/lib/parser';
-import { promptForPort, quickPickPlatform } from './config-utils';
+import * as glob from 'glob';
+import { promptForPort, quickPickPlatform, quickPickOS } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
+import { match } from 'minimatch';
 
-function genDockerFile(serviceName: string, platform: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
+function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -39,17 +41,100 @@ LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
 `;
 
-        case '.net core':
+        case '.net core console':
 
-            return `
-FROM microsoft/aspnetcore:1
-LABEL Name=${serviceName} Version=${version}
-ARG source=.
+            if (os.toLowerCase() === 'windows') {
+                return `
+
+FROM microsoft/dotnet:2.0-runtime-nanoserver-1709 AS base
+WORKDIR /app
+
+FROM microsoft/dotnet:2.0-sdk-nanoserver-1709 AS build
+WORKDIR /src
+COPY ${serviceName}.csproj ${serviceName}/
+RUN dotnet restore ${serviceName}/${serviceName}.csproj
+COPY . .
+WORKDIR /src/${serviceName}
+RUN dotnet build ${serviceName}.csproj -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish ${serviceName}.csproj -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "${serviceName}.dll"]
+`;
+            } else {
+                return `
+FROM microsoft/dotnet:2.0-runtime AS base
+WORKDIR /app
+
+FROM microsoft/dotnet:2.0-sdk AS build
+WORKDIR /src
+COPY ${serviceName}/${serviceName}.csproj ${serviceName}/
+RUN dotnet restore ${serviceName}/${serviceName}.csproj
+COPY . .
+WORKDIR /src/${serviceName}
+RUN dotnet build ${serviceName}.csproj -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish ${serviceName}.csproj -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "${serviceName}.dll"]
+`;
+            }
+
+        case 'asp.net core':
+
+            if (os.toLowerCase() === 'windows') {
+                return `
+FROM microsoft/aspnetcore:2.0-nanoserver-1709 AS base
 WORKDIR /app
 EXPOSE ${port}
-COPY $source .
-ENTRYPOINT dotnet ${serviceName}.dll
+
+FROM microsoft/aspnetcore-build:2.0-nanoserver-1709 AS build
+WORKDIR /src
+COPY ${serviceName}.csproj ${serviceName}/
+RUN dotnet restore ${serviceName}/${serviceName}.csproj
+COPY . .
+WORKDIR /src/${serviceName}
+RUN dotnet build ${serviceName}.csproj -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish ${serviceName}.csproj -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "${serviceName}.dll"]
 `;
+            } else {
+                return `
+FROM microsoft/aspnetcore:2.0 AS base
+WORKDIR /app
+EXPOSE ${port}
+
+FROM microsoft/aspnetcore-build:2.0 AS build
+WORKDIR /src
+COPY ${serviceName}.csproj ${serviceName}/
+RUN dotnet restore ${serviceName}/${serviceName}.csproj
+COPY . .
+WORKDIR /src/${serviceName}
+RUN dotnet build ${serviceName}.csproj -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish ${serviceName}.csproj -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "${serviceName}.dll"]
+`;                
+            }
 
         case 'python':
 
@@ -133,7 +218,17 @@ services:
     ports:
       - ${port}:${port}`;
 
-        case '.net core':
+        case '.net core console':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
+
+        case 'asp.net core':
             return `version: '2.1'
 
 services:
@@ -213,7 +308,27 @@ services:
         - ${port}:${port}
 `;
 
-        case '.net core':
+        case '.net core console':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    build:
+      args:
+        source: obj/Docker/empty/
+    labels:
+      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    volumes:
+      - .:/app
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ~/clrdbg:/clrdbg:ro
+    entrypoint: tail -f /dev/null
+`;
+
+        case 'asp.net core':
             return `version: '2.1'
 
 services:
@@ -390,6 +505,39 @@ async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJ
     return pkg;
 }
 
+async function findCSProjFile(folder: vscode.WorkspaceFolder): Promise<string> {
+    const opt: vscode.QuickPickOptions = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select Project'
+    }
+
+    const projectFiles: string[] = await new Promise<string[]>((resolve, reject) => {
+
+        glob('**/*.csproj', { cwd: folder.uri.fsPath }, (err, matches: string[]) => {
+            if (err) {
+                reject();
+            } else {
+                resolve(matches);
+            }
+        });
+        
+    });
+
+    if (!projectFiles) {
+        return;
+    } 
+    
+    if (projectFiles.length > 0) {
+        const res = await vscode.window.showQuickPick(projectFiles, opt);
+        if (res) {
+            return res.slice(0, -7);
+        }
+    } 
+    
+    return projectFiles[0].slice(0, -7);
+
+}
 const DOCKER_FILE_TYPES = {
     'docker-compose.yml': genDockerCompose,
     'docker-compose.debug.yml': genDockerComposeDebug,
@@ -428,10 +576,28 @@ export async function configure(): Promise<void> {
     const platformType = await quickPickPlatform();
     if (!platformType) return;
 
-    const port = await promptForPort();
+    var os;
+    if (platformType.toLowerCase().includes('.net')) {
+        os = await quickPickOS();
+        if (!os) return;
+    }
+
+    var port;
+    if (platformType.toLowerCase().includes('.net')) {
+        port = await promptForPort(80);
+    } else {
+        port = await promptForPort(3000);
+    }
     if (!port) return;
 
-    const serviceName = path.basename(folder.uri.fsPath).toLowerCase();
+    var serviceName: string;
+    if (platformType.toLowerCase().includes('.net')) {
+        serviceName = await findCSProjFile(folder);
+    } else {
+        serviceName = path.basename(folder.uri.fsPath).toLowerCase();
+    }
+    if (!serviceName) return;
+
     let pkg: PackageJson = getDefaultPackageJson();
     if (platformType.toLowerCase() === 'java') {
         pkg = await readPomOrGradle(folder);
@@ -459,10 +625,10 @@ export async function configure(): Promise<void> {
         if (fs.existsSync(workspacePath)) {
             const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
             if (item.title.toLowerCase() === 'yes') {
-                fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
+                fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
             }
         } else {
-            fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, port, pkg), { encoding: 'utf8' });
+            fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
         }
     }
 }
