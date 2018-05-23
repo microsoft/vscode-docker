@@ -53,8 +53,8 @@ FROM microsoft/dotnet:2.0-sdk-nanoserver-1709 AS build
 WORKDIR /src
 COPY ${serviceName}.csproj ${serviceName}/
 RUN dotnet restore ${serviceName}/${serviceName}.csproj
-COPY . .
 WORKDIR /src/${serviceName}
+COPY . .
 RUN dotnet build ${serviceName}.csproj -c Release -o /app
 
 FROM build AS publish
@@ -72,10 +72,10 @@ WORKDIR /app
 
 FROM microsoft/dotnet:2.0-sdk AS build
 WORKDIR /src
-COPY ${serviceName}/${serviceName}.csproj ${serviceName}/
+COPY ${serviceName}.csproj ${serviceName}/
 RUN dotnet restore ${serviceName}/${serviceName}.csproj
-COPY . .
 WORKDIR /src/${serviceName}
+COPY . .
 RUN dotnet build ${serviceName}.csproj -c Release -o /app
 
 FROM build AS publish
@@ -100,8 +100,8 @@ FROM microsoft/aspnetcore-build:2.0-nanoserver-1709 AS build
 WORKDIR /src
 COPY ${serviceName}.csproj ${serviceName}/
 RUN dotnet restore ${serviceName}/${serviceName}.csproj
-COPY . .
 WORKDIR /src/${serviceName}
+COPY . .
 RUN dotnet build ${serviceName}.csproj -c Release -o /app
 
 FROM build AS publish
@@ -122,8 +122,8 @@ FROM microsoft/aspnetcore-build:2.0 AS build
 WORKDIR /src
 COPY ${serviceName}.csproj ${serviceName}/
 RUN dotnet restore ${serviceName}/${serviceName}.csproj
-COPY . .
 WORKDIR /src/${serviceName}
+COPY . .
 RUN dotnet build ${serviceName}.csproj -c Release -o /app
 
 FROM build AS publish
@@ -133,7 +133,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "${serviceName}.dll"]
-`;                
+`;
             }
 
         case 'python':
@@ -194,7 +194,7 @@ CMD /usr/games/fortune -a | cowsay
     }
 }
 
-function genDockerCompose(serviceName: string, platform: string, port: string): string {
+function genDockerCompose(serviceName: string, platform: string, os: string, port: string): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
             return `version: '2.1'
@@ -219,6 +219,7 @@ services:
       - ${port}:${port}`;
 
         case '.net core console':
+            // we don't generate compose files for .net core
             return `version: '2.1'
 
 services:
@@ -229,6 +230,7 @@ services:
       - ${port}:${port}`;
 
         case 'asp.net core':
+            // we don't generate compose files for .net core
             return `version: '2.1'
 
 services:
@@ -270,7 +272,7 @@ services:
     }
 }
 
-function genDockerComposeDebug(serviceName: string, platform: string, port: string, { fullCommand: cmd }: PackageJson): string {
+function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -309,44 +311,26 @@ services:
 `;
 
         case '.net core console':
+            // we don't generate compose files for .net core
             return `version: '2.1'
 
 services:
   ${serviceName}:
-    build:
-      args:
-        source: obj/Docker/empty/
-    labels:
-      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=1
-    volumes:
-      - .:/app
-      - ~/.nuget/packages:/root/.nuget/packages:ro
-      - ~/clrdbg:/clrdbg:ro
-    entrypoint: tail -f /dev/null
-`;
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
 
         case 'asp.net core':
+            // we don't generate compose files for .net core
             return `version: '2.1'
 
 services:
   ${serviceName}:
-    build:
-      args:
-        source: obj/Docker/empty/
-    labels:
-      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=1
-    volumes:
-      - .:/app
-      - ~/.nuget/packages:/root/.nuget/packages:ro
-      - ~/clrdbg:/clrdbg:ro
-    entrypoint: tail -f /dev/null
-`;
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
 
         case 'python':
             return `version: '2.1'
@@ -392,7 +376,7 @@ services:
     }
 }
 
-function genDockerIgnoreFile(service, platformType, port) {
+function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string) {
     // TODO: Add support for other platform types
     return `node_modules
 npm-debug.log
@@ -521,21 +505,23 @@ async function findCSProjFile(folder: vscode.WorkspaceFolder): Promise<string> {
                 resolve(matches);
             }
         });
-        
+
     });
 
     if (!projectFiles) {
         return;
-    } 
-    
-    if (projectFiles.length > 0) {
+    }
+
+    if (projectFiles.length > 1) {
         const res = await vscode.window.showQuickPick(projectFiles, opt);
         if (res) {
-            return res.slice(0, -7);
+            return res.slice(0, -'.csproj'.length);
+        } else {
+            return;
         }
-    } 
-    
-    return projectFiles[0].slice(0, -7);
+    }
+
+    return projectFiles[0].slice(0, -'.csproj'.length);
 
 }
 const DOCKER_FILE_TYPES = {
@@ -606,7 +592,10 @@ export async function configure(): Promise<void> {
     }
 
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
-        return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+        // don't generate docker-compose files for .NET Core apps
+        if (platformType.toLowerCase().includes('.net') && !fileName.includes('docker-compose')) {
+            return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+        }
     }));
 
     /* __GDPR__

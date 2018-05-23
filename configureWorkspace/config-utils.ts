@@ -36,9 +36,7 @@ export async function quickPickOS(): Promise<string> {
         placeHolder: 'Select Operating System'
     }
 
-    const items: string[] = [];
-    items.push('Windows');
-    items.push('Linux');
+    const items: string[] = ['Windows', 'Linux'];
 
     return vscode.window.showQuickPick(items, opt);
 }
