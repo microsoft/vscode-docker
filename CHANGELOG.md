@@ -2,29 +2,34 @@
 * Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
 
 ## 0.0.27 - 19 May 2018
+
 * Fixes indentation problem with Python docker-compose.yml files (thanks @brettcannon) [#242](https://github.com/Microsoft/vscode-docker/pull/242)
-* Adds support for showing the Docker explorer in a new viewlet
+* Adds support for showing the Docker explorer in a new Activity Bar view
 * Adopt v0.0.17 of the language server (thanks @rcjsuen!) [#249](https://github.com/Microsoft/vscode-docker/pull/249)
 
 ## 0.0.26 - 30 Mar 2018
+
 * Support generating Java Dockerfiles (thanks @testforstephen) [#235](https://github.com/Microsoft/vscode-docker/pull/235)
 * Support generating Python Dockerfiles (thanks @brettcannon) [#219](https://github.com/Microsoft/vscode-docker/pull/219)
 
 ## 0.0.25 - 27 Feb 2018
+
 * Fixes [#217](https://github.com/Microsoft/vscode-docker/issues/217) to adopt the usage of ASAR in VS Code
 * Support for multi-select of `docker-compose` files and then issuing the `compose up` or `compose down` commands.
 * Changed the default of `promptOnSystemPrune` setting to `true`, meaning you will get a confirmation when running the `System Prune` prune command by default. You can change this by setting `docker.promptOnSystemPrune: false` in your `settings.json`. Thanks to [@driskell](https://github.com/driskell) for [PR #213](https://github.com/Microsoft/vscode-docker/pull/213).
-* Right click commands on `dockerfile` and `docker-compose.yml` files are now enabled based on a regular expression over the file name rather than being hard coded. 
+* Right click commands on `dockerfile` and `docker-compose.yml` files are now enabled based on a regular expression over the file name rather than being hard coded.
 
 ## 0.0.24 - 02 Feb 2018
-* Fixes [#189](https://github.com/Microsoft/vscode-docker/issues/189) to provide friendly errors when Docker is not running 
+
+* Fixes [#189](https://github.com/Microsoft/vscode-docker/issues/189) to provide friendly errors when Docker is not running
 * Fixes [#200](https://github.com/Microsoft/vscode-docker/issues/200) to provide two new options `dockerComposeBuild` and `dockerComposeDetached` control how `docker-compose` is launched
 * Fixes [#208](https://github.com/Microsoft/vscode-docker/issues/208) where an incorrect repository name was being passed to Azure App Services
 * Update to `v0.0.13` of the Docker Language Server (thanks @rcjsuen) [#198](https://github.com/Microsoft/vscode-docker/pull/198)
-* Activate on `onDebugInitialConfigurations` insted of `onDebug` to delay loading (thanks @gregvanl)
+* Activate on `onDebugInitialConfigurations` instead of `onDebug` to delay loading (thanks @gregvanl)
 * Thank you to @DovydasNavickas for [PR #202](https://github.com/Microsoft/vscode-docker/pull/202) to fix grammatical errors
 
 ## 0.0.23 - 05 Jan 2018
+
 * Do not show dangling images in explorer (thanks @johnpapa) [#175](https://github.com/Microsoft/vscode-docker/pull/175)
 * Add configuration to prompt on System Prune, fixes [#183](https://github.com/Microsoft/vscode-docker/issues/183)
 * Upgrade to new language server (thanks @rcjsuen) [#173](https://github.com/Microsoft/vscode-docker/pull/173)
@@ -34,7 +39,7 @@
 * Browse to the Azure portal context menu, fixes [#151](https://github.com/Microsoft/vscode-docker/issues/151)
 * Add `docker.truncateLongRegistryPaths` and `docker.truncateMaxLength` configuration options enable truncation of long image and container names in the Explorer, fixes [#180](https://github.com/Microsoft/vscode-docker/issues/180)
 * Images in the Explorer now show age (e.g. '22 days ago')
-* Update `Dockerfile` for `go` workspaces (thanks @vladbarosan) [#194](https://github.com/Microsoft/vscode-docker/pull/194) 
+* Update `Dockerfile` for `go` workspaces (thanks @vladbarosan) [#194](https://github.com/Microsoft/vscode-docker/pull/194)
 
 ## 0.0.22 - 13 Nov 2017
 
@@ -61,8 +66,8 @@
 
 * Add an automatic refresh option for the explorer (`"docker.explorerRefreshInterval": 1000`)
 * Add support for Multi-Root Workspaces
-* Add support for browsing DockerHub and Azure Container Registries
-* Add support for deploying images from DockerHub and Azure Container Registries to Azure App Service
+* Add support for browsing Docker Hub and Azure Container Registries
+* Add support for deploying images from Docker Hub and Azure Container Registries to Azure App Service
 * `docker-compose` now runs detached and always invokes a build (e.g. `docker-compose -f docker-compose.yml -d --build`)
 * `docker system prune` command no longer prompts for confirmation
 * `docker-compose.debuy.yml` no longer contains a volume mapping
@@ -79,7 +84,7 @@
 * Gracefully handle when Docker is not running
 * Add Explorer contribution, letting you view Images and Containers in the Explorer viewlet.
 * Add `--rm` to `docker build` to remove intermediate images
-* Thanks to @rcjsuen, moved to the [Dockerfile Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs) 
+* Thanks to @rcjsuen, moved to the [Dockerfile Language Server](https://github.com/rcjsuen/dockerfile-language-server-nodejs)
 * Update thirdpartynotices.txt, README.md to reflect changes
 
 ## 0.0.16 - 09 June 2017
@@ -95,13 +100,15 @@
 * Updated the `Docker: Azure CLI` command to fully support running `az acs` commands
 
 ## 0.0.14 - 08 May 2017
+
 * Support for Docker multi stage build Dockerfiles (syntax, linting)
 * Support different variations on naming of `dockerfile` such as `dockerfile-development`
 * Bug fixing
 
 ## 0.0.13 - 14 March 2017
-* Support for `.yaml` file extension on `docker-compose` files. 
-* Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windowns containers, fix Windows path issues (this didn't make it into `0.0.12`)
+
+* Support for `.yaml` file extension on `docker-compose` files.
+* Updated Azure CLI image name, map .azure folder from host file system, fix block running on Windows containers, fix Windows path issues (this didn't make it into `0.0.12`)
 * Added telemetry to understand which commands developers find useful. This will help us refine which commands we add in the future. We track whether the following commands are executed:
   * `build image`
   * `compose up`, `compose down`
@@ -118,7 +125,6 @@
 
 > Please note, you can turn off telemetry reporting for VS Code and all extensions through the ["telemetry.enableTelemetry": false setting](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
 
-
 ## 0.0.12 - 11 February 2017
 
 * Removed `MAINTAINER` from templates and linting warnings by upgrading the `dockerfile_lint` module (Docker has deprecated `MAINTAINER` in favor of `LABEL`).
@@ -128,7 +134,7 @@
 ## 0.0.10 - 12 December 2016
 
 * Added context menu support to run the Docker Build command on Dockerfile files from the editor or from the explorer.
-* Docker logs now uses the -f flag ([follow](https://docs.docker.com/engine/reference/commandline/logs/)) to continue streaming the logs to terminal. 
+* Docker logs now uses the -f flag ([follow](https://docs.docker.com/engine/reference/commandline/logs/)) to continue streaming the logs to terminal.
 
 ## 0.0.11 - 4 January 2017
 
