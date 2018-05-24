@@ -103,7 +103,7 @@ export class DockerHubImageNode extends NodeBase {
         super(label);
     }
 
-    // this needs to be empty string for DockerHub
+    // this needs to be empty string for Docker Hub
     public serverUrl: string = '';
     public userName: string;
     public password: string;

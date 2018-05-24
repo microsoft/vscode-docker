@@ -302,7 +302,7 @@
         "docker.defaultRegistry": {
           "type": "string",
           "default": "",
-          "description": "Default registry when tagging an image, empty string will target Dockerhub when pushing."
+          "description": "Default registry when tagging an image, empty string will target Docker Hub when pushing."
         },
         "docker.defaultRegistryPath": {
           "type": "string",
@@ -571,12 +571,12 @@
       },
       {
         "command": "vscode-docker.dockerHubLogout",
-        "title": "DockerHub Logout",
+        "title": "Docker Hub Logout",
         "category": "Docker"
       },
       {
         "command": "vscode-docker.browseDockerHub",
-        "title": "Browse in DockerHub",
+        "title": "Browse in Docker Hub",
         "category": "Docker"
       },
       {
