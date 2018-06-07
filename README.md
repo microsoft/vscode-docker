@@ -11,9 +11,11 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 
 ## Generating Docker Files
 
-Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, and `docker-compose.debug.yml` files for your workspace type:
+Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
 
 ![dockerfile](images/generateFiles.gif)
+
+> Note: The `docker-compose.yml` and `docker-compose.debug.yml` files are not generated for .NET Core applications.
 
 ## Editing
 

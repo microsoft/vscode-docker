@@ -1,3 +1,6 @@
+## 0.0.28 - XX May 2018
+* Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
+
 ## 0.0.27 - 19 May 2018
 
 * Fixes indentation problem with Python docker-compose.yml files (thanks @brettcannon) [#242](https://github.com/Microsoft/vscode-docker/pull/242)

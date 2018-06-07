@@ -255,7 +255,7 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('DockerHub', "dockerHubRootNode", null));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", null));
 
         if (this._azureAccount) {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
