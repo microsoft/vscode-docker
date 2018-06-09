@@ -169,6 +169,26 @@ CMD ["python3", "-m", "${serviceName}"]
 #CMD /bin/bash -c "source activate myenv && python3 -m ${serviceName}"
 `;
 
+        case 'ruby':
+
+            return `
+FROM ruby:2.5
+
+LABEL Name=${serviceName} Version=${version}
+EXPOSE ${port}
+
+# throw errors if Gemfile has been modified since Gemfile.lock
+RUN bundle config --global frozen 1
+
+WORKDIR /app
+COPY . /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+CMD ["ruby", "${serviceName}.rb"]
+`;
+
         case 'java':
             const artifact = artifactName ? artifactName : `${serviceName}.jar`;
             return `
@@ -241,6 +261,16 @@ services:
       - ${port}:${port}`;
 
         case 'python':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    image: ${serviceName}
+    build: .
+    ports:
+      - ${port}:${port}`;
+
+        case 'ruby':
             return `version: '2.1'
 
 services:
@@ -333,6 +363,19 @@ services:
       - ${port}:${port}`;
 
         case 'python':
+            return `version: '2.1'
+
+services:
+  ${serviceName}:
+    image: ${serviceName}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+        - ${port}:${port}
+`;
+
+        case 'ruby':
             return `version: '2.1'
 
 services:
@@ -593,7 +636,8 @@ export async function configure(): Promise<void> {
 
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
         // don't generate docker-compose files for .NET Core apps
-        if (platformType.toLowerCase().includes('.net') && !fileName.includes('docker-compose')) {
+        if (platformType.toLowerCase().includes('.net') && fileName.includes('docker-compose')) {
+        } else {
             return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
         }
     }));
