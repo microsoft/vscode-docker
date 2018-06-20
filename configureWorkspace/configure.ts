@@ -153,7 +153,7 @@ LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
 
 WORKDIR /app
-ADD . /app
+COPY . .
 
 # Using pip:
 RUN python3 -m pip install -r requirements.txt
