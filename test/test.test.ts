@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
 
-suite("Tests", () => {
+suite("Verify tests are running - this should be removed once there are actual tests", () => {
     test("test", async () => {
         assert.equal(true, true);
     });
