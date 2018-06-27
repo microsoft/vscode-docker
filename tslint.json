@@ -308,8 +308,7 @@
     "rulesDirectory": "node_modules/tslint-microsoft-contrib/",
     "linterOptions": {
         "exclude": [
-            "src/mongo/grammar/**", // generated files
-            "test/**" // TODO
+            "test/**"
         ]
     }
 }
