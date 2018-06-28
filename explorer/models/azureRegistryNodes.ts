@@ -199,26 +199,28 @@ export class AzureRepositoryNode extends NodeBase {
                     tags = JSON.parse(body).tags;
                 }
             });
+            let requests = [];
 
             for (let i = 0; i < tags.length; i++) {
-
-                let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                requests.push(                
+                request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
                     auth: { bearer: accessTokenARC }
+                }).then(data => {
+                    let manifest = JSON.parse(data);
+                    node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
+                    node.azureAccount = element.azureAccount;
+                    node.password = element.password;
+                    node.registry = element.registry;
+                    node.serverUrl = element.repository;
+                    node.subscription = element.subscription;
+                    node.userName = element.userName;
+                    node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
+                    imageNodes.push(node);
                 }));
-
-                node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
-                node.azureAccount = element.azureAccount;
-                node.password = element.password;
-                node.registry = element.registry;
-                node.serverUrl = element.repository;
-                node.subscription = element.subscription;
-                node.userName = element.userName;
-                node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
-                imageNodes.push(node);
-
             }
-
+            await Promise.all(requests);
         }
+
         return imageNodes;
     }
 }
