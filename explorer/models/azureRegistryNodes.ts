@@ -222,6 +222,7 @@ export class AzureRepositoryNode extends NodeBase {
                 );
             }
             await pool.scheduleRun();
+            
         }
         function sortfunction(a: AzureImageNode, b : AzureImageNode):number{
             if(a.serverUrl < b.serverUrl) return -1;
