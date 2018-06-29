@@ -171,8 +171,8 @@ export class RegistryRootNode extends NodeBase {
                             });
                         });
                     }
-                }
             }
+        }
             console.log(count + "<- Expected");
             await regPool.scheduleRun();
             function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
