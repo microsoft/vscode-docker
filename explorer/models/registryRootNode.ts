@@ -127,32 +127,37 @@ export class RegistryRootNode extends NodeBase {
         if (loggedIntoAzure) {
 
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
-
+            let subscriptionPromises = [];
+            let credentialPromises = [];
             for (let i = 0; i < subs.length; i++) {
-
                 const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                const registries: ContainerModels.RegistryListResult = await client.registries.list();
 
-                for (let j = 0; j < registries.length; j++) {
-
-                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-                        const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
-
-                        let iconPath = {
-                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                        };
-                        let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                        node.type = RegistryType.Azure;
-                        node.password = creds.passwords[0].value;
-                        node.userName = creds.username;
-                        node.subscription = subs[i];
-                        node.registry = registries[j];
-                        azureRegistryNodes.push(node);
+                //Nonblocking subscription acquisition
+                subscriptionPromises.push(client.registries.list().then(registries => {
+                    for (let j = 0; j < registries.length; j++) {
+                        if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
+                            const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                            //Nonblocking credential acquisition
+                            credentialPromises.push(client.registries.listCredentials(resourceGroup, registries[j].name).then(creds => {
+                                let iconPath = {
+                                    light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                                    dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                                };
+                                let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
+                                node.type = RegistryType.Azure;
+                                node.password = creds.passwords[0].value;
+                                node.userName = creds.username;
+                                node.subscription = subs[i];
+                                node.registry = registries[j];
+                                azureRegistryNodes.push(node);
+                            }));
+                        }
                     }
-                }
+
+                }));
             }
+            await Promise.all(subscriptionPromises);
+            await Promise.all(credentialPromises);
         }
 
         return azureRegistryNodes;
