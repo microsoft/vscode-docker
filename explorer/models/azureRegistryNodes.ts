@@ -202,10 +202,11 @@ export class AzureRepositoryNode extends NodeBase {
             let requests = [];
 
             for (let i = 0; i < tags.length; i++) {
-                requests.push(                
+                requests.push(                    
                 request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
                     auth: { bearer: accessTokenARC }
                 }).then(data => {
+                    //Acquires each image's manifest to acquire build time.
                     let manifest = JSON.parse(data);
                     node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
                     node.azureAccount = element.azureAccount;
