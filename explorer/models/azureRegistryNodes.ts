@@ -199,26 +199,34 @@ export class AzureRepositoryNode extends NodeBase {
                     tags = JSON.parse(body).tags;
                 }
             });
+            let requests = [];
 
             for (let i = 0; i < tags.length; i++) {
-                
-                let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
+                requests.push(                    
+                request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
                     auth: { bearer: accessTokenARC }
+                }).then(data => {
+                    //Acquires each image's manifest to acquire build time.
+                    let manifest = JSON.parse(data);
+                    node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
+                    node.azureAccount = element.azureAccount;
+                    node.password = element.password;
+                    node.registry = element.registry;
+                    node.serverUrl = element.repository;
+                    node.subscription = element.subscription;
+                    node.userName = element.userName;
+                    node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
+                    imageNodes.push(node);
                 }));
-
-                node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
-                node.azureAccount = element.azureAccount;
-                node.password = element.password;
-                node.registry = element.registry;
-                node.serverUrl = element.repository;
-                node.subscription = element.subscription;
-                node.userName = element.userName;
-                node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
-                imageNodes.push(node);
-
             }
-
+            await Promise.all(requests);
         }
+        function sortfunction(a: AzureImageNode, b : AzureImageNode):number{
+            if(a.serverUrl < b.serverUrl) return -1;
+            else if(a.serverUrl === b.serverUrl)return 0;
+            else return 1;
+        }
+        imageNodes.sort(sortfunction);
         return imageNodes;
     }
 }
