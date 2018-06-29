@@ -221,7 +221,12 @@ export class AzureRepositoryNode extends NodeBase {
             }
             await Promise.all(requests);
         }
-
+        function sortfunction(a: AzureImageNode, b : AzureImageNode):number{
+            if(a.serverUrl < b.serverUrl) return -1;
+            else if(a.serverUrl === b.serverUrl)return 0;
+            else return 1;
+        }
+        imageNodes.sort(sortfunction);
         return imageNodes;
     }
 }
