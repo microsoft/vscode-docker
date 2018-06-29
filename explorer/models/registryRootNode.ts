@@ -159,7 +159,13 @@ export class RegistryRootNode extends NodeBase {
             await Promise.all(subscriptionPromises);
             await Promise.all(credentialPromises);
         }
-
+        //Sort the registries in alphabtical model
+        function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
+            if(a.registry.loginServer < b.registry.loginServer) return -1;
+            else if(a.registry.loginServer === b.registry.loginServer)return 0; //This shouldnt even be possible
+            else return 1;
+        }
+        azureRegistryNodes.sort(sortfunction);
         return azureRegistryNodes;
     }
 
