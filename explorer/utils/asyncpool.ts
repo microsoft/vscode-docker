@@ -9,9 +9,11 @@ export class asyncPool {
 
     constructor(asyncLim: number) {
         this.asyncLim = asyncLim;
+        this.runnableQueue = [];
+        this.workers = [];
     }
 
-    public async scheduleBegin(asyncLim: number) {
+    public async scheduleRun() {
         for (let i = 0; i < this.asyncLim; i++) {
             this.workers.push(this.worker());
         }

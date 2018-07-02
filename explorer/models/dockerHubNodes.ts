@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
-
+import { asyncPool } from '../utils/asyncpool';
 
 export class DockerHubOrgNode extends NodeBase {
 
@@ -36,19 +36,22 @@ export class DockerHubOrgNode extends NodeBase {
 
         const user: dockerHub.User = await dockerHub.getUser();
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-
+        const repoPool = new asyncPool(8);
         for (let i = 0; i < myRepos.length; i++) {
-            const myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
-            let iconPath = {
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
-            };
-            node = new DockerHubRepositoryNode(myRepo.name, 'dockerHubRepository', iconPath);
-            node.repository = myRepo;
-            node.userName = element.userName;
-            node.password = element.password;
-            repoNodes.push(node);
+            repoPool.addTask(async ()=> {
+                let myRepo : dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
+                let iconPath = {
+                    light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
+                    dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+                };
+                node = new DockerHubRepositoryNode(myRepo.name, 'dockerHubRepository', iconPath);
+                node.repository = myRepo;
+                node.userName = element.userName;
+                node.password = element.password;
+                repoNodes.push(node);    
+            });
         }
+        await repoPool.scheduleRun();
         return repoNodes;
     }
 }
