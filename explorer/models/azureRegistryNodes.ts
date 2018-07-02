@@ -7,6 +7,7 @@ import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
+import { asyncPool } from '../utils/asyncpool';
 
 export class AzureRegistryNode extends NodeBase {
     private _azureAccount: AzureAccount;
@@ -82,7 +83,6 @@ export class AzureRegistryNode extends NodeBase {
                     return [];
                 }
             });
-
             await request.get('https://' + element.label + '/v2/_catalog', {
                 auth: {
                     bearer: accessTokenARC
@@ -105,7 +105,7 @@ export class AzureRegistryNode extends NodeBase {
                 }
             });
         }
-
+        //Note these are ordered by default in alphabetical order
         return repoNodes;
     }
 }
@@ -199,13 +199,14 @@ export class AzureRepositoryNode extends NodeBase {
                     tags = JSON.parse(body).tags;
                 }
             });
-            let requests = [];
-
+            
+            const pool = new asyncPool(8);
             for (let i = 0; i < tags.length; i++) {
-                requests.push(                    
-                request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
-                    auth: { bearer: accessTokenARC }
-                }).then(data => {
+                pool.addTask(async ()=>{                    
+                    let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                        auth: { bearer: accessTokenARC }
+                    });
+
                     //Acquires each image's manifest to acquire build time.
                     let manifest = JSON.parse(data);
                     node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
@@ -217,9 +218,10 @@ export class AzureRepositoryNode extends NodeBase {
                     node.userName = element.userName;
                     node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
                     imageNodes.push(node);
-                }));
+                }
+                );
             }
-            await Promise.all(requests);
+            await pool.scheduleRun();
         }
         function sortfunction(a: AzureImageNode, b : AzureImageNode):number{
             if(a.serverUrl < b.serverUrl) return -1;

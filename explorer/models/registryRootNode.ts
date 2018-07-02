@@ -126,70 +126,37 @@ export class RegistryRootNode extends NodeBase {
             return [new AzureNotSignedInNode()];
         }
 
-        if (loggedIntoAzure) {
-            
-            // const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
-            // for (let i = 0; i < subs.length; i++) {
-            //     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                
-            //     //Nonblocking subscription acquisition
-            //     let info : {'resourceGroup' : String, 'registry'}[] = [];
-            //     let registries: ContainerModels.RegistryListResult = await client.registries.list();
-
-            //         let q = async.queue(async item => { 
-            //             let creds = await client.registries.listCredentials(item['resourceGroup'], item['registry'].name);
-            //             let iconPath = {
-            //                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-            //                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-            //             };
-            //             let node = new AzureRegistryNode(item['registry'].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-            //             node.type = RegistryType.Azure;
-            //             node.password = creds.passwords[0].value;
-            //             node.userName = creds.username;
-            //             node.subscription = subs[i];
-            //             node.registry = item['registry'];
-            //             azureRegistryNodes.push(node);
-            //         },8);
-
-            //         for (let j = 0; j < registries.length; j++) {
-            //             if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-            //                 const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-            //                 q.push({
-            //                     'resourceGroup' : resourceGroup,
-            //                     'registry' : registries[j]
-            //                 });
-            //             }
-            //         }
-            //         let sorted = false;
-            //         q.drain = ()=>{
-            //             //Sort the registries in alphabtical model
-            //             function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
-            //                 if(a.registry.loginServer < b.registry.loginServer) return -1;
-            //                 else if(a.registry.loginServer === b.registry.loginServer)return 0; //This shouldn't even be possible
-            //                 else return 1;
-            //             }
-            //             azureRegistryNodes.sort(sortfunction);
-            //             sorted = true;
-            //         };
-
-
-            //         return azureRegistryNodes;
-
-            //     };
-            
+        if (loggedIntoAzure) {            
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
+
+            const subPool = new asyncPool(5);
+            let subsAndRegistries : {'subscription':SubscriptionModels.Subscription,'registries':ContainerModels.RegistryListResult, 'client': any }[] = [];
+            //Acquire each subscription's data simultaneously
             for (let i = 0; i < subs.length; i++) {
-                const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                
-                //Nonblocking subscription acquisition
-                let info : {'resourceGroup' : String, 'registry'}[] = [];
-                let registries: ContainerModels.RegistryListResult = await client.registries.list();
-                let credentialPromises = [];              
+                subPool.addTask(async()=>{
+                    const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    subsAndRegistries.push({
+                        'subscription': subs[i],
+                        'registries': await client.registries.list(),
+                        'client':client
+                    });
+                });
+            }
+            await subPool.scheduleRun();
+            let count = 0;
+            const regPool = new asyncPool(8);
+            for (let i = 0; i < subsAndRegistries.length; i++) {
+                const client = subsAndRegistries[i].client;
+                const registries = subsAndRegistries[i].registries;
+                const subscription = subsAndRegistries[i].subscription;
+
+                //Go through the registries and add them to the async pool
                 for (let j = 0; j < registries.length; j++) {
-                        if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-                            const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-                            //Nonblocking credential acquisition
-                            credentialPromises.push(client.registries.listCredentials(resourceGroup, registries[j].name).then(creds => {
+                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
+                        count++;
+                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                        regPool.addTask(async()=>{
+                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name).then(creds => {
                                 let iconPath = {
                                     light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                     dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
@@ -198,18 +165,16 @@ export class RegistryRootNode extends NodeBase {
                                 node.type = RegistryType.Azure;
                                 node.password = creds.passwords[0].value;
                                 node.userName = creds.username;
-                                node.subscription = subs[i];
+                                node.subscription = subscription;
                                 node.registry = registries[j];
                                 azureRegistryNodes.push(node);
-                            }));
-                        }
-                        if(credentialPromises.length === 8){
-                            await Promise.all(credentialPromises);
-                            credentialPromises = [];
-                        }
+                            });
+                        });
                     }
                 }
-                
+            }
+            console.log(count + "<- Expected");
+            await regPool.scheduleRun();
             function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
                 if(a.registry.loginServer < b.registry.loginServer) return -1;
                 else if(a.registry.loginServer === b.registry.loginServer)return 0; //This shouldn't even be possible
