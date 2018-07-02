@@ -1,7 +1,4 @@
 out
 node_modules
 *.vsix
-.vs/slnx.sqlite
-.vs/vscode-docker/v15/.suo
-.vs/VSWorkspaceState.json
-.vs/slnx.sqlite
+.vs
