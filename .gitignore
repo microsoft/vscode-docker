@@ -1,7 +1,11 @@
 out
 node_modules
 *.vsix
+<<<<<<< HEAD
 package-lock.json
 
 # Artifacts from running vscode extension tests
 .vscode-test
+=======
+.vs
+>>>>>>> Removed GitIgnore
