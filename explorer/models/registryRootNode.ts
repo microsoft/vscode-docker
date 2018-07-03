@@ -176,9 +176,7 @@ export class RegistryRootNode extends NodeBase {
             console.log(count + "<- Expected");
             await regPool.scheduleRun();
             function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
-                if(a.registry.loginServer < b.registry.loginServer) return -1;
-                else if(a.registry.loginServer === b.registry.loginServer)return 0; //This shouldn't even be possible
-                else return 1;
+                return a.registry.loginServer.localeCompare(b.registry.loginServer);
             }
             azureRegistryNodes.sort(sortfunction);
             return azureRegistryNodes;

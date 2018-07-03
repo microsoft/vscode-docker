@@ -5,16 +5,20 @@
 export class asyncPool {
     private runnableQueue: Function[];
     private workers: Promise<void>[];
-    private asyncLim : number;
+    private asyncLimit : number;
 
-    constructor(asyncLim: number) {
-        this.asyncLim = asyncLim;
+    constructor(asyncLimit: number) {
+        this.asyncLimit = asyncLimit;
         this.runnableQueue = [];
         this.workers = [];
     }
 
+    /*Runs all functions in runnableQueue by launching asyncLimit worker instances
+      each of which calls an async task extracted from runnableQueue. This will 
+      wait for all scheduled tasks to be completed.*/
+      
     public async scheduleRun() {
-        for (let i = 0; i < this.asyncLim; i++) {
+        for (let i = 0; i < this.asyncLimit; i++) {
             this.workers.push(this.worker());
         }
         await Promise.all(this.workers);
