@@ -9,6 +9,8 @@ import {AzureAccount, AzureSession} from '../../typings/azure-account.api';
 import {RegistryType} from './registryType';
 import {asyncPool} from '../utils/asyncpool';
 
+const MAX_CONCURRENT_REQUESTS = 8;
+
 export class AzureRegistryNode extends NodeBase {
     private _azureAccount : AzureAccount;
 
@@ -36,10 +38,7 @@ export class AzureRegistryNode extends NodeBase {
             return [];
         }
 
-        const session: AzureSession = this
-            ._azureAccount
-            .sessions
-            .find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const {accessToken, refreshToken} = await acquireToken(session);
 
         if (accessToken && refreshToken) {
@@ -56,9 +55,7 @@ export class AzureRegistryNode extends NodeBase {
                 }
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
-                    refreshTokenARC = JSON
-                        .parse(body)
-                        .refresh_token;
+                    refreshTokenARC = JSON.parse(body).refresh_token;
                 } else {
                     return [];
                 }
@@ -73,9 +70,7 @@ export class AzureRegistryNode extends NodeBase {
                 }
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
-                    accessTokenARC = JSON
-                        .parse(body)
-                        .access_token;
+                    accessTokenARC = JSON.parse(body).access_token;
                 } else {
                     return [];
                 }
@@ -86,9 +81,7 @@ export class AzureRegistryNode extends NodeBase {
                 }
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
-                    const repositories = JSON
-                        .parse(body)
-                        .repositories;
+                    const repositories = JSON.parse(body).repositories;
                     for (let i = 0; i < repositories.length; i++) {
                         node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
                         node.accessTokenARC = accessTokenARC;
@@ -199,7 +192,7 @@ export class AzureRepositoryNode extends NodeBase {
                 }
             });
 
-            const pool = new asyncPool(8);
+            const pool = new asyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < tags.length; i++) {
                 pool.addTask(async() => {
                     let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
@@ -224,7 +217,7 @@ export class AzureRepositoryNode extends NodeBase {
             await pool.scheduleRun();
         }
         function sortfunction(a : AzureImageNode, b : AzureImageNode): number {
-            return a.serverUrl.localeCompare(b.serverUrl);
+            return a.created.localeCompare(b.created);
         }
         imageNodes.sort(sortfunction);
         return imageNodes;
