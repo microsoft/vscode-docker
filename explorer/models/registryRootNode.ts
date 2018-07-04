@@ -158,19 +158,18 @@ export class RegistryRootNode extends NodeBase {
                         count++;
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async()=>{
-                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name).then(creds => {
-                                let iconPath = {
-                                    light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                                    dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                                };
-                                let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                                node.type = RegistryType.Azure;
-                                node.password = creds.passwords[0].value;
-                                node.userName = creds.username;
-                                node.subscription = subscription;
-                                node.registry = registries[j];
-                                azureRegistryNodes.push(node);
-                            });
+                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            let iconPath = {
+                                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                            };
+                            let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
+                            node.type = RegistryType.Azure;
+                            node.password = creds.passwords[0].value;
+                            node.userName = creds.username;
+                            node.subscription = subscription;
+                            node.registry = registries[j];
+                            azureRegistryNodes.push(node);
                         });
                     }
                 }
