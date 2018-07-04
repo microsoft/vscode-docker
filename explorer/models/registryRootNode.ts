@@ -145,7 +145,6 @@ export class RegistryRootNode extends NodeBase {
                 });
             }
             await subPool.scheduleRun();
-            let count = 0;
             const regPool = new asyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < subsAndRegistries.length; i++) {
                 const client = subsAndRegistries[i].client;
@@ -155,7 +154,6 @@ export class RegistryRootNode extends NodeBase {
                 //Go through the registries and add them to the async pool
                 for (let j = 0; j < registries.length; j++) {
                     if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-                        count++;
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async()=>{
                             let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
