@@ -636,7 +636,7 @@
     "@types/glob": "5.0.35"
   },
   "dependencies": {
-    "azure-arm-containerregistry": "^1.0.0-preview",
+    "azure-arm-containerregistry": "^2.3.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
     "dockerfile-language-server-nodejs": "^0.0.18",

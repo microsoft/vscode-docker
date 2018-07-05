@@ -15,7 +15,6 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { getCoreNodeModule } from '../utils/utils';
 import { asyncPool } from '../utils/asyncpool';
 import { TIMEOUT } from 'dns';
-const async = require("async");
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 const MAX_CONCURRENT_REQUESTS = 8;
 const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
@@ -153,7 +152,7 @@ export class RegistryRootNode extends NodeBase {
 
                 //Go through the registries and add them to the async pool
                 for (let j = 0; j < registries.length; j++) {
-                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
+                    if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async()=>{
                             let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
