@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
-import { asyncPool } from '../utils/asyncpool';
+import { AsyncPool } from '../utils/asyncPool';
 
 export class DockerHubOrgNode extends NodeBase {
 
@@ -36,7 +36,7 @@ export class DockerHubOrgNode extends NodeBase {
 
         const user: dockerHub.User = await dockerHub.getUser();
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-        const repoPool = new asyncPool(8);
+        const repoPool = new AsyncPool(8);
         for (let i = 0; i < myRepos.length; i++) {
             repoPool.addTask(async ()=> {
                 let myRepo : dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);

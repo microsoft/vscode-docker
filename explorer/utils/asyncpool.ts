@@ -3,7 +3,7 @@
  * To limit the number of asynchonous calls being done, this is helpful to limit 
  * Connection requests and avoid throttling.
  */
-export class asyncPool {
+export class AsyncPool {
     private runnableQueue: Function[];
     private workers: Promise<void>[];
     private asyncLimit : number;
