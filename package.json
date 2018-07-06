@@ -648,6 +648,6 @@
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "^4.2.1",
+    "vscode-languageclient": "^4.2.1"
   }
 }
