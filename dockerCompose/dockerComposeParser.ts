@@ -5,7 +5,7 @@
 'use strict';
 
 import vscode = require('vscode');
-import {Parser, TokenType, IToken} from '../parser';
+import { Parser, TokenType, IToken } from '../parser';
 
 export class DockerComposeParser extends Parser {
     constructor() {

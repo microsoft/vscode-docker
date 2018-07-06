@@ -99,7 +99,7 @@ export class SuggestSupportHelper {
                 if (results[0]) {
                     return [results[0]];
                 }
-                
+
                 return [results[1]];
             });
         }

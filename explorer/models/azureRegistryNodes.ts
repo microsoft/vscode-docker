@@ -201,7 +201,7 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             for (let i = 0; i < tags.length; i++) {
-                
+
                 let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
                     auth: { bearer: accessTokenARC }
                 }));
@@ -230,7 +230,7 @@ export class AzureImageNode extends NodeBase {
     ) {
         super(label);
     }
-    
+
     public azureAccount: AzureAccount
     public created: string;
     public password: string;

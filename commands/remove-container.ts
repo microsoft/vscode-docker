@@ -33,7 +33,7 @@ export async function removeContainer(context?: ContainerNode) {
 
         const numContainers: number = containersToRemove.length;
         let containerCounter: number = 0;
-        
+
         vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
             containersToRemove.forEach((c) => {
                 docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any) {
