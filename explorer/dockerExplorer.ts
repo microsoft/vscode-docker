@@ -33,7 +33,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     refreshRegistries(): void {
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
-    
+
     getTreeItem(element: NodeBase): vscode.TreeItem {
         return element.getTreeItem();
     }
