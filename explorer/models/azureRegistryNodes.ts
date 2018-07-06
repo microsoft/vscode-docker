@@ -7,7 +7,7 @@ import {NodeBase} from './nodeBase';
 import {SubscriptionClient, ResourceManagementClient, SubscriptionModels} from 'azure-arm-resource';
 import {AzureAccount, AzureSession} from '../../typings/azure-account.api';
 import {RegistryType} from './registryType';
-import {asyncPool} from '../utils/asyncpool';
+import {AsyncPool} from '../utils/asyncPool';
 
 const MAX_CONCURRENT_REQUESTS = 8;
 
@@ -192,7 +192,7 @@ export class AzureRepositoryNode extends NodeBase {
                 }
             });
 
-            const pool = new asyncPool(MAX_CONCURRENT_REQUESTS);
+            const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < tags.length; i++) {
                 pool.addTask(async() => {
                     let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {

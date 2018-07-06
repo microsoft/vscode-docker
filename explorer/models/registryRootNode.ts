@@ -13,7 +13,7 @@ import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { getCoreNodeModule } from '../utils/utils';
-import { asyncPool } from '../utils/asyncpool';
+import { AsyncPool } from '../utils/asyncPool';
 import { TIMEOUT } from 'dns';
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 const MAX_CONCURRENT_REQUESTS = 8;
@@ -130,7 +130,7 @@ export class RegistryRootNode extends NodeBase {
         if (loggedIntoAzure) {            
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
 
-            const subPool = new asyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
+            const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
             let subsAndRegistries : {'subscription':SubscriptionModels.Subscription,'registries':ContainerModels.RegistryListResult, 'client': any }[] = [];
             //Acquire each subscription's data simultaneously
             for (let i = 0; i < subs.length; i++) {
@@ -144,7 +144,7 @@ export class RegistryRootNode extends NodeBase {
                 });
             }
             await subPool.scheduleRun();
-            const regPool = new asyncPool(MAX_CONCURRENT_REQUESTS);
+            const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < subsAndRegistries.length; i++) {
                 const client = subsAndRegistries[i].client;
                 const registries = subsAndRegistries[i].registries;
