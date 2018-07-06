@@ -13,8 +13,11 @@ import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { getCoreNodeModule } from '../utils/utils';
-
+import { AsyncPool } from '../utils/asyncPool';
+import { TIMEOUT } from 'dns';
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
+const MAX_CONCURRENT_REQUESTS = 8;
+const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
@@ -114,7 +117,7 @@ export class RegistryRootNode extends NodeBase {
         }
 
         const loggedIntoAzure: boolean = await this._azureAccount.waitForLogin()
-        const azureRegistryNodes: AzureRegistryNode[] = [];
+        let azureRegistryNodes: AzureRegistryNode[] = [];
 
         if (this._azureAccount.status === 'Initializing' || this._azureAccount.status === 'LoggingIn') {
             return [new AzureLoadingNode()];
@@ -124,38 +127,63 @@ export class RegistryRootNode extends NodeBase {
             return [new AzureNotSignedInNode()];
         }
 
-        if (loggedIntoAzure) {
-
+        if (loggedIntoAzure) {            
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
 
+            const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
+            let subsAndRegistries : {'subscription':SubscriptionModels.Subscription,'registries':ContainerModels.RegistryListResult, 'client': any }[] = [];
+            //Acquire each subscription's data simultaneously
             for (let i = 0; i < subs.length; i++) {
-
-                const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                const registries: ContainerModels.RegistryListResult = await client.registries.list();
-
-                for (let j = 0; j < registries.length; j++) {
-
-                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-                        const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
-
-                        let iconPath = {
-                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                        };
-                        let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                        node.type = RegistryType.Azure;
-                        node.password = creds.passwords[0].value;
-                        node.userName = creds.username;
-                        node.subscription = subs[i];
-                        node.registry = registries[j];
-                        azureRegistryNodes.push(node);
-                    }
-                }
+                subPool.addTask(async()=>{
+                    const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    subsAndRegistries.push({
+                        'subscription': subs[i],
+                        'registries': await client.registries.list(),
+                        'client':client
+                    });
+                });
             }
-        }
+            await subPool.scheduleRun();
+            const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+            for (let i = 0; i < subsAndRegistries.length; i++) {
+                const client = subsAndRegistries[i].client;
+                const registries = subsAndRegistries[i].registries;
+                const subscription = subsAndRegistries[i].subscription;
 
-        return azureRegistryNodes;
+                //Go through the registries and add them to the async pool
+                for (let j = 0; j < registries.length; j++) {
+                    if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
+                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                        regPool.addTask(async()=>{
+                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            let iconPath = {
+                                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                            };
+                            let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
+                            node.type = RegistryType.Azure;
+                            node.password = creds.passwords[0].value;
+                            node.userName = creds.username;
+                            node.subscription = subscription;
+                            node.registry = registries[j];
+                            azureRegistryNodes.push(node);
+                        });
+                    }
+            }
+            await regPool.scheduleRun();
+            function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
+                return a.registry.loginServer.localeCompare(b.registry.loginServer);
+            }
+            azureRegistryNodes.sort(sortfunction);
+            return azureRegistryNodes;
+        }
+            await regPool.scheduleRun();
+            function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
+                return a.registry.loginServer.localeCompare(b.registry.loginServer);
+            }
+            azureRegistryNodes.sort(sortfunction);
+            return azureRegistryNodes;
+        }
     }
 
     private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
