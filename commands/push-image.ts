@@ -46,5 +46,5 @@ export async function pushImage(context?: ImageNode) {
 
             }
         }
-    };
+    }
 }

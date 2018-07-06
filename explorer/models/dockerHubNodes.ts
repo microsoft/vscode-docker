@@ -86,7 +86,7 @@ export class DockerHubRepositoryNode extends NodeBase {
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
-            node.created = moment(new Date(myTags[i].last_updated)).fromNow();;
+            node.created = moment(new Date(myTags[i].last_updated)).fromNow();
             imageNodes.push(node);
         }
 

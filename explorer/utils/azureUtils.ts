@@ -2,6 +2,7 @@ import * as opn from 'opn';
 import { AzureRepositoryNode, AzureImageNode, AzureRegistryNode } from '../models/azureRegistryNodes';
 import { AzureSession } from '../../typings/azure-account.api';
 
+// tslint:disable-next-line:export-name
 export function browseAzurePortal(context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode ): void {
 
     if (context) {

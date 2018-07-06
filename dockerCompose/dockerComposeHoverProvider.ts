@@ -43,14 +43,14 @@ export class DockerComposeHoverProvider implements HoverProvider {
                 };
             });
         }).then((results) => {
-            var r = results.filter(r => !!r.result);
-            if (r.length === 0) {
+            var filteredResults = results.filter(r => !!r.result);
+            if (filteredResults.length === 0) {
                 return;
             }
 
-            let range = new Range(position.line, r[0].startIndex, position.line, r[0].endIndex);
+            let range = new Range(position.line, filteredResults[0].startIndex, position.line, filteredResults[0].endIndex);
 
-            let hover = new Hover(r[0].result, range);
+            let hover = new Hover(filteredResults[0].result, range);
 
             return hover;
 

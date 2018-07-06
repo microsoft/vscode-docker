@@ -45,7 +45,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         var imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
 
         if (imageTextWithQuoteMatchYaml) {
-            var imageText = imageTextWithQuoteMatchYaml[1];
+            let imageText = imageTextWithQuoteMatchYaml[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 
@@ -53,7 +53,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         var imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
 
         if (imageTextWithoutQuoteMatch) {
-            var imageText = imageTextWithoutQuoteMatch[1];
+            let imageText = imageTextWithoutQuoteMatch[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 

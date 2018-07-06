@@ -22,6 +22,7 @@ interface IPackageInfo {
 }
 
 function getPackageInfo(context: vscode.ExtensionContext): IPackageInfo {
+    // tslint:disable-next-line:non-literal-require
     let extensionPackage = require(context.asAbsolutePath('./package.json'));
     if (extensionPackage) {
         return {

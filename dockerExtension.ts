@@ -10,7 +10,7 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import vscode = require('vscode');
 import { buildImage } from './commands/build-image';
-import inspectImageCommand from './commands/inspect-image';
+import inspectImage from './commands/inspect-image';
 import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
 import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
@@ -52,7 +52,7 @@ export interface ComposeVersionKeys {
     All: KeyInfo,
     v1: KeyInfo,
     v2: KeyInfo
-};
+}
 
 let client: LanguageClient;
 
@@ -94,7 +94,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImageCommand));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));

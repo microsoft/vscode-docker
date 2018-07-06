@@ -9,7 +9,7 @@ let _token: Token;
 
 export interface Token {
     token: string
-};
+}
 
 export interface User {
     company: string
@@ -24,12 +24,12 @@ export interface User {
     profile_url: string
     type: string
     username: string
-};
+}
 
 export interface Repository {
     namespace: string
     name: string
-};
+}
 
 export interface RepositoryInfo {
     user: string
@@ -241,6 +241,8 @@ export function browseDockerHub(context?: DockerHubImageNode | DockerHubReposito
                 break;
             case 'dockerHubImageTag':
                 url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
+                break;
+            default:
                 break;
         }
         opn(url);
