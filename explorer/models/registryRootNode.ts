@@ -170,8 +170,13 @@ export class RegistryRootNode extends NodeBase {
                         });
                     }
             }
+            await regPool.scheduleRun();
+            function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
+                return a.registry.loginServer.localeCompare(b.registry.loginServer);
+            }
+            azureRegistryNodes.sort(sortfunction);
+            return azureRegistryNodes;
         }
-            console.log(count + "<- Expected");
             await regPool.scheduleRun();
             function sortfunction(a: AzureRegistryNode, b : AzureRegistryNode):number{
                 return a.registry.loginServer.localeCompare(b.registry.loginServer);
