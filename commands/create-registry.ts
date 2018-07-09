@@ -53,7 +53,11 @@ export async function createRegistry(context ?: RegistryRootNode) {
         const subs: SubscriptionModels.Subscription[] = getFilteredSubscriptions(azureAccount);
         //Acquire each subscription's data simultaneously
         const client = new ContainerRegistryManagementClient (getCredentialByTenantId(subs[0].tenantId,azureAccount), subs[0].subscriptionId);
-        await client.registries.beginCreate(resourceGroup,registryName,{'sku':{'name':sku},'location':location});
+        await client.registries.beginCreate(resourceGroup,registryName,{'sku':{'name':sku},'location':location}).then(function(response){
+            console.log("Success!", response);
+        }, function(error){
+            console.error("Failed!", error);
+        })
         console.log(registryName);
 }
 
