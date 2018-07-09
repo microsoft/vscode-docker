@@ -7,7 +7,7 @@ import {AzureAccount, AzureSession} from '../typings/azure-account.api';
 import {accountProvider} from '../dockerExtension';
 import { RegistryRootNode } from "../explorer/models/registryRootNode";
 import { ServiceClientCredentials } from 'ms-rest';
-
+import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 const teleCmdId: string = 'vscode-docker.createRegistry';
 
 export async function createRegistry(context ?: RegistryRootNode) {
@@ -16,8 +16,9 @@ export async function createRegistry(context ?: RegistryRootNode) {
         prompt: 'Registry name? '
     };
 
-    const registryName: string = await vscode.window.showInputBox(opt);
-    
+    let registryName: string = await vscode.window.showInputBox(opt);
+    (registryName);
+
     opt = {
         ignoreFocusOut: true,
         prompt: 'Location? '
@@ -41,7 +42,7 @@ export async function createRegistry(context ?: RegistryRootNode) {
         prompt: 'Resource Group? '
     };
 
-    const resourceGroup: string = await vscode.window.showInputBox(opt);
+    let resourceGroup: string = await vscode.window.showInputBox(opt);
     let azureAccount = context.azureAccount;
     if (!azureAccount) {
         return; 
@@ -53,6 +54,37 @@ export async function createRegistry(context ?: RegistryRootNode) {
         const subs: SubscriptionModels.Subscription[] = getFilteredSubscriptions(azureAccount);
         //Acquire each subscription's data simultaneously
         const client = new ContainerRegistryManagementClient (getCredentialByTenantId(subs[0].tenantId,azureAccount), subs[0].subscriptionId);
+        const resourceclient=new ResourceManagementClient(getCredentialByTenantId(subs[0].tenantId, azureAccount), subs[0].subscriptionId);
+        
+        //check to make sure resource group name provided actually exists
+      
+        // make sure the registry name entered is possible
+        let x : RegistryNameStatus = await client.registries.checkNameAvailability({'name':registryName});
+        while(!x.nameAvailable){
+            opt={
+                ignoreFocusOut: true,
+                prompt: "Invalid registry name. Try again: "
+            }
+            registryName=await vscode.window.showInputBox(opt);
+            x = await client.registries.checkNameAvailability({'name':registryName});
+
+        }
+
+        let exist=await resourceclient.resourceGroups.checkExistence(resourceGroup);
+        while(!exist){
+            opt={
+                ignoreFocusOut: true,
+                placeHolder: registryName,
+                value: registryName,
+                prompt: 'That Resource Group does not exist. Try again? '
+            }
+            resourceGroup=await vscode.window.showInputBox(opt);
+            exist=await resourceclient.resourceGroups.checkExistence(resourceGroup);
+            if(exist){console.log("exists")};
+            if(!exist) {
+                console.log("doesn't exist")
+            };
+        }
         await client.registries.beginCreate(resourceGroup,registryName,{'sku':{'name':sku},'location':location}).then(function(response){
             console.log("Success!", response);
         }, function(error){
@@ -87,51 +119,3 @@ function getCredentialByTenantId(tenantId: string,azureAccount:AzureAccount): Se
 
     throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//     if (this._azureAccount.status === 'Initializing' || this._azureAccount.status === 'LoggingIn') {
-//         return;
-//     }
-
-//     if (this._azureAccount.status === 'LoggedOut') {
-//         return;
-//     }
-
-//     if (loggedIntoAzure) {            
-//         const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
-//         const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[0].tenantId), subs[0].subscriptionId);
-//     }
-    
-// }
-
-// function getFilteredSubscriptions(): SubscriptionModels.Subscription[] {
-
-//     if (this._azureAccount) {
-//         return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
-//             return {
-//                 id: filter.subscription.id,
-//                 session: filter.session,
-//                 subscriptionId: filter.subscription.subscriptionId,
-//                 tenantId: filter.session.tenantId,
-//                 displayName: filter.subscription.displayName,
-//                 state: filter.subscription.state,
-//                 subscriptionPolicies: filter.subscription.subscriptionPolicies,
-//                 authorizationSource: filter.subscription.authorizationSource
-//             };
-//         });
-//     } else {
-//         return [];
-//     }
-
