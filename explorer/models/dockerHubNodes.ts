@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
-import { AsyncPool } from '../utils/asyncPool';
+import { AsyncPool } from '../utils/asyncpool';
 
 export class DockerHubOrgNode extends NodeBase {
 
