@@ -78,7 +78,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(new Reporter(ctx));
 
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
-    accountProvider = new AzureAccountWrapper(ctx,azureAccount);
+    accountProvider = new AzureAccountWrapper(ctx, azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     vscode.commands.registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
 
