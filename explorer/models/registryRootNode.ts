@@ -187,7 +187,7 @@ export class RegistryRootNode extends NodeBase {
         const session = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
-            return session.credentials;
+            return session.credentials
         }
 
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
