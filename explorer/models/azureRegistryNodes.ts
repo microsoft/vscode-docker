@@ -139,7 +139,7 @@ export class AzureRepositoryNode extends NodeBase {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: this.contextValue,
-            iconPath: this.iconPath 
+            iconPath: this.iconPath
         }
     }
 
@@ -194,7 +194,7 @@ export class AzureRepositoryNode extends NodeBase {
                     bearer: accessTokenARC
                 }
             }, (err, httpResponse, body) => {
-                if (err) {return [];}
+                if (err) { return []; }
                 if (body.length > 0) {
                     tags = JSON.parse(body).tags;
                 }
@@ -301,7 +301,7 @@ async function acquireToken(session: AzureSession) {
             } else {
                 resolve({
                     accessToken: result.accessToken,
-                    refreshToken: result.refreshToken 
+                    refreshToken: result.refreshToken
                 });
             }
         });
