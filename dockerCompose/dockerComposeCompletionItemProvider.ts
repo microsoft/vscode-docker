@@ -4,7 +4,7 @@
 
 'use strict';
 
-import {TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri} from 'vscode';
+import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri } from 'vscode';
 import composeVersions from './dockerComposeKeyInfo';
 import helper = require('../helpers/suggestSupportHelper');
 import hub = require('../dockerHubApi');
@@ -15,7 +15,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     public excludeTokens: string[] = [];
 
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
-        var yamlSuggestSupport = new helper.SuggestSupportHelper(); 
+        var yamlSuggestSupport = new helper.SuggestSupportHelper();
 
         // Determine the schema version of the current compose file,
         // based on the existence of a top-level "version" property.
@@ -61,7 +61,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     }
 
     private suggestKeys(word: string, version: string): CompletionItem[] {
-        // Attempt to grab the keys for the requested schema version, 
+        // Attempt to grab the keys for the requested schema version,
         // otherwise, fall back to showing a composition of all possible keys.
         const keys = composeVersions[`v${version}`] || composeVersions.All;
 

@@ -2,7 +2,7 @@ import * as opn from 'opn';
 import { AzureRepositoryNode, AzureImageNode, AzureRegistryNode } from '../models/azureRegistryNodes';
 import { AzureSession } from '../../typings/azure-account.api';
 
-export function browseAzurePortal(context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode ): void {
+export function browseAzurePortal(context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode): void {
 
     if (context) {
         const tenantId: string = context.subscription.tenantId;
