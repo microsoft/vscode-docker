@@ -120,7 +120,8 @@ export class AzureRepositoryNode extends NodeBase {
         public readonly iconPath = {
             light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
             dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
-    }) {
+        }
+    ) {
         super(label);
     }
 
@@ -151,10 +152,7 @@ export class AzureRepositoryNode extends NodeBase {
         let tags;
 
         const tenantId: string = element.subscription.tenantId;
-        const session: AzureSession = element
-            .azureAccount
-            .sessions
-            .find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session: AzureSession = element.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
 
         if (accessToken && refreshToken) {
@@ -288,7 +286,8 @@ export class AzureLoadingNode extends NodeBase {
     getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
-            collapsibleState: vscode.TreeItemCollapsibleState.None }
+            collapsibleState: vscode.TreeItemCollapsibleState.None
+        }
     }
 }
 
@@ -297,14 +296,14 @@ async function acquireToken(session: AzureSession) {
         const credentials: any = session.credentials;
         const environment: any = session.environment;
         credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({
-                        accessToken: result.accessToken,
-                        refreshToken: result.refreshToken 
-                    });
-                }
-            });
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    accessToken: result.accessToken,
+                    refreshToken: result.refreshToken 
+                });
+            }
+        });
     });
 }
