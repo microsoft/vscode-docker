@@ -9,9 +9,7 @@ import { RegistryRootNode } from "../explorer/models/registryRootNode";
 import { ServiceClientCredentials } from 'ms-rest';
 import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 const teleCmdId: string = 'vscode-docker.createRegistry';
-import { asyncPool } from '../explorer/utils/asyncpool';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
-
 
 export async function createRegistry(context ?: RegistryRootNode) {
     
@@ -28,7 +26,7 @@ export async function createRegistry(context ?: RegistryRootNode) {
     let resourceGroup : ResourceGroup = await acquireResourceGroup(subscription,azureAccount);
 
     const client = new ContainerRegistryManagementClient(getCredentialByTenantId(subscription.tenantId, azureAccount), subscription.subscriptionId);
-    let registryName = await acquireRegistryName(client);
+    let registryName : string = await acquireRegistryName(client);
 
     const sku: string = await vscode.window.showInputBox({
         ignoreFocusOut: true,
@@ -40,7 +38,7 @@ export async function createRegistry(context ?: RegistryRootNode) {
     client.registries.beginCreate(resourceGroup.name,registryName,{'sku':{'name':sku},'location':resourceGroup.location}).then(function(response){
         vscode.window.showInformationMessage(response.name + ' has been created succesfully!');
     }, function(error){
-        vscode.window.showErrorMessage(error);
+        vscode.window.showErrorMessage(error.message);
     })
 
 }
