@@ -9,40 +9,12 @@ import { RegistryRootNode } from "../explorer/models/registryRootNode";
 import { ServiceClientCredentials } from 'ms-rest';
 import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 const teleCmdId: string = 'vscode-docker.createRegistry';
+import { asyncPool } from '../explorer/utils/asyncpool';
+import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
+
 
 export async function createRegistry(context ?: RegistryRootNode) {
-    let opt: vscode.InputBoxOptions = {
-        ignoreFocusOut: true,
-        prompt: 'Registry name? '
-    };
-
-    let registryName: string = await vscode.window.showInputBox(opt);
-    (registryName);
-
-    opt = {
-        ignoreFocusOut: true,
-        prompt: 'Location? '
-    };
-
-    const location: string = await vscode.window.showInputBox(opt);
-
-    opt = {
-        ignoreFocusOut: true,
-        placeHolder: 'Basic',
-        value: 'Basic',
-        prompt: 'SKU? '
-    };
-
-    const sku: string = await vscode.window.showInputBox(opt);
-
-    opt = {
-        ignoreFocusOut: true,
-        placeHolder: registryName,
-        value: registryName,
-        prompt: 'Resource Group? '
-    };
-
-    let resourceGroup: string = await vscode.window.showInputBox(opt);
+    
     let azureAccount = context.azureAccount;
     if (!azureAccount) {
         return; 
@@ -50,49 +22,86 @@ export async function createRegistry(context ?: RegistryRootNode) {
 
     if (azureAccount.status === 'LoggedOut') {
         return;
-    }      
-        const subs: SubscriptionModels.Subscription[] = getFilteredSubscriptions(azureAccount);
-        //Acquire each subscription's data simultaneously
-        const client = new ContainerRegistryManagementClient (getCredentialByTenantId(subs[0].tenantId,azureAccount), subs[0].subscriptionId);
-        const resourceclient=new ResourceManagementClient(getCredentialByTenantId(subs[0].tenantId, azureAccount), subs[0].subscriptionId);
-        
-        //check to make sure resource group name provided actually exists
-      
-        // make sure the registry name entered is possible
-        let x : RegistryNameStatus = await client.registries.checkNameAvailability({'name':registryName});
-        while(!x.nameAvailable){
-            opt={
-                ignoreFocusOut: true,
-                prompt: "Invalid registry name. Try again: "
-            }
-            registryName=await vscode.window.showInputBox(opt);
-            x = await client.registries.checkNameAvailability({'name':registryName});
+    }
+  
+    let subscription : SubscriptionModels.Subscription = await acquireSubscription(azureAccount);
+    let resourceGroup : ResourceGroup = await acquireResourceGroup(subscription,azureAccount);
 
-        }
+    const client = new ContainerRegistryManagementClient(getCredentialByTenantId(subscription.tenantId, azureAccount), subscription.subscriptionId);
+    let registryName = await acquireRegistryName(client);
 
-        let exist=await resourceclient.resourceGroups.checkExistence(resourceGroup);
-        while(!exist){
-            opt={
-                ignoreFocusOut: true,
-                placeHolder: registryName,
-                value: registryName,
-                prompt: 'That Resource Group does not exist. Try again? '
-            }
-            resourceGroup=await vscode.window.showInputBox(opt);
-            exist=await resourceclient.resourceGroups.checkExistence(resourceGroup);
-            if(exist){console.log("exists")};
-            if(!exist) {
-                console.log("doesn't exist")
-            };
-        }
-        await client.registries.beginCreate(resourceGroup,registryName,{'sku':{'name':sku},'location':location}).then(function(response){
-            console.log("Success!", response);
-        }, function(error){
-            console.error("Failed!", error);
-        })
-        console.log(registryName);
+    const sku: string = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: 'Basic',
+        value: 'Basic',
+        prompt: 'SKU? '
+    });
+   
+    client.registries.beginCreate(resourceGroup.name,registryName,{'sku':{'name':sku},'location':resourceGroup.location}).then(function(response){
+        vscode.window.showInformationMessage(response.name + ' has been created succesfully!');
+    }, function(error){
+        vscode.window.showErrorMessage(error);
+    })
+
 }
 
+// INPUT HELPERS
+async function acquireSubscription(azureAccount): Promise<SubscriptionModels.Subscription>{
+    const subs: SubscriptionModels.Subscription[] = getFilteredSubscriptions(azureAccount);
+    let subsNames: string[] = [];
+    for(let i = 0; i < subs.length; i++){
+        subsNames.push(subs[i].displayName);
+    }
+    let subscriptionName:string;
+    do{
+        subscriptionName = await vscode.window.showQuickPick(subsNames, {'canPickMany': false,'placeHolder':'Choose a subscription to be used'});
+    } while(!subscriptionName);
+     
+    return subs.find(sub=>{return sub.displayName === subscriptionName});
+}
+
+async function acquireResourceGroup(subscription:SubscriptionModels.Subscription, azureAccount):Promise<ResourceGroup>{
+     //Acquire each subscription's data simultaneously
+     const resourceClient = new ResourceManagementClient(getCredentialByTenantId(subscription.tenantId, azureAccount), subscription.subscriptionId);
+     const resourceGroups = await resourceClient.resourceGroups.list();
+     let resourceGroupNames: string[] = [];
+     for(let i = 0; i < resourceGroups.length; i++){
+         resourceGroupNames.push(resourceGroups[i].name);
+     }
+     let resourceGroup;
+     let resourceGroupName;
+     do{
+         resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, {'canPickMany': false, 'placeHolder':'Choose a Resource Group to be used'});
+         resourceGroup = resourceGroups.find(resGroup=>{return resGroup.name === resourceGroupName});
+ 
+         if(!resourceGroupName){
+             vscode.window.showErrorMessage('You must select a valid resource group');
+         }
+ 
+     } while(!resourceGroupName);
+     return resourceGroup;
+}
+
+async function acquireRegistryName(client:ContainerRegistryManagementClient){
+    let opt: vscode.InputBoxOptions = {
+        ignoreFocusOut: true,
+        prompt: 'Registry name? '
+    };
+    let registryName: string = await vscode.window.showInputBox(opt);
+
+    let registryStatus : RegistryNameStatus = await client.registries.checkNameAvailability({'name':registryName});
+    while(!registryStatus.nameAvailable){
+        opt={
+            ignoreFocusOut: true,
+            prompt: "That registry name is unavailable. Try again: "
+        }
+        registryName = await vscode.window.showInputBox(opt);
+        registryStatus = await client.registries.checkNameAvailability({'name':registryName});
+    }
+    return registryName;
+}
+
+// CREDENTIAL HELPERS
 function getFilteredSubscriptions(azureAccount:AzureAccount): SubscriptionModels.Subscription[] {
         return azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
             return {
@@ -107,7 +116,6 @@ function getFilteredSubscriptions(azureAccount:AzureAccount): SubscriptionModels
             };
         });
 }
-
 
 function getCredentialByTenantId(tenantId: string,azureAccount:AzureAccount): ServiceClientCredentials {
 
