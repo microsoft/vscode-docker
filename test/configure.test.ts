@@ -439,4 +439,23 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
 
     });
+
+    // Python
+
+    suite("Python", () => {
+        testInEmptyFolder("Python", async () => {
+            await testConfigureDocker('Python', undefined /*port*/);
+
+            let projectFiles = await getProjectFiles();
+            assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
+
+            assertFileContains('Dockerfile', 'FROM python:alpine');
+            assertFileContains('Dockerfile', 'LABEL Name=testoutput Version=0.0.1');
+            assertFileContains('DockerFile', 'EXPOSE 3000');
+            assertFileContains('Dockerfile', 'CMD ["python3", "-m", "testoutput"]');
+        });
+    });
+
+    //
+
 });
