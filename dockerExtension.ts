@@ -135,8 +135,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
-    AzureCredentialsManager.getInstance().setAccount(azureAccount);
+    if (azureAccount) {
+        AzureCredentialsManager.getInstance().setAccount(azureAccount);
+    }
     activateLanguageClient(ctx);
 }
 
