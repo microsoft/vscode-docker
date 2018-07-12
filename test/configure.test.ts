@@ -203,7 +203,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder/aspnetapp.csproj'], "The set of files in the project folder after configure was run is not correct.");
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('DockerFile', 'RUN dotnet build projectFolder/aspnetapp.csproj -c Release -o /app');
+            assertFileContains('Dockerfile', 'RUN dotnet build projectFolder/aspnetapp.csproj -c Release -o /app');
             assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "projectFolder/aspnetapp.dll"]');
             assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.0-runtime-nanoserver-1709 AS base');
             assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.0-sdk-nanoserver-1709 AS build');
@@ -221,7 +221,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder2/aspnetapp2.csproj'], "The set of files in the project folder after configure was run is not correct.");
 
             assertNotFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('DockerFile', 'RUN dotnet build projectFolder2/aspnetapp2.csproj -c Release -o /app');
+            assertFileContains('Dockerfile', 'RUN dotnet build projectFolder2/aspnetapp2.csproj -c Release -o /app');
             assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "projectFolder2/aspnetapp2.dll"]');
             assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.0-runtime AS base');
             assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.0-sdk AS build');
@@ -264,7 +264,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder/aspnetapp.csproj'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 80');
-            assertFileContains('DockerFile', 'RUN dotnet build projectFolder/aspnetapp.csproj -c Release -o /app');
+            assertFileContains('Dockerfile', 'RUN dotnet build projectFolder/aspnetapp.csproj -c Release -o /app');
             assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "projectFolder/aspnetapp.dll"]');
             assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore-build:2.0-nanoserver-1709 AS build');
         });
@@ -281,7 +281,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder2/aspnetapp2.csproj'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('DockerFile', 'RUN dotnet build projectFolder2/aspnetapp2.csproj -c Release -o /app');
+            assertFileContains('Dockerfile', 'RUN dotnet build projectFolder2/aspnetapp2.csproj -c Release -o /app');
             assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "projectFolder2/aspnetapp2.dll"]');
             assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore-build:2.0 AS build');
         });
@@ -309,7 +309,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('DockerFile', 'ARG JAVA_OPTS');
+            assertFileContains('Dockerfile', 'ARG JAVA_OPTS');
             assertFileContains('Dockerfile', 'ADD testoutput.jar testoutput.jar');
             assertFileContains('Dockerfile', 'ENTRYPOINT exec java $JAVA_OPTS -jar testoutput.jar');
         });
@@ -338,7 +338,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('DockerFile', 'ARG JAVA_OPTS');
+            assertFileContains('Dockerfile', 'ARG JAVA_OPTS');
             assertFileContains('Dockerfile', 'ADD target/app-artifact-id-1.0-SNAPSHOT.jar testoutput.jar');
             assertFileContains('Dockerfile', 'ENTRYPOINT exec java $JAVA_OPTS -jar testoutput.jar');
         });
@@ -353,7 +353,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('DockerFile', 'ARG JAVA_OPTS');
+            assertFileContains('Dockerfile', 'ARG JAVA_OPTS');
             assertFileContains('Dockerfile', 'ADD build/libs/testOutput-0.0.1.jar testoutput.jar');
             assertFileContains('Dockerfile', 'ENTRYPOINT exec java $JAVA_OPTS -jar testoutput.jar');
         });
@@ -435,7 +435,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertEx.unorderedArraysEqual(projectFiles, ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('DockerFile', 'ARG JAVA_OPTS');
+            assertFileContains('Dockerfile', 'ARG JAVA_OPTS');
             assertFileContains('Dockerfile', 'ADD build/libs/testOutput-1.2.3.jar testoutput.jar');
             assertFileContains('Dockerfile', 'ENTRYPOINT exec java $JAVA_OPTS -jar testoutput.jar');
         });
@@ -453,7 +453,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             assertFileContains('Dockerfile', 'FROM python:alpine');
             assertFileContains('Dockerfile', 'LABEL Name=testoutput Version=0.0.1');
-            assertFileContains('DockerFile', 'EXPOSE 3000');
+            assertFileContains('Dockerfile', 'EXPOSE 3000');
             assertFileContains('Dockerfile', 'CMD ["python3", "-m", "testoutput"]');
         });
     });
