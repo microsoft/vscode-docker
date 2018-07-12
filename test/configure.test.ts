@@ -20,7 +20,7 @@ import { getTestRootFolder, constants } from './global.test';
 let testRootFolder: string = getTestRootFolder();
 
 suite("configure (Add Docker files to Workspace)", function (this: Suite): void {
-    this.timeout(60 * 1000);
+    this.timeout(10 * 1000);
 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;

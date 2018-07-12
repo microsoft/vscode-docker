@@ -607,6 +607,9 @@
   "engines": {
     "vscode": "^1.23.0"
   },
+  "config": {
+    "CODE_TESTS_WORKSPACE": "./test/test.code-workspace"
+  },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "build": "tsc -p ./",
@@ -614,7 +617,7 @@
     "lint": "tslint --project tsconfig.json -t verbose",
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run build && set CODE_TESTS_WORKSPACE=./test/test.code-workspace && node ./node_modules/vscode/bin/test",
+    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace node ./node_modules/vscode/bin/test",
     "all": "npm i && npm run lint && npm test"
   },
   "extensionDependencies": [
@@ -622,19 +625,20 @@
     "vscode.yaml"
   ],
   "devDependencies": {
-    "azure-storage": "^2.8.1",
     "@types/fs-extra": "^5.0.4",
+    "@types/glob": "5.0.35",
+    "@types/keytar": "^4.0.1",
+    "@types/mocha": "^5.2.4",
+    "@types/node": "^8.0.34",
+    "azure-storage": "^2.8.1",
+    "cross-env": "^5.2.0",
     "gulp": "^3.9.1",
     "mocha": "5.2.0",
     "tslint": "^5.7.0",
     "tslint-microsoft-contrib": "5.0.1",
-    "vsce": "^1.37.5",
-    "vscode": "^1.0.0",
     "typescript": "^2.1.5",
-    "@types/mocha": "^5.2.4",
-    "@types/node": "^8.0.34",
-    "@types/keytar": "^4.0.1",
-    "@types/glob": "5.0.35"
+    "vsce": "^1.37.5",
+    "vscode": "^1.0.0"
   },
   "dependencies": {
     "azure-arm-containerregistry": "^1.0.0-preview",
