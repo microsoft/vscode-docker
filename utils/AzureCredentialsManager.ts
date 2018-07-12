@@ -102,7 +102,7 @@ export class AzureCredentialsManager {
             subPool.addTask(async () => {
                 const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
                 const internalGroups = await resourceClient.resourceGroups.list();
-                resourceGroups.concat(resourceGroups);
+                resourceGroups.concat(internalGroups);
             });
         }
         await subPool.scheduleRun();
@@ -120,5 +120,23 @@ export class AzureCredentialsManager {
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 
+    private async checkLogin() {
+        if (!this.azureAccount) {
+            throw 'Azure Account not provided, this computer may be missing the Azure account extension or you may have forgotten to call setAccount ';
+        }
 
+        const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
+
+        if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
+            throw 'Azure account is logging in'
+        }
+
+        if (this.azureAccount.status === 'LoggedOut') {
+            throw 'User is not logged into Azure account'
+        }
+
+        if (loggedIntoAzure) {
+
+        }
+    }
 }
