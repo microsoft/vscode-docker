@@ -2,6 +2,11 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { AzureAccount } from '../typings/azure-account.api';
 import { ServiceClientCredentials } from 'ms-rest';
 import { AsyncPool } from '../utils/asyncpool';
+import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { AzureAccountWrapper } from '.././explorer/deploy/azureAccountWrapper';
+import { RegistryRootNode } from "../explorer/models/registryRootNode";
+import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
+import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
 
 const MAX_CONCURRENT_REQUESTS = 8;
 const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
@@ -44,56 +49,24 @@ export class AzureCredentialsManager {
 
     }
 
-    public async getResourceGroups(subscription?: SubscriptionModels.Subscription) {
+    public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
         if (subscription) {
             const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId, this.azureAccount), subscription.subscriptionId);
             return await resourceClient.resourceGroups.list();
         }
         const subs = this.getFilteredSubscriptionList();
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
-        // let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult, 'client': any }[] = [];
+        let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
-        // for (let i = 0; i < subs.length; i++) {
-        //     subPool.addTask(async () => {
-        //         const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-        //         subsAndRegistries.push({
-        //             'subscription': subs[i],
-        //             'registries': await client.registries.list(),
-        //             'client': client
-        //         });
-        //     });
-        // }
-        // await subPool.scheduleRun();
-        // const regPool = new asyncPool(MAX_CONCURRENT_REQUESTS);
-        // for (let i = 0; i < subsAndRegistries.length; i++) {
-        //     const client = subsAndRegistries[i].client;
-        //     const registries = subsAndRegistries[i].registries;
-        //     const subscription = subsAndRegistries[i].subscription;
-
-        //     //Go through the registries and add them to the async pool
-        //     for (let j = 0; j < registries.length; j++) {
-        //         if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
-        //             const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-        //             regPool.addTask(async () => {
-        //                 let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
-        //                 let iconPath = {
-        //                     light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-        //                     dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-        //                 };
-        //                 let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-        //                 node.type = RegistryType.Azure;
-        //                 node.password = creds.passwords[0].value;
-        //                 node.userName = creds.username;
-        //                 node.subscription = subscription;
-        //                 node.registry = registries[j];
-        //                 azureRegistryNodes.push(node);
-        //             });
-        //         }
-        //     }
-        // }
-
-
-
+        for (let i = 0; i < subs.length; i++) {
+            subPool.addTask(async () => {
+                const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId, this.azureAccount), subscription.subscriptionId);
+                const internalGroups = await resourceClient.resourceGroups.list();
+                resourceGroups.concat(resourceGroups);
+            });
+        }
+        await subPool.runAll();
+        return resourceGroups;
     }
 
     private getCredentialByTenantId(tenantId: string, azureAccount: AzureAccount): ServiceClientCredentials {
