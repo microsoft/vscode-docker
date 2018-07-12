@@ -607,9 +607,6 @@
   "engines": {
     "vscode": "^1.23.0"
   },
-  "config": {
-    "CODE_TESTS_WORKSPACE": "./test/test.code-workspace"
-  },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "build": "tsc -p ./",
