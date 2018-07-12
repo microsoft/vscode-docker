@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
+import { ext } from "./extensionVariables";
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -37,6 +38,7 @@ import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { IAzureUserInput, AzureUserInput } from 'vscode-azureextensionui';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -65,11 +67,14 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
+    // This allows for standard interactions with the end user (as opposed to test input)
+    ext.ui = new AzureUserInput(ctx.globalState);
+
     for (var i = 0; i < installedExtensions.length; i++) {
-        const ext = installedExtensions[i];
-        if (ext.id === 'ms-vscode.azure-account') {
+        const extension = installedExtensions[i];
+        if (extension.id === 'ms-vscode.azure-account') {
             try {
-                azureAccount = await ext.activate();
+                azureAccount = await extension.activate();
             } catch (error) {
                 console.log('Failed to activate the Azure Account Extension: ' + error);
             }
