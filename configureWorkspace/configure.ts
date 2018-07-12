@@ -4,10 +4,8 @@ import * as fs from 'fs';
 import * as pomParser from 'pom-parser';
 import * as gradleParser from 'gradle-to-js/lib/parser';
 import * as glob from 'glob';
-import { globAsync } from '../helpers/async';
 import { promptForPort, quickPickPlatform, quickPickOS, OS, Platform } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
-import { UserCancelledError } from '../explorer/deploy/wizard';
 
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
@@ -555,9 +553,9 @@ export async function configure(folderPath?: string): Promise<void> {
 
         if (!folder) {
             if (!vscode.workspace.workspaceFolders) {
-                throw new UserCancelledError('Docker files can only be generated if VS Code is opened on a folder.');
+                throw new Error('Docker files can only be generated if VS Code is opened on a folder.');
             } else {
-                throw new UserCancelledError('Docker files can only be generated if a workspace folder is picked in VS Code.');
+                throw new Error('Docker files can only be generated if a workspace folder is picked in VS Code.');
             }
         }
 

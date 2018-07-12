@@ -1,22 +1,6 @@
 import * as assert from 'assert';
 import { parseError } from 'vscode-azureextensionui';
 
-export function isTrue<T>(f: boolean, message?: string): void {
-    assert.ok(f === true, message);
-}
-
-export function isFalse<T>(f: boolean, message?: string): void {
-    assert.ok(f === false, message);
-}
-
-export function isTruthy<T>(f: any, message?: string): void {
-    assert.ok(f, message);
-}
-
-export function isFalsey<T>(f: any, message?: string): void {
-    assert.ok(!f, message);
-}
-
 function areUnorderedArraysEqual<T>(actual: T[], expected: T[]): { areEqual: boolean, message?: string } {
     actual = actual.slice();
     expected = expected.slice();

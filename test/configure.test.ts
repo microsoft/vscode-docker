@@ -59,7 +59,6 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             dot: true, // include files beginning with dot
             nodir: true
         });
-        console.log(JSON.stringify(files));
         return files;
     }
 
