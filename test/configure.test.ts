@@ -54,11 +54,13 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
     }
 
     async function getProjectFiles(): Promise<string[]> {
-        return await globAsync('**/*', {
+        let files = await globAsync('**/*', {
             cwd: testRootFolder,
             dot: true, // include files beginning with dot
             nodir: true
         });
+        console.log(JSON.stringify(files));
+        return files;
     }
 
     function testInEmptyFolder(name: string, func: () => Promise<void>): void {
