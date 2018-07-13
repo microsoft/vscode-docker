@@ -110,7 +110,7 @@ class WebAppCreatorStepBase extends WizardStep {
         return websiteStep.website;
     }
 
-    protected getImageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
+    protected getImageInfo(): { serverUrl: string, serverUser: string, serverPassword: string } {
         const websiteStep = <WebsiteStep>this.wizard.findStep(step => step instanceof WebsiteStep, 'The Wizard must have a WebsiteStep.');
         if (!websiteStep.website) {
             throw new Error('A website must be created first.');
@@ -535,8 +535,8 @@ class WebsiteStep extends WebAppCreatorStepBase {
         return this._website;
     }
 
-    get imageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
-        return  {
+    get imageInfo(): { serverUrl: string, serverUser: string, serverPassword: string } {
+        return {
             serverUrl: this._serverUrl,
             serverUser: this._serverUserName,
             serverPassword: this._serverPassword

@@ -593,11 +593,13 @@ export async function configure(): Promise<void> {
         pkg = await readPackageJson(folder);
     }
 
-    await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
-        // don't generate docker-compose files for .NET Core apps
-        if (platformType.toLowerCase().includes('.net') && !fileName.includes('docker-compose')) {
-            return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+    await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
+        if (platformType.toLowerCase().includes('.net') && fileName.includes('docker-compose')) {
+            // don't generate docker-compose files for .NET Core apps
+            return;
         }
+
+        return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
     /* __GDPR__

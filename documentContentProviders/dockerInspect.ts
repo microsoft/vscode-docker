@@ -16,7 +16,7 @@ export default class DockerInspectDocumentContentProvider implements TextDocumen
         return new Promise((resolve, reject) => {
             const imageName = path.substring(1).replace(URI_EXTENSION, "");
             docker.getImage(imageName).inspect((error: Error, imageMetadata: any) => {
-                resolve(JSON.stringify(imageMetadata, null,  "    "));
+                resolve(JSON.stringify(imageMetadata, null, "    "));
             });
         });
     }

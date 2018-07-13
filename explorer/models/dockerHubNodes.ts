@@ -78,7 +78,7 @@ export class DockerHubRepositoryNode extends NodeBase {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
 
-        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({namespace: element.repository.namespace, name: element.repository.name});
+        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
         for (let i = 0; i < myTags.length; i++) {
             node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;
