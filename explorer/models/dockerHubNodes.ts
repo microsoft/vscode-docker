@@ -4,9 +4,7 @@ import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
 
-
 export class DockerHubOrgNode extends NodeBase {
-
 
     constructor(
         public readonly label: string,
@@ -86,7 +84,7 @@ export class DockerHubRepositoryNode extends NodeBase {
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
-            node.created = moment(new Date(myTags[i].last_updated)).fromNow();;
+            node.created = moment(new Date(myTags[i].last_updated)).fromNow();
             imageNodes.push(node);
         }
 
@@ -122,6 +120,3 @@ export class DockerHubImageNode extends NodeBase {
         }
     }
 }
-
-
-

@@ -189,5 +189,3 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 }
-
-

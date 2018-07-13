@@ -17,23 +17,23 @@
         ],
         "no-inner-html": true,
         "no-octal-literal": true,
-        // TODO: "no-reserved-keywords": true,
+        "no-reserved-keywords": false, // changed
         "no-string-based-set-immediate": true,
         "no-string-based-set-interval": true,
-        // TODO: "no-string-based-set-timeout": true,
-        // TODO: "non-literal-require": true,
+        "no-string-based-set-timeout": true,
+        "non-literal-require": true,
         "possible-timing-attack": true,
         "react-anchor-blank-noopener": true,
         "react-iframe-missing-sandbox": true,
         "react-no-dangerous-html": true,
         "await-promise": [
-            false, // TODO: true,
+            true,
             "Thenable" // changed
         ],
         "forin": true,
         "jquery-deferred-must-complete": true,
         "label-position": true,
-        // TODO: "match-default-export-name": true,
+        "match-default-export-name": true,
         "mocha-avoid-only": true,
         "mocha-no-side-effect-code": true,
         // TODO: "no-any": true,
@@ -41,7 +41,7 @@
         "no-bitwise": true,
         "no-conditional-assignment": true,
         "no-console": [
-            false, // TODO: true,
+            false, // changed
             "debug",
             "info",
             "log",
@@ -54,8 +54,8 @@
         "no-debugger": true,
         "no-duplicate-case": true,
         "no-duplicate-super": true,
-        // TODO: "no-duplicate-variable": true,
-        // TODO: "no-empty": true,
+        "no-duplicate-variable": true,
+        "no-empty": false, // changed
         // TODO: "no-floating-promises": true,
         "no-for-in-array": true,
         "no-import-side-effect": true,
@@ -70,7 +70,7 @@
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
         "no-stateless-class": true,
-        // TODO: "no-string-literal": true,
+        "no-string-literal": false, // TODO
         "no-string-throw": true,
         "no-unnecessary-bind": true,
         "no-unnecessary-callback-wrapper": true,
@@ -81,19 +81,19 @@
         // TODO: "no-unused-expression": true,
         // TODO: "no-use-before-declare": true,
         "no-with-statement": true,
-        // TODO: "promise-function-async": true,
+        // TODO:"promise-function-async": true,
         // TODO: "promise-must-complete": true,
         "radix": true,
         "react-this-binding-issue": true,
         "react-unused-props-and-state": true,
-        // TODO: "restrict-plus-operands": true,
+        "restrict-plus-operands": false, // changed
         "strict-boolean-expressions": [
-            false, // TODO: true,
+            false, // changed
             "allow-string", // changed
             "allow-undefined-union", // changed
             "allow-mix" // changed
         ],
-        // TODO: "switch-default": true,
+        "switch-default": true,
         "triple-equals": [
             false, // TODO: true,
             "allow-null-check"
@@ -110,24 +110,24 @@
         "callable-types": true,
         "chai-prefer-contains-to-index-of": true,
         "chai-vague-errors": true,
-        // TODO: "class-name": true,
+        "class-name": true,
         "comment-format": true,
         "completed-docs": [
             false, // changed
             "classes"
         ],
-        // TODO: "export-name": true,
-        // TODO: "function-name": true,
+        "export-name": false,
+        "function-name": false, // changed
         "import-name": false, // changed
-        // TODO: "interface-name": true,
+        "interface-name": false, // changed
         "jsdoc-format": true,
         "max-classes-per-file": [
-            false, // TODO: true,
+            false, // changed
             3
         ],
         "max-file-line-count": true,
         "max-func-body-length": [
-            false, // TODO: true,
+            true,
             100,
             {
                 "ignore-parameters-to-function-regex": "describe"
@@ -139,7 +139,7 @@
         ],
         // TODO: "member-access": true,
         "member-ordering": [
-            false, // TODO: true,
+            false, // changed
             {
                 "order": "fields-first"
             }
@@ -148,17 +148,17 @@
         "mocha-unneeded-done": true,
         "new-parens": true,
         "no-construct": true,
-        // TODO: "no-default-export": true,
+        "no-default-export": false, // changed
         "no-empty-interface": true,
         "no-for-in": true,
-        // TODO: "no-function-expression": true,
+        "no-function-expression": true,
         "no-inferrable-types": false,
         "no-multiline-string": false, // changed
         "no-null-keyword": false,
         "no-parameter-properties": false, // changed
         "no-relative-imports": false, // changed
         "no-require-imports": false, // changed
-        // TODO: "no-shadowed-variable": true,
+        "no-shadowed-variable": true,
         // TODO: "no-suspicious-comment": true,
         "no-typeof-undefined": true,
         "no-unnecessary-field-initialization": true,
@@ -174,14 +174,14 @@
             "ignore-arrow-function-shorthand" // changed
         ],
         "object-literal-sort-keys": false,
-        // TODO: "one-variable-per-declaration": true,
+         "one-variable-per-declaration": false, // changed
         "only-arrow-functions": false,
         // TODO: "ordered-imports": true,
         "prefer-array-literal": true,
         "prefer-const": false, // changed
         // TODO: "prefer-for-of": true,
         "prefer-method-signature": true,
-        // TODO: "prefer-template": true,
+        "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
             false, // TODO: true,
@@ -220,26 +220,26 @@
             "arguments",
             "statements"
         ],
-        // TODO: "curly": true,
-        // TODO: "eofline": true,
+        "curly": false, // TODO
+        "eofline": false, // changed
         "import-spacing": true,
         "indent": [
-            false, // TODO: true,
+            true,
             "spaces"
         ],
         "linebreak-style": false, //changed
         "newline-before-return": false, // changed
-        // TODO: "no-consecutive-blank-lines": true,
+        "no-consecutive-blank-lines": true, // changed
         "no-empty-line-after-opening-brace": false,
-        // TODO: "no-single-line-block-comment": true,
-        // TODO: "no-trailing-whitespace": true,
-        // TODO: "no-unnecessary-semicolons": true,
+        "no-single-line-block-comment": false, // changed
+        "no-trailing-whitespace": true,
+        "no-unnecessary-semicolons": true,
         "object-literal-key-quotes": [
-            false, // TODO: true,
+            false, // changed
             "as-needed"
         ],
         "one-line": [
-            false, // TODO: true,
+            true,
             "check-open-brace",
             "check-catch",
             "check-else",
@@ -255,7 +255,7 @@
             "always"
         ],
         "trailing-comma": [
-            false, // TODO: true,
+            false, // changed
             {
                 "singleline": "never",
                 "multiline": "never"
@@ -263,7 +263,7 @@
         ],
         "typedef-whitespace": false,
         "whitespace": [
-            false, // TODO: true,
+            true,
             "check-branch",
             "check-decl",
             "check-operator",
@@ -295,7 +295,7 @@
             }
         ],
         "object-literal-shorthand": false,
-        // TODO: "prefer-type-cast": true,
+        "prefer-type-cast": false, // changed
         "space-before-function-paren": false,
         "missing-optional-annotation": false,
         "no-duplicate-parameter-names": false,
