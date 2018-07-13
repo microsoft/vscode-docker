@@ -100,3 +100,8 @@ export function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFile
 export function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
     compose('down', 'to take down', dockerComposeFileUri, selectedComposeFileUris);
 }
+
+export async function composeRestart(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
+    await compose('down', 'to take down', dockerComposeFileUri, selectedComposeFileUris);
+    await compose('up', 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
+}

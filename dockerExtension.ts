@@ -2,41 +2,41 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import * as opn from 'opn';
 import * as path from 'path';
-import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
-import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
-import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
-import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
-import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
-import vscode = require('vscode');
+import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
+import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImageCommand from './commands/inspect-image';
-import { removeImage } from './commands/remove-image';
+import { openShellContainer } from './commands/open-shell-container';
 import { pushImage } from './commands/push-image';
-import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
-import { stopContainer } from './commands/stop-container';
+import { removeContainer } from './commands/remove-container';
+import { removeImage } from './commands/remove-image';
 import { restartContainer } from './commands/restart-container';
 import { showLogsContainer } from './commands/showlogs-container';
-import { openShellContainer } from './commands/open-shell-container';
-import { tagImage } from './commands/tag-image';
-import { composeUp, composeDown } from './commands/docker-compose';
-import { configure } from './configureWorkspace/configure';
+import { startAzureCLI, startContainer, startContainerInteractive } from './commands/start-container';
+import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
-import { Reporter } from './telemetry/telemetry';
+import { tagImage } from './commands/tag-image';
+import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
+import { configure } from './configureWorkspace/configure';
+import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
+import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
+import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
+import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
+import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
-import { DockerExplorerProvider } from './explorer/dockerExplorer';
-import { removeContainer } from './commands/remove-container';
-import { DocumentSelector, LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware, ConfigurationParams, DidChangeConfigurationNotification } from 'vscode-languageclient';
-import { WebAppCreator } from './explorer/deploy/webAppCreator';
-import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
-import { DockerHubImageNode, DockerHubRepositoryNode, DockerHubOrgNode } from './explorer/models/dockerHubNodes';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
-import { dockerHubLogout, browseDockerHub } from './explorer/utils/dockerHubUtils';
-import { AzureAccount } from './typings/azure-account.api';
-import * as opn from 'opn';
-import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
+import { WebAppCreator } from './explorer/deploy/webAppCreator';
+import { DockerExplorerProvider } from './explorer/dockerExplorer';
+import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
+import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { Reporter } from './telemetry/telemetry';
+import { AzureAccount } from './typings/azure-account.api';
+import vscode = require('vscode');
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -108,6 +108,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.container.remove', removeContainer));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.up', composeUp));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.restart', composeRestart));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
