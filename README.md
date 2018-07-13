@@ -105,7 +105,7 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.showExplorer` | Show or hide the Explorer. | `true`
 | `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
 | `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
-| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | ``
+| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | 
 
 ## Installation
 
