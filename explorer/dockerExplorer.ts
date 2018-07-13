@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
 import { AzureAccount } from '../typings/azure-account.api';
+import { docker } from '../commands/utils/docker-endpoint';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
@@ -17,20 +18,24 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     }
 
     refresh(): void {
+        docker.refreshEndpoint();
         this._onDidChangeTreeData.fire(this._imagesNode);
         this._onDidChangeTreeData.fire(this._containersNode);
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
     refreshImages(): void {
+        docker.refreshEndpoint();
         this._onDidChangeTreeData.fire(this._imagesNode);
     }
 
     refreshContainers(): void {
+        docker.refreshEndpoint();
         this._onDidChangeTreeData.fire(this._imagesNode);
     }
 
     refreshRegistries(): void {
+        docker.refreshEndpoint();
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
