@@ -70,7 +70,7 @@
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
         "no-stateless-class": true,
-        "no-string-literal": false, // changed
+        "no-string-literal": false, // TODO
         "no-string-throw": true,
         "no-unnecessary-bind": true,
         "no-unnecessary-callback-wrapper": true,
@@ -220,11 +220,11 @@
             "arguments",
             "statements"
         ],
-        "curly": false, // changed
+        "curly": false, // TODO
         "eofline": false, // changed
         "import-spacing": true,
         "indent": [
-            true, // TODO: true,
+            true,
             "spaces"
         ],
         "linebreak-style": false, //changed
