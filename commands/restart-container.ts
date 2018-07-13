@@ -8,7 +8,6 @@ import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.restart';
 
-
 export async function restartContainer(context?: ContainerNode) {
 
     let containersToRestart: Docker.ContainerDesc[];

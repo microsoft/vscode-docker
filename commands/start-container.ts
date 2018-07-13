@@ -31,7 +31,7 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
                 const portMappings = ports.map((port) => `-p ${port}:${port}`);
                 options += ` ${portMappings.join(' ')}`;
             }
-            
+
             const terminal = vscode.window.createTerminal(imageName);
             terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
@@ -56,7 +56,7 @@ export async function startContainerInteractive(context: ImageNode) {
 
 export async function startAzureCLI() {
 
-    // block of we are running windows containers... 
+    // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();
 
     if (engineType === DockerEngineType.Windows) {

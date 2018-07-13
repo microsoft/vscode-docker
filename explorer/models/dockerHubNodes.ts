@@ -4,9 +4,7 @@ import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
 
-
 export class DockerHubOrgNode extends NodeBase {
-
 
     constructor(
         public readonly label: string,
@@ -122,6 +120,3 @@ export class DockerHubImageNode extends NodeBase {
         }
     }
 }
-
-
-

@@ -341,7 +341,7 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
     return Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
-    
+
 export default <ComposeVersionKeys>{
     v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
     v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),

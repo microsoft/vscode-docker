@@ -229,10 +229,10 @@
         ],
         "linebreak-style": false, //changed
         "newline-before-return": false, // changed
-        "no-consecutive-blank-lines": false, // changed
+        "no-consecutive-blank-lines": true, // changed
         "no-empty-line-after-opening-brace": false,
         "no-single-line-block-comment": false, // changed
-        "no-trailing-whitespace": false, // changed
+        "no-trailing-whitespace": true,
         "no-unnecessary-semicolons": true,
         "object-literal-key-quotes": [
             false, // changed

@@ -27,7 +27,7 @@ export async function removeImage(context?: ImageNode) {
     if (imagesToRemove) {
         const numImages: number = imagesToRemove.length;
         let imageCounter: number = 0;
-        
+
         vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
                 // tslint:disable-next-line:no-function-expression // Grandfathered in
@@ -44,7 +44,7 @@ export async function removeImage(context?: ImageNode) {
             });
         }));
     }
-    
+
     if (reporter) {
         /* __GDPR__
            "command" : {

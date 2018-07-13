@@ -10,7 +10,6 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 
-
 export interface PartialList<T> extends Array<T> {
     nextLink?: string;
 }

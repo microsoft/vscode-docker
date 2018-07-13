@@ -3,7 +3,6 @@ import { docker } from './docker-endpoint';
 import vscode = require('vscode');
 import { ContainerDesc } from 'dockerode';
 
-
 export interface ContainerItem extends vscode.QuickPickItem {
     containerDesc: Docker.ContainerDesc
 }
