@@ -31,7 +31,7 @@ class DockerClient {
                 if (isNaN(newPort)) {
                     vscode.window.showErrorMessage(errorMessage);
                 } else {
-                    this.endPoint = new Docker({ host:newHost, port: newPort});
+                    this.endPoint = new Docker({ host: newHost, port: newPort});
                 }
             }
         }
