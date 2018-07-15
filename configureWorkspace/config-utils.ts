@@ -24,6 +24,7 @@ export async function quickPickPlatform(): Promise<string>{
     items.push('ASP.NET Core');
     items.push('Node.js');
     items.push('Python');
+    items.push('Ruby');
     items.push('Other');
 
     return vscode.window.showQuickPick(items, opt);
