@@ -4,9 +4,7 @@ import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
 
-
 export class DockerHubOrgNode extends NodeBase {
-
 
     constructor(
         public readonly label: string,
@@ -80,13 +78,13 @@ export class DockerHubRepositoryNode extends NodeBase {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
 
-        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({namespace: element.repository.namespace, name: element.repository.name});
+        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
         for (let i = 0; i < myTags.length; i++) {
             node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
-            node.created = moment(new Date(myTags[i].last_updated)).fromNow();;
+            node.created = moment(new Date(myTags[i].last_updated)).fromNow();
             imageNodes.push(node);
         }
 
@@ -122,6 +120,3 @@ export class DockerHubImageNode extends NodeBase {
         }
     }
 }
-
-
-

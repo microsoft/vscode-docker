@@ -110,8 +110,6 @@ export class AzureRegistryNode extends NodeBase {
     }
 }
 
-
-
 export class AzureRepositoryNode extends NodeBase {
 
     constructor(
@@ -156,8 +154,6 @@ export class AzureRepositoryNode extends NodeBase {
         const { accessToken, refreshToken } = await acquireToken(session);
 
         if (accessToken && refreshToken) {
-            const tenantId = element.subscription.tenantId;
-
             await request.post('https://' + element.repository + '/oauth2/exchange', {
                 form: {
                     grant_type: 'access_token_refresh_token',
@@ -201,7 +197,7 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             for (let i = 0; i < tags.length; i++) {
-                
+
                 let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
                     auth: { bearer: accessTokenARC }
                 }));
@@ -230,7 +226,7 @@ export class AzureImageNode extends NodeBase {
     ) {
         super(label);
     }
-    
+
     public azureAccount: AzureAccount
     public created: string;
     public password: string;
@@ -286,6 +282,7 @@ async function acquireToken(session: AzureSession) {
     return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
         const credentials: any = session.credentials;
         const environment: any = session.environment;
+        // tslint:disable-next-line:no-function-expression // Grandfathered in
         credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
             if (err) {
                 reject(err);

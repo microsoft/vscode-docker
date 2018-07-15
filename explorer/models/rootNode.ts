@@ -221,7 +221,7 @@ export class RootNode extends NodeBase {
             if (!containers || containers.length == 0) {
                 return [];
             }
-            
+
             for (let i = 0; i < containers.length; i++) {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";

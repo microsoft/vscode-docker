@@ -24,7 +24,7 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
 
 export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult> {
     return invokeHubSearch(imageName, 1, cache).then((data) => {
-        if (data.results.length === 0) {
+        if ((<IHubSearchResponseResult[]>data.results).length === 0) {
             return;
         }
         return data.results[0];
@@ -46,12 +46,12 @@ var popular = [
 
 export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promise<IHubSearchResponseResult[]> {
     if (prefix.length === 0) {
-        // return the popular images if user invoked intellisense 
+        // return the popular images if user invoked intellisense
         // right after typing the keyword and ':' (e.g. 'image:').
         return Promise.resolve(popular.slice(0));
     }
 
-    // Do an image search on Docker hub and return the results 
+    // Do an image search on Docker hub and return the results
     return invokeHubSearch(prefix, 100, cache).then((data) => {
         return data.results;
     });

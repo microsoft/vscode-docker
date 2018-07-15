@@ -36,7 +36,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
 async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: vscode.Uri): Promise<Item> {
     if (dockerFileUri) {
         return createItem(folder, dockerFileUri);
-    };
+    }
 
     const uris: vscode.Uri[] = await getDockerFileUris(folder);
 

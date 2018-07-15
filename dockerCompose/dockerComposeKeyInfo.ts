@@ -188,8 +188,8 @@ const DOCKER_COMPOSE_V2_KEY_INFO: KeyInfo = {
     'services': (
         "Specify the set of services that your app is composed of."
     ),
-     // TODO: There is now a top-level and service-level volumes/networks setting which conflict.
-     // This will be resolved when we add completion that understands file position context.
+    // TODO: There is now a top-level and service-level volumes/networks setting which conflict.
+    // This will be resolved when we add completion that understands file position context.
     'networks': (
         "Specifies the networks to be created as part of your app. This is analogous to running `docker network create`."
     ),
@@ -295,7 +295,7 @@ const DOCKER_COMPOSE_V2_1_KEY_INFO: KeyInfo = {
     // Added service-level properties
     'group_add': (
         "Specifies additional groups to join"
-     ),
+    ),
     'isolation': (
         "Container isolation technology"
     ),
@@ -327,7 +327,7 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
     // Added service-level properties
     'cpu_count': (
         "Number of usable CPUs (Windows only)"
-     ),
+    ),
     'cpu_percent': (
         "Usable percentage of the available CPUs (Windows only)"
     ),
@@ -341,7 +341,7 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
     return Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
-    
+
 export default <ComposeVersionKeys>{
     v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
     v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),

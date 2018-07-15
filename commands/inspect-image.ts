@@ -25,4 +25,4 @@ export default async function inspectImage(context?: ImageNode) {
          */
         reporter && reporter.sendTelemetryEvent("command", { command: "vscode-docker.image.inspect" });
     }
-};
+}

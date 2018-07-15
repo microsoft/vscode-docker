@@ -1,6 +1,6 @@
 import vscode = require('vscode');
 
-export async function promptForPort(port: number): Promise<string>{
+export async function promptForPort(port: number): Promise<string> {
     var opt: vscode.InputBoxOptions = {
         placeHolder: `${port}`,
         prompt: 'What port does your app listen on?',
@@ -10,7 +10,7 @@ export async function promptForPort(port: number): Promise<string>{
     return vscode.window.showInputBox(opt);
 }
 
-export async function quickPickPlatform(): Promise<string>{
+export async function quickPickPlatform(): Promise<string> {
     var opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,

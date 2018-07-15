@@ -25,7 +25,7 @@ export class WebAppCreator extends WizardBase {
         this.steps.push(new ResourceGroupStep(this, azureAccount));
         this.steps.push(new AppServicePlanStep(this, azureAccount));
         this.steps.push(new WebsiteStep(this, azureAccount, context));
-       
+
     }
 
     async run(promptOnly = false): Promise<WizardResult> {
@@ -110,7 +110,7 @@ class WebAppCreatorStepBase extends WizardStep {
         return websiteStep.website;
     }
 
-    protected getImageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
+    protected getImageInfo(): { serverUrl: string, serverUser: string, serverPassword: string } {
         const websiteStep = <WebsiteStep>this.wizard.findStep(step => step instanceof WebsiteStep, 'The Wizard must have a WebsiteStep.');
         if (!websiteStep.website) {
             throw new Error('A website must be created first.');
@@ -483,16 +483,16 @@ class WebsiteStep extends WebAppCreatorStepBase {
         }
 
         this._website = await websiteClient.webApps.createOrUpdate(rg.name, this._website.name, this._website);
-        
+
         this.wizard.writeline('Updating Application Settings...');
         let appSettings: WebSiteModels.StringDictionary;
-        
+
         if (this._serverUrl.length > 0) {
             // azure container registry
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
-                    "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl, 
-                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, 
+                    "DOCKER_REGISTRY_SERVER_URL": 'https://' + this._serverUrl,
+                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName,
                     "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword,
                     "DOCKER_ENABLE_CI": "true"
                 }
@@ -501,13 +501,13 @@ class WebsiteStep extends WebAppCreatorStepBase {
             // dockerhub - dont set docker_registry_server_url
             appSettings = {
                 "id": this._website.id, "name": "appsettings", "location": this._website.location, "type": "Microsoft.Web/sites/config", "properties": {
-                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName, 
+                    "DOCKER_REGISTRY_SERVER_USERNAME": this._serverUserName,
                     "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
-            
+
         }
-        
+
         await websiteClient.webApps.updateApplicationSettings(rg.name, this._website.name, appSettings);
         this._website.siteConfig = await websiteClient.webApps.getConfiguration(rg.name, this._website.name);
 
@@ -535,11 +535,11 @@ class WebsiteStep extends WebAppCreatorStepBase {
         return this._website;
     }
 
-    get imageInfo(): { serverUrl: string, serverUser: string, serverPassword: string} {
-        return  { 
-            serverUrl: this._serverUrl, 
-            serverUser: this._serverUserName, 
-            serverPassword: this._serverPassword 
+    get imageInfo(): { serverUrl: string, serverUser: string, serverPassword: string } {
+        return {
+            serverUrl: this._serverUrl,
+            serverUser: this._serverUserName,
+            serverPassword: this._serverPassword
         }
     }
 

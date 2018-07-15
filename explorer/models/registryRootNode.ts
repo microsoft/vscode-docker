@@ -19,12 +19,12 @@ const ContainerRegistryManagement = require('azure-arm-containerregistry');
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
     private _azureAccount: AzureAccount;
-    
+
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
         public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
-        public readonly azureAccount?: AzureAccount 
+        public readonly azureAccount?: AzureAccount
     ) {
         super(label);
         this._keytar = getCoreNodeModule('keytar');
@@ -189,5 +189,3 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 }
-
-

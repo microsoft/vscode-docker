@@ -37,7 +37,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
 
     if (!vscode.workspace.workspaceFolders) {
         vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
-        return;        
+        return;
     }
 
     if (vscode.workspace.workspaceFolders.length === 1) {
@@ -45,7 +45,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
-    
+
     if (!folder) {
         return;
     }
@@ -53,7 +53,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     let selectedItems: Item[] = [];
 
     if (dockerComposeFileUri) {
-        for (let i:number = 0; i < selectedComposeFileUris.length; i++) {
+        for (let i: number = 0; i < selectedComposeFileUris.length; i++) {
             selectedItems.push(createItem(folder, selectedComposeFileUris[i]));
         }
     } else {
@@ -62,7 +62,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
             return;
         }
-        
+
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
         selectedItems.push(<Item>await vscode.window.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }));
     }
@@ -70,9 +70,9 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     if (selectedItems.length > 0) {
         const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-        const build: string = configOptions.get('dockerComposeBuild', true) ? '--build': '';
+        const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
         const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
-        
+
         terminal.sendText(`cd "${folder.uri.fsPath}"`);
         selectedItems.forEach((item: Item) => {
             terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${item.file} ${command} ${detached} ${build}` : `docker-compose -f ${item.file} ${command}`);

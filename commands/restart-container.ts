@@ -8,15 +8,13 @@ import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.restart';
 
-
 export async function restartContainer(context?: ContainerNode) {
 
     let containersToRestart: Docker.ContainerDesc[];
 
     if (context && context.containerDesc) {
         containersToRestart = [context.containerDesc];
-    }
-    else {
+    } else {
         const opts = {
             "filters": {
                 "status": ["running", "paused", "exited"]
@@ -26,8 +24,7 @@ export async function restartContainer(context?: ContainerNode) {
         if (selectedItem) {
             if (selectedItem.label.toLocaleLowerCase().includes("all containers")) {
                 containersToRestart = await docker.getContainerDescriptors(opts);
-            }
-            else {
+            } else {
                 containersToRestart = [selectedItem.containerDesc];
             }
         }
