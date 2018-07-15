@@ -172,7 +172,7 @@ CMD ["python3", "-m", "${serviceName}"]
         case 'ruby':
 
             return `
-FROM ruby:2.5
+FROM ruby:2.5-slim
 
 LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
