@@ -37,6 +37,7 @@ import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { docker } from './commands/utils/docker-endpoint';
 
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -172,9 +173,14 @@ namespace Configuration {
     }
 
     export function initialize() {
-        configurationListener = vscode.workspace.onDidChangeConfiguration(() => {
+        configurationListener = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
             // notify the language server that settings have change
             client.sendNotification(DidChangeConfigurationNotification.type, { settings: null });
+
+            // Update endpoint if needed
+            if (e.affectsConfiguration('docker')) {
+                docker.refreshEndpoint();
+            }
         });
     }
 

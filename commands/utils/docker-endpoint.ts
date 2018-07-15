@@ -14,9 +14,9 @@ class DockerClient {
     }
 
     public refreshEndpoint() {
-        const errorMessage = 'The host must be entered as <host>:<port>, e.g. dockerhost:2375';
+        const errorMessage = 'The docker.host configuration setting must be entered as <host>:<port>, e.g. dockerhost:2375';
         const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
-        if (value != "") {
+        if (value) {
             let newHost: string = '';
             let newPort: number = 2375;
             let sep: number = -1;
@@ -34,7 +34,8 @@ class DockerClient {
                     this.endPoint = new Docker({ host:newHost, port: newPort});
                 }
             }
-        } else {
+        }
+        if (!this.endPoint) {
             // Pass no options so that the defaultOpts of docker-modem will be used
             this.endPoint = new Docker();
         }

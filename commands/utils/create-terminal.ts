@@ -3,8 +3,11 @@ import * as vscode from "vscode";
 export function createTerminal(name: string): vscode.Terminal {
   let terminalOptions: vscode.TerminalOptions = {};
   terminalOptions.name = name;
-  terminalOptions.env = {
-    DOCKER_HOST: vscode.workspace.getConfiguration("docker").get("host", "")
-  };
+  const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
+  if (value) {
+    terminalOptions.env = {
+      DOCKER_HOST: value
+    };
+  }
   return vscode.window.createTerminal(terminalOptions);
 }
