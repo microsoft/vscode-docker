@@ -1,4 +1,5 @@
 import * as Docker from 'dockerode';
+import * as vscode from "vscode";
 
 export enum DockerEngineType {
     Linux,
@@ -9,8 +10,36 @@ class DockerClient {
     private endPoint: Docker;
 
     constructor() {
-        // Pass no options so that the defaultOpts of docker-modem will be used
-        this.endPoint = new Docker();
+        this.refreshEndpoint();
+    }
+
+    public refreshEndpoint() {
+        const errorMessage = 'The docker.host configuration setting must be entered as <host>:<port>, e.g. dockerhost:2375';
+        const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
+        if (value) {
+            let newHost: string = '';
+            let newPort: number = 2375;
+            let sep: number = -1;
+
+            sep = value.lastIndexOf(':');
+
+            if (sep < 0) {
+                vscode.window.showErrorMessage(errorMessage);
+            } else {
+                newHost = value.slice(0, sep);
+                newPort = Number(value.slice(sep + 1));
+                if (isNaN(newPort)) {
+                    vscode.window.showErrorMessage(errorMessage);
+                } else {
+                    this.endPoint = new Docker({ host: newHost, port: newPort});
+                }
+            }
+        }
+        if (!this.endPoint || !value) {
+            // Pass no options so that the defaultOpts of docker-modem will be used if the endpoint wasn't created
+            // or the user went from configured setting to empty settign
+            this.endPoint = new Docker();
+        }
     }
 
     public getContainerDescriptors(opts?: {}): Thenable<Docker.ContainerDesc[]> {
