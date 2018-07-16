@@ -13,38 +13,38 @@ suite("AsyncPool Tests", () => {
     test("Counting, Low Worker Count", async () => {
         let pool = new AsyncPool(2);
         let counter = 0;
-        for (let i = 0; i < 1000000; i++) {
+        for (let i = 0; i < 100000; i++) {
             pool.addTask(async () => {
                 counter++;
             });
         }
         await pool.runAll();
-        assert.equal(counter, 1000000);
-    }).timeout(7000);
+        assert.equal(counter, 100000);
+    })
 
     test("Counting, High Worker Count", async () => {
         let pool = new AsyncPool(300);
         let counter = 0;
-        for (let i = 0; i < 1000000; i++) {
+        for (let i = 0; i < 100000; i++) {
             pool.addTask(async () => {
                 counter++;
             });
         }
         await pool.runAll();
-        assert.equal(counter, 1000000);
-    }).timeout(10000);
+        assert.equal(counter, 100000);
+    })
 
     test("Counting, Resonable Worker Count", async () => {
         let pool = new AsyncPool(10);
         let counter = 0;
-        for (let i = 0; i < 1000000; i++) {
+        for (let i = 0; i < 100000; i++) {
             pool.addTask(async () => {
                 counter++;
             });
         }
         await pool.runAll();
-        assert.equal(counter, 1000000);
-    }).timeout(10000);
+        assert.equal(counter, 100000);
+    })
 
     test("Timer, Random 1-10 ms tests", async () => {
         let pool = new AsyncPool(8);
