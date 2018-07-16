@@ -7,7 +7,7 @@ import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
-import { AsyncPool } from '../utils/asyncpool';
+import { AsyncPool } from '../../utils/asyncpool';
 import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 
 export class AzureRegistryNode extends NodeBase {

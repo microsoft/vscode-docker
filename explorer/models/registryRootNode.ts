@@ -13,7 +13,7 @@ import { RegistryType } from './registryType';
 import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { getCoreNodeModule } from '../utils/utils';
-import { AsyncPool } from '../utils/asyncpool';
+import { AsyncPool } from '../../utils/asyncpool';
 import { TIMEOUT } from 'dns';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
 const ContainerRegistryManagement = require('azure-arm-containerregistry');

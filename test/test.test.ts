@@ -5,7 +5,7 @@
 
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-import { AsyncPool } from '../explorer/utils/asyncpool'
+import { AsyncPool } from '../utils/asyncpool'
 import { TIMEOUT } from 'dns';
 
 suite("AsyncPool Tests", () => {
