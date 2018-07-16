@@ -78,6 +78,7 @@ export class RegistryRootNode extends NodeBase {
 
         if (!id.token) {
             id = await dockerHub.dockerHubLogin();
+
             if (id && id.token) {
                 if (this._keytar) {
                     this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
@@ -142,7 +143,8 @@ export class RegistryRootNode extends NodeBase {
                     });
                 });
             }
-            await subPool.scheduleRun();
+            await subPool.runAll();
+
             const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < subsAndRegistries.length; i++) {
                 const client = subsAndRegistries[i].client;
@@ -170,11 +172,12 @@ export class RegistryRootNode extends NodeBase {
                     }
                 }
             }
-            await regPool.scheduleRun();
-            function sortfunction(a: AzureRegistryNode, b: AzureRegistryNode): number {
+            await regPool.runAll();
+
+            function sortFunction(a: AzureRegistryNode, b: AzureRegistryNode): number {
                 return a.registry.loginServer.localeCompare(b.registry.loginServer);
             }
-            azureRegistryNodes.sort(sortfunction);
+            azureRegistryNodes.sort(sortFunction);
             return azureRegistryNodes;
         }
     }

@@ -51,7 +51,7 @@ export class DockerHubOrgNode extends NodeBase {
                 repoNodes.push(node);
             });
         }
-        await repoPool.scheduleRun();
+        await repoPool.runAll();
         return repoNodes;
     }
 }

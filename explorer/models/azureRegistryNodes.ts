@@ -221,12 +221,13 @@ export class AzureRepositoryNode extends NodeBase {
                     imageNodes.push(node);
                 });
             }
-            await pool.scheduleRun();
+            await pool.runAll();
+
         }
-        function sortfunction(a: AzureImageNode, b: AzureImageNode): number {
+        function sortFunction(a: AzureImageNode, b: AzureImageNode): number {
             return a.created.localeCompare(b.created);
         }
-        imageNodes.sort(sortfunction);
+        imageNodes.sort(sortFunction);
         return imageNodes;
     }
 }

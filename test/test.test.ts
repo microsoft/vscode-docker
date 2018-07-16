@@ -18,7 +18,7 @@ suite("AsyncPool Tests", () => {
                 counter++;
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(counter, 1000000);
     }).timeout(7000);
 
@@ -30,7 +30,7 @@ suite("AsyncPool Tests", () => {
                 counter++;
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(counter, 1000000);
     }).timeout(10000);
 
@@ -42,7 +42,7 @@ suite("AsyncPool Tests", () => {
                 counter++;
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(counter, 1000000);
     }).timeout(10000);
 
@@ -55,7 +55,7 @@ suite("AsyncPool Tests", () => {
                 counter++;
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(counter, 2000);
     }).timeout(7000);
 
@@ -68,7 +68,7 @@ suite("AsyncPool Tests", () => {
                 counter++;
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(counter, 10000);
     }).timeout(7000);
 
@@ -83,7 +83,7 @@ suite("AsyncPool Tests", () => {
                 arr.pop();
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(0, arr.length);
     });
 
@@ -99,7 +99,7 @@ suite("AsyncPool Tests", () => {
                 arr2.push(i);
             });
         }
-        await pool.scheduleRun();
+        await pool.runAll();
         assert.equal(arr2.length, arr.length);
         arr2.sort((a, b) => {
             if (a > b) {
@@ -125,7 +125,7 @@ suite("AsyncPool Tests", () => {
         });
         let errorThrown: boolean = false;
         try {
-            await pool.scheduleRun();
+            await pool.runAll();
         } catch (error) {
             errorThrown = true;
         }

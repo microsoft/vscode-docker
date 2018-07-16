@@ -17,7 +17,7 @@ export class AsyncPool {
     /*Runs all functions in runnableQueue by launching asyncLimit worker instances
       each of which calls an async task extracted from runnableQueue. This will
       wait for all scheduled tasks to be completed.*/
-    public async scheduleRun() {
+    public async runAll() {
         for (let i = 0; i < this.asyncLimit; i++) {
             this.workers.push(this.worker());
         }
