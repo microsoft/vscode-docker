@@ -7,10 +7,12 @@ import * as vscode from 'vscode';
 export interface DockerOutputManager {
     append(content: string): void;
     appendLine(content: string): void;
-    performOperation<T>(operation: () => Promise<T>, startContent: string, endContent?: string, errorContent?: string): Promise<T>;
+    performOperation<T>(startContent: string, operation: () => Promise<T>, endContent?: string, errorContent?: string): Promise<T>;
 }
 
 export class DefaultDockerOutputManager implements DockerOutputManager {
+    private isShown = false;
+
     constructor(private readonly outputChannel: vscode.OutputChannel) {
     }
 
@@ -22,21 +24,25 @@ export class DefaultDockerOutputManager implements DockerOutputManager {
         this.outputChannel.appendLine(content);
     }
 
-    async performOperation<T>(operation: () => Promise<T>, startContent: string, endContent?: string, errorContent?: string): Promise<T> {
-        this.outputChannel.show(true);
+    async performOperation<T>(startContent: string, operation: () => Promise<T>, endContent?: string, errorContent?: string): Promise<T> {
+        if (!this.isShown) {
+            this.outputChannel.show(true);
+            this.isShown = true;
+        }
+
         this.outputChannel.appendLine(startContent);
 
         try {
             const result = await operation();
 
             if (endContent) {
-                this.outputChannel.appendLine(endContent);
+                this.appendLine(endContent);
             }
 
             return result;
         } catch (error) {
             if (errorContent) {
-                this.outputChannel.appendLine(errorContent);
+                this.appendLine(errorContent);
             }
 
             throw error;

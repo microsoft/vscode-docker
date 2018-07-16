@@ -108,8 +108,8 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const imageId = await this.dockerOutputManager.performOperation(
-            () => this.dockerClient.buildImage(options, content => this.dockerOutputManager.append(content)),
             'Building Docker image...',
+            () => this.dockerClient.buildImage(options, content => this.dockerOutputManager.append(content)),
             'Docker image built.',
             'Failed to build Docker image.');
 
@@ -158,21 +158,27 @@ export class DefaultDockerManager implements DockerManager {
 
         const volumes = this.getVolumes(debuggerFolder, options);
 
-        const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
+        return await this.dockerOutputManager.performOperation(
+            'Starting container...',
+            async () => {
+                const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
 
-        if (containers.find(container => container === options.containerName)) {
-            await this.dockerClient.removeContainer(options.containerName, { force: true });
-        }
+                if (containers.find(container => container === options.containerName)) {
+                    await this.dockerClient.removeContainer(options.containerName, { force: true });
+                }
 
-        // TODO: Manage merge of user-supplied entrypoint or volumes
-        return await this.dockerClient.runContainer(
-            imageTagOrId,
-            {
-                command,
-                containerName: options.containerName,
-                entrypoint,
-                volumes
-            });
+                // TODO: Manage merge of user-supplied entrypoint or volumes
+                return await this.dockerClient.runContainer(
+                    imageTagOrId,
+                    {
+                        command,
+                        containerName: options.containerName,
+                        entrypoint,
+                        volumes
+                    });
+            },
+            'Container started.',
+            'Unable to start container.');
     }
 
     async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {

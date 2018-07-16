@@ -23,6 +23,8 @@ type VsDbgScriptPlatformOptions = {
 };
 
 export class RemoteVsDbgClient implements VsDbgClient {
+    private static readonly stateKey = 'RemoteVsDbgClient';
+
     private readonly vsdbgPath: string;
     private readonly options: VsDbgScriptPlatformOptions;
 
@@ -64,6 +66,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
         }
 
         return await this.dockerOutputManager.performOperation(
+            'Acquiring the latest .NET Core debugger...',
             async () => {
 
                 await this.getVsDbgAcquisitionScript();
@@ -78,7 +81,6 @@ export class RemoteVsDbgClient implements VsDbgClient {
 
                 return vsdbgVersionPath;
             },
-            'Acquiring the latest .NET Core debugger...',
             'Debugger acquired.',
             'Unable to acquire the .NET Core debugger.');
     }
@@ -118,7 +120,6 @@ export class RemoteVsDbgClient implements VsDbgClient {
             aquisitionExpirationDate.setDate(lastAcquisitionDate.getDate() + 1);
 
             if (aquisitionExpirationDate.valueOf() > new Date().valueOf()) {
-
                 // The acquisition is up to date...
                 return true;
             }
@@ -128,11 +129,11 @@ export class RemoteVsDbgClient implements VsDbgClient {
     }
 
     private get lastScriptAcquisitionKey() {
-        return 'RemoteVsDbgClient.lastScriptAcquisition';
+        return `${RemoteVsDbgClient.stateKey}.lastScriptAcquisition`;
     }
 
     private lastDebuggerAcquisitionKey(version: string, runtime: string): string {
-        return `RemoteVsDbgClient.lastDebuggerAcquisition(${version}, ${runtime})`;
+        return `${RemoteVsDbgClient.stateKey}.lastDebuggerAcquisition(${version}, ${runtime})`;
     }
 
     private getDate(key: string): Promise<Date | undefined> {
