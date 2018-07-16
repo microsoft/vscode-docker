@@ -30,6 +30,7 @@ export async function removeImage(context?: ImageNode) {
 
         vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
+                // tslint:disable-next-line:no-function-expression // Grandfathered in
                 docker.getImage(img.Id).remove({ force: true }, function (err, data: any) {
                     imageCounter++;
                     if (err) {

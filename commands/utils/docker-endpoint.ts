@@ -16,7 +16,7 @@ class DockerClient {
     public getContainerDescriptors(opts?: {}): Thenable<Docker.ContainerDesc[]> {
         return new Promise((resolve, reject) => {
             if (!opts) {
-                let opts = {}
+                opts = {}
             }
 
             this.endPoint.listContainers(opts, (err, containers) => {
@@ -31,7 +31,7 @@ class DockerClient {
     public getImageDescriptors(opts?: {}): Thenable<Docker.ImageDesc[]> {
         return new Promise((resolve, reject) => {
             if (!opts) {
-                let opts = {}
+                opts = {}
             }
             this.endPoint.listImages(opts, (err, images) => {
                 if (err) {
@@ -57,7 +57,7 @@ class DockerClient {
                     return resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
                 });
             });
-        };
+        }
 
         // On Linux or macOS, this can only ever be linux,
         // so short-circuit the Docker call entirely.

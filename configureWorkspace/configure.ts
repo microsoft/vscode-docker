@@ -8,6 +8,7 @@ import { promptForPort, quickPickPlatform, quickPickOS } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
 import { match } from 'minimatch';
 
+// tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
@@ -272,6 +273,7 @@ services:
     }
 }
 
+// tslint:disable-next-line:max-func-body-length
 function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
@@ -591,11 +593,13 @@ export async function configure(): Promise<void> {
         pkg = await readPackageJson(folder);
     }
 
-    await Promise.all(Object.keys(DOCKER_FILE_TYPES).map((fileName) => {
-        // don't generate docker-compose files for .NET Core apps
-        if (platformType.toLowerCase().includes('.net') && !fileName.includes('docker-compose')) {
-            return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+    await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
+        if (platformType.toLowerCase().includes('.net') && fileName.includes('docker-compose')) {
+            // don't generate docker-compose files for .NET Core apps
+            return;
         }
+
+        return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
     /* __GDPR__
