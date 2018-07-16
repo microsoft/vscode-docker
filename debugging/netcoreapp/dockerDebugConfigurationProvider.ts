@@ -36,7 +36,18 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         private readonly osProvider: OSProvider) {
     }
 
-    resolveDebugConfiguration?(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
+    provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+        return [
+            {
+                name: 'Docker: Launch .NET Core',
+                type: 'docker-netcoreapp',
+                request: 'launch',
+                preLaunchTask: 'build'
+            }
+        ];
+    }
+
+    resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
         if (folder) {
             return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
         }

@@ -209,25 +209,26 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext) {
 
     const dockerOutputManager = new DefaultDockerOutputManager(dockerOutputChannel);
 
-    vscode.debug.registerDebugConfigurationProvider(
-        'docker-netcoreapp',
-        new DockerDebugConfigurationProvider(
-            new DefaultDockerManager(
-                new DefaultAppStorageProvider(fileSystemProvider),
-                new DefaultDebuggerClient(
-                    new RemoteVsDbgClient(
-                        dockerOutputManager,
-                        fileSystemProvider,
-                        ctx.globalState,
-                        osProvider,
-                        processProvider)),
-                dockerClient,
-                dockerOutputManager,
-                fileSystemProvider,
-                osProvider,
-                processProvider),
-                osProvider
-            ));
+    ctx.subscriptions.push(
+        vscode.debug.registerDebugConfigurationProvider(
+            'docker-netcoreapp',
+            new DockerDebugConfigurationProvider(
+                new DefaultDockerManager(
+                    new DefaultAppStorageProvider(fileSystemProvider),
+                    new DefaultDebuggerClient(
+                        new RemoteVsDbgClient(
+                            dockerOutputManager,
+                            fileSystemProvider,
+                            ctx.globalState,
+                            osProvider,
+                            processProvider)),
+                    dockerClient,
+                    dockerOutputManager,
+                    fileSystemProvider,
+                    osProvider,
+                    processProvider),
+                    osProvider
+                )));
 }
 
 function activateLanguageClient(ctx: vscode.ExtensionContext) {

@@ -265,7 +265,7 @@
     "debuggers": [
       {
         "type": "docker",
-        "label": "Docker",
+        "label": "Docker: Node.js",
         "configurationSnippets": [
           {
             "label": "Docker: Attach to Node",
@@ -285,16 +285,16 @@
       },
       {
         "type": "docker-netcoreapp",
-        "label": "Docker",
+        "label": "Docker: .NET Core",
         "configurationSnippets": [
             {
                 "label": "Docker: Launch .NET Core",
                 "description": "Docker: Launch .NET Core",
                 "body": {
-                    "type": "docker-netcoreapp",
-                    "request": "launch",
-                    "name": "Docker: Launch .NET Core",
-                    "preLaunchTask": "build"
+                  "name": "Docker: Launch .NET Core",
+                  "type": "docker-netcoreapp",
+                  "request": "launch",
+                  "preLaunchTask": "build"
                 }
             }
         ],
