@@ -177,9 +177,10 @@ namespace Configuration {
             // notify the language server that settings have change
             client.sendNotification(DidChangeConfigurationNotification.type, { settings: null });
 
-            // Update endpoint if needed
+            // Update endpoint and refresh explorer if needed
             if (e.affectsConfiguration('docker')) {
                 docker.refreshEndpoint();
+                vscode.commands.executeCommand("vscode-docker.explorer.refresh");
             }
         });
     }

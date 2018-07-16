@@ -35,8 +35,9 @@ class DockerClient {
                 }
             }
         }
-        if (!this.endPoint) {
-            // Pass no options so that the defaultOpts of docker-modem will be used
+        if (!this.endPoint || !value) {
+            // Pass no options so that the defaultOpts of docker-modem will be used if the endpoint wasn't created
+            // or the user went from configured setting to empty settign
             this.endPoint = new Docker();
         }
     }
