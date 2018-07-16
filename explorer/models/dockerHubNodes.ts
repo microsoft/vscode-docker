@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
 import { AsyncPool } from '../utils/asyncpool';
-
+import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 export class DockerHubOrgNode extends NodeBase {
 
 
@@ -36,10 +36,10 @@ export class DockerHubOrgNode extends NodeBase {
 
         const user: dockerHub.User = await dockerHub.getUser();
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-        const repoPool = new AsyncPool(8);
+        const repoPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
         for (let i = 0; i < myRepos.length; i++) {
-            repoPool.addTask(async ()=> {
-                let myRepo : dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
+            repoPool.addTask(async () => {
+                let myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
                 let iconPath = {
                     light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
                     dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
@@ -48,7 +48,7 @@ export class DockerHubOrgNode extends NodeBase {
                 node.repository = myRepo;
                 node.userName = element.userName;
                 node.password = element.password;
-                repoNodes.push(node);    
+                repoNodes.push(node);
             });
         }
         await repoPool.scheduleRun();

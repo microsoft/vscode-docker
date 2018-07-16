@@ -8,8 +8,7 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
 import { AsyncPool } from '../utils/asyncpool';
-
-const MAX_CONCURRENT_REQUESTS = 8;
+import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 
 export class AzureRegistryNode extends NodeBase {
     private _azureAccount: AzureAccount;

@@ -15,9 +15,8 @@ import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from
 import { getCoreNodeModule } from '../utils/utils';
 import { AsyncPool } from '../utils/asyncpool';
 import { TIMEOUT } from 'dns';
+import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
-const MAX_CONCURRENT_REQUESTS = 8;
-const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
