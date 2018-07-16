@@ -1,12 +1,12 @@
 /*Custom asyncpool
  * Author: Esteban Rey L
- * To limit the number of asynchonous calls being done, this is helpful to limit 
+ * To limit the number of asynchonous calls being done, this is helpful to limit
  * Connection requests and avoid throttling.
  */
 export class AsyncPool {
     private runnableQueue: Function[];
     private workers: Promise<void>[];
-    private asyncLimit : number;
+    private asyncLimit: number;
 
     constructor(asyncLimit: number) {
         this.asyncLimit = asyncLimit;
@@ -15,13 +15,17 @@ export class AsyncPool {
     }
 
     /*Runs all functions in runnableQueue by launching asyncLimit worker instances
-      each of which calls an async task extracted from runnableQueue. This will 
-      wait for all scheduled tasks to be completed.*/   
+      each of which calls an async task extracted from runnableQueue. This will
+      wait for all scheduled tasks to be completed.*/
     public async scheduleRun() {
         for (let i = 0; i < this.asyncLimit; i++) {
             this.workers.push(this.worker());
         }
-        await Promise.all(this.workers);
+        try {
+            await Promise.all(this.workers);
+        } catch (error) {
+            throw error;
+        }
     }
 
     /*Takes in an async Thunk to be executed by the asyncpool*/
@@ -29,13 +33,13 @@ export class AsyncPool {
         this.runnableQueue.push(func);
     }
 
-    /*Executes each passed in async function blocking while each function is run. 
+    /*Executes each passed in async function blocking while each function is run.
       Moves on to the next available thunk on completion of the previous thunk.*/
     private async worker() {
         while (this.runnableQueue.length > 0) {
             let func = this.runnableQueue.pop();
             //Avoids possible race condition
-            if(func) await func();
+            if (func) await func();
         }
     }
 
