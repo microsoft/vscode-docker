@@ -155,8 +155,6 @@ export class AzureRepositoryNode extends NodeBase {
         const { accessToken, refreshToken } = await acquireToken(session);
 
         if (accessToken && refreshToken) {
-            const tenantId = element.subscription.tenantId;
-
             await request.post('https://' + element.repository + '/oauth2/exchange', {
                 form: {
                     grant_type: 'access_token_refresh_token',
@@ -295,6 +293,7 @@ async function acquireToken(session: AzureSession) {
     return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
         const credentials: any = session.credentials;
         const environment: any = session.environment;
+        // tslint:disable-next-line:no-function-expression // Grandfathered in
         credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
             if (err) {
                 reject(err);

@@ -19,10 +19,12 @@ export function trimWithElipsis(str: string, max: number = 10): string {
  */
 export function getCoreNodeModule(moduleName: string) {
     try {
+        // tslint:disable-next-line:non-literal-require
         return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);
     } catch (err) { }
 
     try {
+        // tslint:disable-next-line:non-literal-require
         return require(`${vscode.env.appRoot}/node_modules/${moduleName}`);
     } catch (err) { }
 

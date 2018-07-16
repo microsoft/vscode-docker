@@ -10,7 +10,7 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import vscode = require('vscode');
 import { buildImage } from './commands/build-image';
-import inspectImageCommand from './commands/inspect-image';
+import inspectImage from './commands/inspect-image';
 import { removeImage } from './commands/remove-image';
 import { pushImage } from './commands/push-image';
 import { startContainer, startContainerInteractive, startAzureCLI } from './commands/start-container';
@@ -38,7 +38,6 @@ import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 
-
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
@@ -52,7 +51,7 @@ export interface ComposeVersionKeys {
     All: KeyInfo,
     v1: KeyInfo,
     v2: KeyInfo
-};
+}
 
 let client: LanguageClient;
 
@@ -94,7 +93,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImageCommand));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));
@@ -135,7 +134,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
 
     activateLanguageClient(ctx);
 }
