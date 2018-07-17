@@ -17,7 +17,7 @@ export class WizardBase {
 
     async run(promptOnly = false): Promise<WizardResult> {
         // Go through the prompts...
-        for (var i = 0; i < this.steps.length; i++) {
+        for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
 
             try {
@@ -53,7 +53,7 @@ export class WizardBase {
     async execute(): Promise<WizardResult> {
         // Execute each step...
         this.output.show(true);
-        for (var i = 0; i < this.steps.length; i++) {
+        for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
 
             try {

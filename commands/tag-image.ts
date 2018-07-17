@@ -37,7 +37,7 @@ export async function tagImage(context?: ImageNode) {
             imageName = defaultRegistry + '/' + imageName;
         }
 
-        var opt: vscode.InputBoxOptions = {
+        let opt: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             placeHolder: imageName,
             prompt: 'Tag image as...',

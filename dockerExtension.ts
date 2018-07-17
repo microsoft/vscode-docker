@@ -43,8 +43,8 @@ export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
-export var diagnosticCollection: vscode.DiagnosticCollection;
-export var dockerExplorerProvider: DockerExplorerProvider;
+export let diagnosticCollection: vscode.DiagnosticCollection;
+export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string; };
 
@@ -65,7 +65,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
-    for (var i = 0; i < installedExtensions.length; i++) {
+    for (let i = 0; i < installedExtensions.length; i++) {
         const ext = installedExtensions[i];
         if (ext.id === 'ms-vscode.azure-account') {
             try {
@@ -86,7 +86,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
-    var yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
+    let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 

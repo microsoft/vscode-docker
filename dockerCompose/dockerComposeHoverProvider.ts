@@ -21,18 +21,18 @@ export class DockerComposeHoverProvider implements HoverProvider {
     }
 
     public provideHover(document: TextDocument, position: Position, token: CancellationToken): Thenable<Hover> {
-        var line = document.lineAt(position.line);
+        let line = document.lineAt(position.line);
 
         if (line.text.length === 0) {
             return Promise.resolve(null);
         }
 
-        var tokens = this._parser.parseLine(line);
+        let tokens = this._parser.parseLine(line);
         return this._computeInfoForLineWithTokens(line.text, tokens, position);
     }
 
     private _computeInfoForLineWithTokens(line: string, tokens: parser.IToken[], position: Position): Promise<Hover> {
-        var possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
+        let possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
 
         return Promise.all(possibleTokens.map(tokenIndex => this._computeInfoForToken(line, tokens, tokenIndex))).then((results) => {
             return possibleTokens.map((tokenIndex, arrayIndex) => {
@@ -43,7 +43,7 @@ export class DockerComposeHoverProvider implements HoverProvider {
                 };
             });
         }).then((results) => {
-            var filteredResults = results.filter(r => !!r.result);
+            let filteredResults = results.filter(r => !!r.result);
             if (filteredResults.length === 0) {
                 return;
             }
@@ -61,8 +61,8 @@ export class DockerComposeHoverProvider implements HoverProvider {
         // -------------
         // Detect hovering on a key
         if (tokens[tokenIndex].type === parser.TokenType.Key) {
-            var keyName = this._parser.keyNameFromKeyToken(this._parser.tokenValue(line, tokens[tokenIndex])).trim();
-            var r = this._keyInfo[keyName];
+            let keyName = this._parser.keyNameFromKeyToken(this._parser.tokenValue(line, tokens[tokenIndex])).trim();
+            let r = this._keyInfo[keyName];
             if (r) {
                 return Promise.resolve([r]);
             }
@@ -71,8 +71,8 @@ export class DockerComposeHoverProvider implements HoverProvider {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        var helper = new suggestHelper.SuggestSupportHelper();
-        var r2 = helper.getImageNameHover(line, this._parser, tokens, tokenIndex);
+        let helper = new suggestHelper.SuggestSupportHelper();
+        let r2 = helper.getImageNameHover(line, this._parser, tokens, tokenIndex);
         if (r2) {
             return r2;
         }

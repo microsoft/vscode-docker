@@ -164,8 +164,8 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
         const quickPickOptions = { placeHolder: `Select the resource group where the new Web App will be created in. (${this.stepProgressText})` };
         const subscription = this.getSelectedSubscription();
         const resourceClient = new ResourceManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-        var resourceGroups: ResourceModels.ResourceGroup[];
-        var locations: SubscriptionModels.Location[];
+        let resourceGroups: ResourceModels.ResourceGroup[];
+        let locations: SubscriptionModels.Location[];
         const resourceGroupsTask = util.listAll(resourceClient.resourceGroups, resourceClient.resourceGroups.list());
         const locationsTask = this.azureAccount.getLocationsBySubscription(this.getSelectedSubscription());
         await Promise.all([resourceGroupsTask, locationsTask]).then(results => {
