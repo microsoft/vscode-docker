@@ -2,6 +2,7 @@ import vscode = require('vscode');
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
+import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.container.show-logs';
 
 export async function showLogsContainer(context?: ContainerNode) {
@@ -23,7 +24,7 @@ export async function showLogsContainer(context?: ContainerNode) {
     }
 
     if (containerToLog) {
-        const terminal = vscode.window.createTerminal(containerToLog.Image);
+        const terminal = createTerminal(containerToLog.Image);
         terminal.sendText(`docker logs -f ${containerToLog.Id}`);
         terminal.show();
         if (reporter) {

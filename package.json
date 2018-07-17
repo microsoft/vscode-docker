@@ -323,6 +323,11 @@
           "default": 10,
           "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis."
         },
+        "docker.host": {
+          "type": "string",
+          "default": "",
+          "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
+        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",
           "type": "string",
