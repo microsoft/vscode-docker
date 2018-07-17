@@ -51,7 +51,7 @@ export class WebAppCreator extends WizardBase {
     }
 
     protected beforeExecute(step: WizardStep, stepIndex: number): void {
-        if (stepIndex == 0) {
+        if (stepIndex === 0) {
             this.writeline('Start creating new Web App...');
         }
     }

@@ -70,7 +70,7 @@
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
         "no-stateless-class": true,
-        "no-string-literal": false, // TODO
+        "no-string-literal": true,
         "no-string-throw": true,
         "no-unnecessary-bind": true,
         "no-unnecessary-callback-wrapper": true,
@@ -79,10 +79,10 @@
         // TODO: "no-unsafe-any": true,
         "no-unsafe-finally": true,
         // TODO: "no-unused-expression": true,
-        // TODO: "no-use-before-declare": true,
+        "no-use-before-declare": false, // changed (recommended turned off: https://palantir.github.io/tslint/rules/no-use-before-declare/)
         "no-with-statement": true,
         // TODO:"promise-function-async": true,
-        // TODO: "promise-must-complete": true,
+        "promise-must-complete": true,
         "radix": true,
         "react-this-binding-issue": true,
         "react-unused-props-and-state": true,
@@ -95,7 +95,7 @@
         ],
         "switch-default": true,
         "triple-equals": [
-            false, // TODO: true,
+            true,
             "allow-null-check"
         ],
         "use-isnan": true,
@@ -167,7 +167,7 @@
         "no-unsupported-browser-code": true,
         "no-useless-files": true,
         // TODO: "no-var-keyword": true,
-        // TODO: "no-var-requires": true,
+        "no-var-requires": true,
         "no-var-self": true,
         "no-void-expression": [
             false, // changed
@@ -220,7 +220,7 @@
             "arguments",
             "statements"
         ],
-        "curly": false, // TODO
+        "curly": true,
         "eofline": false, // changed
         "import-spacing": true,
         "indent": [
@@ -251,7 +251,7 @@
         ],
         "react-tsx-curly-spacing": true,
         "semicolon": [
-            false, // TODO: true,
+            false, // changed
             "always"
         ],
         "trailing-comma": [
