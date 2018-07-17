@@ -1,12 +1,12 @@
-import vscode = require('vscode');
-import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
-import os = require('os');
-import { reporter } from '../telemetry/telemetry';
-import { ImageNode } from '../explorer/models/imageNode';
 import * as fs from 'fs';
+import os = require('os');
+import vscode = require('vscode');
+import { ImageNode } from '../explorer/models/imageNode';
+import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
+import { docker, DockerEngineType } from './utils/docker-endpoint';
+import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 

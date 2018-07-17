@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-import { DockerEngineType, docker } from './utils/docker-endpoint';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
+import { docker, DockerEngineType } from './utils/docker-endpoint';
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');

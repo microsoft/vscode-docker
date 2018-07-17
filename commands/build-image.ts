@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { reporter } from '../telemetry/telemetry';
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from "./utils/create-terminal";
 
 const teleCmdId: string = 'vscode-docker.image.build';

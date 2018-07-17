@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
 import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
-import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
+import * as vscode from 'vscode';
+import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { getCoreNodeModule } from './utils';
 
 let _token: Token;

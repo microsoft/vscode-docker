@@ -1,9 +1,9 @@
+import vscode = require('vscode');
+import { dockerExplorerProvider } from '../dockerExtension';
+import { ImageNode } from "../explorer/models/imageNode";
+import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-import vscode = require('vscode');
-import { reporter } from '../telemetry/telemetry';
-import { ImageNode } from "../explorer/models/imageNode";
-import { dockerExplorerProvider } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.image.remove';
 

@@ -5,9 +5,9 @@
 'use strict';
 
 import vscode = require('vscode');
+import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 import hub = require('../dockerHubApi');
 import parser = require('../parser');
-import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 
 export class SuggestSupportHelper {
     suggestImages(word: string): Promise<vscode.CompletionItem[]> {

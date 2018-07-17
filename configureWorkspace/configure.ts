@@ -1,12 +1,12 @@
-import vscode = require('vscode');
-import * as path from 'path';
 import * as fs from 'fs';
-import * as pomParser from 'pom-parser';
-import * as gradleParser from 'gradle-to-js/lib/parser';
 import * as glob from 'glob';
-import { promptForPort, quickPickPlatform, quickPickOS } from './config-utils';
-import { reporter } from '../telemetry/telemetry';
+import * as gradleParser from 'gradle-to-js/lib/parser';
 import { match } from 'minimatch';
+import * as path from 'path';
+import * as pomParser from 'pom-parser';
+import vscode = require('vscode');
+import { reporter } from '../telemetry/telemetry';
+import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
 // tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {

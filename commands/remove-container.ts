@@ -1,8 +1,8 @@
 import vscode = require('vscode');
-import { docker } from './utils/docker-endpoint';
-import { reporter } from '../telemetry/telemetry';
-import { ContainerNode } from '../explorer/models/containerNode';
 import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
+import { reporter } from '../telemetry/telemetry';
+import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';

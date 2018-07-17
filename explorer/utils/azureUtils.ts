@@ -1,6 +1,6 @@
 import * as opn from 'opn';
-import { AzureRepositoryNode, AzureImageNode, AzureRegistryNode } from '../models/azureRegistryNodes';
 import { AzureSession } from '../../typings/azure-account.api';
+import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 
 export function browseAzurePortal(context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode): void {
 

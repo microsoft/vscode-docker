@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as moment from 'moment';
-import { NodeBase } from './nodeBase';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { trimWithElipsis } from '../utils/utils';
+import { NodeBase } from './nodeBase';
 
 export class ImageNode extends NodeBase {
 

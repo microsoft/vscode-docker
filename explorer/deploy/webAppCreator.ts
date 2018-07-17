@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { AzureAccountWrapper } from './azureAccountWrapper';
-import { AzureImageNode } from '../models/azureRegistryNodes';
-import { DockerHubImageNode } from '../models/dockerHubNodes';
-import { reporter } from '../../telemetry/telemetry';
-import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'azure-arm-resource';
-import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from './wizard';
+import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
+import WebSiteManagementClient = require('azure-arm-website');
 import * as fs from 'fs';
 import * as path from 'path';
-import * as util from './util';
+import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
-import WebSiteManagementClient = require('azure-arm-website');
+import { reporter } from '../../telemetry/telemetry';
+import { AzureImageNode } from '../models/azureRegistryNodes';
+import { DockerHubImageNode } from '../models/dockerHubNodes';
+import { AzureAccountWrapper } from './azureAccountWrapper';
+import * as util from './util';
+import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
 
 const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
 

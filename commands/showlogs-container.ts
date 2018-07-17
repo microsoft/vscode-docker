@@ -1,8 +1,8 @@
 import vscode = require('vscode');
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 const teleCmdId: string = 'vscode-docker.container.show-logs';
 
 export async function showLogsContainer(context?: ContainerNode) {

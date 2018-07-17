@@ -4,9 +4,9 @@
 
 'use strict';
 
-import { CompletionItemProvider, TextDocument, Position, CancellationToken, CompletionItem } from 'vscode';
-import helper = require('../helpers/suggestSupportHelper');
+import { CancellationToken, CompletionItem, CompletionItemProvider, Position, TextDocument } from 'vscode';
 import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
+import helper = require('../helpers/suggestSupportHelper');
 
 // IntelliSense
 export class DockerfileCompletionItemProvider implements CompletionItemProvider {
