@@ -37,6 +37,7 @@ import { AzureAccount } from './typings/azure-account.api';
 import * as opn from 'opn';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { AzureCredentialsManager } from './utils/AzureCredentialsManager';
 import { docker } from './commands/utils/docker-endpoint';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -135,7 +136,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
+    if (azureAccount) {
+        AzureCredentialsManager.getInstance().setAccount(azureAccount);
+    }
     activateLanguageClient(ctx);
 }
 
