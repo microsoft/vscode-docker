@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, Extension, extensions, Disposable } from 'vscode';
+import { SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ServiceClientCredentials } from 'ms-rest';
 import { AzureEnvironment } from 'ms-rest-azure';
-import { SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
-import { AzureAccount, AzureSession, AzureLoginStatus } from '../../typings/azure-account.api';
+import { Disposable, Extension, ExtensionContext, extensions } from 'vscode';
+import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 
 import * as util from './util';
 

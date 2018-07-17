@@ -4,8 +4,8 @@
 
 'use strict';
 
-import vscode = require('vscode');
 import https = require('https');
+import vscode = require('vscode');
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     let tags: string[] = [];

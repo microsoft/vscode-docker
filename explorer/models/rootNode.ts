@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { ContainerNode } from './containerNode';
 import { docker } from '../../commands/utils/docker-endpoint';
+import { AzureAccount } from '../../typings/azure-account.api';
+import { ContainerNode } from './containerNode';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
-import { AzureAccount } from '../../typings/azure-account.api';
 
 const imageFilters = {
     "filters": {

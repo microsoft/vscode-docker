@@ -1,8 +1,8 @@
 import vscode = require('vscode');
-import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-import { docker } from './utils/docker-endpoint';
-import { reporter } from '../telemetry/telemetry';
 import { ImageNode } from "../explorer/models/imageNode";
+import { reporter } from '../telemetry/telemetry';
+import { docker } from './utils/docker-endpoint';
+import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 

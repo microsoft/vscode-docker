@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { NodeBase } from './nodeBase';
 import { trimWithElipsis } from '../utils/utils';
+import { NodeBase } from './nodeBase';
 
 export class ContainerNode extends NodeBase {
 

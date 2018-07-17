@@ -1,5 +1,5 @@
-import TelemetryReporter from 'vscode-extension-telemetry';
 import vscode = require('vscode');
+import TelemetryReporter from 'vscode-extension-telemetry';
 
 export let reporter: TelemetryReporter;
 

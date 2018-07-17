@@ -1,7 +1,7 @@
-import { ImageNode } from "../explorer/models/imageNode";
 import DockerInspectDocumentContentProvider from "../documentContentProviders/dockerInspect";
-import { quickPickImage } from "./utils/quick-pick-image";
+import { ImageNode } from "../explorer/models/imageNode";
 import { reporter } from "../telemetry/telemetry";
+import { quickPickImage } from "./utils/quick-pick-image";
 
 export default async function inspectImage(context?: ImageNode): Promise<void> {
 

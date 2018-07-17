@@ -4,10 +4,10 @@
 
 'use strict';
 
-import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri } from 'vscode';
-import composeVersions from './dockerComposeKeyInfo';
-import helper = require('../helpers/suggestSupportHelper');
+import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
 import hub = require('../dockerHubApi');
+import helper = require('../helpers/suggestSupportHelper');
+import composeVersions from './dockerComposeKeyInfo';
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
 

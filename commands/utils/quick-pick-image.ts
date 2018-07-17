@@ -1,6 +1,6 @@
 import * as Docker from 'dockerode';
-import { docker } from './docker-endpoint';
 import vscode = require('vscode');
+import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
     imageDesc: Docker.ImageDesc
