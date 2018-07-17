@@ -5,6 +5,8 @@ import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
+import { AsyncPool } from '../../utils/asyncpool';
+import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 
@@ -82,7 +84,6 @@ export class AzureRegistryNode extends NodeBase {
                     return [];
                 }
             });
-
             await request.get('https://' + element.label + '/v2/_catalog', {
                 auth: {
                     bearer: accessTokenARC
@@ -105,7 +106,7 @@ export class AzureRegistryNode extends NodeBase {
                 }
             });
         }
-
+        //Note these are ordered by default in alphabetical order
         return repoNodes;
     }
 }
@@ -196,25 +197,35 @@ export class AzureRepositoryNode extends NodeBase {
                 }
             });
 
+            const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             for (let i = 0; i < tags.length; i++) {
+                pool.addTask(async () => {
+                    let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                        auth: {
+                            bearer: accessTokenARC
+                        }
+                    });
 
-                let manifest = JSON.parse(await request.get('https://' + element.repository + '/v2/' + element.label + '/manifests/latest', {
-                    auth: { bearer: accessTokenARC }
-                }));
-
-                node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
-                node.azureAccount = element.azureAccount;
-                node.password = element.password;
-                node.registry = element.registry;
-                node.serverUrl = element.repository;
-                node.subscription = element.subscription;
-                node.userName = element.userName;
-                node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
-                imageNodes.push(node);
-
+                    //Acquires each image's manifest to acquire build time.
+                    let manifest = JSON.parse(data);
+                    node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
+                    node.azureAccount = element.azureAccount;
+                    node.password = element.password;
+                    node.registry = element.registry;
+                    node.serverUrl = element.repository;
+                    node.subscription = element.subscription;
+                    node.userName = element.userName;
+                    node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
+                    imageNodes.push(node);
+                });
             }
+            await pool.runAll();
 
         }
+        function sortFunction(a: AzureImageNode, b: AzureImageNode): number {
+            return a.created.localeCompare(b.created);
+        }
+        imageNodes.sort(sortFunction);
         return imageNodes;
     }
 }

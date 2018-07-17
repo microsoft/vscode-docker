@@ -45,7 +45,7 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
 
     try {
         containers = await docker.getContainerDescriptors(opts);
-        if (!containers || containers.length == 0) {
+        if (!containers || containers.length === 0) {
             vscode.window.showInformationMessage('There are no Docker Containers.');
             return;
         } else {

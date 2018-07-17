@@ -121,7 +121,7 @@ function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<
 
 function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
     opts.headers = opts.headers || {};
-    opts.headers['Accept'] = 'application/json';
+    opts.headers.Accept = 'application/json';
     return httpsRequestAsPromise(opts).then((data) => {
         return JSON.parse(data);
     })

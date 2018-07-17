@@ -218,7 +218,7 @@ export class RootNode extends NodeBase {
 
         try {
             containers = await docker.getContainerDescriptors(containerFilters);
-            if (!containers || containers.length == 0) {
+            if (!containers || containers.length === 0) {
                 return [];
             }
 
