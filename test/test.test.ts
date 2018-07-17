@@ -13,72 +13,72 @@ suite("AsyncPool Tests", () => {
     test("Counting, Low Worker Count", async () => {
         let pool = new AsyncPool(2);
         let counter = 0;
-        for (let i = 0; i < 100000; i++) {
-            pool.addTask(async () => {
-                counter++;
-            });
-        }
-        await pool.runAll();
-        assert.equal(counter, 100000);
-    })
-
-    test("Counting, High Worker Count", async () => {
-        let pool = new AsyncPool(300);
-        let counter = 0;
-        for (let i = 0; i < 100000; i++) {
-            pool.addTask(async () => {
-                counter++;
-            });
-        }
-        await pool.runAll();
-        assert.equal(counter, 100000);
-    })
-
-    test("Counting, Resonable Worker Count", async () => {
-        let pool = new AsyncPool(10);
-        let counter = 0;
-        for (let i = 0; i < 100000; i++) {
-            pool.addTask(async () => {
-                counter++;
-            });
-        }
-        await pool.runAll();
-        assert.equal(counter, 100000);
-    })
-
-    test("Timer, Random 1-10 ms tests", async () => {
-        let pool = new AsyncPool(8);
-        let counter = 0;
-        for (let i = 0; i < 2000; i++) {
-            pool.addTask(async () => {
-                await sleep(Math.random() * 10);
-                counter++;
-            });
-        }
-        await pool.runAll();
-        assert.equal(counter, 2000);
-    }).timeout(7000);
-
-    test("Timer, 100ms , High Worker Count", async () => {
-        let pool = new AsyncPool(300);
-        let counter = 0;
         for (let i = 0; i < 10000; i++) {
             pool.addTask(async () => {
-                await sleep(100);
                 counter++;
             });
         }
         await pool.runAll();
         assert.equal(counter, 10000);
-    }).timeout(7000);
+    })
+
+    test("Counting, High Worker Count", async () => {
+        let pool = new AsyncPool(300);
+        let counter = 0;
+        for (let i = 0; i < 10000; i++) {
+            pool.addTask(async () => {
+                counter++;
+            });
+        }
+        await pool.runAll();
+        assert.equal(counter, 10000);
+    })
+
+    test("Counting, Resonable Worker Count", async () => {
+        let pool = new AsyncPool(10);
+        let counter = 0;
+        for (let i = 0; i < 10000; i++) {
+            pool.addTask(async () => {
+                counter++;
+            });
+        }
+        await pool.runAll();
+        assert.equal(counter, 10000);
+    })
+
+    test("Timer, Random 1-6 ms tests", async () => {
+        let pool = new AsyncPool(8);
+        let counter = 0;
+        for (let i = 0; i < 1000; i++) {
+            pool.addTask(async () => {
+                await sleep(Math.random() * 6);
+                counter++;
+            });
+        }
+        await pool.runAll();
+        assert.equal(counter, 1000);
+    });
+
+    test("Timer, 5ms , High Worker Count", async () => {
+        let pool = new AsyncPool(300);
+        let counter = 0;
+        for (let i = 0; i < 10000; i++) {
+            pool.addTask(async () => {
+                await sleep(5);
+                counter++;
+            });
+        }
+        await pool.runAll();
+        assert.equal(counter, 10000);
+    });
 
     test("Empty array", async () => {
         let pool = new AsyncPool(8);
         let arr = [];
-        for (let i = 0; i < 100000; i++) {
+        for (let i = 0; i < 30000; i++) {
             arr.push('testData' + i);
         }
-        for (let i = 0; i < 100000; i++) {
+        for (let i = 0; i < 30000; i++) {
             pool.addTask(async () => {
                 arr.pop();
             });
@@ -91,10 +91,10 @@ suite("AsyncPool Tests", () => {
         let pool = new AsyncPool(8);
         let arr: number[] = [];
         let arr2: number[] = [];
-        for (let i = 0; i < 100000; i++) {
+        for (let i = 0; i < 30000; i++) {
             arr.push(i);
         }
-        for (let i = 0; i < 100000; i++) {
+        for (let i = 0; i < 30000; i++) {
             pool.addTask(async () => {
                 arr2.push(i);
             });
@@ -115,7 +115,7 @@ suite("AsyncPool Tests", () => {
 
     test("Error thrown appropiately", async () => {
         let pool = new AsyncPool(8);
-        for (let i = 0; i < 100000; i++) {
+        for (let i = 0; i < 100; i++) {
             pool.addTask(async () => {
                 //Empty decoy functions
             });
