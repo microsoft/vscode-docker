@@ -379,7 +379,6 @@ services:
 }
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string) {
-    // TODO: Add support for other platform types
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -562,12 +561,12 @@ export async function configure(): Promise<void> {
     }
 
     const platformType = await quickPickPlatform();
-    if (!platformType) return;
+    if (!platformType) { return; }
 
     let os;
     if (platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
-        if (!os) return;
+        if (!os) { return; }
     }
 
     let port;
@@ -576,7 +575,7 @@ export async function configure(): Promise<void> {
     } else {
         port = await promptForPort(3000);
     }
-    if (!port) return;
+    if (!port) { return; }
 
     let serviceName: string;
     if (platformType.toLowerCase().includes('.net')) {
@@ -584,7 +583,7 @@ export async function configure(): Promise<void> {
     } else {
         serviceName = path.basename(folder.uri.fsPath).toLowerCase();
     }
-    if (!serviceName) return;
+    if (!serviceName) { return; }
 
     let pkg: PackageJson = getDefaultPackageJson();
     if (platformType.toLowerCase() === 'java') {
