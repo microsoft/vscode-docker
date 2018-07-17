@@ -29,7 +29,7 @@ export function unorderedArraysEqual<T>(actual: T[], expected: T[], message?: st
 
 export function notUnorderedArraysEqual<T>(actual: T[], expected: T[], message?: string): void {
     let result = areUnorderedArraysEqual(actual, expected);
-    assert(!result.areEqual, `${message}\n${result.message}`);
+    assert(!result.areEqual, `${message || "Unordered arrays are equal but were expected not to be"}\n${result.message}`);
 }
 
 export async function throwsOrRejectsAsync(block: () => Promise<any>, expected: {}, message?: string): Promise<void> {
