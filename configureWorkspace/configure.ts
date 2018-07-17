@@ -6,6 +6,7 @@ import * as gradleParser from 'gradle-to-js/lib/parser';
 import * as glob from 'glob';
 import { promptForPort, quickPickPlatform, quickPickOS, OS, Platform } from './config-utils';
 import { reporter } from '../telemetry/telemetry';
+import { globAsync } from '../helpers/async';
 
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
@@ -497,16 +498,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
         placeHolder: 'Select Project'
     }
 
-    const projectFiles: string[] = await new Promise<string[]>((resolve, reject) => {
-        glob('**/*.csproj', { cwd: folderPath }, (err, matches: string[]) => {
-            if (err) {
-                reject();
-            } else {
-                resolve(matches);
-            }
-        });
-
-    });
+    const projectFiles: string[] = await globAsync('**/*.csproj', { cwd: folderPath });
 
     if (!projectFiles) {
         return;
