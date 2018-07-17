@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 import { reporter } from '../telemetry/telemetry';
+import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
@@ -58,7 +59,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
         }
     } else {
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
-        if (!uris || uris.length == 0) {
+        if (!uris || uris.length === 0) {
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
             return;
         }
@@ -68,7 +69,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     }
 
     if (selectedItems.length > 0) {
-        const terminal: vscode.Terminal = vscode.window.createTerminal('Docker Compose');
+        const terminal: vscode.Terminal = createTerminal('Docker Compose');
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
         const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';

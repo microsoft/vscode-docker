@@ -16,7 +16,7 @@ import { getCoreNodeModule } from '../utils/utils';
 import { AsyncPool } from '../../utils/asyncpool';
 import { TIMEOUT } from 'dns';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
-const ContainerRegistryManagement = require('azure-arm-containerregistry');
+import ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;

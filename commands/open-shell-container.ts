@@ -3,6 +3,7 @@ import { ContainerItem, quickPickContainer } from './utils/quick-pick-container'
 import { DockerEngineType, docker } from './utils/docker-endpoint';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
+import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
@@ -30,7 +31,7 @@ export async function openShellContainer(context?: ContainerNode) {
 
     if (containerToAttach) {
         docker.getEngineType().then((engineType: DockerEngineType) => {
-            const terminal = vscode.window.createTerminal(`Shell: ${containerToAttach.Image}`);
+            const terminal = createTerminal(`Shell: ${containerToAttach.Image}`);
             terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
             terminal.show();
             if (reporter) {

@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.0.28",
+  "version": "0.1.0-alpha",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -333,6 +333,11 @@
           "type": "number",
           "default": 10,
           "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis."
+        },
+        "docker.host": {
+          "type": "string",
+          "default": "",
+          "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
         },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",

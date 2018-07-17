@@ -6,6 +6,7 @@ import os = require('os');
 import { reporter } from '../telemetry/telemetry';
 import { ImageNode } from '../explorer/models/imageNode';
 import * as fs from 'fs';
+import { createTerminal } from './utils/create-terminal';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
@@ -32,7 +33,7 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
                 options += ` ${portMappings.join(' ')}`;
             }
 
-            const terminal = vscode.window.createTerminal(imageName);
+            const terminal = createTerminal(imageName);
             terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
