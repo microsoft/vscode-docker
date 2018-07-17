@@ -8,9 +8,7 @@ import { RegistryRootNode } from "../explorer/models/registryRootNode";
 import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
-
-const MAX_CONCURRENT_REQUESTS = 8;
-const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
+import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
 
 export class AzureCredentialsManager {
 
@@ -121,23 +119,36 @@ export class AzureCredentialsManager {
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 
-    private async checkLogin() {
+    private async checkLogin(): Promise<void> {
         if (!this.azureAccount) {
             throw 'Azure Account not provided, this computer may be missing the Azure account extension or you may have forgotten to call setAccount ';
         }
 
         const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
 
-        if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
-            throw 'Azure account is logging in'
-        }
-
-        if (this.azureAccount.status === 'LoggedOut') {
+        if (!loggedIntoAzure) {
             throw 'User is not logged into Azure account';
         }
 
-        if (loggedIntoAzure) {
-
+        if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
+            throw 'Azure account is logging in';
         }
+    }
+
+    private async isLoggedIn(): Promise<boolean> {
+        if (!this.azureAccount) {
+            return false;
+        }
+
+        const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
+
+        if (!loggedIntoAzure) {
+            return false;
+
+        } else if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
+            return false;
+        }
+
+        return true;
     }
 }
