@@ -418,7 +418,7 @@ function getDefaultPackageJson(): PackageJson {
 async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
     // open package.json and look for main, scripts start
     const uris: vscode.Uri[] = await getPackageJson(folder);
-    var pkg: PackageJson = getDefaultPackageJson(); //default
+    let pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (uris && uris.length > 0) {
         const json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
@@ -448,7 +448,7 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
 }
 
 async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
-    var pkg: PackageJson = getDefaultPackageJson(); //default
+    let pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (fs.existsSync(path.join(folder.uri.fsPath, 'pom.xml'))) {
         const json = await new Promise<any>((resolve, reject) => {
@@ -563,13 +563,13 @@ export async function configure(): Promise<void> {
     const platformType = await quickPickPlatform();
     if (!platformType) { return; }
 
-    var os;
+    let os;
     if (platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
         if (!os) { return; }
     }
 
-    var port;
+    let port;
     if (platformType.toLowerCase().includes('.net')) {
         port = await promptForPort(80);
     } else {
@@ -577,7 +577,7 @@ export async function configure(): Promise<void> {
     }
     if (!port) { return; }
 
-    var serviceName: string;
+    let serviceName: string;
     if (platformType.toLowerCase().includes('.net')) {
         serviceName = await findCSProjFile(folder);
     } else {

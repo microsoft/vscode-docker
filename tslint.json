@@ -166,7 +166,7 @@
         "no-unnecessary-qualifier": true,
         "no-unsupported-browser-code": true,
         "no-useless-files": true,
-        // TODO: "no-var-keyword": true,
+        "no-var-keyword": true,
         "no-var-requires": true,
         "no-var-self": true,
         "no-void-expression": [

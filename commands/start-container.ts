@@ -79,7 +79,7 @@ export async function startAzureCLI() {
 
         // volume map .azure folder so don't have to log in every time
         const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
-        var vol: string = '';
+        let vol: string = '';
 
         if (fs.existsSync(`${homeDir}/.azure`)) {
             vol += ` -v ${homeDir}/.azure:/root/.azure`;

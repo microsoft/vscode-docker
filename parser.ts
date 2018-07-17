@@ -22,8 +22,8 @@ export abstract class Parser {
     }
 
     tokensAtColumn(tokens: IToken[], charIndex: number): number[] {
-        for (var i = 0, len = tokens.length; i < len; i++) {
-            var token = tokens[i];
+        for (let i = 0, len = tokens.length; i < len; i++) {
+            let token = tokens[i];
 
             if (token.endIndex < charIndex) {
                 continue;
