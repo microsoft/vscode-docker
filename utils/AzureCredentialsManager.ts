@@ -3,17 +3,16 @@ import { AzureAccount } from '../typings/azure-account.api';
 import { ServiceClientCredentials } from 'ms-rest';
 import { AsyncPool } from '../utils/asyncpool';
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { AzureAccountWrapper } from '.././explorer/deploy/azureAccountWrapper';
-import { RegistryRootNode } from "../explorer/models/registryRootNode";
-import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
-import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
+import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
 
 export class AzureCredentialsManager {
 
+    //SETUP
     private static _instance: AzureCredentialsManager = new AzureCredentialsManager();
     private azureAccount: AzureAccount;
+
     constructor() {
         if (AzureCredentialsManager._instance) {
             throw new Error("Error: Instantiation failed: Use SingletonClass.getInstance() instead of new.");
@@ -29,8 +28,10 @@ export class AzureCredentialsManager {
         this.azureAccount = azureAccount;
     }
 
+    //GETTERS
     public getAccount() {
-        return this.azureAccount;
+        if (this.azureAccount) return this.azureAccount;
+        throw ('Azure account is not present, you may have forgotten to call setAccount');
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
@@ -119,23 +120,8 @@ export class AzureCredentialsManager {
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 
-    private async checkLogin(): Promise<void> {
-        if (!this.azureAccount) {
-            throw 'Azure Account not provided, this computer may be missing the Azure account extension or you may have forgotten to call setAccount ';
-        }
-
-        const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
-
-        if (!loggedIntoAzure) {
-            throw 'User is not logged into Azure account';
-        }
-
-        if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
-            throw 'Azure account is logging in';
-        }
-    }
-
-    private async isLoggedIn(): Promise<boolean> {
+    //ERR CHECKS
+    public async isLoggedIn(): Promise<boolean> {
         if (!this.azureAccount) {
             return false;
         }
@@ -143,9 +129,6 @@ export class AzureCredentialsManager {
         const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
 
         if (!loggedIntoAzure) {
-            return false;
-
-        } else if (this.azureAccount.status === 'Initializing' || this.azureAccount.status === 'LoggingIn') {
             return false;
         }
 
