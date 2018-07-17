@@ -133,7 +133,7 @@ export class AzureCredentialsManager {
         }
 
         if (this.azureAccount.status === 'LoggedOut') {
-            throw 'User is not logged into Azure account'
+            throw 'User is not logged into Azure account';
         }
 
         if (loggedIntoAzure) {
