@@ -14,7 +14,7 @@ import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { getCoreNodeModule } from '../utils/utils';
 
-const ContainerRegistryManagement = require('azure-arm-containerregistry');
+import ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
