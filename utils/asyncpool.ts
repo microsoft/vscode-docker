@@ -39,7 +39,9 @@ export class AsyncPool {
         while (this.runnableQueue.length > 0) {
             let func = this.runnableQueue.pop();
             //Avoids possible race condition
-            if (func) await func();
+            if (func) {
+                await func();
+            }
         }
     }
 
