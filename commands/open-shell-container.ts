@@ -12,7 +12,7 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: configOptions.get('attachShellCommand.windowsContainer', 'powershell')
 }
 
-export async function openShellContainer(context?: ContainerNode) {
+export async function openShellContainer(context?: ContainerNode): Promise<void> {
     let containerToAttach: Docker.ContainerDesc;
 
     if (context && context.containerDesc) {

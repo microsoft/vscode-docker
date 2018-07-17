@@ -127,10 +127,10 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     }));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
         browseAzurePortal(context);
     }));
 
@@ -170,7 +170,7 @@ namespace Configuration {
         return result;
     }
 
-    export function initialize() {
+    export function initialize(): void {
         configurationListener = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
             // notify the language server that settings have change
             client.sendNotification(DidChangeConfigurationNotification.type, { settings: null });
@@ -183,7 +183,7 @@ namespace Configuration {
         });
     }
 
-    export function dispose() {
+    export function dispose(): void {
         if (configurationListener) {
             // remove this listener when disposed
             configurationListener.dispose();
@@ -191,7 +191,7 @@ namespace Configuration {
     }
 }
 
-function activateLanguageClient(ctx: vscode.ExtensionContext) {
+function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     let serverModule = ctx.asAbsolutePath(path.join("node_modules", "dockerfile-language-server-nodejs", "lib", "server.js"));
     let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
 

@@ -17,7 +17,7 @@ export function trimWithElipsis(str: string, max: number = 10): string {
 /**
  * Returns a node module installed with VSCode, or null if it fails.
  */
-export function getCoreNodeModule(moduleName: string) {
+export function getCoreNodeModule(moduleName: string): any {
     try {
         // tslint:disable-next-line:non-literal-require
         return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);

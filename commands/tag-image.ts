@@ -6,7 +6,7 @@ import { ImageNode } from "../explorer/models/imageNode";
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage(context?: ImageNode) {
+export async function tagImage(context?: ImageNode): Promise<void> {
 
     let imageName: string;
     let imageToTag: Docker.ImageDesc;
@@ -57,8 +57,9 @@ export async function tagImage(context?: ImageNode) {
             const image = docker.getImage(imageToTag.Id);
 
             // tslint:disable-next-line:no-function-expression // Grandfathered in
-            image.tag({ repo: repo, tag: tag }, function (err: Error, data: any) {
+            image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
                 if (err) {
+                    // TODO: use parseError, proper error handling
                     vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
                 }
             });

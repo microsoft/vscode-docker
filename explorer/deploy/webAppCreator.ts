@@ -28,7 +28,7 @@ export class WebAppCreator extends WizardBase {
 
     }
 
-    async run(promptOnly = false): Promise<WizardResult> {
+    async run(promptOnly: boolean = false): Promise<WizardResult> {
         // If not signed in, execute the sign in command and wait for it...
         if (this.azureAccount.signInStatus !== 'LoggedIn') {
             await vscode.commands.executeCommand(util.getSignInCommandString());
@@ -50,13 +50,13 @@ export class WebAppCreator extends WizardBase {
         return (<WebsiteStep>websiteStep).website;
     }
 
-    protected beforeExecute(step: WizardStep, stepIndex: number) {
+    protected beforeExecute(step: WizardStep, stepIndex: number): void {
         if (stepIndex == 0) {
             this.writeline('Start creating new Web App...');
         }
     }
 
-    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error) {
+    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error): void {
         if (error instanceof UserCancelledError) {
             return;
         }

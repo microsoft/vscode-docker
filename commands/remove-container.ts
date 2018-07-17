@@ -7,7 +7,7 @@ import { ContainerItem, quickPickContainer } from './utils/quick-pick-container'
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
-export async function removeContainer(context?: ContainerNode) {
+export async function removeContainer(context?: ContainerNode): Promise<void> {
 
     let containersToRemove: Docker.ContainerDesc[];
 
@@ -37,9 +37,10 @@ export async function removeContainer(context?: ContainerNode) {
         vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
             containersToRemove.forEach((c) => {
                 // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any) {
+                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any): void {
                     containerCounter++;
                     if (err) {
+                        // TODO: parseError, proper error handling
                         vscode.window.showErrorMessage(err.message);
                         dockerExplorerProvider.refreshContainers();
                         reject();

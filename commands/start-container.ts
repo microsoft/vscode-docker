@@ -10,7 +10,7 @@ import { createTerminal } from './utils/create-terminal';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
-export async function startContainer(context?: ImageNode, interactive?: boolean) {
+export async function startContainer(context?: ImageNode, interactive?: boolean): Promise<void> {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
@@ -51,11 +51,11 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
     }
 }
 
-export async function startContainerInteractive(context: ImageNode) {
+export async function startContainerInteractive(context: ImageNode): Promise<void> {
     await startContainer(context, true);
 }
 
-export async function startAzureCLI() {
+export async function startAzureCLI(): Promise<cp.ChildProcess> {
 
     // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();

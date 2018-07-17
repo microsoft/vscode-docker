@@ -7,7 +7,7 @@ import { dockerExplorerProvider } from '../dockerExtension';
 
 const teleCmdId: string = 'vscode-docker.image.remove';
 
-export async function removeImage(context?: ImageNode) {
+export async function removeImage(context?: ImageNode): Promise<void> {
 
     let imagesToRemove: Docker.ImageDesc[];
 
@@ -31,9 +31,10 @@ export async function removeImage(context?: ImageNode) {
         vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
                 // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getImage(img.Id).remove({ force: true }, function (err, data: any) {
+                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, data: any): void {
                     imageCounter++;
                     if (err) {
+                        // TODO: use parseError, proper error handling
                         vscode.window.showErrorMessage(err.message);
                         reject();
                     }

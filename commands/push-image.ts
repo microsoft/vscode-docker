@@ -6,7 +6,7 @@ import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
-export async function pushImage(context?: ImageNode) {
+export async function pushImage(context?: ImageNode): Promise<void> {
     let imageToPush: Docker.ImageDesc;
     let imageName: string = "";
 

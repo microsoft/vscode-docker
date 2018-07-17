@@ -174,7 +174,7 @@
             "ignore-arrow-function-shorthand" // changed
         ],
         "object-literal-sort-keys": false,
-         "one-variable-per-declaration": false, // changed
+        "one-variable-per-declaration": false, // changed
         "only-arrow-functions": false,
         // TODO: "ordered-imports": true,
         "prefer-array-literal": true,
@@ -184,7 +184,7 @@
         "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
-            false, // TODO: true,
+            true, // TODO: true,
             "call-signature",
             // "arrow-call-signature", changed
             "parameter",
