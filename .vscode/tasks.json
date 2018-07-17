@@ -5,24 +5,26 @@
 // ${fileDirname}: the current opened file's dirname
 // ${fileExtname}: the current opened file's extension
 // ${cwd}: the current working directory of the spawned process
-// A task runner that calls a custom npm script that compiles the extension.
 {
-	"version": "0.1.0",
-	// we want to run npm
-	"command": "npm",
-	// the command is a shell script
-	"isShellCommand": true,
-	// show the output window only if unrecognized errors occur.
-	"showOutput": "silent",
-	// we run the custom script "compile" as defined in package.json
-	"args": [
-		"run",
-		"compile",
-		"--loglevel",
-		"silent"
-	],
-	// The tsc compiler is started in watching mode
-	"isBackground": true,
-	// use the standard tsc in watch mode problem matcher to find compile problems in the output.
-	"problemMatcher": "$tsc-watch"
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// Also: https://raw.githubusercontent.com/Microsoft/vscode-tslint/master/tslint-tests/.vscode/tasks.json
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "lint",
+			"problemMatcher": {
+				"base": "$tslint5",
+				"fileLocation": "relative"
+			}
+		},
+		{
+			"type": "gulp",
+			"task": "tslint",
+			"problemMatcher": [
+				"$tslint5"
+			]
+		}
+	]
 }

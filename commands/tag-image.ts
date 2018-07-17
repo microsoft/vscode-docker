@@ -56,6 +56,7 @@ export async function tagImage(context?: ImageNode) {
 
             const image = docker.getImage(imageToTag.Id);
 
+            // tslint:disable-next-line:no-function-expression // Grandfathered in
             image.tag({ repo: repo, tag: tag }, function (err: Error, data: any) {
                 if (err) {
                     vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
@@ -73,5 +74,5 @@ export async function tagImage(context?: ImageNode) {
                 });
             }
         }
-    };
+    }
 }

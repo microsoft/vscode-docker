@@ -8,6 +8,7 @@ import { promptForPort, quickPickPlatform, quickPickOS, OS, Platform } from './c
 import { reporter } from '../telemetry/telemetry';
 import { globAsync } from '../helpers/async';
 
+// tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
@@ -272,6 +273,7 @@ services:
     }
 }
 
+// tslint:disable-next-line:max-func-body-length
 function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageJson): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
@@ -377,7 +379,6 @@ services:
 }
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string) {
-    // TODO: Add support for other platform types
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -574,7 +575,7 @@ export async function configure(folderPath?: string): Promise<void> {
     } else {
         serviceName = path.basename(folderPath).toLowerCase();
     }
-    if (!serviceName) return;
+    if (!serviceName) { return; }
 
     let pkg: PackageJson = getDefaultPackageJson();
     if (platformType.toLowerCase() === 'java') {

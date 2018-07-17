@@ -2,6 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { reporter } from '../telemetry/telemetry';
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { createTerminal } from "./utils/create-terminal";
 
 const teleCmdId: string = 'vscode-docker.image.build';
 
@@ -36,11 +37,11 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
 async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: vscode.Uri): Promise<Item> {
     if (dockerFileUri) {
         return createItem(folder, dockerFileUri);
-    };
+    }
 
     const uris: vscode.Uri[] = await getDockerFileUris(folder);
 
-    if (!uris || uris.length == 0) {
+    if (!uris || uris.length === 0) {
         vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
         return;
     } else {
@@ -71,10 +72,10 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
     }
 
     const uri: Item = await resolveImageItem(folder, dockerFileUri);
-    if (!uri) return;
+    if (!uri) { return; }
 
     let contextPath: string = uri.path;
-    if (defaultContextPath && defaultContextPath != '') {
+    if (defaultContextPath && defaultContextPath !== '') {
         contextPath = defaultContextPath;
     }
 
@@ -101,9 +102,9 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
 
     const value: string = await vscode.window.showInputBox(opt);
 
-    if (!value) return;
+    if (!value) { return; }
 
-    const terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
+    const terminal: vscode.Terminal = createTerminal('Docker');
     terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${contextPath}`);
     terminal.show();
 

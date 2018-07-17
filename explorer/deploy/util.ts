@@ -10,7 +10,6 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 
-
 export interface PartialList<T> extends Array<T> {
     nextLink?: string;
 }
@@ -26,6 +25,7 @@ export async function listAll<T>(client: { listNext(nextPageLink: string): Promi
 }
 
 export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementClient, site: WebSiteModels.Site, state: string, intervalMs = 5000, timeoutMs = 60000): Promise<void> {
+    // tslint:disable-next-line:promise-must-complete // false positive
     return new Promise((resolve, reject) => {
         const func = async (count: number) => {
             const currentSite = await webSiteManagementClient.webApps.get(site.resourceGroup, site.name);
@@ -35,12 +35,15 @@ export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementCl
                 count += intervalMs;
 
                 if (count < timeoutMs) {
+                    // tslint:disable-next-line:no-string-based-set-timeout // false positive
                     setTimeout(func, intervalMs, count);
                 } else {
                     reject(new Error(`Timeout waiting for Web Site "${site.name}" state "${state}".`));
                 }
             }
         };
+
+        // tslint:disable-next-line:no-string-based-set-timeout // false positive
         setTimeout(func, intervalMs, intervalMs);
     });
 }

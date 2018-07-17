@@ -2,6 +2,7 @@ import vscode = require('vscode');
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 import { reporter } from '../telemetry/telemetry';
 import { ImageNode } from '../explorer/models/imageNode';
+import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
@@ -21,7 +22,7 @@ export async function pushImage(context?: ImageNode) {
     }
 
     if (imageToPush) {
-        const terminal = vscode.window.createTerminal(imageName);
+        const terminal = createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();
         if (reporter) {
@@ -46,5 +47,5 @@ export async function pushImage(context?: ImageNode) {
 
             }
         }
-    };
+    }
 }

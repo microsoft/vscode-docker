@@ -25,4 +25,3 @@ export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvi
     }
 
 }
-
