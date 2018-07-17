@@ -7,9 +7,7 @@ import { NodeBase } from './nodeBase';
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { RegistryType } from './registryType';
-
 import { AsyncPool } from '../utils/asyncpool';
-
 
 const MAX_CONCURRENT_REQUESTS = 8;
 
@@ -142,7 +140,6 @@ export class AzureRepositoryNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: this.contextValue,
             iconPath: this.iconPath
-
         }
     }
 
@@ -155,7 +152,6 @@ export class AzureRepositoryNode extends NodeBase {
         let tags;
 
         const tenantId: string = element.subscription.tenantId;
-
         const session: AzureSession = element.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
 
@@ -199,7 +195,6 @@ export class AzureRepositoryNode extends NodeBase {
                 }
             }, (err, httpResponse, body) => {
                 if (err) { return []; }
-
                 if (body.length > 0) {
                     tags = JSON.parse(body).tags;
                 }
@@ -293,7 +288,6 @@ export class AzureLoadingNode extends NodeBase {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.None
         }
-
     }
 }
 

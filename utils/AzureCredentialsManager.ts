@@ -1,4 +1,3 @@
-
 import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount } from '../typings/azure-account.api';
 import { ServiceClientCredentials } from 'ms-rest';
@@ -142,4 +141,3 @@ export class AzureCredentialsManager {
         }
     }
 }
-
