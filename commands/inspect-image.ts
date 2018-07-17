@@ -3,7 +3,7 @@ import DockerInspectDocumentContentProvider from "../documentContentProviders/do
 import { quickPickImage } from "./utils/quick-pick-image";
 import { reporter } from "../telemetry/telemetry";
 
-export default async function inspectImage(context?: ImageNode) {
+export default async function inspectImage(context?: ImageNode): Promise<void> {
 
     let imageToInspect: Docker.ImageDesc;
 

@@ -5,7 +5,7 @@ import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.container.show-logs';
 
-export async function showLogsContainer(context?: ContainerNode) {
+export async function showLogsContainer(context?: ContainerNode): Promise<void> {
 
     let containerToLog: Docker.ContainerDesc;
 

@@ -116,7 +116,7 @@ export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly iconPath = {
+        public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
             light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
             dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
         }
@@ -289,12 +289,12 @@ export class AzureLoadingNode extends NodeBase {
     }
 }
 
-async function acquireToken(session: AzureSession) {
+async function acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
     return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
         const credentials: any = session.credentials;
         const environment: any = session.environment;
         // tslint:disable-next-line:no-function-expression // Grandfathered in
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any) {
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: { accessToken: string; refreshToken: string; }): void {
             if (err) {
                 reject(err);
             } else {

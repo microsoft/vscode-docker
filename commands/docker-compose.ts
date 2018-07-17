@@ -33,7 +33,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
+async function compose(command: string, message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     let folder: vscode.WorkspaceFolder;
 
     if (!vscode.workspace.workspaceFolders) {
@@ -94,10 +94,10 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
 
 }
 
-export function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
-    compose('up', 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
+export async function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+    return await compose('up', 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]) {
-    compose('down', 'to take down', dockerComposeFileUri, selectedComposeFileUris);
+export async function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+    return await compose('down', 'to take down', dockerComposeFileUri, selectedComposeFileUris);
 }

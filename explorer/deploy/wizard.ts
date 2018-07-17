@@ -15,7 +15,7 @@ export class WizardBase {
 
     protected constructor(protected readonly output: vscode.OutputChannel) { }
 
-    async run(promptOnly = false): Promise<WizardResult> {
+    async run(promptOnly: boolean = false): Promise<WizardResult> {
         // Go through the prompts...
         for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
@@ -101,17 +101,17 @@ export class WizardBase {
         return step;
     }
 
-    write(text: string) {
+    write(text: string): void {
         this.output.append(text);
     }
 
-    writeline(text: string) {
+    writeline(text: string): void {
         this.output.appendLine(text);
     }
 
-    protected beforeExecute(step: WizardStep, stepIndex: number) { }
+    protected beforeExecute(step: WizardStep, stepIndex: number): void { }
 
-    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error) { }
+    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error): void { }
 }
 
 export interface WizardResult {

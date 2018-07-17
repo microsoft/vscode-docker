@@ -13,7 +13,7 @@ class DockerClient {
         this.refreshEndpoint();
     }
 
-    public refreshEndpoint() {
+    public refreshEndpoint(): void {
         const errorMessage = 'The docker.host configuration setting must be entered as <host>:<port>, e.g. dockerhost:2375';
         const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
         if (value) {
@@ -31,7 +31,7 @@ class DockerClient {
                 if (isNaN(newPort)) {
                     vscode.window.showErrorMessage(errorMessage);
                 } else {
-                    this.endPoint = new Docker({ host: newHost, port: newPort});
+                    this.endPoint = new Docker({ host: newHost, port: newPort });
                 }
             }
         }

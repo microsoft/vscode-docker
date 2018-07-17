@@ -378,7 +378,7 @@ services:
     }
 }
 
-function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string) {
+function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string): string {
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -525,7 +525,10 @@ async function findCSProjFile(folder: vscode.WorkspaceFolder): Promise<string> {
     return projectFiles[0].slice(0, -'.csproj'.length);
 
 }
-const DOCKER_FILE_TYPES = {
+
+type GeneratorFunction = (serviceName: string, platform: string, os: string, port: string, packageJson?: PackageJson) => string;
+
+const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
     'docker-compose.debug.yml': genDockerComposeDebug,
     'Dockerfile': genDockerFile,
@@ -612,15 +615,15 @@ export async function configure(): Promise<void> {
         platformType
     });
 
-    async function createWorkspaceFileIfNotExists(fileName, writerFunction) {
+    async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const workspacePath = path.join(folder.uri.fsPath, fileName);
         if (fs.existsSync(workspacePath)) {
             const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
             if (item.title.toLowerCase() === 'yes') {
-                fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
+                fs.writeFileSync(workspacePath, generatorFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
             }
         } else {
-            fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
+            fs.writeFileSync(workspacePath, generatorFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
         }
     }
 }

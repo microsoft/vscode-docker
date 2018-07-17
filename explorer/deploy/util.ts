@@ -24,7 +24,7 @@ export async function listAll<T>(client: { listNext(nextPageLink: string): Promi
     return all;
 }
 
-export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementClient, site: WebSiteModels.Site, state: string, intervalMs = 5000, timeoutMs = 60000): Promise<void> {
+export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementClient, site: WebSiteModels.Site, state: string, intervalMs: number = 5000, timeoutMs: number = 60000): Promise<void> {
     // tslint:disable-next-line:promise-must-complete // false positive
     return new Promise((resolve, reject) => {
         const func = async (count: number) => {

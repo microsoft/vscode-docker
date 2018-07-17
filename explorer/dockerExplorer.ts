@@ -13,7 +13,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     private _registriesNode: RootNode
     private _azureAccount: AzureAccount;
 
-    constructor(azureAccount) {
+    constructor(azureAccount: AzureAccount) {
         this._azureAccount = azureAccount;
     }
 

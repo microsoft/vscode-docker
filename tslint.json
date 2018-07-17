@@ -184,7 +184,7 @@
         "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
-            false, // TODO: true,
+            true, // TODO: true,
             "call-signature",
             // "arrow-call-signature", changed
             "parameter",

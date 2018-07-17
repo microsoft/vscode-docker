@@ -106,7 +106,7 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
 
 }
 
-export function setDockerHubToken(token: string) {
+export function setDockerHubToken(token: string): void {
     _token = { token: token };
 }
 
@@ -227,7 +227,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
 }
 
-export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) {
+export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
 
     if (context) {
         let url: string = 'https://hub.docker.com/';
