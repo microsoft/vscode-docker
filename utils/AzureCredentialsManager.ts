@@ -76,7 +76,7 @@ export class AzureCredentialsManager {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
                     let registry: ContainerModels.Registry[] = await client.registries.list();
-                    registries = registries.concat(registry);
+                    registries.concat(registry);
                 });
             }
             await subPool.scheduleRun();
@@ -99,11 +99,10 @@ export class AzureCredentialsManager {
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
         for (let i = 0; i < subs.length; i++) {
-            subscription = subs[i];
             subPool.addTask(async () => {
                 const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
                 const internalGroups = await resourceClient.resourceGroups.list();
-                resourceGroups = resourceGroups.concat(internalGroups);
+                resourceGroups.concat(internalGroups);
             });
         }
         await subPool.scheduleRun();
