@@ -79,7 +79,7 @@ export class AzureCredentialsManager {
                     registries = registries.concat(registry);
                 });
             }
-            await subPool.scheduleRun();
+            await subPool.runAll();
         }
 
         if (sortFunction) {
