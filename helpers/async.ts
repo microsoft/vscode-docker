@@ -1,5 +1,6 @@
 import * as glob from 'glob';
-import { resolve } from 'path';
+
+// tslint:disable-next-line:no-var-requires
 const { promisify } = require('util');
 
 export async function globAsync(pattern: string, options: glob.IOptions): Promise<string[]> {
