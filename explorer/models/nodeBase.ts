@@ -15,7 +15,7 @@ export class NodeBase {
         };
     }
 
-    async getChildren(element: NodeBase): Promise<NodeBase[]> {
+    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
         return [];
     }
 

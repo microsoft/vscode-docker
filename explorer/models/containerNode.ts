@@ -14,7 +14,7 @@ export class ContainerNode extends NodeBase {
 
     public containerDesc: Docker.ContainerDesc;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {

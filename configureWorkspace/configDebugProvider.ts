@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvider {
 
-    provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
+    public provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
 
         const config: vscode.DebugConfiguration = {
             name: 'Docker: Attach to Node',
