@@ -416,7 +416,7 @@ function getDefaultPackageJson(): PackageJson {
 async function readPackageJson(folderPath: string): Promise<PackageJson> {
     // open package.json and look for main, scripts start
     const uris: vscode.Uri[] = await getPackageJson(folderPath);
-    var pkg: PackageJson = getDefaultPackageJson(); //default
+    let pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (uris && uris.length > 0) {
         const json = JSON.parse(fs.readFileSync(uris[0].fsPath, 'utf8'));
@@ -446,7 +446,7 @@ async function readPackageJson(folderPath: string): Promise<PackageJson> {
 }
 
 async function readPomOrGradle(folderPath: string): Promise<PackageJson> {
-    var pkg: PackageJson = getDefaultPackageJson(); //default
+    let pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (fs.existsSync(path.join(folderPath, 'pom.xml'))) {
         let json = await new Promise<any>((resolve, reject) => {

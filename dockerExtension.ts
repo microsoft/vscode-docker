@@ -6,7 +6,7 @@ import * as opn from 'opn';
 import * as path from 'path';
 import vscode = require('vscode');
 
-import { ext } from "./extensionVariables";
+import { AzureUserInput } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeUp } from './commands/docker-compose';
@@ -37,14 +37,13 @@ import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
-import { AzureUserInput } from 'vscode-azureextensionui';
+import { ext } from "./extensionVariables";
 import { AzureAccount } from './typings/azure-account.api';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
-export let diagnosticCollection: vscode.DiagnosticCollection;
 export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string; };

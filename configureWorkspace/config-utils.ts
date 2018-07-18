@@ -1,5 +1,5 @@
 import vscode = require('vscode');
-import { IAzureUserInput, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 
 export type OS = 'Windows' | 'Linux';
