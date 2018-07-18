@@ -70,8 +70,10 @@ export class RootNode extends NodeBase {
                 if (this._imageCache.length !== images.length) {
                     needToRefresh = true;
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i: number = 0; i < this._imageCache.length; i++) {
                         let before: string = JSON.stringify(this._imageCache[i]);
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         for (let j: number = 0; j < images.length; j++) {
                             let after: string = JSON.stringify(images[j]);
                             if (before === after) {
@@ -130,13 +132,17 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < images.length; i++) {
+                // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 if (!images[i].RepoTags) {
                     let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
                     node.imageDesc = images[i];
                     imageNodes.push(node);
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let j = 0; j < images[i].RepoTags.length; j++) {
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
                         node.imageDesc = images[i];
                         imageNodes.push(node);
@@ -180,8 +186,10 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i = 0; i < this._containerCache.length; i++) {
                         let ctr: Docker.ContainerDesc = this._containerCache[i];
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         for (let j = 0; j < containers.length; j++) {
                             // can't do a full object compare because "Status" keeps changing for running containers
                             if (ctr.Id === containers[j].Id &&
@@ -222,6 +230,7 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < containers.length; i++) {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";

@@ -27,6 +27,7 @@ function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
 
 function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscode.QuickPickItem[] {
     const items: vscode.QuickPickItem[] = [];
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < uris.length; i++) {
         items.push(createItem(folder, uris[i]));
     }
@@ -54,6 +55,7 @@ async function compose(command: string, message: string, dockerComposeFileUri?: 
     let selectedItems: Item[] = [];
 
     if (dockerComposeFileUri) {
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
         for (let i: number = 0; i < selectedComposeFileUris.length; i++) {
             selectedItems.push(createItem(folder, selectedComposeFileUris[i]));
         }

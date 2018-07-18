@@ -78,10 +78,10 @@
         "no-unnecessary-override": true,
         // TODO: "no-unsafe-any": true,
         "no-unsafe-finally": true,
-        // TODO: "no-unused-expression": true,
+        "no-unused-expression": true,
         "no-use-before-declare": false, // changed (recommended turned off: https://palantir.github.io/tslint/rules/no-use-before-declare/)
         "no-with-statement": true,
-        // TODO:"promise-function-async": true,
+        "promise-function-async": true,
         "promise-must-complete": true,
         "radix": true,
         "react-this-binding-issue": true,
@@ -179,12 +179,12 @@
         "ordered-imports": true,
         "prefer-array-literal": true,
         "prefer-const": false, // changed
-        // TODO: "prefer-for-of": true,
+        "prefer-for-of": true,
         "prefer-method-signature": true,
         "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
-            true, // TODO: true,
+            true,
             "call-signature",
             // "arrow-call-signature", changed
             "parameter",

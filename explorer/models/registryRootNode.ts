@@ -135,6 +135,7 @@ export class RegistryRootNode extends NodeBase {
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
             let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult, 'client': any }[] = [];
             //Acquire each subscription's data simultaneously
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
@@ -148,12 +149,14 @@ export class RegistryRootNode extends NodeBase {
             await subPool.runAll();
 
             const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subsAndRegistries.length; i++) {
                 const client = subsAndRegistries[i].client;
                 const registries = subsAndRegistries[i].registries;
                 const subscription = subsAndRegistries[i].subscription;
 
                 //Go through the registries and add them to the async pool
+                // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));

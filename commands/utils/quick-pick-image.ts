@@ -17,13 +17,14 @@ function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
 function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageItem[] {
     const items: ImageItem[] = [];
 
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < images.length; i++) {
         if (!images[i].RepoTags) {
             // dangling
             const item = createItem(images[i], '<none>:<none>');
             items.push(item);
         } else {
-
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let j = 0; j < images[i].RepoTags.length; j++) {
                 const item = createItem(images[i], images[i].RepoTags[j]);
                 items.push(item);
