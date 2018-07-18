@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as glob from 'glob';
+import * as gradleParser from "gradle-to-js/lib/parser";
 import * as path from "path";
+import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
 import { globAsync } from '../helpers/async';
 import { reporter } from '../telemetry/telemetry';
