@@ -5,7 +5,7 @@ This project incorporates material from the projects listed below.  The original
 and the license under which Microsoft received such material are set out below. Microsoft reserves
 all other rights not expressly granted, whether by implication, estoppel or otherwise.
 
-1. DefinitelyTyped version 0.0.1 (https://github.com/borisyankov/DefinitelyTyped)
+1. DefinitelyTyped (https://github.com/borisyankov/DefinitelyTyped)
 
 This project is licensed under the MIT license.
 Copyrights are respective of each contributor listed at the beginning of each definition file.
@@ -28,7 +28,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-2. dockerode versions 2.3.1 (https://github.com/apocas/dockerode)
+2. dockerode version (https://github.com/apocas/dockerode)
 
 Pedro Dias - @pedromdias
 
@@ -41,7 +41,7 @@ under the license is distributed on an "as is" basis, without warranties or cond
 of any kind, either express or implied. See the license for the specific language
 governing permissions and limitations under the license.
 
-3. dockerfile-language-server-nodejs version 0.0.6 (https://github.com/rcjsuen/dockerfile-language-server-nodejs)
+3. dockerfile-language-server-nodejs (https://github.com/rcjsuen/dockerfile-language-server-nodejs)
 
 Copyright (c) 2017 Remy Suen
 
@@ -60,7 +60,7 @@ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-4. request-promise version 4.2.2 (https://github.com/request/request-promise)
+4. request-promise version (https://github.com/request/request-promise)
 
 ISC License
 
