@@ -5,6 +5,8 @@
 import * as opn from 'opn';
 import * as path from 'path';
 import vscode = require('vscode');
+
+import { AzureUserInput } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeUp } from './commands/docker-compose';
@@ -36,6 +38,7 @@ import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explor
 import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { ext } from "./extensionVariables";
 import { Reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
 
@@ -43,7 +46,6 @@ export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
-export let diagnosticCollection: vscode.DiagnosticCollection;
 export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string; };
@@ -65,11 +67,14 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
+    // This allows for standard interactions with the end user (as opposed to test input)
+    ext.ui = new AzureUserInput(ctx.globalState);
+
     for (let i = 0; i < installedExtensions.length; i++) {
-        const ext = installedExtensions[i];
-        if (ext.id === 'ms-vscode.azure-account') {
+        const extension = installedExtensions[i];
+        if (extension.id === 'ms-vscode.azure-account') {
             try {
-                azureAccount = await ext.activate();
+                azureAccount = await extension.activate();
             } catch (error) {
                 console.log('Failed to activate the Azure Account Extension: ' + error);
             }

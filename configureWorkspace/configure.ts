@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as glob from 'glob';
-import * as gradleParser from 'gradle-to-js/lib/parser';
-import { match } from 'minimatch';
-import * as path from 'path';
-import * as pomParser from 'pom-parser';
-import vscode = require('vscode');
+import * as gradleParser from "gradle-to-js/lib/parser";
+import * as path from "path";
+import * as pomParser from "pom-parser";
+import * as vscode from "vscode";
+import { globAsync } from '../helpers/async';
 import { reporter } from '../telemetry/telemetry';
-import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
+import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
 // tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
@@ -400,8 +400,8 @@ interface PackageJson {
     artifactName: string
 }
 
-async function getPackageJson(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return vscode.workspace.findFiles(new vscode.RelativePattern(folder, 'package.json'), null, 1, null);
+async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
+    return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, null);
 }
 
 function getDefaultPackageJson(): PackageJson {
@@ -415,9 +415,9 @@ function getDefaultPackageJson(): PackageJson {
     };
 }
 
-async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
+async function readPackageJson(folderPath: string): Promise<PackageJson> {
     // open package.json and look for main, scripts start
-    const uris: vscode.Uri[] = await getPackageJson(folder);
+    const uris: vscode.Uri[] = await getPackageJson(folderPath);
     let pkg: PackageJson = getDefaultPackageJson(); //default
 
     if (uris && uris.length > 0) {
@@ -447,13 +447,13 @@ async function readPackageJson(folder: vscode.WorkspaceFolder): Promise<PackageJ
     return pkg;
 }
 
-async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJson> {
+async function readPomOrGradle(folderPath: string): Promise<PackageJson> {
     let pkg: PackageJson = getDefaultPackageJson(); //default
 
-    if (fs.existsSync(path.join(folder.uri.fsPath, 'pom.xml'))) {
-        const json = await new Promise<any>((resolve, reject) => {
+    if (fs.existsSync(path.join(folderPath, 'pom.xml'))) {
+        let json = await new Promise<any>((resolve, reject) => {
             pomParser.parse({
-                filePath: path.join(folder.uri.fsPath, 'pom.xml')
+                filePath: path.join(folderPath, 'pom.xml')
             }, (error, response) => {
                 if (error) {
                     reject(`Failed to parse pom.xml: ${error}`);
@@ -462,16 +462,17 @@ async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJ
                 resolve(response.pomObject);
             });
         });
+        json = json || {};
 
-        if (json.project.version) {
+        if (json.project && json.project.version) {
             pkg.version = json.project.version;
         }
 
-        if (json.project.artifactid) {
+        if (json.project && json.project.artifactid) {
             pkg.artifactName = `target/${json.project.artifactid}-${pkg.version}.jar`;
         }
-    } else if (fs.existsSync(path.join(folder.uri.fsPath, 'build.gradle'))) {
-        const json = await gradleParser.parseFile(path.join(folder.uri.fsPath, 'build.gradle'));
+    } else if (fs.existsSync(path.join(folderPath, 'build.gradle'))) {
+        const json = await gradleParser.parseFile(path.join(folderPath, 'build.gradle'));
 
         if (json.jar && json.jar.version) {
             pkg.version = json.jar.version;
@@ -482,7 +483,7 @@ async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJ
         if (json.jar && json.jar.archiveName) {
             pkg.artifactName = `build/libs/${json.jar.archiveName}`;
         } else {
-            const baseName = json.jar && json.jar.baseName ? json.jar.baseName : json.archivesBaseName || folder.name;
+            const baseName = json.jar && json.jar.baseName ? json.jar.baseName : json.archivesBaseName || path.basename(folderPath);
             pkg.artifactName = `build/libs/${baseName}-${pkg.version}.jar`;
         }
     }
@@ -490,24 +491,15 @@ async function readPomOrGradle(folder: vscode.WorkspaceFolder): Promise<PackageJ
     return pkg;
 }
 
-async function findCSProjFile(folder: vscode.WorkspaceFolder): Promise<string> {
+// Returns the relative path of the project file without the extension
+async function findCSProjFile(folderPath: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Project'
     }
 
-    const projectFiles: string[] = await new Promise<string[]>((resolve, reject) => {
-
-        glob('**/*.csproj', { cwd: folder.uri.fsPath }, (err, matches: string[]) => {
-            if (err) {
-                reject();
-            } else {
-                resolve(matches);
-            }
-        });
-
-    });
+    const projectFiles: string[] = await globAsync('**/*.csproj', { cwd: folderPath });
 
     if (!projectFiles) {
         return;
@@ -546,53 +538,53 @@ const YES_OR_NO_PROMPT: vscode.MessageItem[] = [
     }
 ];
 
-export async function configure(): Promise<void> {
-    let folder: vscode.WorkspaceFolder;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-        folder = vscode.workspace.workspaceFolders[0];
-    } else {
-        folder = await (<any>vscode).window.showWorkspaceFolderPick();
-    }
-
-    if (!folder) {
-        if (!vscode.workspace.workspaceFolders) {
-            vscode.window.showErrorMessage('Docker files can only be generated if VS Code is opened on a folder.');
+export async function configure(folderPath?: string): Promise<void> {
+    if (!folderPath) {
+        let folder: vscode.WorkspaceFolder;
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+            folder = vscode.workspace.workspaceFolders[0];
         } else {
-            vscode.window.showErrorMessage('Docker files can only be generated if a workspace folder is picked in VS Code.');
+            folder = await vscode.window.showWorkspaceFolderPick();
         }
-        return;
+
+        if (!folder) {
+            if (!vscode.workspace.workspaceFolders) {
+                throw new Error('Docker files can only be generated if VS Code is opened on a folder.');
+            } else {
+                throw new Error('Docker files can only be generated if a workspace folder is picked in VS Code.');
+            }
+        }
+
+        folderPath = folder.uri.fsPath;
     }
 
-    const platformType = await quickPickPlatform();
-    if (!platformType) { return; }
+    const platformType: Platform = await quickPickPlatform();
 
-    let os;
+    let os: OS | undefined;
     if (platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
-        if (!os) { return; }
     }
 
-    let port;
+    let port: string;
     if (platformType.toLowerCase().includes('.net')) {
         port = await promptForPort(80);
     } else {
         port = await promptForPort(3000);
     }
-    if (!port) { return; }
 
     let serviceName: string;
     if (platformType.toLowerCase().includes('.net')) {
-        serviceName = await findCSProjFile(folder);
+        serviceName = await findCSProjFile(folderPath);
     } else {
-        serviceName = path.basename(folder.uri.fsPath).toLowerCase();
+        serviceName = path.basename(folderPath).toLowerCase();
     }
     if (!serviceName) { return; }
 
     let pkg: PackageJson = getDefaultPackageJson();
     if (platformType.toLowerCase() === 'java') {
-        pkg = await readPomOrGradle(folder);
+        pkg = await readPomOrGradle(folderPath);
     } else {
-        pkg = await readPackageJson(folder);
+        pkg = await readPackageJson(folderPath);
     }
 
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
@@ -616,7 +608,7 @@ export async function configure(): Promise<void> {
     });
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
-        const workspacePath = path.join(folder.uri.fsPath, fileName);
+        const workspacePath = path.join(folderPath, fileName);
         if (fs.existsSync(workspacePath)) {
             const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
             if (item.title.toLowerCase() === 'yes') {
