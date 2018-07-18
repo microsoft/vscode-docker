@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { reporter } from '../telemetry/telemetry';
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from "./utils/create-terminal";
 
 const teleCmdId: string = 'vscode-docker.image.build';
@@ -51,7 +51,7 @@ async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: 
 
 }
 
-export async function buildImage(dockerFileUri?: vscode.Uri) {
+export async function buildImage(dockerFileUri?: vscode.Uri): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 

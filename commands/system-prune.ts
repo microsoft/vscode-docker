@@ -1,12 +1,12 @@
 import vscode = require('vscode');
-import { reporter } from '../telemetry/telemetry';
-import { docker } from './utils/docker-endpoint';
 import { getCoreNodeModule } from '../explorer/utils/utils';
+import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
+import { docker } from './utils/docker-endpoint';
 
 const teleCmdId: string = 'vscode-docker.system.prune';
 
-export async function systemPrune() {
+export async function systemPrune(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = createTerminal("docker system prune");
     const semver = getCoreNodeModule('semver');
@@ -14,7 +14,7 @@ export async function systemPrune() {
     try {
 
         if (configOptions.get('promptOnSystemPrune', true)) {
-            var res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
+            let res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
                 { title: 'Yes' },
                 { title: 'Cancel', isCloseAffordance: true }
             );

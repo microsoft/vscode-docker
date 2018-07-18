@@ -166,7 +166,7 @@
         "no-unnecessary-qualifier": true,
         "no-unsupported-browser-code": true,
         "no-useless-files": true,
-        // TODO: "no-var-keyword": true,
+        "no-var-keyword": true,
         "no-var-requires": true,
         "no-var-self": true,
         "no-void-expression": [
@@ -176,7 +176,7 @@
         "object-literal-sort-keys": false,
         "one-variable-per-declaration": false, // changed
         "only-arrow-functions": false,
-        // TODO: "ordered-imports": true,
+        "ordered-imports": true,
         "prefer-array-literal": true,
         "prefer-const": false, // changed
         // TODO: "prefer-for-of": true,
@@ -184,7 +184,7 @@
         "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
-            false, // TODO: true,
+            true, // TODO: true,
             "call-signature",
             // "arrow-call-signature", changed
             "parameter",

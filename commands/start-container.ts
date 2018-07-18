@@ -1,16 +1,16 @@
-import vscode = require('vscode');
-import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-import { DockerEngineType, docker } from './utils/docker-endpoint';
 import * as cp from 'child_process';
-import os = require('os');
-import { reporter } from '../telemetry/telemetry';
-import { ImageNode } from '../explorer/models/imageNode';
 import * as fs from 'fs';
+import os = require('os');
+import vscode = require('vscode');
+import { ImageNode } from '../explorer/models/imageNode';
+import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
+import { docker, DockerEngineType } from './utils/docker-endpoint';
+import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
-export async function startContainer(context?: ImageNode, interactive?: boolean) {
+export async function startContainer(context?: ImageNode, interactive?: boolean): Promise<void> {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
@@ -51,11 +51,11 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
     }
 }
 
-export async function startContainerInteractive(context: ImageNode) {
+export async function startContainerInteractive(context: ImageNode): Promise<void> {
     await startContainer(context, true);
 }
 
-export async function startAzureCLI() {
+export async function startAzureCLI(): Promise<cp.ChildProcess> {
 
     // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();
@@ -79,7 +79,7 @@ export async function startAzureCLI() {
 
         // volume map .azure folder so don't have to log in every time
         const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
-        var vol: string = '';
+        let vol: string = '';
 
         if (fs.existsSync(`${homeDir}/.azure`)) {
             vol += ` -v ${homeDir}/.azure:/root/.azure`;

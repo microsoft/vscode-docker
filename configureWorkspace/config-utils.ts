@@ -16,7 +16,7 @@ export type Platform = 'Go' |
  * @throws `UserCancelledError` if the user cancels.
  */
 export async function promptForPort(port: number): Promise<string> {
-    var opt: vscode.InputBoxOptions = {
+    let opt: vscode.InputBoxOptions = {
         placeHolder: `${port}`,
         prompt: 'What port does your app listen on?',
         value: `${port}`
@@ -30,7 +30,7 @@ export async function promptForPort(port: number): Promise<string> {
  * @throws `UserCancelledError` if the user cancels.
  */
 export async function quickPickPlatform(): Promise<Platform> {
-    var opt: vscode.QuickPickOptions = {
+    let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Application Platform'
@@ -56,7 +56,7 @@ export async function quickPickPlatform(): Promise<Platform> {
  * @throws `UserCancelledError` if the user cancels.
  */
 export async function quickPickOS(): Promise<OS> {
-    var opt: vscode.QuickPickOptions = {
+    let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Operating System'

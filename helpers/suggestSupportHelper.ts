@@ -5,15 +5,15 @@
 'use strict';
 
 import vscode = require('vscode');
+import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 import hub = require('../dockerHubApi');
 import parser = require('../parser');
-import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 
 export class SuggestSupportHelper {
     suggestImages(word: string): Promise<vscode.CompletionItem[]> {
         return hub.searchImagesInRegistryHub(word, true).then((results) => {
             return results.map((image) => {
-                var stars = '';
+                let stars = '';
                 if (image.star_count > 0) {
                     stars = ' ' + image.star_count + ' ' + (image.star_count > 1 ? 'stars' : 'star');
                 }
@@ -32,11 +32,11 @@ export class SuggestSupportHelper {
     searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[]> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
-                var r: vscode.MarkedString[] = [];
-                var tags = hub.tagsForImage(result);
+                let r: vscode.MarkedString[] = [];
+                let tags = hub.tagsForImage(result);
 
                 // Name, tags and stars.
-                var nameString = '';
+                let nameString = '';
                 if (tags.length > 0) {
                     nameString = '**' + result.name + ' ' + tags + '** ';
                 } else {
@@ -44,7 +44,7 @@ export class SuggestSupportHelper {
                 }
 
                 if (result.star_count) {
-                    var plural = (result.star_count > 1);
+                    let plural = (result.star_count > 1);
                     nameString += '**' + String(result.star_count) + (plural ? ' stars' : ' star') + '**';
                 }
 
@@ -62,12 +62,12 @@ export class SuggestSupportHelper {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        var originalValue = _parser.tokenValue(line, tokens[tokenIndex]);
+        let originalValue = _parser.tokenValue(line, tokens[tokenIndex]);
 
-        var keyToken: string = null;
+        let keyToken: string = null;
         tokenIndex--;
         while (tokenIndex >= 0) {
-            var type = tokens[tokenIndex].type;
+            let type = tokens[tokenIndex].type;
             if (type === parser.TokenType.String || type === parser.TokenType.Text) {
                 return;
             }
@@ -81,7 +81,7 @@ export class SuggestSupportHelper {
         if (!keyToken) {
             return;
         }
-        var keyName = _parser.keyNameFromKeyToken(keyToken);
+        let keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
             let imageName;
 

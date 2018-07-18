@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
+import { docker } from '../commands/utils/docker-endpoint';
+import { AzureAccount } from '../typings/azure-account.api';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
-import { AzureAccount } from '../typings/azure-account.api';
-import { docker } from '../commands/utils/docker-endpoint';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
@@ -13,7 +13,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     private _registriesNode: RootNode
     private _azureAccount: AzureAccount;
 
-    constructor(azureAccount) {
+    constructor(azureAccount: AzureAccount) {
         this._azureAccount = azureAccount;
     }
 

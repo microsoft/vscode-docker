@@ -1,12 +1,10 @@
-import vscode = require('vscode');
-import * as path from 'path';
 import * as fs from 'fs';
-import * as pomParser from 'pom-parser';
-import * as gradleParser from 'gradle-to-js/lib/parser';
 import * as glob from 'glob';
-import { promptForPort, quickPickPlatform, quickPickOS, OS, Platform } from './config-utils';
-import { reporter } from '../telemetry/telemetry';
+import * as path from "path";
+import * as vscode from "vscode";
 import { globAsync } from '../helpers/async';
+import { reporter } from '../telemetry/telemetry';
+import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
 // tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
@@ -378,7 +376,7 @@ services:
     }
 }
 
-function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string) {
+function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string): string {
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -517,7 +515,10 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     return projectFiles[0].slice(0, -'.csproj'.length);
 
 }
-const DOCKER_FILE_TYPES = {
+
+type GeneratorFunction = (serviceName: string, platform: string, os: string, port: string, packageJson?: PackageJson) => string;
+
+const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
     'docker-compose.debug.yml': genDockerComposeDebug,
     'Dockerfile': genDockerFile,
@@ -557,19 +558,19 @@ export async function configure(folderPath?: string): Promise<void> {
 
     const platformType: Platform = await quickPickPlatform();
 
-    var os: OS | undefined;
+    let os: OS | undefined;
     if (platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
     }
 
-    var port: string;
+    let port: string;
     if (platformType.toLowerCase().includes('.net')) {
         port = await promptForPort(80);
     } else {
         port = await promptForPort(3000);
     }
 
-    var serviceName: string;
+    let serviceName: string;
     if (platformType.toLowerCase().includes('.net')) {
         serviceName = await findCSProjFile(folderPath);
     } else {
@@ -604,15 +605,15 @@ export async function configure(folderPath?: string): Promise<void> {
         platformType
     });
 
-    async function createWorkspaceFileIfNotExists(fileName, writerFunction) {
+    async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const workspacePath = path.join(folderPath, fileName);
         if (fs.existsSync(workspacePath)) {
             const item: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists. Would you like to override it?`, ...YES_OR_NO_PROMPT);
             if (item.title.toLowerCase() === 'yes') {
-                fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
+                fs.writeFileSync(workspacePath, generatorFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
             }
         } else {
-            fs.writeFileSync(workspacePath, writerFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
+            fs.writeFileSync(workspacePath, generatorFunction(serviceName, platformType, os, port, pkg), { encoding: 'utf8' });
         }
     }
 }

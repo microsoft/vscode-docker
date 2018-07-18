@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { AzureAccountWrapper } from './azureAccountWrapper';
-import { AzureImageNode } from '../models/azureRegistryNodes';
-import { DockerHubImageNode } from '../models/dockerHubNodes';
-import { reporter } from '../../telemetry/telemetry';
-import { SubscriptionModels, ResourceManagementClient, ResourceModels } from 'azure-arm-resource';
-import { WizardBase, WizardResult, WizardStep, SubscriptionStepBase, QuickPickItemWithData, UserCancelledError } from './wizard';
+import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
+import WebSiteManagementClient = require('azure-arm-website');
 import * as fs from 'fs';
 import * as path from 'path';
-import * as util from './util';
+import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
-import WebSiteManagementClient = require('azure-arm-website');
+import { reporter } from '../../telemetry/telemetry';
+import { AzureImageNode } from '../models/azureRegistryNodes';
+import { DockerHubImageNode } from '../models/dockerHubNodes';
+import { AzureAccountWrapper } from './azureAccountWrapper';
+import * as util from './util';
+import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
 
 const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
 
@@ -28,7 +28,7 @@ export class WebAppCreator extends WizardBase {
 
     }
 
-    async run(promptOnly = false): Promise<WizardResult> {
+    async run(promptOnly: boolean = false): Promise<WizardResult> {
         // If not signed in, execute the sign in command and wait for it...
         if (this.azureAccount.signInStatus !== 'LoggedIn') {
             await vscode.commands.executeCommand(util.getSignInCommandString());
@@ -50,13 +50,13 @@ export class WebAppCreator extends WizardBase {
         return (<WebsiteStep>websiteStep).website;
     }
 
-    protected beforeExecute(step: WizardStep, stepIndex: number) {
+    protected beforeExecute(step: WizardStep, stepIndex: number): void {
         if (stepIndex === 0) {
             this.writeline('Start creating new Web App...');
         }
     }
 
-    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error) {
+    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error): void {
         if (error instanceof UserCancelledError) {
             return;
         }
@@ -164,8 +164,8 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
         const quickPickOptions = { placeHolder: `Select the resource group where the new Web App will be created in. (${this.stepProgressText})` };
         const subscription = this.getSelectedSubscription();
         const resourceClient = new ResourceManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-        var resourceGroups: ResourceModels.ResourceGroup[];
-        var locations: SubscriptionModels.Location[];
+        let resourceGroups: ResourceModels.ResourceGroup[];
+        let locations: SubscriptionModels.Location[];
         const resourceGroupsTask = util.listAll(resourceClient.resourceGroups, resourceClient.resourceGroups.list());
         const locationsTask = this.azureAccount.getLocationsBySubscription(this.getSelectedSubscription());
         await Promise.all([resourceGroupsTask, locationsTask]).then(results => {
