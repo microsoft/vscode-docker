@@ -60,6 +60,7 @@ export class SuggestSupportHelper {
         })
     }
 
+    // tslint:disable-next-line:promise-function-async // Grandfathered in
     public getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
         // -------------
         // Detect <<image: [["something"]]>>
