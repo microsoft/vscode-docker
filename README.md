@@ -79,6 +79,9 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
+## Doing more with the extension
+Check out this [tutorial](https://code.visualstudio.com/docs/azure/docker) to learn to utilize the other features of the extension, like linting in your docker compose file.
+
 ## Configuration Settings
 
 The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
