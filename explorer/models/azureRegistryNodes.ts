@@ -29,7 +29,7 @@ export class AzureRegistryNode extends NodeBase {
     public type: RegistryType;
     public userName: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -38,7 +38,7 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
+    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
         const repoNodes: AzureRepositoryNode[] = [];
         let node: AzureRepositoryNode;
 
@@ -134,7 +134,7 @@ export class AzureRepositoryNode extends NodeBase {
     public subscription: SubscriptionModels.Subscription;
     public userName: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -143,7 +143,7 @@ export class AzureRepositoryNode extends NodeBase {
         }
     }
 
-    async getChildren(element: AzureRepositoryNode): Promise<AzureImageNode[]> {
+    public async getChildren(element: AzureRepositoryNode): Promise<AzureImageNode[]> {
         const imageNodes: AzureImageNode[] = [];
         let node: AzureImageNode;
         let created: string = '';
@@ -248,7 +248,7 @@ export class AzureImageNode extends NodeBase {
     public subscription: SubscriptionModels.Subscription;
     public userName: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         displayName = `${displayName} (${this.created})`;
@@ -266,7 +266,7 @@ export class AzureNotSignedInNode extends NodeBase {
         super('Click here to sign in to Azure...');
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             command: {
@@ -283,7 +283,7 @@ export class AzureLoadingNode extends NodeBase {
         super('Loading...');
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.None

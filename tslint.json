@@ -137,7 +137,7 @@
             false, // changed
             140
         ],
-        // TODO: "member-access": true,
+        "member-access": true,
         "member-ordering": [
             false, // changed
             {

@@ -13,7 +13,7 @@ export class DockerComposeParser extends Parser {
         super(parseRegex);
     }
 
-    parseLine(textLine: vscode.TextLine): IToken[] {
+    public parseLine(textLine: vscode.TextLine): IToken[] {
         let r: IToken[] = [];
         let lastTokenEndIndex = 0, lastPushedToken: IToken = null;
 

@@ -21,7 +21,7 @@ export class DockerHubOrgNode extends NodeBase {
     public password: string;
     public token: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -30,7 +30,7 @@ export class DockerHubOrgNode extends NodeBase {
         }
     }
 
-    async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
+    public async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
         const repoNodes: DockerHubRepositoryNode[] = [];
         let node: DockerHubRepositoryNode;
 
@@ -71,7 +71,7 @@ export class DockerHubRepositoryNode extends NodeBase {
     public userName: string;
     public password: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -80,7 +80,7 @@ export class DockerHubRepositoryNode extends NodeBase {
         }
     }
 
-    async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
+    public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
         const imageNodes: DockerHubImageNode[] = [];
         let node: DockerHubImageNode;
 
@@ -115,7 +115,7 @@ export class DockerHubImageNode extends NodeBase {
     public repository: any;
     public created: string;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         displayName = `${displayName} (${this.created})`;
