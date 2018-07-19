@@ -34,8 +34,9 @@
     "onCommand:vscode-docker.image.remove",
     "onCommand:vscode-docker.image.push",
     "onCommand:vscode-docker.image.tag",
-    "onCommand:vscode-docker.container.start",
+    "onCommand:vscode-docker.container.start.container-from-image",
     "onCommand:vscode-docker.container.start.interactive",
+    "onCommand:vscode-docker.container.start.container",
     "onCommand:vscode-docker.container.start.azurecli",
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.container.restart",
@@ -124,11 +125,11 @@
       ],
       "view/item/context": [
         {
-          "command": "vscode-docker.container.start",
+          "command": "vscode-docker.container.start.container-from-image",
           "when": "view == dockerExplorer && viewItem == localImageNode"
         },
         {
-          "command": "vscode-docker.container.start",
+          "command": "vscode-docker.container.start.container-from-image",
           "when": "view == dockerExplorer && viewItem == imagesRootNode"
         },
         {
@@ -138,6 +139,10 @@
         {
           "command": "vscode-docker.container.start.interactive",
           "when": "view == dockerExplorer && viewItem == imagesRootNode"
+        },
+        {
+          "command": "vscode-docker.container.start.container",
+          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
         },
         {
           "command": "vscode-docker.image.push",
@@ -182,10 +187,6 @@
         {
           "command": "vscode-docker.container.restart",
           "when": "view == dockerExplorer && viewItem == runningLocalContainerNode"
-        },
-        {
-          "command": "vscode-docker.container.restart",
-          "when": "view == dockerExplorer && viewItem == stoppedLocalContainerNode"
         },
         {
           "command": "vscode-docker.container.restart",
@@ -486,7 +487,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.container.start",
+        "command": "vscode-docker.container.start.container-from-image",
         "title": "Run",
         "description": "Starts a container from an image",
         "category": "Docker"
@@ -495,6 +496,12 @@
         "command": "vscode-docker.container.start.interactive",
         "title": "Run Interactive",
         "description": "Starts a container from an image and runs it interactively",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.container.start.container",
+        "title": "Start",
+        "description": "Starts an existing container",
         "category": "Docker"
       },
       {

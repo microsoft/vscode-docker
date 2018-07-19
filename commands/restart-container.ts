@@ -6,9 +6,10 @@ import { ContainerItem, quickPickContainer } from './utils/quick-pick-container'
 
 import vscode = require('vscode');
 
-const teleCmdId: string = 'vscode-docker.container.restart';
+let teleCmdId: string = 'vscode-docker.container.restart';
 
-export async function restartContainer(context?: ContainerNode): Promise<void> {
+export async function restartContainer(context?: ContainerNode, isRestartCommand: boolean = true): Promise<void> {
+    teleCmdId = isRestartCommand ? teleCmdId : 'vscode-docker.container.start.container';
 
     let containersToRestart: Docker.ContainerDesc[];
 
@@ -35,7 +36,7 @@ export async function restartContainer(context?: ContainerNode): Promise<void> {
         const numContainers: number = containersToRestart.length;
         let containerCounter: number = 0;
 
-        vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
+        vscode.window.setStatusBarMessage(`Docker: ${isRestartCommand ? 'Restarting' : 'Starting'} Container(s)...`, new Promise((resolve, reject) => {
             containersToRestart.forEach((container) => {
                 docker.getContainer(container.Id).restart((err: Error, data: any) => {
                     containerCounter++;
