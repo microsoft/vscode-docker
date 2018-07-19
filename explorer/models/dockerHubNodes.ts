@@ -37,6 +37,7 @@ export class DockerHubOrgNode extends NodeBase {
         const user: dockerHub.User = await dockerHub.getUser();
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
         const repoPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
         for (let i = 0; i < myRepos.length; i++) {
             repoPool.addTask(async () => {
                 let myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
@@ -84,6 +85,7 @@ export class DockerHubRepositoryNode extends NodeBase {
         let node: DockerHubImageNode;
 
         const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
         for (let i = 0; i < myTags.length; i++) {
             node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
             node.password = element.password;

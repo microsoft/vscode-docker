@@ -70,6 +70,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     // This allows for standard interactions with the end user (as opposed to test input)
     ext.ui = new AzureUserInput(ctx.globalState);
 
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {
         const extension = installedExtensions[i];
         if (extension.id === 'ms-vscode.azure-account') {

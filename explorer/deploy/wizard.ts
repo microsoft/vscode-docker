@@ -17,6 +17,7 @@ export class WizardBase {
 
     public async run(promptOnly: boolean = false): Promise<WizardResult> {
         // Go through the prompts...
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
         for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
 

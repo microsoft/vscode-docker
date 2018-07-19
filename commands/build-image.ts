@@ -28,6 +28,7 @@ function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
 
 function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscode.QuickPickItem[] {
     let items: vscode.QuickPickItem[] = [];
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < uris.length; i++) {
         items.push(createItem(folder, uris[i]));
     }

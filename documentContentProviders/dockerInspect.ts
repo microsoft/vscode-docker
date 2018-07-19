@@ -12,6 +12,7 @@ export default class DockerInspectDocumentContentProvider implements TextDocumen
         window.showTextDocument(await workspace.openTextDocument(uri));
     }
 
+    // tslint:disable-next-line:promise-function-async // Grandfathered in
     public provideTextDocumentContent({ path }: Uri): Promise<string> {
         return new Promise((resolve, reject) => {
             const imageName = path.substring(1).replace(URI_EXTENSION, "");

@@ -91,6 +91,7 @@ export class AzureRegistryNode extends NodeBase {
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i = 0; i < repositories.length; i++) {
                         node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
                         node.accessTokenARC = accessTokenARC;
@@ -198,6 +199,7 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < tags.length; i++) {
                 pool.addTask(async () => {
                     let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {

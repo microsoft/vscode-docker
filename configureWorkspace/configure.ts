@@ -596,16 +596,18 @@ export async function configure(folderPath?: string): Promise<void> {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
-    /* __GDPR__
-       "command" : {
-          "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
-          "platformType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-       }
-     */
-    reporter && reporter.sendTelemetryEvent('command', {
-        command: 'vscode-docker.configure',
-        platformType
-    });
+    if (reporter) {
+        /* __GDPR__
+        "command" : {
+            "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
+            "platformType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+        }
+        */
+        reporter.sendTelemetryEvent('command', {
+            command: 'vscode-docker.configure',
+            platformType
+        });
+    }
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const workspacePath = path.join(folderPath, fileName);

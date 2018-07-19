@@ -54,11 +54,13 @@ export async function removeContainer(context?: ContainerNode): Promise<void> {
         }));
     }
 
-    /* __GDPR__
-       "command" : {
-          "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-       }
-     */
-    reporter && reporter.sendTelemetryEvent("command", { command: teleCmdId });
+    if (reporter) {
+        /* __GDPR__
+        "command" : {
+            "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+        }
+        */
+        reporter.sendTelemetryEvent("command", { command: teleCmdId });
+    }
 
 }

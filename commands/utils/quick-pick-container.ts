@@ -17,6 +17,7 @@ function createItem(container: Docker.ContainerDesc): ContainerItem {
 function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): ContainerItem[] {
     const items: ContainerItem[] = [];
 
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < containers.length; i++) {
         const item = createItem(containers[i]);
         items.push(item);
