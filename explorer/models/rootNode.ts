@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { ContainerNode } from './containerNode';
 import { docker } from '../../commands/utils/docker-endpoint';
+import { AzureAccount } from '../../typings/azure-account.api';
+import { ContainerNode } from './containerNode';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
-import { AzureAccount } from '../../typings/azure-account.api';
 
 const imageFilters = {
     "filters": {
@@ -44,7 +44,7 @@ export class RootNode extends NodeBase {
         this._azureAccount = azureAccount;
     }
 
-    autoRefreshImages(): void {
+    public autoRefreshImages(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
 
@@ -70,8 +70,10 @@ export class RootNode extends NodeBase {
                 if (this._imageCache.length !== images.length) {
                     needToRefresh = true;
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i: number = 0; i < this._imageCache.length; i++) {
                         let before: string = JSON.stringify(this._imageCache[i]);
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         for (let j: number = 0; j < images.length; j++) {
                             let after: string = JSON.stringify(images[j]);
                             if (before === after) {
@@ -97,7 +99,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -106,7 +108,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    async getChildren(element): Promise<NodeBase[]> {
+    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
 
         if (element.contextValue === 'imagesRootNode') {
             return this.getImages();
@@ -130,13 +132,17 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < images.length; i++) {
+                // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 if (!images[i].RepoTags) {
                     let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
                     node.imageDesc = images[i];
                     imageNodes.push(node);
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let j = 0; j < images[i].RepoTags.length; j++) {
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
                         node.imageDesc = images[i];
                         imageNodes.push(node);
@@ -153,7 +159,7 @@ export class RootNode extends NodeBase {
         return imageNodes;
     }
 
-    autoRefreshContainers(): void {
+    public autoRefreshContainers(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
 
@@ -180,8 +186,10 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i = 0; i < this._containerCache.length; i++) {
                         let ctr: Docker.ContainerDesc = this._containerCache[i];
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         for (let j = 0; j < containers.length; j++) {
                             // can't do a full object compare because "Status" keeps changing for running containers
                             if (ctr.Id === containers[j].Id &&
@@ -218,10 +226,11 @@ export class RootNode extends NodeBase {
 
         try {
             containers = await docker.getContainerDescriptors(containerFilters);
-            if (!containers || containers.length == 0) {
+            if (!containers || containers.length === 0) {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < containers.length; i++) {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";

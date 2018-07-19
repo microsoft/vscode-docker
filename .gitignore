@@ -5,3 +5,5 @@ package-lock.json
 
 # Artifacts from running vscode extension tests
 .vscode-test
+testOutput
+.vs

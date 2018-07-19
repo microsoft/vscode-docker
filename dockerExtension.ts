@@ -4,10 +4,12 @@
 
 import * as opn from 'opn';
 import * as path from 'path';
+import * as vscode from 'vscode';
+import { AzureUserInput } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
-import inspectImageCommand from './commands/inspect-image';
+import inspectImage from './commands/inspect-image';
 import { openShellContainer } from './commands/open-shell-container';
 import { pushImage } from './commands/push-image';
 import { removeContainer } from './commands/remove-container';
@@ -18,6 +20,7 @@ import { startAzureCLI, startContainer, startContainerInteractive } from './comm
 import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
 import { tagImage } from './commands/tag-image';
+import { docker } from './commands/utils/docker-endpoint';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -34,17 +37,15 @@ import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explor
 import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { ext } from "./extensionVariables";
 import { Reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
-import vscode = require('vscode');
-
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
 
-export var diagnosticCollection: vscode.DiagnosticCollection;
-export var dockerExplorerProvider: DockerExplorerProvider;
+export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string; };
 
@@ -52,7 +53,7 @@ export interface ComposeVersionKeys {
     All: KeyInfo,
     v1: KeyInfo,
     v2: KeyInfo
-};
+}
 
 let client: LanguageClient;
 
@@ -65,11 +66,15 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
-    for (var i = 0; i < installedExtensions.length; i++) {
-        const ext = installedExtensions[i];
-        if (ext.id === 'ms-vscode.azure-account') {
+    // This allows for standard interactions with the end user (as opposed to test input)
+    ext.ui = new AzureUserInput(ctx.globalState);
+
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
+    for (let i = 0; i < installedExtensions.length; i++) {
+        const extension = installedExtensions[i];
+        if (extension.id === 'ms-vscode.azure-account') {
             try {
-                azureAccount = await ext.activate();
+                azureAccount = await extension.activate();
             } catch (error) {
                 console.log('Failed to activate the Azure Account Extension: ' + error);
             }
@@ -86,7 +91,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
-    var yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
+    let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 
@@ -94,7 +99,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.configure', configure));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.build', buildImage));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImageCommand));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.inspect', inspectImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.remove', removeImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.push', pushImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.image.tag', tagImage));
@@ -128,15 +133,14 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }));
 
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     }));
-    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', async (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
         browseAzurePortal(context);
     }));
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
 
     activateLanguageClient(ctx);
 }
@@ -172,14 +176,20 @@ namespace Configuration {
         return result;
     }
 
-    export function initialize() {
-        configurationListener = vscode.workspace.onDidChangeConfiguration(() => {
+    export function initialize(): void {
+        configurationListener = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
             // notify the language server that settings have change
             client.sendNotification(DidChangeConfigurationNotification.type, { settings: null });
+
+            // Update endpoint and refresh explorer if needed
+            if (e.affectsConfiguration('docker')) {
+                docker.refreshEndpoint();
+                vscode.commands.executeCommand("vscode-docker.explorer.refresh");
+            }
         });
     }
 
-    export function dispose() {
+    export function dispose(): void {
         if (configurationListener) {
             // remove this listener when disposed
             configurationListener.dispose();
@@ -187,7 +197,7 @@ namespace Configuration {
     }
 }
 
-function activateLanguageClient(ctx: vscode.ExtensionContext) {
+function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     let serverModule = ctx.asAbsolutePath(path.join("node_modules", "dockerfile-language-server-nodejs", "lib", "server.js"));
     let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
 
@@ -211,6 +221,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext) {
     }
 
     client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);
+    // tslint:disable-next-line:no-floating-promises
     client.onReady().then(() => {
         // attach the VS Code settings listener
         Configuration.initialize();

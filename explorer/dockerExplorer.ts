@@ -1,44 +1,45 @@
 import * as vscode from 'vscode';
+import { docker } from '../commands/utils/docker-endpoint';
+import { AzureAccount } from '../typings/azure-account.api';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
-import { AzureAccount } from '../typings/azure-account.api';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
     private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
-    readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
+    public readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
     private _registriesNode: RootNode
     private _azureAccount: AzureAccount;
 
-    constructor(azureAccount) {
+    constructor(azureAccount: AzureAccount) {
         this._azureAccount = azureAccount;
     }
 
-    refresh(): void {
+    public refresh(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
         this._onDidChangeTreeData.fire(this._containersNode);
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
-    refreshImages(): void {
+    public refreshImages(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
     }
 
-    refreshContainers(): void {
+    public refreshContainers(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
     }
 
-    refreshRegistries(): void {
+    public refreshRegistries(): void {
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
-    getTreeItem(element: NodeBase): vscode.TreeItem {
+    public getTreeItem(element: NodeBase): vscode.TreeItem {
         return element.getTreeItem();
     }
 
-    async getChildren(element?: NodeBase): Promise<NodeBase[]> {
+    public async getChildren(element?: NodeBase): Promise<NodeBase[]> {
         if (!element) {
             return this.getRootNodes();
         }

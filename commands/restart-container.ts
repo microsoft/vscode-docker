@@ -1,22 +1,20 @@
+import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
+import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-import { reporter } from '../telemetry/telemetry';
-import { ContainerNode } from '../explorer/models/containerNode';
-import { dockerExplorerProvider } from '../dockerExtension';
 
 import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.restart';
 
-
-export async function restartContainer(context?: ContainerNode) {
+export async function restartContainer(context?: ContainerNode): Promise<void> {
 
     let containersToRestart: Docker.ContainerDesc[];
 
     if (context && context.containerDesc) {
         containersToRestart = [context.containerDesc];
-    }
-    else {
+    } else {
         const opts = {
             "filters": {
                 "status": ["running", "paused", "exited"]
@@ -26,8 +24,7 @@ export async function restartContainer(context?: ContainerNode) {
         if (selectedItem) {
             if (selectedItem.label.toLocaleLowerCase().includes("all containers")) {
                 containersToRestart = await docker.getContainerDescriptors(opts);
-            }
-            else {
+            } else {
                 containersToRestart = [selectedItem.containerDesc];
             }
         }

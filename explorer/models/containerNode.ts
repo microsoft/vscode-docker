@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { NodeBase } from './nodeBase';
 import { trimWithElipsis } from '../utils/utils';
+import { NodeBase } from './nodeBase';
 
 export class ContainerNode extends NodeBase {
 
@@ -14,7 +14,7 @@ export class ContainerNode extends NodeBase {
 
     public containerDesc: Docker.ContainerDesc;
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {

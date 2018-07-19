@@ -4,26 +4,27 @@
 
 'use strict';
 
-import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri } from 'vscode';
-import composeVersions from './dockerComposeKeyInfo';
-import helper = require('../helpers/suggestSupportHelper');
+import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
 import hub = require('../dockerHubApi');
+import helper = require('../helpers/suggestSupportHelper');
+import composeVersions from './dockerComposeKeyInfo';
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
 
     public triggerCharacters: string[] = [];
     public excludeTokens: string[] = [];
 
+    // tslint:disable-next-line:promise-function-async // Grandfathered in
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
-        var yamlSuggestSupport = new helper.SuggestSupportHelper();
+        let yamlSuggestSupport = new helper.SuggestSupportHelper();
 
         // Determine the schema version of the current compose file,
         // based on the existence of a top-level "version" property.
-        var versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
-        var version = versionMatch ? versionMatch[2] : "1";
+        let versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
+        let version = versionMatch ? versionMatch[2] : "1";
 
         // Get the line where intellisense was invoked on (e.g. 'image: u').
-        var line = document.lineAt(position.line).text;
+        let line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
@@ -35,25 +36,25 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         // Get the text where intellisense was invoked on (e.g. 'u').
         let word = range && document.getText(range) || '';
 
-        var textBefore = line.substring(0, position.character);
+        let textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
             return Promise.resolve(this.suggestKeys(word, version));
         }
 
         // Matches strings like: 'image: "ubuntu'
-        var imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
+        let imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
 
         if (imageTextWithQuoteMatchYaml) {
-            var imageText = imageTextWithQuoteMatchYaml[1];
+            let imageText = imageTextWithQuoteMatchYaml[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 
         // Matches strings like: 'image: ubuntu'
-        var imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
+        let imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
 
         if (imageTextWithoutQuoteMatch) {
-            var imageText = imageTextWithoutQuoteMatch[1];
+            let imageText = imageTextWithoutQuoteMatch[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 
@@ -66,7 +67,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         const keys = composeVersions[`v${version}`] || composeVersions.All;
 
         return Object.keys(keys).map(ruleName => {
-            var completionItem = new CompletionItem(ruleName);
+            let completionItem = new CompletionItem(ruleName);
             completionItem.kind = CompletionItemKind.Keyword;
             completionItem.insertText = ruleName + ': ';
             completionItem.documentation = keys[ruleName];

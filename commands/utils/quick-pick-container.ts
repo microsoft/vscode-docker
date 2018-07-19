@@ -1,38 +1,38 @@
 import * as Docker from 'dockerode';
-import {docker} from './docker-endpoint';
-import vscode = require('vscode');
 import { ContainerDesc } from 'dockerode';
-
+import vscode = require('vscode');
+import { docker } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {
     containerDesc: Docker.ContainerDesc
 }
 
-function createItem(container: Docker.ContainerDesc) : ContainerItem {
-    return <ContainerItem> {
+function createItem(container: Docker.ContainerDesc): ContainerItem {
+    return <ContainerItem>{
         label: container.Image,
         containerDesc: container
     };
 }
 
-function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean) : ContainerItem[] {
-    const items : ContainerItem[] = [];
+function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): ContainerItem[] {
+    const items: ContainerItem[] = [];
 
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < containers.length; i++) {
         const item = createItem(containers[i]);
         items.push(item);
     }
 
     if (includeAll && containers.length > 0) {
-        items.unshift(<ContainerItem> {
-            label: 'All Containers' 
+        items.unshift(<ContainerItem>{
+            label: 'All Containers'
         });
     }
 
     return items;
 }
 
-export async function quickPickContainer(includeAll: boolean = false, opts?: {}) : Promise<ContainerItem>{
+export async function quickPickContainer(includeAll: boolean = false, opts?: {}): Promise<ContainerItem> {
     let containers: ContainerDesc[];
 
     // "status": ["created", "restarting", "running", "paused", "exited", "dead"]
@@ -42,11 +42,11 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
                 "status": ["running"]
             }
         };
-    };
+    }
 
     try {
         containers = await docker.getContainerDescriptors(opts);
-        if (!containers || containers.length == 0) {
+        if (!containers || containers.length === 0) {
             vscode.window.showInformationMessage('There are no Docker Containers.');
             return;
         } else {

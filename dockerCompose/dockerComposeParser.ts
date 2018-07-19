@@ -5,19 +5,19 @@
 'use strict';
 
 import vscode = require('vscode');
-import { Parser, TokenType, IToken } from '../parser';
+import { IToken, Parser, TokenType } from '../parser';
 
 export class DockerComposeParser extends Parser {
     constructor() {
-        var parseRegex = /\:+$/g;
+        let parseRegex = /\:+$/g;
         super(parseRegex);
     }
 
-    parseLine(textLine: vscode.TextLine): IToken[] {
-        var r: IToken[] = [];
-        var lastTokenEndIndex = 0, lastPushedToken: IToken = null;
+    public parseLine(textLine: vscode.TextLine): IToken[] {
+        let r: IToken[] = [];
+        let lastTokenEndIndex = 0, lastPushedToken: IToken = null;
 
-        var emit = (end: number, type: TokenType) => {
+        let emit = (end: number, type: TokenType) => {
             if (end <= lastTokenEndIndex) {
                 return;
             }
@@ -39,12 +39,12 @@ export class DockerComposeParser extends Parser {
             lastTokenEndIndex = end;
         };
 
-        var inString = false;
-        var idx = textLine.firstNonWhitespaceCharacterIndex;
-        var line = textLine.text;
+        let inString = false;
+        let idx = textLine.firstNonWhitespaceCharacterIndex;
+        let line = textLine.text;
 
-        for (var i = idx, len = line.length; i < len; i++) {
-            var ch = line.charAt(i);
+        for (let i = idx, len = line.length; i < len; i++) {
+            let ch = line.charAt(i);
 
             if (inString) {
                 if (ch === '"' && line.charAt(i - 1) !== '\\') {

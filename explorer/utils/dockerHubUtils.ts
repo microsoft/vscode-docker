@@ -1,15 +1,15 @@
-import * as vscode from 'vscode';
 import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
-import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
+import * as vscode from 'vscode';
+import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { getCoreNodeModule } from './utils';
 
 let _token: Token;
 
 export interface Token {
     token: string
-};
+}
 
 export interface User {
     company: string
@@ -24,12 +24,12 @@ export interface User {
     profile_url: string
     type: string
     username: string
-};
+}
 
 export interface Repository {
     namespace: string
     name: string
-};
+}
 
 export interface RepositoryInfo {
     user: string
@@ -78,13 +78,13 @@ export interface Image {
     variant: any
 }
 
-export function dockerHubLogout(): void {
+export async function dockerHubLogout(): Promise<void> {
 
     const keytar: typeof keytarType = getCoreNodeModule('keytar');
     if (keytar) {
-        keytar.deletePassword('vscode-docker', 'dockerhub.token');
-        keytar.deletePassword('vscode-docker', 'dockerhub.password');
-        keytar.deletePassword('vscode-docker', 'dockerhub.username');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.token');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.password');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.username');
     }
     _token = null;
 }
@@ -106,7 +106,7 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
 
 }
 
-export function setDockerHubToken(token: string) {
+export function setDockerHubToken(token: string): void {
     _token = { token: token };
 }
 
@@ -227,7 +227,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
 }
 
-export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) {
+export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
 
     if (context) {
         let url: string = 'https://hub.docker.com/';
@@ -241,6 +241,8 @@ export function browseDockerHub(context?: DockerHubImageNode | DockerHubReposito
                 break;
             case 'dockerHubImageTag':
                 url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
+                break;
+            default:
                 break;
         }
         opn(url);

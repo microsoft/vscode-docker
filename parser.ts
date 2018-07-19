@@ -7,23 +7,23 @@
 import {TextLine} from 'vscode';
 
 export abstract class Parser {
-    _tokenParseRegex: RegExp;
+    public _tokenParseRegex: RegExp;
 
     constructor(parseTokenRegex: RegExp) {
         this._tokenParseRegex = parseTokenRegex;
     }
 
-    keyNameFromKeyToken(keyToken: string): string {
+    public keyNameFromKeyToken(keyToken: string): string {
         return keyToken.replace(this._tokenParseRegex, '');
     }
 
-    tokenValue(line: string, token: IToken): string {
+    public tokenValue(line: string, token: IToken): string {
         return line.substring(token.startIndex, token.endIndex);
     }
 
-    tokensAtColumn(tokens: IToken[], charIndex: number): number[] {
-        for (var i = 0, len = tokens.length; i < len; i++) {
-            var token = tokens[i];
+    public tokensAtColumn(tokens: IToken[], charIndex: number): number[] {
+        for (let i = 0, len = tokens.length; i < len; i++) {
+            let token = tokens[i];
 
             if (token.endIndex < charIndex) {
                 continue;
@@ -39,7 +39,7 @@ export abstract class Parser {
         return [tokens.length - 1];
     }
 
-    abstract parseLine(textLine: TextLine): IToken[];
+    public abstract parseLine(textLine: TextLine): IToken[];
 }
 
 export enum TokenType {
