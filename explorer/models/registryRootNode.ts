@@ -83,9 +83,9 @@ export class RegistryRootNode extends NodeBase {
 
             if (id && id.token) {
                 if (this._keytar) {
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
                 }
             } else {
                 return orgNodes;
