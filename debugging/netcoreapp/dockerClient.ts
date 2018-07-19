@@ -43,6 +43,7 @@ export interface DockerClient {
     matchId(id1: string, id2: string): boolean;
     removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void>;
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
+    trimId(id: string): string;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -183,6 +184,10 @@ export class CliDockerClient implements DockerClient {
         }
 
         return containerId;
+    }
+
+    trimId(id: string): string {
+        return id.substring(0, 12);
     }
 }
 

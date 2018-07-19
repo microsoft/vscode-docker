@@ -119,8 +119,8 @@ export class DefaultDockerManager implements DockerManager {
         const imageId = await this.dockerOutputManager.performOperation(
             'Building Docker image...',
             () => this.dockerClient.buildImage(options, content => this.dockerOutputManager.append(content)),
-            'Docker image built.',
-            'Failed to build Docker image.');
+            id => `Docker image ${this.dockerClient.trimId(id)} built.`,
+            err => `Failed to build Docker image: ${err}`);
 
         const dockerfileHash = await dockerfileHasher.value;
         const dockerIgnoreHash = await dockerIgnoreHasher.value;
@@ -173,8 +173,8 @@ export class DefaultDockerManager implements DockerManager {
                         volumes
                     });
             },
-            'Container started.',
-            'Unable to start container.');
+            id => `Container ${this.dockerClient.trimId(id)} started.`,
+            err => `Unable to start container: ${err}`);
 
         const cache = await this.appCacheFactory.getStorage(options.appFolder);
 
