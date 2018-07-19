@@ -68,6 +68,8 @@ export interface DockerManager {
 }
 
 export class DefaultDockerManager implements DockerManager {
+    private static readonly DebugContainersKey = 'DefaultDockerManager.debugContainers';
+
     constructor(
         private readonly appCacheFactory: AppStorageProvider,
         private readonly debuggerClient: DebuggerClient,
@@ -191,11 +193,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
-        const runningContainers = this.workspaceState.get<string[]>('DefaultDockerManager.runningContainers', []);
-
-        runningContainers.push(containerId);
-
-        await this.workspaceState.update('DefaultDockerManager.runningContainers', runningContainers);
+        await this.addToDebugContainers(containerId);
 
         const browserUrl = await this.getContainerWebEndpoint(containerId);
 
@@ -228,24 +226,8 @@ export class DefaultDockerManager implements DockerManager {
         };
     }
 
-    private static matchId(id1: string, id2: string): boolean {
-        const validateArgument =
-            id => {
-                if (id === undefined || id1.length < 12) {
-                    throw new Error(`'${id}' must be defined and at least 12 characters.`)
-                }
-            };
-
-        validateArgument(id1);
-        validateArgument(id2);
-
-        return id1.length < id2.length
-            ? id2.startsWith(id1)
-            : id1.startsWith(id2);
-    }
-
     async cleanupAfterLaunch(): Promise<void> {
-        const debugContainers = this.workspaceState.get<string[]>('DefaultDockerManager.runningContainers', []);
+        const debugContainers = this.workspaceState.get<string[]>(DefaultDockerManager.DebugContainersKey, []);
 
         const runningContainers = (await this.dockerClient.listContainers({ format: '{{.ID}}' })).split('\n');
 
@@ -254,7 +236,7 @@ export class DefaultDockerManager implements DockerManager {
         if (runningContainers && runningContainers.length >= 0) {
             const removeContainerTasks =
                 debugContainers
-                    .filter(containerId => runningContainers.find(runningContainerId => DefaultDockerManager.matchId(containerId, runningContainerId)))
+                    .filter(containerId => runningContainers.find(runningContainerId => this.dockerClient.matchId(containerId, runningContainerId)))
                     .map(
                         async containerId => {
                             try {
@@ -271,7 +253,15 @@ export class DefaultDockerManager implements DockerManager {
             remainingContainers = [];
         }
 
-        await this.workspaceState.update('DefaultDockerManager.runningContainers', remainingContainers);
+        await this.workspaceState.update(DefaultDockerManager.DebugContainersKey, remainingContainers);
+    }
+
+    private async addToDebugContainers(containerId: string): Promise<void> {
+        const runningContainers = this.workspaceState.get<string[]>(DefaultDockerManager.DebugContainersKey, []);
+
+        runningContainers.push(containerId);
+
+        await this.workspaceState.update(DefaultDockerManager.DebugContainersKey, runningContainers);
     }
 
     private async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {

@@ -40,6 +40,7 @@ export interface DockerClient {
     buildImage(options: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string>;
     inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined>;
     listContainers(options?: DockerContainersListOptions): Promise<string>;
+    matchId(id1: string, id2: string): boolean;
     removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void>;
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
 }
@@ -122,6 +123,22 @@ export class CliDockerClient implements DockerClient {
         const output = await this.processProvider.exec(command, {});
 
         return output.stdout;
+    }
+
+    matchId(id1: string, id2: string): boolean {
+        const validateArgument =
+            id => {
+                if (id === undefined || id1.length < 12) {
+                    throw new Error(`'${id}' must be defined and at least 12 characters.`)
+                }
+            };
+
+        validateArgument(id1);
+        validateArgument(id2);
+
+        return id1.length < id2.length
+            ? id2.startsWith(id1)
+            : id1.startsWith(id2);
     }
 
     async removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void> {
