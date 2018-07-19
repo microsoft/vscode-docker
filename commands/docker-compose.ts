@@ -35,7 +35,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-async function compose(commands: string[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+async function compose(commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     let folder: vscode.WorkspaceFolder;
 
     if (!vscode.workspace.workspaceFolders) {
