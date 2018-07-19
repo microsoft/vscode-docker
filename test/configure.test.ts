@@ -53,7 +53,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         assert(!fileContains(fileName, text), `Unexpected found '${text}' in file ${fileName}`);
     }
 
-    async function getProjectFiles(): Promise<string[]> {
+    async function getFilesInProject(): Promise<string[]> {
         let files = await globAsync('**/*', {
             cwd: testRootFolder,
             dot: true, // include files beginning with dot
@@ -77,7 +77,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("No package.json", async () => {
             await testConfigureDocker('Node.js', '1234');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
@@ -118,7 +118,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Node.js', '4321');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
@@ -158,7 +158,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Node.js', '4321');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
@@ -184,19 +184,33 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         </Project>
         `;
 
-        // https://github.com/Microsoft/vscode-docker/issues/295
-        // testInEmptyFolder("No project file", async () => {
-        //     await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('.NET Core Console', 'Windows', '1234'),
-        //         { message: "No .csproj file could be found." }
-        //     );
-        // });
+        testInEmptyFolder("No project file", async () => {
+            await assertEx.throwsOrRejectsAsync(async () =>
+                testConfigureDocker('.NET Core Console', 'Windows', '1234'),
+                { message: "No .csproj file could be found." }
+            );
+        });
+
+        testInEmptyFolder("Multiple project files", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', projectFile);
+            await writeFile('projectFolder2', 'aspnetapp.csproj', projectFile);
+            await testConfigureDocker('.NET Core Console', 'Windows', '1234', 'projectFolder2/aspnetapp.csproj');
+
+            let projectFiles = await getFilesInProject();
+            assertEx.unorderedArraysEqual(
+                projectFiles,
+                ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj'], "The set of files in the project folder after configure was run is not correct.");
+
+            assertNotFileContains('Dockerfile', 'projectFolder1/aspnetapp');
+            assertFileContains('Dockerfile', 'projectFolder2/aspnetapp');
+        });
 
         testInEmptyFolder("Windows", async () => {
             await writeFile('projectFolder', 'aspnetapp.csproj', projectFile);
 
             await testConfigureDocker('.NET Core Console', 'Windows', '1234');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
 
             // No docker-compose files
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder/aspnetapp.csproj'], "The set of files in the project folder after configure was run is not correct.");
@@ -214,7 +228,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('.NET Core Console', 'Linux', '1234');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
 
             // No docker-compose files
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder2/aspnetapp2.csproj'], "The set of files in the project folder after configure was run is not correct.");
@@ -244,12 +258,11 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         </Project>
         `;
 
-        // https://github.com/Microsoft/vscode-docker/issues/295
-        // testInEmptyFolder("ASP.NET Core no project file", async () => {
-        //     await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', 'Windows', '1234'),
-        //         { message: "No .csproj file could be found." }
-        //     );
-        // });
+        testInEmptyFolder("ASP.NET Core no project file", async () => {
+            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', 'Windows', '1234'),
+                { message: "No .csproj file could be found." }
+            );
+        });
 
         testInEmptyFolder("Windows", async () => {
             // https://github.com/dotnet/dotnet-docker/tree/master/samples/aspnetapp
@@ -257,7 +270,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('ASP.NET Core', 'Windows', undefined /*use default port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
 
             // No docker-compose files
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder/aspnetapp.csproj'], "The set of files in the project folder after configure was run is not correct.");
@@ -274,7 +287,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('ASP.NET Core', 'Linux', '1234');
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
 
             // No docker-compose files
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', '.dockerignore', 'projectFolder2/aspnetapp2.csproj'], "The set of files in the project folder after configure was run is not correct.");
@@ -290,12 +303,17 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
     // Java
 
     suite("Java", () => {
-        // https://github.com/Microsoft/vscode-docker/issues/295
-        // testInEmptyFolder("No pom file", async () => {
-        //     await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('Java', '1234'),
-        //         { message: "No .csproj file could be found." }
-        //     );
-        // });
+        testInEmptyFolder("No pom file", async () => {
+            await testConfigureDocker('Java', '1234');
+
+            let projectFiles = await getFilesInProject();
+            assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
+
+            assertFileContains('Dockerfile', 'EXPOSE 1234');
+            assertFileContains('Dockerfile', 'ARG JAVA_OPTS');
+            assertFileContains('Dockerfile', 'ADD testoutput.jar testoutput.jar');
+            assertFileContains('Dockerfile', 'ENTRYPOINT exec java $JAVA_OPTS -jar testoutput.jar');
+        });
 
         testInEmptyFolder("Empty pom file", async () => {
             await writeFile('', 'pom.xml', `
@@ -304,7 +322,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Java', undefined /*port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
@@ -333,7 +351,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Java', undefined /*port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
@@ -348,7 +366,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Java', undefined /*port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
@@ -430,7 +448,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Java', undefined /*port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
@@ -447,7 +465,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Python", async () => {
             await testConfigureDocker('Python', undefined /*port*/);
 
-            let projectFiles = await getProjectFiles();
+            let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
 
             assertFileContains('Dockerfile', 'FROM python:alpine');
