@@ -56,7 +56,7 @@
         "no-duplicate-super": true,
         "no-duplicate-variable": true,
         "no-empty": false, // changed
-        // TODO: "no-floating-promises": true,
+        "no-floating-promises": true,
         "no-for-in-array": true,
         "no-import-side-effect": true,
         "no-increment-decrement": false, // changed

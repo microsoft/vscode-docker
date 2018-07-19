@@ -78,13 +78,13 @@ export interface Image {
     variant: any
 }
 
-export function dockerHubLogout(): void {
+export async function dockerHubLogout(): Promise<void> {
 
     const keytar: typeof keytarType = getCoreNodeModule('keytar');
     if (keytar) {
-        keytar.deletePassword('vscode-docker', 'dockerhub.token');
-        keytar.deletePassword('vscode-docker', 'dockerhub.password');
-        keytar.deletePassword('vscode-docker', 'dockerhub.username');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.token');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.password');
+        await keytar.deletePassword('vscode-docker', 'dockerhub.username');
     }
     _token = null;
 }

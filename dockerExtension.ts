@@ -221,6 +221,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     }
 
     client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);
+    // tslint:disable-next-line:no-floating-promises
     client.onReady().then(() => {
         // attach the VS Code settings listener
         Configuration.initialize();
