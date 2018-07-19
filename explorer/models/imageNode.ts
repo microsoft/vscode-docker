@@ -16,7 +16,7 @@ export class ImageNode extends NodeBase {
 
     public imageDesc: Docker.ImageDesc
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {

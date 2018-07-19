@@ -49,7 +49,7 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -57,7 +57,7 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 
-    async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
+    public async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
         if (element.contextValue === 'azureRegistryRootNode') {
             return this.getAzureRegistries();
         } else if (element.contextValue === 'dockerHubRootNode') {

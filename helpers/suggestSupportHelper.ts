@@ -10,7 +10,7 @@ import hub = require('../dockerHubApi');
 import parser = require('../parser');
 
 export class SuggestSupportHelper {
-    suggestImages(word: string): Promise<vscode.CompletionItem[]> {
+    public suggestImages(word: string): Promise<vscode.CompletionItem[]> {
         return hub.searchImagesInRegistryHub(word, true).then((results) => {
             return results.map((image) => {
                 let stars = '';
@@ -29,7 +29,7 @@ export class SuggestSupportHelper {
         });
     }
 
-    searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[]> {
+    public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[]> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
                 let r: vscode.MarkedString[] = [];
@@ -58,7 +58,7 @@ export class SuggestSupportHelper {
         })
     }
 
-    getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
+    public getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>

@@ -44,7 +44,7 @@ export class RootNode extends NodeBase {
         this._azureAccount = azureAccount;
     }
 
-    autoRefreshImages(): void {
+    public autoRefreshImages(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
 
@@ -97,7 +97,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -106,7 +106,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    async getChildren(element: NodeBase): Promise<NodeBase[]> {
+    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
 
         if (element.contextValue === 'imagesRootNode') {
             return this.getImages();
@@ -153,7 +153,7 @@ export class RootNode extends NodeBase {
         return imageNodes;
     }
 
-    autoRefreshContainers(): void {
+    public autoRefreshContainers(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
 

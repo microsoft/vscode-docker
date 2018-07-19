@@ -11,8 +11,8 @@ import suggestHelper = require('../helpers/suggestSupportHelper');
 import parser = require('../parser');
 
 export class DockerComposeHoverProvider implements HoverProvider {
-    _parser: parser.Parser;
-    _keyInfo: KeyInfo;
+    public _parser: parser.Parser;
+    public _keyInfo: KeyInfo;
 
     // Provide the parser you want to use as well as keyinfo dictionary.
     constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
