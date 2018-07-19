@@ -11,6 +11,7 @@ import { DockerOutputManager } from './dockerOutputManager';
 import { AppStorageProvider } from './appStorage';
 import { FileSystemProvider } from './fsProvider';
 import Lazy from './lazy';
+import { Memento } from 'vscode';
 
 export type DockerManagerBuildImageOptions
     = DockerBuildImageOptions
@@ -47,18 +48,23 @@ export type LaunchResult = {
     programCwd: string;
 };
 
-export type LastImageBuildMetadata = {
+type LastImageBuildMetadata = {
     dockerfileHash: string;
     dockerIgnoreHash: string | undefined;
     imageId: string;
     options: DockerBuildImageOptions;
 };
 
+type LastContainerRunMetadata = {
+    containerId: string;
+    options: DockerRunContainerOptions;
+}
+
 export interface DockerManager {
     buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
-    getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined>;
     runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string>;
     prepareForLaunch(options: LaunchOptions): Promise<LaunchResult>;
+    cleanupAfterLaunch(): Promise<void>;
 }
 
 export class DefaultDockerManager implements DockerManager {
@@ -69,7 +75,8 @@ export class DefaultDockerManager implements DockerManager {
         private readonly dockerOutputManager: DockerOutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
-        private readonly processProvider: ProcessProvider) {
+        private readonly processProvider: ProcessProvider,
+        private readonly workspaceState: Memento) {
     }
 
     async buildImage(options: DockerManagerBuildImageOptions): Promise<string> {
@@ -128,19 +135,6 @@ export class DefaultDockerManager implements DockerManager {
         return imageId;
     }
 
-    async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {
-        const webPorts = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{(index (index .NetworkSettings.Ports \\\"80/tcp\\\") 0).HostPort}}' });
-
-        if (webPorts) {
-            const webPort = webPorts.split('\n')[0];
-
-            // tslint:disable-next-line:no-http-string
-            return `http://localhost:${webPort}`;
-        }
-
-        return undefined;
-    }
-
     async runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string> {
         if (options.containerName === undefined) {
             throw new Error('No container name was provided.');
@@ -158,7 +152,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const volumes = this.getVolumes(debuggerFolder, options);
 
-        return await this.dockerOutputManager.performOperation(
+        const containerId = await this.dockerOutputManager.performOperation(
             'Starting container...',
             async () => {
                 const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
@@ -179,12 +173,29 @@ export class DefaultDockerManager implements DockerManager {
             },
             'Container started.',
             'Unable to start container.');
+
+        const cache = await this.appCacheFactory.getStorage(options.appFolder);
+
+        await cache.update<LastContainerRunMetadata>(
+            'run',
+            {
+                containerId,
+                options
+            });
+
+        return containerId;
     }
 
     async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
+
+        const runningContainers = this.workspaceState.get<string[]>('DefaultDockerManager.runningContainers', []);
+
+        runningContainers.push(containerId);
+
+        await this.workspaceState.update('DefaultDockerManager.runningContainers', runningContainers);
 
         const browserUrl = await this.getContainerWebEndpoint(containerId);
 
@@ -215,6 +226,65 @@ export class DefaultDockerManager implements DockerManager {
             programArgs: [additionalProbingPathsArgs, containerAppOutput],
             programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app'
         };
+    }
+
+    private static matchId(id1: string, id2: string): boolean {
+        const validateArgument =
+            id => {
+                if (id === undefined || id1.length < 12) {
+                    throw new Error(`'${id}' must be defined and at least 12 characters.`)
+                }
+            };
+
+        validateArgument(id1);
+        validateArgument(id2);
+
+        return id1.length < id2.length
+            ? id2.startsWith(id1)
+            : id1.startsWith(id2);
+    }
+
+    async cleanupAfterLaunch(): Promise<void> {
+        const debugContainers = this.workspaceState.get<string[]>('DefaultDockerManager.runningContainers', []);
+
+        const runningContainers = (await this.dockerClient.listContainers({ format: '{{.ID}}' })).split('\n');
+
+        let remainingContainers;
+
+        if (runningContainers && runningContainers.length >= 0) {
+            const removeContainerTasks =
+                debugContainers
+                    .filter(containerId => runningContainers.find(runningContainerId => DefaultDockerManager.matchId(containerId, runningContainerId)))
+                    .map(
+                        async containerId => {
+                            try {
+                                await this.dockerClient.removeContainer(containerId, { force: true });
+
+                                return undefined;
+                            } catch {
+                                return containerId;
+                            }
+                        });
+
+            remainingContainers = (await Promise.all(removeContainerTasks)).filter(containerId => containerId !== undefined);
+        } else {
+            remainingContainers = [];
+        }
+
+        await this.workspaceState.update('DefaultDockerManager.runningContainers', remainingContainers);
+    }
+
+    private async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {
+        const webPorts = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{(index (index .NetworkSettings.Ports \\\"80/tcp\\\") 0).HostPort}}' });
+
+        if (webPorts) {
+            const webPort = webPorts.split('\n')[0];
+
+            // tslint:disable-next-line:no-http-string
+            return `http://localhost:${webPort}`;
+        }
+
+        return undefined;
     }
 
     private getVolumes(debuggerFolder: string, options: DockerManagerRunContainerOptions): DockerContainerVolume[] {
