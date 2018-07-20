@@ -43,6 +43,7 @@
     "onCommand:vscode-docker.container.open-shell",
     "onCommand:vscode-docker.compose.up",
     "onCommand:vscode-docker.compose.down",
+    "onCommand:vscode-docker.compose.restart",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
     "onCommand:vscode-docker.system.prune",
@@ -83,6 +84,11 @@
           "group": "docker"
         },
         {
+          "when": "resourceFilename == docker-compose.yml",
+          "command": "vscode-docker.compose.restart",
+          "group": "docker"
+        },
+        {
           "when": "resourceFilename == docker-compose.debug.yml",
           "command": "vscode-docker.compose.up",
           "group": "docker"
@@ -90,6 +96,11 @@
         {
           "when": "resourceFilename == docker-compose.debug.yml",
           "command": "vscode-docker.compose.down",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename == docker-compose.debug.yml",
+          "command": "vscode-docker.compose.restart",
           "group": "docker"
         }
       ],
@@ -107,6 +118,11 @@
         {
           "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
           "command": "vscode-docker.compose.down",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
+          "command": "vscode-docker.compose.restart",
           "group": "docker"
         }
       ],
@@ -543,6 +559,12 @@
         "command": "vscode-docker.compose.down",
         "title": "Compose Down",
         "description": "Stops a composition of containers",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.compose.restart",
+        "title": "Compose Restart",
+        "description": "Restarts a composition of containers",
         "category": "Docker"
       },
       {
