@@ -4,6 +4,7 @@ import * as gradleParser from "gradle-to-js/lib/parser";
 import * as path from "path";
 import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
+import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { reporter } from '../telemetry/telemetry';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
@@ -501,17 +502,14 @@ async function findCSProjFile(folderPath: string): Promise<string> {
 
     const projectFiles: string[] = await globAsync('**/*.csproj', { cwd: folderPath });
 
-    if (!projectFiles) {
-        return;
+    if (!projectFiles || !projectFiles.length) {
+        throw new Error("No .csproj file could be found.");
     }
 
     if (projectFiles.length > 1) {
-        const res = await vscode.window.showQuickPick(projectFiles, opt);
-        if (res) {
-            return res.slice(0, -'.csproj'.length);
-        } else {
-            return;
-        }
+        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
+        const res = await ext.ui.showQuickPick(items, opt);
+        return res.label.slice(0, -'.csproj'.length);
     }
 
     return projectFiles[0].slice(0, -'.csproj'.length);
