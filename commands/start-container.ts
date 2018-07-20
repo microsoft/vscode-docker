@@ -2,15 +2,17 @@ import * as cp from 'child_process';
 import * as fs from 'fs';
 import os = require('os');
 import vscode = require('vscode');
+import { ContainerNode } from '../explorer/models/containerNode';
 import { ImageNode } from '../explorer/models/imageNode';
 import { reporter } from '../telemetry/telemetry';
+import { restartContainer } from './restart-container';
 import { createTerminal } from './utils/create-terminal';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
-const teleCmdId: string = 'vscode-docker.container.start';
+const teleCmdId: string = 'vscode-docker.container.start.container-from-image';
 
-export async function startContainer(context?: ImageNode, interactive?: boolean): Promise<void> {
+export async function startContainerFromImage(context?: ImageNode, interactive?: boolean): Promise<void> {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
@@ -52,7 +54,11 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
 }
 
 export async function startContainerInteractive(context: ImageNode): Promise<void> {
-    await startContainer(context, true);
+    await startContainerFromImage(context, true);
+}
+
+export async function startContainer(context: ContainerNode): Promise<void> {
+    await restartContainer(context, false);
 }
 
 export async function startAzureCLI(): Promise<cp.ChildProcess> {
