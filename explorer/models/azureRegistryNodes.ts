@@ -1,6 +1,7 @@
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
 import * as path from 'path';
+import { RequestClient } from 'reqclient';
 import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
@@ -38,6 +39,17 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
+    private async isV2Registry(url: string): Promise<boolean> {
+        try {
+            // If this succeeds, it's a V2 registry
+            request.get(`${url}/v2`);
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    // tslint:disable-next-line:max-func-body-length
     public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
         const repoNodes: AzureRepositoryNode[] = [];
         let node: AzureRepositoryNode;
@@ -49,6 +61,58 @@ export class AzureRegistryNode extends NodeBase {
 
         const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
+
+        // tslint:disable-next-line:no-http-string
+        let url = 'http://' + element.label;
+
+        if (!await this.isV2Registry(url)) {
+            throw new Error('Does not appear to be a valid V2 registry');
+        }
+
+        // tslint:disable-next-line:no-http-string
+        //url = 'http://localhost:5000';
+        //        let a = await client.get(url);
+        let a2 = await request.get(url);
+
+        //      let b = await client.get(url + '/v2');
+        let b2 = await request.get(url + '/v2');
+
+        //    let c = await client.get(url + '/v2/_catalog');
+        let c2 = await request.get(url + '/v2/_catalog');
+
+        //let d2 = await request.get('https://' + element.label);
+        let client = new RequestClient({
+            baseUrl: '',
+            debugRequest: true, debugResponse: true,
+            oauth2: {
+                user: "stephwereg", pass: "",
+                baseUrl: 'https://' + element.label + "/oauth2",
+                fullResponse: true
+            },
+            //sendImmediately: false,
+            fullResponse: true
+        });
+        client.fullResponse = true;
+
+        //let e2 = await request.get('https://' + element.label + "/v2");
+        try {
+            let e = await client.get('https://' + element.label + '/v2/_catalog', {
+                fullResponse: true
+            });
+            let f = e;
+        } catch (error) {
+            console.error(error);
+        }
+
+        let f2 = await request.get('https://' + element.label + "/v2/_catalog");
+
+        try {
+            let response = await request(url, {
+
+            });
+        } catch (error) {
+            let d = error;
+        }
 
         if (accessToken && refreshToken) {
             let refreshTokenARC;
@@ -70,26 +134,26 @@ export class AzureRegistryNode extends NodeBase {
                 }
             });
 
-            await request.post('https://' + element.label + '/oauth2/token', {
-                form: {
-                    grant_type: 'refresh_token',
-                    service: element.label,
-                    scope: 'registry:catalog:*',
-                    refresh_token: refreshTokenARC
-                }
-            }, (err, httpResponse, body) => {
-                if (body.length > 0) {
-                    accessTokenARC = JSON.parse(body).access_token;
-                } else {
-                    return [];
-                }
-            });
+            // await request.post('https://' + element.label + '/oauth2/token', {
+            //     form: {
+            //         grant_type: 'refresh_token',
+            //         service: element.label,
+            //         scope: 'registry:catalog:*',
+            //         refresh_token: refreshTokenARC
+            //     }
+            // }, (err, httpResponse, body) => {
+            //     if (body.length > 0) {
+            //         accessTokenARC = JSON.parse(body).access_token;
+            //     } else {
+            //         return [];
+            //     }
+            // });
             await request.get('https://' + element.label + '/v2/_catalog', {
-                auth: {
-                    bearer: accessTokenARC
-                }
+                // auth: {
+                //     bearer: accessTokenARC
+                // }
             }, (err, httpResponse, body) => {
-                if (body.length > 0) {
+                if (body && body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
                     // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i = 0; i < repositories.length; i++) {
