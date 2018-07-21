@@ -12,6 +12,7 @@
 			],
 			"env": {
 				"NO_TIMEOUTS": "1",
+				"debug": "module"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,
