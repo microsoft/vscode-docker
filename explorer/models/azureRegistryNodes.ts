@@ -82,7 +82,7 @@ export class AzureRegistryNode extends NodeBase {
 
         //let d2 = await request.get('https://' + element.label);
         let client = new RequestClient({
-            baseUrl: 'https://' + element.label,
+            baseUrl: '',
             debugRequest: true, debugResponse: true,
             oauth2: {
                 user: "stephwereg", pass: "",
@@ -96,7 +96,7 @@ export class AzureRegistryNode extends NodeBase {
 
         //let e2 = await request.get('https://' + element.label + "/v2");
         try {
-            let e = await client.get("v2/_catalog", {
+            let e = await client.get('https://' + element.label + '/v2/_catalog', {
                 fullResponse: true
             });
             let f = e;
