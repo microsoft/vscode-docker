@@ -96,7 +96,6 @@ export class DockerHubRepositoryNode extends NodeBase {
         }
 
         return imageNodes;
-
     }
 }
 
