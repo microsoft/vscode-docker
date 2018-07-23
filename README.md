@@ -122,7 +122,7 @@ By default, Docker runs as the root user, requiring other users to access it wit
 
 ## Connecting to `docker-machine`
 
-The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host or if you set the `docker.host` configuration setting.
+The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host (and DOCKER_CERT_PATH if you're using TLS) or if you set the `docker.host` configuration setting. See [the Docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
 
 ## Contributing
 
