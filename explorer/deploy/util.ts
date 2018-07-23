@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ServiceClientCredentials } from 'ms-rest';
 import { SubscriptionModels } from 'azure-arm-resource';
-import { AzureAccountWrapper } from './azureAccountWrapper';
 import WebSiteManagementClient = require('azure-arm-website');
+import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
+import { AzureAccountWrapper } from './azureAccountWrapper';
 
 export interface PartialList<T> extends Array<T> {
     nextLink?: string;
@@ -24,7 +24,9 @@ export async function listAll<T>(client: { listNext(nextPageLink: string): Promi
     return all;
 }
 
-export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementClient, site: WebSiteModels.Site, state: string, intervalMs = 5000, timeoutMs = 60000): Promise<void> {
+// tslint:disable-next-line:promise-function-async // Grandfathered in
+export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementClient, site: WebSiteModels.Site, state: string, intervalMs: number = 5000, timeoutMs: number = 60000): Promise<void> {
+    // tslint:disable-next-line:promise-must-complete // false positive
     return new Promise((resolve, reject) => {
         const func = async (count: number) => {
             const currentSite = await webSiteManagementClient.webApps.get(site.resourceGroup, site.name);
@@ -51,6 +53,7 @@ export function getSignInCommandString(): string {
     return 'azure-account.login';
 }
 
+// tslint:disable-next-line:promise-function-async // Grandfathered in
 export function getWebAppPublishCredential(azureAccount: AzureAccountWrapper, subscription: SubscriptionModels.Subscription, site: WebSiteModels.Site): Promise<WebSiteModels.User> {
     const credentials = azureAccount.getCredentialByTenantId(subscription.tenantId);
     const websiteClient = new WebSiteManagementClient(credentials, subscription.subscriptionId);

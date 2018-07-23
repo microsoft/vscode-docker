@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as moment from 'moment';
-import { NodeBase } from './nodeBase';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { trimWithElipsis } from '../utils/utils';
+import { NodeBase } from './nodeBase';
 
 export class ImageNode extends NodeBase {
 
@@ -16,7 +16,7 @@ export class ImageNode extends NodeBase {
 
     public imageDesc: Docker.ImageDesc
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
 
         if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {

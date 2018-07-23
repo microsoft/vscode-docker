@@ -1,14 +1,14 @@
+import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
+import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-import { reporter } from '../telemetry/telemetry';
-import { ContainerNode } from '../explorer/models/containerNode';
-import { dockerExplorerProvider } from '../dockerExtension';
 
 import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.restart';
 
-export async function restartContainer(context?: ContainerNode) {
+export async function restartContainer(context?: ContainerNode): Promise<void> {
 
     let containersToRestart: Docker.ContainerDesc[];
 

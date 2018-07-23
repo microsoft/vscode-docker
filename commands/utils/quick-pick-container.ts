@@ -1,7 +1,7 @@
 import * as Docker from 'dockerode';
-import { docker } from './docker-endpoint';
-import vscode = require('vscode');
 import { ContainerDesc } from 'dockerode';
+import vscode = require('vscode');
+import { docker } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {
     containerDesc: Docker.ContainerDesc
@@ -17,6 +17,7 @@ function createItem(container: Docker.ContainerDesc): ContainerItem {
 function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): ContainerItem[] {
     const items: ContainerItem[] = [];
 
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < containers.length; i++) {
         const item = createItem(containers[i]);
         items.push(item);
@@ -45,7 +46,7 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
 
     try {
         containers = await docker.getContainerDescriptors(opts);
-        if (!containers || containers.length == 0) {
+        if (!containers || containers.length === 0) {
             vscode.window.showInformationMessage('There are no Docker Containers.');
             return;
         } else {

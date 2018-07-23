@@ -79,6 +79,9 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
+## Doing more with the extension
+Check out this [tutorial](https://code.visualstudio.com/docs/azure/docker) to learn to utilize the other features of the extension, like linting in your docker compose file.
+
 ## Configuration Settings
 
 The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
@@ -105,6 +108,7 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.showExplorer` | Show or hide the Explorer. | `true`
 | `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
 | `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
+| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) |
 
 ## Installation
 
@@ -118,7 +122,7 @@ By default, Docker runs as the root user, requiring other users to access it wit
 
 ## Connecting to `docker-machine`
 
-The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host.
+The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host or if you set the `docker.host` configuration setting.
 
 ## Contributing
 

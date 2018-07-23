@@ -1,13 +1,13 @@
 import vscode = require('vscode');
-import { docker } from './utils/docker-endpoint';
-import { reporter } from '../telemetry/telemetry';
-import { ContainerNode } from '../explorer/models/containerNode';
 import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
+import { reporter } from '../telemetry/telemetry';
+import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
-export async function removeContainer(context?: ContainerNode) {
+export async function removeContainer(context?: ContainerNode): Promise<void> {
 
     let containersToRemove: Docker.ContainerDesc[];
 
@@ -37,9 +37,10 @@ export async function removeContainer(context?: ContainerNode) {
         vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
             containersToRemove.forEach((c) => {
                 // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any) {
+                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any): void {
                     containerCounter++;
                     if (err) {
+                        // TODO: parseError, proper error handling
                         vscode.window.showErrorMessage(err.message);
                         dockerExplorerProvider.refreshContainers();
                         reject();
@@ -53,11 +54,13 @@ export async function removeContainer(context?: ContainerNode) {
         }));
     }
 
-    /* __GDPR__
-       "command" : {
-          "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-       }
-     */
-    reporter && reporter.sendTelemetryEvent("command", { command: teleCmdId });
+    if (reporter) {
+        /* __GDPR__
+        "command" : {
+            "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+        }
+        */
+        reporter.sendTelemetryEvent("command", { command: teleCmdId });
+    }
 
 }
