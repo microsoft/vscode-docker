@@ -233,7 +233,6 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
 export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {

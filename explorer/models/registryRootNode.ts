@@ -13,6 +13,7 @@ import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '..
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
+import { CustomRegistryNode } from './customRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
@@ -63,7 +64,9 @@ export class RegistryRootNode extends NodeBase {
         } else if (element.contextValue === 'dockerHubRootNode') {
             return this.getDockerHubOrgs();
         } else {
-            return [];
+            //asdf
+            // tslint:disable-next-line:no-http-string
+            return this.getCustomRegistries();
         }
     }
 
@@ -110,6 +113,15 @@ export class RegistryRootNode extends NodeBase {
         });
 
         return orgNodes;
+    }
+
+    private async getCustomRegistries(): Promise<CustomRegistryNode[]> {
+        let iconPath = {
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        };
+        // tslint:disable-next-line:no-http-string
+        return [new CustomRegistryNode('localhost:5000', 'customRegistryNode'/*asdf*/, 'http://localhost:5000', 'a', 'b')];
     }
 
     private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
