@@ -53,7 +53,14 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         return;
     }
 
-    let commandParameterFileUris = (selectedComposeFileUris && selectedComposeFileUris.length) ? selectedComposeFileUris : [dockerComposeFileUri];
+    let commandParameterFileUris: vscode.Uri[];
+    if (selectedComposeFileUris && selectedComposeFileUris.length) {
+        commandParameterFileUris = selectedComposeFileUris;
+    } else if (dockerComposeFileUri) {
+        commandParameterFileUris = [dockerComposeFileUri];
+    } else {
+        commandParameterFileUris = [];
+    }
     let selectedItems: Item[] = commandParameterFileUris.map(uri => createItem(folder, uri));
     if (!selectedItems.length) {
         // prompt for compose file
