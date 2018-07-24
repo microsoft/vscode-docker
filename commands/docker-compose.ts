@@ -53,10 +53,10 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         return;
     }
 
-    let selectedItems: Item[] = [];
-
-    if (!dockerComposeFileUri) {
-        // prompt for the compose file
+    let commandParameterFileUris = (selectedComposeFileUris && selectedComposeFileUris.length) ? selectedComposeFileUris : [dockerComposeFileUri];
+    let selectedItems: Item[] = commandParameterFileUris.map(uri => createItem(folder, uri));
+    if (!selectedItems.length) {
+        // prompt for compose file
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length === 0) {
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
@@ -65,11 +65,6 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
 
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
         selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
-    } else {
-        if (!(selectedComposeFileUris && selectedComposeFileUris.length)) {
-            selectedComposeFileUris = [dockerComposeFileUri];
-        }
-        selectedItems = selectedComposeFileUris.map(uri => createItem(folder, uri));
     }
 
     const terminal: vscode.Terminal = createTerminal('Docker Compose');
