@@ -9,6 +9,7 @@ export type Platform = 'Go' |
     'ASP.NET Core' |
     'Node.js' |
     'Python' |
+    'Ruby' |
     'Other';
 
 /**
@@ -43,6 +44,7 @@ export async function quickPickPlatform(): Promise<Platform> {
         'ASP.NET Core',
         'Node.js',
         'Python',
+        'Ruby',
         'Other'
     ];
 

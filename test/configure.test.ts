@@ -475,6 +475,23 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
     });
 
+    // Ruby
+
+    suite("Ruby", () => {
+        testInEmptyFolder("Ruby", async () => {
+            await testConfigureDocker('Ruby', undefined /*port*/);
+
+            let projectFiles = await getFilesInProject();
+            assertEx.unorderedArraysEqual(projectFiles, ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore'], "The set of files in the project folder after configure was run is not correct.");
+
+            assertFileContains('Dockerfile', 'FROM ruby:2.5-slim');
+            assertFileContains('Dockerfile', 'LABEL Name=testoutput Version=0.0.1');
+            assertFileContains('Dockerfile', 'COPY Gemfile Gemfile.lock ./');
+            assertFileContains('Dockerfile', 'RUN bundle install');
+            assertFileContains('Dockerfile', 'CMD ["ruby", "testoutput.rb"]');
+        });
+    });
+
     //
 
 });
