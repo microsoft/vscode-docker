@@ -8,7 +8,7 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing Images, running Containers, and Docker Hub registries
 * Deploy images from Docker Hub and Azure Container Registries directly to Azure App Service
-* This [tutorial](https://code.visualstudio.com/docs/azure/docker) has resources to help you utilize other features of the extension
+* [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
 
 
 ## Generating Docker Files
