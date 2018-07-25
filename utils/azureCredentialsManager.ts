@@ -41,7 +41,7 @@ export class AzureCredentialsManager {
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
-        return this.azureAccount.filters.map<SubscriptionModels.Subscription>(filter => {
+        return this.getAccount().filters.map<SubscriptionModels.Subscription>(filter => {
             return {
                 id: filter.subscription.id,
                 session: filter.session,
@@ -80,8 +80,8 @@ export class AzureCredentialsManager {
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                    let registry: ContainerModels.Registry[] = await client.registries.list();
-                    registries = registries.concat(registry);
+                    let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
+                    registries = registries.concat(subscriptionRegistries);
                 });
             }
             await subPool.runAll();
@@ -117,7 +117,7 @@ export class AzureCredentialsManager {
 
     public getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
 
-        const session = this.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session = this.getAccount().sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
             return session.credentials;
@@ -127,19 +127,12 @@ export class AzureCredentialsManager {
     }
 
     //ERR CHECKS
-
     //Provides a unified check for login that should be called once before using the rest of the singletons capabilities
     public async isLoggedIn(): Promise<boolean> {
         if (!this.azureAccount) {
             return false;
         }
-
         const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
-
-        if (!loggedIntoAzure) {
-            return false;
-        }
-
-        return true;
+        return loggedIntoAzure;
     }
 }
