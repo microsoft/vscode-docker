@@ -56,7 +56,7 @@ The first time you expand the Docker Hub node you'll be prompted to log in to yo
 
 ![Docker Hub Login](images/dockerHubLogin.gif)
 
-Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store)so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
+Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
 
 ## Deploying images to Azure App Service
 
