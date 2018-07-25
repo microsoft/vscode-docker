@@ -142,7 +142,7 @@ Before we can accept your pull request you will need to sign a **Contribution Li
 
 ### I get "unauthorized: authentication required" in the terminal when executing some commands, such as "Docker: push".
 
-Make sure you are signed in to the Docker Hub or Azure container registry from the docker CLI via `docker login`.
+Make sure you are signed in to the Docker Hub or Azure container registry from the docker CLI via `docker login` (using your username, not your e-mail address).
 
 If you are using an Azure container registry, you will need to get the username and password from Azure by right-clicking on the Azure container registry in the extension and selecting "Browse in the Azure Portal", then selecting the "Access Keys" tab.
 ![Getting Azure username and password](images/AzureUsernamePassword.png)
@@ -153,7 +153,7 @@ Finally, execute `docker login`, for example:
 docker login exampleazurecontainerregistry.azurecr.io
 ```
 
-and respond with the username and password from Azure.
+and respond with the username and password specified by Azure.
 
 ### I'm on Linux and get the error "Unable to connect to Docker, is the Docker daemon running?"
 
