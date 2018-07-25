@@ -1,6 +1,6 @@
 ## 0.1.0 - 26 July 2018
 * Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
-* Update to version 0.0.18 of the language server (thanks @rcjsuen) [#291](https://github.com/Microsoft/vscode-docker/pull/291).  This includes fixes for
+* Update to version 0.0.18 of the language server (thanks @rcjsuen) [#291](https://github.com/Microsoft/vscode-docker/pull/291).  This includes fixes for:
   * command 'vscode-docker.configure' not found [#271](https://github.com/Microsoft/vscode-docker/issues/271)
   * Dockerfile linting error in FROM [#269](https://github.com/Microsoft/vscode-docker/issues/269), #280, #288, and others
   * Other linting fixes
@@ -11,9 +11,11 @@
   * Fixes [#266](https://github.com/Microsoft/vscode-docker/issues/266) to fix error when expanding empty container registry
   * Improves Azure explorer expansion speed by parallelizing network calls
   * Alphabetically organized registries listed from azure and organized tags by date of creation
-* Add link to extension docs and Azure publish tutorial to readme
 * Add "Docker: Compose Restart" command [#316](https://github.com/Microsoft/vscode-docker/pull/316)
-* Fixes [#295](https://github.com/Microsoft/vscode-docker/issues/295) to provide proper error handling if project file can't be found adding Dockerfile to project
+* Add link to extension docs and Azure publish tutorial to readme
+* Fix [#295](https://github.com/Microsoft/vscode-docker/issues/295) to provide proper error handling if project file can't be found adding Dockerfile to project
+* Fix [#302](https://github.com/Microsoft/vscode-docker/issues/302) so that Compose Up/Down work correctly from the text editor context menu
+* Clarify README documentation on DOCKER_HOST to note that DOCKER_CER_PATH may be required for TLS (thanks @mikepatrick) [#324](https://github.com/Microsoft/vscode-docker/pull/324)
 
 ## 0.0.27 - 19 May 2018
 
