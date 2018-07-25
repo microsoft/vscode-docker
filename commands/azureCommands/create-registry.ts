@@ -5,8 +5,12 @@ import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource
 import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
-
+import { reporter } from '../../telemetry/telemetry';
+import TelemetryReporter from "../../node_modules/vscode-extension-telemetry";
+const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
+
+
 
 export async function createRegistry() {
     let subscription: SubscriptionModels.Subscription;
@@ -38,6 +42,29 @@ export async function createRegistry() {
     }, function (error) {
         vscode.window.showErrorMessage(error.message);
     })
+
+    //Acquiring telemetry data here
+    if (reporter) {
+        /* __GDPR__
+           "command" : {
+              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+           }
+         */
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
+        });
+
+        if (registryName.toLowerCase().indexOf('azurecr.io')) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
+            reporter.sendTelemetryEvent('command', {
+                command: teleAzureId
+            });
+        }
+    }
 
 }
 
