@@ -18,14 +18,14 @@ export class AzureCredentialsManager {
     private static _instance: AzureCredentialsManager = new AzureCredentialsManager();
     private azureAccount: AzureAccount;
 
-    constructor() {
-        if (AzureCredentialsManager._instance) {
-            throw new Error("Error: Instantiation failed: Use SingletonClass.getInstance() instead of new.");
-        }
+    private constructor() {
         AzureCredentialsManager._instance = this;
     }
 
     public static getInstance(): AzureCredentialsManager {
+        if (!AzureCredentialsManager._instance) { // lazy initialization
+            AzureCredentialsManager._instance = new AzureCredentialsManager();
+        }
         return AzureCredentialsManager._instance;
     }
 
@@ -59,6 +59,10 @@ export class AzureCredentialsManager {
         return new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
     }
 
+    public getResourceManagementClient(subscription: SubscriptionModels.Subscription): ResourceManagementClient {
+        return new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+    }
+
     public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string, sortFunction?): Promise<ContainerModels.Registry[]> {
         let registries: ContainerModels.Registry[] = [];
 
@@ -79,7 +83,7 @@ export class AzureCredentialsManager {
 
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
-                    const client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    const client = this.getContainerRegistryManagementClient(subs[i]);
                     let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
                     registries = registries.concat(subscriptionRegistries);
                 });
@@ -87,7 +91,7 @@ export class AzureCredentialsManager {
             await subPool.runAll();
         }
 
-        if (sortFunction) {
+        if (sortFunction && registries.length > 1) {
             registries.sort(sortFunction);
         }
 
@@ -96,7 +100,7 @@ export class AzureCredentialsManager {
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
         if (subscription) {
-            const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+            const resourceClient = this.getResourceManagementClient(subscription);
             return await resourceClient.resourceGroups.list();
         }
         const subs = this.getFilteredSubscriptionList();
@@ -104,9 +108,8 @@ export class AzureCredentialsManager {
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
         for (let i = 0; i < subs.length; i++) {
-            subscription = subs[i];
             subPool.addTask(async () => {
-                const resourceClient = new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+                const resourceClient = this.getResourceManagementClient(subs[i]);
                 const internalGroups = await resourceClient.resourceGroups.list();
                 resourceGroups = resourceGroups.concat(internalGroups);
             });
@@ -117,7 +120,7 @@ export class AzureCredentialsManager {
 
     public getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
 
-        const session = this.getAccount().sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session = this.getAccount().sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
             return session.credentials;
@@ -126,13 +129,12 @@ export class AzureCredentialsManager {
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 
-    //ERR CHECKS
+    //CHECKS
     //Provides a unified check for login that should be called once before using the rest of the singletons capabilities
     public async isLoggedIn(): Promise<boolean> {
         if (!this.azureAccount) {
             return false;
         }
-        const loggedIntoAzure: boolean = await this.azureAccount.waitForLogin();
-        return loggedIntoAzure;
+        return await this.azureAccount.waitForLogin();
     }
 }
