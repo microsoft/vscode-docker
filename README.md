@@ -43,13 +43,11 @@ You can move the View up or down by dragging the Docker icon and you can hide th
 
 ![show and hide the view](images/viewRightClick.png)
 
-The `showExplorer` configuration setting controls the visibility of the Explorer within the Docker View.
+The `showExplorer` configuration setting controls the visibility of the Docker View.
 
 ``` json
 "docker.showExplorer": false
 ```
-
-> Note: This setting was introduced prior to the View. Setting it to `false` will hide the Explorer within the Docker View. It does not control whether or not the View itself is visible. Future releases of the extension may be able to support a setting to toggle the visibility of the view [48704](https://github.com/Microsoft/vscode/issues/48704).
 
 ## Docker Hub Login
 The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
