@@ -9,5 +9,8 @@
 	"files.trimTrailingWhitespace": true,
 	"files.insertFinalNewline": true,
 	"editor.formatOnSave": true,
-	"tslint.autoFixOnSave": true
+	"tslint.autoFixOnSave": true,
+	"yaml.schemas": {
+		"http://json.schemastore.org/bukkit-plugin": "/*"
+	}
 }

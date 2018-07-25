@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
@@ -18,7 +19,7 @@ import { getSubscriptionId, getTenantId } from './nonNull';
 
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
-  Authors: Esteban Rey L, Jackson Stokes
+  Authors: Esteban Rey L, Jackson Stokes, Julia Lieberman
 */
 
 export class AzureUtilityManager {
@@ -111,6 +112,7 @@ export class AzureUtilityManager {
             for (let sub of subs) {
                 subPool.addTask(async () => {
                     const client = this.getContainerRegistryManagementClient(sub);
+
                     let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
                     registries = registries.concat(subscriptionRegistries);
                 });
@@ -133,13 +135,14 @@ export class AzureUtilityManager {
             const resourceClient = this.getResourceManagementClient(subscription);
             return await resourceClient.resourceGroups.list();
         }
-        const subs = this.getFilteredSubscriptionList();
+        const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptionList();
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
-        for (let sub of subs) {
+
+        for (let tempSub of subs) {
             subPool.addTask(async () => {
-                const resourceClient = this.getResourceManagementClient(sub);
+                const resourceClient = this.getResourceManagementClient(tempSub);
                 const internalGroups = await resourceClient.resourceGroups.list();
                 resourceGroups = resourceGroups.concat(internalGroups);
             });
@@ -151,11 +154,9 @@ export class AzureUtilityManager {
     public getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): ServiceClientCredentials {
         let tenantId = typeof tenantIdOrSubscription === 'string' ? tenantIdOrSubscription : getTenantId(tenantIdOrSubscription);
         const session = this.getAccount().sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
-
         if (session) {
             return session.credentials;
         }
-
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 

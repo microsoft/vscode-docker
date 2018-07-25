@@ -104,16 +104,20 @@ export class RootNode extends NodeBase {
 
     }
 
-    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
-
-        if (element.contextValue === 'imagesRootNode') {
-            return this.getImages();
-        }
-        if (element.contextValue === 'containersRootNode') {
-            return this.getContainers();
-        }
-        if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries()
+    public async getChildren(element: RootNode): Promise<NodeBase[]> {
+        switch (element.contextValue) {
+            case 'imagesRootNode': {
+                return this.getImages();
+            }
+            case 'containersRootNode': {
+                return this.getContainers();
+            }
+            case 'registriesRootNode': {
+                return this.getRegistries();
+            }
+            default: {
+                break;
+            }
         }
 
         throw new Error(`Unexpected contextValue ${element.contextValue}`);
@@ -183,15 +187,13 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < this._containerCache.length; i++) {
-                        let ctr: Docker.ContainerDesc = this._containerCache[i];
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j = 0; j < containers.length; j++) {
+                    for (let cachedContainer of this._containerCache) {
+                        let ctr: Docker.ContainerDesc = cachedContainer;
+                        for (let cont of containers) {
                             // can't do a full object compare because "Status" keeps changing for running containers
-                            if (ctr.Id === containers[j].Id &&
-                                ctr.Image === containers[j].Image &&
-                                ctr.State === containers[j].State) {
+                            if (ctr.Id === cont.Id &&
+                                ctr.Image === cont.Image &&
+                                ctr.State === cont.State) {
                                 found = true;
                                 break;
                             }

@@ -31,6 +31,14 @@ export async function createRegistry(): Promise<Registry> {
     dockerExplorerProvider.refreshRegistries();
     return registry;
 }
+async function acquireSKU(): Promise<string> {
+    let skus: string[] = ["Standard", "Basic", "Premium"];
+    let sku: string;
+    sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU' });
+    if (sku === undefined) { throw new Error('User exit'); }
+
+    return sku;
+}
 
 /** Acquires a new registry name from a user, validating that the name is unique */
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {

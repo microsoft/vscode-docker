@@ -1,0 +1,71 @@
+/*
+  Your use of the content in the files referenced here is subject to the terms of the license at https://aka.ms/fabric-assets-license
+*/
+
+@font-face {
+  font-family: 'VSC MDL2 Assets';
+  src: url('../fonts/vscmdl2-icons-d3699964.woff') format('woff');
+}
+
+.ms-Icon {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-family: 'VSC MDL2 Assets';
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+}
+
+.ms-Icon--ChevronDown:before {
+  cursor: pointer;
+  content: "\E70D";
+}
+
+.ms-Icon--ChevronRight:before {
+  cursor: pointer;
+  content: "\E76C";
+}
+
+.ms-Icon--Clear:before {
+  content: "\E894";
+}
+
+.ms-Icon--OpenInNewWindow:before {
+  cursor: pointer;
+  content: "\E8A7";
+}
+
+.ms-Icon--Copy:before {
+  cursor: pointer;
+  content: "\E8C8";
+}
+
+.ms-Icon--StatusErrorFull:before {
+  color: var(--vscode-list-errorForeground);
+  content: "\EB90";
+}
+
+.ms-Icon--CompletedSolid:before {
+  color: var(--vscode-list-warningForeground);
+  content: "\EC61";
+}
+
+.ms-Icon--SkypeCircleClock:before {
+  color: #CCCCCC;
+  content: "\EF7E";
+}
+
+.ms-Icon--CaretSolidDown:before {
+  content: "\F08E";
+}
+
+.ms-Icon--MSNVideosSolid:before {
+  color: var(--vscode-activityBarBadge-foreground);
+  content: "\F2DA";
+}
+
+.ms-Icon--CriticalErrorSolid:before {
+  color: var(--vscode-list-invalidItemForeground);
+  content: "\F5C9";
+}

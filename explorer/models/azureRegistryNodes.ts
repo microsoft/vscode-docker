@@ -14,6 +14,7 @@ import { Repository } from '../../utils/Azure/models/repository';
 import { getLoginServer, } from '../../utils/nonNull';
 import { formatTag } from './commonRegistryUtils';
 import { IconPath, NodeBase } from './nodeBase';
+import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
@@ -40,8 +41,12 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
-        const repoNodes: AzureRepositoryNode[] = [];
+    public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
+        const repoNodes: NodeBase[] = [];
+
+        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+        let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
+        repoNodes.push(taskNode);
 
         if (!this.azureAccount) {
             return [];
@@ -62,7 +67,6 @@ export class AzureRegistryNode extends NodeBase {
         return repoNodes;
     }
 }
-
 export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,

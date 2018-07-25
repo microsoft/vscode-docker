@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { skus } from '../../constants'
+import { imageTagRegExp, skus } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -31,6 +32,16 @@ export async function quickPickACRRepository(registry: Registry, prompt?: string
     const quickPickRepoList = repositories.map(repo => <IAzureQuickPickItem<Repository>>{ label: repo.name, data: repo });
     let desiredRepo = await ext.ui.showQuickPick(quickPickRepoList, { 'canPickMany': false, 'placeHolder': placeHolder });
     return desiredRepo.data;
+}
+
+export async function quickPickTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.Task> {
+    const placeHolder = prompt ? prompt : 'Choose a Task';
+
+    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    let tasks: ContainerModels.Task[] = await client.tasks.list(resourceGroup.name, registry.name);
+    const quickpPickBTList = tasks.map(task => <IAzureQuickPickItem<ContainerModels.Task>>{ label: task.name, data: task });
+    let desiredTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
+    return desiredTask.data;
 }
 
 export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
@@ -153,7 +164,6 @@ async function createNewResourceGroup(loc: string, subscription?: Subscription):
     };
 
     let resourceGroupName: string = await ext.ui.showInputBox(opt);
-
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
         location: loc,
@@ -169,6 +179,26 @@ async function checkForValidResourcegroupName(resourceGroupName: string, resourc
 
     if (resourceGroupStatus) {
         return 'This resource group is already in use';
+    }
+    return undefined;
+
+}
+
+/*Creates a new resource group within the current subscription */
+export async function quickPickNewImageName(): Promise<string> {
+    let opt: vscode.InputBoxOptions = {
+        validateInput: checkForValidTag,
+        ignoreFocusOut: false,
+        prompt: 'Enter repository name and tag in format  <name>:<tag>'
+    };
+
+    let tag: string = await ext.ui.showInputBox(opt);
+    return tag;
+}
+function checkForValidTag(str: string): string {
+    if (!imageTagRegExp.test(str)) {
+        return 'Repository name must have 0-256 alpha-numeric characters, optionally separated by periods, dashes or underscores.'
+            + 'A tag name must have 0-128 alpha-numeric characters, digits, underscores, periods or dashes. A tag name may not start with a period or a dash.';
     }
     return undefined;
 

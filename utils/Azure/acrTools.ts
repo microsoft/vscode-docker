@@ -5,11 +5,15 @@
 
 import { AuthenticationContext } from 'adal-node';
 import * as assert from 'assert';
-import { Registry } from "azure-arm-containerregistry/lib/models";
+import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
+import { Registry, Run, RunGetLogResult } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
+import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
+import * as vscode from "vscode";
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
@@ -20,7 +24,8 @@ import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
 
 //General helpers
-/** Gets the subscription for a given registry
+/**
+ * @param registry gets the subscription for a given registry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -41,6 +46,13 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
 export function getResourceGroupName(registry: Registry): string {
     let id = getId(registry);
     return id.slice(id.search('resourceGroups/') + 'resourceGroups/'.length, id.search('/providers/'));
+}
+
+//Gets resource group object from registry and subscription
+export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup> { ///to do: move to acr tools
+    let resourceGroups: ResourceGroup[] = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
+    const resourceGroupName = getResourceGroupName(registry);
+    return resourceGroups.find((res) => { return res.name === resourceGroupName });
 }
 
 //Registry item management
@@ -71,7 +83,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
-/** Sends a custom html request to a registry
+/** Sends a custon html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -97,7 +109,7 @@ export async function sendRequestToRegistry(http_method: 'delete', login_server:
 
 //Credential management
 /** Obtains registry username and password compatible with docker login */
-export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
+export async function getLoginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
     const subscription: Subscription = getSubscriptionFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
@@ -171,4 +183,75 @@ export async function acquireACRAccessToken(registryUrl: string, scope: string, 
         json: true
     });
     return acrAccessTokenResponse.access_token;
+}
+
+/** Parses information into a readable format from a blob url */
+export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuffix: string, containerName: string, blobName: string, sasToken: string, host: string } {
+    let items: string[] = blobUrl.slice(blobUrl.search('https://') + 'https://'.length).split('/');
+    let accountName: string = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
+    let endpointSuffix: string = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
+    let containerName: string = items[1];
+    let blobName: string = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
+    let sasToken: string = items[4].slice(items[4].search('[?]') + 1);
+    let host: string = accountName + '.blob.' + endpointSuffix;
+    return { accountName, endpointSuffix, containerName, blobName, sasToken, host };
+}
+
+/** Stream logs from a blob into output channel.
+ * Note, since output streams don't actually deal with streams directly, text is not actually
+ * streamed in which prevents updating of already appended lines. Usure if this can be fixed. Nonetheless
+ * logs do load in chunks every 1 second.
+ */
+export async function streamLogs(registry: Registry, run: Run, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
+    //Prefer passed in client to avoid initialization but if not added obtains own
+    let client = providedClient ? providedClient : AzureUtilityManager.getInstance().getContainerRegistryManagementClient(getSubscriptionFromRegistry(registry));
+    let temp: RunGetLogResult = await client.runs.getLogSasUrl(getResourceGroupName(registry), registry.name, run.runId);
+    const link = temp.logLink;
+    let blobInfo = getBlobInfo(link);
+    let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
+    let available = 0;
+    let start = 0;
+
+    let obtainLogs = setInterval(async () => {
+        let props: BlobService.BlobResult;
+        let metadata: { [key: string]: string; };
+        try {
+            props = await getBlobProperties(blobInfo, blob);
+            metadata = props.metadata;
+        } catch (error) {
+            //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
+            if (error.code === "NotFound") { return; } else { throw error; }
+        }
+        available = +props.contentLength;
+        let text: string;
+        //Makes sure that if item fails it does so due to network/azure errors not lack of new content
+        if (available > start) {
+            text = await getBlobToText(blobInfo, blob, start);
+            let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
+            start += text.length;
+            outputChannel.append(utf8encoded);
+        }
+        if (metadata.Complete) {
+            clearInterval(obtainLogs);
+        }
+    }, 1000);
+}
+
+// Promisify getBlobToText for readability and error handling purposes
+async function getBlobToText(blobInfo: any, blob: BlobService, rangeStart: number): Promise<string> {
+    return new Promise<any>((resolve, reject) => {
+        blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
+            (error, result) => {
+                if (error) { reject() } else { resolve(result); }
+            });
+    });
+}
+
+// Promisify getBlobProperties for readability and error handling purposes
+async function getBlobProperties(blobInfo: any, blob: BlobService): Promise<BlobService.BlobResult> {
+    return new Promise<any>((resolve, reject) => {
+        blob.getBlobProperties(blobInfo.containerName, blobInfo.blobName, (error, result) => {
+            if (error) { reject(error) } else { resolve(result); }
+        });
+    });
 }
