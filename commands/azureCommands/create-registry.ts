@@ -14,9 +14,13 @@ const teleCmdId: string = 'vscode-docker.createRegistry';
 export async function createRegistry() {
     let subscription: SubscriptionModels.Subscription;
     let resourceGroup: ResourceGroup;
+    let location: string;
+
     try {
         subscription = await acquireSubscription();
-        resourceGroup = await acquireResourceGroup(subscription);
+        location = await acquireLocation(subscription);
+        resourceGroup = await acquireResourceGroup(location, subscription);
+
     } catch (error) {
         return;
     }
@@ -36,7 +40,7 @@ export async function createRegistry() {
         prompt: 'SKU? '
     });
 
-    client.registries.beginCreate(resourceGroup.name, registryName, { 'sku': { 'name': sku }, 'location': resourceGroup.location }).then(function (response) {
+    client.registries.beginCreate(resourceGroup.name, registryName, { 'sku': { 'name': sku }, 'location': location }).then(function (response) {
         vscode.window.showInformationMessage(response.name + ' has been created succesfully!');
     }, function (error) {
         vscode.window.showErrorMessage(error.message);
@@ -109,7 +113,26 @@ async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
     return subs.find(sub => { return sub.displayName === subscriptionName });
 }
 
-async function acquireResourceGroup(subscription: SubscriptionModels.Subscription): Promise<ResourceGroup> {
+async function acquireLocation(subscription): Promise<string> {
+    let locations: SubscriptionModels.Location[] = await AzureCredentialsManager.getInstance().getLocationsBySubscription(subscription);
+    let locationNames: string[] = [];
+
+    for (let i = 0; i < locations.length; i++) {
+        locationNames.push(locations[i].displayName);
+    }
+    let location: string;
+    do {
+        location = await vscode.window.showQuickPick(locationNames, { 'canPickMany': false, 'placeHolder': 'Choose a location' });
+        if (location === undefined) throw 'User exit';
+    } while (!location);
+
+    let num = locationNames.indexOf(location);
+    return locations[num].name;
+}
+
+
+
+async function acquireResourceGroup(loc: string, subscription: SubscriptionModels.Subscription): Promise<ResourceGroup> {
     //Acquire each subscription's data simultaneously
     let resourceGroup;
     let resourceGroupName;
@@ -126,7 +149,7 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
         resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, { 'canPickMany': false, 'placeHolder': 'Choose a Resource Group to be used' });
         if (resourceGroupName === undefined) throw 'user Exit';
         if (resourceGroupName === '+ Create new resource group') {
-            resourceGroupName = await createNewResourceGroup(resourceGroupClient);
+            resourceGroupName = await createNewResourceGroup(loc, resourceGroupClient);
         }
         resourceGroups = await AzureCredentialsManager.getInstance().getResourceGroups(subscription);
         resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
@@ -137,7 +160,7 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
     return resourceGroup;
 }
 
-async function createNewResourceGroup(resourceGroupClient: ResourceManagementClient): Promise<string> {
+async function createNewResourceGroup(loc: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
 
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
@@ -157,7 +180,7 @@ async function createNewResourceGroup(resourceGroupClient: ResourceManagementCli
 
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
-        location: 'West US',
+        location: loc,
     };
     //Potential error when two clients try to create same resource group name at once
     try {

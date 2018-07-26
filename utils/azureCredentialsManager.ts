@@ -129,6 +129,13 @@ export class AzureCredentialsManager {
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 
+    public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
+        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const client = new SubscriptionClient(credential);
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        return locations;
+    }
+
     //CHECKS
     //Provides a unified check for login that should be called once before using the rest of the singletons capabilities
     public async isLoggedIn(): Promise<boolean> {
