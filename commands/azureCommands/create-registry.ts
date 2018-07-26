@@ -6,7 +6,6 @@ import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
 import { reporter } from '../../telemetry/telemetry';
-import TelemetryReporter from "../../node_modules/vscode-extension-telemetry";
 const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
 
@@ -68,6 +67,28 @@ export async function createRegistry() {
 
 }
 
+async function acquireRegistryName(client: ContainerRegistryManagementClient) {
+    let opt: vscode.InputBoxOptions = {
+        ignoreFocusOut: false,
+        prompt: 'Registry name? '
+    };
+    let registryName: string = await vscode.window.showInputBox(opt);
+
+    let registryStatus: RegistryNameStatus = await client.registries.checkNameAvailability({ 'name': registryName });
+    while (!registryStatus.nameAvailable) {
+        opt = {
+            ignoreFocusOut: false,
+            prompt: "That registry name is unavailable. Try again: "
+        }
+        registryName = await vscode.window.showInputBox(opt);
+
+        if (registryName === undefined) throw 'user Exit';
+
+        registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
+    }
+    return registryName;
+}
+
 // INPUT HELPERS
 async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
     let subscription: SubscriptionModels.Subscription;
@@ -105,56 +126,49 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
         resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, { 'canPickMany': false, 'placeHolder': 'Choose a Resource Group to be used' });
         if (resourceGroupName === undefined) throw 'user Exit';
         if (resourceGroupName === '+ Create new resource group') {
-            let opt: vscode.InputBoxOptions = {
-                ignoreFocusOut: false,
-                prompt: 'Resource group name? '
-            };
-            resourceGroupName = await vscode.window.showInputBox(opt);
-            let resourceGroupStatus: boolean = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
-            while (resourceGroupStatus) {
-                opt = {
-                    ignoreFocusOut: false,
-                    prompt: "That resource group name is already in existence. Try again: "
-                }
-                resourceGroupName = await vscode.window.showInputBox(opt);
-                if (resourceGroupName === undefined) throw 'user Exit';
-                resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
-            }
-
-            let newResourceGroup: ResourceGroup = {
-                name: resourceGroupName,
-                location: 'West US',
-            };
-            await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
+            resourceGroupName = await createNewResourceGroup(resourceGroupClient);
         }
-
-        resourceGroups = await resourceGroupClient.resourceGroups.list();
+        resourceGroups = await AzureCredentialsManager.getInstance().getResourceGroups(subscription);
         resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
+
         if (!resourceGroupName) vscode.window.showErrorMessage('You must select a valid resource group');
     } while (!resourceGroupName);
 
     return resourceGroup;
 }
 
-async function acquireRegistryName(client: ContainerRegistryManagementClient) {
+async function createNewResourceGroup(resourceGroupClient: ResourceManagementClient): Promise<string> {
+
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
-        prompt: 'Registry name? '
+        prompt: 'Resource group name? '
     };
-    let registryName: string = await vscode.window.showInputBox(opt);
-
-    let registryStatus: RegistryNameStatus = await client.registries.checkNameAvailability({ 'name': registryName });
-    while (!registryStatus.nameAvailable) {
+    let resourceGroupName: string = await vscode.window.showInputBox(opt);
+    let resourceGroupStatus: boolean = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
+    while (resourceGroupStatus) {
         opt = {
             ignoreFocusOut: false,
-            prompt: "That registry name is unavailable. Try again: "
+            prompt: "That resource group name is already in existence. Try again: "
         }
-        registryName = await vscode.window.showInputBox(opt);
-
-        if (registryName === undefined) throw 'user Exit';
-
-        registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
+        resourceGroupName = await vscode.window.showInputBox(opt);
+        if (resourceGroupName === undefined) throw 'user Exit';
+        resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
     }
-    return registryName;
+
+    let newResourceGroup: ResourceGroup = {
+        name: resourceGroupName,
+        location: 'West US',
+    };
+    //Potential error when two clients try to create same resource group name at once
+    try {
+        await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
+    } catch (error) {
+        vscode.window.showErrorMessage(error.message);
+    }
+
+    return resourceGroupName;
 }
+
+
+
 
