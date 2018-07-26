@@ -15,12 +15,10 @@ import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
 export class AzureCredentialsManager {
 
     //SETUP
-    private static _instance: AzureCredentialsManager = new AzureCredentialsManager();
+    private static _instance: AzureCredentialsManager;
     private azureAccount: AzureAccount;
 
-    private constructor() {
-        AzureCredentialsManager._instance = this;
-    }
+    private constructor() { }
 
     public static getInstance(): AzureCredentialsManager {
         if (!AzureCredentialsManager._instance) { // lazy initialization
