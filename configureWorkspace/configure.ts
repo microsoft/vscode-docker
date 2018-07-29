@@ -38,7 +38,7 @@ RUN go-wrapper install    # "go install -v ./..."
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
-ENTRYPOINT /app
+ENTRYPOINT ["/app"]
 LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
 `;
