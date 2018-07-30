@@ -86,7 +86,6 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
         registryName = await vscode.window.showInputBox(opt);
 
         if (registryName === undefined) { throw new Error('user Exit'); }
-
         registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
     }
     return registryName;
@@ -94,8 +93,9 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
 
 // INPUT HELPERS
 async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
-    let subscription: SubscriptionModels.Subscription;
     const subs = AzureCredentialsManager.getInstance().getFilteredSubscriptionList();
+
+    if (subs.length === 0) { vscode.window.showErrorMessage('You do not have any subscriptions. Head over to Azure Portal to make one.'); }
 
     let subsNames: string[] = [];
     for (let sub of subs) {
@@ -133,7 +133,6 @@ async function acquireLocation(resourceGroup: ResourceGroup, subscription: Subsc
                 return;
             }
         });
-
     }
     let location: string;
     do {
@@ -173,27 +172,33 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
 }
 
 async function createNewResourceGroup(loc: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
+    let promptMessage = 'Resource group name?';
 
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
-        prompt: 'Resource group name? '
+        prompt: promptMessage
     };
-    let resourceGroupName: string = await vscode.window.showInputBox(opt);
-    let resourceGroupStatus: boolean = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
-    while (resourceGroupStatus) {
-        opt = {
-            ignoreFocusOut: false,
-            prompt: "That resource group name is already in existence. Try again: "
-        }
+
+    let resourceGroupName: string;
+    let resourceGroupStatus: boolean;
+
+    while (opt.prompt) {
         resourceGroupName = await vscode.window.showInputBox(opt);
-        if (resourceGroupName === undefined) { throw new Error('user Exit'); }
         resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
+        if (!resourceGroupStatus) {
+            opt.prompt = null;
+            console.log("true status, prompt message = null");
+        } else {
+            opt.prompt = "That resource group name is already in existence. Try again: ";
+            console.log("false status, prompt message = try again");
+        }
     }
 
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
         location: loc,
     };
+
     //Potential error when two clients try to create same resource group name at once
     try {
         await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
