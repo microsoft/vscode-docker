@@ -64,11 +64,7 @@ export async function createRegistry(): Promise<void> {
 
 }
 async function acquireSKU(): Promise<string> {
-    let skus: string[];
-    skus.push("Basic");
-    skus.push("Standard");
-    skus.push("Premium");
-
+    let skus: string[] = ["Basic", "Standard", "Premium"];
     let sku: string;
     sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU' });
     if (sku === undefined) { throw new Error('User exit'); }
@@ -173,7 +169,6 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
 
         if (!resourceGroupName) { vscode.window.showErrorMessage('You must select a valid resource group'); }
     } while (!resourceGroupName);
-
     return resourceGroup;
 }
 
