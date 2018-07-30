@@ -30,13 +30,7 @@ export async function createRegistry(): Promise<void> {
         return;
     }
 
-    const sku: string = await vscode.window.showInputBox({
-        ignoreFocusOut: false,
-        placeHolder: 'Basic',
-        value: 'Basic',
-        prompt: 'SKU? '
-    });
-
+    const sku: string = await acquireSKU();
     location = await acquireLocation(resourceGroup, subscription);
 
     client.registries.beginCreate(resourceGroup.name, registryName, { 'sku': { 'name': sku }, 'location': location }).then((response): void => {
@@ -68,6 +62,18 @@ export async function createRegistry(): Promise<void> {
         }
     }
 
+}
+async function acquireSKU(): Promise<string> {
+    let skus: string[];
+    skus.push("Basic");
+    skus.push("Standard");
+    skus.push("Premium");
+
+    let sku: string;
+    sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU' });
+    if (sku === undefined) { throw new Error('User exit'); }
+
+    return sku;
 }
 
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
