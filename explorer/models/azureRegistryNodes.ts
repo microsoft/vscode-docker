@@ -201,12 +201,17 @@ export class AzureRepositoryNode extends NodeBase {
             const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < tags.length; i++) {
+                let data: string;
                 pool.addTask(async () => {
-                    let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
-                        auth: {
-                            bearer: accessTokenARC
-                        }
-                    });
+                    try {
+                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                            auth: {
+                                bearer: accessTokenARC
+                            }
+                        });
+                    } catch (error) {
+                        console.log(error);
+                    }
 
                     //Acquires each image's manifest to acquire build time.
                     let manifest = JSON.parse(data);

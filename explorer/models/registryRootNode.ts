@@ -139,9 +139,15 @@ export class RegistryRootNode extends NodeBase {
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    let regs: ContainerModels.Registry[];
+                    try {
+                        regs = await client.registries.list();
+                    } catch (error) {
+                        console.log(error);
+                    }
                     subsAndRegistries.push({
                         'subscription': subs[i],
-                        'registries': await client.registries.list(),
+                        'registries': regs,
                         'client': client
                     });
                 });
@@ -161,7 +167,13 @@ export class RegistryRootNode extends NodeBase {
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async () => {
-                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            let creds: any;
+                            try {
+                                creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            } catch (error) {
+                                console.log(error);
+                            }
+
                             let iconPath = {
                                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
