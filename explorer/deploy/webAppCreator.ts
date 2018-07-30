@@ -3,13 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
+import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import WebSiteManagementClient = require('azure-arm-website');
 import * as fs from 'fs';
 import * as path from 'path';
+import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 import { reporter } from '../../telemetry/telemetry';
+import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
@@ -172,9 +177,15 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
             resourceGroups = results[0];
             locations = results[1];
             resourceGroups.forEach(rg => {
+                try {
+                    let s = `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase())})`;
+                } catch (error) {
+                    console.log(error);
+                    console.log(rg);
+                }
                 quickPickItems.push({
                     label: rg.name,
-                    description: `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName})`,
+                    description: `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase())})`,
                     detail: '',
                     data: rg
                 });
@@ -408,13 +419,22 @@ class WebsiteStep extends WebAppCreatorStepBase {
     private _serverUserName: string;
     private _serverPassword: string;
     private _imageName: string;
+    private _imageSubscription: Subscription;
+    private _registry: Registry;
 
     constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode) {
         super(wizard, 'Create Web App', azureAccount);
 
         this._serverUrl = context.serverUrl;
-        this._serverPassword = context.password;
-        this._serverUserName = context.userName;
+        if (context instanceof DockerHubImageNode) {
+            this._serverPassword = context.password;
+            this._serverUserName = context.userName;
+        }
+        if (context instanceof AzureImageNode) {
+            this._imageSubscription = context.subscription;
+            this._registry = context.registry;
+        }
+
         this._imageName = context.label;
 
     }
@@ -447,6 +467,12 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 await vscode.window.showWarningMessage(nameAvailability.message);
             }
         }
+        try {
+            await this.loginCredentials();
+        } catch (error) {
+            //Admin was not enabled, cannot proceed
+            throw new Error(('Admin not enabled'));
+        }
 
         let linuxFXVersion: string;
         if (this._serverUrl.length > 0) {
@@ -476,7 +502,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
         const subscription = this.getSelectedSubscription();
         const rg = this.getSelectedResourceGroup();
         const websiteClient = new WebSiteManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-
         // If the plan is also newly created, its resource ID won't be available at this step's prompt stage, but should be available now.
         if (!this._website.serverFarmId) {
             this._website.serverFarmId = this.getSelectedAppServicePlan().id;
@@ -505,7 +530,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
                     "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
-
         }
 
         await websiteClient.webApps.updateApplicationSettings(rg.name, this._website.name, appSettings);
@@ -541,6 +565,76 @@ class WebsiteStep extends WebAppCreatorStepBase {
             serverUser: this._serverUserName,
             serverPassword: this._serverPassword
         }
+    }
+
+    //Implements new Service principal model for ACR container registries while maintaining old admin enabled use
+    private async loginCredentials(): Promise<void> {
+        if (this._serverPassword && this._serverUserName) { return; }
+
+        const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
+        const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
+
+        if (this._registry.adminUserEnabled) {
+            try {
+                let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
+                this._serverPassword = creds.passwords[0].value;
+                this._serverUserName = creds.username;
+                return;
+            } catch (error) {
+                vscode.window.showErrorMessage(error.message);
+                throw new Error(('Admin not enabled'));
+            }
+        }
+        await vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
+        throw new Error(('Admin not enabled'));
+        // Un-Comment when Admin enabled is not required
+        // let convertedCredentials: { password: string, username: string } = await this.getSessionCredentials();
+        // this._serverUserName = convertedCredentials.password;
+        // this._serverPassword = convertedCredentials.username;
+    }
+
+    //For future non-admin enabled support
+    private async getSessionCredentials(): Promise<{ password: string, username: string }> {
+        const tenantId: string = this._imageSubscription.tenantId;
+        const session: AzureSession = this.azureAccount.getAzureSessions().find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const { accessToken, refreshToken } = await this.acquireToken(session);
+
+        if (accessToken && refreshToken) {
+            let refreshTokenARC: string;
+
+            await request.post('https://' + this._registry.loginServer + '/oauth2/exchange', {
+                form: {
+                    grant_type: 'access_token_refresh_token',
+                    service: this._registry.loginServer,
+                    tenant: tenantId,
+                    refresh_token: refreshToken,
+                    access_token: accessToken
+                }
+            }, (err, httpResponse, body) => {
+                if (body.length > 0) {
+                    refreshTokenARC = JSON.parse(body).refresh_token;
+                }
+            });
+            const nullGUID: string = "00000000-0000-0000-0000-000000000000"
+            return { 'username': nullGUID, 'password': refreshTokenARC }
+        }
+    }
+
+    private async acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
+        return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
+            const credentials: any = session.credentials;
+            const environment: any = session.environment;
+            credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: { accessToken: string; refreshToken: string; }): void => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({
+                        accessToken: result.accessToken,
+                        refreshToken: result.refreshToken
+                    });
+                }
+            });
+        });
     }
 
 }
