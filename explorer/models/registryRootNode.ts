@@ -133,7 +133,7 @@ export class RegistryRootNode extends NodeBase {
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
 
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
-            let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult, 'client': any }[] = [];
+            let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult }[] = [];
             //Acquire each subscription's data simultaneously
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
@@ -142,14 +142,13 @@ export class RegistryRootNode extends NodeBase {
                     let regs: ContainerModels.Registry[];
                     try {
                         regs = await client.registries.list();
+                        subsAndRegistries.push({
+                            'subscription': subs[i],
+                            'registries': regs
+                        });
                     } catch (error) {
-                        console.log(error);
+                        vscode.window.showErrorMessage(error);
                     }
-                    subsAndRegistries.push({
-                        'subscription': subs[i],
-                        'registries': regs,
-                        'client': client
-                    });
                 });
             }
             await subPool.runAll();
@@ -157,31 +156,20 @@ export class RegistryRootNode extends NodeBase {
             const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subsAndRegistries.length; i++) {
-                const client = subsAndRegistries[i].client;
                 const registries = subsAndRegistries[i].registries;
                 const subscription = subsAndRegistries[i].subscription;
 
                 //Go through the registries and add them to the async pool
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
-                    if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                    if (!registries[j].sku.tier.includes('Classic')) {
                         regPool.addTask(async () => {
-                            let creds: any;
-                            try {
-                                creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
-                            } catch (error) {
-                                console.log(error);
-                            }
-
                             let iconPath = {
                                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
                             };
                             let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
                             node.type = RegistryType.Azure;
-                            node.password = creds.passwords[0].value;
-                            node.userName = creds.username;
                             node.subscription = subscription;
                             node.registry = registries[j];
                             azureRegistryNodes.push(node);
