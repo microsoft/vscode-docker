@@ -144,7 +144,8 @@ Before we can accept your pull request you will need to sign a **Contribution Li
 
 Make sure you are signed in to the Docker Hub or Azure container registry from the docker CLI via `docker login` (using your username, not your e-mail address).
 
-If you are using an Azure container registry, you will need to get the username and password from Azure by right-clicking on the Azure container registry in the extension and selecting "Browse in the Azure Portal", then selecting the "Access Keys" tab.
+If you are using an Azure container registry, you will need to ensure admin user is enabled. To do this, right-click on the Azure container registry in the extension and select "Browse in the Azure Portal" - select the "Access Keys" tab in the portal. You will then see the username and password from Azure.
+
 ![Getting Azure username and password](images/AzureUsernamePassword.png)
 
 Finally, execute `docker login`, for example:
