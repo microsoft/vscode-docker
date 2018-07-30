@@ -1,25 +1,22 @@
 
-import * as vscode from "vscode";
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
+import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
-import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
+import * as vscode from "vscode";
 import { reporter } from '../../telemetry/telemetry';
+import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
 const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
 
-
-
-export async function createRegistry() {
+export async function createRegistry(): Promise<void> {
     let subscription: SubscriptionModels.Subscription;
     let resourceGroup: ResourceGroup;
     let location: string;
 
     try {
         subscription = await acquireSubscription();
-        location = await acquireLocation(subscription);
-        resourceGroup = await acquireResourceGroup(location, subscription);
+        resourceGroup = await acquireResourceGroup(subscription);
 
     } catch (error) {
         return;
@@ -40,9 +37,11 @@ export async function createRegistry() {
         prompt: 'SKU? '
     });
 
-    client.registries.beginCreate(resourceGroup.name, registryName, { 'sku': { 'name': sku }, 'location': location }).then(function (response) {
+    location = await acquireLocation(resourceGroup, subscription);
+
+    client.registries.beginCreate(resourceGroup.name, registryName, { 'sku': { 'name': sku }, 'location': location }).then((response): void => {
         vscode.window.showInformationMessage(response.name + ' has been created succesfully!');
-    }, function (error) {
+    }, (error): void => {
         vscode.window.showErrorMessage(error.message);
     })
 
@@ -71,7 +70,7 @@ export async function createRegistry() {
 
 }
 
-async function acquireRegistryName(client: ContainerRegistryManagementClient) {
+async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
         prompt: 'Registry name? '
@@ -86,7 +85,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient) {
         }
         registryName = await vscode.window.showInputBox(opt);
 
-        if (registryName === undefined) throw 'user Exit';
+        if (registryName === undefined) { throw new Error('user Exit'); }
 
         registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
     }
@@ -99,40 +98,52 @@ async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
     const subs = AzureCredentialsManager.getInstance().getFilteredSubscriptionList();
 
     let subsNames: string[] = [];
-    for (let i = 0; i < subs.length; i++) {
-        subsNames.push(subs[i].displayName);
+    for (let sub of subs) {
+        subsNames.push(sub.displayName);
     }
     let subscriptionName: string;
-    do {
-        subscriptionName = await vscode.window.showQuickPick(subsNames, { 'canPickMany': false, 'placeHolder': 'Choose a subscription to be used' });
-
-        if (subscriptionName === undefined) throw 'User exit';
-    } while (!subscriptionName);
-
+    subscriptionName = await vscode.window.showQuickPick(subsNames, { 'canPickMany': false, 'placeHolder': 'Choose a subscription to be used' });
+    if (subscriptionName === undefined) { throw new Error('User exit'); }
 
     return subs.find(sub => { return sub.displayName === subscriptionName });
 }
 
-async function acquireLocation(subscription): Promise<string> {
+async function acquireLocation(resourceGroup: ResourceGroup, subscription: SubscriptionModels.Subscription): Promise<string> {
     let locations: SubscriptionModels.Location[] = await AzureCredentialsManager.getInstance().getLocationsBySubscription(subscription);
     let locationNames: string[] = [];
+    let placeHolder: string;
 
-    for (let i = 0; i < locations.length; i++) {
-        locationNames.push(locations[i].displayName);
+    for (let loc of locations) {
+        locationNames.push(loc.displayName);
+    }
+
+    locationNames.sort((loc1: string, loc2: string): number => {
+        return loc1.localeCompare(loc2);
+    });
+
+    if (resourceGroup === undefined) {
+        placeHolder = "Choose location for your new resource group";
+    } else {
+        placeHolder = resourceGroup.location;
+
+        //makes placeholder the Display Name version of the location's name
+        locations.forEach((locObj: SubscriptionModels.Location): string => {
+            if (locObj.name === resourceGroup.location) {
+                placeHolder = locObj.displayName;
+                return;
+            }
+        });
+
     }
     let location: string;
     do {
-        location = await vscode.window.showQuickPick(locationNames, { 'canPickMany': false, 'placeHolder': 'Choose a location' });
-        if (location === undefined) throw 'User exit';
+        location = await vscode.window.showQuickPick(locationNames, { 'canPickMany': false, 'placeHolder': placeHolder });
+        if (location === undefined) { throw new Error('User exit'); }
     } while (!location);
-
-    let num = locationNames.indexOf(location);
-    return locations[num].name;
+    return location;
 }
 
-
-
-async function acquireResourceGroup(loc: string, subscription: SubscriptionModels.Subscription): Promise<ResourceGroup> {
+async function acquireResourceGroup(subscription: SubscriptionModels.Subscription): Promise<ResourceGroup> {
     //Acquire each subscription's data simultaneously
     let resourceGroup;
     let resourceGroupName;
@@ -141,20 +152,21 @@ async function acquireResourceGroup(loc: string, subscription: SubscriptionModel
 
     let resourceGroupNames: string[] = [];
     resourceGroupNames.push('+ Create new resource group');
-    for (let i = 0; i < resourceGroups.length; i++) {
-        resourceGroupNames.push(resourceGroups[i].name);
+    for (let resGroupName of resourceGroups) {
+        resourceGroupNames.push(resGroupName.name);
     }
 
     do {
         resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, { 'canPickMany': false, 'placeHolder': 'Choose a Resource Group to be used' });
-        if (resourceGroupName === undefined) throw 'user Exit';
+        if (resourceGroupName === undefined) { throw new Error('user Exit'); }
         if (resourceGroupName === '+ Create new resource group') {
+            let loc = await acquireLocation(resourceGroup, subscription);
             resourceGroupName = await createNewResourceGroup(loc, resourceGroupClient);
         }
         resourceGroups = await AzureCredentialsManager.getInstance().getResourceGroups(subscription);
         resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
 
-        if (!resourceGroupName) vscode.window.showErrorMessage('You must select a valid resource group');
+        if (!resourceGroupName) { vscode.window.showErrorMessage('You must select a valid resource group'); }
     } while (!resourceGroupName);
 
     return resourceGroup;
@@ -174,7 +186,7 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
             prompt: "That resource group name is already in existence. Try again: "
         }
         resourceGroupName = await vscode.window.showInputBox(opt);
-        if (resourceGroupName === undefined) throw 'user Exit';
+        if (resourceGroupName === undefined) { throw new Error('user Exit'); }
         resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
     }
 
@@ -186,12 +198,7 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
     try {
         await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
     } catch (error) {
-        vscode.window.showErrorMessage(error.message);
+        vscode.window.showErrorMessage("That resource group name is already in existence. Try again");
     }
-
     return resourceGroupName;
 }
-
-
-
-
