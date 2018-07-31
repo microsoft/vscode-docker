@@ -1,12 +1,12 @@
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
-import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'

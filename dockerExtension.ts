@@ -6,7 +6,7 @@ import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, registerUIExtensionVariables } from 'vscode-azureextensionui';
-import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -21,6 +21,7 @@ import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
 import { tagImage } from './commands/tag-image';
 import { docker } from './commands/utils/docker-endpoint';
+import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -66,8 +67,13 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const outputChannel = util.getOutputChannel();
     let azureAccount: AzureAccount;
 
-    // This allows for standard interactions with the end user (as opposed to test input)
-    ext.ui = new AzureUserInput(ctx.globalState);
+    if (!ext.ui) {
+        // This allows for standard interactions with the end user (as opposed to test input)
+        ext.ui = new AzureUserInput(ctx.globalState);
+    }
+    if (!ext.terminalProvider) {
+        ext.terminalProvider = new DefaultTerminalProvider();
+    }
 
     // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {

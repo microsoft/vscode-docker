@@ -649,11 +649,13 @@
     "vscode.yaml"
   ],
   "devDependencies": {
+    "@types/adm-zip": "^0.4.31",
     "@types/fs-extra": "^5.0.4",
     "@types/glob": "5.0.35",
     "@types/keytar": "^4.0.1",
     "@types/mocha": "^5.2.5",
     "@types/node": "^8.0.34",
+    "adm-zip": "^0.4.11",
     "azure-storage": "^2.8.1",
     "cross-env": "^5.2.0",
     "gulp": "^3.9.1",
