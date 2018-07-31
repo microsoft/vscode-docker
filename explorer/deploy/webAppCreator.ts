@@ -177,16 +177,16 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
             resourceGroups = results[0];
             locations = results[1];
             resourceGroups.forEach(rg => {
-                let location: string;
+                let locationDisplayName: string;
                 try {
-                    location = `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName})`;
+                    locationDisplayName = locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName;
                 } catch (error) {
                     //Less desirable formatting but allows this to work (Only occurs when a location is not part of the locations for a given subscription)
-                    location = rg.location;
+                    locationDisplayName = rg.location;
                 }
                 quickPickItems.push({
                     label: rg.name,
-                    description: location,
+                    description: locationDisplayName,
                     detail: '',
                     data: rg
                 });
@@ -430,10 +430,11 @@ class WebsiteStep extends WebAppCreatorStepBase {
         if (context instanceof DockerHubImageNode) {
             this._serverPassword = context.password;
             this._serverUserName = context.userName;
-        }
-        if (context instanceof AzureImageNode) {
+        } else if (context instanceof AzureImageNode) {
             this._imageSubscription = context.subscription;
             this._registry = context.registry;
+        } else {
+            throw Error(`Invalid context, cannot deploy to Azure App services from ${context}`);
         }
 
         this._imageName = context.label;
@@ -469,7 +470,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
             }
         }
         try {
-            await this.loginCredentials();
+            await this.acquireRegistryLoginCredentials();
         } catch (error) {
             //Admin was not enabled, cannot proceed
             throw new Error(('Admin not enabled'));
@@ -569,7 +570,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
     }
 
     //Implements new Service principal model for ACR container registries while maintaining old admin enabled use
-    private async loginCredentials(): Promise<void> {
+    private async acquireRegistryLoginCredentials(): Promise<void> {
         if (this._serverPassword && this._serverUserName) { return; }
 
         const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
@@ -583,11 +584,11 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 return;
             } catch (error) {
                 vscode.window.showErrorMessage(error.message);
-                throw new Error(('Admin not enabled'));
+                throw new Error(('Azure Container Registry Admin is not enabled'));
             }
         }
         await vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
-        throw new Error(('Admin not enabled'));
+        throw new Error(('Azure Container Registry Admin is not enabled'));
     }
 
 }
