@@ -588,54 +588,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
         }
         await vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
         throw new Error(('Admin not enabled'));
-        // Un-Comment when Admin enabled is not required
-        // let convertedCredentials: { password: string, username: string } = await this.getSessionCredentials();
-        // this._serverUserName = convertedCredentials.password;
-        // this._serverPassword = convertedCredentials.username;
-    }
-
-    //For future non-admin enabled support
-    private async getSessionCredentials(): Promise<{ password: string, username: string }> {
-        const tenantId: string = this._imageSubscription.tenantId;
-        const session: AzureSession = this.azureAccount.getAzureSessions().find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-        const { accessToken, refreshToken } = await this.acquireToken(session);
-
-        if (accessToken && refreshToken) {
-            let refreshTokenARC: string;
-
-            await request.post('https://' + this._registry.loginServer + '/oauth2/exchange', {
-                form: {
-                    grant_type: 'access_token_refresh_token',
-                    service: this._registry.loginServer,
-                    tenant: tenantId,
-                    refresh_token: refreshToken,
-                    access_token: accessToken
-                }
-            }, (err, httpResponse, body) => {
-                if (body.length > 0) {
-                    refreshTokenARC = JSON.parse(body).refresh_token;
-                }
-            });
-            const nullGUID: string = "00000000-0000-0000-0000-000000000000"
-            return { 'username': nullGUID, 'password': refreshTokenARC }
-        }
-    }
-
-    private async acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
-        return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
-            const credentials: any = session.credentials;
-            const environment: any = session.environment;
-            credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: { accessToken: string; refreshToken: string; }): void => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({
-                        accessToken: result.accessToken,
-                        refreshToken: result.refreshToken
-                    });
-                }
-            });
-        });
     }
 
 }
