@@ -40,17 +40,14 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         await fse.writeFile(path.join(testRootFolder, subfolderName, fileName), text);
     }
 
-    function fileContains(fileName: string, text: string): boolean {
-        let contents = fse.readFileSync(path.join(testRootFolder, fileName)).toString();
-        return contents.indexOf(text) >= 0;
-    }
-
     function assertFileContains(fileName: string, text: string): void {
-        assert(fileContains(fileName, text), `Expected to find '${text}' in file ${fileName}`);
+        let filePath = path.join(testRootFolder, fileName);
+        assertEx.assertFileContains(filePath, text);
     }
 
     function assertNotFileContains(fileName: string, text: string): void {
-        assert(!fileContains(fileName, text), `Unexpected found '${text}' in file ${fileName}`);
+        let filePath = path.join(testRootFolder, fileName);
+        assertEx.assertNotFileContains(filePath, text);
     }
 
     async function getFilesInProject(): Promise<string[]> {
