@@ -177,15 +177,16 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
             resourceGroups = results[0];
             locations = results[1];
             resourceGroups.forEach(rg => {
+                let location: string;
                 try {
-                    let s = `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase())})`;
+                    location = `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName})`;
                 } catch (error) {
-                    console.log(error);
-                    console.log(rg);
+                    //Less desirable formatting but allows this to work (Only occurs when a location is not part of the locations for a given subscription)
+                    location = rg.location;
                 }
                 quickPickItems.push({
                     label: rg.name,
-                    description: `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase())})`,
+                    description: location,
                     detail: '',
                     data: rg
                 });
