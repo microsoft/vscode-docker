@@ -53,14 +53,17 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         return;
     }
 
-    let selectedItems: Item[] = [];
-
-    if (dockerComposeFileUri) {
-        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-        for (let i: number = 0; i < selectedComposeFileUris.length; i++) {
-            selectedItems.push(createItem(folder, selectedComposeFileUris[i]));
-        }
+    let commandParameterFileUris: vscode.Uri[];
+    if (selectedComposeFileUris && selectedComposeFileUris.length) {
+        commandParameterFileUris = selectedComposeFileUris;
+    } else if (dockerComposeFileUri) {
+        commandParameterFileUris = [dockerComposeFileUri];
     } else {
+        commandParameterFileUris = [];
+    }
+    let selectedItems: Item[] = commandParameterFileUris.map(uri => createItem(folder, uri));
+    if (!selectedItems.length) {
+        // prompt for compose file
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length === 0) {
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
@@ -68,7 +71,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         }
 
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
-        selectedItems.push(<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` }));
+        selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
     }
 
     const terminal: vscode.Terminal = createTerminal('Docker Compose');
