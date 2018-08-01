@@ -118,7 +118,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const imageId = await this.dockerOutputManager.performOperation(
             'Building Docker image...',
-            () => this.dockerClient.buildImage(options, content => this.dockerOutputManager.append(content)),
+            outputManager => this.dockerClient.buildImage(options, content => outputManager.append(content)),
             id => `Docker image ${this.dockerClient.trimId(id)} built.`,
             err => `Failed to build Docker image: ${err}`);
 
