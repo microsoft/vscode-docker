@@ -12,6 +12,7 @@
 			],
 			"env": {
 				"NO_TIMEOUTS": "1",
+				"DEBUG": "vscode-azureextensionui:telemetry"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,
@@ -35,7 +36,10 @@
 			"outFiles": [
 				"${workspaceRoot}/out/test"
 			],
-			"preLaunchTask": "npm"
+			"preLaunchTask": "npm",
+			"env": {
+				"DEBUG": "vscode-azureextensionui:telemetry"
+			}
 		}
 	]
 }
