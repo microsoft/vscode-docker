@@ -582,7 +582,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 throw new Error(('Azure Container Registry Admin is not enabled'));
             }
         }
-        await vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
+        vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
         throw new Error(('Azure Container Registry Admin is not enabled'));
     }
 
