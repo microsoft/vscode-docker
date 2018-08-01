@@ -8,13 +8,9 @@ import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import WebSiteManagementClient = require('azure-arm-website');
-import * as fs from 'fs';
-import * as path from 'path';
-import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 import { reporter } from '../../telemetry/telemetry';
-import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
@@ -573,10 +569,9 @@ class WebsiteStep extends WebAppCreatorStepBase {
     private async acquireRegistryLoginCredentials(): Promise<void> {
         if (this._serverPassword && this._serverUserName) { return; }
 
-        const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
-        const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
-
         if (this._registry.adminUserEnabled) {
+            const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
+            const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
             try {
                 let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
                 this._serverPassword = creds.passwords[0].value;
