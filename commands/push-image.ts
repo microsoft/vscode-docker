@@ -35,7 +35,7 @@ export async function pushImage(context?: ImageNode): Promise<void> {
                 command: teleCmdId
             });
 
-            if (imageName.toLowerCase().indexOf('azurecr.io')) {
+            if (imageName.toLowerCase().includes('azurecr.io')) {
                 /* __GDPR__
                    "command" : {
                       "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
