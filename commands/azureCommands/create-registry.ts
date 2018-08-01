@@ -8,7 +8,9 @@ import { reporter } from '../../telemetry/telemetry';
 import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
 const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
+import * as opn from 'opn';
 
+/* Creates a new registry based on user input/selection of features, such as location */
 export async function createRegistry(): Promise<void> {
     let subscription: SubscriptionModels.Subscription;
     let resourceGroup: ResourceGroup;
@@ -63,6 +65,8 @@ export async function createRegistry(): Promise<void> {
     }
 
 }
+
+// INPUT HELPERS
 async function acquireSKU(): Promise<string> {
     let skus: string[] = ["Basic", "Standard", "Premium"];
     let sku: string;
@@ -83,7 +87,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     while (!registryStatus.nameAvailable) {
         opt = {
             ignoreFocusOut: false,
-            prompt: "That registry name is unavailable. Try again: "
+            prompt: `The registry name '${registryName}' is unavailable. Try again: `
         }
         registryName = await vscode.window.showInputBox(opt);
 
@@ -93,11 +97,15 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     return registryName;
 }
 
-// INPUT HELPERS
 async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
     const subs = AzureCredentialsManager.getInstance().getFilteredSubscriptionList();
-
-    if (subs.length === 0) { vscode.window.showErrorMessage('You do not have any subscriptions. Head over to Azure Portal to make one.'); }
+    if (subs.length === 0) {
+        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure Portal", "Open Portal").then(val => {
+            if (val === "Open Portal") {
+                opn('https://portal.azure.com/');
+            }
+        });
+    }
 
     let subsNames: string[] = [];
     for (let sub of subs) {
@@ -172,6 +180,7 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
     return resourceGroup;
 }
 
+/*Creates a new resource group within the current subscription */
 async function createNewResourceGroup(loc: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
     let promptMessage = 'Resource group name?';
 
@@ -188,10 +197,8 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
         resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
         if (!resourceGroupStatus) {
             opt.prompt = null;
-            console.log("true status, prompt message = null");
         } else {
-            opt.prompt = "That resource group name is already in existence. Try again: ";
-            console.log("false status, prompt message = try again");
+            opt.prompt = `The resource group '${resourceGroupName}' already exists. Try again: `;
         }
     }
 
@@ -204,7 +211,7 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
     try {
         await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
     } catch (error) {
-        vscode.window.showErrorMessage("That resource group name is already in existence. Try again");
+        vscode.window.showErrorMessage(`The resource group '${resourceGroupName}' already exists. Try again: `);
     }
     return resourceGroupName;
 }
