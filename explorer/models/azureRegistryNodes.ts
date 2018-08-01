@@ -196,13 +196,18 @@ export class AzureRepositoryNode extends NodeBase {
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < tags.length; i++) {
                 pool.addTask(async () => {
+                    let data: string;
                     try {
-                        let data: string = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
                             auth: {
                                 bearer: accessTokenARC
                             }
                         });
+                    } catch (error) {
+                        vscode.window.showErrorMessage(error);
+                    }
 
+                    if (data) {
                         //Acquires each image's manifest to acquire build time.
                         let manifest = JSON.parse(data);
                         node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
@@ -212,9 +217,6 @@ export class AzureRepositoryNode extends NodeBase {
                         node.subscription = element.subscription;
                         node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
                         imageNodes.push(node);
-
-                    } catch (error) {
-                        vscode.window.showErrorMessage(error);
                     }
                 });
             }
