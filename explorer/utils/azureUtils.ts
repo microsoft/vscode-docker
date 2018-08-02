@@ -15,3 +15,15 @@ export function browseAzurePortal(context?: AzureRegistryNode | AzureRepositoryN
     }
 
 }
+
+export function openAzurePortal(): void {
+
+    /*
+        let url: string = `${session.environment.portalUrl}/${tenantId}/#resource${context.registry.id}`;
+        if (context.contextValue === 'azureImageNode' || context.contextValue === 'azureRepositoryNode') {
+            url = `${url}/repository`;
+        }
+        opn(url);
+    }*/
+
+}

@@ -1,10 +1,10 @@
-import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
-import { AzureAccount } from '../typings/azure-account.api';
-import { ServiceClientCredentials } from 'ms-rest';
-import { AsyncPool } from '../utils/asyncpool';
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
+import { ServiceClientCredentials } from 'ms-rest';
+import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
+import { AzureAccount } from '../typings/azure-account.api';
+import { AsyncPool } from '../utils/asyncpool';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
 
 /* Singleton for facilitating communication with Azure account services by providing extended shared
@@ -28,14 +28,14 @@ export class AzureCredentialsManager {
     }
 
     //This function has to be called explicitly before using the singleton.
-    public setAccount(azureAccount) {
+    public setAccount(azureAccount: AzureAccount): void {
         this.azureAccount = azureAccount;
     }
 
     //GETTERS
-    public getAccount() {
-        if (this.azureAccount) return this.azureAccount;
-        throw ('Azure account is not present, you may have forgotten to call setAccount');
+    public getAccount(): AzureAccount {
+        if (this.azureAccount) { return this.azureAccount; }
+        throw new Error(('Azure account is not present, you may have forgotten to call setAccount'));
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
@@ -61,7 +61,7 @@ export class AzureCredentialsManager {
         return new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
     }
 
-    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string, sortFunction?): Promise<ContainerModels.Registry[]> {
+    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string, sortFunction?: any): Promise<ContainerModels.Registry[]> {
         let registries: ContainerModels.Registry[] = [];
 
         if (subscription && resourceGroup) {
@@ -79,9 +79,9 @@ export class AzureCredentialsManager {
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptionList();
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
 
-            for (let i = 0; i < subs.length; i++) {
+            for (let sub of subs) {
                 subPool.addTask(async () => {
-                    const client = this.getContainerRegistryManagementClient(subs[i]);
+                    const client = this.getContainerRegistryManagementClient(sub);
                     let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
                     registries = registries.concat(subscriptionRegistries);
                 });
@@ -105,9 +105,9 @@ export class AzureCredentialsManager {
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
-        for (let i = 0; i < subs.length; i++) {
+        for (let sub of subs) {
             subPool.addTask(async () => {
-                const resourceClient = this.getResourceManagementClient(subs[i]);
+                const resourceClient = this.getResourceManagementClient(sub);
                 const internalGroups = await resourceClient.resourceGroups.list();
                 resourceGroups = resourceGroups.concat(internalGroups);
             });
@@ -125,6 +125,13 @@ export class AzureCredentialsManager {
         }
 
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
+    }
+
+    public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
+        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const client = new SubscriptionClient(credential);
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        return locations;
     }
 
     //CHECKS

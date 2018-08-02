@@ -25,6 +25,7 @@ import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvi
 import { configure } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
+import { createRegistry } from './commands/azureCommands/create-registry';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
@@ -116,7 +117,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.restart', composeRestart));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
-
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createRegistry', createRegistry));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
