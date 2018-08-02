@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -632,7 +632,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.23.0"
+    "vscode": "^1.25.0"
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
@@ -662,7 +662,7 @@
     "tslint-microsoft-contrib": "5.0.1",
     "typescript": "^2.1.5",
     "vsce": "^1.37.5",
-    "vscode": "^1.0.0"
+    "vscode": "^1.1.18"
   },
   "dependencies": {
     "azure-arm-containerregistry": "^2.3.0",
@@ -679,6 +679,6 @@
     "request-promise": "^4.2.2",
     "vscode-azureextensionui": "~0.15.0",
     "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "4.3.0"
+    "vscode-languageclient": "4.4.0"
   }
 }
