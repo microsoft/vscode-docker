@@ -6,13 +6,13 @@ import * as vscode from 'vscode';
 
 type outputCallback<T> = (result: T) => string;
 
-export interface DockerOutputManager {
+export interface OutputManager {
     append(content: string): void;
     appendLine(content: string): void;
-    performOperation<T>(startContent: string, operation: (outputManager: DockerOutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T>;
+    performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T>;
 }
 
-export class DefaultDockerOutputManager implements DockerOutputManager {
+export class DefaultOutputManager implements OutputManager {
     private skipFirstLine = false;
     private isShown = false;
 
@@ -51,7 +51,7 @@ export class DefaultDockerOutputManager implements DockerOutputManager {
         this.outputChannel.appendLine(content);
     }
 
-    async performOperation<T>(startContent: string, operation: (outputManager: DockerOutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T> {
+    async performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T> {
         if (!this.isShown) {
             this.outputChannel.show(true);
             this.isShown = true;
@@ -60,7 +60,7 @@ export class DefaultDockerOutputManager implements DockerOutputManager {
         this.appendLine(startContent);
 
         try {
-            const result = await operation(new DefaultDockerOutputManager(this.outputChannel, this.level + 1));
+            const result = await operation(new DefaultOutputManager(this.outputChannel, this.level + 1));
 
             if (endContent) {
                 this.appendLine(typeof endContent === 'string' ? endContent : endContent(result));

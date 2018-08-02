@@ -41,7 +41,7 @@ import { LocalFileSystemProvider } from './debugging/netcoreapp/fsProvider';
 import ChildProcessProvider from './debugging/netcoreapp/processProvider';
 import CliDockerClient from './debugging/netcoreapp/dockerClient';
 import LocalOSProvider from './debugging/netcoreapp/osProvider';
-import { DefaultDockerOutputManager } from './debugging/netcoreapp/dockerOutputManager';
+import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
 import DockerDebugConfigurationProvider from './debugging/netcoreapp/dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './debugging/netcoreapp/dockerManager';
 import { DefaultAppStorageProvider } from './debugging/netcoreapp/appStorage';
@@ -207,7 +207,7 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext) {
 
     ctx.subscriptions.push(dockerOutputChannel);
 
-    const dockerOutputManager = new DefaultDockerOutputManager(dockerOutputChannel);
+    const dockerOutputManager = new DefaultOutputManager(dockerOutputChannel);
 
     const dockerManager =
         new DefaultDockerManager(

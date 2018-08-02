@@ -7,7 +7,7 @@ import { DockerClient, DockerBuildImageOptions, DockerRunContainerOptions, Docke
 import { OSProvider, PlatformType } from './osProvider';
 import { ProcessProvider } from './processProvider';
 import { DebuggerClient } from './debuggerClient';
-import { DockerOutputManager } from './dockerOutputManager';
+import { OutputManager } from './outputManager';
 import { AppStorageProvider } from './appStorage';
 import { FileSystemProvider } from './fsProvider';
 import Lazy from './lazy';
@@ -74,7 +74,7 @@ export class DefaultDockerManager implements DockerManager {
         private readonly appCacheFactory: AppStorageProvider,
         private readonly debuggerClient: DebuggerClient,
         private readonly dockerClient: DockerClient,
-        private readonly dockerOutputManager: DockerOutputManager,
+        private readonly dockerOutputManager: OutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
         private readonly processProvider: ProcessProvider,

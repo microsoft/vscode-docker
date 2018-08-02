@@ -9,7 +9,7 @@ import { ProcessProvider } from './processProvider';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { Memento } from 'vscode';
-import { DockerOutputManager } from './dockerOutputManager';
+import { OutputManager } from './outputManager';
 
 export interface VsDbgClient {
     getVsDbgVersion(version: string, runtime: string): Promise<string>;
@@ -29,7 +29,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
     private readonly options: VsDbgScriptPlatformOptions;
 
     constructor(
-        private readonly dockerOutputManager: DockerOutputManager,
+        private readonly dockerOutputManager: OutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly globalState: Memento,
         osProvider: OSProvider,
