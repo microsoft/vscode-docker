@@ -9,7 +9,6 @@ import { ext } from '../extensionVariables';
 
 export let reporter: ITelemetryReporter;
 
-export function initializeTelemetryReporter(ctx: vscode.ExtensionContext): void {
-    reporter = createTelemetryReporter(ctx);
-    ext.reporter = reporter;
+export function initializeTelemetryReporter(newReporter: ITelemetryReporter): void {
+    reporter = newReporter;
 }

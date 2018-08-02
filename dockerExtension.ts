@@ -5,7 +5,7 @@
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
@@ -82,7 +82,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         }
     }
 
-    initializeTelemetryReporter(ctx);
+    registerUIExtensionVariables(ext);
+    initializeTelemetryReporter(createTelemetryReporter(ctx));
+    ext.reporter = reporter;
 
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);

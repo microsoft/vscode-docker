@@ -11,8 +11,7 @@
 				"--extensionDevelopmentPath=${workspaceRoot}"
 			],
 			"env": {
-				"NO_TIMEOUTS": "1",
-				"DEBUG": "vscode-azureextensionui:telemetry"
+				"DEBUGTELEMETRY": "1"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,
@@ -38,7 +37,8 @@
 			],
 			"preLaunchTask": "npm",
 			"env": {
-				"DEBUG": "vscode-azureextensionui:telemetry"
+				"NO_TIMEOUTS": "1",
+				"DEBUGTELEMETRY": "1"
 			}
 		}
 	]
