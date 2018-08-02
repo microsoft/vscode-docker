@@ -12,19 +12,19 @@ import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
   Authors: Esteban Rey L, Jackson Stokes
 */
 
-export class AzureCredentialsManager {
+export class AzureUtilityManager {
 
     //SETUP
-    private static _instance: AzureCredentialsManager;
+    private static _instance: AzureUtilityManager;
     private azureAccount: AzureAccount;
 
     private constructor() { }
 
-    public static getInstance(): AzureCredentialsManager {
-        if (!AzureCredentialsManager._instance) { // lazy initialization
-            AzureCredentialsManager._instance = new AzureCredentialsManager();
+    public static getInstance(): AzureUtilityManager {
+        if (!AzureUtilityManager._instance) { // lazy initialization
+            AzureUtilityManager._instance = new AzureUtilityManager();
         }
-        return AzureCredentialsManager._instance;
+        return AzureUtilityManager._instance;
     }
 
     //This function has to be called explicitly before using the singleton.
