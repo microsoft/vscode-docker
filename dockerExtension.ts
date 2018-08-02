@@ -5,7 +5,7 @@
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
@@ -38,7 +38,7 @@ import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '.
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
-import { Reporter } from './telemetry/telemetry';
+import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -82,7 +82,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         }
     }
 
-    ctx.subscriptions.push(new Reporter(ctx));
+    registerUIExtensionVariables(ext);
+    initializeTelemetryReporter(createTelemetryReporter(ctx));
+    ext.reporter = reporter;
 
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);

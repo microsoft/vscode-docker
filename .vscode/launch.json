@@ -11,7 +11,7 @@
 				"--extensionDevelopmentPath=${workspaceRoot}"
 			],
 			"env": {
-				"NO_TIMEOUTS": "1",
+				"DEBUGTELEMETRY": "1"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,
@@ -35,7 +35,11 @@
 			"outFiles": [
 				"${workspaceRoot}/out/test"
 			],
-			"preLaunchTask": "npm"
+			"preLaunchTask": "npm",
+			"env": {
+				"NO_TIMEOUTS": "1",
+				"DEBUGTELEMETRY": "1"
+			}
 		}
 	]
 }

@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, OutputChannel } from "vscode";
-import { IAzureUserInput } from "vscode-azureextensionui";
-import TelemetryReporter from "vscode-extension-telemetry";
+import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -14,5 +13,5 @@ export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: OutputChannel;
     export let ui: IAzureUserInput;
-    export let reporter: TelemetryReporter;
+    export let reporter: ITelemetryReporter;
 }
