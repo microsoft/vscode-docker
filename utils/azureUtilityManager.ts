@@ -35,14 +35,13 @@ export class AzureUtilityManager {
     //GETTERS
     public getAccount(): AzureAccount {
         if (this.azureAccount) { return this.azureAccount; }
-        throw new Error(('Azure account is not present, you may have forgotten to call setAccount'));
+        throw new Error('Azure account is not present, you may have forgotten to call setAccount');
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
         return this.getAccount().filters.map<SubscriptionModels.Subscription>(filter => {
             return {
                 id: filter.subscription.id,
-                session: filter.session,
                 subscriptionId: filter.subscription.subscriptionId,
                 tenantId: filter.session.tenantId,
                 displayName: filter.subscription.displayName,
@@ -129,7 +128,7 @@ export class AzureUtilityManager {
 
     //CHECKS
     //Provides a unified check for login that should be called once before using the rest of the singletons capabilities
-    public async isLoggedIn(): Promise<boolean> {
+    public async waitForLogin(): Promise<boolean> {
         if (!this.azureAccount) {
             return false;
         }
