@@ -63,8 +63,6 @@ class TestTerminal implements vscode.Terminal {
    * redirected standard and error output.
    */
   public async exit(): Promise<{ errorText: string, outputText: string }> {
-    let pid = await this._terminal.processId;
-
     // Output text to a semaphore file. This will execute when the terminal is no longer busy.
     this.sendTextRaw(`echo Done > ${this._semaphorePath}`);
 
@@ -72,10 +70,10 @@ class TestTerminal implements vscode.Terminal {
     await this.waitForFileCreation(this._semaphorePath);
 
     assert(fse.existsSync(this._outputFilePath), 'The output file from the command was not created.');
-    let output = fse.readFileSync(this._outputFilePath).toString();
+    let output = bufferToString(fse.readFileSync(this._outputFilePath));
 
     assert(fse.existsSync(this._errFilePath), 'The error file from the command was not created.');
-    let err = fse.readFileSync(this._errFilePath).toString();
+    let err = bufferToString(fse.readFileSync(this._errFilePath));
 
     return { outputText: output, errorText: err };
   }
@@ -119,4 +117,12 @@ class TestTerminal implements vscode.Terminal {
   public dispose(): void {
     this._terminal.dispose();
   }
+}
+
+function bufferToString(buffer: Buffer): string {
+  if (buffer.length > 2 && buffer[0] === 0xff && buffer[1] === 0xfe) {
+    return buffer.toString("utf-16le");
+  }
+
+  return buffer.toString();
 }

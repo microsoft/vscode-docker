@@ -78,7 +78,7 @@ suite("Build Image", function (this: Suite): void {
 
         // Build image
         ext.ui = new TestUserInput(buildInputs);
-        let dockerFile = Uri.parse(path.join(testRootFolder, 'Dockerfile'));
+        let dockerFile = Uri.file(path.join(testRootFolder, 'Dockerfile'));
         await commands.executeCommand('vscode-docker.image.build', dockerFile);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for Build Image');
 
