@@ -1,12 +1,12 @@
 import * as cp from 'child_process';
 import * as fs from 'fs';
-import os = require('os');
-import vscode = require('vscode');
 import { ImageNode } from '../explorer/models/imageNode';
 import { reporter } from '../telemetry/telemetry';
 import { createTerminal } from './utils/create-terminal';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
+import os = require('os');
+import vscode = require('vscode');
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
@@ -29,7 +29,7 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
         docker.getExposedPorts(imageToStart.Id).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
-                const portMappings = ports.map((port) => `-p ${port}:${port}`);
+                const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`);
                 options += ` ${portMappings.join(' ')}`;
             }
 
