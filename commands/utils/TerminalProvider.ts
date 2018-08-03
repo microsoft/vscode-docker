@@ -24,6 +24,9 @@ export class DefaultTerminalProvider {
   }
 }
 
+/**
+ * Creates terminals for testing that automatically save the standard and error output of the commands sent to it
+ */
 export class TestTerminalProvider {
   private _currentTerminal: TestTerminal;
 
@@ -55,15 +58,17 @@ class TestTerminal implements vscode.Terminal {
     this._semaphorePath = path.join(root, `.sem${this._suffix}`);
   }
 
-  public get name(): string { return this._terminal.name; }
-
-  public get processId(): Thenable<number> { return this._terminal.processId; }
-
+  /**
+   * Causes the terminal to exit after completing the current command, and returns the
+   * redirected standard and error output.
+   */
   public async exit(): Promise<{ errorText: string, outputText: string }> {
     let pid = await this._terminal.processId;
 
+    // Output text to a semaphore file. This will execute when the terminal is no longer busy.
     this.sendTextRaw(`echo Done > ${this._semaphorePath}`);
 
+    // Wait for the semaphore file
     await this.waitForFileCreation(this._semaphorePath);
 
     assert(fse.existsSync(this._outputFilePath), 'The output file from the command was not created.');
@@ -74,6 +79,10 @@ class TestTerminal implements vscode.Terminal {
 
     return { outputText: output, errorText: err };
   }
+
+  public get name(): string { return this._terminal.name; }
+
+  public get processId(): Thenable<number> { return this._terminal.processId; }
 
   private async waitForFileCreation(filePath: string): Promise<void> {
     return new Promise<void>((resolve, _reject) => {
@@ -89,6 +98,7 @@ class TestTerminal implements vscode.Terminal {
 
   public sendText(text: string, addNewLine?: boolean): void {
     if (addNewLine !== false) {
+      // Redirect the output and error output to files (not a perfect solution, but it works)
       text += ` >${this._outputFilePath} 2>${this._errFilePath}`;
     }
     this.sendTextRaw(text, addNewLine);
