@@ -67,14 +67,15 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let azureAccount: AzureAccount;
 
     // Set up extension variables
-    ctx.subscriptions.push(new Reporter(ctx));
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    ext.reporter = reporter;
     registerUIExtensionVariables(ext);
+
+    initializeTelemetryReporter(createTelemetryReporter(ctx));
+    ext.reporter = reporter;
 
     // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {
@@ -88,10 +89,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
             break;
         }
     }
-
-    registerUIExtensionVariables(ext);
-    initializeTelemetryReporter(createTelemetryReporter(ctx));
-    ext.reporter = reporter;
 
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
