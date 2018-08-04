@@ -56,5 +56,5 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
     username = creds.username;
     password = creds.password;
     let path = `/v2/_acr/${repoName}/tags/${tag}`;
-    await acrTools.requestDataFromRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
+    await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
 }
