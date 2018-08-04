@@ -53,6 +53,7 @@
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
     "onCommand:vscode-docker.deleteAzureImage",
+    "onCommand:vscode-docker.deleteAzureRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -260,6 +261,10 @@
         {
           "command": "vscode-docker.deleteAzureImage",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
+        },
+        {
+          "command": "vscode-docker.deleteAzureRegistry",
+          "when": "view == dockerExplorer && viewItem == azureRegistryNode"
         },
         {
           "command": "vscode-docker.browseDockerHub",
@@ -624,6 +629,11 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.deleteAzureRegistry",
+        "title": "Delete Azure Registry",
         "category": "Docker"
       },
       {

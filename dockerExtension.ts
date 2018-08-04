@@ -9,6 +9,7 @@ import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExt
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
+import { deleteAzureRegistry } from './commands/azureCommands/delete-azure-registry';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -155,6 +156,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     if (azureAccount) {
         registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
         registerCommand('vscode-docker.createRegistry', createRegistry);
+        registerCommand('vscode-docker.deleteAzureRegistry', deleteAzureRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }
 
