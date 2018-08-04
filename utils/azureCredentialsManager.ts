@@ -1,15 +1,15 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
 import { ServiceClientCredentials } from 'ms-rest';
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
-import { AzureAccount } from '../typings/azure-account.api';
+import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from '../utils/asyncpool';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
-
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
-  Authors: Esteban Rey L, Jackson Stokes
+  Authors: Esteban Rey L, Jackson Stokes, Julia Lieberman
 */
 
 export class AzureCredentialsManager {
@@ -82,17 +82,16 @@ export class AzureCredentialsManager {
             for (let sub of subs) {
                 subPool.addTask(async () => {
                     const client = this.getContainerRegistryManagementClient(sub);
+
                     let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
                     registries = registries.concat(subscriptionRegistries);
                 });
             }
             await subPool.runAll();
         }
-
         if (sortFunction && registries.length > 1) {
             registries.sort(sortFunction);
         }
-
         return registries;
     }
 
@@ -101,13 +100,14 @@ export class AzureCredentialsManager {
             const resourceClient = this.getResourceManagementClient(subscription);
             return await resourceClient.resourceGroups.list();
         }
-        const subs = this.getFilteredSubscriptionList();
+        const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptionList();
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
-        for (let sub of subs) {
+
+        for (let tempSub of subs) {
             subPool.addTask(async () => {
-                const resourceClient = this.getResourceManagementClient(sub);
+                const resourceClient = this.getResourceManagementClient(tempSub);
                 const internalGroups = await resourceClient.resourceGroups.list();
                 resourceGroups = resourceGroups.concat(internalGroups);
             });
@@ -117,13 +117,10 @@ export class AzureCredentialsManager {
     }
 
     public getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
-
         const session = this.getAccount().sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
-
         if (session) {
             return session.credentials;
         }
-
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 

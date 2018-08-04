@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -117,7 +118,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.down', composeDown));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.compose.restart', composeRestart));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.system.prune', systemPrune));
+    ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage));
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createRegistry', createRegistry));
+
     ctx.subscriptions.push(vscode.commands.registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
