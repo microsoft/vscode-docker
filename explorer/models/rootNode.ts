@@ -109,7 +109,6 @@ export class RootNode extends NodeBase {
     }
 
     public async getChildren(element: NodeBase): Promise<NodeBase[]> {
-
         if (element.contextValue === 'imagesRootNode') {
             return this.getImages();
         }
