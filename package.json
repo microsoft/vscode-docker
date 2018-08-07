@@ -46,11 +46,13 @@
     "onCommand:vscode-docker.compose.restart",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
+    "onCommand:vscode-docker.createRegistry",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
+    "onCommand:vscode-docker.deleteAzureImage",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -248,8 +250,16 @@
           "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
         },
         {
+          "command": "vscode-docker.createRegistry",
+          "when": "view == dockerExplorer && viewItem == azureRegistryRootNode"
+        },
+        {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
+        },
+        {
+          "command": "vscode-docker.deleteAzureImage",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
           "command": "vscode-docker.browseDockerHub",
@@ -568,6 +578,11 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.createRegistry",
+        "title": "Create Registry",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.image.push",
         "title": "Push",
         "description": "Push an image to a registry",
@@ -609,6 +624,11 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.deleteAzureImage",
+        "title": "Delete Azure Image",
         "category": "Docker"
       }
     ],
