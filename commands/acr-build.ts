@@ -3,7 +3,7 @@ import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as vscode from "vscode";
 import { ImageNode } from "../explorer/models/imageNode";
-import { AzureCredentialsManager } from "../utils/AzureCredentialsManager";
+import { AzureUtilityManager } from "../utils/azureUtilityManager";
 let tar = require('tar');
 let fs = require('fs');
 let os = require('os');
@@ -22,8 +22,8 @@ export async function queueBuild(context?: ImageNode): Promise<void> {
     const registryName: string = await vscode.window.showInputBox(opt);
 
     console.log("Obtaining Subscription and Client");
-    let subscription = AzureCredentialsManager.getInstance().getFilteredSubscriptionList()[0];
-    let client = AzureCredentialsManager.getInstance().getContainerRegistryManagementClient(subscription);
+    let subscription = AzureUtilityManager.getInstance().getFilteredSubscriptionList()[0];
+    let client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
 
     console.log("Setting up temp file with 'sourceArchive.tar.gz' ");
     let tarFilePath = url.resolve(os.tmpdir(), 'sourceArchive.tar.gz');

@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { queueBuild } from './commands/acr-build';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
 import { buildImage } from './commands/build-image';
@@ -156,6 +157,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
         registerCommand('vscode-docker.createRegistry', createRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
+        registerCommand('vscode-docker.queueBuild', queueBuild)
     }
 
     activateLanguageClient(ctx);
