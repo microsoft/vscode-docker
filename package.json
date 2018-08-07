@@ -697,8 +697,8 @@
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
-    "vscode-azureextensionui": "~0.15.0",
-    "vscode-extension-telemetry": "^0.0.6",
-    "vscode-languageclient": "4.4.0"
+    "vscode-azureextensionui": "^0.16.6",
+    "vscode-extension-telemetry": "0.0.18",
+    "vscode-languageclient": "^4.4.0"
   }
 }
