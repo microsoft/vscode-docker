@@ -53,7 +53,6 @@ export class RootNode extends NodeBase {
         //     clearInterval(this._imageDebounceTimer);
         //     return;
         // }
-
         clearInterval(this._imageDebounceTimer);
 
         if (refreshInterval > 0) {
@@ -70,13 +69,9 @@ export class RootNode extends NodeBase {
                 if (this._imageCache.length !== images.length) {
                     needToRefresh = true;
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i: number = 0; i < this._imageCache.length; i++) {
-                        let before: string = JSON.stringify(this._imageCache[i]);
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j: number = 0; j < images.length; j++) {
-                            let after: string = JSON.stringify(images[j]);
-                            if (before === after) {
+                    for (let cachedImage of this._imageCache) {
+                        for (let image of images) {
+                            if (image === cachedImage) {
                                 found = true;
                                 break;
                             }
@@ -108,18 +103,21 @@ export class RootNode extends NodeBase {
 
     }
 
-    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
-
-        if (element.contextValue === 'imagesRootNode') {
-            return this.getImages();
+    public async getChildren(element: RootNode): Promise<NodeBase[]> {
+        switch (element.contextValue) {
+            case 'imagesRootNode': {
+                return this.getImages();
+            }
+            case 'containersRootNode': {
+                return this.getContainers();
+            }
+            case 'registriesRootNode': {
+                return this.getRegistries();
+            }
+            default: {
+                break;
+            }
         }
-        if (element.contextValue === 'containersRootNode') {
-            return this.getContainers();
-        }
-        if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries()
-        }
-
     }
 
     private async getImages(): Promise<ImageNode[]> {
@@ -132,19 +130,15 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < images.length; i++) {
-                // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                if (!images[i].RepoTags) {
+            for (let image of images) {
+                if (!image.RepoTags) {
                     let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
-                    node.imageDesc = images[i];
+                    node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
-                        node.imageDesc = images[i];
+                    for (let repoTag of image.RepoTags) {
+                        let node = new ImageNode(`${repoTag}`, "localImageNode", this.eventEmitter);
+                        node.imageDesc = image;
                         imageNodes.push(node);
                     }
                 }
@@ -168,7 +162,6 @@ export class RootNode extends NodeBase {
         //     clearInterval(this._containerDebounceTimer);
         //     return;
         // }
-
         clearInterval(this._containerDebounceTimer);
 
         if (refreshInterval > 0) {
@@ -186,15 +179,13 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < this._containerCache.length; i++) {
-                        let ctr: Docker.ContainerDesc = this._containerCache[i];
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j = 0; j < containers.length; j++) {
+                    for (let cachedContainer of this._containerCache) {
+                        let ctr: Docker.ContainerDesc = cachedContainer;
+                        for (let cont of containers) {
                             // can't do a full object compare because "Status" keeps changing for running containers
-                            if (ctr.Id === containers[j].Id &&
-                                ctr.Image === containers[j].Image &&
-                                ctr.State === containers[j].State) {
+                            if (ctr.Id === cont.Id &&
+                                ctr.Image === cont.Image &&
+                                ctr.State === cont.State) {
                                 found = true;
                                 break;
                             }
@@ -230,9 +221,8 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < containers.length; i++) {
-                if (['exited', 'dead'].includes(containers[i].State)) {
+            for (let container of containers) {
+                if (['exited', 'dead'].includes(container.State)) {
                     contextValue = "stoppedLocalContainerNode";
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
@@ -246,8 +236,8 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, contextValue, iconPath);
-                containerNode.containerDesc = containers[i];
+                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, contextValue, iconPath);
+                containerNode.containerDesc = container;
                 containerNodes.push(containerNode);
             }
 

@@ -68,7 +68,7 @@ export async function createRegistry(): Promise<void> {
 
 // INPUT HELPERS
 async function acquireSKU(): Promise<string> {
-    let skus: string[] = ["Basic", "Standard", "Premium"];
+    let skus: string[] = ["Standard", "Basic", "Premium"];
     let sku: string;
     sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU' });
     if (sku === undefined) { throw new Error('User exit'); }

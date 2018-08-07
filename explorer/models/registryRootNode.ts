@@ -9,6 +9,7 @@ import * as ContainerModels from '../../node_modules/azure-arm-containerregistry
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
+import * as acrTools from '../../utils/Azure/acrTools';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
@@ -158,8 +159,10 @@ export class RegistryRootNode extends NodeBase {
                 //Go through the registries and add them to the async pool
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
+
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                        const resourceGroup: string = acrTools.getResourceGroup(registries[j]);
+
                         regPool.addTask(async () => {
                             let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
                             let iconPath = {
