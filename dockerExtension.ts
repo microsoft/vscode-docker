@@ -210,7 +210,7 @@ namespace Configuration {
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     let serverModule = ctx.asAbsolutePath(path.join("node_modules", "dockerfile-language-server-nodejs", "lib", "server.js"));
-    let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
+    let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
     let serverOptions: ServerOptions = {
         run: { module: serverModule, transport: TransportKind.ipc, args: ["--node-ipc"] },
