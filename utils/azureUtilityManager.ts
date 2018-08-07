@@ -1,5 +1,5 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { ServiceClientCredentials } from 'ms-rest';
 import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
@@ -124,6 +124,13 @@ export class AzureUtilityManager {
         }
 
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
+    }
+
+    public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
+        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const client = new SubscriptionClient(credential);
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        return locations;
     }
 
     //CHECKS

@@ -5,7 +5,7 @@ import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
 import { reporter } from '../../telemetry/telemetry';
-import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
 import * as opn from 'opn';
@@ -23,7 +23,7 @@ export async function createRegistry(): Promise<void> {
     } catch (error) {
         return;
     }
-    const client = AzureCredentialsManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
 
     let registryName: string;
     try {
@@ -98,7 +98,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
 }
 
 async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
-    const subs = AzureCredentialsManager.getInstance().getFilteredSubscriptionList();
+    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subs.length === 0) {
         vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure Portal", "Open Portal").then(val => {
             if (val === "Open Portal") {
@@ -119,7 +119,7 @@ async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
 }
 
 async function acquireLocation(resourceGroup: ResourceGroup, subscription: SubscriptionModels.Subscription): Promise<string> {
-    let locations: SubscriptionModels.Location[] = await AzureCredentialsManager.getInstance().getLocationsBySubscription(subscription);
+    let locations: SubscriptionModels.Location[] = await AzureUtilityManager.getInstance().getLocationsBySubscription(subscription);
     let locationNames: string[] = [];
     let placeHolder: string;
 
@@ -156,8 +156,8 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
     //Acquire each subscription's data simultaneously
     let resourceGroup;
     let resourceGroupName;
-    const resourceGroupClient = new ResourceManagementClient(AzureCredentialsManager.getInstance().getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-    let resourceGroups = await AzureCredentialsManager.getInstance().getResourceGroups(subscription);
+    const resourceGroupClient = new ResourceManagementClient(AzureUtilityManager.getInstance().getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+    let resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
 
     let resourceGroupNames: string[] = [];
     resourceGroupNames.push('+ Create new resource group');
@@ -172,7 +172,7 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
             let loc = await acquireLocation(resourceGroup, subscription);
             resourceGroupName = await createNewResourceGroup(loc, resourceGroupClient);
         }
-        resourceGroups = await AzureCredentialsManager.getInstance().getResourceGroups(subscription);
+        resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
         resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
 
         if (!resourceGroupName) { vscode.window.showErrorMessage('You must select a valid resource group'); }

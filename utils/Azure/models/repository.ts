@@ -2,7 +2,6 @@ import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../../typings/azure-account.api';
 import * as acrTools from '../../../utils/Azure/acrTools';
-import { AzureCredentialsManager } from '../../AzureCredentialsManager';
 /**
  * class Repository: used locally as of August 2018, primarily for functions within azureUtils.ts and new commands such as delete Repository
  * accessToken can be used like a password, and the username can be '00000000-0000-0000-0000-000000000000'

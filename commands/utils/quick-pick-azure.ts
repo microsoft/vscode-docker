@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/Repository";
-import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
 /**
  * function to allow user to pick a desired image for use
@@ -46,7 +46,7 @@ export async function quickPickACRRepository(registry: Registry): Promise<Reposi
  */
 export async function quickPickACRRegistry(): Promise<Registry> {
     //first get desired registry
-    let registries = await AzureCredentialsManager.getInstance().getRegistries();
+    let registries = await AzureUtilityManager.getInstance().getRegistries();
     let reg: string[] = [];
     for (let registryName of registries) {
         reg.push(registryName.name);

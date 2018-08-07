@@ -6,7 +6,7 @@ import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/Azure
 import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
-import { AzureCredentialsManager } from '../azureCredentialsManager';
+import { AzureUtilityManager } from '../azureUtilityManager';
 const teleCmdId: string = 'vscode-docker.deleteAzureImage';
 
 /**
@@ -17,7 +17,7 @@ const teleCmdId: string = 'vscode-docker.deleteAzureImage';
 export async function getAzureRepositories(registry: Registry): Promise<Repository[]> {
     const allRepos: Repository[] = [];
     let repo: Repository;
-    let azureAccount: AzureAccount = AzureCredentialsManager.getInstance().getAccount();
+    let azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
     if (!azureAccount) {
         return [];
     }
@@ -49,7 +49,7 @@ export async function getAzureRepositories(registry: Registry): Promise<Reposito
 export async function getRegistryTokens(registry: Registry): Promise<{ refreshToken: any, accessToken: any }> {
     const subscription = getRegistrySubscription(registry);
     const tenantId: string = subscription.tenantId;
-    let azureAccount: AzureAccount = AzureCredentialsManager.getInstance().getAccount();
+    let azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
 
     const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
     const { accessToken } = await acquireARMToken(session);
@@ -147,7 +147,7 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     let tags;
-    let azureAccount: AzureAccount = AzureCredentialsManager.getInstance().getAccount();
+    let azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
     let tenantId: string = element.subscription.tenantId;
     let refreshTokenACR;
     let accessTokenACR;
@@ -218,7 +218,7 @@ export async function loginCredentials(subscription: SubscriptionModels.Subscrip
     }
     let username: string;
     let password: string;
-    const client = AzureCredentialsManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
     if (context) {
         username = node.userName;
@@ -267,7 +267,7 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
  */
 export function getRegistrySubscription(registry: Registry): SubscriptionModels.Subscription {
     let subscriptionId = registry.id.slice('/subscriptions/'.length, registry.id.search('/resourceGroups/'));
-    const subs = AzureCredentialsManager.getInstance().getFilteredSubscriptionList();
+    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     let subscription = subs.find((sub): boolean => {
         return sub.subscriptionId === subscriptionId;
     });
