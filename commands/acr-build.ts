@@ -1,6 +1,5 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
-<<<<<<< HEAD
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient } from 'azure-arm-resource';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
@@ -8,19 +7,12 @@ import * as vscode from "vscode";
 import { ImageNode } from "../explorer/models/imageNode";
 import { AzureUtilityManager } from "../utils/azureUtilityManager";
 import { acquireResourceGroup, quickPickACRRegistry } from './utils/quick-pick-azure';
-=======
-import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import * as vscode from "vscode";
-import { ImageNode } from "../explorer/models/imageNode";
-import { AzureCredentialsManager } from "../utils/AzureCredentialsManager";
->>>>>>> 2332645099ddef2593b806586cf2d69a5587f979
 let tar = require('tar');
 let fs = require('fs');
 let os = require('os');
 let url = require('url');
 
 export async function queueBuild(context?: ImageNode): Promise<void> {
-<<<<<<< HEAD
 
     console.log("Obtaining Subscription and Client");
     let subscription = AzureUtilityManager.getInstance().getFilteredSubscriptionList()[0];
@@ -32,33 +24,13 @@ export async function queueBuild(context?: ImageNode): Promise<void> {
 
     let registry: Registry = await quickPickACRRegistry(subscription, resourceGroupName);
     let registryName = registry.name;
-=======
-    let opt: vscode.InputBoxOptions = {
-        ignoreFocusOut: true,
-        prompt: 'Resource Group? '
-    };
-    const resourceGroup: string = await vscode.window.showInputBox(opt);
-    opt = {
-        ignoreFocusOut: true,
-        prompt: 'Registry name? '
-    };
-    const registryName: string = await vscode.window.showInputBox(opt);
-
-    console.log("Obtaining Subscription and Client");
-    let subscription = AzureCredentialsManager.getInstance().getFilteredSubscriptionList()[0];
-    let client = AzureCredentialsManager.getInstance().getContainerRegistryManagementClient(subscription);
->>>>>>> 2332645099ddef2593b806586cf2d69a5587f979
 
     console.log("Setting up temp file with 'sourceArchive.tar.gz' ");
     let tarFilePath = url.resolve(os.tmpdir(), 'sourceArchive.tar.gz');
 
     console.log("Uploading Source Code");
     let sourceLocation: string = vscode.workspace.rootPath;
-<<<<<<< HEAD
     sourceLocation = await uploadSourceCode(client, registryName, resourceGroupName, sourceLocation, tarFilePath);
-=======
-    sourceLocation = await uploadSourceCode(client, registryName, resourceGroup, sourceLocation, tarFilePath);
->>>>>>> 2332645099ddef2593b806586cf2d69a5587f979
 
     console.log("Setting up Build Request");
     let buildRequest: QuickBuildRequest = {
@@ -72,19 +44,11 @@ export async function queueBuild(context?: ImageNode): Promise<void> {
 
     console.log("Queueing Build");
     try {
-<<<<<<< HEAD
         await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
     } catch (error) {
         console.log(error.message);
     }
     console.log(client.builds.list(resourceGroupName, registryName));
-=======
-        await client.registries.queueBuild(resourceGroup, registryName, buildRequest);
-    } catch (error) {
-        console.log(error.message);
-    }
-    console.log(client.builds.list(resourceGroup, registryName));
->>>>>>> 2332645099ddef2593b806586cf2d69a5587f979
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string): Promise<string> {
