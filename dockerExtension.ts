@@ -7,6 +7,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { createRegistry } from './commands/azureCommands/create-registry';
+import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
+import { deleteAzureRegistry } from './commands/azureCommands/delete-azure-registry';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -122,7 +125,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
@@ -137,6 +139,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 }
             }
         }
+
     });
 
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
@@ -150,6 +153,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
     if (azureAccount) {
+        registerCommand('vscode-docker.deleteAzureRegistry', deleteAzureRegistry);
+        registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
+        registerCommand('vscode-docker.createRegistry', createRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }
 
