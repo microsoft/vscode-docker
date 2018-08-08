@@ -125,7 +125,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
@@ -154,9 +153,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
     if (azureAccount) {
+        registerCommand('vscode-docker.deleteAzureRegistry', deleteAzureRegistry);
         registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
         registerCommand('vscode-docker.createRegistry', createRegistry);
-        registerCommand('vscode-docker.deleteAzureRegistry', deleteAzureRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }
 

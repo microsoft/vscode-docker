@@ -18,7 +18,7 @@ export class Repository {
 
     constructor(registry: Registry, repository: string, accessToken?: string, refreshToken?: string, password?: string, username?: string) {
         this.registry = registry;
-        this.resourceGroupName = acrTools.getResourceGroup(registry);
+        this.resourceGroupName = acrTools.getResourceGroupName(registry);
         this.subscription = acrTools.getRegistrySubscription(registry);
         this.name = repository;
         if (accessToken) { this.accessToken = accessToken; }

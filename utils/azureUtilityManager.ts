@@ -91,8 +91,8 @@ export class AzureUtilityManager {
         if (sortFunction && registries.length > 1) {
             registries.sort(sortFunction);
         }
-
-        return registries;
+        //Return only non classic registries
+        return registries.filter((registry) => { return !registry.sku.tier.includes('Classic') });
     }
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {

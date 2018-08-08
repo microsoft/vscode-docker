@@ -37,7 +37,7 @@ export class TaskRootNode extends NodeBase {
         let buildTasks: ContainerModels.BuildTask[] = [];
 
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
-        const resourceGroup: string = acrTools.getResourceGroup(element.registry);
+        const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
 
         buildTasks = await client.buildTasks.list(resourceGroup, element.registry.name);
         if (buildTasks.length === 0) {
