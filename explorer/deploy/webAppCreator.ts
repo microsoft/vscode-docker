@@ -173,13 +173,15 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
             resourceGroups = results[0];
             locations = results[1];
             resourceGroups.forEach(rg => {
+                const location: SubscriptionModels.Location = locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase());
                 let locationDisplayName: string;
-                try {
-                    locationDisplayName = locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName;
-                } catch (error) {
-                    //Less desirable formatting but allows this to work (Only occurs when a location is not part of the locations for a given subscription)
+
+                if (location) {
+                    locationDisplayName = location.displayName;
+                } else {
                     locationDisplayName = rg.location;
                 }
+
                 quickPickItems.push({
                     label: rg.name,
                     description: locationDisplayName,
@@ -465,13 +467,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 await vscode.window.showWarningMessage(nameAvailability.message);
             }
         }
-        try {
-            await this.acquireRegistryLoginCredentials();
-        } catch (error) {
-            //Admin was not enabled, cannot proceed
-            throw new Error(('Admin not enabled'));
-        }
-
+        await this.acquireRegistryLoginCredentials();
         let linuxFXVersion: string;
         if (this._serverUrl.length > 0) {
             // azure container registry
@@ -572,18 +568,12 @@ class WebsiteStep extends WebAppCreatorStepBase {
         if (this._registry.adminUserEnabled) {
             const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
             const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
-            try {
-                let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
-                this._serverPassword = creds.passwords[0].value;
-                this._serverUserName = creds.username;
-                return;
-            } catch (error) {
-                vscode.window.showErrorMessage(error.message);
-                throw new Error(('Azure Container Registry Admin is not enabled'));
-            }
+            let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
+            this._serverPassword = creds.passwords[0].value;
+            this._serverUserName = creds.username;
+        } else {
+            throw new Error('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
         }
-        vscode.window.showErrorMessage('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
-        throw new Error(('Azure Container Registry Admin is not enabled'));
     }
 
 }
