@@ -1,5 +1,6 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import * as opn from 'opn';
 import * as vscode from "vscode";
 import { ResourceGroup } from '../../node_modules/azure-arm-resource/lib/resource/models';
 import { Subscription } from '../../node_modules/azure-arm-resource/lib/subscription/models';
@@ -157,4 +158,25 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
         vscode.window.showErrorMessage(`The resource group '${resourceGroupName}' already exists. Try again: `);
     }
     return resourceGroupName;
+}
+
+export async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
+    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+    if (subs.length === 0) {
+        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure Portal", "Open Portal").then(val => {
+            if (val === "Open Portal") {
+                opn('https://portal.azure.com/');
+            }
+        });
+    }
+
+    let subsNames: string[] = [];
+    for (let sub of subs) {
+        subsNames.push(sub.displayName);
+    }
+    let subscriptionName: string;
+    subscriptionName = await vscode.window.showQuickPick(subsNames, { 'canPickMany': false, 'placeHolder': 'Choose a subscription to be used' });
+    if (subscriptionName === undefined) { throw new Error('User exit'); }
+
+    return subs.find(sub => { return sub.displayName === subscriptionName });
 }
