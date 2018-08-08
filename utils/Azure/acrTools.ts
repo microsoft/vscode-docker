@@ -7,7 +7,6 @@ import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
-const teleCmdId: string = 'vscode-docker.deleteAzureImage';
 
 /**
  * Developers can use this to visualize and list repositories on a given Registry. This is not a command, just a developer tool.
@@ -40,6 +39,15 @@ export async function getAzureRepositories(registry: Registry): Promise<Reposito
     }
     //Note these are ordered by default in alphabetical order
     return allRepos;
+}
+
+/**
+ *
+ * @param registry gets the registry
+ * @returns a string, the resource group name
+ */
+export function getResourceGroup(registry: Registry): any {
+    return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
 
 /**
@@ -218,8 +226,10 @@ export async function loginCredentials(subscription: SubscriptionModels.Subscrip
     }
     let username: string;
     let password: string;
+
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
+
     if (context) {
         username = node.userName;
         password = node.password;

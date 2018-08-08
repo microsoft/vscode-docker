@@ -9,6 +9,7 @@ import { AsyncPool } from '../../utils/asyncpool';
 import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
+import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
     private _azureAccount: AzureAccount;
@@ -38,9 +39,17 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
-        const repoNodes: AzureRepositoryNode[] = [];
-        let node: AzureRepositoryNode;
+    public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
+        const registryChildNodes: NodeBase[] = [];
+
+        let iconPath = {
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'buildTasks_light.svg'),
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'buildTasks_dark.svg')
+        };
+
+        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+        let taskNode = new TaskRootNode("Build Tasks", "taskRootNode", element.subscription, element.azureAccount, element.registry, iconPath);
+        registryChildNodes.push(taskNode);
 
         const tenantId: string = element.subscription.tenantId;
         if (!this._azureAccount) {
@@ -49,6 +58,8 @@ export class AzureRegistryNode extends NodeBase {
 
         const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
+
+        let node: AzureRepositoryNode;
 
         if (accessToken && refreshToken) {
             let refreshTokenARC;
@@ -91,9 +102,8 @@ export class AzureRegistryNode extends NodeBase {
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < repositories.length; i++) {
-                        node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
+                    for (let repo of repositories) {
+                        node = new AzureRepositoryNode(repo, "azureRepositoryNode");
                         node.accessTokenARC = accessTokenARC;
                         node.azureAccount = element.azureAccount;
                         node.password = element.password;
@@ -102,13 +112,13 @@ export class AzureRegistryNode extends NodeBase {
                         node.repository = element.label;
                         node.subscription = element.subscription;
                         node.userName = element.userName;
-                        repoNodes.push(node);
+                        registryChildNodes.push(node);
                     }
                 }
             });
         }
         //Note these are ordered by default in alphabetical order
-        return repoNodes;
+        return registryChildNodes;
     }
 }
 
@@ -117,7 +127,7 @@ export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+        public readonly iconPath: AzureRegistryNode["iconPath"] = {
             light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
             dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
         }
@@ -199,10 +209,9 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < tags.length; i++) {
+            for (let tag of tags) {
                 pool.addTask(async () => {
-                    let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                    let data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tag}`, {
                         auth: {
                             bearer: accessTokenARC
                         }
@@ -210,7 +219,7 @@ export class AzureRepositoryNode extends NodeBase {
 
                     //Acquires each image's manifest to acquire build time.
                     let manifest = JSON.parse(data);
-                    node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
+                    node = new AzureImageNode(`${element.label}:${tag}`, 'azureImageNode');
                     node.azureAccount = element.azureAccount;
                     node.password = element.password;
                     node.registry = element.registry;
@@ -296,7 +305,7 @@ async function acquireToken(session: AzureSession): Promise<{ accessToken: strin
         const credentials: any = session.credentials;
         const environment: any = session.environment;
         // tslint:disable-next-line:no-function-expression // Grandfathered in
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: { accessToken: string; refreshToken: string; }): void {
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any): any {
             if (err) {
                 reject(err);
             } else {
