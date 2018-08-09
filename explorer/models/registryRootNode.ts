@@ -1,18 +1,18 @@
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
-import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
-import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
+import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './AzureRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
@@ -138,12 +138,14 @@ export class RegistryRootNode extends NodeBase {
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
-                    const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                    subsAndRegistries.push({
-                        'subscription': subs[i],
-                        'registries': await client.registries.list(),
-                        'client': client
-                    });
+                    try {
+                        const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                        subsAndRegistries.push({
+                            'subscription': subs[i],
+                            'registries': await client.registries.list(),
+                            'client': client
+                        });
+                    } catch (err) { } ///cheat fix for the no repo error, remove later
                 });
             }
             await subPool.runAll();
@@ -161,15 +163,15 @@ export class RegistryRootNode extends NodeBase {
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async () => {
-                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            //let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
                             let iconPath = {
                                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
                             };
                             let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
                             node.type = RegistryType.Azure;
-                            node.password = creds.passwords[0].value;
-                            node.userName = creds.username;
+                            //node.password = creds.passwords[0].value;
+                            //node.userName = creds.username;
                             node.subscription = subscription;
                             node.registry = registries[j];
                             azureRegistryNodes.push(node);

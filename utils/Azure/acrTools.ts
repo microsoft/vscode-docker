@@ -4,9 +4,9 @@ import request = require('request-promise');
 import * as vscode from "vscode";
 import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
-import { AzureImage } from "../Azure/models/image";
-import { Repository } from "../Azure/models/Repository";
 import { AzureCredentialsManager } from '../azureCredentialsManager';
+import { AzureImage } from "./models/image";
+import { Repository } from "./models/repository";
 const teleCmdId: string = 'vscode-docker.deleteAzureImage';
 
 /**
@@ -211,28 +211,12 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
  * @param registry : the registry to get login credentials for
  * @param context : if command is invoked through a right click on an AzureRepositoryNode. This context has a password and username
  */
+///using for pull
 export async function loginCredentials(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
-    let node: AzureImageNode | AzureRepositoryNode;
-    if (context) {
-        node = context;
-    }
-    let username: string;
-    let password: string;
-    const client = AzureCredentialsManager.getInstance().getContainerRegistryManagementClient(subscription);
-    const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
-    if (context) {
-        username = node.userName;
-        password = node.password;
-    } else if (registry.adminUserEnabled) {
-        let creds = await client.registries.listCredentials(resourceGroup, registry.name);
-        password = creds.passwords[0].value;
-        username = creds.username;
-    } else {
-        //grab the access token to be used as a password, and a generic username
-        let creds = await getRegistryTokens(registry);
-        password = creds.accessToken;
-        username = '00000000-0000-0000-0000-000000000000';
-    }
+    //grab the access token to be used as a password, and a generic username
+    let creds = await getRegistryTokens(registry);
+    let password = creds.accessToken;
+    let username = '00000000-0000-0000-0000-000000000000';
     return { password, username };
 }
 

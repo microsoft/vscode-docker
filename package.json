@@ -53,6 +53,7 @@
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
     "onCommand:vscode-docker.deleteAzureImage",
+    "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -259,6 +260,10 @@
         },
         {
           "command": "vscode-docker.deleteAzureImage",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
+        },
+        {
+          "command": "vscode-docker.pullFromAzure",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
@@ -609,6 +614,11 @@
       {
         "command": "vscode-docker.createWebApp",
         "title": "Deploy Image to Azure App Service",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.pullFromAzure",
+        "title": "Pull Image from Azure",
         "category": "Docker"
       },
       {

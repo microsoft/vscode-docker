@@ -3,7 +3,7 @@ import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as vscode from "vscode";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/Repository";
+import { Repository } from "../../utils/Azure/models/repository";
 import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
 
 /**

@@ -5,8 +5,8 @@ import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureCredentialsManager } from '../../utils/azureCredentialsManager';
 const teleCmdId: string = 'vscode-docker.deleteAzureImage';
-import * as quickPicks from '../../commands/utils/quick-pick-azure';
 import * as acrTools from '../../utils/Azure/acrTools';
+import * as quickPicks from '../utils/quick-pick-azure';
 
 /**
  * function to delete an Azure repository and its associated images
@@ -56,5 +56,5 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
     username = creds.username;
     password = creds.password;
     let path = `/v2/_acr/${repoName}/tags/${tag}`;
-    await acrTools.requestDataFromRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
+    await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
 }

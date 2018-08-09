@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
-import { pathExists } from '../node_modules/@types/fs-extra';
+import { pathExists } from 'fs-extra';
 
 export namespace constants {
     export const testOutputName = 'testOutput';

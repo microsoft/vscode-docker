@@ -1,11 +1,11 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup, ResourceGroupListResult } from "azure-arm-resource/lib/resource/models";
 import { ServiceClientCredentials } from 'ms-rest';
-import * as ContainerModels from '../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
-import { AsyncPool } from '../utils/asyncpool';
+import { AsyncPool } from './asyncpool';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from './constants';
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
