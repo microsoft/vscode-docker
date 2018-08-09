@@ -5,10 +5,10 @@
 
 import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
 import WebSiteManagementClient = require('azure-arm-website');
+import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 import { reporter } from '../../telemetry/telemetry';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
