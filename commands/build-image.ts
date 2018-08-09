@@ -104,7 +104,7 @@ export async function buildImage(dockerFileUri?: vscode.Uri): Promise<void> {
     const value: string = await ext.ui.showInputBox(opt);
 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-    terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${contextPath}`);
+    terminal.sendText(`docker build --rm -f "${uri.file}" -t ${value} ${contextPath}`);
     terminal.show();
 
     if (reporter) {
