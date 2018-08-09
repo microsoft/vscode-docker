@@ -1,5 +1,8 @@
+import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { SubscriptionModels } from 'azure-arm-resource';
+import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
@@ -11,7 +14,7 @@ import { AsyncPool } from '../../utils/asyncpool';
 import * as acrTools from '../../utils/Azure/acrTools';
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
-import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
+import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './AzureRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
