@@ -675,8 +675,8 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
-    // No wait
-    ext.ui.showInformationMessage(
+    // Don't wait
+    vscode.window.showInformationMessage(
         filesWritten.length ?
             `The following files were written into the workspace:${EOL}${EOL}${filesWritten.join(', ')}` :
             "No files were written"
