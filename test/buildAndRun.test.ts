@@ -20,6 +20,7 @@ import { TestUserInput } from 'vscode-azureextensionui';
 import { getTestRootFolder, constants } from './global.test';
 import { httpsRequestBinary } from '../utils/httpRequest';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
+import { openShellContainer } from '../commands/open-shell-container';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -113,7 +114,7 @@ suite("Build Image", function (this: Suite): void {
         });
     }
 
-    // Node.js
+    // Go
 
     testInEmptyFolder("Go", async () => {
         let uri = 'https://codeload.github.com/cloudfoundry-community/simple-go-web-app/zip/master'; // https://github.com/cloudfoundry-community/simple-go-web-app/archive/master.zip
@@ -124,4 +125,13 @@ suite("Build Image", function (this: Suite): void {
             ['testoutput:latest']
         );
     });
+
+    // NEEDED TESTS:
+    // 'Java'
+    // '.NET Core Console'
+    // 'ASP.NET Core'
+    // 'Node.js'
+    // 'Python'
+    // 'Ruby'
+
 });
