@@ -73,6 +73,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
+    ext.outputChannel = outputChannel;
     registerUIExtensionVariables(ext);
 
     initializeTelemetryReporter(createTelemetryReporter(ctx));
@@ -130,8 +131,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
                 if (result.status === 'Faulted') {
-                    vscode.window.showErrorMessage(result.error.message);
-                    throw (result.error);
+                    throw result.error;
                 }
             } else {
                 const open: vscode.MessageItem = { title: "View in Marketplace" };
