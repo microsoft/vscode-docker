@@ -69,16 +69,17 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let azureAccount: AzureAccount;
 
     // Set up extension variables
+    registerUIExtensionVariables(ext);
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    registerUIExtensionVariables(ext);
-
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
+    initializeTelemetryReporter(createTelemetryReporter(ctx));
+    ext.reporter = reporter;
 
     // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {
