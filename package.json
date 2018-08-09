@@ -52,7 +52,8 @@
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
-    "onCommand:vscode-docker.deleteAzureImage",
+    "onCommand:vscode-docker.deleteACRRepository",
+    "onCommand:vscode-docker.deleteACRImage",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -256,6 +257,10 @@
         {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
+        },
+        {
+          "command": "vscode-docker.deleteACRRepository",
+          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
         },
         {
           "command": "vscode-docker.deleteAzureImage",
@@ -583,6 +588,16 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.deleteACRRepository",
+        "title": "Delete Azure Repository",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.deleteAzureImage",
+        "title": "Delete Azure Image",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.image.push",
         "title": "Push",
         "description": "Push an image to a registry",
@@ -624,11 +639,6 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.deleteAzureImage",
-        "title": "Delete Azure Image",
         "category": "Docker"
       }
     ],

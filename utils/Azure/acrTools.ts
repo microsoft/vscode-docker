@@ -7,6 +7,7 @@ import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
+import { NULL_GUID } from "../constants";
 
 /**
  * Developers can use this to visualize and list repositories on a given Registry. This is not a command, just a developer tool.
@@ -42,7 +43,6 @@ export async function getAzureRepositories(registry: Registry): Promise<Reposito
 }
 
 /**
- *
  * @param registry gets the registry
  * @returns a string, the resource group name
  */
@@ -120,10 +120,7 @@ export async function acquireARMToken(localSession: AzureSession): Promise<{ acc
     });
 }
 
-/**
- *
- * function used to create header for http request to acr
- */
+/** Function used to create header for http request to acr */
 export function getAuthorizationHeader(username: string, password: string): string {
     let auth;
     if (username === '00000000-0000-0000-0000-000000000000') {
@@ -135,7 +132,7 @@ export function getAuthorizationHeader(username: string, password: string): stri
 }
 
 /**
- * first encodes to base 64, and then to latin1. See online documentation to see typescript encoding capabilities
+ * First encodes to base 64, and then to latin1. See online documentation to see typescript encoding capabilities
  * see https://nodejs.org/api/buffer.html#buffer_buf_tostring_encoding_start_end for details {Buffers and Character Encodings}
  * current character encodings include: ascii, utf8, utf16le, ucs2, base64, latin1, binary, hex. Version v6.4.0
  * @param str : the string to encode for api URL purposes
@@ -212,9 +209,7 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
     return allImages;
 }
 
-//Implements new Service principal model for ACR container registries while maintaining old admin enabled use
-/**
- * this function implements a new Service principal model for ACR and gets the valid login credentials to make an API call
+/** Acquires login credentials for a registry in the form of refresh tokens and NULL_GUID
  * @param subscription : the subscription the registry is on
  * @param registry : the registry to get login credentials for
  * @param context : if command is invoked through a right click on an AzureRepositoryNode. This context has a password and username
@@ -241,13 +236,12 @@ export async function loginCredentials(subscription: SubscriptionModels.Subscrip
         //grab the access token to be used as a password, and a generic username
         let creds = await getRegistryTokens(registry);
         password = creds.accessToken;
-        username = '00000000-0000-0000-0000-000000000000';
+        username = NULL_GUID;
     }
     return { password, username };
 }
 
 /**
- *
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -262,16 +256,13 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
         http_method: http_method,
         url: url
     }
-    try {
+    if (http_method === 'delete') {
         await request.delete(opt);
-    } catch (error) {
-        throw error;
+        vscode.window.showInformationMessage('Successfully deleted item');
     }
-    vscode.window.showInformationMessage('Successfully deleted image');
 }
 
 /**
- *
  * @param registry gets the subscription for a given registry
  * @returns a subscription object
  */

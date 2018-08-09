@@ -3,10 +3,12 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import * as quickPicks from '../../commands/utils/quick-pick-azure';
 import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
+import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
-const teleCmdId: string = 'vscode-docker.deleteAzureImage';
+
+const teleCmdId: string = 'vscode-docker.deleteACRImage';
 
 /** Function to delete an Azure repository and its associated images
  * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
@@ -56,4 +58,13 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
     password = creds.password;
     let path = `/v2/_acr/${repoName}/tags/${tag}`;
     await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
+    reportTelemetry();
+}
+
+function reportTelemetry(): void {
+    if (reporter) {
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
+        });
+    }
 }
