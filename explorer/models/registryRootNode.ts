@@ -161,7 +161,7 @@ export class RegistryRootNode extends NodeBase {
                 for (let j = 0; j < registries.length; j++) {
 
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
-                        const resourceGroup: string = acrTools.getResourceGroup(registries[j]);
+                        const resourceGroup: string = acrTools.getResourceGroupName(registries[j]);
 
                         regPool.addTask(async () => {
                             let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);

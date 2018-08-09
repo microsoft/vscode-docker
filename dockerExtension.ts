@@ -9,6 +9,7 @@ import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExt
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
+import { deleteAzureRegistry } from './commands/azureCommands/delete-azure-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
@@ -125,7 +126,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
@@ -154,8 +154,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
     if (azureAccount) {
-        registerCommand('vscode-docker.deleteACRImage', deleteAzureImage);
-        registerCommand('vscode-docker.deleteACRRepository', deleteRepository);
+        registerCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
+        registerCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
+        registerCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
         registerCommand('vscode-docker.createRegistry', createRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }

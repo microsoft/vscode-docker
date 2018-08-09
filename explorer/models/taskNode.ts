@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureUtilityManager } from '../../utils/AzureUtilityManager';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { NodeBase } from './nodeBase';
 
 /* Single TaskRootNode under each Repository. Labeled "Build Tasks" */
@@ -37,7 +37,7 @@ export class TaskRootNode extends NodeBase {
         let buildTasks: ContainerModels.BuildTask[] = [];
 
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
-        const resourceGroup: string = acrTools.getResourceGroup(element.registry);
+        const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
 
         buildTasks = await client.buildTasks.list(resourceGroup, element.registry.name);
         if (buildTasks.length === 0) {

@@ -46,7 +46,7 @@ export async function getAzureRepositories(registry: Registry): Promise<Reposito
  * @param registry gets the registry
  * @returns a string, the resource group name
  */
-export function getResourceGroup(registry: Registry): any {
+export function getResourceGroupName(registry: Registry): any {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
 
