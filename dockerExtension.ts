@@ -5,7 +5,7 @@
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
@@ -132,6 +132,8 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 const result = await wizard.run();
                 if (result.status === 'Faulted') {
                     throw result.error;
+                } else if (result.status === 'Cancelled') {
+                    throw new UserCancelledError();
                 }
             } else {
                 const open: vscode.MessageItem = { title: "View in Marketplace" };
