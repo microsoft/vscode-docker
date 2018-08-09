@@ -69,11 +69,11 @@ class TestTerminal implements vscode.Terminal {
     // Wait for the semaphore file
     await this.waitForFileCreation(this._semaphorePath);
 
-    assert(fse.existsSync(this._outputFilePath), 'The output file from the command was not created.');
-    let output = bufferToString(fse.readFileSync(this._outputFilePath));
+    assert(await fse.pathExists(this._outputFilePath), 'The output file from the command was not created.');
+    let output = bufferToString(await fse.readFile(this._outputFilePath));
 
-    assert(fse.existsSync(this._errFilePath), 'The error file from the command was not created.');
-    let err = bufferToString(fse.readFileSync(this._errFilePath));
+    assert(await fse.pathExists(this._errFilePath), 'The error file from the command was not created.');
+    let err = bufferToString(await fse.readFile(this._errFilePath));
 
     return { outputText: output, errorText: err };
   }
@@ -121,6 +121,7 @@ class TestTerminal implements vscode.Terminal {
 
 function bufferToString(buffer: Buffer): string {
   if (buffer.length > 2 && buffer[0] === 0xff && buffer[1] === 0xfe) {
+    // Buffer is in UTF-16 format (happens in some shells)
     return buffer.toString("utf-16le");
   }
 

@@ -23,14 +23,21 @@ import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 
 let testRootFolder: string = getTestRootFolder();
 
+/**
+ * Downloads and then extracts only a specific subfolder and its folders.
+ */
 async function unzipFileFromUrl(uri: Uri, sourceFolderInZip: string, outputFolder: string): Promise<void> {
     let zipContents = await httpsRequestBinary(uri.toString());
     let zip = new AdmZip(zipContents);
     await extractFolderTo(zip, sourceFolderInZip, outputFolder);
 }
 
+/**
+ * Extracts only a specific folder and its subfolders.
+ * Not using AdmZip.extractAllTo because depending on the .zip file we may end up with an extraneous top-level folder
+ */
 async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFolder: string): Promise<void> {
-    if (!sourceFolderInZip.endsWith('/')) {
+    if (!(sourceFolderInZip.endsWith('/') || sourceFolderInZip.endsWith('\\'))) {
         sourceFolderInZip += '/';
     }
 
