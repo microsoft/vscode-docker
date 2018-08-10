@@ -6,6 +6,7 @@
 
 import https = require('https');
 import vscode = require('vscode');
+import { httpsRequest } from './utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     let tags: string[] = [];
@@ -127,24 +128,7 @@ function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<
 function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
     opts.headers = opts.headers || {};
     opts.headers.Accept = 'application/json';
-    return httpsRequestAsPromise(opts).then((data) => {
+    return httpsRequest(opts).then((data) => {
         return JSON.parse(data);
     })
-}
-
-// tslint:disable-next-line:promise-function-async // Grandfathered in
-function httpsRequestAsPromise(opts: https.RequestOptions): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        let req = https.request(opts, (res) => {
-            let data = '';
-            res.on('data', (d: string) => {
-                data += d;
-            })
-            res.on('end', () => {
-                resolve(data);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
 }

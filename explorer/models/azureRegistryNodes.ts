@@ -1,4 +1,4 @@
-import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
+import { SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';

@@ -21,6 +21,7 @@ import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
 import { tagImage } from './commands/tag-image';
 import { docker } from './commands/utils/docker-endpoint';
+import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -68,14 +69,15 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let azureAccount: AzureAccount;
 
     // Set up extension variables
+    registerUIExtensionVariables(ext);
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    ext.outputChannel = outputChannel;
-    registerUIExtensionVariables(ext);
-
+    if (!ext.terminalProvider) {
+        ext.terminalProvider = new DefaultTerminalProvider();
+    }
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
 

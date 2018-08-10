@@ -1,8 +1,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { ext } from "../extensionVariables";
 import { reporter } from '../telemetry/telemetry';
-import { createTerminal } from "./utils/create-terminal";
 
 const teleCmdId: string = 'vscode-docker.image.build';
 
@@ -101,12 +101,10 @@ export async function buildImage(dockerFileUri?: vscode.Uri): Promise<void> {
         value: imageName + ':latest'
     };
 
-    const value: string = await vscode.window.showInputBox(opt);
+    const value: string = await ext.ui.showInputBox(opt);
 
-    if (!value) { return; }
-
-    const terminal: vscode.Terminal = createTerminal('Docker');
-    terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${contextPath}`);
+    const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
+    terminal.sendText(`docker build --rm -f "${uri.file}" -t ${value} ${contextPath}`);
     terminal.show();
 
     if (reporter) {
