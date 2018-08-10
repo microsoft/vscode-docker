@@ -1,5 +1,6 @@
 ## 0.0.28 - XX May 2018
 * Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
+* Adds experimental debugging support for .NET Core web applications running in Linux Docker containers, enabled via the `docker.debugging.enabled` configuration setting.
 
 ## 0.0.27 - 19 May 2018
 

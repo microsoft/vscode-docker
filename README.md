@@ -8,6 +8,7 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing Images, running Containers, and Docker Hub registries
 * Deploy images from Docker Hub and Azure Container Registries directly to Azure App Service
+* Debug .NET Core applications running in Linux Docker containers
 
 ## Generating Docker Files
 
@@ -22,6 +23,38 @@ Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `D
 Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ![IntelliSense for DockerFiles](images/intelliSense.gif)
+
+## Debugging
+
+> Note: This feature is currently experimental and must be enabled by setting the [`docker.debugging.enabled`](#configuration-settings) configuration value to `true`.
+
+To debug a .NET Core web application running in a Linux Docker container, add a Docker .NET Core launch configuration:
+
+1. Switch to the debugging tab.
+1. Select `Add configuration...`
+1. Select `Docker: Launch .NET Core`
+1. Set a breakpoint.
+1. Start debugging.
+
+Upon debugging, a Docker image will be built and a container run based on that image.  The container will have a volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigated to the application's initial page.
+
+Most properties of the configuration are optional will be inferred from the project. If not, or if there are additional customizations to the Docker image build or container run process to be made, those can be added under the `dockerOptions` property of the configuration.
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Docker: Launch .NET Core",
+            "type": "docker-netcoreapp",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerOptions": {
+                // Add customizations here.
+            }
+        }
+    ]
+}
+```
 
 ## Docker commands
 
@@ -87,10 +120,11 @@ The Docker extension comes with a number of useful configuration settings allowi
 | --- |---|---|
 | `docker.attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
-| `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
-| `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
+| `docker.debugging.enabled` | Whether debugging within Docker images is enabled. | `false`
 | `docker.defaultRegistry` | Default registry when tagging an image, empty string will target Docker Hub when pushing. | `""`
 | `docker.defaultRegistryPath` | Path within registry to push to. | `""`
+| `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
+| `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
 | `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
 | `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
 | `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`

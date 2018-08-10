@@ -285,7 +285,7 @@
       },
       {
         "type": "docker-netcoreapp",
-        "label": "Docker: .NET Core",
+        "label": "Docker: Launch .NET Core",
         "configurationSnippets": [
             {
                 "label": "Docker: Launch .NET Core",
@@ -365,6 +365,11 @@
       "type": "object",
       "title": "Docker configuration options",
       "properties": {
+        "docker.debugging.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether debugging within Docker images is enabled."
+        },
         "docker.defaultRegistry": {
           "type": "string",
           "default": "",
