@@ -3,6 +3,7 @@ import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient } from 'azure-arm-resource';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
+import { Stream, Writable } from "stream";
 import * as vscode from "vscode";
 import { ImageNode } from "../explorer/models/imageNode";
 import { AzureUtilityManager } from "../utils/azureUtilityManager";
@@ -12,7 +13,7 @@ let fs = require('fs');
 let os = require('os');
 let url = require('url');
 
-export async function queueBuild(context?: ImageNode): Promise<void> {
+export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
 
     console.log("Obtaining Subscription and Client");
     let subscription = await acquireSubscription();
@@ -25,11 +26,17 @@ export async function queueBuild(context?: ImageNode): Promise<void> {
     let registry: Registry = await quickPickACRRegistry(subscription, resourceGroupName);
     let registryName = registry.name;
 
+    let folder: vscode.WorkspaceFolder;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+        folder = vscode.workspace.workspaceFolders[0];
+    } else {
+        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+    }
+    let sourceLocation: string = folder.uri.path;
     console.log("Setting up temp file with 'sourceArchive.tar.gz' ");
     let tarFilePath = url.resolve(os.tmpdir(), 'sourceArchive.tar.gz');
 
     console.log("Uploading Source Code");
-    let sourceLocation: string = vscode.workspace.rootPath;
     sourceLocation = await uploadSourceCode(client, registryName, resourceGroupName, sourceLocation, tarFilePath);
 
     console.log("Setting up Build Request");
@@ -47,7 +54,7 @@ export async function queueBuild(context?: ImageNode): Promise<void> {
         await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
     } catch (error) {
         console.log('Build Failed');
-        console.log(error.message);
+        vscode.window.showErrorMessage(error);
     }
     console.log(client.builds.list(resourceGroupName, registryName));
 }
