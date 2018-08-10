@@ -6,10 +6,11 @@ import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
+import { constants } from 'perf_hooks';
 import * as vscode from 'vscode';
+import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants'
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
-import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
@@ -73,9 +74,9 @@ export class RegistryRootNode extends NodeBase {
         let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
 
         if (this._keytar) {
-            id.token = await this._keytar.getPassword('vscode-docker', 'dockerhub.token');
-            id.username = await this._keytar.getPassword('vscode-docker', 'dockerhub.username');
-            id.password = await this._keytar.getPassword('vscode-docker', 'dockerhub.password');
+            id.token = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+            id.username = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+            id.password = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
         }
 
         if (!id.token) {
@@ -83,9 +84,9 @@ export class RegistryRootNode extends NodeBase {
 
             if (id && id.token) {
                 if (this._keytar) {
-                    await this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
-                    await this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
-                    await this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
+                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
                 }
             } else {
                 return orgNodes;
