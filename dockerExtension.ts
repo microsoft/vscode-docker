@@ -75,6 +75,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
+    ext.outputChannel = outputChannel;
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
