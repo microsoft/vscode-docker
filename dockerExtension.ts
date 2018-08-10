@@ -34,8 +34,9 @@ import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
-import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
-import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
+import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
+import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
@@ -126,8 +127,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
-    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
+    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => {
         if (context) {
             if (azureAccount) {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
@@ -147,14 +147,15 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
             }
         }
     });
-
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     });
-    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
+    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode) => {
         browseAzurePortal(context);
     });
+    registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
+    registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 

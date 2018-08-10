@@ -3,7 +3,7 @@ import * as opn from 'opn';
 import request = require('request-promise');
 import * as vscode from 'vscode';
 import { keytarConstants } from '../../constants';
-import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { getCoreNodeModule } from './utils';
 
 let _token: Token;
@@ -79,6 +79,27 @@ export interface Image {
     variant: any
 }
 
+export interface ManifestFsLayer {
+    blobSum: string;
+}
+
+export interface ManifestHistory {
+    v1Compatibility: string; // stringified ManifestHistoryV1Compatibility
+}
+
+export interface ManifestHistoryV1Compatibility {
+    created: string;
+}
+
+export interface Manifest {
+    name: string;
+    tag: string;
+    architecture: string;
+    fsLayers: ManifestFsLayer[];
+    history: ManifestHistory[];
+    schemaVersion: number;
+}
+
 export async function dockerHubLogout(): Promise<void> {
 
     const keytar: typeof keytarType = getCoreNodeModule('keytar');
@@ -104,7 +125,6 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
     }
 
     return;
-
 }
 
 export function setDockerHubToken(token: string): void {
@@ -132,7 +152,6 @@ async function login(username: string, password: string): Promise<Token> {
     }
 
     return t;
-
 }
 
 export async function getUser(): Promise<User> {
@@ -157,7 +176,6 @@ export async function getUser(): Promise<User> {
     }
 
     return u;
-
 }
 
 export async function getRepositories(username: string): Promise<Repository[]> {
@@ -225,10 +243,9 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
-export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+export function browseDockerHub(context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
 
     if (context) {
         let url: string = 'https://hub.docker.com/';

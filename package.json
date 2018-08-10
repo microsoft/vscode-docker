@@ -51,6 +51,8 @@
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
+    "onCommand:vscode-docker.connectCustomRegistry",
+    "onCommand:vscode-docker.disconnectCustomRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -185,7 +187,7 @@
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureImageNode|dockerHubImageTag)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTag|customImageTag)$/"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
@@ -197,7 +199,15 @@
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
+        },
+        {
+          "command": "vscode-docker.connectCustomRegistry",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRootNode|registriesRootNode)$/"
+        },
+        {
+          "command": "vscode-docker.disconnectCustomRegistry",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistry)$/"
         }
       ]
     },
@@ -533,6 +543,16 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.connectCustomRegistry",
+        "title": "Connect to a private registry...",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.disconnectCustomRegistry",
+        "title": "Disconnect from private registry",
         "category": "Docker"
       }
     ],

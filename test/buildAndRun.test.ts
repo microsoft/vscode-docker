@@ -92,14 +92,6 @@ suite("Build Image", function (this: Suite): void {
 
         let { outputText, errorText } = await testTerminalProvider.currentTerminal.exit();
 
-        console.log("=== OUTPUT BEGIN ================================");
-        console.log(outputText ? outputText : '(NONE)');
-        console.log("=== OUTPUT END ==================================");
-
-        console.log("=== ERROR OUTPUT BEGIN ================================");
-        console.log(errorText ? errorText : '(NONE)');
-        console.log("=== ERROR OUTPUT END ==================================");
-
         assert.equal(errorText, '', 'Expected no errors from Build Image');
         assertEx.assertContains(outputText, 'Successfully built');
         assertEx.assertContains(outputText, 'Successfully tagged')
@@ -124,9 +116,11 @@ suite("Build Image", function (this: Suite): void {
             ['3001'],
             ['testoutput:latest']
         );
+
+        // CONSIDER: Run the built image
     });
 
-    // NEEDED TESTS:
+    // CONSIDER TESTS:
     // 'Java'
     // '.NET Core Console'
     // 'ASP.NET Core'

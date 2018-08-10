@@ -11,8 +11,9 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as vscode from 'vscode';
 import { reporter } from '../../telemetry/telemetry';
-import { AzureImageNode } from '../models/azureRegistryNodes';
-import { DockerHubImageNode } from '../models/dockerHubNodes';
+import { AzureImageTagNode } from '../models/azureRegistryNodes';
+import { CustomImageTagNode } from '../models/customRegistryNodes';
+import { DockerHubImageTagNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 import * as util from './util';
 import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
@@ -20,7 +21,7 @@ import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, Wizard
 const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
 
 export class WebAppCreator extends WizardBase {
-    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode, subscription?: SubscriptionModels.Subscription) {
+    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
         super(output);
         this.steps.push(new SubscriptionStep(this, azureAccount, subscription));
         this.steps.push(new ResourceGroupStep(this, azureAccount));
@@ -421,16 +422,19 @@ class WebsiteStep extends WebAppCreatorStepBase {
     private _imageSubscription: Subscription;
     private _registry: Registry;
 
-    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode) {
+    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode | CustomImageTagNode) {
         super(wizard, 'Create Web App', azureAccount);
 
         this._serverUrl = context.serverUrl;
-        if (context instanceof DockerHubImageNode) {
+        if (context instanceof DockerHubImageTagNode) {
             this._serverPassword = context.password;
             this._serverUserName = context.userName;
-        } else if (context instanceof AzureImageNode) {
+        } else if (context instanceof AzureImageTagNode) {
             this._imageSubscription = context.subscription;
             this._registry = context.registry;
+        } else if (context instanceof CustomImageTagNode) {
+            this._serverPassword = context.registry.credentials.password;
+            this._serverUserName = context.registry.credentials.userName;
         } else {
             throw Error(`Invalid context, cannot deploy to Azure App services from ${context}`);
         }

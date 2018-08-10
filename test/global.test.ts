@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
-import { pathExists } from 'fs-extra';
+import * as assert from 'assert';
 
 export namespace constants {
     export const testOutputName = 'testOutput';
@@ -37,6 +37,15 @@ export function getTestRootFolder(): string {
     }
 
     return testRootFolder;
+}
+
+export function testInEmptyFolder(name: string, func: () => Promise<void>): void {
+    test(name, async () => {
+        // Delete everything in the root testing folder
+        assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
+        await fse.emptyDir(testRootFolder);
+        await func();
+    });
 }
 
 // Runs before all tests

@@ -1,3 +1,4 @@
+import * as Keytar from 'keytar';
 import * as vscode from 'vscode';
 
 export function trimWithElipsis(str: string, max: number = 10): string {
@@ -15,7 +16,7 @@ export function trimWithElipsis(str: string, max: number = 10): string {
 }
 
 /**
- * Returns a node module installed with VSCode, or null if it fails.
+ * Returns a node module installed with VSCode, or undefined if it fails.
  */
 export function getCoreNodeModule(moduleName: string): any {
     try {
@@ -28,5 +29,18 @@ export function getCoreNodeModule(moduleName: string): any {
         return require(`${vscode.env.appRoot}/node_modules/${moduleName}`);
     } catch (err) { }
 
-    return null;
+    return undefined;
+}
+
+/**
+ * Returns the keytar module installed with vscode
+ */
+export function getKeytarModule(): typeof Keytar {
+    const keytar: typeof Keytar | undefined = getCoreNodeModule('keytar');
+
+    if (!keytar) {
+        throw new Error("Internal error: Could not find keytar module for reading and writing passwords");
+    }
+
+    return keytar;
 }

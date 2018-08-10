@@ -31,7 +31,7 @@ export class RootNode extends NodeBase {
 
     constructor(
         public readonly label: string,
-        public readonly contextValue: string,
+        public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
         public eventEmitter: vscode.EventEmitter<NodeBase>,
         public azureAccount?: AzureAccount
     ) {
@@ -269,6 +269,8 @@ export class RootNode extends NodeBase {
         if (this._azureAccount) {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
         }
+
+        registryRootNodes.push(new RegistryRootNode('Private registries', 'customRootNode', null));
 
         return registryRootNodes;
     }
