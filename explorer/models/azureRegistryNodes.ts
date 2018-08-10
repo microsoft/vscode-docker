@@ -4,9 +4,9 @@ import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';
 import * as vscode from 'vscode';
+import { MAX_CONCURRENT_REQUESTS } from '../../constants'
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
-import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
 
