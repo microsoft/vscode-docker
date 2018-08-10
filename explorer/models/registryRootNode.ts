@@ -5,6 +5,7 @@ import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
@@ -139,15 +140,14 @@ export class RegistryRootNode extends NodeBase {
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                    let regs: ContainerModels.Registry[];
                     try {
-                        regs = await client.registries.list();
+                        let regs: ContainerModels.Registry[] = await client.registries.list();
                         subsAndRegistries.push({
                             'subscription': subs[i],
                             'registries': regs
                         });
                     } catch (error) {
-                        vscode.window.showErrorMessage(error);
+                        vscode.window.showErrorMessage(parseError(error).message);
                     }
                 });
             }

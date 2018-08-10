@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
@@ -204,7 +205,7 @@ export class AzureRepositoryNode extends NodeBase {
                             }
                         });
                     } catch (error) {
-                        vscode.window.showErrorMessage(error);
+                        vscode.window.showErrorMessage(parseError(error).message);
                     }
 
                     if (data) {
