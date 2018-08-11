@@ -1,12 +1,13 @@
 import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
-import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
+import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
+import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
@@ -133,17 +134,21 @@ export class RegistryRootNode extends NodeBase {
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
 
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
-            let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult, 'client': any }[] = [];
+            let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult }[] = [];
             //Acquire each subscription's data simultaneously
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                    subsAndRegistries.push({
-                        'subscription': subs[i],
-                        'registries': await client.registries.list(),
-                        'client': client
-                    });
+                    try {
+                        let regs: ContainerModels.Registry[] = await client.registries.list();
+                        subsAndRegistries.push({
+                            'subscription': subs[i],
+                            'registries': regs
+                        });
+                    } catch (error) {
+                        vscode.window.showErrorMessage(parseError(error).message);
+                    }
                 });
             }
             await subPool.runAll();
@@ -151,25 +156,20 @@ export class RegistryRootNode extends NodeBase {
             const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subsAndRegistries.length; i++) {
-                const client = subsAndRegistries[i].client;
                 const registries = subsAndRegistries[i].registries;
                 const subscription = subsAndRegistries[i].subscription;
 
                 //Go through the registries and add them to the async pool
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
-                    if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
-                        const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
+                    if (!registries[j].sku.tier.includes('Classic')) {
                         regPool.addTask(async () => {
-                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
                             let iconPath = {
                                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
                             };
                             let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
                             node.type = RegistryType.Azure;
-                            node.password = creds.passwords[0].value;
-                            node.userName = creds.username;
                             node.subscription = subscription;
                             node.registry = registries[j];
                             azureRegistryNodes.push(node);
