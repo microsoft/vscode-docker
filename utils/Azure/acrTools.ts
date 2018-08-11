@@ -215,8 +215,16 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
  * @param registry : the registry to get login credentials for
  * @param context : if command is invoked through a right click on an AzureRepositoryNode. This context has a password and username
  */
-///using for pull
-export async function loginCredentials(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
+
+export async function loginCredentialsRefreshToken(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
+    //grab the access token to be used as a password, and a generic username
+    let creds = await getRegistryTokens(registry);
+    let password = creds.refreshToken;
+    let username = '00000000-0000-0000-0000-000000000000';
+    return { password, username };
+}
+
+export async function loginCredentialsAccessToken(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
     //grab the access token to be used as a password, and a generic username
     let creds = await getRegistryTokens(registry);
     let password = creds.accessToken;

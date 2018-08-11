@@ -53,7 +53,7 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    let creds = await acrTools.loginCredentials(subscription, registry);
+    let creds = await acrTools.loginCredentialsAccessToken(subscription, registry);
     username = creds.username;
     password = creds.password;
     let path = `/v2/_acr/${repoName}/tags/${tag}`;
