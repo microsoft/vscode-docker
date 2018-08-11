@@ -75,6 +75,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
+    ext.outputChannel = outputChannel;
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
@@ -132,6 +133,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
                 const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
+                if (result.status === 'Faulted') {
+                    throw result.error;
+                } else if (result.status === 'Cancelled') {
+                    throw new UserCancelledError();
+                }
             } else {
                 const open: vscode.MessageItem = { title: "View in Marketplace" };
                 const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
