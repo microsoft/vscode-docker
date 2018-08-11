@@ -214,6 +214,7 @@ export class AzureRepositoryNode extends NodeBase {
                     node.azureAccount = element.azureAccount;
                     node.password = element.password;
                     node.registry = element.registry;
+                    node.repository = element.label;
                     node.serverUrl = element.repository;
                     node.subscription = element.subscription;
                     node.userName = element.userName;
@@ -247,6 +248,7 @@ export class AzureImageNode extends NodeBase {
     public serverUrl: string;
     public subscription: SubscriptionModels.Subscription;
     public userName: string;
+    public repository: string; ///HERE
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
