@@ -1,3 +1,4 @@
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
@@ -5,7 +6,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
-import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils'
