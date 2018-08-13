@@ -138,14 +138,13 @@ export class RegistryRootNode extends NodeBase {
             // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
-                    try {
-                        const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                        subsAndRegistries.push({
-                            'subscription': subs[i],
-                            'registries': await client.registries.list(),
-                            'client': client
-                        });
-                    } catch (err) { } ///cheat fix for the no repo error, remove later
+                    const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    subsAndRegistries.push({
+                        'subscription': subs[i],
+                        'registries': await client.registries.list(),
+                        'client': client
+                    });
+
                 });
             }
             await subPool.runAll();
@@ -163,7 +162,6 @@ export class RegistryRootNode extends NodeBase {
                     if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
                         regPool.addTask(async () => {
-                            //let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
                             let iconPath = {
                                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
                                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')

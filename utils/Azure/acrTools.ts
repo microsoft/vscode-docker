@@ -213,15 +213,14 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
  */
 
 export async function loginCredentialsRefreshToken(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
-    //grab the access token to be used as a password, and a generic username
     let creds = await getRegistryTokens(registry);
     let password = creds.refreshToken;
     let username = '00000000-0000-0000-0000-000000000000';
     return { password, username };
 }
 
+/* Used in delete Azure image and is pending edits */
 export async function loginCredentialsAccessToken(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
-    //grab the access token to be used as a password, and a generic username
     let creds = await getRegistryTokens(registry);
     let password = creds.accessToken;
     let username = '00000000-0000-0000-0000-000000000000';
