@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import os = require('os');
 import vscode = require('vscode');
 import { ImageNode } from '../explorer/models/imageNode';
+import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { createTerminal } from './utils/create-terminal';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
@@ -33,7 +33,7 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
                 options += ` ${portMappings.join(' ')}`;
             }
 
-            const terminal = createTerminal(imageName);
+            const terminal = ext.terminalProvider.createTerminal(imageName);
             terminal.sendText(`docker run ${options} ${imageName}`);
             terminal.show();
 
