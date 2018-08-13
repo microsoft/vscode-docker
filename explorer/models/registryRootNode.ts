@@ -170,8 +170,6 @@ export class RegistryRootNode extends NodeBase {
                             };
                             let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
                             node.type = RegistryType.Azure;
-                            //node.password = creds.passwords[0].value;
-                            //node.userName = creds.username;
                             node.subscription = subscription;
                             node.registry = registries[j];
                             azureRegistryNodes.push(node);

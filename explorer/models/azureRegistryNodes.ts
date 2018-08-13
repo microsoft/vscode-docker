@@ -23,11 +23,9 @@ export class AzureRegistryNode extends NodeBase {
         this._azureAccount = azureAccount;
     }
 
-    public password: string;
     public registry: ContainerModels.Registry;
     public subscription: SubscriptionModels.Subscription;
     public type: RegistryType;
-    public userName: string;
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -96,12 +94,10 @@ export class AzureRegistryNode extends NodeBase {
                         node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
                         node.accessTokenARC = accessTokenARC;
                         node.azureAccount = element.azureAccount;
-                        node.password = element.password;
                         node.refreshTokenARC = refreshTokenARC;
                         node.registry = element.registry;
                         node.repository = element.label;
                         node.subscription = element.subscription;
-                        node.userName = element.userName;
                         repoNodes.push(node);
                     }
                 }
