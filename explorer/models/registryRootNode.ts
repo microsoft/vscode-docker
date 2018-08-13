@@ -141,15 +141,11 @@ export class RegistryRootNode extends NodeBase {
             for (let i = 0; i < subs.length; i++) {
                 subPool.addTask(async () => {
                     const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                    try {
-                        let regs: ContainerModels.Registry[] = await client.registries.list();
-                        subsAndRegistries.push({
-                            'subscription': subs[i],
-                            'registries': regs
-                        });
-                    } catch (error) {
-                        vscode.window.showErrorMessage(parseError(error).message);
-                    }
+                    subsAndRegistries.push({
+                        'subscription': subs[i],
+                        'registries': await client.registries.list(),
+                    });
+
                 });
             }
             await subPool.runAll();

@@ -252,6 +252,8 @@ export class AzureImageNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public serverUrl: string;
     public subscription: SubscriptionModels.Subscription;
+    public userName: string;
+    public repository: string;
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
