@@ -52,14 +52,11 @@
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
-<<<<<<< HEAD
     "onCommand:vscode-docker.delete-ACR-Registry",
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
-=======
     "onCommand:vscode-docker.deleteAzureImage",
     "onCommand:vscode-docker.pullFromAzure",
->>>>>>> Made loginCredentials method in acrTools more efficient, added Pull Image from Azure option, temporary fix for no registries
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],

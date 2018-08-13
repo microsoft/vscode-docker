@@ -7,7 +7,7 @@ import { ServiceClientCredentials } from 'ms-rest';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
-//C:\Users\t-rusama\Documents\GitHub\vscode-docker\constants.ts
+
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
   Authors: Esteban Rey L, Jackson Stokes
