@@ -1,8 +1,8 @@
 import * as moment from 'moment';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { MAX_CONCURRENT_REQUESTS } from '../../constants'
 import { AsyncPool } from '../../utils/asyncpool';
-import { MAX_CONCURRENT_REQUESTS } from '../../utils/constants'
 import * as dockerHub from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
 

@@ -2,12 +2,12 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import request = require('request-promise');
 import * as vscode from "vscode";
+import { NULL_GUID } from "../../constants";
 import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
-import { NULL_GUID } from "../constants";
 
 /**
  * Developers can use this to visualize and list repositories on a given Registry. This is not a command, just a developer tool.
@@ -225,10 +225,7 @@ export async function loginCredentials(subscription: SubscriptionModels.Subscrip
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 
-    if (context) {
-        username = node.userName;
-        password = node.password;
-    } else if (registry.adminUserEnabled) {
+    if (registry.adminUserEnabled) {
         let creds = await client.registries.listCredentials(resourceGroup, registry.name);
         password = creds.passwords[0].value;
         username = creds.username;
