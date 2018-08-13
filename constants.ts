@@ -13,3 +13,6 @@ export namespace keytarConstants {
 
 //Credentials Constants
 export const NULL_GUID = '00000000-0000-0000-0000-000000000000';
+
+//Azure Container Registries
+export const skus = ["Standard", "Basic", "Premium"];

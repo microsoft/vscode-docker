@@ -11,7 +11,7 @@ const teleCmdId: string = 'vscode-docker.createRegistry';
 import * as opn from 'opn';
 
 /* Creates a new registry based on user input/selection of features, such as location */
-export async function createRegistry(): Promise<void> {
+export async function createRegistry(): Promise<string> {
     let subscription: SubscriptionModels.Subscription;
     let resourceGroup: ResourceGroup;
     let location: string;
@@ -39,29 +39,15 @@ export async function createRegistry(): Promise<void> {
         vscode.window.showInformationMessage(response.name + ' has been created succesfully!');
     }, (error): void => {
         vscode.window.showErrorMessage(error.message);
-    })
+    });
+
+    return registryName;
 
     //Acquiring telemetry data here
     if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId
         });
-
-        if (registryName.toLowerCase().indexOf('azurecr.io')) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleAzureId
-            });
-        }
     }
 
 }

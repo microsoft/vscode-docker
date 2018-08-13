@@ -167,7 +167,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         registerCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
         registerCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
         registerCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
-        registerCommand('vscode-docker.createRegistry', createRegistry);
+        registerCommand('vscode-docker.create-ACR-Registry', createRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }
 
