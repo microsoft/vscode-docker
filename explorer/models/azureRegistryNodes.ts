@@ -4,8 +4,8 @@ import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants'
-import { parseError } from '../../node_modules/vscode-azureextensionui';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { NodeBase } from './nodeBase';
