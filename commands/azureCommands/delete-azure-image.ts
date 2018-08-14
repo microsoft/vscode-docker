@@ -2,6 +2,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import * as quickPicks from '../../commands/utils/quick-pick-azure';
+import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -16,35 +17,21 @@ const teleCmdId: string = 'vscode-docker.deleteACRImage';
 export async function deleteAzureImage(context?: AzureImageNode): Promise<void> {
     if (!AzureUtilityManager.getInstance().waitForLogin()) {
         vscode.window.showErrorMessage('You are not logged into Azure');
-        return;
+        throw new Error('User is not logged into azure');
     }
     let registry: Registry;
     let subscription: SubscriptionModels.Subscription;
     let repoName: string;
-    let username: string;
-    let password: string;
     let tag: string;
+
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
         subscription = acrTools.getRegistrySubscription(registry);
-        let repository: Repository = await quickPicks.quickPickACRRepository(registry);
+        const repository: Repository = await quickPicks.quickPickACRRepository(registry);
         repoName = repository.name;
         const image = await quickPicks.quickPickACRImage(repository);
         tag = image.tag;
-    }
-
-    //ensure user truly wants to delete image
-    let opt: vscode.InputBoxOptions = {
-        ignoreFocusOut: true,
-        placeHolder: 'No',
-        value: 'No',
-        prompt: 'Are you sure you want to delete this image? Enter Yes to continue: '
-    };
-    let answer = await vscode.window.showInputBox(opt);
-    answer = answer.toLowerCase();
-    if (answer !== 'yes') { return; }
-
-    if (context) {
+    } else {
         repoName = context.label;
         subscription = context.subscription;
         registry = context.registry;
@@ -53,11 +40,14 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    let creds = await acrTools.loginCredentials(subscription, registry);
-    username = creds.username;
-    password = creds.password;
-    let path = `/v2/_acr/${repoName}/tags/${tag}`;
-    await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password); //official call to delete the image
+    const shouldDelete = await quickPicks.confirmUserIntent('Are you sure you want to delete this image? Enter Yes to continue: ');
+    if (shouldDelete) {
+        let creds = await acrTools.loginCredentials(subscription, registry);
+        let path = `/v2/_acr/${repoName}/tags/${tag}`;
+        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, creds.username, creds.password);
+    } else {
+        throw new UserCancelledError();
+    }
     reportTelemetry();
 }
 
