@@ -285,10 +285,6 @@
           "when": "view == dockerExplorer && viewItem == dockerHubNamespace"
         },
         {
-          "command": "vscode-docker.queueBuild",
-          "when": "view == dockerExplorer && viewItem == localImageNode"
-        },
-        {
           "command": "vscode-docker.browseAzurePortal",
           "when": "view == dockerExplorer && viewItem == azureRegistryNode"
         },
@@ -717,9 +713,9 @@
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
+    "tar": "^4.4.6",
     "vscode-azureextensionui": "^0.16.6",
     "vscode-extension-telemetry": "0.0.18",
-    "vscode-languageclient": "^4.4.0",
-    "tar": "^4.4.6"
+    "vscode-languageclient": "^4.4.0"
   }
 }

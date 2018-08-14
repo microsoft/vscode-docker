@@ -1,20 +1,18 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { ResourceManagementClient } from 'azure-arm-resource';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import { Stream, Writable } from "stream";
+import * as fs from 'fs';
+import * as os from 'os';
+import * as tar from 'tar';
+import * as url from 'url';
 import * as vscode from "vscode";
-import { ImageNode } from "../explorer/models/imageNode";
 import { AzureUtilityManager } from "../utils/azureUtilityManager";
 import { acquireResourceGroup, acquireSubscription, quickPickACRRegistry } from './utils/quick-pick-azure';
-let tar = require('tar');
-let fs = require('fs');
-let os = require('os');
-let url = require('url');
+const idPrecision = 6;
 
 export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
-
     console.log("Obtaining Subscription and Client");
     let subscription = await acquireSubscription();
     let client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
@@ -33,20 +31,36 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
     let sourceLocation: string = folder.uri.path;
-    console.log("Setting up temp file with 'sourceArchive.tar.gz' ");
-    let tarFilePath = url.resolve(os.tmpdir(), 'sourceArchive.tar.gz');
 
-    console.log("Uploading Source Code");
+    let relativeDockerPath = 'Dockerfile';
+    if (dockerFileUri.path.indexOf(sourceLocation) !== 0) {
+        //Currently, there is no support for selecting source location folders that don't contain a path to the triggered dockerfile.
+        throw new TypeError("Source code path must be a parent of the Dockerfile path")
+    } else {
+        relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length);
+    }
+
+    const opt: vscode.InputBoxOptions = {
+        prompt: 'Image name and tag in format  <name>:<tag>',
+    };
+    const name: string = await vscode.window.showInputBox(opt);
+
+    /* tslint:disable-next-line:insecure-random */
+    let id = Math.floor(Math.random() * Math.pow(10, idPrecision));
+    console.log("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
+    let tarFilePath = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
+
+    console.log("Uploading Source Code to " + tarFilePath);
     sourceLocation = await uploadSourceCode(client, registryName, resourceGroupName, sourceLocation, tarFilePath);
 
     console.log("Setting up Build Request");
     let buildRequest: QuickBuildRequest = {
         'type': 'QuickBuild',
-        'imageNames': [],
-        'isPushEnabled': false,
+        'imageNames': [name],
+        'isPushEnabled': true,
         'sourceLocation': sourceLocation,
         'platform': { 'osType': 'Linux' },
-        'dockerFilePath': 'DockerFile'
+        'dockerFilePath': relativeDockerPath
     };
 
     console.log("Queueing Build");
