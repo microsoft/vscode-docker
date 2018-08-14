@@ -55,7 +55,6 @@
     "onCommand:vscode-docker.delete-ACR-Registry",
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
-    "onCommand:vscode-docker.deleteAzureImage",
     "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
@@ -200,10 +199,6 @@
         {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
-        },
-        {
-          "command": "vscode-docker.deleteAzureImage",
-          "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
           "command": "vscode-docker.pullFromAzure",

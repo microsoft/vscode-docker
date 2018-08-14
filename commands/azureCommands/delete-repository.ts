@@ -41,7 +41,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
     answer = answer.toLowerCase();
     if (answer !== 'yes') { return; }
 
-    let creds = await acrTools.loginCredentials(subscription, registry);
+    let creds = await acrTools.loginCredentialsAccessToken(subscription, registry);
     const username: string = creds.username;
     const password: string = creds.password;
     let path = `/v2/_acr/${repoName}/repository`;
