@@ -7,7 +7,7 @@ import * as acrTools from '../../utils/Azure/acrTools';
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
 export async function pullFromAzure(context?: AzureImageNode): Promise<any> {
 
-    // Step 1: Using loginCredentials() function to get the username and password. This takes care of all users, even if they don't have the Azure CLI
+    // Step 1: Using loginCredentials function to get the username and password. This takes care of all users, even if they don't have the Azure CLI
     let credentials;
     try {
         credentials = await acrTools.acquireRegistryLoginCredential(context.subscription, context.registry, context);

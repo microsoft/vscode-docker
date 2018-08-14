@@ -14,7 +14,7 @@ import { AsyncPool } from '../../utils/asyncpool';
 import * as acrTools from '../../utils/Azure/acrTools';
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
-import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './AzureRegistryNodes';
+import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
