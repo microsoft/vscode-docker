@@ -4,6 +4,7 @@ import request = require('request-promise');
 import * as vscode from "vscode";
 import { NULL_GUID } from "../../constants";
 import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
+import { ServiceClientCredentials } from "../../node_modules/ms-rest";
 import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
@@ -60,7 +61,7 @@ export async function getRegistryTokens(registry: Registry): Promise<{ refreshTo
     let azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
 
     const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-    const { accessToken } = await acquireARMToken(session);
+    const { accessToken } = await acquireAADToken(session);
 
     //regenerates in case they have expired
     if (accessToken) {
@@ -102,18 +103,18 @@ export async function getRegistryTokens(registry: Registry): Promise<{ refreshTo
     }
     vscode.window.showErrorMessage('Could not generate tokens');
 }
-
-export async function acquireARMToken(localSession: AzureSession): Promise<{ accessToken: string; }> {
-    return new Promise<{ accessToken: string; }>((resolve, reject) => {
-        const credentials: any = localSession.credentials;
-        const environment: any = localSession.environment;
-        // tslint:disable-next-line:no-function-expression // Grandfathered in
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: { accessToken: string; }): void {
+//Obtains refresh and access tokens for an Azure Active Directory enabled registry.
+export async function acquireAadToken(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
+    return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
+        const credentials: any = session.credentials;
+        const environment: any = session.environment;
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: any) => {
             if (err) {
                 reject(err);
             } else {
                 resolve({
-                    accessToken: result.accessToken
+                    aadAccessToken: result.accessToken,
+                    aadRefreshToken: result.refreshToken,
                 });
             }
         });
@@ -157,7 +158,7 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
     let refreshTokenACR;
     let accessTokenACR;
     const session: AzureSession = azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-    const { accessToken } = await acquireARMToken(session);
+    const { accessToken } = await acquireAADToken(session);
     if (accessToken) {
         await request.post('https://' + element.registry.loginServer + '/oauth2/exchange', {
             form: {
@@ -253,14 +254,23 @@ export function getRegistrySubscription(registry: Registry): SubscriptionModels.
     return subscription;
 }
 
+/*
+Calls to Azure Resource Manager to resolve the login server for the specified registry.
+Obtains refresh credentials from the profile in use. For a headless call, this will give you the registered SPN, for a regular user this will give you a refresh token.
+Makes an HTTPS GET call to the registry server's /v2 endpoint, without credentials. A bearer token authentication challenge is expected, specifying realm and service values. The realm contains the authentication server's URL.
+Makes an HTTPS POST call to the authentication server's POST /oauth2/exchange endpoint, with a body indicating the grant type, the service, the tenant, and the credentials.
+From the server's response, we extract an Azure Container Registry refresh token.
+Pass the refresh token as the password to the Docker CLI, using a null GUID as the username and calling docker login. From here on, the docker CLI takes care of the authorization cycle using oauth2.
+*/
+
 export async function getSessionCredentials(subscription: SubscriptionModels.Subscription, registry: Registry): Promise<{ password: string, username: string }> {
     const tenantId: string = subscription.tenantId;
     const session: AzureSession = AzureUtilityManager.getInstance().getAccount().sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-    const { accessToken, refreshToken } = await acquireToken(session);
+    const { accessToken, refreshToken } = await acquireAADToken(session);
 
     if (accessToken && refreshToken) {
         let refreshTokenARC: string;
-
+        //Call POST /oauth2/exchange presenting the AAD refresh token and the AAD access token. The service will return you an ACR refresh token.
         await request.post('https://' + registry.loginServer + '/oauth2/exchange', {
             form: {
                 grant_type: 'access_token_refresh_token',
@@ -279,19 +289,5 @@ export async function getSessionCredentials(subscription: SubscriptionModels.Sub
     }
 }
 
-async function acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
-    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
-        const credentials: any = session.credentials;
-        const environment: any = session.environment;
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: { accessToken: string; refreshToken: string; }): void => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken
-                });
-            }
-        });
-    });
-}
+//Access Token - To call the ACR API's
+//RefreshToken - To do docker Login
