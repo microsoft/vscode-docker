@@ -143,6 +143,9 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
     return resourceGroup;
 }
 
+/** Requests confirmation for an action and returns true only in the case that the user types in yes
+ * @param yesOrNoPrompt Should be a yes or no question
+ */
 export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
     //ensure user truly wants to delete image
     let opt: vscode.InputBoxOptions = {

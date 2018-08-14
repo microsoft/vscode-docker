@@ -10,7 +10,7 @@ import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../utils/quick-pick-azure';
 const teleCmdId: string = 'vscode-docker.createRegistry';
 
-/* Creates a new registry based on user input/selection of features, such as location */
+/* Creates a new Azure container registry based on user input/selection of features */
 export async function createRegistry(): Promise<string> {
     const subscription: SubscriptionModels.Subscription = await quickPickSubscription();
     const resourceGroup: ResourceGroup = await quickPickResourceGroup(true, subscription);
@@ -22,7 +22,7 @@ export async function createRegistry(): Promise<string> {
     const registry = await client.registries.beginCreate(resourceGroup.name, registryName, {
         'sku': { 'name': sku },
         'location': location
-    })
+    });
     vscode.window.showInformationMessage(registry.name + ' has been created succesfully!');
     recordTelemetry();
     return registryName;
@@ -36,6 +36,7 @@ function recordTelemetry(): void {
     }
 }
 
+/** Acquires a new registry name from a user, validating that the name is unique */
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,

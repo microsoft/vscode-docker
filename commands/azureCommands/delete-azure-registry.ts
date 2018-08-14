@@ -1,6 +1,7 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
-import { quickPickACRRegistry } from '../../commands/utils/quick-pick-azure';
+import { confirmUserIntent, quickPickACRRegistry } from '../../commands/utils/quick-pick-azure';
+import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { SubscriptionModels } from "../../node_modules/azure-arm-resource";
 import { reporter } from '../../telemetry/telemetry';
@@ -19,24 +20,17 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
     } else {
         registry = await quickPickACRRegistry();
     }
+    const shouldDelete = await confirmUserIntent('Are you sure you want to delete this registry and its associated images? Enter yes to continue: ');
+    if (shouldDelete) {
+        let subscription: SubscriptionModels.Subscription = acrTools.getRegistrySubscription(registry);
+        let resourceGroup: string = acrTools.getResourceGroupName(registry);
+        const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+        await client.registries.beginDeleteMethod(resourceGroup, registry.name);
+        vscode.window.showInformationMessage(`Successfully deleted registry ${registry.name}`);
+    } else {
+        throw new UserCancelledError();
+    }
 
-    let opt: vscode.InputBoxOptions = {
-        ignoreFocusOut: true,
-        placeHolder: 'No',
-        value: 'No',
-        prompt: 'Are you sure you want to delete this registry and its associated images? Enter yes to continue: '
-    };
-    let answer = await vscode.window.showInputBox(opt);
-
-    answer = answer.toLowerCase();
-    if (answer !== 'yes') { return; }
-
-    let subscription: SubscriptionModels.Subscription = acrTools.getRegistrySubscription(registry);
-    let resourceGroup: string = acrTools.getResourceGroupName(registry);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-
-    await client.registries.beginDeleteMethod(resourceGroup, registry.name);
-    vscode.window.showInformationMessage('Successfully deleted registry ' + registry.name);
     telemetryReport();
 }
 

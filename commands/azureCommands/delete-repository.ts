@@ -1,7 +1,8 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
-import * as quickPicks from '../../commands/utils/quick-pick-azure';
+import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../../commands/utils/quick-pick-azure';
+import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -23,29 +24,22 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         subscription = context.subscription;
         registry = context.registry;
     } else {
-        registry = await quickPicks.quickPickACRRegistry();
+        registry = await quickPickACRRegistry();
         subscription = acrTools.getRegistrySubscription(registry);
-        const repository: Repository = await quickPicks.quickPickACRRepository(registry);
+        const repository: Repository = await quickPickACRRepository(registry);
         repoName = repository.name;
     }
-
-    // Ensure user truly wants to delete registry
-    let opt: vscode.InputBoxOptions = {
-        ignoreFocusOut: true,
-        placeHolder: 'No',
-        value: 'No',
-        prompt: 'Are you sure you want to delete this repository and its associated images? Enter Yes to continue: '
-    };
-
-    let answer = await vscode.window.showInputBox(opt);
-    answer = answer.toLowerCase();
-    if (answer !== 'yes') { return; }
-
-    let creds = await acrTools.loginCredentials(subscription, registry);
-    const username: string = creds.username;
-    const password: string = creds.password;
-    let path = `/v2/_acr/${repoName}/repository`;
-    await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password);
+    const shouldDelete = await confirmUserIntent('Are you sure you want to delete this repository and its associated images? Enter yes to continue: ');
+    if (shouldDelete) {
+        let creds = await acrTools.loginCredentials(subscription, registry);
+        const username: string = creds.username;
+        const password: string = creds.password;
+        let path = `/v2/_acr/${repoName}/repository`;
+        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, username, password);
+        vscode.window.showInformationMessage(`Successfully deleted repository ${Repository}`);
+    } else {
+        throw new UserCancelledError();
+    }
     reportTelemetry();
 }
 

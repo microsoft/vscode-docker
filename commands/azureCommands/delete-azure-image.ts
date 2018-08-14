@@ -45,6 +45,7 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         let creds = await acrTools.loginCredentials(subscription, registry);
         let path = `/v2/_acr/${repoName}/tags/${tag}`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, creds.username, creds.password);
+        vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);
     } else {
         throw new UserCancelledError();
     }
