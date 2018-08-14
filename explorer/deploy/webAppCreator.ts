@@ -13,7 +13,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { reporter } from '../../telemetry/telemetry';
-import { AzureImageNode } from '../models/AzureRegistryNodes';
+import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 import * as util from './util';
