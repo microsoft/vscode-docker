@@ -31,7 +31,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
     }
     const shouldDelete = await confirmUserIntent('Are you sure you want to delete this repository and its associated images? Enter yes to continue: ');
     if (shouldDelete) {
-        let creds = await acrTools.loginCredentials(subscription, registry);
+        let creds = await acrTools.loginCredentials(registry);
         const username: string = creds.username;
         const password: string = creds.password;
         let path = `/v2/_acr/${repoName}/repository`;

@@ -26,10 +26,4 @@ export class Repository {
         if (password) { this.password = password; }
         if (username) { this.username = username; }
     }
-
-    public async  setTokens(registry: Registry): Promise<void> {
-        let tokens = await acrTools.getRegistryTokens(registry);
-        this.accessToken = tokens.accessToken;
-        this.refreshToken = tokens.refreshToken;
-    }
 }

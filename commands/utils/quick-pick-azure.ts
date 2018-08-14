@@ -1,4 +1,3 @@
-import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as opn from 'opn';
 import * as vscode from "vscode";
@@ -17,7 +16,7 @@ import { AzureUtilityManager } from '../../utils/azureUtilityManager';
  * @returns an AzureImage object (see azureUtils.ts)
  */
 export async function quickPickACRImage(repository: Repository): Promise<AzureImage> {
-    const repoImages: AzureImage[] = await acrTools.getAzureImages(repository);
+    const repoImages: AzureImage[] = await acrTools.getACRImages(repository);
     let imageListNames: string[] = [];
     for (let tempImage of repoImages) {
         imageListNames.push(tempImage.tag);
@@ -29,7 +28,7 @@ export async function quickPickACRImage(repository: Repository): Promise<AzureIm
 }
 
 export async function quickPickACRRepository(registry: Registry): Promise<Repository> {
-    const myRepos: Repository[] = await acrTools.getAzureRepositories(registry);
+    const myRepos: Repository[] = await acrTools.getACRRepositories(registry);
     let rep: string[] = [];
     for (let repo of myRepos) {
         rep.push(repo.name);
