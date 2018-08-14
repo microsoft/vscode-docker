@@ -252,3 +252,46 @@ export function getRegistrySubscription(registry: Registry): SubscriptionModels.
     });
     return subscription;
 }
+
+export async function getSessionCredentials(subscription: SubscriptionModels.Subscription, registry: Registry): Promise<{ password: string, username: string }> {
+    const tenantId: string = subscription.tenantId;
+    const session: AzureSession = AzureUtilityManager.getInstance().getAccount().sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+    const { accessToken, refreshToken } = await acquireToken(session);
+
+    if (accessToken && refreshToken) {
+        let refreshTokenARC: string;
+
+        await request.post('https://' + registry.loginServer + '/oauth2/exchange', {
+            form: {
+                grant_type: 'access_token_refresh_token',
+                service: registry.loginServer,
+                tenant: tenantId,
+                refresh_token: refreshToken,
+                access_token: accessToken
+            }
+        }, (err, httpResponse, body) => {
+            if (body.length > 0) {
+                refreshTokenARC = JSON.parse(body).refresh_token;
+            }
+        });
+        const nullGUID: string = "00000000-0000-0000-0000-000000000000"
+        return { 'username': nullGUID, 'password': refreshTokenARC }
+    }
+}
+
+async function acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
+    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
+        const credentials: any = session.credentials;
+        const environment: any = session.environment;
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: { accessToken: string; refreshToken: string; }): void => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    accessToken: result.accessToken,
+                    refreshToken: result.refreshToken
+                });
+            }
+        });
+    });
+}
