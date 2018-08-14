@@ -214,28 +214,10 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
  * @param registry : the registry to get login credentials for
  * @param context : if command is invoked through a right click on an AzureRepositoryNode. This context has a password and username
  */
-export async function loginCredentials(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
-    let node: AzureImageNode | AzureRepositoryNode;
-    if (context) {
-        node = context;
-    }
-    let username: string;
-    let password: string;
-
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
-
-    if (registry.adminUserEnabled) {
-        let creds = await client.registries.listCredentials(resourceGroup, registry.name);
-        password = creds.passwords[0].value;
-        username = creds.username;
-    } else {
-        //grab the access token to be used as a password, and a generic username
-        let creds = await getRegistryTokens(registry);
-        password = creds.accessToken;
-        username = NULL_GUID;
-    }
-    return { password, username };
+export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
+    //grab the access token to be used as a password, and a generic username
+    let creds = await getRegistryTokens(registry);
+    return { password: creds.refreshToken, username: NULL_GUID };
 }
 
 /**
