@@ -66,7 +66,6 @@ export async function acquireResourceGroup(subscription: Subscription, resourceG
     //Acquire each subscription's data simultaneously
     let resourceGroup;
     let resourceGroupName;
-    //const resourceGroupClient = new ResourceManagementClient(AzureUtilityManager.getInstance().getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
     let resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
 
     let resourceGroupNames: string[] = [];
@@ -90,7 +89,7 @@ export async function acquireResourceGroup(subscription: Subscription, resourceG
     return resourceGroup;
 }
 
-async function acquireLocation(resourceGroup: ResourceGroup, subscription: SubscriptionModels.Subscription): Promise<string> {
+export async function acquireLocation(resourceGroup: ResourceGroup, subscription: SubscriptionModels.Subscription): Promise<string> {
     let locations: SubscriptionModels.Location[] = await AzureUtilityManager.getInstance().getLocationsBySubscription(subscription);
     let locationNames: string[] = [];
     let placeHolder: string;

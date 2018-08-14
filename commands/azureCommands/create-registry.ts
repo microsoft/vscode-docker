@@ -6,6 +6,7 @@ import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
 import { reporter } from '../../telemetry/telemetry';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { acquireLocation, acquireResourceGroup, acquireSubscription } from "../utils/quick-pick-azure"
 const teleAzureId: string = 'vscode-docker.create.registry.azureContainerRegistry';
 const teleCmdId: string = 'vscode-docker.createRegistry';
 import * as opn from 'opn';
@@ -18,7 +19,8 @@ export async function createRegistry(): Promise<void> {
 
     try {
         subscription = await acquireSubscription();
-        resourceGroup = await acquireResourceGroup(subscription);
+        const resourceGroupClient = new ResourceManagementClient(AzureUtilityManager.getInstance().getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+        resourceGroup = await acquireResourceGroup(subscription, resourceGroupClient);
 
     } catch (error) {
         return;
@@ -96,7 +98,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     }
     return registryName;
 }
-
+/*
 async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
     const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subs.length === 0) {
@@ -179,7 +181,7 @@ async function acquireResourceGroup(subscription: SubscriptionModels.Subscriptio
     } while (!resourceGroupName);
     return resourceGroup;
 }
-
+*/
 /*Creates a new resource group within the current subscription */
 async function createNewResourceGroup(loc: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
     let promptMessage = 'Resource group name?';
