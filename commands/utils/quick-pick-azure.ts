@@ -11,7 +11,7 @@ import { Repository } from "../../utils/Azure/models/Repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
 export async function quickPickACRImage(repository: Repository): Promise<AzureImage> {
-    const repoImages: AzureImage[] = await acrTools.getACRImages(repository);
+    const repoImages: AzureImage[] = await acrTools.getImagesByRepository(repository);
     let imageListNames: string[] = [];
     for (let tempImage of repoImages) {
         imageListNames.push(tempImage.tag);
@@ -23,7 +23,7 @@ export async function quickPickACRImage(repository: Repository): Promise<AzureIm
 }
 
 export async function quickPickACRRepository(registry: Registry): Promise<Repository> {
-    const myRepos: Repository[] = await acrTools.getACRRepositories(registry);
+    const myRepos: Repository[] = await acrTools.getRepositoriesByRegistry(registry);
     let rep: string[] = [];
     for (let repo of myRepos) {
         rep.push(repo.name);

@@ -26,7 +26,7 @@ export function getResourceGroupName(registry: Registry): any {
 
 //Registry item management
 /** List images under a specific Repository */
-export async function getACRImages(element: Repository): Promise<AzureImage[]> {
+export async function getImagesByRepository(element: Repository): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     let tags: string[];
@@ -49,7 +49,7 @@ export async function getACRImages(element: Repository): Promise<AzureImage[]> {
     return allImages;
 }
 /** List repositories on a given Registry. */
-export async function getACRRepositories(registry: Registry): Promise<Repository[]> {
+export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
     const allRepos: Repository[] = [];
     let repo: Repository;
     const { acrRefreshToken, acrAccessToken } = await getDockerCompatibleTokensFromRegistry(registry, "registry:catalog:*");
@@ -77,20 +77,16 @@ export async function getACRRepositories(registry: Registry): Promise<Repository
  * @param username : registry username, can be in generic form of 0's, used to generate authorization header
  * @param password : registry password, can be in form of accessToken, used to generate authorization header
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, password: string): Promise<any> {
+export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<any> {
     let url: string = `https://${login_server}${path}`;
-    let header = 'Bearer ' + password;
+    let header = 'Bearer ' + bearerAccessToken;
     let opt = {
         headers: { 'Authorization': header },
         http_method: http_method,
         url: url
     }
     if (http_method === 'delete') {
-        try {
-            await request.delete(opt);
-        } catch (error) {
-            console.log(error);
-        }
+        await request.delete(opt);
     }
 }
 
