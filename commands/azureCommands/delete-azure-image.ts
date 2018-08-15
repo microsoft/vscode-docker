@@ -1,5 +1,4 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
-import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import * as quickPicks from '../../commands/utils/quick-pick-azure';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
