@@ -35,9 +35,8 @@ export async function getACRImages(element: Repository): Promise<AzureImage[]> {
         auth: {
             bearer: acrAccessToken
         }
-    }, (err, body) => {
+    }, (err, httpResponse, body) => {
         if (err) { throw (err) }
-
         if (body.length > 0) {
             tags = JSON.parse(body).tags;
         }
@@ -53,16 +52,12 @@ export async function getACRImages(element: Repository): Promise<AzureImage[]> {
 export async function getACRRepositories(registry: Registry): Promise<Repository[]> {
     const allRepos: Repository[] = [];
     let repo: Repository;
-    let azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
-    if (!azureAccount) {
-        return [];
-    }
-    const { acrAccessToken, acrRefreshToken } = await getDockerCompatibleTokensFromRegistry(registry, "registry:catalog:*");
+    const { acrRefreshToken, acrAccessToken } = await getDockerCompatibleTokensFromRegistry(registry, "registry:catalog:*");
     await request.get('https://' + registry.loginServer + '/v2/_catalog', {
         auth: {
             bearer: acrAccessToken
         }
-    }, (body) => {
+    }, (err, httpResponse, body) => {
         if (body.length > 0) {
             const repositories = JSON.parse(body).repositories;
             for (let tempRepo of repositories) {
@@ -82,7 +77,7 @@ export async function getACRRepositories(registry: Registry): Promise<Repository
  * @param username : registry username, can be in generic form of 0's, used to generate authorization header
  * @param password : registry password, can be in form of accessToken, used to generate authorization header
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, username: string, password: string): Promise<any> {
+export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, password: string): Promise<any> {
     let url: string = `https://${login_server}${path}`;
     let header = 'Bearer ' + password;
     let opt = {
@@ -91,7 +86,11 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
         url: url
     }
     if (http_method === 'delete') {
-        return await request.delete(opt);
+        try {
+            await request.delete(opt);
+        } catch (error) {
+            console.log(error);
+        }
     }
 }
 

@@ -11,8 +11,8 @@ import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
 const teleCmdId: string = 'vscode-docker.deleteACRImage';
 
-/** Function to delete an Azure repository and its associated images
- * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
+/** Function to delete an Azure hosted image
+ * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function deleteAzureImage(context?: AzureImageNode): Promise<void> {
     if (!AzureUtilityManager.getInstance().waitForLogin()) {
@@ -20,31 +20,27 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         throw new Error('User is not logged into azure');
     }
     let registry: Registry;
-    let subscription: SubscriptionModels.Subscription;
     let repoName: string;
     let tag: string;
 
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
-        subscription = acrTools.getRegistrySubscription(registry);
         const repository: Repository = await quickPicks.quickPickACRRepository(registry);
         repoName = repository.name;
         const image = await quickPicks.quickPickACRImage(repository);
         tag = image.tag;
     } else {
-        repoName = context.label;
-        subscription = context.subscription;
         registry = context.registry;
-        let wholeName = repoName.split(':');
+        let wholeName = context.label.split(':');
         repoName = wholeName[0];
         tag = wholeName[1];
     }
 
     const shouldDelete = await quickPicks.confirmUserIntent('Are you sure you want to delete this image? Enter Yes to continue: ');
     if (shouldDelete) {
-        let creds = await acrTools.loginCredentials(registry);
-        let path = `/v2/_acr/${repoName}/tags/${tag}`;
-        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, creds.username, creds.password);
+        const { acrAccessToken } = await acrTools.getDockerCompatibleTokensFromRegistry(registry, `repository:${repoName}:*`);
+        const path = `/v2/_acr/${repoName}/tags/${tag}`;
+        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);
     } else {
         throw new UserCancelledError();

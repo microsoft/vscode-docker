@@ -6,7 +6,7 @@ import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { SubscriptionModels } from "../../node_modules/azure-arm-resource";
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureUtilityManager } from '../../utils/AzureUtilityManager';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
 const teleCmdId: string = 'vscode-docker.deleteAzureRegistry';
 

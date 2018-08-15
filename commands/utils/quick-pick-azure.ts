@@ -2,19 +2,14 @@ import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { skus } from '../../constants'
+import { UserCancelledError } from '../../explorer/deploy/wizard';
 import { ResourceGroup } from '../../node_modules/azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from '../../node_modules/azure-arm-resource/lib/subscription/models';
-import { UserCancelledError } from '../../node_modules/vscode-azureextensionui';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/Repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
-/**
- * function to allow user to pick a desired image for use
- * @param repository the repository to look in
- * @returns an AzureImage object (see azureUtils.ts)
- */
 export async function quickPickACRImage(repository: Repository): Promise<AzureImage> {
     const repoImages: AzureImage[] = await acrTools.getACRImages(repository);
     let imageListNames: string[] = [];
