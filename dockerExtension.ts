@@ -11,6 +11,7 @@ import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-azure-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-azure-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
+import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -131,6 +132,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
+    registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
+    registerCommand('vscode-docker.pullFromAzure', pullFromAzure);
+
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {

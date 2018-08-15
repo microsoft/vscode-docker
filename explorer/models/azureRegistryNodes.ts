@@ -1,5 +1,5 @@
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import { SubscriptionModels } from 'azure-arm-resource';
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';
@@ -252,6 +252,8 @@ export class AzureImageNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public serverUrl: string;
     public subscription: SubscriptionModels.Subscription;
+    public userName: string;
+    public repository: string;
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;

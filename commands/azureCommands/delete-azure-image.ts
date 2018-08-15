@@ -2,7 +2,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import * as quickPicks from '../../commands/utils/quick-pick-azure';
-import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureImageNode } from '../../explorer/models/azureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
@@ -53,7 +53,8 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    let creds = await acrTools.loginCredentials(subscription, registry);
+    let creds = await acrTools.acquireRegistryAccessToken(context.subscription, context.registry, context);
+
     username = creds.username;
     password = creds.password;
     let path = `/v2/_acr/${repoName}/tags/${tag}`;

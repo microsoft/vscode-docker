@@ -2,7 +2,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import * as quickPicks from '../../commands/utils/quick-pick-azure';
-import { AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
@@ -41,7 +41,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
     answer = answer.toLowerCase();
     if (answer !== 'yes') { return; }
 
-    let creds = await acrTools.loginCredentials(subscription, registry);
+    let creds = await acrTools.acquireRegistryAccessToken(subscription, registry);
     const username: string = creds.username;
     const password: string = creds.password;
     let path = `/v2/_acr/${repoName}/repository`;

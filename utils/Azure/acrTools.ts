@@ -2,12 +2,11 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import request = require('request-promise');
 import * as vscode from "vscode";
-import { NULL_GUID } from "../../constants";
 import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
-import { AzureImage } from "../Azure/models/image";
-import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
+import { AzureImage } from "./models/image";
+import { Repository } from "./models/repository";
 
 /**
  * Developers can use this to visualize and list repositories on a given Registry. This is not a command, just a developer tool.
@@ -214,27 +213,18 @@ export async function getAzureImages(element: Repository): Promise<AzureImage[]>
  * @param registry : the registry to get login credentials for
  * @param context : if command is invoked through a right click on an AzureRepositoryNode. This context has a password and username
  */
-export async function loginCredentials(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
-    let node: AzureImageNode | AzureRepositoryNode;
-    if (context) {
-        node = context;
-    }
-    let username: string;
-    let password: string;
 
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    const resourceGroup: string = registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
+export async function acquireRegistryLoginCredential(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
+    let creds = await getRegistryTokens(registry);
+    let password = creds.refreshToken;
+    let username = '00000000-0000-0000-0000-000000000000';
+    return { password, username };
+}
 
-    if (registry.adminUserEnabled) {
-        let creds = await client.registries.listCredentials(resourceGroup, registry.name);
-        password = creds.passwords[0].value;
-        username = creds.username;
-    } else {
-        //grab the access token to be used as a password, and a generic username
-        let creds = await getRegistryTokens(registry);
-        password = creds.accessToken;
-        username = NULL_GUID;
-    }
+export async function acquireRegistryAccessToken(subscription: SubscriptionModels.Subscription, registry: Registry, context?: AzureImageNode | AzureRepositoryNode): Promise<{ password: string, username: string }> {
+    let creds = await getRegistryTokens(registry);
+    let password = creds.accessToken;
+    let username = '00000000-0000-0000-0000-000000000000';
     return { password, username };
 }
 
