@@ -109,7 +109,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     registerCommand('vscode-docker.configure', configure);
-    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { buildImage(this); });
+    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
     registerCommand('vscode-docker.image.push', pushImage);

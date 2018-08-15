@@ -3,9 +3,6 @@ import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
-import { reporter } from '../telemetry/telemetry';
-
-const teleCmdId: string = 'vscode-docker.image.build';
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
@@ -117,15 +114,4 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
     terminal.sendText(`docker build --rm -f "${dockerFileItem.fileName}" -t ${value} ${contextPath}`);
     terminal.show();
-
-    if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
-    }
 }
