@@ -5,6 +5,7 @@ import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
+import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
@@ -24,13 +25,13 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
 
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
-        const repository: Repository = await quickPicks.quickPickACRRepository(registry);
+        const repository: Repository = await quickPicks.quickPickACRRepository(registry, 'Choose the Repository of the image you want to delete');
         repoName = repository.name;
-        const image = await quickPicks.quickPickACRImage(repository);
+        const image: AzureImage = await quickPicks.quickPickACRImage(repository, 'Choose the Image you want to delete');
         tag = image.tag;
     } else {
         registry = context.registry;
-        let wholeName = context.label.split(':');
+        let wholeName: string[] = context.label.split(':');
         repoName = wholeName[0];
         tag = wholeName[1];
     }

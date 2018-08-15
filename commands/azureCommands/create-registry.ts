@@ -40,7 +40,7 @@ function recordTelemetry(): void {
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
-        prompt: 'Registry name? '
+        prompt: 'New Registry name? '
     };
     let registryName: string = await vscode.window.showInputBox(opt);
     if (!registryName) { throw new UserCancelledError(); }
@@ -50,7 +50,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     while (!registryStatus.nameAvailable) {
         opt = {
             ignoreFocusOut: false,
-            prompt: `The registry name '${registryName}' is unavailable. Try again: `
+            prompt: `The Registry name '${registryName}' is unavailable. Try again: `
         }
         registryName = await vscode.window.showInputBox(opt);
         if (!registryName) { throw new UserCancelledError(); }
