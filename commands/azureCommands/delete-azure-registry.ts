@@ -22,7 +22,7 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
     }
     const shouldDelete = await confirmUserIntent('Are you sure you want to delete this registry and its associated images? Enter yes to continue: ');
     if (shouldDelete) {
-        let subscription: SubscriptionModels.Subscription = acrTools.getRegistrySubscription(registry);
+        let subscription: SubscriptionModels.Subscription = acrTools.getSubscriptionFromRegistry(registry);
         let resourceGroup: string = acrTools.getResourceGroupName(registry);
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
         await client.registries.beginDeleteMethod(resourceGroup, registry.name);

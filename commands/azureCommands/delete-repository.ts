@@ -1,5 +1,4 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
-import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from "vscode";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../../commands/utils/quick-pick-azure';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
@@ -16,22 +15,19 @@ const teleCmdId: string = 'vscode-docker.deleteACRRepository';
 export async function deleteRepository(context?: AzureRepositoryNode): Promise<void> {
 
     let registry: Registry;
-    let subscription: SubscriptionModels.Subscription;
     let repoName: string;
 
     if (context) {
         repoName = context.label;
-        subscription = context.subscription;
         registry = context.registry;
     } else {
         registry = await quickPickACRRegistry();
-        subscription = acrTools.getRegistrySubscription(registry);
         const repository: Repository = await quickPickACRRepository(registry);
         repoName = repository.name;
     }
     const shouldDelete = await confirmUserIntent('Are you sure you want to delete this repository and its associated images? Enter yes to continue: ');
     if (shouldDelete) {
-        const { acrAccessToken } = await acrTools.getDockerCompatibleTokensFromRegistry(registry, `repository:${repoName}:*`);
+        const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/repository`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted repository ${Repository}`);

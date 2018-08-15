@@ -38,7 +38,7 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
 
     const shouldDelete = await quickPicks.confirmUserIntent('Are you sure you want to delete this image? Enter Yes to continue: ');
     if (shouldDelete) {
-        const { acrAccessToken } = await acrTools.getDockerCompatibleTokensFromRegistry(registry, `repository:${repoName}:*`);
+        const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/tags/${tag}`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);

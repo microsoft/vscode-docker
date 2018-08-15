@@ -2,7 +2,8 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import request = require('request-promise');
 import { NULL_GUID } from "../../constants";
-import { AzureAccount, AzureSession } from "../../typings/azure-account.api";
+import { Subscription } from "../../node_modules/azure-arm-resource/lib/subscription/models";
+import { AzureSession } from "../../typings/azure-account.api";
 import { AzureImage } from "../Azure/models/image";
 import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
@@ -12,7 +13,7 @@ import { AzureUtilityManager } from '../azureUtilityManager';
  * @param registry gets the subscription for a given registry
  * @returns a subscription object
  */
-export function getRegistrySubscription(registry: Registry): SubscriptionModels.Subscription {
+export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
     let subscriptionId = registry.id.slice('/subscriptions/'.length, registry.id.search('/resourceGroups/'));
     const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     let subscription = subs.find((sub): boolean => {
@@ -30,7 +31,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     let tags: string[];
-    const { acrAccessToken } = await getDockerCompatibleTokensFromRegistry(element.registry, 'repository:' + element.name + ':pull');
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
     await request.get('https://' + element.registry.loginServer + '/v2/' + element.name + '/tags/list', {
         auth: {
             bearer: acrAccessToken
@@ -52,7 +53,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
     const allRepos: Repository[] = [];
     let repo: Repository;
-    const { acrRefreshToken, acrAccessToken } = await getDockerCompatibleTokensFromRegistry(registry, "registry:catalog:*");
+    const { acrRefreshToken, acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
     await request.get('https://' + registry.loginServer + '/v2/_catalog', {
         auth: {
             bearer: acrAccessToken
@@ -93,9 +94,8 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 //Credential management
 /** Obtains registry username and password compatible with docker login */
 export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
-    const tenantId: string = getRegistrySubscription(registry).tenantId;
-    const azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
-    const session: AzureSession = azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+    const subscription: Subscription = getSubscriptionFromRegistry(registry);
+    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
     return { 'password': acrRefreshToken, 'username': NULL_GUID };
@@ -105,10 +105,9 @@ export async function loginCredentials(registry: Registry): Promise<{ password: 
  * @param scope String determining the scope of the access token
  * @returns acrRefreshToken: For use as a Password for docker registry access , acrAccessToken: For use with docker API
  */
-export async function getDockerCompatibleTokensFromRegistry(registry: Registry, scope: string): Promise<{ acrRefreshToken: string, acrAccessToken: string }> {
-    const tenantId: string = getRegistrySubscription(registry).tenantId;
-    const azureAccount: AzureAccount = AzureUtilityManager.getInstance().getAccount();
-    const session: AzureSession = azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+export async function acquireACRAccessTokenFromRegistry(registry: Registry, scope: string): Promise<{ acrRefreshToken: string, acrAccessToken: string }> {
+    const subscription: Subscription = getSubscriptionFromRegistry(registry);
+    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription);
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
     const acrAccessToken = await acquireACRAccessToken(registry.loginServer, scope, acrRefreshToken)
