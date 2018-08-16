@@ -40,6 +40,11 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
         suiteSetup(async function (this: Context): Promise<void> {
             await stopRegistry();
+            await registryTerminal.execute(`docker pull registry`,
+                {
+                    // docker uses stderr to indicate that it didn't find a local cache and has to download
+                    ignoreErrors: true
+                });
             await registryTerminal.execute(`docker run -d --rm --name ${registryContainerName} -p 5100:5000 registry`);
 
             // Make sure it's running
