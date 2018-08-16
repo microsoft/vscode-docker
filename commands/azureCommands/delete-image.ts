@@ -37,7 +37,7 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    const shouldDelete = await quickPicks.confirmUserIntent('Are you sure you want to delete this image? Enter Yes to continue: ');
+    const shouldDelete = await quickPicks.confirmUserIntent(`Are you sure you want to delete ${repoName}:${tag}? Enter Yes to continue: `);
     if (shouldDelete) {
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/tags/${tag}`;
