@@ -11,7 +11,6 @@ import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
-import * as acrTools from '../../utils/Azure/acrTools';
 import * as dockerHub from '../utils/dockerHubUtils'
 import { getCoreNodeModule } from '../utils/utils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';

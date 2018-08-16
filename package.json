@@ -46,7 +46,7 @@
     "onCommand:vscode-docker.compose.restart",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
-    "onCommand:vscode-docker.createRegistry",
+    "onCommand:vscode-docker.create-ACR-Registry",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.browseDockerHub",
@@ -193,7 +193,7 @@
           "when": "view == dockerExplorer && viewItem =~ /^(azureImageNode|dockerHubImageTag)$/"
         },
         {
-          "command": "vscode-docker.createRegistry",
+          "command": "vscode-docker.create-ACR-Registry",
           "when": "view == dockerExplorer && viewItem == azureRegistryRootNode"
         },
         {
@@ -521,7 +521,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.createRegistry",
+        "command": "vscode-docker.create-ACR-Registry",
         "title": "Create Registry",
         "category": "Docker"
       },

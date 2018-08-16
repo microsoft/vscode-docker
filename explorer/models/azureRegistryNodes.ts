@@ -109,6 +109,7 @@ export class AzureRegistryNode extends NodeBase {
                         node.registry = element.registry;
                         node.repository = element.label;
                         node.subscription = element.subscription;
+                        node.parent = element;
                         registryChildNodes.push(node);
                     }
                 }
@@ -136,6 +137,7 @@ export class AzureRepositoryNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public repository: string;
     public subscription: SubscriptionModels.Subscription;
+    public parent: NodeBase;
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -223,6 +225,7 @@ export class AzureRepositoryNode extends NodeBase {
                         node.registry = element.registry;
                         node.serverUrl = element.repository;
                         node.subscription = element.subscription;
+                        node.parent = element;
                         node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
                         imageNodes.push(node);
                     }
@@ -252,8 +255,7 @@ export class AzureImageNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public serverUrl: string;
     public subscription: SubscriptionModels.Subscription;
-    public userName: string;
-    public repository: string;
+    public parent: NodeBase;
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
