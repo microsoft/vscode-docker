@@ -48,7 +48,9 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
             await registryTerminal.execute(`docker run -d --rm --name ${registryContainerName} -p 5100:5000 registry`);
 
             // Make sure it's running
-            let curlResult = await registryTerminal.execute(`curl http://localhost:5100/v2/_catalog`);
+            // (On some Linux systems, --silent and --show-error are necessary otherwise errors don't go to
+            // correct output).
+            let curlResult = await registryTerminal.execute(`curl http://localhost:5100/v2/_catalog --silent --show-error`);
             assertEx.assertContains(curlResult, '"repositories":');
         });
 
@@ -56,7 +58,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
             await stopRegistry();
         });
 
-        test("Connect, no credentials needed", async function (this: Context) {
+        test("Connect, no auth", async function (this: Context) {
             let input = new TestUserInput([
                 'http://localhost:5100',
                 'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
