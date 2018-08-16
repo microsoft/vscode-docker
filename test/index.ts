@@ -25,7 +25,7 @@ let options = {
 };
 let noTimeouts = process.env.NO_TIMEOUTS;
 if (!!noTimeouts && noTimeouts !== "0") {
-    options["timeout"] = Number.MAX_SAFE_INTEGER;
+    options["timeout"] = 60 * 60 * 1000;
 }
 testRunner.configure(options);
 

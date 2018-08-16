@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
+import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import WebSiteManagementClient = require('azure-arm-website');
+import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as WebSiteModels from '../../node_modules/azure-arm-website/lib/models';
 import { reporter } from '../../telemetry/telemetry';
 import { AzureImageNode } from '../models/azureRegistryNodes';
 import { DockerHubImageNode } from '../models/dockerHubNodes';
@@ -172,9 +175,18 @@ class ResourceGroupStep extends WebAppCreatorStepBase {
             resourceGroups = results[0];
             locations = results[1];
             resourceGroups.forEach(rg => {
+                const location: SubscriptionModels.Location = locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase());
+                let locationDisplayName: string;
+
+                if (location) {
+                    locationDisplayName = location.displayName;
+                } else {
+                    locationDisplayName = rg.location;
+                }
+
                 quickPickItems.push({
                     label: rg.name,
-                    description: `(${locations.find(l => l.name.toLowerCase() === rg.location.toLowerCase()).displayName})`,
+                    description: locationDisplayName,
                     detail: '',
                     data: rg
                 });
@@ -408,13 +420,23 @@ class WebsiteStep extends WebAppCreatorStepBase {
     private _serverUserName: string;
     private _serverPassword: string;
     private _imageName: string;
+    private _imageSubscription: Subscription;
+    private _registry: Registry;
 
     constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageNode | DockerHubImageNode) {
         super(wizard, 'Create Web App', azureAccount);
 
         this._serverUrl = context.serverUrl;
-        this._serverPassword = context.password;
-        this._serverUserName = context.userName;
+        if (context instanceof DockerHubImageNode) {
+            this._serverPassword = context.password;
+            this._serverUserName = context.userName;
+        } else if (context instanceof AzureImageNode) {
+            this._imageSubscription = context.subscription;
+            this._registry = context.registry;
+        } else {
+            throw Error(`Invalid context, cannot deploy to Azure App services from ${context}`);
+        }
+
         this._imageName = context.label;
 
     }
@@ -447,7 +469,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 await vscode.window.showWarningMessage(nameAvailability.message);
             }
         }
-
+        await this.acquireRegistryLoginCredentials();
         let linuxFXVersion: string;
         if (this._serverUrl.length > 0) {
             // azure container registry
@@ -476,7 +498,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
         const subscription = this.getSelectedSubscription();
         const rg = this.getSelectedResourceGroup();
         const websiteClient = new WebSiteManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-
         // If the plan is also newly created, its resource ID won't be available at this step's prompt stage, but should be available now.
         if (!this._website.serverFarmId) {
             this._website.serverFarmId = this.getSelectedAppServicePlan().id;
@@ -505,7 +526,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
                     "DOCKER_REGISTRY_SERVER_PASSWORD": this._serverPassword
                 }
             };
-
         }
 
         await websiteClient.webApps.updateApplicationSettings(rg.name, this._website.name, appSettings);
@@ -540,6 +560,21 @@ class WebsiteStep extends WebAppCreatorStepBase {
             serverUrl: this._serverUrl,
             serverUser: this._serverUserName,
             serverPassword: this._serverPassword
+        }
+    }
+
+    //Implements new Service principal model for ACR container registries while maintaining old admin enabled use
+    private async acquireRegistryLoginCredentials(): Promise<void> {
+        if (this._serverPassword && this._serverUserName) { return; }
+
+        if (this._registry.adminUserEnabled) {
+            const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
+            const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
+            let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
+            this._serverPassword = creds.passwords[0].value;
+            this._serverUserName = creds.username;
+        } else {
+            throw new Error('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
         }
     }
 
