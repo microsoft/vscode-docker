@@ -1,7 +1,8 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
+import { dockerExplorerProvider } from '../../dockerExtension';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
-import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
@@ -42,6 +43,9 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         const path = `/v2/_acr/${repoName}/tags/${tag}`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);
+        if (context) {
+            dockerExplorerProvider.refreshNode(context.parent);
+        }
     } else {
         throw new UserCancelledError();
     }

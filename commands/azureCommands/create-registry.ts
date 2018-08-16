@@ -4,6 +4,7 @@ import { RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
+import { dockerExplorerProvider } from '../../dockerExtension';
 import { UserCancelledError } from '../../explorer/deploy/wizard';
 import { reporter } from '../../telemetry/telemetry';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
@@ -24,7 +25,7 @@ export async function createRegistry(): Promise<string> {
         'location': location
     });
     vscode.window.showInformationMessage(registry.name + ' has been created succesfully!');
-
+    dockerExplorerProvider.refreshRegistries();
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId

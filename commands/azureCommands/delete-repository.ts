@@ -1,7 +1,9 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
+import { Context } from "mocha";
 import * as vscode from "vscode";
+import { dockerExplorerProvider } from '../../dockerExtension';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
-import { AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureRegistryNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
@@ -31,6 +33,9 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         const path = `/v2/_acr/${repoName}/repository`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted repository ${Repository}`);
+        if (context) {
+            dockerExplorerProvider.refreshNode(context.parent);
+        }
     } else {
         throw new UserCancelledError();
     }
