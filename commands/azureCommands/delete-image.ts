@@ -2,7 +2,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
-import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
