@@ -1,12 +1,12 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
+import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import request = require('request-promise');
 import { NULL_GUID } from "../../constants";
-import { Subscription } from "../../node_modules/azure-arm-resource/lib/subscription/models";
 import { AzureSession } from "../../typings/azure-account.api";
-import { AzureImage } from "../Azure/models/image";
-import { Repository } from "../Azure/models/Repository";
 import { AzureUtilityManager } from '../azureUtilityManager';
+import { AzureImage } from "./models/image";
+import { Repository } from "./models/repository";
 
 //General helpers
 /**

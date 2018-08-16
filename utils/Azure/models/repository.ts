@@ -1,6 +1,6 @@
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as acrTools from '../../../utils/Azure/acrTools';
+import * as acrTools from '../acrTools';
 
 /** Class Azure Repository: Used locally, Organizes data for managing Repositories */
 export class Repository {

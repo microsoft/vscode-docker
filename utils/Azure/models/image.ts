@@ -1,6 +1,6 @@
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import { Repository } from '../models/repository';
+import { Repository } from './repository';
 
 /** Class Azure Image: Used locally, Organizes data for managing images */
 export class AzureImage {

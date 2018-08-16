@@ -1,13 +1,13 @@
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
+import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { skus } from '../../constants'
 import { UserCancelledError } from '../../explorer/deploy/wizard';
-import { ResourceGroup } from '../../node_modules/azure-arm-resource/lib/resource/models';
-import { Location, Subscription } from '../../node_modules/azure-arm-resource/lib/subscription/models';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/Repository";
+import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {

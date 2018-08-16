@@ -8,7 +8,7 @@ import { UserCancelledError } from '../../explorer/deploy/wizard';
 import { reporter } from '../../telemetry/telemetry';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../utils/quick-pick-azure';
-const teleCmdId: string = 'vscode-docker.createRegistry';
+const teleCmdId: string = 'vscode-docker.create-ACR-Registry';
 
 /* Creates a new Azure container registry based on user input/selection of features */
 export async function createRegistry(): Promise<string> {
@@ -24,16 +24,14 @@ export async function createRegistry(): Promise<string> {
         'location': location
     });
     vscode.window.showInformationMessage(registry.name + ' has been created succesfully!');
-    recordTelemetry();
-    return registryName;
-}
 
-function recordTelemetry(): void {
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId
         });
     }
+
+    return registryName;
 }
 
 /** Acquires a new registry name from a user, validating that the name is unique */

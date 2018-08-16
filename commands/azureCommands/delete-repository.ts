@@ -1,13 +1,13 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
-import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../../commands/utils/quick-pick-azure';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureRepositoryNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
+import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
-const teleCmdId: string = 'vscode-docker.deleteACRRepository';
+const teleCmdId: string = 'vscode-docker.delete-ACR-Repository';
 /**
  * function to delete an Azure repository and its associated images
  * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
@@ -34,10 +34,6 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
     } else {
         throw new UserCancelledError();
     }
-    reportTelemetry();
-}
-
-function reportTelemetry(): void {
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId

@@ -1,7 +1,7 @@
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import * as opn from 'opn';
 import * as vscode from 'vscode';
-import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';

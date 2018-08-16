@@ -1,6 +1,5 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
-import * as quickPicks from '../../commands/utils/quick-pick-azure';
 import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureImageNode } from '../../explorer/models/AzureRegistryNodes';
 import { reporter } from '../../telemetry/telemetry';
@@ -8,8 +7,9 @@ import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import * as quickPicks from '../utils/quick-pick-azure';
 
-const teleCmdId: string = 'vscode-docker.deleteACRImage';
+const teleCmdId: string = 'vscode-docker.delete-ACR-Image';
 
 /** Function to delete an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
@@ -45,10 +45,6 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
     } else {
         throw new UserCancelledError();
     }
-    reportTelemetry();
-}
-
-function reportTelemetry(): void {
     if (reporter) {
         reporter.sendTelemetryEvent('command', {
             command: teleCmdId
