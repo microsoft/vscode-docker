@@ -3,16 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
 import { ext } from '../extensionVariables';
 import { Suite, Test, Context } from 'mocha';
-import { testInEmptyFolder } from './global.test';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
-import { CustomRegistryNode } from '../explorer/models/customRegistryNodes';
 
 const registryContainerName = 'test-registry';
 
