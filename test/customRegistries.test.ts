@@ -14,7 +14,7 @@ import { TestUserInput } from 'vscode-azureextensionui';
 const registryContainerName = 'test-registry';
 
 suite("Custom registries", async function (this: Suite): Promise<void> {
-    this.timeout(Math.max(60 * 1000, this.timeout()));
+    this.timeout(Math.max(60 * 1000 * 3, this.timeout()));
 
     const outputChannel: OutputChannel = window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
