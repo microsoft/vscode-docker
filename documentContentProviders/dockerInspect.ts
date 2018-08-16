@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { TextDocumentContentProvider, Uri, window, workspace } from "vscode";
 import { docker } from "../commands/utils/docker-endpoint";
 
