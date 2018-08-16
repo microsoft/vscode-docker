@@ -59,13 +59,16 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
         });
 
         test("Connect, no auth", async function (this: Context) {
+            console.warn("1");
             let input = new TestUserInput([
                 'http://localhost:5100',
                 'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
                 'fake password'
             ]);
             ext.ui = input;
+            console.warn("2");
             await commands.executeCommand('vscode-docker.connectCustomRegistry');
+            console.warn("3");
 
             // TODO: Verify the node is there (have to start using common tree provider first)
         });

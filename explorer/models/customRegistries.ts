@@ -31,8 +31,9 @@ export interface CustomRegistry extends CustomRegistryNonsensitive {
 const customRegistriesKey = 'customRegistries';
 
 export async function connectCustomRegistry(): Promise<void> {
+    console.warn("10");
     let registries = await getCustomRegistries();
-
+    console.warn("11");
     // tslint:disable-next-line:no-constant-condition
     let url = await ext.ui.showInputBox({
         prompt: "Enter the URL for the registry",
@@ -50,35 +51,41 @@ export async function connectCustomRegistry(): Promise<void> {
             return undefined;
         }
     });
+    console.warn("12");
     let userName = await ext.ui.showInputBox({
         prompt: "Enter the username for connecting, or ENTER for none"
     });
+    console.warn("13");
     let password: string;
     if (userName) {
+        console.warn("14");
         password = await ext.ui.showInputBox({
             prompt: "Enter the password",
             password: true
         });
     }
-
+    console.warn("15");
     let newRegistry: CustomRegistry = {
         url,
         credentials: { userName, password }
     };
 
+    console.warn("16");
     let invalidMessage = await CustomRegistryNode.isValidRegistryUrl(newRegistry);
     if (invalidMessage) {
         throw new Error(invalidMessage);
     }
 
     // Save
+    console.warn("17");
     let sensitive: string = JSON.stringify(newRegistry.credentials);
     let key = getUsernamePwdKey(newRegistry.url);
     await keytar.setPassword(keytarConstants.serviceId, key, sensitive);
     registries.push(newRegistry);
     await saveCustomRegistriesNonsensitive(registries);
-
+    console.warn("18");
     await refresh();
+    console.warn("19");
 }
 
 export async function disconnectCustomRegistry(node: CustomRegistryNode): Promise<void> {
