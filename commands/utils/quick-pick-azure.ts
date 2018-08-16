@@ -1,98 +1,100 @@
-import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
+import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
 import * as vscode from "vscode";
-import { ResourceGroup } from '../../node_modules/azure-arm-resource/lib/resource/models';
-import { Subscription } from '../../node_modules/azure-arm-resource/lib/subscription/models';
+import { skus } from '../../constants'
+import { UserCancelledError } from '../../explorer/deploy/wizard';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/Repository";
+import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 
-import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
-
-/**
- * function to allow user to pick a desired image for use
- * @param repository the repository to look in
- * @returns an AzureImage object (see azureUtils.ts)
- */
-export async function quickPickACRImage(repository: Repository): Promise<AzureImage> {
-    const repoImages: AzureImage[] = await acrTools.getAzureImages(repository);
+export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
+    const placeHolder = prompt ? prompt : 'Choose Image to Use';
+    const repoImages: AzureImage[] = await acrTools.getImagesByRepository(repository);
     let imageListNames: string[] = [];
     for (let tempImage of repoImages) {
         imageListNames.push(tempImage.tag);
     }
-    let desiredImage = await vscode.window.showQuickPick(imageListNames, { 'canPickMany': false, 'placeHolder': 'Choose the image you want to delete' });
+    let desiredImage = await vscode.window.showQuickPick(imageListNames, { 'canPickMany': false, 'placeHolder': placeHolder });
     if (!desiredImage) { return; }
     const image = repoImages.find((myImage): boolean => { return desiredImage === myImage.tag });
     return image;
 }
 
-/**
- * function to allow user to pick a desired repository for use
- * @param registry the registry to choose a repository from
- * @returns a Repository object (see azureUtils.ts)
- */
-export async function quickPickACRRepository(registry: Registry): Promise<Repository> {
-    const myRepos: Repository[] = await acrTools.getAzureRepositories(registry);
+export async function quickPickACRRepository(registry: Registry, prompt?: string): Promise<Repository> {
+    const placeHolder = prompt ? prompt : 'Choose Registry to Use';
+    const myRepos: Repository[] = await acrTools.getRepositoriesByRegistry(registry);
     let rep: string[] = [];
     for (let repo of myRepos) {
         rep.push(repo.name);
     }
-    let desiredRepo = await vscode.window.showQuickPick(rep, { 'canPickMany': false, 'placeHolder': 'Choose the repository from which your desired image exists' });
+    let desiredRepo = await vscode.window.showQuickPick(rep, { 'canPickMany': false, 'placeHolder': placeHolder });
     if (!desiredRepo) { return; }
     const repository = myRepos.find((currentRepo): boolean => { return desiredRepo === currentRepo.name });
     return repository;
 }
 
-/**
- * function to let user choose a registry for use
- * @returns a Registry object
- */
-export async function quickPickACRRegistry(subscription?: Subscription, resourceGroup?: string): Promise<Registry> {
-    //first get desired registry
-    let registries = await AzureUtilityManager.getInstance().getRegistries(subscription, resourceGroup);
-    let reg: string[] = [];
+export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
+    const placeHolder = prompt ? prompt : 'Choose Registry to Use';
+    let registries = await AzureUtilityManager.getInstance().getRegistries();
+    const reg: string[] = [];
+    if (canCreateNew) { reg.push('+ Create new registry'); }
     for (let registryName of registries) {
         reg.push(registryName.name);
     }
-    let desired = await vscode.window.showQuickPick(reg, { 'canPickMany': false, 'placeHolder': 'Choose the Registry from which your desired image exists' });
-    if (!desired) { return; }
+    let desired: string = await vscode.window.showQuickPick(reg, {
+        'canPickMany': false,
+        'placeHolder': placeHolder
+    });
+
+    if (!desired) {
+        throw new UserCancelledError();
+    } else if (canCreateNew && desired === reg[0]) {
+        desired = String(await vscode.commands.executeCommand("vscode-docker.create-ACR-Registry"));
+        registries = await AzureUtilityManager.getInstance().getRegistries(); // Reload
+    }
+
     const registry = registries.find((currentReg): boolean => { return desired === currentReg.name });
     return registry;
 }
 
-export async function acquireResourceGroup(subscription: Subscription, resourceGroupClient: ResourceManagementClient): Promise<ResourceGroup> {
-    //Acquire each subscription's data simultaneously
-    let resourceGroup;
-    let resourceGroupName;
-    let resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
-
-    let resourceGroupNames: string[] = [];
-    resourceGroupNames.push('+ Create new resource group');
-    for (let resGroupName of resourceGroups) {
-        resourceGroupNames.push(resGroupName.name);
-    }
-
-    do {
-        resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, { 'canPickMany': false, 'placeHolder': 'Choose a Resource Group to be used' });
-        if (resourceGroupName === undefined) { throw new Error('user Exit'); }
-        if (resourceGroupName === '+ Create new resource group') {
-            let loc = await acquireLocation(resourceGroup, subscription);
-            resourceGroupName = await createNewResourceGroup(loc, resourceGroupClient);
-        }
-        resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
-        resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
-
-        if (!resourceGroupName) { vscode.window.showErrorMessage('You must select a valid resource group'); }
-    } while (!resourceGroupName);
-    return resourceGroup;
+export async function quickPickSKU(): Promise<string> {
+    let sku: string;
+    sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU to use' });
+    if (!sku) { throw new UserCancelledError(); }
+    return sku;
 }
 
-export async function acquireLocation(resourceGroup: ResourceGroup, subscription: SubscriptionModels.Subscription): Promise<string> {
-    let locations: SubscriptionModels.Location[] = await AzureUtilityManager.getInstance().getLocationsBySubscription(subscription);
+export async function quickPickSubscription(): Promise<Subscription> {
+    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+    if (subs.length === 0) {
+        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure Portal", "Open Portal").then(val => {
+            if (val === "Open Portal") {
+                opn('https://portal.azure.com/');
+            }
+        });
+        throw new Error('User has no azure subscriptions');
+    }
+
+    let subsNames: string[] = [];
+    for (let sub of subs) {
+        subsNames.push(sub.displayName);
+    }
+    let subscriptionName: string;
+    subscriptionName = await vscode.window.showQuickPick(subsNames, {
+        'canPickMany': false,
+        'placeHolder': 'Choose a subscription to use'
+    });
+    if (!subscriptionName) { throw new UserCancelledError(); }
+
+    return subs.find(sub => { return sub.displayName === subscriptionName });
+}
+
+export async function quickPickLocation(subscription: Subscription): Promise<string> {
+    let locations: Location[] = await AzureUtilityManager.getInstance().getLocationsBySubscription(subscription);
     let locationNames: string[] = [];
-    let placeHolder: string;
 
     for (let loc of locations) {
         locationNames.push(loc.displayName);
@@ -102,34 +104,66 @@ export async function acquireLocation(resourceGroup: ResourceGroup, subscription
         return loc1.localeCompare(loc2);
     });
 
-    if (resourceGroup === undefined) {
-        placeHolder = "Choose location for your new resource group";
-    } else {
-        placeHolder = resourceGroup.location;
-
-        //makes placeholder the Display Name version of the location's name
-        locations.forEach((locObj: SubscriptionModels.Location): string => {
-            if (locObj.name === resourceGroup.location) {
-                placeHolder = locObj.displayName;
-                return;
-            }
-        });
-    }
-    let location: string;
-    do {
-        location = await vscode.window.showQuickPick(locationNames, { 'canPickMany': false, 'placeHolder': placeHolder });
-        if (location === undefined) { throw new Error('User exit'); }
-    } while (!location);
+    let location: string = await vscode.window.showQuickPick(locationNames, {
+        'canPickMany': false,
+        'placeHolder': 'Choose a Location to use'
+    });
+    if (!location) { throw new UserCancelledError(); }
     return location;
 }
 
+export async function quickPickResourceGroup(canCreateNew?: boolean, subscription?: Subscription): Promise<ResourceGroup> {
+    let resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
+    let resourceGroupNames: string[] = [];
+
+    if (canCreateNew) { resourceGroupNames.push('+ Create new resource group'); }
+    for (let resGroupName of resourceGroups) {
+        resourceGroupNames.push(resGroupName.name);
+    }
+
+    let resourceGroupName = await vscode.window.showQuickPick(resourceGroupNames, {
+        'canPickMany': false,
+        'placeHolder': 'Choose a Resource Group to use'
+    });
+    if (!resourceGroupName) { throw new UserCancelledError(); }
+
+    let resourceGroup: ResourceGroup;
+    if (canCreateNew && resourceGroupName === '+ Create new Resource Group') {
+        if (!subscription) {
+            subscription = await quickPickSubscription();
+        }
+        const loc = await quickPickLocation(subscription);
+        resourceGroup = await createNewResourceGroup(loc, subscription);
+    } else {
+        resourceGroup = resourceGroups.find(resGroup => { return resGroup.name === resourceGroupName; });
+    }
+    return resourceGroup;
+}
+
+/** Requests confirmation for an action and returns true only in the case that the user types in yes
+ * @param yesOrNoPrompt Should be a yes or no question
+ */
+export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
+    //ensure user truly wants to delete image
+    let opt: vscode.InputBoxOptions = {
+        ignoreFocusOut: true,
+        placeHolder: 'No',
+        value: 'No',
+        prompt: yesOrNoPrompt
+    };
+    let answer = await vscode.window.showInputBox(opt);
+    if (!answer) { throw new UserCancelledError(); }
+
+    answer = answer.toLowerCase();
+    return answer === 'yes';
+}
 /*Creates a new resource group within the current subscription */
-async function createNewResourceGroup(loc: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
-    let promptMessage = 'Resource group name?';
+async function createNewResourceGroup(loc: string, subscription?: Subscription): Promise<ResourceGroup> {
+    const resourceGroupClient = AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
 
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
-        prompt: promptMessage
+        prompt: 'New Resource Group name?'
     };
 
     let resourceGroupName: string;
@@ -137,11 +171,13 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
 
     while (opt.prompt) {
         resourceGroupName = await vscode.window.showInputBox(opt);
+        if (!resourceGroupName) { throw new UserCancelledError(); }
+
         resourceGroupStatus = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
         if (!resourceGroupStatus) {
-            opt.prompt = null;
+            opt.prompt = undefined;
         } else {
-            opt.prompt = `The resource group '${resourceGroupName}' already exists. Try again: `;
+            opt.prompt = `The Resource Group '${resourceGroupName}' already exists. Try again: `;
         }
     }
 
@@ -150,32 +186,5 @@ async function createNewResourceGroup(loc: string, resourceGroupClient: Resource
         location: loc,
     };
 
-    //Potential error when two clients try to create same resource group name at once
-    try {
-        await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
-    } catch (error) {
-        vscode.window.showErrorMessage(`The resource group '${resourceGroupName}' already exists. Try again: `);
-    }
-    return resourceGroupName;
-}
-
-export async function acquireSubscription(): Promise<SubscriptionModels.Subscription> {
-    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
-    if (subs.length === 0) {
-        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure Portal", "Open Portal").then(val => {
-            if (val === "Open Portal") {
-                opn('https://portal.azure.com/');
-            }
-        });
-    }
-
-    let subsNames: string[] = [];
-    for (let sub of subs) {
-        subsNames.push(sub.displayName);
-    }
-    let subscriptionName: string;
-    subscriptionName = await vscode.window.showQuickPick(subsNames, { 'canPickMany': false, 'placeHolder': 'Choose a subscription to be used' });
-    if (subscriptionName === undefined) { throw new Error('User exit'); }
-
-    return subs.find(sub => { return sub.displayName === subscriptionName });
+    return await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
 }

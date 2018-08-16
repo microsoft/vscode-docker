@@ -1,6 +1,6 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient } from 'azure-arm-resource';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
@@ -10,7 +10,7 @@ import * as url from 'url';
 import * as vscode from "vscode";
 import { getBlobInfo } from "../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../utils/azureUtilityManager";
-import { acquireResourceGroup, acquireSubscription, quickPickACRRegistry } from './utils/quick-pick-azure';
+import { quickPickACRRegistry, quickPickResourceGroup, quickPickSubscription } from './utils/quick-pick-azure';
 const idPrecision = 6;
 let status = vscode.window.createOutputChannel('status');
 
@@ -20,14 +20,14 @@ let status = vscode.window.createOutputChannel('status');
 export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     status.show();
     status.appendLine("Obtaining Subscription and Client");
-    let subscription = await acquireSubscription();
+    let subscription = await quickPickSubscription();
     let client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const resourceGroupClient = new ResourceManagementClient(AzureUtilityManager.getInstance().getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
 
-    let resourceGroup = await acquireResourceGroup(subscription, resourceGroupClient);
+    let resourceGroup = await quickPickResourceGroup(false, subscription);
     let resourceGroupName = resourceGroup.name;
 
-    let registry: Registry = await quickPickACRRegistry(subscription, resourceGroupName);
+    let registry: Registry = await quickPickACRRegistry(false);
     let registryName = registry.name;
 
     let folder: vscode.WorkspaceFolder;

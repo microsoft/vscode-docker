@@ -39,6 +39,12 @@ export class AzureUtilityManager {
         throw new Error('Azure account is not present, you may have forgotten to call setAccount');
     }
 
+    public getSession(subscription: SubscriptionModels.Subscription): AzureSession {
+        const tenantId: string = subscription.tenantId;
+        const azureAccount: AzureAccount = this.getAccount();
+        return azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+    }
+
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
         return this.getAccount().filters.map<SubscriptionModels.Subscription>(filter => {
             return {
