@@ -49,7 +49,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
             // Make sure it's running
             // (On some Linux systems, --silent and --show-error are necessary otherwise errors don't go to
-            // correct output).
+            // correct output). On others these may not be valid and may show an error which can be ignored.
             let curlResult = await registryTerminal.execute(`curl http://localhost:5100/v2/_catalog --silent --show-error`);
             assertEx.assertContains(curlResult, '"repositories":');
         });
