@@ -38,7 +38,6 @@ export async function connectCustomRegistry(): Promise<void> {
 
     // tslint:disable-next-line:no-constant-condition
     let url = await ext.ui.showInputBox({
-        ignoreFocusOut: true,
         prompt: "Enter the URL for the registry",
         placeHolder: 'Example: http://localhost:5000',
         validateInput: (value: string): string | undefined => {
@@ -60,7 +59,8 @@ export async function connectCustomRegistry(): Promise<void> {
     let password: string;
     if (userName) {
         password = await ext.ui.showInputBox({
-            prompt: "Enter the password"
+            prompt: "Enter the password",
+            password: true
         });
     }
 
