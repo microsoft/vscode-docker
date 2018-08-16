@@ -1,7 +1,7 @@
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import { AzureAccount, AzureSession } from '../../../typings/azure-account.api';
-import { Repository } from '../models/repository';
+import { Repository } from './repository';
 
 /**
  * class Repository: used locally as of August 2018, primarily for functions within azureUtils.ts and new commands such as delete Repository
