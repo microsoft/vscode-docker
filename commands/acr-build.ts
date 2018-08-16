@@ -13,12 +13,12 @@ import { AzureUtilityManager } from "../utils/azureUtilityManager";
 import { acquireResourceGroup, acquireSubscription, quickPickACRRegistry } from './utils/quick-pick-azure';
 const idPrecision = 6;
 let status = vscode.window.createOutputChannel('status');
-status.show();
 
 // Prompts user to select a subscription, resource group, then registry from drop down. If there are multiple folders in the workspace, the source folder must also be selected.
 // The user is then asked to name & tag the image. A build is queued for the image in the selected registry.
 // Selected source code must contain a path to the desired dockerfile.
 export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
+    status.show();
     status.appendLine("Obtaining Subscription and Client");
     let subscription = await acquireSubscription();
     let client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
@@ -41,7 +41,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     let relativeDockerPath = 'Dockerfile';
     if (dockerFileUri.path.indexOf(sourceLocation) !== 0) {
         //Currently, there is no support for selecting source location folders that don't contain a path to the triggered dockerfile.
-        throw new TypeError("Source code path must be a parent of the Dockerfile path")
+        throw new Error("Source code path must be a parent of the Dockerfile path");
     } else {
         relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length);
     }
@@ -52,13 +52,15 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     };
     const name: string = await vscode.window.showInputBox(opt);
 
-    /* tslint:disable-next-line:insecure-random */
-    let id = Math.floor(Math.random() * Math.pow(10, idPrecision));
-    status.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
-    let tarFilePath = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
+    let tarFilePath = getTempSourceArchivePath();
 
     status.appendLine("Uploading Source Code to " + tarFilePath);
     sourceLocation = await uploadSourceCode(client, registryName, resourceGroupName, sourceLocation, tarFilePath);
+
+    let osType = os.type()
+    if (osType === 'Windows_NT') {
+        osType = 'Windows'
+    }
 
     status.appendLine("Setting up Build Request");
     let buildRequest: QuickBuildRequest = {
@@ -66,31 +68,22 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         'imageNames': [name],
         'isPushEnabled': true,
         'sourceLocation': sourceLocation,
-        'platform': { 'osType': 'Linux' },
+        'platform': { 'osType': osType },
         'dockerFilePath': relativeDockerPath
     };
     status.appendLine("Queueing Build");
-    try {
-        await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
-    } catch (error) {
-        status.appendLine('Build Failed');
-        vscode.window.showErrorMessage(error);
-    }
+    await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
     status.appendLine('Success');
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string): Promise<string> {
     status.appendLine("   Sending source code to temp file");
-    try {
-        tar.c(
-            {
-                gzip: true
-            },
-            [sourceLocation]
-        ).pipe(fs.createWriteStream(tarFilePath));
-    } catch (error) {
-        status.appendLine(error);
-    }
+    tar.c(
+        {
+            gzip: true
+        },
+        [sourceLocation]
+    ).pipe(fs.createWriteStream(tarFilePath));
 
     status.appendLine("   Getting Build Source Upload Url ");
     let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
@@ -105,12 +98,17 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let blob: BlobService = createBlobServiceWithSas(host, sasToken);
 
     status.appendLine("   Creating Block Blob ");
-    try {
-        blob.createBlockBlobFromLocalFile(containerName, blobName, tarFilePath, (): void => { });
-    } catch (error) {
-        status.appendLine("   Failed to create Block Blob ");
-        vscode.window.showErrorMessage(error);
-    }
+
+    blob.createBlockBlobFromLocalFile(containerName, blobName, tarFilePath, (): void => { });
+
     status.appendLine("   Success ");
     return relative_path;
+}
+
+function getTempSourceArchivePath(): string {
+    /* tslint:disable-next-line:insecure-random */
+    let id = Math.floor(Math.random() * Math.pow(10, idPrecision));
+    status.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
+    let tarFilePath = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
+    return tarFilePath;
 }
