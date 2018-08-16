@@ -121,7 +121,8 @@ class TestTerminal implements vscode.Terminal {
   }
 
   /**
-   * Executes one or more commands and waits for them to complete
+   * Executes one or more commands and waits for them to complete. Returns stdout output and
+   * throws if there is output to stdout.
    */
   public async execute(commands: string | string[], options: { ignoreErrors?: boolean } = {}): Promise<string> {
     if (typeof commands === 'string') {

@@ -36,7 +36,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
     }
 
     suite("localhost", async function (this: Suite): Promise<void> {
-        this.timeout(Math.max(60 * 1000, this.timeout()));
+        this.timeout(Math.max(60 * 1000 * 2, this.timeout()));
 
         suiteSetup(async function (this: Context): Promise<void> {
             await stopRegistry();
@@ -48,7 +48,8 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
             await registryTerminal.execute(`docker run -d --rm --name ${registryContainerName} -p 5100:5000 registry`);
 
             // Make sure it's running
-            await registryTerminal.execute(`curl http://localhost:5100/v2 --silent --show-error`);
+            let curlResult = await registryTerminal.execute(`curl http://localhost:5100/v2/_catalog`);
+            assertEx.assertContains(curlResult, '"repositories":');
         });
 
         suiteTeardown(async function (this: Context): Promise<void> {
