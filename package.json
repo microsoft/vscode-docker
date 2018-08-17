@@ -565,7 +565,7 @@
     "lint": "tslint --project tsconfig.json -t verbose",
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace node ./node_modules/vscode/bin/test",
+    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace DEBUGTELEMETRY=1 node ./node_modules/vscode/bin/test",
     "all": "npm i && npm run lint && npm test"
   },
   "extensionDependencies": [
