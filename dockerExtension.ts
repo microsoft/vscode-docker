@@ -6,7 +6,7 @@
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
@@ -109,7 +109,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
-    registerCommand('vscode-docker.configure', configure);
+    registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this); });
     registerCommand('vscode-docker.image.build', buildImage);
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);

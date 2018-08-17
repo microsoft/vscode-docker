@@ -27,7 +27,7 @@
 			],
 			"isBackground": true,
 			"presentation": {
-				"reveal": "silent"
+				"reveal": "never"
 			},
 			"problemMatcher": "$tsc-watch"
 		},
