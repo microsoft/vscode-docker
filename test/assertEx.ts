@@ -65,11 +65,11 @@ function areUnorderedArraysEqual<T>(actual: T[], expected: T[]): { areEqual: boo
 }
 
 export function assertContains(s: string, searchString: string): void {
-    assert(s.includes(searchString), `Expected to find '${searchString}' in ${s}`);
+    assert(s.includes(searchString), `Expected to find '${searchString}' in '${s}'`);
 }
 
 export function assertNotContains(s: string, searchString: string): void {
-    assert(!s.includes(searchString), `Unexpected text '${searchString}' found in ${s}`);
+    assert(!s.includes(searchString), `Unexpected text '${searchString}' found in '${s}'`);
 }
 
 function fileContains(filePath: string, text: string): boolean {
