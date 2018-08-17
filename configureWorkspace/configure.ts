@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
@@ -39,8 +44,8 @@ FROM golang:alpine AS builder
 WORKDIR /go/src/app
 COPY . .
 RUN apk add --no-cache git
-RUN go-wrapper download   # "go get -d -v ./..."
-RUN go-wrapper install    # "go install -v ./..."
+RUN go get -d -v ./...
+RUN go install -v ./...
 
 #final stage
 FROM alpine:latest

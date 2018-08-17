@@ -1,12 +1,13 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
-import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient';
+import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -21,6 +22,7 @@ import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
 import { tagImage } from './commands/tag-image';
 import { docker } from './commands/utils/docker-endpoint';
+import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -68,13 +70,16 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let azureAccount: AzureAccount;
 
     // Set up extension variables
+    registerUIExtensionVariables(ext);
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    registerUIExtensionVariables(ext);
-
+    ext.outputChannel = outputChannel;
+    if (!ext.terminalProvider) {
+        ext.terminalProvider = new DefaultTerminalProvider();
+    }
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
 
@@ -129,6 +134,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
                 const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
+                if (result.status === 'Faulted') {
+                    throw result.error;
+                } else if (result.status === 'Cancelled') {
+                    throw new UserCancelledError();
+                }
             } else {
                 const open: vscode.MessageItem = { title: "View in Marketplace" };
                 const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);

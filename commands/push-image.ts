@@ -1,7 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import vscode = require('vscode');
 import { ImageNode } from '../explorer/models/imageNode';
+import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { createTerminal } from './utils/create-terminal';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
@@ -22,7 +27,7 @@ export async function pushImage(context?: ImageNode): Promise<void> {
     }
 
     if (imageToPush) {
-        const terminal = createTerminal(imageName);
+        const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();
         if (reporter) {

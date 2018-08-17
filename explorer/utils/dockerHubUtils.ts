@@ -1,7 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
 import * as vscode from 'vscode';
+import { keytarConstants } from '../../constants';
 import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { getCoreNodeModule } from './utils';
 
@@ -82,18 +88,18 @@ export async function dockerHubLogout(): Promise<void> {
 
     const keytar: typeof keytarType = getCoreNodeModule('keytar');
     if (keytar) {
-        await keytar.deletePassword('vscode-docker', 'dockerhub.token');
-        await keytar.deletePassword('vscode-docker', 'dockerhub.password');
-        await keytar.deletePassword('vscode-docker', 'dockerhub.username');
+        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
     _token = null;
 }
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
 
-    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Username' });
+    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
     if (username) {
-        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Password', password: true });
+        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
         if (password) {
             _token = await login(username, password);
             if (_token) {

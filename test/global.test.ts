@@ -1,8 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
-import { pathExists } from '../node_modules/@types/fs-extra';
+import { pathExists } from 'fs-extra';
 
 export namespace constants {
     export const testOutputName = 'testOutput';

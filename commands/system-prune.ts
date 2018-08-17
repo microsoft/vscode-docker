@@ -1,14 +1,19 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import vscode = require('vscode');
 import { getCoreNodeModule } from '../explorer/utils/utils';
+import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { createTerminal } from './utils/create-terminal';
 import { docker } from './utils/docker-endpoint';
 
 const teleCmdId: string = 'vscode-docker.system.prune';
 
 export async function systemPrune(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    const terminal = createTerminal("docker system prune");
+    const terminal = ext.terminalProvider.createTerminal("docker system prune");
     const semver = getCoreNodeModule('semver');
 
     try {

@@ -1,9 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import vscode = require('vscode');
 import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 
 export type OS = 'Windows' | 'Linux';
-export type Platform = 'Go' |
+export type Platform =
+    'Go' |
     'Java' |
     '.NET Core Console' |
     'ASP.NET Core' |

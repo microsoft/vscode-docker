@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
 
@@ -107,7 +112,7 @@ class DockerClient {
     public getExposedPorts(imageId: string): Thenable<string[]> {
         return new Promise((resolve, reject) => {
             this.getImage(imageId).inspect((error, { Config: { ExposedPorts = {} } }) => {
-                const ports = Object.keys(ExposedPorts).map((port) => port.split("/")[0]);
+                const ports = Object.keys(ExposedPorts);
                 resolve(ports);
             });
         });

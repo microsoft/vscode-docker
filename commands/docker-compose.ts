@@ -1,9 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { createTerminal } from './utils/create-terminal';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
@@ -74,7 +78,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
     }
 
-    const terminal: vscode.Terminal = createTerminal('Docker Compose');
+    const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker Compose');
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
     const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
@@ -82,7 +86,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (let command of commands) {
         selectedItems.forEach((item: Item) => {
-            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f ${item.file} ${command} ${detached} ${build}` : `docker-compose -f ${item.file} ${command}`);
+            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
         });
         terminal.show();
         if (reporter) {
