@@ -42,10 +42,10 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
         assert.equal(inputs.length, 0, 'Not all inputs were used.');
 
         let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
-        assert.equal(properties.os, expectedTelemetryProperties.os, "os");
+        assert.equal(properties.configureOs, expectedTelemetryProperties.configureOs, "os");
         assert.equal(properties.packageFileSubfolderDepth, expectedTelemetryProperties.packageFileSubfolderDepth, "packageFileSubfolderDepth");
         assert.equal(properties.packageFileType, expectedTelemetryProperties.packageFileType, "packageFileType");
-        assert.equal(properties.platform, expectedTelemetryProperties.platform, "platform");
+        assert.equal(properties.configurePlatform, expectedTelemetryProperties.configurePlatform, "platform");
     }
 
     async function writeFile(subfolderName: string, fileName: string, text: string): Promise<void> {
@@ -91,8 +91,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Node.js',
                 {
-                    platform: 'Node.js',
-                    os: undefined,
+                    configurePlatform: 'Node.js',
+                    configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
@@ -140,8 +140,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Node.js',
                 {
-                    platform: 'Node.js',
-                    os: undefined,
+                    configurePlatform: 'Node.js',
+                    configureOs: undefined,
                     packageFileType: 'package.json',
                     packageFileSubfolderDepth: '0'
                 },
@@ -188,8 +188,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Node.js',
                 {
-                    platform: 'Node.js',
-                    os: undefined,
+                    configurePlatform: 'Node.js',
+                    configureOs: undefined,
                     packageFileType: 'package.json',
                     packageFileSubfolderDepth: '0',
                 },
@@ -226,8 +226,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                 testConfigureDocker(
                     '.NET Core Console',
                     {
-                        platform: '.NET Core Console',
-                        os: 'Windows',
+                        configurePlatform: '.NET Core Console',
+                        configureOs: 'Windows',
                         packageFileType: undefined,
                         packageFileSubfolderDepth: undefined
                     },
@@ -242,8 +242,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 '.NET Core Console',
                 {
-                    platform: '.NET Core Console',
-                    os: 'Windows',
+                    configurePlatform: '.NET Core Console',
+                    configureOs: 'Windows',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
@@ -264,8 +264,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 '.NET Core Console',
                 {
-                    platform: '.NET Core Console',
-                    os: 'Windows',
+                    configurePlatform: '.NET Core Console',
+                    configureOs: 'Windows',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
@@ -290,8 +290,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 '.NET Core Console',
                 {
-                    platform: '.NET Core Console',
-                    os: 'Linux',
+                    configurePlatform: '.NET Core Console',
+                    configureOs: 'Linux',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
@@ -340,8 +340,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'ASP.NET Core',
                 {
-                    platform: 'ASP.NET Core',
-                    os: 'Windows',
+                    configurePlatform: 'ASP.NET Core',
+                    configureOs: 'Windows',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1',
                 },
@@ -365,8 +365,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'ASP.NET Core',
                 {
-                    platform: 'ASP.NET Core',
-                    os: 'Linux',
+                    configurePlatform: 'ASP.NET Core',
+                    configureOs: 'Linux',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '2',
                 },
@@ -392,8 +392,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Java',
                 {
-                    platform: 'Java',
-                    os: undefined,
+                    configurePlatform: 'Java',
+                    configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined,
                 },
@@ -416,8 +416,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Java',
                 {
-                    platform: 'Java',
-                    os: undefined,
+                    configurePlatform: 'Java',
+                    configureOs: undefined,
                     packageFileType: 'pom.xml',
                     packageFileSubfolderDepth: '0',
                 },
@@ -453,8 +453,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Java',
                 {
-                    platform: 'Java',
-                    os: undefined,
+                    configurePlatform: 'Java',
+                    configureOs: undefined,
                     packageFileType: 'pom.xml',
                     packageFileSubfolderDepth: '0',
                 },
@@ -475,8 +475,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             await testConfigureDocker('Java',
                 {
-                    platform: 'Java',
-                    os: undefined,
+                    configurePlatform: 'Java',
+                    configureOs: undefined,
                     packageFileType: 'build.gradle',
                     packageFileSubfolderDepth: '0',
                 },
@@ -565,8 +565,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Java',
                 {
-                    platform: 'Java',
-                    os: undefined,
+                    configurePlatform: 'Java',
+                    configureOs: undefined,
                     packageFileType: 'build.gradle',
                     packageFileSubfolderDepth: '0',
                 },
@@ -590,8 +590,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Python',
                 {
-                    platform: 'Python',
-                    os: undefined,
+                    configurePlatform: 'Python',
+                    configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
@@ -614,8 +614,8 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Ruby',
                 {
-                    platform: 'Ruby',
-                    os: undefined,
+                    configurePlatform: 'Ruby',
+                    configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as glob from 'glob';
+import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
 import { EOL } from 'os';
 import * as path from "path";
@@ -8,12 +8,11 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
-import { reporter } from '../telemetry/telemetry';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
 export type ConfigureTelemetryProperties = {
-    platform?: Platform;
-    os?: OS;
+    configurePlatform?: Platform;
+    configureOs?: OS;
     packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj'
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
@@ -512,7 +511,7 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
     let pomPath = path.join(folderPath, 'pom.xml');
     let gradlePath = path.join(folderPath, 'build.gradle');
 
-    if (fs.existsSync(pomPath)) {
+    if (await fse.pathExists(pomPath)) {
         foundPath = pomPath;
         let json = await new Promise<any>((resolve, reject) => {
             pomParser.parse({
@@ -623,13 +622,13 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
     }
 
     const platformType: Platform = await quickPickPlatform();
-    properties.platform = platformType;
+    properties.configurePlatform = platformType;
 
     let os: OS | undefined;
     if (platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
     }
-    properties.os = os;
+    properties.configureOs = os;
 
     let port: string;
     if (platformType.toLowerCase().includes('.net')) {
@@ -686,7 +685,7 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
         const workspacePath = path.join(rootFolderPath, fileName);
         let writeFile = false;
         if (fs.existsSync(workspacePath)) {
-            const response: vscode.MessageItem = await vscode.window.showErrorMessage(`A ${fileName} already exists.Would you like to overwrite it ? `, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }
