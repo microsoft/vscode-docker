@@ -43,6 +43,7 @@ import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
+import { Keytar } from './utils/keytar';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -64,24 +65,29 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    const installedExtensions: any[] = vscode.extensions.all;
-    const outputChannel = util.getOutputChannel();
-    let azureAccount: AzureAccount;
-
-    // Set up extension variables
+function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    ext.outputChannel = outputChannel;
+    ext.outputChannel = util.getOutputChannel();
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
+    if (!ext.keytar) {
+        ext.keytar = new Keytar();
+    }
+}
+
+export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+    const installedExtensions: any[] = vscode.extensions.all;
+    let azureAccount: AzureAccount;
+
+    initializeExtensionVariables(ctx);
 
     // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {
@@ -131,7 +137,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         if (context) {
             if (azureAccount) {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
+                const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
                 if (result.status === 'Faulted') {
                     throw result.error;

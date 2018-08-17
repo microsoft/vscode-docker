@@ -3,17 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as Keytar from 'keytar';
 import * as vscode from 'vscode';
 import { DialogResponses } from 'vscode-azureextensionui';
-
 import { callWithTelemetryAndErrorHandling, IActionContext, IAzureNode, parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS } from '../../constants'
 import { ext } from '../../extensionVariables';
-import { getCoreNodeModule, getKeytarModule } from '../utils/utils';
 import { CustomRegistryNode } from './customRegistryNodes';
-
-const keytar: typeof Keytar = getCoreNodeModule('keytar');
 
 interface CustomRegistryNonsensitive {
     url: string,
@@ -74,7 +69,7 @@ export async function connectCustomRegistry(): Promise<void> {
     // Save
     let sensitive: string = JSON.stringify(newRegistry.credentials);
     let key = getUsernamePwdKey(newRegistry.url);
-    await keytar.setPassword(keytarConstants.serviceId, key, sensitive);
+    await ext.keytar.setPassword(keytarConstants.serviceId, key, sensitive);
     registries.push(newRegistry);
     await saveCustomRegistriesNonsensitive(registries);
 
@@ -89,7 +84,7 @@ export async function disconnectCustomRegistry(node: CustomRegistryNode): Promis
         let response = await ext.ui.showWarningMessage(`Disconnect from container registry at "${registry.url}"?`, DialogResponses.yes, DialogResponses.no);
         if (response === DialogResponses.yes) {
             let key = getUsernamePwdKey(node.registry.url);
-            await keytar.deletePassword(keytarConstants.serviceId, key);
+            await ext.keytar.deletePassword(keytarConstants.serviceId, key);
             registries.splice(registries.indexOf(registry), 1);
             await saveCustomRegistriesNonsensitive(registries);
             await refresh();
@@ -111,7 +106,7 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
 
             try {
                 let key = getUsernamePwdKey(reg.url);
-                let credentialsString = await keytar.getPassword(keytarConstants.serviceId, key);
+                let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
                 let credentials: CustomRegistryCredentials = JSON.parse(credentialsString);
                 registries.push({
                     url: reg.url,

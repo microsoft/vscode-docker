@@ -3,8 +3,8 @@ import * as opn from 'opn';
 import request = require('request-promise');
 import * as vscode from 'vscode';
 import { keytarConstants } from '../../constants';
+import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
-import { getCoreNodeModule } from './utils';
 
 let _token: Token;
 
@@ -101,13 +101,9 @@ export interface Manifest {
 }
 
 export async function dockerHubLogout(): Promise<void> {
-
-    const keytar: typeof keytarType = getCoreNodeModule('keytar');
-    if (keytar) {
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
-    }
+    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     _token = null;
 }
 

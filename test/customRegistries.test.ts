@@ -10,6 +10,7 @@ import { ext } from '../extensionVariables';
 import { Suite, Test, Context } from 'mocha';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
+import { DebugKeytar } from '../utils/keytar';
 
 const registryContainerName = 'test-registry';
 
@@ -39,6 +40,8 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
         this.timeout(Math.max(60 * 1000 * 2, this.timeout()));
 
         suiteSetup(async function (this: Context): Promise<void> {
+            ext.keytar = new DebugKeytar();
+
             await stopRegistry();
             await registryTerminal.execute(`docker pull registry`,
                 {
@@ -56,6 +59,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
         suiteTeardown(async function (this: Context): Promise<void> {
             await stopRegistry();
+            ext.keytar = undefined;
         });
 
         test("Connect, no auth", async function (this: Context) {

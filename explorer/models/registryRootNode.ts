@@ -6,10 +6,10 @@ import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
+import { ext } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils'
-import { getKeytarModule } from '../utils/utils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
 import { getCustomRegistries } from './customRegistries';
 import { CustomRegistryNode } from './customRegistryNodes';
@@ -21,7 +21,6 @@ import { RegistryType } from './registryType';
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
-    private _keytar: typeof keytarType;
     private _azureAccount: AzureAccount;
 
     constructor(
@@ -31,7 +30,6 @@ export class RegistryRootNode extends NodeBase {
         public readonly azureAccount?: AzureAccount
     ) {
         super(label);
-        this._keytar = getKeytarModule();
 
         this._azureAccount = azureAccount;
 
@@ -73,21 +71,17 @@ export class RegistryRootNode extends NodeBase {
 
         let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
 
-        if (this._keytar) {
-            id.token = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-            id.username = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
-            id.password = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
-        }
+        id.token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        id.username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+        id.password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
 
         if (!id.token) {
             id = await dockerHub.dockerHubLogin();
 
             if (id && id.token) {
-                if (this._keytar) {
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
-                }
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
             } else {
                 return orgNodes;
             }
