@@ -48,12 +48,12 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
                     // docker uses stderr to indicate that it didn't find a local cache and has to download
                     ignoreErrors: true
                 });
-            await registryTerminal.execute(`docker run -d --rm --name ${registryContainerName} -p 5100:5000 registry`);
+            await registryTerminal.execute(`docker run -d --rm --name ${registryContainerName} -p 5900:5000 registry`);
 
             // Make sure it's running
             // (On some Linux systems, --silent and --show-error are necessary otherwise errors don't go to
             // correct output). On others these may not be valid and may show an error which can be ignored.
-            let curlResult = await registryTerminal.execute(`curl http://localhost:5100/v2/_catalog --silent --show-error`);
+            let curlResult = await registryTerminal.execute(`curl http://localhost:5900/v2/_catalog --silent --show-error`);
             assertEx.assertContains(curlResult, '"repositories":');
         });
 
@@ -64,7 +64,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
         test("Connect, no auth", async function (this: Context) {
             let input = new TestUserInput([
-                'http://localhost:5100',
+                'http://localhost:5900',
                 'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
                 'fake password'
             ]);

@@ -68,7 +68,7 @@ export class Keytar implements IKeytar {
 }
 
 export class DebugKeytar implements IKeytar {
-    private _services: Map<string, Map<string, string>>;
+    private _services: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
 
     public async getPassword(service: string, account: string): Promise<string> {
         await this.delay();
@@ -104,7 +104,7 @@ export class DebugKeytar implements IKeytar {
         return false;
     }
 
-    private delay(): Promise<void> {
+    private async delay(): Promise<void> {
         return new Promise<void>(resolve => {
             setTimeout(() => {
                 resolve();
