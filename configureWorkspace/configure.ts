@@ -168,15 +168,17 @@ LABEL Name=${serviceName} Version=${version}
 EXPOSE ${port}
 
 WORKDIR /app
-ADD . /app
+COPY . .
+
+# install dependencies if dependencies file is present
+RUN python3 -m pip install -r requirements.txt || echo ‘No requirements.txt - skipping pip install’
 
 # Using pip:
-RUN python3 -m pip install -r requirements.txt
 CMD ["python3", "-m", "${serviceName}"]
 
 # Using pipenv:
-#RUN python3 -m pip install pipenv
-#RUN pipenv install --ignore-pipfile
+#RUN python3 -m pip install pipenv  || echo ‘No requirements.txt - skipping pip install’
+#RUN pipenv install --ignore-pipfile  || echo ‘No requirements.txt - skipping pip install’
 #CMD ["pipenv", "run", "python3", "-m", "${serviceName}"]
 
 # Using miniconda (make sure to replace 'myenv' w/ your environment name):
