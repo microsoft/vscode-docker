@@ -67,7 +67,7 @@ export class Keytar implements IKeytar {
     }
 }
 
-export class DebugKeytar implements IKeytar {
+export class TestKeytar implements IKeytar {
     private _services: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
 
     public async getPassword(service: string, account: string): Promise<string> {

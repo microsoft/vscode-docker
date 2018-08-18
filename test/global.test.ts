@@ -3,6 +3,8 @@ import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
 import * as assert from 'assert';
+import { ext } from "../extensionVariables";
+import { TestKeytar } from "../utils/keytar";
 
 export namespace constants {
     export const testOutputName = 'testOutput';
@@ -50,6 +52,8 @@ export function testInEmptyFolder(name: string, func: () => Promise<void>): void
 
 // Runs before all tests
 suiteSetup(function (this: mocha.IHookCallbackContext): void {
+    // Otherwise the app can blocking asking for keychain access
+    ext.keytar = new TestKeytar();
 });
 
 // Runs after all tests
