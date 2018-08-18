@@ -1,7 +1,11 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -15,7 +19,6 @@ import { getCustomRegistries } from './customRegistries';
 import { CustomRegistryNode } from './customRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
-import { RegistryType } from './registryType';
 
 // tslint:disable-next-line:no-var-requires
 const ContainerRegistryManagement = require('azure-arm-containerregistry');

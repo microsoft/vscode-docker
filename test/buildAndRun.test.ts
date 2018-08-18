@@ -16,11 +16,10 @@ import { Platform } from "../configureWorkspace/config-utils";
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
 import { configure } from '../configureWorkspace/configure';
-import { TestUserInput } from 'vscode-azureextensionui';
+import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
 import { getTestRootFolder, constants } from './global.test';
 import { httpsRequestBinary } from '../utils/httpRequest';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
-import { openShellContainer } from '../commands/open-shell-container';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -81,7 +80,15 @@ suite("Build Image", function (this: Suite): void {
         let testTerminalProvider = new TestTerminalProvider();
         ext.terminalProvider = testTerminalProvider;
 
-        await configure(testRootFolder);
+        let actionContext: IActionContext = {
+            properties: { isActivationEvent: 'false', cancelStep: '', errorMessage: '', error: undefined, result: 'Succeeded' },
+            measurements: { duration: 0 },
+            suppressTelemetry: false,
+            rethrowError: false,
+            suppressErrorDisplay: false
+        };
+
+        await configure(actionContext, testRootFolder);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for configure docker files');
 
         // Build image

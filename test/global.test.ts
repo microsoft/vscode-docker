@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fse from "fs-extra";
@@ -21,21 +26,22 @@ export function getTestRootFolder(): string {
         if (!workspaceFolders || workspaceFolders.length === 0) {
             console.error("No workspace is open.");
             process.exit(1);
-        }
-        if (workspaceFolders.length > 1) {
-            console.error("There are unexpected multiple workspaces open");
-            process.exit(1);
-        }
+        } else {
+            if (workspaceFolders.length > 1) {
+                console.error("There are unexpected multiple workspaces open");
+                process.exit(1);
+            }
 
-        testRootFolder = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        console.log(`testRootFolder: ${testRootFolder}`);
-        if (path.basename(testRootFolder) !== constants.testOutputName) {
-            console.error("vscode is opened against the wrong folder for tests");
-            process.exit(1);
-        }
+            testRootFolder = workspaceFolders[0].uri.fsPath;
+            console.log(`testRootFolder: ${testRootFolder}`);
+            if (path.basename(testRootFolder) !== constants.testOutputName) {
+                console.error("vscode is opened against the wrong folder for tests");
+                process.exit(1);
+            }
 
-        fse.ensureDirSync(testRootFolder);
-        fse.emptyDirSync(testRootFolder);
+            fse.ensureDirSync(testRootFolder);
+            fse.emptyDirSync(testRootFolder);
+        }
     }
 
     return testRootFolder;

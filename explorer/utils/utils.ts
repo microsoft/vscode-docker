@@ -1,5 +1,7 @@
-import * as Keytar from 'keytar';
-import * as vscode from 'vscode';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 export function trimWithElipsis(str: string, max: number = 10): string {
     const elipsis: string = "...";
