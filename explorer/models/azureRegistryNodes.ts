@@ -208,7 +208,7 @@ export class AzureRepositoryNode extends NodeBase {
                 pool.addTask(async () => {
                     let data: string;
                     try {
-                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags}`, {
+                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tag}`, {
                             auth: {
                                 bearer: accessTokenARC
                             }

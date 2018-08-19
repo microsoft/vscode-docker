@@ -38,7 +38,6 @@ export class TaskRootNode extends NodeBase {
 
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
-
         buildTasks = await client.buildTasks.list(resourceGroup, element.registry.name);
         if (buildTasks.length === 0) {
             vscode.window.showInformationMessage(`You do not have any Build Tasks in the registry, '${element.registry.name}'. You can create one with ACR Build. `, "Learn More").then(val => {
