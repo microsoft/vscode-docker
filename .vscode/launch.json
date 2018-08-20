@@ -37,8 +37,8 @@
 			],
 			"preLaunchTask": "npm",
 			"env": {
-				"MOCHA_grep": "", // Tests to run
-				"MOCHA_enableTimeouts": "0",
+				"MOCHA_grep": "API", // RegExp of tests to run (empty for all)
+				"MOCHA_enableTimeouts": "0", // Disable time-outs
 				"DEBUGTELEMETRY": "1"
 			}
 		}
