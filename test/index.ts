@@ -17,16 +17,15 @@
 
 var testRunner = require('vscode/lib/testrunner');
 
+let noTimeouts = !!process.env.NO_TIMEOUTS && process.env.NO_TIMEOUTS !== "0";
+
 // You can directly control Mocha options by uncommenting the following lines
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
 let options = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
-    useColors: true // colored output from test results
+    useColors: true, // colored output from test results
+    enableTimeouts: !noTimeouts,
 };
-let noTimeouts = process.env.NO_TIMEOUTS;
-if (!!noTimeouts && noTimeouts !== "0") {
-    options["timeout"] = 60 * 60 * 1000;
-}
 testRunner.configure(options);
 
 module.exports = testRunner;
