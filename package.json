@@ -29,6 +29,7 @@
   "activationEvents": [
     "onLanguage:dockerfile",
     "onLanguage:yaml",
+    "onCommand:vscode-docker.api.configure",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -65,6 +66,10 @@
         {
           "command": "vscode-docker.createWebApp",
           "when": "false"
+        },
+        {
+          "command": "vscode-docker.api.configure",
+          "when": "never"
         }
       ],
       "editor/context": [
@@ -400,6 +405,10 @@
         "title": "Add Docker files to Workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.api.configure",
+        "title": "Add Docker files to Workspace (API)"
       },
       {
         "command": "vscode-docker.image.build",

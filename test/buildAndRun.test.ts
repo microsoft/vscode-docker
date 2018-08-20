@@ -17,7 +17,7 @@ import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
 import { configure } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
-import { getTestRootFolder, constants } from './global.test';
+import { getTestRootFolder, testInEmptyFolder } from './global.test';
 import { httpsRequestBinary } from '../utils/httpRequest';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 
@@ -64,7 +64,7 @@ async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFol
 }
 
 suite("Build Image", function (this: Suite): void {
-    this.timeout(Math.max(60 * 1000, this.timeout()));
+    this.timeout(60 * 1000);
 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
@@ -110,15 +110,6 @@ suite("Build Image", function (this: Suite): void {
         assert.equal(errorText, '', 'Expected no errors from Build Image');
         assertEx.assertContains(outputText, 'Successfully built');
         assertEx.assertContains(outputText, 'Successfully tagged')
-    }
-
-    function testInEmptyFolder(name: string, func: () => Promise<void>): void {
-        test(name, async () => {
-            // Delete everything in the root testing folder
-            assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
-            await fse.emptyDir(testRootFolder);
-            await func();
-        });
     }
 
     // Go

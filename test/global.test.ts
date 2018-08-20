@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
-import { pathExists } from 'fs-extra';
+import * as assert from 'assert';
 
 export namespace constants {
     export const testOutputName = 'testOutput';
@@ -45,12 +45,27 @@ export function getTestRootFolder(): string {
     return testRootFolder;
 }
 
+/**
+ * Run a test with an empty root testing folder (i.e. delete everything out of it before running the test).
+ * This is important since we can't open new folders in vscode while tests are running
+ */
+export function testInEmptyFolder(name: string, func?: () => Promise<void>): void {
+    test(name, !func ? undefined : async () => {
+        // Delete everything in the root testing folder
+        assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
+        await fse.emptyDir(testRootFolder);
+        await func();
+    });
+}
+
 // Runs before all tests
 suiteSetup(function (this: mocha.IHookCallbackContext): void {
+    console.log('global.test.ts: suiteSetup');
 });
 
 // Runs after all tests
 suiteTeardown(function (this: mocha.IHookCallbackContext): void {
+    console.log('global.test.ts: suiteTestdown');
     if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {
         fse.emptyDir(testRootFolder);
     }
