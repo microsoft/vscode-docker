@@ -43,7 +43,8 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         //Currently, there is no support for selecting source location folders that don't contain a path to the triggered dockerfile.
         throw new Error("Source code path must be a parent of the Dockerfile path");
     } else {
-        relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length);
+        relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length + 1);
+        console.log(relativeDockerPath);
     }
 
     // Prompting for name so the image can then be pushed to a repository.
@@ -72,8 +73,10 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         'dockerFilePath': relativeDockerPath
     };
     status.appendLine("Queueing Build");
-    await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
-    status.appendLine('Success');
+    let queuedBuild = await client.registries.queueBuild(resourceGroupName, registryName, buildRequest);
+    let buildId = queuedBuild.buildId
+
+    status.appendLine('Successfully queued build with ID ' + buildId);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string): Promise<string> {
