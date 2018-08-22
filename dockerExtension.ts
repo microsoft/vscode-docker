@@ -110,23 +110,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     registerCommand('vscode-docker.configure', configure);
-    registerCommand('vscode-docker.image.build', buildImage);
-    registerCommand('vscode-docker.image.inspect', inspectImage);
-    registerCommand('vscode-docker.image.remove', removeImage);
-    registerCommand('vscode-docker.image.push', pushImage);
-    registerCommand('vscode-docker.image.tag', tagImage);
-    registerCommand('vscode-docker.container.start', startContainer);
-    registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
-    registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
-    registerCommand('vscode-docker.container.stop', stopContainer);
-    registerCommand('vscode-docker.container.restart', restartContainer);
-    registerCommand('vscode-docker.container.show-logs', showLogsContainer);
-    registerCommand('vscode-docker.container.open-shell', openShellContainer);
-    registerCommand('vscode-docker.container.remove', removeContainer);
-    registerCommand('vscode-docker.compose.up', composeUp);
-    registerCommand('vscode-docker.compose.down', composeDown);
-    registerCommand('vscode-docker.compose.restart', composeRestart);
-    registerCommand('vscode-docker.system.prune', systemPrune);
+    await registerImageCommands();
+    await registerContainerCommands();
+    await registerComposeCommands();
 
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
@@ -164,6 +150,33 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     }
 
     activateLanguageClient(ctx);
+}
+
+function registerContainerCommands(): void {
+    registerCommand('vscode-docker.container.start', startContainer);
+    registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
+    registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
+    registerCommand('vscode-docker.container.stop', stopContainer);
+    registerCommand('vscode-docker.container.restart', restartContainer);
+    registerCommand('vscode-docker.container.show-logs', showLogsContainer);
+    registerCommand('vscode-docker.container.open-shell', openShellContainer);
+    registerCommand('vscode-docker.container.remove', removeContainer);
+}
+
+function registerImageCommands(): void {
+    registerCommand('vscode-docker.image.build', buildImage);
+    registerCommand('vscode-docker.image.inspect', inspectImage);
+    registerCommand('vscode-docker.image.remove', removeImage);
+    registerCommand('vscode-docker.image.push', pushImage);
+    registerCommand('vscode-docker.image.tag', tagImage);
+
+}
+
+function registerComposeCommands(): void {
+    registerCommand('vscode-docker.compose.up', composeUp);
+    registerCommand('vscode-docker.compose.down', composeDown);
+    registerCommand('vscode-docker.compose.restart', composeRestart);
+    registerCommand('vscode-docker.system.prune', systemPrune);
 }
 
 export function deactivate(): Thenable<void> {
