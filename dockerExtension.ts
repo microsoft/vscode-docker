@@ -67,7 +67,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
-    let azureAccount: AzureAccount;
+    let azureAccount: AzureAccount | undefined;
 
     // Set up extension variables
     registerUIExtensionVariables(ext);
@@ -193,12 +193,9 @@ namespace Configuration {
     let configurationListener: vscode.Disposable;
 
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
-        if (!params.items) {
-            return null;
-        }
         let result: vscode.WorkspaceConfiguration[] = [];
         for (let item of params.items) {
-            let config = null;
+            let config: vscode.WorkspaceConfiguration;
 
             if (item.scopeUri) {
                 config = vscode.workspace.getConfiguration(item.section, client.protocol2CodeConverter.asUri(item.scopeUri));
@@ -251,7 +248,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
         },
-        middleware: middleware as Middleware
+        middleware: middleware
     }
 
     client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);

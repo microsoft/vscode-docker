@@ -74,7 +74,7 @@ suite("AsyncPool Tests", () => {
 
     test("Empty array", async () => {
         let pool = new AsyncPool(8);
-        let arr = [];
+        let arr: string[] = [];
         for (let i = 0; i < 300; i++) {
             arr.push('testData' + i);
         }
