@@ -1,16 +1,16 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { dockerExplorerProvider } from '../../dockerExtension';
-import { UserCancelledError } from "../../explorer/deploy/wizard";
-import { AzureImageNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { reporter } from '../../telemetry/telemetry';
+import { AzureImageNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import * as quickPicks from '../utils/quick-pick-azure';
-
-const teleCmdId: string = 'vscode-docker.delete-ACR-Image';
 
 /** Function to delete an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
@@ -46,12 +46,5 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
         }
-    } else {
-        throw new UserCancelledError();
-    }
-    if (reporter) {
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
     }
 }

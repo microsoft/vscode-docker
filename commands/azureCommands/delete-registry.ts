@@ -1,15 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from "azure-arm-resource";
 import * as vscode from "vscode";
 import { dockerExplorerProvider } from '../../dockerExtension';
-import { UserCancelledError } from "../../explorer/deploy/wizard";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
-import { reporter } from '../../telemetry/telemetry';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { confirmUserIntent, quickPickACRRegistry } from '../utils/quick-pick-azure';
-
-const teleCmdId: string = 'vscode-docker.delete-ACR-Registry';
 
 /** Delete a registry and all it's associated nested items
  * @param context : the AzureRegistryNode the user right clicked on to delete
@@ -29,13 +29,5 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
         await client.registries.beginDeleteMethod(resourceGroup, registry.name);
         vscode.window.showInformationMessage(`Successfully deleted registry ${registry.name}`);
         dockerExplorerProvider.refreshRegistries();
-    } else {
-        throw new UserCancelledError();
-    }
-
-    if (reporter) {
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
     }
 }

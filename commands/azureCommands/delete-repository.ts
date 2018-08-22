@@ -1,15 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { Registry } from "azure-arm-containerregistry/lib/models";
-import { Context } from "mocha";
 import * as vscode from "vscode";
 import { dockerExplorerProvider } from '../../dockerExtension';
-import { UserCancelledError } from "../../explorer/deploy/wizard";
-import { AzureRegistryNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { reporter } from '../../telemetry/telemetry';
+import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
-const teleCmdId: string = 'vscode-docker.delete-ACR-Repository';
 /**
  * function to delete an Azure repository and its associated images
  * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
@@ -36,12 +36,5 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
         }
-    } else {
-        throw new UserCancelledError();
-    }
-    if (reporter) {
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
     }
 }
