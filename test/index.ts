@@ -1,6 +1,3 @@
-import { endianness } from "os";
-import { isNumber } from "util";
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
@@ -20,9 +17,7 @@ import { isNumber } from "util";
 
 var testRunner = require('vscode/lib/testrunner');
 
-let noTimeouts = !!process.env.NO_TIMEOUTS && process.env.NO_TIMEOUTS !== "0";
-
-let options = {
+let options: { [key: string]: string | boolean | number } = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
     useColors: true // colored output from test results
 };
@@ -52,6 +47,8 @@ for (let envVar of Object.keys(process.env)) {
         options[option] = value;
     }
 }
+
+console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
 
 testRunner.configure(options);
 
