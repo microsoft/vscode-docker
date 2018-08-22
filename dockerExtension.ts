@@ -110,9 +110,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     registerCommand('vscode-docker.configure', configure);
-    await registerImageCommands();
-    await registerContainerCommands();
-    await registerComposeCommands();
+    registerImageCommands();
+    registerContainerCommands();
+    registerComposeCommands();
 
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
