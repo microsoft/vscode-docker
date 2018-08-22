@@ -34,7 +34,7 @@ export async function createRegistry(): Promise<Registry> {
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
-        prompt: 'New Registry name? '
+        prompt: 'Enter the new registry name? '
     };
     let registryName: string = await ext.ui.showInputBox(opt);
 
@@ -42,7 +42,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     while (!registryStatus.nameAvailable) {
         opt = {
             ignoreFocusOut: false,
-            prompt: `The Registry name '${registryName}' is unavailable. Try again: `
+            prompt: `The registry name '${registryName}' is unavailable. Try again: `
         }
         registryName = await ext.ui.showInputBox(opt);
         registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
