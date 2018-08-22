@@ -1,6 +1,7 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 'use strict';
 
@@ -31,7 +32,7 @@ export class SuggestSupportHelper {
     }
 
     // tslint:disable-next-line:promise-function-async // Grandfathered in
-    public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[]> {
+    public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[] | undefined> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
                 let r: vscode.MarkedString[] = [];

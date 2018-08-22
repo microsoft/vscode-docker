@@ -1,6 +1,7 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 'use strict';
 
@@ -15,7 +16,8 @@ export class DockerComposeParser extends Parser {
 
     public parseLine(textLine: vscode.TextLine): IToken[] {
         let r: IToken[] = [];
-        let lastTokenEndIndex = 0, lastPushedToken: IToken = null;
+        let lastTokenEndIndex = 0;
+        let lastPushedToken: IToken | undefined;
 
         let emit = (end: number, type: TokenType) => {
             if (end <= lastTokenEndIndex) {

@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 const gulp = require('gulp');
@@ -23,7 +23,7 @@ gulp.task('upload-vsix', (callback) => {
         const containerName = packageJson.name;
         const vsixName = `${packageJson.name}-${packageJson.version}.vsix`;
         const blobPath = path.join(process.env.TRAVIS_BRANCH, process.env.TRAVIS_BUILD_NUMBER, vsixName);
-        const storageName =process.env.STORAGE_NAME;
+        const storageName = process.env.STORAGE_NAME;
         const storageKey = process.env.STORAGE_KEY;
         if (!storageName || !storageKey) {
             console.log();
