@@ -9,7 +9,7 @@ import * as fse from "fs-extra";
 import mocha = require("mocha");
 import * as assert from 'assert';
 import { ext } from "../extensionVariables";
-import { TestKeytar } from "../utils/keytar";
+import { TestKeytar } from "../test/testKeytar";
 
 export namespace constants {
     export const testOutputName = 'testOutput';

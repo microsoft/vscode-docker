@@ -13,8 +13,10 @@ import { RegistryType } from './registryType';
 
 export class CustomRegistryNode extends NodeBase {
     public type: RegistryType = RegistryType.Custom;
-    public static readonly contextValue: string = 'customRegistry';
+
+    public static readonly contextValue: string = 'customRegistryNode';
     public contextValue: string = CustomRegistryNode.contextValue;
+
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
@@ -37,15 +39,9 @@ export class CustomRegistryNode extends NodeBase {
     }
 
     // Returns undefined if it's valid, otherwise returns an error message
-    public static async isValidRegistryUrl(registry: CustomRegistry): Promise<string | undefined> {
-        try {
-            let response = await registryRequest<{}>(registry.url, 'v2', registry.credentials);
-
-            // If the call succeeded, it's a V2 registry
-            return undefined;
-        } catch (error) {
-            return parseError(error).message;
-        }
+    public static async verifyIsValidRegistryUrl(registry: CustomRegistry): Promise<void> {
+        // If the call succeeded, it's a V2 registry
+        await registryRequest<{}>(registry.url, 'v2', registry.credentials);
     }
 
     public async getChildren(element: CustomRegistryNode): Promise<CustomRepositoryNode[]> {
@@ -110,7 +106,7 @@ export class CustomRepositoryNode extends NodeBase {
 }
 
 export class CustomImageTagNode extends NodeBase {
-    public static contextValue: string = 'customImageTag';
+    public static contextValue: string = 'customImageTagNode';
     public contextValue: string = CustomImageTagNode.contextValue;
 
     constructor(

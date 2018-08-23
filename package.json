@@ -187,7 +187,7 @@
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTag|customImageTag)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
@@ -195,7 +195,7 @@
         },
         {
           "command": "vscode-docker.browseDockerHub",
-          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTag|dockerHubRepository|dockerHubNamespace)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/"
         },
         {
           "command": "vscode-docker.browseAzurePortal",
@@ -207,7 +207,7 @@
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
-          "when": "view == dockerExplorer && viewItem =~ /^(customRegistry)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/"
         }
       ]
     },

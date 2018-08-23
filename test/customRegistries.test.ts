@@ -58,7 +58,6 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
         suiteTeardown(async function (this: Context): Promise<void> {
             await stopRegistry();
-            ext.keytar = undefined;
         });
 
         test("Connect, no auth", async function (this: Context) {
@@ -72,6 +71,32 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
             // TODO: Verify the node is there (have to start using common tree provider first)
         });
+
+        test("Connect, no auth - keytar not available", async function (this: Context) {
+            // Make sure extension activated
+            await commands.executeCommand('vscode-docker.refresh');
+
+            let oldKeytar = ext.keytar;
+            try {
+                ext.keytar = undefined;
+
+                let input = new TestUserInput([
+                    'http://localhost:5900',
+                    'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
+                    'fake password'
+                ]);
+                ext.ui = input;
+                await commands.executeCommand('vscode-docker.connectCustomRegistry');
+
+                // TODO: Verify the node is there (have to start using common tree provider first)
+            } finally {
+                ext.keytar = oldKeytar;
+            }
+        });
+
+        test("Connect with credentials");
+        test("Publish to Azure app service with credentials");
+        test("Disconnect");
 
         test("Connect with credentials");
         test("Publish to Azure app service with credentials");

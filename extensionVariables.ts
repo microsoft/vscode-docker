@@ -17,5 +17,5 @@ export namespace ext {
     export let ui: IAzureUserInput;
     export let reporter: ITelemetryReporter;
     export let terminalProvider: ITerminalProvider;
-    export let keytar: IKeytar;
+    export let keytar: IKeytar | undefined;
 }

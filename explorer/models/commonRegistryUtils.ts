@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
@@ -5,7 +10,7 @@ import * as path from 'path';
 import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants'
+import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
@@ -65,7 +70,7 @@ export async function getCatalog(registryUrl: string, credentials?: RegistryCred
 }
 
 export async function getTags(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
-    let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=100&page=1`, credentials);
+    let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=${PAGE_SIZE}&page=1`, credentials);
     let tags = result.tags;
     let tagInfos: TagInfo[] = [];
 

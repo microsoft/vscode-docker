@@ -80,7 +80,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
     if (!ext.keytar) {
-        ext.keytar = new Keytar();
+        ext.keytar = Keytar.tryCreate();
     }
 }
 

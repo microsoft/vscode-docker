@@ -61,17 +61,16 @@ export async function connectCustomRegistry(): Promise<void> {
         credentials: { userName, password }
     };
 
-    let invalidMessage = await CustomRegistryNode.isValidRegistryUrl(newRegistry);
-    if (invalidMessage) {
-        throw new Error(invalidMessage);
-    }
+    await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
 
     // Save
-    let sensitive: string = JSON.stringify(newRegistry.credentials);
-    let key = getUsernamePwdKey(newRegistry.url);
-    await ext.keytar.setPassword(keytarConstants.serviceId, key, sensitive);
-    registries.push(newRegistry);
-    await saveCustomRegistriesNonsensitive(registries);
+    if (ext.keytar) {
+        let sensitive: string = JSON.stringify(newRegistry.credentials);
+        let key = getUsernamePwdKey(newRegistry.url);
+        await ext.keytar.setPassword(keytarConstants.serviceId, key, sensitive);
+        registries.push(newRegistry);
+        await saveCustomRegistriesNonsensitive(registries);
+    }
 
     await refresh();
 }
@@ -81,14 +80,13 @@ export async function disconnectCustomRegistry(node: CustomRegistryNode): Promis
     let registry = registries.find(reg => reg.url.toLowerCase() === node.registry.url.toLowerCase());
 
     if (registry) {
-        let response = await ext.ui.showWarningMessage(`Disconnect from container registry at "${registry.url}"?`, DialogResponses.yes, DialogResponses.no);
-        if (response === DialogResponses.yes) {
-            let key = getUsernamePwdKey(node.registry.url);
+        let key = getUsernamePwdKey(node.registry.url);
+        if (ext.keytar) {
             await ext.keytar.deletePassword(keytarConstants.serviceId, key);
-            registries.splice(registries.indexOf(registry), 1);
-            await saveCustomRegistriesNonsensitive(registries);
-            await refresh();
         }
+        registries.splice(registries.indexOf(registry), 1);
+        await saveCustomRegistriesNonsensitive(registries);
+        await refresh();
     }
 }
 
@@ -97,7 +95,7 @@ function getUsernamePwdKey(registryUrl: string): string {
 }
 
 export async function getCustomRegistries(): Promise<CustomRegistry[]> {
-    let nonsensitive = ext.context.workspaceState.get<CustomRegistryNonsensitive[]>(customRegistriesKey) || [];
+    let nonsensitive = ext.context.globalState.get<CustomRegistryNonsensitive[]>(customRegistriesKey) || [];
     let registries: CustomRegistry[] = [];
 
     for (let reg of nonsensitive) {
@@ -105,14 +103,15 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
             this.suppressTelemetry = true;
 
             try {
-                let key = getUsernamePwdKey(reg.url);
-                let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
-                let credentials: CustomRegistryCredentials = JSON.parse(credentialsString);
-                registries.push({
-                    url: reg.url,
-                    credentials
-                });
-                registries.push()
+                if (ext.keytar) {
+                    let key = getUsernamePwdKey(reg.url);
+                    let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
+                    let credentials: CustomRegistryCredentials = JSON.parse(credentialsString);
+                    registries.push({
+                        url: reg.url,
+                        credentials
+                    });
+                }
             } catch (error) {
                 throw new Error(`Unable to retrieve password for container registry ${reg.url}: ${parseError(error).message}`);
             }

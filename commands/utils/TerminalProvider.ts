@@ -138,7 +138,7 @@ class TestTerminal implements vscode.Terminal {
       this.sendText(command);
     }
 
-    let results = await this.waitForCompletionCore({ ignoreErrors: options.ignoreErrors });
+    let results = await this.waitForCompletionCore(options);
 
     if (!options.ignoreErrors) {
       assert.equal(results.errorText, '', `Encountered errors executing in terminal`);

@@ -7,7 +7,7 @@ import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
 import * as vscode from 'vscode';
-import { keytarConstants } from '../../constants';
+import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 
@@ -106,9 +106,11 @@ export interface Manifest {
 }
 
 export async function dockerHubLogout(): Promise<void> {
-    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
-    await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+    if (ext.keytar) {
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+    }
     _token = null;
 }
 
@@ -229,7 +231,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
     let options = {
         method: 'GET',
-        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=100&page=1`,
+        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
             Authorization: 'JWT ' + _token.token
         },
@@ -252,13 +254,13 @@ export function browseDockerHub(context?: DockerHubImageTagNode | DockerHubRepos
         let url: string = 'https://hub.docker.com/';
         const repo: RepositoryInfo = context.repository;
         switch (context.contextValue) {
-            case 'dockerHubNamespace':
+            case DockerHubOrgNode.contextValue:
                 url = `${url}u/${context.userName}`;
                 break;
-            case 'dockerHubRepository':
+            case DockerHubRepositoryNode.contextValue:
                 url = `${url}r/${context.repository.namespace}/${context.repository.name}`;
                 break;
-            case 'dockerHubImageTag':
+            case DockerHubImageTagNode.contextValue:
                 url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
                 break;
             default:

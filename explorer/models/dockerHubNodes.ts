@@ -20,7 +20,9 @@ export class DockerHubOrgNode extends NodeBase {
         super(label);
     }
 
-    public readonly contextValue: string = 'dockerHubNamespace';
+    public static readonly contextValue: string = 'dockerHubOrgNode';
+    public readonly contextValue: string = DockerHubOrgNode.contextValue;
+
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
@@ -71,7 +73,9 @@ export class DockerHubRepositoryNode extends NodeBase {
         super(label);
     }
 
-    public readonly contextValue: string = 'dockerHubRepository';
+    public static readonly contextValue: string = 'dockerHubRepositoryNode';
+    public readonly contextValue: string = DockerHubRepositoryNode.contextValue;
+
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
@@ -115,7 +119,8 @@ export class DockerHubImageTagNode extends NodeBase {
         super(`${repositoryName}:${tag}`);
     }
 
-    public readonly contextValue: string = 'dockerHubImageTag';
+    public static readonly contextValue: string = 'dockerHubImageTagNode';
+    public readonly contextValue: string = DockerHubImageTagNode.contextValue;
 
     // this needs to be empty string for Docker Hub
     public serverUrl: string = '';
