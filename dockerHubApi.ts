@@ -1,6 +1,7 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 'use strict';
 
@@ -24,10 +25,10 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
 }
 
 // tslint:disable-next-line:promise-function-async // Grandfathered in
-export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult> {
+export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult | undefined> {
     return invokeHubSearch(imageName, 1, cache).then((data) => {
         if ((<IHubSearchResponseResult[]>data.results).length === 0) {
-            return;
+            return undefined;
         }
         return data.results[0];
     });
