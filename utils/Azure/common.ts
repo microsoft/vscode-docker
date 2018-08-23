@@ -7,6 +7,6 @@ export function isValidAzureName(value: string): { isValid: boolean, message?: s
     } else if (!alphaNum.test(value)) {
         return { isValid: false, message: 'Registry name may contain alpha numeric characters only' };
     } else {
-        return { isValid: false };
+        return { isValid: true };
     }
 }

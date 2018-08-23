@@ -71,7 +71,9 @@ export class AzureUtilityManager {
         return new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
     }
 
-    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string, sortFunction?: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number): Promise<ContainerModels.Registry[]> {
+    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string,
+        compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically): Promise<ContainerModels.Registry[]> {
+
         let registries: ContainerModels.Registry[] = [];
 
         if (subscription && resourceGroup) {
@@ -99,11 +101,14 @@ export class AzureUtilityManager {
             await subPool.runAll();
         }
 
-        if (sortFunction && registries.length > 1) {
-            registries.sort(sortFunction);
-        }
+        registries.sort(compareFn);
+
         //Return only non classic registries
         return registries.filter((registry) => { return !registry.sku.tier.includes('Classic') });
+    }
+
+    private sortRegistriesAlphabetically(a: ContainerModels.Registry, b: ContainerModels.Registry): number {
+        return a.loginServer.localeCompare(b.loginServer);
     }
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
