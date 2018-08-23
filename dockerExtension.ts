@@ -187,13 +187,13 @@ function consolidateDefaultRegistrySettings(): void {
     }
 }
 
-export function deactivate(): Thenable<void> {
+export async function deactivate(): Promise<void> {
     if (!client) {
         return undefined;
     }
     // perform cleanup
     Configuration.dispose();
-    return client.stop();
+    return await client.stop();
 }
 
 namespace Configuration {
