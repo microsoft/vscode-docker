@@ -514,7 +514,7 @@
       {
         "command": "vscode-docker.create-ACR-Registry",
         "title": "Create Registry",
-        "category": "Docker"
+        "category": "ACR"
       },
       {
         "command": "vscode-docker.delete-ACR-Repository",

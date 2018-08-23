@@ -9,6 +9,7 @@ import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { ext } from '../../extensionVariables';
+import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../utils/quick-pick-azure';
 
@@ -33,19 +34,21 @@ export async function createRegistry(): Promise<Registry> {
 /** Acquires a new registry name from a user, validating that the name is unique */
 async function acquireRegistryName(client: ContainerRegistryManagementClient): Promise<string> {
     let opt: vscode.InputBoxOptions = {
+        validateInput: async (value: string) => { return await checkForValidName(value, client) },
         ignoreFocusOut: false,
         prompt: 'Enter the new registry name? '
     };
     let registryName: string = await ext.ui.showInputBox(opt);
 
-    let registryStatus: RegistryNameStatus = await client.registries.checkNameAvailability({ 'name': registryName });
-    while (!registryStatus.nameAvailable) {
-        opt = {
-            ignoreFocusOut: false,
-            prompt: `The registry name '${registryName}' is unavailable. Try again: `
-        }
-        registryName = await ext.ui.showInputBox(opt);
-        registryStatus = await client.registries.checkNameAvailability({ 'name': registryName });
-    }
     return registryName;
+}
+
+async function checkForValidName(registryName: string, client: ContainerRegistryManagementClient): Promise<string> {
+    let check = isValidAzureName(registryName);
+    if (!check.isValid) { return check.message; }
+    let registryStatus: RegistryNameStatus = await client.registries.checkNameAvailability({ 'name': registryName });
+    if (registryStatus.message) {
+        return registryStatus.message;
+    }
+    return undefined;
 }

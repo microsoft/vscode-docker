@@ -21,9 +21,9 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
 
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
-        const repository: Repository = await quickPicks.quickPickACRRepository(registry, 'Choose the repository of the image you want to delete');
+        const repository: Repository = await quickPicks.quickPickACRRepository(registry, 'Select the repository of the image you want to delete');
         repoName = repository.name;
-        const image: AzureImage = await quickPicks.quickPickACRImage(repository, 'Choose the image you want to delete');
+        const image: AzureImage = await quickPicks.quickPickACRImage(repository, 'Select the image you want to delete');
         tag = image.tag;
 
     } else {
@@ -41,6 +41,8 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
+        } else {
+            dockerExplorerProvider.refreshRegistries();
         }
     }
 }

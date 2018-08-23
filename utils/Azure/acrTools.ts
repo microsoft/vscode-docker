@@ -25,6 +25,7 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
     });
     return subscription;
 }
+
 export function getResourceGroupName(registry: Registry): any {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
@@ -53,6 +54,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
     }
     return allImages;
 }
+
 /** List repositories on a given Registry. */
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
     const allRepos: Repository[] = [];
@@ -75,6 +77,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     //Note these are ordered by default in alphabetical order
     return allRepos;
 }
+
 /** Sends a custon html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
@@ -104,6 +107,7 @@ export async function loginCredentials(registry: Registry): Promise<{ password: 
     const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
     return { 'password': acrRefreshToken, 'username': NULL_GUID };
 }
+
 /** Obtains tokens for using the Docker Registry v2 Api
  * @param registry The targeted Azure Container Registry
  * @param scope String determining the scope of the access token
@@ -117,6 +121,7 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
     const acrAccessToken = await acquireACRAccessToken(registry.loginServer, scope, acrRefreshToken)
     return { acrRefreshToken, acrAccessToken };
 }
+
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
@@ -134,6 +139,7 @@ export async function acquireAADTokens(session: AzureSession): Promise<{ aadAcce
         });
     });
 }
+
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
     const acrRefreshTokenResponse = await request.post(`https://${registryUrl}/oauth2/exchange`, {
@@ -149,6 +155,7 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
     return JSON.parse(acrRefreshTokenResponse).refresh_token;
 
 }
+
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
     const acrAccessTokenResponse = await request.post(`https://${registryUrl}/oauth2/token`, {

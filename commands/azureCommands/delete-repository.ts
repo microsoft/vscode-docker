@@ -24,7 +24,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         registry = context.registry;
     } else {
         registry = await quickPickACRRegistry();
-        const repository: Repository = await quickPickACRRepository(registry, 'Choose the repository you want to delete');
+        const repository: Repository = await quickPickACRRepository(registry, 'Select the repository you want to delete');
         repoName = repository.name;
     }
     const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${repoName} and its associated images? Enter yes to continue: `);
@@ -35,6 +35,8 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         vscode.window.showInformationMessage(`Successfully deleted repository ${Repository.name}`);
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
+        } else {
+            dockerExplorerProvider.refreshRegistries();
         }
     }
 }

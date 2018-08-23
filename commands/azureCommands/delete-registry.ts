@@ -19,7 +19,7 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
     if (context) {
         registry = context.registry;
     } else {
-        registry = await quickPickACRRegistry(false, 'Choose the registry you want to delete');
+        registry = await quickPickACRRegistry(false, 'Select the registry you want to delete');
     }
     const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${registry.name} and its associated images? Enter yes to continue: `);
     if (shouldDelete) {
