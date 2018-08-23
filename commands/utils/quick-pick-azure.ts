@@ -167,7 +167,7 @@ async function checkForValidResourcegroupName(resourceGroupName: string, resourc
     if (!check.isValid) { return check.message; }
     let resourceGroupStatus: boolean = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);
 
-    if (!resourceGroupStatus) {
+    if (resourceGroupStatus) {
         return 'This resource group is already in use';
     }
     return undefined;
