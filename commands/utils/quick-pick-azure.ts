@@ -9,7 +9,6 @@ import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
 import { skus } from '../../constants'
-import { QuickPickItemWithData } from '../../explorer/deploy/wizard';
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
 import * as acrTools from '../../utils/Azure/acrTools';

@@ -13,8 +13,7 @@ import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
 
 //General helpers
-/**
- * @param registry gets the subscription for a given registry
+/** Gets the subscription for a given registry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -26,7 +25,7 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
     return subscription;
 }
 
-export function getResourceGroupName(registry: Registry): any {
+export function getResourceGroupName(registry: Registry): string {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
 
@@ -53,6 +52,20 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
         allImages.push(image);
     }
     return allImages;
+}
+
+/** Returns the textual manifest for an ACR Image
+ * @param acrAccessToken If the token is not provided one will be created for the particular image, if doing multiple requests this should be provided
+ */
+export async function getRawImageManifest(image: AzureImage, acrAccessToken?: string): Promise<string> {
+    if (!acrAccessToken) {
+        acrAccessToken = (await acquireACRAccessTokenFromRegistry(image.registry, `repository:${image.repository}:pull`)).acrAccessToken;
+    }
+    return await request.get('https://' + image.registry.loginServer + '/v2/' + image.repository.name + `/manifests/${image.tag}`, {
+        auth: {
+            bearer: acrAccessToken
+        }
+    });
 }
 
 /** List repositories on a given Registry. */
