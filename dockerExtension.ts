@@ -1,11 +1,12 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { queueBuild } from './commands/acr-build';
 import { createRegistry } from './commands/azureCommands/create-registry';
@@ -73,7 +74,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
-    let azureAccount: AzureAccount;
+    let azureAccount: AzureAccount | undefined;
 
     // Set up extension variables
     registerUIExtensionVariables(ext);
@@ -115,8 +116,8 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
-    registerCommand('vscode-docker.configure', configure);
-    registerCommand('vscode-docker.image.build', buildImage);
+    registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this); });
+    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
     registerCommand('vscode-docker.image.push', pushImage);
@@ -180,13 +181,13 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     activateLanguageClient(ctx);
 }
 
-export function deactivate(): Thenable<void> {
+export async function deactivate(): Promise<void> {
     if (!client) {
         return undefined;
     }
     // perform cleanup
     Configuration.dispose();
-    return client.stop();
+    return await client.stop();
 }
 
 namespace Configuration {
@@ -194,12 +195,9 @@ namespace Configuration {
     let configurationListener: vscode.Disposable;
 
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
-        if (!params.items) {
-            return null;
-        }
         let result: vscode.WorkspaceConfiguration[] = [];
         for (let item of params.items) {
-            let config = null;
+            let config: vscode.WorkspaceConfiguration;
 
             if (item.scopeUri) {
                 config = vscode.workspace.getConfiguration(item.section, client.protocol2CodeConverter.asUri(item.scopeUri));
@@ -252,7 +250,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
         },
-        middleware: middleware as Middleware
+        middleware: middleware
     }
 
     client = new LanguageClient("dockerfile-langserver", "Dockerfile Language Server", serverOptions, clientOptions);

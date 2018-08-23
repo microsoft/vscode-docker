@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as cp from 'child_process';
 import * as fs from 'fs';
 import os = require('os');
@@ -29,7 +34,8 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
         docker.getExposedPorts(imageToStart.Id).then((ports: string[]) => {
             let options = `--rm ${interactive ? '-it' : '-d'}`;
             if (ports.length) {
-                const portMappings = ports.map((port) => `-p ${port}:${port}`);
+                const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`); //'port' is of the form number/protocol, eg. 8080/udp.
+                // In the command, the host port has just the number (mentioned in the EXPOSE step), while the destination port can specify the protocol too
                 options += ` ${portMappings.join(' ')}`;
             }
 

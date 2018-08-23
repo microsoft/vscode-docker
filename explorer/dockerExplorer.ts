@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from 'vscode';
 import { docker } from '../commands/utils/docker-endpoint';
 import { AzureAccount } from '../typings/azure-account.api';
@@ -11,16 +16,16 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     private _imagesNode: RootNode;
     private _containersNode: RootNode;
     private _registriesNode: RootNode
-    private _azureAccount: AzureAccount;
+    private _azureAccount: AzureAccount | undefined;
 
-    constructor(azureAccount: AzureAccount) {
+    constructor(azureAccount: AzureAccount | undefined) {
         this._azureAccount = azureAccount;
     }
 
     public refresh(): void {
-        this._onDidChangeTreeData.fire(this._imagesNode);
-        this._onDidChangeTreeData.fire(this._containersNode);
-        this._onDidChangeTreeData.fire(this._registriesNode);
+        this.refreshImages();
+        this.refreshContainers();
+        this.refreshRegistries();
     }
 
     public refreshImages(): void {
@@ -28,7 +33,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     }
 
     public refreshContainers(): void {
-        this._onDidChangeTreeData.fire(this._imagesNode);
+        this._onDidChangeTreeData.fire(this._containersNode);
     }
 
     public refreshRegistries(): void {
