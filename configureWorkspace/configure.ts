@@ -689,6 +689,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
     let serviceNameAndPathRelativeToOutput: string;
     {
+        // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
         if (platformType.toLowerCase().includes('.net')) {
             serviceNameAndPathRelativeToRoot = await findCSProjFile(rootFolderPath);
