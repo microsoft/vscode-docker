@@ -95,11 +95,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
             break;
         }
     }
-
-    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
-    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
-    registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
-
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
@@ -109,39 +104,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
-    registerCommand('vscode-docker.configure', configure);
-    registerImageCommands();
-    registerContainerCommands();
-    registerComposeCommands();
-
-    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
-        if (context) {
-            if (azureAccount) {
-                const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
-                const result = await wizard.run();
-                if (result.status === 'Faulted') {
-                    throw result.error;
-                } else if (result.status === 'Cancelled') {
-                    throw new UserCancelledError();
-                }
-            } else {
-                const open: vscode.MessageItem = { title: "View in Marketplace" };
-                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
-                if (response === open) {
-                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
-                }
-            }
-        }
-    });
-
-    registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
-        browseDockerHub(context);
-    });
-    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
-        browseAzurePortal(context);
-    });
+    registerDockerCommands(azureAccount);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
@@ -152,7 +115,33 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     activateLanguageClient(ctx);
 }
 
-function registerContainerCommands(): void {
+async function createWebApp(context?: AzureImageNode | DockerHubImageNode, azureAccount?: AzureAccount): Promise<void> {
+    if (context) {
+        if (azureAccount) {
+            const azureAccountWrapper = new AzureAccountWrapper(ext.context, azureAccount);
+            const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, context);
+            const result = await wizard.run();
+            if (result.status === 'Faulted') {
+                throw result.error;
+            } else if (result.status === 'Cancelled') {
+                throw new UserCancelledError();
+            }
+        } else {
+            const open: vscode.MessageItem = { title: "View in Marketplace" };
+            const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+            if (response === open) {
+                opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+            }
+        }
+    }
+}
+
+function registerDockerCommands(azureAccount: AzureAccount): void {
+    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
+    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
+    registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
+
+    registerCommand('vscode-docker.configure', configure);
     registerCommand('vscode-docker.container.start', startContainer);
     registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
     registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
@@ -161,22 +150,24 @@ function registerContainerCommands(): void {
     registerCommand('vscode-docker.container.show-logs', showLogsContainer);
     registerCommand('vscode-docker.container.open-shell', openShellContainer);
     registerCommand('vscode-docker.container.remove', removeContainer);
-}
-
-function registerImageCommands(): void {
     registerCommand('vscode-docker.image.build', buildImage);
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
     registerCommand('vscode-docker.image.push', pushImage);
     registerCommand('vscode-docker.image.tag', tagImage);
-
-}
-
-function registerComposeCommands(): void {
     registerCommand('vscode-docker.compose.up', composeUp);
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
+    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => await createWebApp(context, azureAccount));
+    registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
+    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+        browseDockerHub(context);
+    });
+    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
+        browseAzurePortal(context);
+    });
+
 }
 
 function consolidateDefaultRegistrySettings(): void {
