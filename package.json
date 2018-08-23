@@ -46,11 +46,17 @@
     "onCommand:vscode-docker.compose.restart",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.createWebApp",
+    "onCommand:vscode-docker.create-ACR-Registry",
     "onCommand:vscode-docker.system.prune",
     "onCommand:vscode-docker.dockerHubLogout",
+    "onCommand:vscode-docker.queuebuild",
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
+    "onCommand:vscode-docker.delete-ACR-Registry",
+    "onCommand:vscode-docker.delete-ACR-Repository",
+    "onCommand:vscode-docker.delete-ACR-Image",
+    "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -71,6 +77,11 @@
         {
           "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
+          "group": "docker"
+        },
+        {
+          "when": "editorLangId == dockerfile",
+          "command": "vscode-docker.queueBuild",
           "group": "docker"
         },
         {
@@ -108,6 +119,11 @@
         {
           "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
           "command": "vscode-docker.image.build",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
+          "command": "vscode-docker.queueBuild",
           "group": "docker"
         },
         {
@@ -188,8 +204,32 @@
           "when": "view == dockerExplorer && viewItem =~ /^(azureImageNode|dockerHubImageTag)$/"
         },
         {
+          "command": "vscode-docker.create-ACR-Registry",
+          "when": "view == dockerExplorer && viewItem == azureRegistryRootNode"
+        },
+        {
           "command": "vscode-docker.dockerHubLogout",
           "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
+        },
+        {
+          "command": "vscode-docker.pullFromAzure",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
+        },
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "view == dockerExplorer && viewItem == dockerHubImageTag"
+        },
+        {
+          "command": "vscode-docker.browseDockerHub",
+          "when": "view == dockerExplorer && viewItem == dockerHubRepository"
+        },
+        {
+          "command": "vscode-docker.delete-ACR-Image",
+          "when": "view == dockerExplorer && viewItem == azureImageNode"
+        },
+        {
+          "command": "vscode-docker.delete-ACR-Registry",
+          "when": "view == dockerExplorer && viewItem == azureRegistryNode"
         },
         {
           "command": "vscode-docker.browseDockerHub",
@@ -492,6 +532,21 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.create-ACR-Registry",
+        "title": "Create Registry",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.delete-ACR-Repository",
+        "title": "Delete Azure Repository",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.delete-ACR-Image",
+        "title": "Delete Azure Image",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.image.push",
         "title": "Push",
         "description": "Push an image to a registry",
@@ -521,6 +576,11 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.pullFromAzure",
+        "title": "Pull Image from Azure",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.dockerHubLogout",
         "title": "Docker Hub Logout",
         "category": "Docker"
@@ -533,6 +593,21 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.delete-ACR-Registry",
+        "title": "Delete Azure Registry",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.delete-ACR-Image",
+        "title": "Delete Azure Image",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.queueBuild",
+        "title": "Lightweight Build",
         "category": "Docker"
       }
     ],
@@ -603,6 +678,7 @@
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
+    "tar": "^4.4.6",
     "vscode-azureextensionui": "^0.16.6",
     "vscode-extension-telemetry": "0.0.18",
     "vscode-languageclient": "^4.4.0"

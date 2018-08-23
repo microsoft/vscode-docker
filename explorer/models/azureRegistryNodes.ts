@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import { SubscriptionModels } from 'azure-arm-resource';
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as request from 'request-promise';
@@ -15,6 +15,7 @@ import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
+import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
     private _azureAccount: AzureAccount;
@@ -42,9 +43,17 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
-        const repoNodes: AzureRepositoryNode[] = [];
-        let node: AzureRepositoryNode;
+    public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
+        const registryChildNodes: NodeBase[] = [];
+
+        let iconPath = {
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'buildTasks_light.svg'),
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'buildTasks_dark.svg')
+        };
+
+        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+        let taskNode = new TaskRootNode("Build Tasks", "taskRootNode", element.subscription, element.azureAccount, element.registry, iconPath);
+        registryChildNodes.push(taskNode);
 
         const tenantId: string = element.subscription.tenantId;
         if (!this._azureAccount) {
@@ -53,6 +62,8 @@ export class AzureRegistryNode extends NodeBase {
 
         const session: AzureSession = this._azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         const { accessToken, refreshToken } = await acquireToken(session);
+
+        let node: AzureRepositoryNode;
 
         if (accessToken && refreshToken) {
             let refreshTokenARC;
@@ -95,31 +106,29 @@ export class AzureRegistryNode extends NodeBase {
             }, (err, httpResponse, body) => {
                 if (body.length > 0) {
                     const repositories = JSON.parse(body).repositories;
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < repositories.length; i++) {
-                        node = new AzureRepositoryNode(repositories[i], "azureRepositoryNode");
+                    for (let repo of repositories) {
+                        node = new AzureRepositoryNode(repo, "azureRepositoryNode");
                         node.accessTokenARC = accessTokenARC;
                         node.azureAccount = element.azureAccount;
                         node.refreshTokenARC = refreshTokenARC;
                         node.registry = element.registry;
                         node.repository = element.label;
                         node.subscription = element.subscription;
-                        repoNodes.push(node);
+                        node.parent = element;
+                        registryChildNodes.push(node);
                     }
                 }
             });
+            //Note these are ordered by default in alphabetical order
         }
-        //Note these are ordered by default in alphabetical order
-        return repoNodes;
+        return registryChildNodes;
     }
 }
-
 export class AzureRepositoryNode extends NodeBase {
-
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
-        public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+        public readonly iconPath: AzureRegistryNode['iconPath'] = {
             light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
             dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
         }
@@ -133,6 +142,7 @@ export class AzureRepositoryNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public repository: string;
     public subscription: SubscriptionModels.Subscription;
+    public parent: NodeBase;
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -199,12 +209,11 @@ export class AzureRepositoryNode extends NodeBase {
             });
 
             const pool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < tags.length; i++) {
+            for (let tag of tags) {
                 pool.addTask(async () => {
                     let data: string;
                     try {
-                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tags[i]}`, {
+                        data = await request.get('https://' + element.repository + '/v2/' + element.label + `/manifests/${tag}`, {
                             auth: {
                                 bearer: accessTokenARC
                             }
@@ -216,11 +225,12 @@ export class AzureRepositoryNode extends NodeBase {
                     if (data) {
                         //Acquires each image's manifest to acquire build time.
                         let manifest = JSON.parse(data);
-                        node = new AzureImageNode(`${element.label}:${tags[i]}`, 'azureImageNode');
+                        node = new AzureImageNode(`${element.label}:${tag}`, 'azureImageNode');
                         node.azureAccount = element.azureAccount;
                         node.registry = element.registry;
                         node.serverUrl = element.repository;
                         node.subscription = element.subscription;
+                        node.parent = element;
                         node.created = moment(new Date(JSON.parse(manifest.history[0].v1Compatibility).created)).fromNow();
                         imageNodes.push(node);
                     }
@@ -250,6 +260,7 @@ export class AzureImageNode extends NodeBase {
     public registry: ContainerModels.Registry;
     public serverUrl: string;
     public subscription: SubscriptionModels.Subscription;
+    public parent: NodeBase;
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;
@@ -299,7 +310,7 @@ async function acquireToken(session: AzureSession): Promise<{ accessToken: strin
         const credentials: any = session.credentials;
         const environment: any = session.environment;
         // tslint:disable-next-line:no-function-expression // Grandfathered in
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: { accessToken: string; refreshToken: string; }): void {
+        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: any): any {
             if (err) {
                 reject(err);
             } else {

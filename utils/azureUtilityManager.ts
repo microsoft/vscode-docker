@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import { ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { ServiceClientCredentials } from 'ms-rest';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
-import { AzureAccount } from '../typings/azure-account.api';
+import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
 
 /* Singleton for facilitating communication with Azure account services by providing extended shared
@@ -41,6 +42,12 @@ export class AzureUtilityManager {
     public getAccount(): AzureAccount {
         if (this.azureAccount) { return this.azureAccount; }
         throw new Error('Azure account is not present, you may have forgotten to call setAccount');
+    }
+
+    public getSession(subscription: SubscriptionModels.Subscription): AzureSession {
+        const tenantId: string = subscription.tenantId;
+        const azureAccount: AzureAccount = this.getAccount();
+        return azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
@@ -96,8 +103,8 @@ export class AzureUtilityManager {
         if (sortFunction && registries.length > 1) {
             registries.sort(sortFunction);
         }
-
-        return registries;
+        //Return only non classic registries
+        return registries.filter((registry) => { return !registry.sku.tier.includes('Classic') });
     }
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
@@ -129,6 +136,13 @@ export class AzureUtilityManager {
         }
 
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
+    }
+
+    public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
+        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const client = new SubscriptionClient(credential);
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        return locations;
     }
 
     //CHECKS

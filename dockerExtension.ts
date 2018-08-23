@@ -8,6 +8,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
+import { queueBuild } from './commands/acr-build';
+import { createRegistry } from './commands/azureCommands/create-registry';
+import { deleteAzureImage } from './commands/azureCommands/delete-image';
+import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
+import { deleteRepository } from './commands/azureCommands/delete-repository';
+import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -64,6 +70,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
+// tslint:disable-next-line:max-func-body-length
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
@@ -115,6 +122,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.image.remove', removeImage);
     registerCommand('vscode-docker.image.push', pushImage);
     registerCommand('vscode-docker.image.tag', tagImage);
+    registerCommand('vscode-docker.queueBuild', queueBuild);
     registerCommand('vscode-docker.container.start', startContainer);
     registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
     registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
@@ -127,7 +135,8 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
+    registerCommand('vscode-docker.deleteAzureImage', deleteAzureImage);
+    registerCommand('vscode-docker.pullFromAzure', pullFromAzure);
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
         if (context) {
             if (azureAccount) {
@@ -147,6 +156,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
                 }
             }
         }
+
     });
 
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
@@ -160,7 +170,12 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
     if (azureAccount) {
+        registerCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
+        registerCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
+        registerCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
+        registerCommand('vscode-docker.create-ACR-Registry', createRegistry);
         AzureUtilityManager.getInstance().setAccount(azureAccount);
+
     }
 
     activateLanguageClient(ctx);

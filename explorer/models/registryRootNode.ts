@@ -3,8 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { SubscriptionModels } from 'azure-arm-resource';
+import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as path from 'path';
@@ -151,6 +154,7 @@ export class RegistryRootNode extends NodeBase {
                     } catch (error) {
                         vscode.window.showErrorMessage(parseError(error).message);
                     }
+
                 });
             }
             await subPool.runAll();
