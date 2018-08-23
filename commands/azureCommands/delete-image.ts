@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
+import { DialogResponses } from "vscode-azureextensionui";
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureImageNode } from '../../explorer/models/azureRegistryNodes';
+import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
@@ -33,8 +35,8 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    const shouldDelete = await quickPicks.confirmUserIntent(`Are you sure you want to delete ${repoName}:${tag}? Enter yes to continue: `);
-    if (shouldDelete) {
+    const shouldDelete = await ext.ui.showWarningMessage(`Are you sure you want to delete ${repoName}:${tag}? Enter yes to continue: `, { modal: true }, DialogResponses.deleteResponse, DialogResponses.cancel);
+    if (shouldDelete === DialogResponses.deleteResponse) {
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/tags/${tag}`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
