@@ -148,7 +148,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     if (azureAccount) {
         AzureUtilityManager.getInstance().setAccount(azureAccount);
     }
-
+    consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
 }
 
@@ -177,6 +177,23 @@ function registerComposeCommands(): void {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
+}
+
+function consolidateDefaultRegistrySettings(): void {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+    let defaultRegistry = configOptions.get('defaultRegistry', '');
+
+    if (defaultRegistry) {
+        if (defaultRegistryPath) { // combine both the settings, then notify the user
+            configOptions.update('defaultRegistryPath', `${defaultRegistry}/${defaultRegistryPath}`, false);
+        }
+        if (!defaultRegistryPath) {// assign defaultRegistry to defaultRegistryPath
+            configOptions.update('defaultRegistryPath', `${defaultRegistry}`, false);
+        }
+        configOptions.update('defaultRegistry', '', false);
+        vscode.window.showInformationMessage("Moving forward, we shall deprecate the use of the defaultRegistry setting, combining it with defaultRegistryPath.")
+    }
 }
 
 export function deactivate(): Thenable<void> {

@@ -242,12 +242,12 @@
         "docker.defaultRegistry": {
           "type": "string",
           "default": "",
-          "description": "Default registry when tagging an image, empty string will target Docker Hub when pushing."
+          "description": "(Deprecated) Default registry when tagging an image, empty string will target Docker Hub when pushing."
         },
         "docker.defaultRegistryPath": {
           "type": "string",
           "default": "",
-          "description": "Path within registry to push to."
+          "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
         },
         "docker.showExplorer": {
           "type": "boolean",
