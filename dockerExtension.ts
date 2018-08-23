@@ -24,7 +24,7 @@ import { tagImage } from './commands/tag-image';
 import { docker } from './commands/utils/docker-endpoint';
 import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
-import { configure } from './configureWorkspace/configure';
+import { configure, configureApi, ConfigureApiOptions } from './configureWorkspace/configure';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
@@ -64,6 +64,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
+// tslint:disable-next-line:max-func-body-length
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     const installedExtensions: any[] = vscode.extensions.all;
     const outputChannel = util.getOutputChannel();
@@ -110,6 +111,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this); });
+    registerCommand('vscode-docker.api.configure', async function (this: IActionContext, options: ConfigureApiOptions): Promise<void> {
+        await configureApi(this, options);
+    });
     registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
@@ -127,12 +131,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-
-    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageNode | DockerHubImageNode) => {
-        if (context) {
+    registerCommand('vscode-docker.createWebApp', async (node?: AzureImageNode | DockerHubImageNode) => {
+        if (node) {
             if (azureAccount) {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, context);
+                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, node);
                 const result = await wizard.run();
                 if (result.status === 'Faulted') {
                     throw result.error;
@@ -148,13 +151,12 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
             }
         }
     });
-
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
-        browseDockerHub(context);
+    registerCommand('vscode-docker.browseDockerHub', (node?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+        browseDockerHub(node);
     });
-    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
-        browseAzurePortal(context);
+    registerCommand('vscode-docker.browseAzurePortal', (node?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
+        browseAzurePortal(node);
     });
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));

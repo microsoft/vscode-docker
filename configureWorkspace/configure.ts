@@ -22,6 +22,7 @@ export type ConfigureTelemetryProperties = {
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
 
+// Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
 // tslint:disable-next-line:max-func-body-length
 function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
     switch (platform.toLowerCase()) {
@@ -538,7 +539,7 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
         if (json.project && json.project.artifactid) {
             pkg.artifactName = `target/${json.project.artifactid}-${pkg.version}.jar`;
         }
-    } else if (fs.existsSync(gradlePath)) {
+    } else if (await fse.pathExists(gradlePath)) {
         foundPath = gradlePath;
         const json = await gradleParser.parseFile(gradlePath);
 
@@ -603,10 +604,34 @@ const YES_OR_NO_PROMPTS: vscode.MessageItem[] = [
     }
 ];
 
-// tslint:disable-next-line:max-func-body-length // Because of nested functions
-export async function configure(actionContext: IActionContext, rootFolderPath?: string): Promise<void> {
-    let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
+export interface ConfigureApiOptions {
+    /**
+     * Root folder from which to search for .csproj, package.json, .pom or .gradle files
+     */
+    rootPath: string;
 
+    /**
+     * Output folder for the docker files. Relative paths in the Dockerfile we will calculated based on this folder
+     */
+    outputFolder: string;
+
+    /**
+     * Platform
+     */
+    platform?: Platform;
+
+    /**
+     * Port to expose
+     */
+    port?: string;
+
+    /**
+     * The OS for the images. Currently only needed for .NET platforms.
+     */
+    os?: OS;
+}
+
+export async function configure(actionContext: IActionContext, rootFolderPath?: string): Promise<void> {
     if (!rootFolderPath) {
         let folder: vscode.WorkspaceFolder;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
@@ -626,29 +651,57 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
         rootFolderPath = folder.uri.fsPath;
     }
 
-    const platformType: Platform = await quickPickPlatform();
+    return configureCore(
+        actionContext,
+        {
+            rootPath: rootFolderPath,
+            outputFolder: rootFolderPath
+        });
+}
+
+export async function configureApi(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
+    return configureCore(actionContext, options);
+}
+
+// tslint:disable-next-line:max-func-body-length // Because of nested functions
+async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
+    let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
+    let rootFolderPath: string = options.rootPath;
+    let outputFolder = options.outputFolder;
+
+    const platformType: Platform = options.platform || await quickPickPlatform();
     properties.configurePlatform = platformType;
 
-    let os: OS | undefined;
-    if (platformType.toLowerCase().includes('.net')) {
+    let os: OS | undefined = options.os;
+    if (!os && platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
     }
     properties.configureOs = os;
 
-    let port: string;
-    if (platformType.toLowerCase().includes('.net')) {
-        port = await promptForPort(80);
-    } else {
-        port = await promptForPort(3000);
+    let port: string = options.port;
+    if (!port) {
+        if (platformType.toLowerCase().includes('.net')) {
+            port = await promptForPort(80);
+        } else {
+            port = await promptForPort(3000);
+        }
     }
 
-    let serviceNameAndRelativePath: string;
-    if (platformType.toLowerCase().includes('.net')) {
-        serviceNameAndRelativePath = await findCSProjFile(rootFolderPath);
-        properties.packageFileType = '.csproj';
-        properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndRelativePath);
-    } else {
-        serviceNameAndRelativePath = path.basename(rootFolderPath).toLowerCase();
+    let serviceNameAndPathRelativeToOutput: string;
+    {
+        // Scope serviceNameAndPathRelativeToRoot only to this block of code
+        let serviceNameAndPathRelativeToRoot: string;
+        if (platformType.toLowerCase().includes('.net')) {
+            serviceNameAndPathRelativeToRoot = await findCSProjFile(rootFolderPath);
+            properties.packageFileType = '.csproj';
+            properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
+        } else {
+            serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
+        }
+
+        // We need paths in the Dockerfile to be relative to the output folder, not the root
+        serviceNameAndPathRelativeToOutput = path.relative(outputFolder, path.join(rootFolderPath, serviceNameAndPathRelativeToRoot));
+        serviceNameAndPathRelativeToOutput = serviceNameAndPathRelativeToOutput.replace(/\\/g, '/');
     }
 
     let packageContents: PackageJson = getDefaultPackageJson();
@@ -687,9 +740,9 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
     );
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
-        const workspacePath = path.join(rootFolderPath, fileName);
+        const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
-        if (fs.existsSync(workspacePath)) {
+        if (await fse.pathExists(filePath)) {
             const response: vscode.MessageItem = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
@@ -699,13 +752,14 @@ export async function configure(actionContext: IActionContext, rootFolderPath?: 
         }
 
         if (writeFile) {
-            fs.writeFileSync(workspacePath, generatorFunction(serviceNameAndRelativePath, platformType, os, port, packageContents), { encoding: 'utf8' });
+            // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
+            fs.writeFileSync(filePath, generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageContents), { encoding: 'utf8' });
             filesWritten.push(fileName);
         }
     }
 
     function getSubfolderDepth(filePath: string): string {
-        let relativeToRoot = path.relative(rootFolderPath, path.resolve(rootFolderPath, filePath));
+        let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
         let matches = relativeToRoot.match(/[\/\\]/g);
         let depth: number = matches ? matches.length : 0;
         return String(depth);
