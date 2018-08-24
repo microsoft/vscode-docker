@@ -76,13 +76,13 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let source = sourceLocation.substring(1);
     let current = process.cwd();
     process.chdir(source);
-    await fs.readdir(source, (err, items) => {
+    fs.readdir(source, (err, items) => {
+        process.chdir(current);
         items = filter(items);
         tar.c(
             {},
             items
         ).pipe(fs.createWriteStream(tarFilePath));
-        process.chdir(current);
     });
 
     status.appendLine("   Getting Build Source Upload Url ");
@@ -109,10 +109,11 @@ function getTempSourceArchivePath(): string {
 }
 
 function filter(list: string[]): string[] {
+    let result = [];
     for (let file of list) {
-        if (vcsIgnoreList.indexOf(file) !== -1) {
-            list.splice(list.indexOf(file), 1);
+        if (vcsIgnoreList.indexOf(file) === -1) {
+            result.push(file);
         }
     }
-    return list;
+    return result;
 }
