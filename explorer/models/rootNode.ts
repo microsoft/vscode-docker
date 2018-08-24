@@ -68,9 +68,9 @@ export class RootNode extends NodeBase {
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
                 images.sort((img1, img2) => {
-                    if (img1.Id < img2.Id) {
+                    if (img1.Id > img2.Id) {
                         return -1;
-                    } else if (img1.Id > img2.Id) {
+                    } else if (img1.Id < img2.Id) {
                         return 1;
                     } else {
                         return 0;
