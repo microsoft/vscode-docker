@@ -8,6 +8,8 @@ import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
 import * as assert from 'assert';
+import { ext } from "../extensionVariables";
+import { TestKeytar } from "../test/testKeytar";
 
 export namespace constants {
     export const testOutputName = 'testOutput';
@@ -61,11 +63,15 @@ export function testInEmptyFolder(name: string, func?: () => Promise<void>): voi
 // Runs before all tests
 suiteSetup(function (this: mocha.IHookCallbackContext): void {
     console.log('global.test.ts: suiteSetup');
+
+    // Otherwise the app can blocking asking for keychain access
+    ext.keytar = new TestKeytar();
 });
 
 // Runs after all tests
 suiteTeardown(function (this: mocha.IHookCallbackContext): void {
     console.log('global.test.ts: suiteTestdown');
+
     if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {
         fse.emptyDir(testRootFolder);
     }

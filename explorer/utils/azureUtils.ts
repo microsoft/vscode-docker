@@ -5,15 +5,15 @@
 
 import * as opn from 'opn';
 import { AzureSession } from '../../typings/azure-account.api';
-import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
+import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 
-export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode): void {
+export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
 
     if (node) {
         const tenantId: string = node.subscription.tenantId;
         const session: AzureSession = node.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         let url: string = `${session.environment.portalUrl}/${tenantId}/#resource${node.registry.id}`;
-        if (node.contextValue === 'azureImageNode' || node.contextValue === 'azureRepositoryNode') {
+        if (node.contextValue === AzureImageTagNode.contextValue || node.contextValue === AzureRepositoryNode.contextValue) {
             url = `${url}/repository`;
         }
         opn(url);

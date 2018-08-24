@@ -35,14 +35,16 @@ import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from "./explorer/deploy/util";
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
-import { AzureImageNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
-import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
+import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
+import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
+import { Keytar } from './utils/keytar';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -64,25 +66,29 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
-// tslint:disable-next-line:max-func-body-length
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    const installedExtensions: any[] = vscode.extensions.all;
-    const outputChannel = util.getOutputChannel();
-    let azureAccount: AzureAccount | undefined;
-
-    // Set up extension variables
+function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
-    ext.outputChannel = outputChannel;
+    ext.outputChannel = util.getOutputChannel();
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
+    if (!ext.keytar) {
+        ext.keytar = Keytar.tryCreate();
+    }
+}
+
+export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+    const installedExtensions: any[] = vscode.extensions.all;
+    let azureAccount: AzureAccount | undefined;
+
+    initializeExtensionVariables(ctx);
 
     // tslint:disable-next-line:prefer-for-of // Grandfathered in
     for (let i = 0; i < installedExtensions.length; i++) {
@@ -131,11 +137,11 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-    registerCommand('vscode-docker.createWebApp', async (node?: AzureImageNode | DockerHubImageNode) => {
-        if (node) {
+    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => {
+        if (context) {
             if (azureAccount) {
                 const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(outputChannel, azureAccountWrapper, node);
+                const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, context);
                 const result = await wizard.run();
                 if (result.status === 'Faulted') {
                     throw result.error;
@@ -152,12 +158,14 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         }
     });
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-    registerCommand('vscode-docker.browseDockerHub', (node?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
-        browseDockerHub(node);
+    registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
+        browseDockerHub(context);
     });
-    registerCommand('vscode-docker.browseAzurePortal', (node?: AzureRegistryNode | AzureRepositoryNode | AzureImageNode) => {
-        browseAzurePortal(node);
+    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode) => {
+        browseAzurePortal(context);
     });
+    registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
+    registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 

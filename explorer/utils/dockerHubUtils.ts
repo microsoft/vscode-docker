@@ -7,9 +7,9 @@ import * as keytarType from 'keytar';
 import * as opn from 'opn';
 import request = require('request-promise');
 import * as vscode from 'vscode';
-import { keytarConstants } from '../../constants';
-import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
-import { getCoreNodeModule } from './utils';
+import { keytarConstants, PAGE_SIZE } from '../../constants';
+import { ext } from '../../extensionVariables';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 
 let _token: Token;
 
@@ -84,13 +84,32 @@ export interface Image {
     variant: any
 }
 
-export async function dockerHubLogout(): Promise<void> {
+export interface ManifestFsLayer {
+    blobSum: string;
+}
 
-    const keytar: typeof keytarType = getCoreNodeModule('keytar');
-    if (keytar) {
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+export interface ManifestHistory {
+    v1Compatibility: string; // stringified ManifestHistoryV1Compatibility
+}
+
+export interface ManifestHistoryV1Compatibility {
+    created: string;
+}
+
+export interface Manifest {
+    name: string;
+    tag: string;
+    architecture: string;
+    fsLayers: ManifestFsLayer[];
+    history: ManifestHistory[];
+    schemaVersion: number;
+}
+
+export async function dockerHubLogout(): Promise<void> {
+    if (ext.keytar) {
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
     _token = null;
 }
@@ -109,7 +128,6 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
     }
 
     return;
-
 }
 
 export function setDockerHubToken(token: string): void {
@@ -137,7 +155,6 @@ async function login(username: string, password: string): Promise<Token> {
     }
 
     return t;
-
 }
 
 export async function getUser(): Promise<User> {
@@ -162,7 +179,6 @@ export async function getUser(): Promise<User> {
     }
 
     return u;
-
 }
 
 export async function getRepositories(username: string): Promise<Repository[]> {
@@ -215,7 +231,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
     let options = {
         method: 'GET',
-        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=100&page=1`,
+        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
             Authorization: 'JWT ' + _token.token
         },
@@ -230,22 +246,21 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
-export function browseDockerHub(node?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
 
     if (node) {
         let url: string = 'https://hub.docker.com/';
         const repo: RepositoryInfo = node.repository;
         switch (node.contextValue) {
-            case 'dockerHubNamespace':
+            case DockerHubOrgNode.contextValue:
                 url = `${url}u/${node.userName}`;
                 break;
-            case 'dockerHubRepository':
+            case DockerHubRepositoryNode.contextValue:
                 url = `${url}r/${node.repository.namespace}/${node.repository.name}`;
                 break;
-            case 'dockerHubImageTag':
+            case DockerHubImageTagNode.contextValue:
                 url = `${url}r/${node.repository.namespace}/${node.repository.name}/tags`;
                 break;
             default:
