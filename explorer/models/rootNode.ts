@@ -26,7 +26,7 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _imageCache: Docker.ImageDesc[];
+    private _sortedImageCache: Docker.ImageDesc[];
     private _imageDebounceTimer: NodeJS.Timer;
     private _imagesNode: RootNode;
     private _containerCache: Docker.ContainerDesc[];
@@ -77,16 +77,16 @@ export class RootNode extends NodeBase {
                     }
                 });
 
-                if (!this._imageCache) {
-                    this._imageCache = images;
+                if (!this._sortedImageCache) {
+                    this._sortedImageCache = images;
                     return;
                 }
 
                 let imagesAsJson = JSON.stringify(images);
-                let cacheAsJson = JSON.stringify(this._imageCache);
+                let cacheAsJson = JSON.stringify(this._sortedImageCache);
                 if (imagesAsJson !== cacheAsJson) {
                     this.eventEmitter.fire(this._imagesNode);
-                    this._imageCache = images;
+                    this._sortedImageCache = images;
                 }
 
             }, refreshInterval);
