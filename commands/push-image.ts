@@ -42,7 +42,7 @@ export async function pushImage(context?: ImageNode): Promise<void> {
         }
         if (userPrefixPreference === DialogResponses.yes) {
             await configOptions.update('defaultRegistryPath', prefix, vscode.ConfigurationTarget.Workspace);
-            await vscode.window.showInformationMessage('You can change this value at any time via the docker.defaultRegistryPath setting.');
+            vscode.window.showInformationMessage('Default registry path saved. You can change this value at any time via the docker.defaultRegistryPath setting.');
         }
     }
     if (imageToPush) {
