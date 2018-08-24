@@ -1,14 +1,16 @@
 # Azure Docker API (Preview)
 
-The following extension commands are supported for programatic use. If a parameter is not specified, the user will be prompted for the value. You must list 'PeterJausovec.vscode-docker' under the 'extensionDependencies' section of your package.json to ensure these apis are available to your extension.  (Note: the publisher will soon be changing, and although we will attempt to keep this change from affecting users, it would be good to contact us if you are using this API so we can inform you of the change.)
+The following extension commands are supported for programatic use. If a parameter is not specified, the user will be prompted for the value. You must list 'PeterJausovec.vscode-docker' under the 'extensionDependencies' section of your package.json to ensure these apis are available to your extension.  (**Note: the publisher will soon be changing, and although we will attempt to keep this change from affecting dependents, it would be good to contact us if you are using this API so we can inform you of the change.**)
 
-> NOTE: The docker extension is still in preview and the apis are subject to change.
+> NOTE: The docker extension is still in preview and the APIs are subject to change.
 
 Commands:
 
 * [Configure (Add Docker Files to Workspace)](#configure-add-docker-files-to-workspace)
 
 ## Configure (Add Docker Files to Workspace)
+
+### Command ID: `vscode-docker.api.configure`
 
 ### Parameters
 
