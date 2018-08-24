@@ -63,8 +63,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
         test("Connect, no auth", async function (this: Context) {
             let input = new TestUserInput([
                 'http://localhost:5900',
-                'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
-                'fake password'
+                ''
             ]);
             ext.ui = input;
             await commands.executeCommand('vscode-docker.connectCustomRegistry');
@@ -82,8 +81,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
                 let input = new TestUserInput([
                     'http://localhost:5900',
-                    'fake username', // TODO: TestUserInput doesn't currently allow '' as an input
-                    'fake password'
+                    ''
                 ]);
                 ext.ui = input;
                 await commands.executeCommand('vscode-docker.connectCustomRegistry');
