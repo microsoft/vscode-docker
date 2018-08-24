@@ -254,15 +254,15 @@
       "type": "object",
       "title": "Docker configuration options",
       "properties": {
-        "docker.defaultRegistry": {
-          "type": "string",
-          "default": "",
-          "description": "Default registry when tagging an image, empty string will target Docker Hub when pushing."
-        },
         "docker.defaultRegistryPath": {
           "type": "string",
           "default": "",
-          "description": "Path within registry to push to."
+          "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
+        },
+        "docker.askToSaveRegistryPath": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask the user whether to store the path prefix in defaultRegsitryPath on first push"
         },
         "docker.showExplorer": {
           "type": "boolean",

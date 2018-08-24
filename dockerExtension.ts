@@ -102,11 +102,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
             break;
         }
     }
-
-    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
-    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
-    registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
-
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
     const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
@@ -116,15 +111,48 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
+    registerDockerCommands(azureAccount);
+
+    ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
+
+    if (azureAccount) {
+        AzureUtilityManager.getInstance().setAccount(azureAccount);
+    }
+    await consolidateDefaultRegistrySettings();
+    activateLanguageClient(ctx);
+}
+
+async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode, azureAccount?: AzureAccount): Promise<void> {
+    if (context) {
+        if (azureAccount) {
+            const azureAccountWrapper = new AzureAccountWrapper(ext.context, azureAccount);
+            const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, context);
+            const result = await wizard.run();
+            if (result.status === 'Faulted') {
+                throw result.error;
+            } else if (result.status === 'Cancelled') {
+                throw new UserCancelledError();
+            }
+        } else {
+            const open: vscode.MessageItem = { title: "View in Marketplace" };
+            const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
+            if (response === open) {
+                opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+            }
+        }
+    }
+}
+
+function registerDockerCommands(azureAccount: AzureAccount): void {
+    dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
+    vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
+    registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
+
     registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this); });
     registerCommand('vscode-docker.api.configure', async function (this: IActionContext, options: ConfigureApiOptions): Promise<void> {
         await configureApi(this, options);
     });
-    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
-    registerCommand('vscode-docker.image.inspect', inspectImage);
-    registerCommand('vscode-docker.image.remove', removeImage);
-    registerCommand('vscode-docker.image.push', pushImage);
-    registerCommand('vscode-docker.image.tag', tagImage);
+
     registerCommand('vscode-docker.container.start', startContainer);
     registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
     registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
@@ -133,30 +161,16 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.container.show-logs', showLogsContainer);
     registerCommand('vscode-docker.container.open-shell', openShellContainer);
     registerCommand('vscode-docker.container.remove', removeContainer);
+    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
+    registerCommand('vscode-docker.image.inspect', inspectImage);
+    registerCommand('vscode-docker.image.remove', removeImage);
+    registerCommand('vscode-docker.image.push', pushImage);
+    registerCommand('vscode-docker.image.tag', tagImage);
     registerCommand('vscode-docker.compose.up', composeUp);
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
-    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => {
-        if (context) {
-            if (azureAccount) {
-                const azureAccountWrapper = new AzureAccountWrapper(ctx, azureAccount);
-                const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, context);
-                const result = await wizard.run();
-                if (result.status === 'Faulted') {
-                    throw result.error;
-                } else if (result.status === 'Cancelled') {
-                    throw new UserCancelledError();
-                }
-            } else {
-                const open: vscode.MessageItem = { title: "View in Marketplace" };
-                const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
-                if (response === open) {
-                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
-                }
-            }
-        }
-    });
+    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context, azureAccount));
     registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
     registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
@@ -167,13 +181,23 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
 
-    ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
+}
 
-    if (azureAccount) {
-        AzureUtilityManager.getInstance().setAccount(azureAccount);
+async function consolidateDefaultRegistrySettings(): Promise<void> {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+    let defaultRegistry = configOptions.get('defaultRegistry', '');
+
+    if (defaultRegistry) {
+        if (defaultRegistryPath) { // combine both the settings, then notify the user
+            await configOptions.update('defaultRegistryPath', `${defaultRegistry}/${defaultRegistryPath}`, vscode.ConfigurationTarget.Workspace);
+        }
+        if (!defaultRegistryPath) {// assign defaultRegistry to defaultRegistryPath
+            await configOptions.update('defaultRegistryPath', `${defaultRegistry}`, vscode.ConfigurationTarget.Workspace);
+        }
+        await configOptions.update('defaultRegistry', undefined, vscode.ConfigurationTarget.Workspace);
+        vscode.window.showInformationMessage("The 'docker.defaultRegistry' setting is now obsolete, and you should just use the 'docker.defaultRegistryPath' setting. Your settings have been updated to reflect this change.")
     }
-
-    activateLanguageClient(ctx);
 }
 
 export async function deactivate(): Promise<void> {
