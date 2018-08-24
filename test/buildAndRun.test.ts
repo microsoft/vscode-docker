@@ -64,7 +64,7 @@ async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFol
 }
 
 suite("Build Image", function (this: Suite): void {
-    this.timeout(Math.max(60 * 1000, this.timeout()));
+    this.timeout(Math.max(2 * 60 * 1000, this.timeout()));
 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
