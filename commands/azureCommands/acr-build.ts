@@ -1,6 +1,6 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { BuildGetLogResult, QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
-import { Build, Registry } from 'azure-arm-containerregistry/lib/models';
+import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
 import * as os from 'os';
@@ -58,14 +58,13 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         osType = 'Windows'
     }
     status.appendLine("Setting up Build Request");
-    console.log(relativeDockerPath);
     let buildRequest: QuickBuildRequest = {
         'type': 'QuickBuild',
         'imageNames': [name],
         'isPushEnabled': true,
         'sourceLocation': uploadedSourceLocation,
         'platform': { 'osType': 'Linux' },
-        'dockerFilePath': 'Dockerfile'
+        'dockerFilePath': relativeDockerPath
     };
     status.appendLine("Queueing Build");
     await client.registries.queueBuild(resourceGroupName, registry.name, buildRequest);
