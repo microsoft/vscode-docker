@@ -3,38 +3,36 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as keytarType from 'keytar';
 import { ServiceClientCredentials } from 'ms-rest';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
+import { ext } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils'
-import { getCoreNodeModule } from '../utils/utils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
+import { getCustomRegistries } from './customRegistries';
+import { CustomRegistryNode } from './customRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
-import { RegistryType } from './registryType';
 
 // tslint:disable-next-line:no-var-requires
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
-    private _keytar: typeof keytarType;
     private _azureAccount: AzureAccount;
 
     constructor(
         public readonly label: string,
-        public readonly contextValue: string,
+        public readonly contextValue: 'dockerHubRootNode' | 'azureRegistryRootNode' | 'customRootNode',
         public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
         public readonly azureAccount?: AzureAccount
     ) {
         super(label);
-        this._keytar = getCoreNodeModule('keytar');
 
         this._azureAccount = azureAccount;
 
@@ -66,7 +64,8 @@ export class RegistryRootNode extends NodeBase {
         } else if (element.contextValue === 'dockerHubRootNode') {
             return this.getDockerHubOrgs();
         } else {
-            return [];
+            assert(element.contextValue === 'customRootNode');
+            return await this.getCustomRegistryNodes();
         }
     }
 
@@ -75,21 +74,19 @@ export class RegistryRootNode extends NodeBase {
 
         let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
 
-        if (this._keytar) {
-            id.token = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-            id.username = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
-            id.password = await this._keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        if (ext.keytar) {
+            id.token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+            id.username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+            id.password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
         }
 
         if (!id.token) {
             id = await dockerHub.dockerHubLogin();
 
-            if (id && id.token) {
-                if (this._keytar) {
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                    await this._keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
-                }
+            if (id && id.token && ext.keytar) {
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
             } else {
                 return orgNodes;
             }
@@ -101,11 +98,7 @@ export class RegistryRootNode extends NodeBase {
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
         const namespaces = [...new Set(myRepos.map(item => item.namespace))];
         namespaces.forEach((namespace) => {
-            let iconPath = {
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-            };
-            let node = new DockerHubOrgNode(`${namespace}`, 'dockerHubNamespace', iconPath);
+            let node = new DockerHubOrgNode(`${namespace}`);
             node.userName = id.username;
             node.password = id.password;
             node.token = id.token;
@@ -113,6 +106,16 @@ export class RegistryRootNode extends NodeBase {
         });
 
         return orgNodes;
+    }
+
+    private async getCustomRegistryNodes(): Promise<CustomRegistryNode[]> {
+        let registries = await getCustomRegistries();
+        let nodes: CustomRegistryNode[] = [];
+        for (let registry of registries) {
+            nodes.push(new CustomRegistryNode(vscode.Uri.parse(registry.url).authority, registry));
+        }
+
+        return nodes;
     }
 
     private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
@@ -166,14 +169,11 @@ export class RegistryRootNode extends NodeBase {
                 for (let j = 0; j < registries.length; j++) {
                     if (!registries[j].sku.tier.includes('Classic')) {
                         regPool.addTask(async () => {
-                            let iconPath = {
-                                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                            };
-                            let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                            node.type = RegistryType.Azure;
-                            node.subscription = subscription;
-                            node.registry = registries[j];
+                            let node = new AzureRegistryNode(
+                                registries[j].loginServer,
+                                this._azureAccount,
+                                registries[j],
+                                subscription);
                             azureRegistryNodes.push(node);
                         });
                     }

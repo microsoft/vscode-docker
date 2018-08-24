@@ -7,6 +7,9 @@
 export const MAX_CONCURRENT_REQUESTS = 8;
 export const MAX_CONCURRENT_SUBSCRIPTON_REQUESTS = 5;
 
+// Consider downloading multiple pages (images, tags, etc)
+export const PAGE_SIZE = 100;
+
 export namespace keytarConstants {
     export const serviceId: string = 'vscode-docker';
 

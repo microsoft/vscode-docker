@@ -2,6 +2,8 @@ out
 node_modules
 *.vsix
 package-lock.json
+.nyc_output/**
+coverage/**
 
 # Artifacts from running vscode extension tests
 .vscode-test
