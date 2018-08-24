@@ -53,10 +53,6 @@ export class RootNode extends NodeBase {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
 
-        function sortImagesForComparison(images: Docker.ImageDesc[]): void {
-
-        }
-
         // https://github.com/Microsoft/vscode/issues/30535
         // if (this._imagesNode.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed) {
         //     clearInterval(this._imageDebounceTimer);
@@ -71,10 +67,10 @@ export class RootNode extends NodeBase {
                 let found: boolean = false;
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
-                images.sort((a, b) => {
-                    if (a.Id < a.Id) {
+                images.sort((img1, img2) => {
+                    if (img1.Id < img2.Id) {
                         return -1;
-                    } else if (a.Id > a.Id) {
+                    } else if (img1.Id > img2.Id) {
                         return 1;
                     } else {
                         return 0;
@@ -89,7 +85,6 @@ export class RootNode extends NodeBase {
                 let imagesAsJson = JSON.stringify(images);
                 let cacheAsJson = JSON.stringify(this._imageCache);
                 if (imagesAsJson !== cacheAsJson) {
-                    console.warn("** REFRESH **");
                     this.eventEmitter.fire(this._imagesNode);
                     this._imageCache = images;
                 }
