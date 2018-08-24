@@ -35,7 +35,7 @@ export async function deleteAzureImage(context?: AzureImageNode): Promise<void> 
         tag = wholeName[1];
     }
 
-    const shouldDelete = await ext.ui.showWarningMessage(`Are you sure you want to delete ${repoName}:${tag}? Enter yes to continue: `, { modal: true }, DialogResponses.deleteResponse, DialogResponses.cancel);
+    const shouldDelete = await ext.ui.showWarningMessage(`Are you sure you want to delete ${repoName}:${tag}? `, { modal: true }, DialogResponses.deleteResponse, DialogResponses.cancel);
     if (shouldDelete === DialogResponses.deleteResponse) {
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/tags/${tag}`;

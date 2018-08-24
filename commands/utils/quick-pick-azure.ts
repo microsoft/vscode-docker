@@ -71,7 +71,6 @@ export async function quickPickSubscription(): Promise<Subscription> {
                 opn('https://portal.azure.com/');
             }
         });
-        throw new Error('User has no azure subscriptions');
     }
     if (subscriptions.length === 1) { return subscriptions[0]; }
 

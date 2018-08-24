@@ -32,7 +32,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/repository`;
         await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
-        vscode.window.showInformationMessage(`Successfully deleted repository ${Repository.name}`);
+        vscode.window.showInformationMessage(`Successfully deleted repository ${repoName}`);
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
         } else {
