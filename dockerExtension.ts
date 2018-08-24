@@ -182,8 +182,8 @@ async function consolidateDefaultRegistrySettings(): Promise<void> {
         if (!defaultRegistryPath) {// assign defaultRegistry to defaultRegistryPath
             await configOptions.update('defaultRegistryPath', `${defaultRegistry}`, vscode.ConfigurationTarget.Workspace);
         }
-        await configOptions.update('defaultRegistry', '', false);
-        vscode.window.showInformationMessage("Moving forward, we shall deprecate the use of the defaultRegistry setting, combining it with defaultRegistryPath.")
+        await configOptions.update('defaultRegistry', undefined, vscode.ConfigurationTarget.Workspace);
+        vscode.window.showInformationMessage("The 'docker.defaultRegistry' setting is now obsolete, and you should just use the 'docker.defaultRegistryPath' setting. Your settings have been updated to reflect this change.")
     }
 }
 

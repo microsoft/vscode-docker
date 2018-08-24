@@ -244,7 +244,7 @@
           "default": "",
           "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
         },
-        "docker.askToSavePrefix": {
+        "docker.askToSaveRegistryPath": {
           "type": "boolean",
           "default": true,
           "description": "Ask the user whether to store the path prefix in defaultRegsitryPath on first push"

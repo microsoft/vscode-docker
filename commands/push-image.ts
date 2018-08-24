@@ -14,7 +14,7 @@ const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    let askToSavePrefix = configOptions.get('askToSavePrefix', undefined);
+    let askToSaveRegistryPath: boolean = configOptions.get<boolean>('askToSaveRegistryPath');
 
     let prefix = "";
     let imageToPush: Docker.ImageDesc;
@@ -34,15 +34,16 @@ export async function pushImage(context?: ImageNode): Promise<void> {
     if (imageName.includes('/')) {
         prefix = imageName.substring(0, imageName.lastIndexOf('/'));
     }
-    if (prefix && askToSavePrefix !== false) { //account for undefined
-        let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage("Would you like to save the prefix for autocomplete later?", DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
+    if (prefix && askToSaveRegistryPath !== false) { //account for undefined
+        let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage(`Would you like to save '${prefix}' as your default registry path?`, DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
         if (userPrefixPreference === DialogResponses.yes || userPrefixPreference === DialogResponses.no) {
-            askToSavePrefix = false;
+            askToSaveRegistryPath = false;
+            await configOptions.update('askToSaveRegistryPath', false, vscode.ConfigurationTarget.Workspace);
         }
         if (userPrefixPreference === DialogResponses.yes) {
             await configOptions.update('defaultRegistryPath', prefix, vscode.ConfigurationTarget.Workspace);
+            await vscode.window.showInformationMessage('You can change this value at any time via the docker.defaultRegistryPath setting.');
         }
-        await configOptions.update('askToSavePrefix', askToSavePrefix, vscode.ConfigurationTarget.Workspace);
     }
     if (imageToPush) {
         const terminal = ext.terminalProvider.createTerminal(imageName);
