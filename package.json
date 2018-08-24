@@ -412,7 +412,7 @@
     "commands": [
       {
         "command": "vscode-docker.configure",
-        "title": "Add Docker files to Workspace",
+        "title": "Add Docker files to workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
         "category": "Docker"
       },
