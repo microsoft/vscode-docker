@@ -42,11 +42,14 @@ export async function tagImage(context?: ImageNode): Promise<void> {
             imageName = defaultRegistry + '/' + imageName;
         }
 
+        let separatorLastIndex: number = imageName.lastIndexOf('/');
+
         let opt: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             placeHolder: imageName,
             prompt: 'Tag image as...',
-            value: imageName
+            value: imageName,
+            valueSelection: [0, separatorLastIndex]
         };
 
         const value: string = await vscode.window.showInputBox(opt);
