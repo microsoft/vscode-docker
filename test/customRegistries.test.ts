@@ -74,7 +74,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
 
         test("Connect, no auth - keytar not available", async function (this: Context) {
             // Make sure extension activated
-            await commands.executeCommand('vscode-docker.refresh');
+            await commands.executeCommand('vscode-docker.explorer.refresh');
 
             let oldKeytar = ext.keytar;
             try {
