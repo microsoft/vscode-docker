@@ -29,6 +29,7 @@
   "activationEvents": [
     "onLanguage:dockerfile",
     "onLanguage:yaml",
+    "onCommand:vscode-docker.api.configure",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -67,6 +68,10 @@
         {
           "command": "vscode-docker.createWebApp",
           "when": "false"
+        },
+        {
+          "command": "vscode-docker.api.configure",
+          "when": "never"
         }
       ],
       "editor/context": [
@@ -412,6 +417,10 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.api.configure",
+        "title": "Add Docker files to Workspace (API)"
+      },
+      {
         "command": "vscode-docker.image.build",
         "title": "Build Image",
         "description": "Build a Docker image from a Dockerfile",
@@ -585,7 +594,7 @@
     "lint": "tslint --project tsconfig.json -t verbose",
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace node ./node_modules/vscode/bin/test",
+    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace DEBUGTELEMETRY=1 node ./node_modules/vscode/bin/test",
     "all": "npm i && npm run lint && npm test"
   },
   "extensionDependencies": [
@@ -623,7 +632,7 @@
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
-    "vscode-azureextensionui": "^0.16.6",
+    "vscode-azureextensionui": "^0.17.0",
     "vscode-extension-telemetry": "0.0.18",
     "vscode-languageclient": "^4.4.0"
   }

@@ -248,20 +248,20 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     return <Tag[]>tagsPage.results;
 }
 
-export function browseDockerHub(context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
 
-    if (context) {
+    if (node) {
         let url: string = 'https://hub.docker.com/';
-        const repo: RepositoryInfo = context.repository;
-        switch (context.contextValue) {
+        const repo: RepositoryInfo = node.repository;
+        switch (node.contextValue) {
             case DockerHubOrgNode.contextValue:
-                url = `${url}u/${context.userName}`;
+                url = `${url}u/${node.userName}`;
                 break;
             case DockerHubRepositoryNode.contextValue:
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}`;
+                url = `${url}r/${node.repository.namespace}/${node.repository.name}`;
                 break;
             case DockerHubImageTagNode.contextValue:
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
+                url = `${url}r/${node.repository.namespace}/${node.repository.name}/tags`;
                 break;
             default:
                 break;

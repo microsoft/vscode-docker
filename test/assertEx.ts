@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import { parseError } from 'vscode-azureextensionui';
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { getTestRootFolder } from './global.test';
 
 // Provides additional assertion-style functions for use in tests.
 
@@ -89,4 +90,3 @@ export function assertFileContains(filePath: string, text: string): void {
 export function assertNotFileContains(filePath: string, text: string): void {
     assert(!fileContains(filePath, text), `Unexpected text '${text}' found in file ${filePath}`);
 }
-

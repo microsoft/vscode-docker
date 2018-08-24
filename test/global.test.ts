@@ -47,8 +47,12 @@ export function getTestRootFolder(): string {
     return testRootFolder;
 }
 
-export function testInEmptyFolder(name: string, func: () => Promise<void>): void {
-    test(name, async () => {
+/**
+ * Run a test with an empty root testing folder (i.e. delete everything out of it before running the test).
+ * This is important since we can't open new folders in vscode while tests are running
+ */
+export function testInEmptyFolder(name: string, func?: () => Promise<void>): void {
+    test(name, !func ? undefined : async () => {
         // Delete everything in the root testing folder
         assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
         await fse.emptyDir(testRootFolder);
@@ -58,12 +62,16 @@ export function testInEmptyFolder(name: string, func: () => Promise<void>): void
 
 // Runs before all tests
 suiteSetup(function (this: mocha.IHookCallbackContext): void {
+    console.log('global.test.ts: suiteSetup');
+
     // Otherwise the app can blocking asking for keychain access
     ext.keytar = new TestKeytar();
 });
 
 // Runs after all tests
 suiteTeardown(function (this: mocha.IHookCallbackContext): void {
+    console.log('global.test.ts: suiteTestdown');
+
     if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {
         fse.emptyDir(testRootFolder);
     }
