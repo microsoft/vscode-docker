@@ -127,5 +127,5 @@ async function refresh(): Promise<void> {
 
 async function saveCustomRegistriesNonsensitive(registries: CustomRegistry[]): Promise<void> {
     let minimal: CustomRegistryNonsensitive[] = registries.map(reg => <CustomRegistryNonsensitive>{ url: reg.url });
-    await ext.context.workspaceState.update(customRegistriesKey, minimal);
+    await ext.context.globalState.update(customRegistriesKey, minimal);
 }
