@@ -26,7 +26,7 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _imageCache: Docker.ImageDesc[];
+    private _sortedImageCache: Docker.ImageDesc[];
     private _imageDebounceTimer: NodeJS.Timer;
     private _imagesNode: RootNode;
     private _containerCache: Docker.ContainerDesc[];
@@ -67,36 +67,26 @@ export class RootNode extends NodeBase {
                 let found: boolean = false;
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
-
-                if (!this._imageCache) {
-                    this._imageCache = images;
-                }
-
-                if (this._imageCache.length !== images.length) {
-                    needToRefresh = true;
-                } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i: number = 0; i < this._imageCache.length; i++) {
-                        let before: string = JSON.stringify(this._imageCache[i]);
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j: number = 0; j < images.length; j++) {
-                            let after: string = JSON.stringify(images[j]);
-                            if (before === after) {
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (!found) {
-                            needToRefresh = true;
-                            break
-                        }
+                images.sort((img1, img2) => {
+                    if (img1.Id > img2.Id) {
+                        return -1;
+                    } else if (img1.Id < img2.Id) {
+                        return 1;
+                    } else {
+                        return 0;
                     }
+                });
+
+                if (!this._sortedImageCache) {
+                    this._sortedImageCache = images;
+                    return;
                 }
 
-                if (needToRefresh) {
+                let imagesAsJson = JSON.stringify(images);
+                let cacheAsJson = JSON.stringify(this._sortedImageCache);
+                if (imagesAsJson !== cacheAsJson) {
                     this.eventEmitter.fire(this._imagesNode);
-                    this._imageCache = images;
+                    this._sortedImageCache = images;
                 }
 
             }, refreshInterval);
