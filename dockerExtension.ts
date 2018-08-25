@@ -12,6 +12,7 @@ import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
+import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -124,6 +125,10 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
+    if (azureAccount) {
+        AzureUtilityManager.getInstance().setAccount(azureAccount);
+        registerCommand('vscode-docker.pullFromAzure', pullFromAzure);
+    }
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
 }

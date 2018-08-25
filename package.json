@@ -58,6 +58,7 @@
     "onCommand:vscode-docker.delete-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
     "onCommand:vscode-docker.disconnectCustomRegistry",
+    "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -225,6 +226,10 @@
         {
           "command": "vscode-docker.browseAzurePortal",
           "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
+        },
+        {
+          "command": "vscode-docker.pullFromAzure",
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|azureRepositoryNode)$/"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
@@ -607,6 +612,11 @@
       {
         "command": "vscode-docker.disconnectCustomRegistry",
         "title": "Disconnect from private registry",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.pullFromAzure",
+        "title": "Pull image from Azure",
         "category": "Docker"
       }
     ],

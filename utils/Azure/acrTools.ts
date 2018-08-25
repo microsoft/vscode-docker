@@ -14,7 +14,8 @@ import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
 
 //General helpers
-/** Gets the subscription for a given registry
+/**
+ * @param registry gets the subscription for a given registry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -25,8 +26,7 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
     });
     return subscription;
 }
-
-export function getResourceGroupName(registry: Registry): string {
+export function getResourceGroupName(registry: Registry): any {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
 
@@ -58,6 +58,9 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
+//Registry item management
+/** List images under a specific Repository */
+
 /** Sends a custon html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
@@ -81,11 +84,19 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 //Credential management
 /** Obtains registry username and password compatible with docker login */
 export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
-    const subscription: Subscription = getSubscriptionFromRegistry(registry);
-    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
-    const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
-    const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
-    return { 'password': acrRefreshToken, 'username': NULL_GUID };
+    if (registry.adminUserEnabled) {
+        const subscription: Subscription = getSubscriptionFromRegistry(registry);
+        const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+        const resourceGroup: string = getResourceGroupName(registry);
+        let creds = await client.registries.listCredentials(resourceGroup, registry.name);
+        return { 'password': creds.passwords[0].value, 'username': creds.username };
+    } else {
+        const subscription: Subscription = getSubscriptionFromRegistry(registry);
+        const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
+        const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
+        const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
+        return { 'password': acrRefreshToken, 'username': NULL_GUID };
+    }
 }
 
 /** Obtains tokens for using the Docker Registry v2 Api
@@ -147,4 +158,15 @@ export async function acquireACRAccessToken(registryUrl: string, scope: string, 
         },
     });
     return JSON.parse(acrAccessTokenResponse).access_token;
+}
+
+export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuffix: string, containerName: string, blobName: string, sasToken: string, host: string } {
+    let items: string[] = blobUrl.slice(blobUrl.search('https://') + 'https://'.length).split('/');
+    let accountName: string = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
+    let endpointSuffix: string = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
+    let containerName: string = items[1];
+    let blobName: string = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
+    let sasToken: string = items[4].slice(items[4].search('[?]') + 1);
+    let host: string = accountName + '.blob.' + endpointSuffix;
+    return { accountName, endpointSuffix, containerName, blobName, sasToken, host };
 }
