@@ -21,7 +21,7 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
     } else {
         registry = await quickPickACRRegistry(false, 'Select the registry you want to delete');
     }
-    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${registry.name} and its associated images? Enter yes to continue: `);
+    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${registry.name} and its associated images?`);
     if (shouldDelete) {
         let subscription: SubscriptionModels.Subscription = acrTools.getSubscriptionFromRegistry(registry);
         let resourceGroup: string = acrTools.getResourceGroupName(registry);

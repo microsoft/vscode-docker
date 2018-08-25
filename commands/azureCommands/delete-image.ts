@@ -6,7 +6,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { DialogResponses } from "vscode-azureextensionui";
 import { dockerExplorerProvider } from '../../dockerExtension';
-import { AzureImageNode } from '../../explorer/models/azureRegistryNodes';
+import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
@@ -16,7 +16,7 @@ import * as quickPicks from '../utils/quick-pick-azure';
 /** Function to delete an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function deleteAzureImage(context?: AzureImageNode): Promise<void> {
+export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
     let registry: Registry;
     let repoName: string;
     let tag: string;

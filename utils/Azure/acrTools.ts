@@ -7,6 +7,7 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import request = require('request-promise');
 import { NULL_GUID } from "../../constants";
+import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { AzureSession } from "../../typings/azure-account.api";
 import { AzureUtilityManager } from '../azureUtilityManager';
 import { AzureImage } from "./models/image";
@@ -34,59 +35,25 @@ export function getResourceGroupName(registry: Registry): string {
 export async function getImagesByRepository(element: Repository): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
     let image: AzureImage;
-    let tags: string[];
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
-    await request.get('https://' + element.registry.loginServer + '/v2/' + element.name + '/tags/list', {
-        auth: {
-            bearer: acrAccessToken
-        }
-    }, (err, httpResponse, body) => {
-        if (err) { throw (err) }
-        if (body.length > 0) {
-            tags = JSON.parse(body).tags;
-        }
-    });
-
+    const tags: TagInfo[] = await getTags('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
-        image = new AzureImage(element, tag);
+        image = new AzureImage(element, tag.tag, tag.created);
         allImages.push(image);
     }
     return allImages;
 }
 
-/** Returns the textual manifest for an ACR Image
- * @param acrAccessToken If the token is not provided one will be created for the particular image, if doing multiple requests this should be provided
- */
-export async function getRawImageManifest(image: AzureImage, acrAccessToken?: string): Promise<string> {
-    if (!acrAccessToken) {
-        acrAccessToken = (await acquireACRAccessTokenFromRegistry(image.registry, `repository:${image.repository}:pull`)).acrAccessToken;
-    }
-    return await request.get('https://' + image.registry.loginServer + '/v2/' + image.repository.name + `/manifests/${image.tag}`, {
-        auth: {
-            bearer: acrAccessToken
-        }
-    });
-}
-
 /** List repositories on a given Registry. */
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
-    const allRepos: Repository[] = [];
     let repo: Repository;
-    const { acrRefreshToken, acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
-    await request.get('https://' + registry.loginServer + '/v2/_catalog', {
-        auth: {
-            bearer: acrAccessToken
-        }
-    }, (err, httpResponse, body) => {
-        if (body.length > 0) {
-            const repositories = JSON.parse(body).repositories;
-            for (let tempRepo of repositories) {
-                repo = new Repository(registry, tempRepo, acrAccessToken, acrRefreshToken);
-                allRepos.push(repo);
-            }
-        }
-    });
-
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
+    const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
+    let allRepos: Repository[] = [];
+    for (let tempRepo of repositories) {
+        repo = new Repository(registry, tempRepo);
+        allRepos.push(repo);
+    }
     //Note these are ordered by default in alphabetical order
     return allRepos;
 }

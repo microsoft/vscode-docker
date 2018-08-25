@@ -1,3 +1,6 @@
+import { endianness } from "os";
+import { isNumber } from "util";
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
@@ -17,16 +20,38 @@
 
 var testRunner = require('vscode/lib/testrunner');
 
-// You can directly control Mocha options by uncommenting the following lines
-// See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
-let options = {
+let options: { [key: string]: string | boolean | number } = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
     useColors: true // colored output from test results
 };
-let noTimeouts = process.env.NO_TIMEOUTS;
-if (!!noTimeouts && noTimeouts !== "0") {
-    options["timeout"] = 60 * 60 * 1000;
+
+// You can directly control Mocha options using environment variables beginning with MOCHA_.
+// For example:
+// {
+//   "name": "Launch Tests",
+//   "type": "extensionHost",
+//   "request": "launch",
+//   ...
+//   "env": {
+//     "MOCHA_enableTimeouts": "0",
+//     "MOCHA_grep": "tests-to-run"
+// }
+//
+// See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for all available options
+
+for (let envVar of Object.keys(process.env)) {
+    let match = envVar.match(/^mocha_(.+)/i);
+    if (match) {
+        let [, option] = match;
+        let value: string | number = process.env[envVar];
+        if (!isNaN(parseInt(value))) {
+            value = parseInt(value);
+        }
+        options[option] = value;
+    }
 }
+console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
+
 testRunner.configure(options);
 
 module.exports = testRunner;

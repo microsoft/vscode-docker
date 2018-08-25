@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import { parseError } from 'vscode-azureextensionui';
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { getTestRootFolder } from './global.test';
 
 // Provides additional assertion-style functions for use in tests.
 
@@ -70,11 +71,11 @@ function areUnorderedArraysEqual<T>(actual: T[], expected: T[]): { areEqual: boo
 }
 
 export function assertContains(s: string, searchString: string): void {
-    assert(s.includes(searchString), `Expected to find '${searchString}' in ${s}`);
+    assert(s.includes(searchString), `Expected to find '${searchString}' in '${s}'`);
 }
 
 export function assertNotContains(s: string, searchString: string): void {
-    assert(!s.includes(searchString), `Unexpected text '${searchString}' found in ${s}`);
+    assert(!s.includes(searchString), `Unexpected text '${searchString}' found in '${s}'`);
 }
 
 function fileContains(filePath: string, text: string): boolean {
@@ -89,4 +90,3 @@ export function assertFileContains(filePath: string, text: string): void {
 export function assertNotFileContains(filePath: string, text: string): void {
     assert(!fileContains(filePath, text), `Unexpected text '${text}' found in file ${filePath}`);
 }
-

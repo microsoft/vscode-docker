@@ -92,7 +92,6 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
-| `docker.defaultRegistry` | Default registry when tagging an image, empty string will target Docker Hub when pushing. | `""`
 | `docker.defaultRegistryPath` | Path within registry to push to. | `""`
 | `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
 | `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`

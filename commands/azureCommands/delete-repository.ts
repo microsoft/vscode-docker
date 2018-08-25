@@ -8,6 +8,7 @@ import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
+import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 /**
@@ -15,7 +16,6 @@ import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from 
  * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function deleteRepository(context?: AzureRepositoryNode): Promise<void> {
-
     let registry: Registry;
     let repoName: string;
 

@@ -29,6 +29,7 @@
   "activationEvents": [
     "onLanguage:dockerfile",
     "onLanguage:yaml",
+    "onCommand:vscode-docker.api.configure",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -55,6 +56,8 @@
     "onCommand:vscode-docker.delete-ACR-Registry",
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
+    "onCommand:vscode-docker.connectCustomRegistry",
+    "onCommand:vscode-docker.disconnectCustomRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
   ],
@@ -68,6 +71,10 @@
         {
           "command": "vscode-docker.createWebApp",
           "when": "false"
+        },
+        {
+          "command": "vscode-docker.api.configure",
+          "when": "never"
         }
       ],
       "editor/context": [{
@@ -184,7 +191,7 @@
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureImageNode|dockerHubImageTag)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/"
         },
         {
           "command": "vscode-docker.create-ACR-Registry",
@@ -200,7 +207,7 @@
         },
         {
           "command": "vscode-docker.delete-ACR-Image",
-          "when": "view == dockerExplorer && viewItem == azureImageNode"
+          "when": "view == dockerExplorer && viewItem == azureImageTagNode"
         },
         {
           "command": "vscode-docker.delete-ACR-Registry",
@@ -208,11 +215,19 @@
         },
         {
           "command": "vscode-docker.browseDockerHub",
-          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTag|dockerHubRepository|dockerHubNamespace)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/"
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
+        },
+        {
+          "command": "vscode-docker.connectCustomRegistry",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRootNode|registriesRootNode)$/"
+        },
+        {
+          "command": "vscode-docker.disconnectCustomRegistry",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/"
         }
       ]
     },
@@ -248,15 +263,15 @@
       "type": "object",
       "title": "Docker configuration options",
       "properties": {
-        "docker.defaultRegistry": {
-          "type": "string",
-          "default": "",
-          "description": "Default registry when tagging an image, empty string will target Docker Hub when pushing."
-        },
         "docker.defaultRegistryPath": {
           "type": "string",
           "default": "",
-          "description": "Path within registry to push to."
+          "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
+        },
+        "docker.askToSaveRegistryPath": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask the user whether to store the path prefix in defaultRegsitryPath on first push"
         },
         "docker.showExplorer": {
           "type": "boolean",
@@ -405,9 +420,13 @@
     },
     "commands": [{
         "command": "vscode-docker.configure",
-        "title": "Add Docker files to Workspace",
+        "title": "Add Docker files to workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.api.configure",
+        "title": "Add Docker files to Workspace (API)"
       },
       {
         "command": "vscode-docker.image.build",
@@ -567,6 +586,16 @@
         "command": "vscode-docker.delete-ACR-Image",
         "title": "Delete Azure Image",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.connectCustomRegistry",
+        "title": "Connect to a private registry...",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.disconnectCustomRegistry",
+        "title": "Disconnect from private registry",
+        "category": "Docker"
       }
     ],
     "views": {
@@ -594,7 +623,7 @@
     "lint": "tslint --project tsconfig.json -t verbose",
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace node ./node_modules/vscode/bin/test",
+    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace DEBUGTELEMETRY=1 node ./node_modules/vscode/bin/test",
     "all": "npm i && npm run lint && npm test"
   },
   "extensionDependencies": [
@@ -632,7 +661,7 @@
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
     "request-promise": "^4.2.2",
-    "vscode-azureextensionui": "^0.16.6",
+    "vscode-azureextensionui": "^0.17.0",
     "vscode-extension-telemetry": "0.0.18",
     "vscode-languageclient": "^4.4.0"
   }

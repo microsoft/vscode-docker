@@ -130,7 +130,7 @@ export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean>
         ignoreFocusOut: true,
         placeHolder: 'Yes',
         value: 'No',
-        prompt: yesOrNoPrompt
+        prompt: yesOrNoPrompt + ' Enter yes to continue'
     };
     let answer = await ext.ui.showInputBox(opt);
     answer = answer.toLowerCase();

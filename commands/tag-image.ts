@@ -37,16 +37,12 @@ export async function tagImage(context?: ImageNode): Promise<void> {
             imageName = defaultRegistryPath + '/' + imageName;
         }
 
-        const defaultRegistry = configOptions.get('defaultRegistry', '');
-        if (defaultRegistry.length > 0) {
-            imageName = defaultRegistry + '/' + imageName;
-        }
-
         let opt: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             placeHolder: imageName,
             prompt: 'Tag image as...',
-            value: imageName
+            value: imageName,
+            valueSelection: [0, defaultRegistryPath.length]
         };
 
         const value: string = await vscode.window.showInputBox(opt);

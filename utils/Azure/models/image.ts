@@ -8,6 +8,7 @@ import { Repository } from './repository';
 
 /** Class Azure Image: Used locally, Organizes data for managing images */
 export class AzureImage {
+    public created: Date;
     public registry: Registry;
     public repository: Repository;
     public tag: string;
@@ -16,10 +17,11 @@ export class AzureImage {
     public password?: string;
     public username?: string;
 
-    constructor(repository: Repository, tag: string) {
+    constructor(repository: Repository, tag: string, created: Date) {
         this.registry = repository.registry;
         this.repository = repository;
         this.tag = tag;
+        this.created = created;
         this.subscription = repository.subscription;
         this.resourceGroupName = repository.resourceGroupName;
         if (repository.password) { this.password = repository.password; }

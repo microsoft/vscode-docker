@@ -25,6 +25,10 @@ export class AzureUtilityManager {
 
     private constructor() { }
 
+    public static hasLoadedUtilityManager(): boolean {
+        if (AzureUtilityManager._instance) { return true; } else { return false; }
+    }
+
     public static getInstance(): AzureUtilityManager {
         if (!AzureUtilityManager._instance) { // lazy initialization
             AzureUtilityManager._instance = new AzureUtilityManager();
