@@ -112,7 +112,6 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
     const acrAccessToken = await acquireACRAccessToken(registry.loginServer, scope, acrRefreshToken)
     return { acrRefreshToken, acrAccessToken };
 }
-
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
@@ -130,7 +129,6 @@ export async function acquireAADTokens(session: AzureSession): Promise<{ aadAcce
         });
     });
 }
-
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
     const acrRefreshTokenResponse = await request.post(`https://${registryUrl}/oauth2/exchange`, {
@@ -146,7 +144,6 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
     return JSON.parse(acrRefreshTokenResponse).refresh_token;
 
 }
-
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
     const acrAccessTokenResponse = await request.post(`https://${registryUrl}/oauth2/token`, {
