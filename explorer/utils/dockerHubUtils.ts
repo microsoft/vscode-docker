@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+// tslint:disable-next-line:no-require-imports
 import * as opn from 'opn';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
@@ -147,14 +149,7 @@ async function login(username: string, password: string): Promise<Token> {
         json: true
     }
 
-    try {
-        t = await ext.request(options);
-    } catch (error) {
-        console.log(error);
-        vscode.window.showErrorMessage(error.error.detail);
-    }
-
-    return t;
+    return <Token>await ext.request(options);
 }
 
 export async function getUser(): Promise<User> {
@@ -170,12 +165,15 @@ export async function getUser(): Promise<User> {
     }
 
     try {
-        u = await ext.request(options);
-    } catch (error) {
+        u = <User>await ext.request(options);
+    } catch (err) {
+        let error = <{ statusCode?: number }>err;
         console.log(error);
         if (error.statusCode === 401) {
-            vscode.window.showErrorMessage('Docker: Please logout of DockerHub and then log in again.');
+            throw new Error('Docker: Please log out of Docker Hub and then log in again.');
         }
+
+        throw err;
     }
 
     return u;
@@ -194,7 +192,7 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     }
 
     try {
-        repos = await ext.request(options);
+        repos = <Repository[]>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repositories');
@@ -203,9 +201,8 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     return repos;
 }
 
-export async function getRepositoryInfo(repository: Repository): Promise<any> {
-
-    let res: any;
+export async function getRepositoryInfo(repository: Repository): Promise<RepositoryInfo> {
+    let info: RepositoryInfo;
 
     let options = {
         method: 'GET',
@@ -217,17 +214,17 @@ export async function getRepositoryInfo(repository: Repository): Promise<any> {
     }
 
     try {
-        res = await ext.request(options);
+        info = <RepositoryInfo>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to get Repository Details');
     }
 
-    return res;
+    return info;
 }
 
 export async function getRepositoryTags(repository: Repository): Promise<Tag[]> {
-    let tagsPage: any;
+    let tagsPage: { results: Tag[] };
 
     let options = {
         method: 'GET',
@@ -239,7 +236,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     try {
-        tagsPage = await ext.request(options);
+        tagsPage = <{ results: Tag[] }>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');
@@ -260,6 +257,8 @@ export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubReposito
         } else {
             assert(false, `browseDockerHub: Unexpected node type, contextValue=${(<NodeBase>node).contextValue}`)
         }
+
+        // tslint:disable-next-line:no-unsafe-any
         opn(url);
     }
 }

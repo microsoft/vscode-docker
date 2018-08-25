@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AuthenticationContext } from 'adal-node';
 import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import { TokenResponse } from 'ms-rest-azure';
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
@@ -111,24 +113,29 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
-        const credentials: any = session.credentials;
-        const environment: any = session.environment;
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, (err: any, result: any) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    aadAccessToken: result.accessToken,
-                    aadRefreshToken: result.refreshToken,
-                });
-            }
-        });
+        const credentials = <{ context: AuthenticationContext, username: string, clientId: string }><any>session.credentials;
+        const environment = session.environment;
+        credentials.context.acquireToken(
+            environment.activeDirectoryResourceId,
+            credentials.username,
+            credentials.clientId,
+            (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    let tokenResponse = <TokenResponse>result;
+                    resolve({
+                        aadAccessToken: tokenResponse.accessToken,
+                        aadRefreshToken: tokenResponse.refreshToken,
+                    });
+                }
+            });
     });
 }
 
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
-    const acrRefreshTokenResponse: { refresh_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
+    const acrRefreshTokenResponse = <{ refresh_token: string }>await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
@@ -144,7 +151,7 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
 
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
-    const acrAccessTokenResponse: { access_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/token`, {
+    const acrAccessTokenResponse = <{ access_token: string }>await ext.request.post(`https://${registryUrl}/oauth2/token`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,

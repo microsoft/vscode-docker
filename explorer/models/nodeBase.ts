@@ -5,6 +5,8 @@
 
 import * as vscode from 'vscode';
 
+export type IconPath = string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon;
+
 export class NodeBase {
     public readonly label: string;
     public readonly contextValue: string;
@@ -24,5 +26,5 @@ export class NodeBase {
         return [];
     }
 
-    public iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri };
+    public iconPath?: IconPath;
 }

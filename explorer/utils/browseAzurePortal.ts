@@ -16,6 +16,7 @@ export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode
         if (node.contextValue === AzureImageTagNode.contextValue || node.contextValue === AzureRepositoryNode.contextValue) {
             url = `${url}/repository`;
         }
+        // tslint:disable-next-line:no-unsafe-any
         opn(url);
     }
 

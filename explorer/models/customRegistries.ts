@@ -64,7 +64,7 @@ export async function connectCustomRegistry(): Promise<void> {
     try {
         await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
     } catch (err) {
-        let error: { statusCode?: number } = err;
+        let error = <{ statusCode?: number }>err;
         let message = parseError(error).message;
 
         if (error.statusCode === 401) {
@@ -118,7 +118,7 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
                 if (ext.keytar) {
                     let key = getUsernamePwdKey(reg.url);
                     let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
-                    let credentials: CustomRegistryCredentials = JSON.parse(credentialsString);
+                    let credentials = <CustomRegistryCredentials>JSON.parse(credentialsString);
                     registries.push({
                         url: reg.url,
                         credentials

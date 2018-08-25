@@ -9,7 +9,7 @@
  * Connection requests and avoid throttling.
  */
 export class AsyncPool {
-    private runnableQueue: Function[];
+    private runnableQueue: (() => Promise<void>)[];
     private workers: Promise<void>[];
     private asyncLimit: number;
 
@@ -34,7 +34,7 @@ export class AsyncPool {
     }
 
     /*Takes in an async Thunk to be executed by the asyncpool*/
-    public addTask(func: Function): void {
+    public addTask(func: () => Promise<void>): void {
         this.runnableQueue.push(func);
     }
 

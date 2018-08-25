@@ -87,7 +87,7 @@ export class SuggestSupportHelper {
         }
         let keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-            let imageName;
+            let imageName: string;
 
             if (keyName === 'FROM') {
                 imageName = line.match(FROM_DIRECTIVE_PATTERN)[1];

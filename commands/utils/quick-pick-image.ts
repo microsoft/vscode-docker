@@ -66,8 +66,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        error.message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
-        throw error;
+        throw new Error('Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message);
     }
     if (!images || images.length === 0) {
         vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');

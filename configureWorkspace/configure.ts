@@ -15,6 +15,29 @@ import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
+interface PackageInfo {
+    npmStart: boolean; //has npm start
+    cmd: string;
+    fullCommand: string; //full command
+    author: string;
+    version: string;
+    artifactName: string;
+}
+
+interface JsonPackageContents {
+    main?: string;
+    scripts?: { [key: string]: string };
+    author?: string;
+    version?: string;
+}
+
+interface PomXmlContents {
+    project?: {
+        version?: string;
+        artifactid?: string;
+    };
+}
+
 export type ConfigureTelemetryProperties = {
     configurePlatform?: Platform;
     configureOs?: OS;
@@ -24,7 +47,7 @@ export type ConfigureTelemetryProperties = {
 
 // Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
 // tslint:disable-next-line:max-func-body-length
-function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageJson): string {
+function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageInfo): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -319,7 +342,7 @@ services:
 }
 
 // tslint:disable-next-line:max-func-body-length
-function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageJson): string {
+function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageInfo): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -449,20 +472,11 @@ LICENSE
 .vscode`;
 }
 
-interface PackageJson {
-    npmStart: boolean, //has npm start
-    cmd: string,
-    fullCommand: string, //full command
-    author: string,
-    version: string,
-    artifactName: string
-}
-
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
     return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, null);
 }
 
-function getDefaultPackageJson(): PackageJson {
+function getDefaultPackageInfo(): PackageInfo {
     return {
         npmStart: true,
         fullCommand: 'npm start',
@@ -473,45 +487,45 @@ function getDefaultPackageJson(): PackageJson {
     };
 }
 
-async function readPackageJson(folderPath: string): Promise<{ packagePath?: string, packageContents: PackageJson }> {
+async function readPackageJson(folderPath: string): Promise<{ packagePath?: string, packageInfo: PackageInfo }> {
     // open package.json and look for main, scripts start
     const uris: vscode.Uri[] = await getPackageJson(folderPath);
-    let packageContents: PackageJson = getDefaultPackageJson(); //default
+    let packageInfo: PackageInfo = getDefaultPackageInfo(); //default
     let packagePath: string | undefined;
 
     if (uris && uris.length > 0) {
         packagePath = uris[0].fsPath;
-        const json = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        const json = <JsonPackageContents>JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 
-        if (json.scripts && json.scripts.start) {
-            packageContents.npmStart = true;
-            packageContents.fullCommand = json.scripts.start;
-            packageContents.cmd = 'npm start';
-        } else if (json.main) {
-            packageContents.npmStart = false;
-            packageContents.fullCommand = 'node' + ' ' + json.main;
-            packageContents.cmd = packageContents.fullCommand;
+        if (json.scripts && typeof json.scripts.start === "string") {
+            packageInfo.npmStart = true;
+            packageInfo.fullCommand = json.scripts.start;
+            packageInfo.cmd = 'npm start';
+        } else if (typeof json.main === "string") {
+            packageInfo.npmStart = false;
+            packageInfo.fullCommand = 'node' + ' ' + json.main;
+            packageInfo.cmd = packageInfo.fullCommand;
         } else {
-            packageContents.fullCommand = '';
+            packageInfo.fullCommand = '';
         }
 
-        if (json.author) {
-            packageContents.author = json.author;
+        if (typeof json.author === "string") {
+            packageInfo.author = json.author;
         }
 
-        if (json.version) {
-            packageContents.version = json.version;
+        if (typeof json.version === "string") {
+            packageInfo.version = json.version;
         }
     }
 
-    return { packagePath, packageContents };
+    return { packagePath, packageInfo };
 }
 
 /**
  * Looks for a pom.xml or build.gradle file, and returns its parsed contents, or else a default package contents if none path
  */
-async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string, packageContents: PackageJson }> {
-    let pkg: PackageJson = getDefaultPackageJson(); //default
+async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string, packageInfo: PackageInfo }> {
+    let pkg: PackageInfo = getDefaultPackageInfo(); //default
     let foundPath: string | undefined;
 
     let pomPath = path.join(folderPath, 'pom.xml');
@@ -519,10 +533,11 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
 
     if (await fse.pathExists(pomPath)) {
         foundPath = pomPath;
-        let json = await new Promise<any>((resolve, reject) => {
+        let json = await new Promise<PomXmlContents>((resolve, reject) => {
+            // tslint:disable-next-line:no-unsafe-any
             pomParser.parse({
                 filePath: pomPath
-            }, (error, response) => {
+            }, (error, response: { pomObject: PomXmlContents }) => {
                 if (error) {
                     reject(`Failed to parse pom.xml: ${error}`);
                     return;
@@ -541,7 +556,12 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
         }
     } else if (await fse.pathExists(gradlePath)) {
         foundPath = gradlePath;
-        const json = await gradleParser.parseFile(gradlePath);
+        const json: {
+            archivesBaseName?: string;
+            jar?: { version?: string; archiveName?: string; baseName?: string; };
+            version?: string;
+            // tslint:disable-next-line:no-unsafe-any
+        } = await gradleParser.parseFile(gradlePath);
 
         if (json.jar && json.jar.version) {
             pkg.version = json.jar.version;
@@ -557,7 +577,7 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
         }
     }
 
-    return { foundPath, packageContents: pkg };
+    return { foundPath, packageInfo: pkg };
 }
 
 // Returns the relative path of the project file without the extension
@@ -583,7 +603,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     return projectFiles[0].slice(0, -'.csproj'.length);
 }
 
-type GeneratorFunction = (serviceName: string, platform: string, os: string, port: string, packageJson?: PackageJson) => string;
+type GeneratorFunction = (serviceName: string, platform: string, os: string, port: string, packageJson?: PackageInfo) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -704,17 +724,17 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         serviceNameAndPathRelativeToOutput = serviceNameAndPathRelativeToOutput.replace(/\\/g, '/');
     }
 
-    let packageContents: PackageJson = getDefaultPackageJson();
+    let packageInfo: PackageInfo = getDefaultPackageInfo();
     if (platformType === 'Java') {
         let foundPomOrGradlePath: string | undefined;
-        ({ packageContents, foundPath: foundPomOrGradlePath } = await readPomOrGradle(rootFolderPath));
+        ({ packageInfo, foundPath: foundPomOrGradlePath } = await readPomOrGradle(rootFolderPath));
         if (foundPomOrGradlePath) {
             properties.packageFileType = path.basename(foundPomOrGradlePath);
             properties.packageFileSubfolderDepth = getSubfolderDepth(foundPomOrGradlePath);
         }
     } else {
         let packagePath: string | undefined;
-        ({ packagePath, packageContents } = await readPackageJson(rootFolderPath));
+        ({ packagePath, packageInfo } = await readPackageJson(rootFolderPath));
         if (packagePath) {
             properties.packageFileType = 'package.json';
             properties.packageFileSubfolderDepth = getSubfolderDepth(packagePath);
@@ -753,7 +773,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
         if (writeFile) {
             // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
-            fs.writeFileSync(filePath, generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageContents), { encoding: 'utf8' });
+            fs.writeFileSync(filePath, generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo), { encoding: 'utf8' });
             filesWritten.push(fileName);
         }
     }

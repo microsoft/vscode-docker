@@ -83,7 +83,7 @@ export class DockerHubRepositoryNode extends NodeBase {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
     };
-    public repository: any;
+    public repository: dockerHub.RepositoryInfo;
     public userName: string;
     public password: string;
 
@@ -129,7 +129,7 @@ export class DockerHubImageTagNode extends NodeBase {
     public serverUrl: string = '';
     public userName: string;
     public password: string;
-    public repository: any;
+    public repository: dockerHub.RepositoryInfo;
     public created: Date;
 
     public getTreeItem(): vscode.TreeItem {

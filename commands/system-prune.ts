@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as semver from 'semver';
 import vscode = require('vscode');
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { getCoreNodeModule } from '../utils/getCoreNodeModule';
 import { docker } from './utils/docker-endpoint';
 
 const teleCmdId: string = 'vscode-docker.system.prune';
@@ -14,7 +14,6 @@ const teleCmdId: string = 'vscode-docker.system.prune';
 export async function systemPrune(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = ext.terminalProvider.createTerminal("docker system prune");
-    const semver = getCoreNodeModule('semver');
 
     try {
 
@@ -29,7 +28,7 @@ export async function systemPrune(): Promise<void> {
             }
         }
 
-        const info = await docker.getEngineInfo();
+        const info = <Docker.EngineInfo & { ServerVersion: string }>await docker.getEngineInfo();
 
         // in docker 17.06.1 and higher you must specify the --volumes flag
         if (semver.gte(info.ServerVersion, '17.6.1', true)) {
