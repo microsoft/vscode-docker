@@ -8,6 +8,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
+import { createRegistry } from './commands/azureCommands/create-registry';
+import { deleteAzureImage } from './commands/azureCommands/delete-image';
+import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
+import { deleteRepository } from './commands/azureCommands/delete-repository';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -43,6 +47,7 @@ import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtil
 import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
+import { registerAzureCommand } from './utils/Azure/common';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { Keytar } from './utils/keytar';
 
@@ -111,13 +116,14 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
+    if (azureAccount) {
+        AzureUtilityManager.getInstance().setAccount(azureAccount);
+    }
+
     registerDockerCommands(azureAccount);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
 
-    if (azureAccount) {
-        AzureUtilityManager.getInstance().setAccount(azureAccount);
-    }
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
 }
@@ -180,7 +186,10 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     });
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
-
+    registerAzureCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
+    registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
+    registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
+    registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
 }
 
 async function consolidateDefaultRegistrySettings(): Promise<void> {

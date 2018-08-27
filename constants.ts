@@ -17,3 +17,9 @@ export namespace keytarConstants {
     export const dockerHubUserNameKey: string = 'dockerhub.username';
     export const dockerHubPasswordKey: string = 'dockerhub.password';
 }
+
+//Credentials Constants
+export const NULL_GUID = '00000000-0000-0000-0000-000000000000';
+
+//Azure Container Registries
+export const skus = ["Standard", "Basic", "Premium"];
