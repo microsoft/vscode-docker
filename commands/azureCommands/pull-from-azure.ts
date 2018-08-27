@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { exec } from 'child_process';
 import vscode = require('vscode');
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
