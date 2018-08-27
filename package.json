@@ -65,7 +65,8 @@
   "main": "./out/dockerExtension",
   "contributes": {
     "menus": {
-      "commandPalette": [{
+      "commandPalette": [
+        {
           "command": "vscode-docker.browseDockerHub",
           "when": "false"
         },
@@ -78,7 +79,8 @@
           "when": "never"
         }
       ],
-      "editor/context": [{
+      "editor/context": [
+        {
           "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
@@ -114,7 +116,8 @@
           "group": "docker"
         }
       ],
-      "explorer/context": [{
+      "explorer/context": [
+        {
           "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
           "command": "vscode-docker.image.build",
           "group": "docker"
@@ -135,7 +138,8 @@
           "group": "docker"
         }
       ],
-      "view/title": [{
+      "view/title": [
+        {
           "command": "vscode-docker.explorer.refresh",
           "when": "view == dockerExplorer",
           "group": "navigation"
@@ -146,7 +150,8 @@
           "group": "navigation"
         }
       ],
-      "view/item/context": [{
+      "view/item/context": [
+        {
           "command": "vscode-docker.container.start",
           "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
         },
@@ -236,34 +241,40 @@
         }
       ]
     },
-    "debuggers": [{
-      "type": "docker",
-      "label": "Docker",
-      "configurationSnippets": [{
-        "label": "Docker: Attach to Node",
-        "description": "Docker: Attach to Node",
-        "body": {
-          "type": "node",
-          "request": "attach",
-          "name": "Docker: Attach to Node",
-          "port": 9229,
-          "address": "localhost",
-          "localRoot": "^\"\\${workspaceFolder}\"",
-          "remoteRoot": "/usr/src/app",
-          "protocol": "inspector"
-        }
-      }]
-    }],
-    "languages": [{
-      "id": "dockerfile",
-      "aliases": [
-        "Dockerfile"
-      ],
-      "filenamePatterns": [
-        "*.dockerfile",
-        "Dockerfile"
-      ]
-    }],
+    "debuggers": [
+      {
+        "type": "docker",
+        "label": "Docker",
+        "configurationSnippets": [
+          {
+            "label": "Docker: Attach to Node",
+            "description": "Docker: Attach to Node",
+            "body": {
+              "type": "node",
+              "request": "attach",
+              "name": "Docker: Attach to Node",
+              "port": 9229,
+              "address": "localhost",
+              "localRoot": "^\"\\${workspaceFolder}\"",
+              "remoteRoot": "/usr/src/app",
+              "protocol": "inspector"
+            }
+          }
+        ]
+      }
+    ],
+    "languages": [
+      {
+        "id": "dockerfile",
+        "aliases": [
+          "Dockerfile"
+        ],
+        "filenamePatterns": [
+          "*.dockerfile",
+          "Dockerfile"
+        ]
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Docker configuration options",
@@ -423,7 +434,8 @@
         }
       }
     },
-    "commands": [{
+    "commands": [
+      {
         "command": "vscode-docker.configure",
         "title": "Add Docker files to workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
@@ -609,18 +621,22 @@
       }
     ],
     "views": {
-      "dockerView": [{
-        "id": "dockerExplorer",
-        "name": "Explorer",
-        "when": "config.docker.showExplorer == true"
-      }]
+      "dockerView": [
+        {
+          "id": "dockerExplorer",
+          "name": "Explorer",
+          "when": "config.docker.showExplorer == true"
+        }
+      ]
     },
     "viewsContainers": {
-      "activitybar": [{
-        "icon": "images/docker.svg",
-        "id": "dockerView",
-        "title": "Docker"
-      }]
+      "activitybar": [
+        {
+          "icon": "images/docker.svg",
+          "id": "dockerView",
+          "title": "Docker"
+        }
+      ]
     }
   },
   "engines": {
