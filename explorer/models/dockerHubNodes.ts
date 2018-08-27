@@ -12,6 +12,9 @@ import * as dockerHub from '../utils/dockerHubUtils';
 import { formatTag } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
 
+/**
+ * This is a child node of the "Docker Hub" node - i.e., it represents a namespace, e.g. a docker ID or an organization name
+ */
 export class DockerHubOrgNode extends NodeBase {
 
     constructor(
@@ -28,7 +31,6 @@ export class DockerHubOrgNode extends NodeBase {
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
     };
 
-    public repository: string;
     public userName: string;
     public password: string;
     public token: string;
