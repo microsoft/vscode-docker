@@ -5,18 +5,14 @@
 
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as moment from 'moment';
 import * as path from 'path';
-import * as request from 'request-promise';
 import * as vscode from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants'
-import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
-import { AsyncPool } from '../../utils/asyncpool';
-import { getRepositories } from '../utils/dockerHubUtils';
+import { AzureAccount } from '../../typings/azure-account.api';
+import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
+import { AzureImage } from '../../utils/Azure/models/image';
+import { Repository } from '../../utils/Azure/models/repository';
 import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
-import { RegistryType } from './registryType';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
@@ -45,62 +41,20 @@ export class AzureRegistryNode extends NodeBase {
 
     public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
         const repoNodes: AzureRepositoryNode[] = [];
-        let node: AzureRepositoryNode;
 
-        const tenantId: string = element.subscription.tenantId;
         if (!this.azureAccount) {
             return [];
         }
 
-        const session: AzureSession = this.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-        const { accessToken, refreshToken } = await acquireToken(session);
-
-        if (accessToken && refreshToken) {
-            let refreshTokenARC;
-            let accessTokenARC;
-
-            await request.post('https://' + element.label + '/oauth2/exchange', {
-                form: {
-                    grant_type: 'access_token_refresh_token',
-                    service: element.label,
-                    tenant: tenantId,
-                    refresh_token: refreshToken,
-                    access_token: accessToken
-                }
-            }, (err, httpResponse, body) => {
-                if (body.length > 0) {
-                    refreshTokenARC = JSON.parse(body).refresh_token;
-                } else {
-                    return [];
-                }
-            });
-
-            await request.post('https://' + element.label + '/oauth2/token', {
-                form: {
-                    grant_type: 'refresh_token',
-                    service: element.label,
-                    scope: 'registry:catalog:*',
-                    refresh_token: refreshTokenARC
-                }
-            }, (err, httpResponse, body) => {
-                if (body.length > 0) {
-                    accessTokenARC = JSON.parse(body).access_token;
-                } else {
-                    return [];
-                }
-            });
-
-            let repositories = await getCatalog('https://' + element.label, { bearer: accessTokenARC });
-            for (let repository of repositories) {
-                node = new AzureRepositoryNode(repository,
-                    this.azureAccount,
-                    element.subscription,
-                    accessTokenARC,
-                    refreshTokenARC,
-                    element.registry,
-                    element.label);
-                repoNodes.push(node);
-            }
+        const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
+        for (let repository of repositories) {
+            let node = new AzureRepositoryNode(repository.name,
+                element,
+                this.azureAccount,
+                element.subscription,
+                element.registry,
+                element.label);
+            repoNodes.push(node);
         }
 
         //Note these are ordered by default in alphabetical order
@@ -111,10 +65,9 @@ export class AzureRegistryNode extends NodeBase {
 export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,
+        public parent: NodeBase,
         public readonly azureAccount: AzureAccount,
         public readonly subscription: SubscriptionModels.Subscription,
-        public readonly accessTokenARC: string,
-        public readonly refreshTokenARC: string,
         public readonly registry: ContainerModels.Registry,
         public readonly repositoryName: string
     ) {
@@ -140,54 +93,18 @@ export class AzureRepositoryNode extends NodeBase {
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
         const imageNodes: AzureImageTagNode[] = [];
         let node: AzureImageTagNode;
-        let refreshTokenARC;
-        let accessTokenARC;
-
-        const tenantId: string = element.subscription.tenantId;
-        const session: AzureSession = element.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
-        const { accessToken, refreshToken } = await acquireToken(session);
-
-        await request.post('https://' + element.repositoryName + '/oauth2/exchange', {
-            form: {
-                grant_type: 'access_token_refresh_token',
-                service: element.repositoryName,
-                tenant: tenantId,
-                refresh_token: refreshToken,
-                access_token: accessToken
-            }
-        }, (err, httpResponse, body) => {
-            if (body.length > 0) {
-                refreshTokenARC = JSON.parse(body).refresh_token;
-            } else {
-                return [];
-            }
-        });
-
-        await request.post('https://' + element.repositoryName + '/oauth2/token', {
-            form: {
-                grant_type: 'refresh_token',
-                service: element.repositoryName,
-                scope: 'repository:' + element.label + ':pull',
-                refresh_token: refreshTokenARC
-            }
-        }, (err, httpResponse, body) => {
-            if (body.length > 0) {
-                accessTokenARC = JSON.parse(body).access_token;
-            } else {
-                return [];
-            }
-        });
-
-        let tagInfos = await getTags('https://' + element.repositoryName, element.label, { bearer: accessTokenARC });
-        for (let tagInfo of tagInfos) {
+        let repo = new Repository(element.registry, element.label);
+        let images: AzureImage[] = await getImagesByRepository(repo);
+        for (let img of images) {
             node = new AzureImageTagNode(
                 element.azureAccount,
-                element.subscription,
-                element.registry,
-                element.registry.loginServer,
-                element.label,
-                tagInfo.tag,
-                tagInfo.created);
+                element,
+                img.subscription,
+                img.registry,
+                img.registry.loginServer,
+                img.repository.name,
+                img.tag,
+                img.created);
             imageNodes.push(node);
         }
 
@@ -198,6 +115,7 @@ export class AzureRepositoryNode extends NodeBase {
 export class AzureImageTagNode extends NodeBase {
     constructor(
         public readonly azureAccount: AzureAccount,
+        public readonly parent: NodeBase,
         public readonly subscription: SubscriptionModels.Subscription,
         public readonly registry: ContainerModels.Registry,
         public readonly serverUrl: string,
@@ -248,22 +166,4 @@ export class AzureLoadingNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.None
         }
     }
-}
-
-async function acquireToken(session: AzureSession): Promise<{ accessToken: string; refreshToken: string; }> {
-    return new Promise<{ accessToken: string; refreshToken: string; }>((resolve, reject) => {
-        const credentials: any = session.credentials;
-        const environment: any = session.environment;
-        // tslint:disable-next-line:no-function-expression // Grandfathered in
-        credentials.context.acquireToken(environment.activeDirectoryResourceId, credentials.username, credentials.clientId, function (err: any, result: { accessToken: string; refreshToken: string; }): void {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken
-                });
-            }
-        });
-    });
 }
