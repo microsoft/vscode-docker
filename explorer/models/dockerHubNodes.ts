@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as moment from 'moment';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants'
+import { MAX_CONCURRENT_REQUESTS } from '../../constants';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { formatTag } from './commonRegistryUtils';
@@ -15,13 +14,14 @@ import { NodeBase } from './nodeBase';
 export class DockerHubOrgNode extends NodeBase {
 
     constructor(
-        public readonly label: string
+        public readonly namespace: string
     ) {
-        super(label);
+        super(namespace);
     }
 
     public static readonly contextValue: string = 'dockerHubOrgNode';
     public readonly contextValue: string = DockerHubOrgNode.contextValue;
+    public readonly label: string = this.namespace;
 
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),

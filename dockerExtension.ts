@@ -186,11 +186,17 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
 }
 
 async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegistryNode | DockerHubOrgNode): Promise<void> {
-    const registryName = node.label;
+    let registryName: string;
+    if (node instanceof DockerHubOrgNode) {
+        registryName = node.namespace;
+    } else if (node instanceof AzureRegistryNode) {
+        registryName = node.registry.loginServer || node.label;
+    } else { //CustomREgistryNode
+        registryName = node.registryName;
+    }
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     await configOptions.update('defaultRegistryPath', registryName, vscode.ConfigurationTarget.Workspace);
-    const updatedPath = configOptions.get('defaultRegistryPath', '');
-    vscode.window.showInformationMessage(`Update defaultRegistryPath to ${updatedPath}`);
+    vscode.window.showInformationMessage(`Update defaultRegistryPath to ${registryName}`);
 }
 
 async function consolidateDefaultRegistrySettings(): Promise<void> {

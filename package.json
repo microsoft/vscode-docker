@@ -566,7 +566,7 @@
       },
       {
         "command": "vscode-docker.setRegistryAsDefault",
-        "title": "Set registry as default prefix",
+        "title": "Set registry as default registry path",
         "category": "Docker"
       },
       {
