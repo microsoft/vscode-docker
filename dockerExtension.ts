@@ -5,6 +5,7 @@
 
 import * as opn from 'opn';
 import * as path from 'path';
+import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
@@ -42,11 +43,12 @@ import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
-import { browseAzurePortal } from './explorer/utils/azureUtils';
+import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
+import { addUserAgent } from './utils/addUserAgent';
 import { registerAzureCommand } from './utils/Azure/common';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { Keytar } from './utils/keytar';
@@ -73,6 +75,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
+
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
@@ -87,6 +90,11 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
+
+    // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
+    let defaultRequestOptions = {};
+    addUserAgent(defaultRequestOptions);
+    ext.request = request.defaults(defaultRequestOptions);
 }
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {

@@ -7,11 +7,12 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
 import * as path from 'path';
-import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
+import { ext } from '../../extensionVariables';
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
+import { addUserAgent } from '../../utils/addUserAgent';
 import { AsyncPool } from '../../utils/asyncpool';
 import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
 import { NodeBase } from './nodeBase';
@@ -45,7 +46,7 @@ export async function registryRequest<T>(
     let httpSettings = vscode.workspace.getConfiguration('http');
     let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
 
-    let response = await request.get(
+    let response = await ext.request.get(
         `${registryUrl}/${relativeUrl}`,
         {
             json: true,

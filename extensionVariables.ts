@@ -3,10 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as requestType from 'request';
 import { ExtensionContext, OutputChannel, Terminal } from "vscode";
 import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ITerminalProvider } from "./commands/utils/TerminalProvider";
 import { IKeytar } from './utils/keytar';
+
+type Request = requestType.RequestAPI<requestType.Request, requestType.CoreOptions, requestType.RequiredUriUrl>;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -18,4 +21,9 @@ export namespace ext {
     export let reporter: ITelemetryReporter;
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
+
+    /**
+     * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)
+     */
+    export let request: Request;
 }

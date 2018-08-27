@@ -5,7 +5,6 @@
 
 import * as assert from 'assert';
 import * as opn from 'opn';
-import request = require('request-promise');
 import * as vscode from 'vscode';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
@@ -149,7 +148,7 @@ async function login(username: string, password: string): Promise<Token> {
     }
 
     try {
-        t = await request(options);
+        t = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage(error.error.detail);
@@ -171,7 +170,7 @@ export async function getUser(): Promise<User> {
     }
 
     try {
-        u = await request(options);
+        u = await ext.request(options);
     } catch (error) {
         console.log(error);
         if (error.statusCode === 401) {
@@ -195,7 +194,7 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     }
 
     try {
-        repos = await request(options);
+        repos = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repositories');
@@ -218,7 +217,7 @@ export async function getRepositoryInfo(repository: Repository): Promise<any> {
     }
 
     try {
-        res = await request(options);
+        res = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to get Repository Details');
@@ -240,7 +239,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     try {
-        tagsPage = await request(options);
+        tagsPage = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');

@@ -10,6 +10,7 @@ import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as vscode from 'vscode';
+import { addExtensionUserAgent } from 'vscode-azureextensionui';
 import { reporter } from '../../telemetry/telemetry';
 import { AzureImageTagNode } from '../models/azureRegistryNodes';
 import { CustomImageTagNode } from '../models/customRegistryNodes';
@@ -571,6 +572,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         if (this._registry.adminUserEnabled) {
             const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
+            addExtensionUserAgent(client);
             const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
             let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
             this._serverPassword = creds.passwords[0].value;

@@ -653,6 +653,7 @@
     "@types/keytar": "^4.0.1",
     "@types/mocha": "^5.2.5",
     "@types/node": "^8.0.34",
+    "@types/request-promise": "^4.1.42",
     "adm-zip": "^0.4.11",
     "azure-storage": "^2.8.1",
     "cross-env": "^5.2.0",
