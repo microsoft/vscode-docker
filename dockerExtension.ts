@@ -37,6 +37,7 @@ import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
+import { CustomRegistryNode } from './explorer/models/customRegistryNodes';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { browseAzurePortal } from './explorer/utils/azureUtils';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
@@ -179,8 +180,17 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
         browseAzurePortal(context);
     });
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
+    registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
 
+}
+
+async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegistryNode | DockerHubOrgNode): Promise<void> {
+    const registryName = node.label;
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    await configOptions.update('defaultRegistryPath', registryName, vscode.ConfigurationTarget.Workspace);
+    const updatedPath = configOptions.get('defaultRegistryPath', '');
+    vscode.window.showInformationMessage(`Update defaultRegistryPath to ${updatedPath}`);
 }
 
 async function consolidateDefaultRegistrySettings(): Promise<void> {

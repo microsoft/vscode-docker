@@ -53,6 +53,7 @@
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
     "onCommand:vscode-docker.connectCustomRegistry",
+    "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
@@ -209,6 +210,10 @@
         {
           "command": "vscode-docker.connectCustomRegistry",
           "when": "view == dockerExplorer && viewItem =~ /^(customRootNode|registriesRootNode)$/"
+        },
+        {
+          "command": "vscode-docker.setRegistryAsDefault",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
@@ -557,6 +562,11 @@
       {
         "command": "vscode-docker.connectCustomRegistry",
         "title": "Connect to a private registry...",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.setRegistryAsDefault",
+        "title": "Set registry as default prefix",
         "category": "Docker"
       },
       {
