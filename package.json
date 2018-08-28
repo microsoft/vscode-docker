@@ -606,7 +606,7 @@
       },
       {
         "command": "vscode-docker.disconnectCustomRegistry",
-        "title": "Disconnect From Private Registry",
+        "title": "Disconnect from Private Registry",
         "category": "Docker"
       }
     ],
