@@ -1,6 +1,6 @@
 # Docker Support for Visual Studio Code
 
-[![Build Status](https://travis-ci.org/Microsoft/vscode-docker.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-docker) [![Release Status](https://img.shields.io/github/tag/Microsoft/vscode-docker.svg?label=prerelease&colorB=0E7FC0)](https://github.com/Microsoft/vscode-docker/releases)
+[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://travis-ci.org/Microsoft/vscode-docker.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-docker)
 
 The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for example:
 
