@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { OutgoingHttpHeaders } from 'http';
-import * as https from 'https';
 import { appendExtensionUserAgent } from 'vscode-azureextensionui';
 
 const userAgentKey = 'User-Agent';
