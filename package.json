@@ -228,7 +228,7 @@
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
-          "when": "view == dockerExplorer && viewItem =~ /^(customRootNode|registriesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem == customRootNode"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
