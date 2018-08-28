@@ -14,15 +14,21 @@ import * as quickPicks from '../utils/quick-pick-azure';
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
 export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositoryNode): Promise<any> {
-
     let registryName: string;
     let registry: Registry;
     let imageName: string;
 
-    if (context) { // Right Click on ImageNode
+    if (context) { // Right Click
         registryName = context.registry.loginServer;
         registry = context.registry;
-        imageName = context.label;
+
+        if (context.contextValue === "azureImageTagNode") { // Right Click on AzureImageNode
+            imageName = context.label;
+        } else { // Right Click on AzureRepositoryNode
+            console.log(context.repositoryName);
+            imageName = `${context.label} -a`; // Pull all images in repository
+        }
+
     } else { // Command Palette
         registry = await quickPicks.quickPickACRRegistry();
         registryName = registry.loginServer;
