@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as requestType from 'request';
+import { RequestAPI, RequiredUriUrl } from 'request';
+import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel, Terminal } from "vscode";
 import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ITerminalProvider } from "./commands/utils/TerminalProvider";
 import { IKeytar } from './utils/keytar';
 
-type Request = requestType.RequestAPI<requestType.Request, requestType.CoreOptions, requestType.RequiredUriUrl>;
+type Request = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts

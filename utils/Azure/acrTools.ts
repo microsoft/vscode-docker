@@ -128,7 +128,7 @@ export async function acquireAADTokens(session: AzureSession): Promise<{ aadAcce
 
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
-    const acrRefreshTokenResponse = await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
+    const acrRefreshTokenResponse: { refresh_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
@@ -136,21 +136,22 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
             refresh_token: aadRefreshToken,
             access_token: aadAccessToken,
         },
+        json: true
     });
 
-    return JSON.parse(acrRefreshTokenResponse).refresh_token;
-
+    return acrRefreshTokenResponse.refresh_token;
 }
 
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
-    const acrAccessTokenResponse = await ext.request.post(`https://${registryUrl}/oauth2/token`, {
+    const acrAccessTokenResponse: { access_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/token`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
             scope,
             refresh_token: acrRefreshToken,
         },
+        json: true
     });
-    return JSON.parse(acrAccessTokenResponse).access_token;
+    return acrAccessTokenResponse.access_token;
 }
