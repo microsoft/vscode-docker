@@ -697,7 +697,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                 // We will be passed a directory path which will be the service folder. The dockerFile needs to be generated at this location. This holds true for all language types.
                 // The csproj might be present in this folder or a sub directory or none at all (if the app is not C# type).
                 // We will not be passed the csproj location. The language-type prompts will be presented by the plugin like they appear today. Platform will not be passed in. All the language specific processing should happen within this plugin.
-                // Will pass in: Port number, Operating System, folder path where the dockerFile should be created, service name if desired. asdf service name?
+                // Will pass in: Port number, Operating System, folder path where the dockerFile should be created, service name if desired.
                 // The service folder will only have 0 or 1 csproj within them. So even though there are multiple service directories within the root, we will only be passed 1 service directory at a time, so that only 1 dockerFile generation happens at a time.
                 // So the command which is "Add DockerFile to this Workspace" now extends to "Add DockerFile to the directory", and we would do all the searching and processing only within the passed directory path.
 

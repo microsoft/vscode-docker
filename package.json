@@ -653,6 +653,7 @@
     "@types/keytar": "^4.0.1",
     "@types/mocha": "^5.2.5",
     "@types/node": "^8.0.34",
+    "@types/request-promise-native": "^1.0.15",
     "adm-zip": "^0.4.11",
     "azure-storage": "^2.8.1",
     "cross-env": "^5.2.0",
@@ -676,7 +677,7 @@
     "moment": "^2.19.3",
     "opn": "^5.1.0",
     "pom-parser": "^1.1.1",
-    "request-promise": "^4.2.2",
+    "request-promise-native": "^1.0.5",
     "vscode-azureextensionui": "^0.17.0",
     "vscode-extension-telemetry": "0.0.18",
     "vscode-languageclient": "^4.4.0"
