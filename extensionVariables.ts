@@ -10,7 +10,7 @@ import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ITerminalProvider } from "./commands/utils/TerminalProvider";
 import { IKeytar } from './utils/keytar';
 
-type Request = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
+type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -26,5 +26,5 @@ export namespace ext {
     /**
      * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)
      */
-    export let request: Request;
+    export let request: requestPromise;
 }
