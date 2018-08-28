@@ -85,19 +85,11 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 //Credential management
 /** Obtains registry username and password compatible with docker login */
 export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
-    if (registry.adminUserEnabled) {
-        const subscription: Subscription = getSubscriptionFromRegistry(registry);
-        const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-        const resourceGroup: string = getResourceGroupName(registry);
-        let creds = await client.registries.listCredentials(resourceGroup, registry.name);
-        return { 'password': creds.passwords[0].value, 'username': creds.username };
-    } else {
-        const subscription: Subscription = getSubscriptionFromRegistry(registry);
-        const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
-        const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
-        const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
-        return { 'password': acrRefreshToken, 'username': NULL_GUID };
-    }
+    const subscription: Subscription = getSubscriptionFromRegistry(registry);
+    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
+    const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
+    const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
+    return { 'password': acrRefreshToken, 'username': NULL_GUID };
 }
 
 /** Obtains tokens for using the Docker Registry v2 Api
