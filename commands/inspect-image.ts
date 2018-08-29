@@ -9,7 +9,7 @@ import { reporter } from "../telemetry/telemetry";
 import { quickPickImage } from "./utils/quick-pick-image";
 
 export default async function inspectImage(context?: ImageNode): Promise<void> {
-    let imageToInspect: Docker.ImageDesc; //asdf
+    let imageToInspect: Docker.ImageDesc;
 
     if (context && context.imageDesc) {
         imageToInspect = context.imageDesc;

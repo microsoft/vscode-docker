@@ -62,15 +62,15 @@ export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
     };
 
     try {
-        images = await docker.getImageDescriptors(imageFilters); //asdf
-        if (!images || images.length === 0) {
-            throw new Error('There are no docker images. Try Docker Build first.');
-        } else {
-            const items: ImageItem[] = computeItems(images, includeAll);
-            return ext.ui.showQuickPick(items, { placeHolder: 'Choose image...' });
-        }
+        images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        throw new Error(`Unable to connect to Docker, is the Docker daemon running?  ${parseError(error).message}`);
+        throw new Error(`Unable to connect to Docker, is the Docker daemon running?\n${parseError(error).message}`);
     }
 
+    if (!images || images.length === 0) {
+        throw new Error('There are no docker images. Try Docker Build first.');
+    } else {
+        const items: ImageItem[] = computeItems(images, includeAll);
+        return ext.ui.showQuickPick(items, { placeHolder: 'Choose image...' });
+    }
 }
