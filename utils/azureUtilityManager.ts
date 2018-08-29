@@ -9,6 +9,7 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { ServiceClientCredentials } from 'ms-rest';
+import { addExtensionUserAgent } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
@@ -25,6 +26,10 @@ export class AzureUtilityManager {
     private azureAccount: AzureAccount;
 
     private constructor() { }
+
+    public static hasLoadedUtilityManager(): boolean {
+        if (AzureUtilityManager._instance) { return true; } else { return false; }
+    }
 
     public static getInstance(): AzureUtilityManager {
         if (!AzureUtilityManager._instance) { // lazy initialization
@@ -65,14 +70,18 @@ export class AzureUtilityManager {
     }
 
     public getContainerRegistryManagementClient(subscription: SubscriptionModels.Subscription): ContainerRegistryManagementClient {
-        return new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+        let client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+        addExtensionUserAgent(client);
+        return client;
     }
 
     public getResourceManagementClient(subscription: SubscriptionModels.Subscription): ResourceManagementClient {
         return new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
     }
 
-    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string, sortFunction?: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number): Promise<ContainerModels.Registry[]> {
+    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string,
+        compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically): Promise<ContainerModels.Registry[]> {
+
         let registries: ContainerModels.Registry[] = [];
 
         if (subscription && resourceGroup) {
@@ -100,11 +109,14 @@ export class AzureUtilityManager {
             await subPool.runAll();
         }
 
-        if (sortFunction && registries.length > 1) {
-            registries.sort(sortFunction);
-        }
+        registries.sort(compareFn);
+
         //Return only non classic registries
         return registries.filter((registry) => { return !registry.sku.tier.includes('Classic') });
+    }
+
+    private sortRegistriesAlphabetically(a: ContainerModels.Registry, b: ContainerModels.Registry): number {
+        return a.loginServer.localeCompare(b.loginServer);
     }
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {

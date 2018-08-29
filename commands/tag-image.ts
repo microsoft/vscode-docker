@@ -33,20 +33,18 @@ export async function tagImage(context?: ImageNode): Promise<void> {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
 
-        if (defaultRegistryPath.length > 0) {
+        let highlightEnd = imageName.indexOf('/');
+        if (defaultRegistryPath.length > 0 && highlightEnd < 0) {
             imageName = defaultRegistryPath + '/' + imageName;
-        }
-
-        const defaultRegistry = configOptions.get('defaultRegistry', '');
-        if (defaultRegistry.length > 0) {
-            imageName = defaultRegistry + '/' + imageName;
+            highlightEnd = defaultRegistryPath.length;
         }
 
         let opt: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             placeHolder: imageName,
             prompt: 'Tag image as...',
-            value: imageName
+            value: imageName,
+            valueSelection: [0, highlightEnd]
         };
 
         const value: string = await vscode.window.showInputBox(opt);
