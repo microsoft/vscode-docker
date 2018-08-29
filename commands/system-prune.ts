@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { getCoreNodeModule } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
+import { getCoreNodeModule } from '../utils/getCoreNodeModule';
 import { docker } from './utils/docker-endpoint';
 
 const teleCmdId: string = 'vscode-docker.system.prune';

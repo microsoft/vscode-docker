@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as keytarType from 'keytar';
+import * as assert from 'assert';
 import * as opn from 'opn';
-import request = require('request-promise');
 import * as vscode from 'vscode';
-import { keytarConstants } from '../../constants';
-import { DockerHubImageNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
-import { getCoreNodeModule } from './utils';
+import { keytarConstants, PAGE_SIZE } from '../../constants';
+import { ext } from '../../extensionVariables';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
+import { NodeBase } from '../models/nodeBase';
 
 let _token: Token;
 
@@ -84,13 +84,32 @@ export interface Image {
     variant: any
 }
 
-export async function dockerHubLogout(): Promise<void> {
+export interface ManifestFsLayer {
+    blobSum: string;
+}
 
-    const keytar: typeof keytarType = getCoreNodeModule('keytar');
-    if (keytar) {
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
-        await keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+export interface ManifestHistory {
+    v1Compatibility: string; // stringified ManifestHistoryV1Compatibility
+}
+
+export interface ManifestHistoryV1Compatibility {
+    created: string;
+}
+
+export interface Manifest {
+    name: string;
+    tag: string;
+    architecture: string;
+    fsLayers: ManifestFsLayer[];
+    history: ManifestHistory[];
+    schemaVersion: number;
+}
+
+export async function dockerHubLogout(): Promise<void> {
+    if (ext.keytar) {
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
     _token = null;
 }
@@ -109,7 +128,6 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
     }
 
     return;
-
 }
 
 export function setDockerHubToken(token: string): void {
@@ -130,14 +148,13 @@ async function login(username: string, password: string): Promise<Token> {
     }
 
     try {
-        t = await request(options);
+        t = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage(error.error.detail);
     }
 
     return t;
-
 }
 
 export async function getUser(): Promise<User> {
@@ -153,7 +170,7 @@ export async function getUser(): Promise<User> {
     }
 
     try {
-        u = await request(options);
+        u = await ext.request(options);
     } catch (error) {
         console.log(error);
         if (error.statusCode === 401) {
@@ -162,7 +179,6 @@ export async function getUser(): Promise<User> {
     }
 
     return u;
-
 }
 
 export async function getRepositories(username: string): Promise<Repository[]> {
@@ -178,7 +194,7 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     }
 
     try {
-        repos = await request(options);
+        repos = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repositories');
@@ -201,7 +217,7 @@ export async function getRepositoryInfo(repository: Repository): Promise<any> {
     }
 
     try {
-        res = await request(options);
+        res = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to get Repository Details');
@@ -215,7 +231,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
 
     let options = {
         method: 'GET',
-        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=100&page=1`,
+        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
             Authorization: 'JWT ' + _token.token
         },
@@ -223,33 +239,26 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     try {
-        tagsPage = await request(options);
+        tagsPage = await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
-export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
-
-    if (context) {
+export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+    if (node) {
         let url: string = 'https://hub.docker.com/';
-        const repo: RepositoryInfo = context.repository;
-        switch (context.contextValue) {
-            case 'dockerHubNamespace':
-                url = `${url}u/${context.userName}`;
-                break;
-            case 'dockerHubRepository':
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}`;
-                break;
-            case 'dockerHubImageTag':
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
-                break;
-            default:
-                break;
+        if (node instanceof DockerHubOrgNode) {
+            url = `${url}u/${node.userName}`;
+        } else if (node instanceof DockerHubRepositoryNode) {
+            url = `${url}r/${node.repository.namespace}/${node.repository.name}`;
+        } else if (node instanceof DockerHubImageTagNode) {
+            url = `${url}r/${node.repository.namespace}/${node.repository.name}/tags`;
+        } else {
+            assert(false, `browseDockerHub: Unexpected node type, contextValue=${(<NodeBase>node).contextValue}`)
         }
         opn(url);
     }

@@ -1,16 +1,23 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
-import request = require('request-promise');
 import { NULL_GUID } from "../../constants";
+import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
+import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
+import { addUserAgent } from "../addUserAgent";
 import { AzureUtilityManager } from '../azureUtilityManager';
 import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
 
 //General helpers
-/**
- * @param registry gets the subscription for a given registry
+/** Gets the subscription for a given registry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -21,7 +28,8 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
     });
     return subscription;
 }
-export function getResourceGroupName(registry: Registry): any {
+
+export function getResourceGroupName(registry: Registry): string {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
 }
 
@@ -30,48 +38,30 @@ export function getResourceGroupName(registry: Registry): any {
 export async function getImagesByRepository(element: Repository): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
     let image: AzureImage;
-    let tags: string[];
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
-    await request.get('https://' + element.registry.loginServer + '/v2/' + element.name + '/tags/list', {
-        auth: {
-            bearer: acrAccessToken
-        }
-    }, (err, httpResponse, body) => {
-        if (err) { throw (err) }
-        if (body.length > 0) {
-            tags = JSON.parse(body).tags;
-        }
-    });
-
+    const tags: TagInfo[] = await getTags('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
-        image = new AzureImage(element, tag);
+        image = new AzureImage(element, tag.tag, tag.created);
         allImages.push(image);
     }
     return allImages;
 }
+
 /** List repositories on a given Registry. */
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
-    const allRepos: Repository[] = [];
     let repo: Repository;
-    const { acrRefreshToken, acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
-    await request.get('https://' + registry.loginServer + '/v2/_catalog', {
-        auth: {
-            bearer: acrAccessToken
-        }
-    }, (err, httpResponse, body) => {
-        if (body.length > 0) {
-            const repositories = JSON.parse(body).repositories;
-            for (let tempRepo of repositories) {
-                repo = new Repository(registry, tempRepo, acrAccessToken, acrRefreshToken);
-                allRepos.push(repo);
-            }
-        }
-    });
-
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
+    const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
+    let allRepos: Repository[] = [];
+    for (let tempRepo of repositories) {
+        repo = new Repository(registry, tempRepo);
+        allRepos.push(repo);
+    }
     //Note these are ordered by default in alphabetical order
     return allRepos;
 }
-/** Sends a custon html request to a registry
+
+/** Sends a custom html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -86,9 +76,12 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
         http_method: http_method,
         url: url
     }
+
     if (http_method === 'delete') {
-        await request.delete(opt);
+        return await ext.request.delete(opt);
     }
+
+    assert(false, 'sendRequestToRegistry: Unexpected http method');
 }
 
 //Credential management
@@ -100,6 +93,7 @@ export async function loginCredentials(registry: Registry): Promise<{ password: 
     const acrRefreshToken = await acquireACRRefreshToken(registry.loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
     return { 'password': acrRefreshToken, 'username': NULL_GUID };
 }
+
 /** Obtains tokens for using the Docker Registry v2 Api
  * @param registry The targeted Azure Container Registry
  * @param scope String determining the scope of the access token
@@ -113,6 +107,7 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
     const acrAccessToken = await acquireACRAccessToken(registry.loginServer, scope, acrRefreshToken)
     return { acrRefreshToken, acrAccessToken };
 }
+
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
@@ -130,9 +125,10 @@ export async function acquireAADTokens(session: AzureSession): Promise<{ aadAcce
         });
     });
 }
+
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
-    const acrRefreshTokenResponse = await request.post(`https://${registryUrl}/oauth2/exchange`, {
+    const acrRefreshTokenResponse: { refresh_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
@@ -140,22 +136,24 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
             refresh_token: aadRefreshToken,
             access_token: aadAccessToken,
         },
+        json: true
     });
 
-    return JSON.parse(acrRefreshTokenResponse).refresh_token;
-
+    return acrRefreshTokenResponse.refresh_token;
 }
+
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
-    const acrAccessTokenResponse = await request.post(`https://${registryUrl}/oauth2/token`, {
+    const acrAccessTokenResponse: { access_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/token`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
             scope,
             refresh_token: acrRefreshToken,
         },
+        json: true
     });
-    return JSON.parse(acrAccessTokenResponse).access_token;
+    return acrAccessTokenResponse.access_token;
 }
 
 export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuffix: string, containerName: string, blobName: string, sasToken: string, host: string } {

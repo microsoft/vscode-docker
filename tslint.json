@@ -28,7 +28,8 @@
         "react-no-dangerous-html": true,
         "await-promise": [
             true,
-            "Thenable" // changed
+            "Thenable", // changed
+            "RequestPromise" // changed
         ],
         "forin": true,
         "jquery-deferred-must-complete": true,

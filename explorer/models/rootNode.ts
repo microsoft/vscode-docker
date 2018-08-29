@@ -26,7 +26,7 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _imageCache: Docker.ImageDesc[];
+    private _sortedImageCache: Docker.ImageDesc[];
     private _imageDebounceTimer: NodeJS.Timer;
     private _imagesNode: RootNode;
     private _containerCache: Docker.ContainerDesc[];
@@ -36,7 +36,7 @@ export class RootNode extends NodeBase {
 
     constructor(
         public readonly label: string,
-        public readonly contextValue: string,
+        public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
         public eventEmitter: vscode.EventEmitter<NodeBase>,
         public azureAccount?: AzureAccount
     ) {
@@ -66,32 +66,26 @@ export class RootNode extends NodeBase {
                 let found: boolean = false;
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
-
-                if (!this._imageCache) {
-                    this._imageCache = images;
-                }
-
-                if (this._imageCache.length !== images.length) {
-                    needToRefresh = true;
-                } else {
-                    for (let cachedImage of this._imageCache) {
-                        for (let image of images) {
-                            if (image === cachedImage) {
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (!found) {
-                            needToRefresh = true;
-                            break
-                        }
+                images.sort((img1, img2) => {
+                    if (img1.Id > img2.Id) {
+                        return -1;
+                    } else if (img1.Id < img2.Id) {
+                        return 1;
+                    } else {
+                        return 0;
                     }
+                });
+
+                if (!this._sortedImageCache) {
+                    this._sortedImageCache = images;
+                    return;
                 }
 
-                if (needToRefresh) {
+                let imagesAsJson = JSON.stringify(images);
+                let cacheAsJson = JSON.stringify(this._sortedImageCache);
+                if (imagesAsJson !== cacheAsJson) {
                     this.eventEmitter.fire(this._imagesNode);
-                    this._imageCache = images;
+                    this._sortedImageCache = images;
                 }
 
             }, refreshInterval);
@@ -264,6 +258,8 @@ export class RootNode extends NodeBase {
         if (this._azureAccount) {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
         }
+
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', null));
 
         return registryRootNodes;
     }
