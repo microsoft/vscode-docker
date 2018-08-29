@@ -152,7 +152,6 @@ async function createNewResourceGroup(loc: string, subscription?: Subscription):
     };
 
     let resourceGroupName: string = await ext.ui.showInputBox(opt);
-
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
         location: loc,

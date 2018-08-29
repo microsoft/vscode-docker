@@ -155,3 +155,14 @@ export async function acquireACRAccessToken(registryUrl: string, scope: string, 
     });
     return acrAccessTokenResponse.access_token;
 }
+
+export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuffix: string, containerName: string, blobName: string, sasToken: string, host: string } {
+    let items: string[] = blobUrl.slice(blobUrl.search('https://') + 'https://'.length).split('/');
+    let accountName: string = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
+    let endpointSuffix: string = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
+    let containerName: string = items[1];
+    let blobName: string = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
+    let sasToken: string = items[4].slice(items[4].search('[?]') + 1);
+    let host: string = accountName + '.blob.' + endpointSuffix;
+    return { accountName, endpointSuffix, containerName, blobName, sasToken, host };
+}

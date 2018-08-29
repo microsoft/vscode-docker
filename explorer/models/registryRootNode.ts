@@ -6,7 +6,6 @@
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
@@ -151,6 +150,7 @@ export class RegistryRootNode extends NodeBase {
                     } catch (error) {
                         vscode.window.showErrorMessage(parseError(error).message);
                     }
+
                 });
             }
             await subPool.runAll();

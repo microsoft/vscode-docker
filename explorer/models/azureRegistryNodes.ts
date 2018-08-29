@@ -13,6 +13,7 @@ import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
 import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
+import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
@@ -39,8 +40,17 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
-        const repoNodes: AzureRepositoryNode[] = [];
+    public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
+        const registryChildNodes: NodeBase[] = [];
+
+        let iconPath = {
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'buildTasks_light.svg'),
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'buildTasks_dark.svg')
+        };
+
+        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+        let taskNode = new TaskRootNode("Build Tasks", "taskRootNode", element.subscription, element.azureAccount, element.registry, iconPath);
+        registryChildNodes.push(taskNode);
 
         if (!this.azureAccount) {
             return [];
@@ -54,14 +64,13 @@ export class AzureRegistryNode extends NodeBase {
                 element.subscription,
                 element.registry,
                 element.label);
-            repoNodes.push(node);
+            registryChildNodes.push(node);
         }
 
         //Note these are ordered by default in alphabetical order
-        return repoNodes;
+        return registryChildNodes;
     }
 }
-
 export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,
