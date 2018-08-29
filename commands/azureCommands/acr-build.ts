@@ -1,6 +1,6 @@
-import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
-import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models";
-import { Registry } from 'azure-arm-containerregistry/lib/models';
+import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
+import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models/quickBuildRequest";
+import { Registry } from 'azure-arm-containerregistry/lib/models/registry';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
 import * as os from 'os';
@@ -77,12 +77,12 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let current = process.cwd();
     process.chdir(source);
     fs.readdir(source, (err, items) => {
-        process.chdir(current);
         items = filter(items);
         tar.c(
             {},
             items
         ).pipe(fs.createWriteStream(tarFilePath));
+        process.chdir(current);
     });
 
     status.appendLine("   Getting Build Source Upload Url ");
