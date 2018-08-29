@@ -2,13 +2,16 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
+import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
-import request = require('request-promise');
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
+import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
+import { addUserAgent } from "../addUserAgent";
 import { AzureUtilityManager } from '../azureUtilityManager';
 import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
@@ -58,7 +61,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
-/** Sends a custon html request to a registry
+/** Sends a custom html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -73,9 +76,12 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
         http_method: http_method,
         url: url
     }
+
     if (http_method === 'delete') {
-        await request.delete(opt);
+        return await ext.request.delete(opt);
     }
+
+    assert(false, 'sendRequestToRegistry: Unexpected http method');
 }
 
 //Credential management
@@ -122,7 +128,7 @@ export async function acquireAADTokens(session: AzureSession): Promise<{ aadAcce
 
 /** Obtains refresh tokens for Azure Container Registry. */
 export async function acquireACRRefreshToken(registryUrl: string, tenantId: string, aadRefreshToken: string, aadAccessToken: string): Promise<string> {
-    const acrRefreshTokenResponse = await request.post(`https://${registryUrl}/oauth2/exchange`, {
+    const acrRefreshTokenResponse: { refresh_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/exchange`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
@@ -130,21 +136,22 @@ export async function acquireACRRefreshToken(registryUrl: string, tenantId: stri
             refresh_token: aadRefreshToken,
             access_token: aadAccessToken,
         },
+        json: true
     });
 
-    return JSON.parse(acrRefreshTokenResponse).refresh_token;
-
+    return acrRefreshTokenResponse.refresh_token;
 }
 
 /** Gets an ACR accessToken by using an acrRefreshToken */
 export async function acquireACRAccessToken(registryUrl: string, scope: string, acrRefreshToken: string): Promise<string> {
-    const acrAccessTokenResponse = await request.post(`https://${registryUrl}/oauth2/token`, {
+    const acrAccessTokenResponse: { access_token: string } = await ext.request.post(`https://${registryUrl}/oauth2/token`, {
         form: {
             grant_type: "refresh_token",
             service: registryUrl,
             scope,
             refresh_token: acrRefreshToken,
         },
+        json: true
     });
-    return JSON.parse(acrAccessTokenResponse).access_token;
+    return acrAccessTokenResponse.access_token;
 }

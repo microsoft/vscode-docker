@@ -265,7 +265,7 @@ export class RootNode extends NodeBase {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
         }
 
-        registryRootNodes.push(new RegistryRootNode('Private registries', 'customRootNode', null));
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', null));
 
         return registryRootNodes;
     }
