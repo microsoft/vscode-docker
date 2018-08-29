@@ -40,6 +40,9 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): 
     return items;
 }
 
+/**
+ * @throws UserCancelledError
+ */
 export async function quickPickContainer(includeAll: boolean = false, opts?: {}): Promise<ContainerItem> {
     let containers: ContainerDesc[];
 
@@ -67,6 +70,6 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
         throw new Error('There are no Docker containers that apply to this command.');
     } else {
         const items: ContainerItem[] = computeItems(containers, includeAll);
-        return ext.ui.showQuickPick(items, { placeHolder: 'Choose container...' });
+        return await ext.ui.showQuickPick(items, { placeHolder: 'Choose container...' });
     }
 }

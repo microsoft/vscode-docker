@@ -5,6 +5,8 @@
 
 import * as Docker from 'dockerode';
 import vscode = require('vscode');
+import { parseError } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
@@ -47,6 +49,9 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
     return items;
 }
 
+/**
+ * @throws UserCancelledError
+ */
 export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
     let images: Docker.ImageDesc[];
 
@@ -57,17 +62,15 @@ export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
     };
 
     try {
-        images = await docker.getImageDescriptors(imageFilters);
+        images = await docker.getImageDescriptors(imageFilters); //asdf
         if (!images || images.length === 0) {
-            vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
-            return;
+            throw new Error('There are no docker images. Try Docker Build first.');
         } else {
             const items: ImageItem[] = computeItems(images, includeAll);
-            return vscode.window.showQuickPick(items, { placeHolder: 'Choose image...' });
+            return ext.ui.showQuickPick(items, { placeHolder: 'Choose image...' });
         }
     } catch (error) {
-        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-        return;
+        throw new Error(`Unable to connect to Docker, is the Docker daemon running?  ${parseError(error).message}`);
     }
 
 }

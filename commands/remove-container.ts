@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { parseError, UserCancelledError } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-
-const teleCmdId: string = 'vscode-docker.container.remove';
 
 export async function removeContainer(context?: ContainerNode): Promise<void> {
 
@@ -25,17 +24,14 @@ export async function removeContainer(context?: ContainerNode): Promise<void> {
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(true, opts);
-        if (selectedItem) {
-            if (selectedItem.label.toLowerCase().includes('all containers')) {
-                containersToRemove = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToRemove = [selectedItem.containerDesc];
-            }
+        if (selectedItem.label.toLowerCase().includes('all containers')) {
+            containersToRemove = await docker.getContainerDescriptors(opts);
+        } else {
+            containersToRemove = [selectedItem.containerDesc];
         }
     }
 
-    if (containersToRemove) {
-
+    if (containersToRemove.length) {
         const numContainers: number = containersToRemove.length;
         let containerCounter: number = 0;
 
@@ -45,27 +41,19 @@ export async function removeContainer(context?: ContainerNode): Promise<void> {
                 docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any): void {
                     containerCounter++;
                     if (err) {
-                        // TODO: parseError, proper error handling
-                        vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers();
-                        reject();
+                        dockerExplorerProvider.refreshContainers(); //asdf
+                        reject(err);
                     }
                     if (containerCounter === numContainers) {
                         dockerExplorerProvider.refreshContainers();
                         resolve();
+                    } else {
+                        reject(new Error('An error occurred removing a container'));
                     }
                 });
             });
         }));
+    } else {
+        throw new UserCancelledError();
     }
-
-    if (reporter) {
-        /* __GDPR__
-        "command" : {
-            "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-        }
-        */
-        reporter.sendTelemetryEvent("command", { command: teleCmdId });
-    }
-
 }

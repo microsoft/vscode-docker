@@ -3,20 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import vscode = require('vscode');
+import { UserCancelledError } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
-import vscode = require('vscode');
-
-const teleCmdId: string = 'vscode-docker.container.restart';
-
 export async function restartContainer(context?: ContainerNode): Promise<void> {
-
     let containersToRestart: Docker.ContainerDesc[];
-
+    //asdf
     if (context && context.containerDesc) {
         containersToRestart = [context.containerDesc];
     } else {
@@ -26,17 +22,14 @@ export async function restartContainer(context?: ContainerNode): Promise<void> {
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(true, opts);
-        if (selectedItem) {
-            if (selectedItem.label.toLocaleLowerCase().includes("all containers")) {
-                containersToRestart = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToRestart = [selectedItem.containerDesc];
-            }
+        if (selectedItem.label.toLocaleLowerCase().includes("all containers")) {
+            containersToRestart = await docker.getContainerDescriptors(opts);
+        } else {
+            containersToRestart = [selectedItem.containerDesc];
         }
     }
 
-    if (containersToRestart) {
-
+    if (containersToRestart.length) {
         const numContainers: number = containersToRestart.length;
         let containerCounter: number = 0;
 
@@ -45,10 +38,10 @@ export async function restartContainer(context?: ContainerNode): Promise<void> {
                 docker.getContainer(container.Id).restart((err: Error, data: any) => {
                     containerCounter++;
                     if (err) {
-                        vscode.window.showErrorMessage(err.message);
                         dockerExplorerProvider.refreshContainers();
-                        reject();
+                        reject(err); //asdf
                     }
+
                     if (containerCounter === numContainers) {
                         dockerExplorerProvider.refreshContainers();
                         resolve();
@@ -56,16 +49,7 @@ export async function restartContainer(context?: ContainerNode): Promise<void> {
                 });
             });
         }));
-
-        if (reporter) {
-            /* __GDPR__
-                "command" : {
-                    "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                }
-            */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
+    } else {
+        throw new UserCancelledError();
     }
 }

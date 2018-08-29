@@ -4,29 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { getCoreNodeModule } from '../utils/getCoreNodeModule';
 import { docker } from './utils/docker-endpoint';
 
-const teleCmdId: string = 'vscode-docker.system.prune';
-
-export async function systemPrune(): Promise<void> {
+export async function systemPrune(): Promise<void> { //asdf
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = ext.terminalProvider.createTerminal("docker system prune");
     const semver = getCoreNodeModule('semver');
 
     try {
-
-        if (configOptions.get('promptOnSystemPrune', true)) {
-            let res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
+        if (configOptions.get('promptOnSystemPrune', true)) { //asdf
+            await ext.ui.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
                 { title: 'Yes' },
                 { title: 'Cancel', isCloseAffordance: true }
             );
-
-            if (!res || res.isCloseAffordance) {
-                return;
-            }
         }
 
         const info = await docker.getEngineInfo();
@@ -41,18 +34,6 @@ export async function systemPrune(): Promise<void> {
         terminal.show();
 
     } catch (error) {
-        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-        console.log(error);
-    }
-
-    if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
+        throw new Error(`Unable to connect to Docker, is the Docker daemon running?  ${parseError(error).message}`); //asdf
     }
 }

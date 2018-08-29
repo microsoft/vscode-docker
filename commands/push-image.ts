@@ -4,31 +4,31 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { DialogResponses } from 'vscode-azureextensionui';
+import { DialogResponses, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-const teleCmdId: string = 'vscode-docker.image.push';
-const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
-export async function pushImage(context?: ImageNode): Promise<void> {
+type RegistryType = 'gitlab' | 'Empty' | 'ACR' | 'Unknown' | 'localhost' | 'GCR' | 'ECR';
+
+export async function pushImage(actionContext: IActionContext, node?: ImageNode): Promise<void> {
+    let properties: {
+        registryType?: RegistryType
+    } & TelemetryProperties = actionContext.properties;
+
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     let askToSaveRegistryPath: boolean = configOptions.get<boolean>('askToSaveRegistryPath');
-
+    //asdf
     let prefix = "";
     let imageToPush: Docker.ImageDesc;
     let imageName: string = "";
 
-    if (context && context.imageDesc) {
-        imageToPush = context.imageDesc;
-        imageName = context.label;
+    if (node && node.imageDesc) {
+        imageToPush = node.imageDesc;
+        imageName = node.label;
     } else {
         const selectedItem: ImageItem = await quickPickImage();
-        if (selectedItem) {
-            imageToPush = selectedItem.imageDesc;
-            imageName = selectedItem.label;
-        }
+        imageToPush = selectedItem.imageDesc;
     }
 
     if (imageName.includes('/')) {
@@ -45,31 +45,26 @@ export async function pushImage(context?: ImageNode): Promise<void> {
             vscode.window.showInformationMessage('Default registry path saved. You can change this value at any time via the docker.defaultRegistryPath setting.');
         }
     }
-    if (imageToPush) {
-        const terminal = ext.terminalProvider.createTerminal(imageName);
-        terminal.sendText(`docker push ${imageName}`);
-        terminal.show();
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
 
-            if (imageName.toLowerCase().includes('azurecr.io')) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleAzureId
-                });
-
-            }
+    if (imageName.indexOf('/') < 0) {
+        properties.registryType = 'Empty';
+    } else {
+        let registry = imageName.toLowerCase().split('/')[0];
+        properties.registryType = 'Unknown';
+        const registryTypes: [string, RegistryType][] = [
+            ['azurecr.io', 'ACR'],
+            ['localhost', 'localhost'],
+            ['gitlab', 'gitlab'],
+            ['gcr.io', 'GCR'],
+            ['.ecr.', 'ECR']
+        ];
+        let foundType = registryTypes.find(tuple => registry.includes(tuple[0]));
+        if (foundType) {
+            properties.registryType = foundType[1];
         }
     }
+
+    const terminal = ext.terminalProvider.createTerminal(imageName);
+    terminal.sendText(`docker push ${imageName}`);
+    terminal.show();
 }

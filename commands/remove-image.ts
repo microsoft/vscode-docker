@@ -3,33 +3,28 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import vscode = require('vscode');
-import { dockerExplorerProvider } from '../dockerExtension';
+import { UserCancelledError } from 'vscode-azureextensionui';
 import { ImageNode } from "../explorer/models/imageNode";
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
-const teleCmdId: string = 'vscode-docker.image.remove';
-
 export async function removeImage(context?: ImageNode): Promise<void> {
-
-    let imagesToRemove: Docker.ImageDesc[];
+    let imagesToRemove: Docker.ImageDesc[]; //asdf
 
     if (context && context.imageDesc) {
         imagesToRemove = [context.imageDesc];
     } else {
         const selectedItem: ImageItem = await quickPickImage(true);
-        if (selectedItem) {
-            if (selectedItem.label.toLowerCase().includes('all containers')) {
-                imagesToRemove = await docker.getImageDescriptors();
-            } else {
-                imagesToRemove = [selectedItem.imageDesc];
-            }
+        if (selectedItem.label.toLowerCase().includes('all containers')) {
+            imagesToRemove = await docker.getImageDescriptors();
+        } else {
+            imagesToRemove = [selectedItem.imageDesc];
         }
     }
 
-    if (imagesToRemove) {
+    if (imagesToRemove.length) {
         const numImages: number = imagesToRemove.length;
         let imageCounter: number = 0;
 
@@ -39,26 +34,16 @@ export async function removeImage(context?: ImageNode): Promise<void> {
                 docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, data: any): void {
                     imageCounter++;
                     if (err) {
-                        // TODO: use parseError, proper error handling
-                        vscode.window.showErrorMessage(err.message);
-                        reject();
-                    }
-                    if (imageCounter === numImages) {
+                        reject(err);
+                    } else if (imageCounter === numImages) {
                         resolve();
+                    } else {
+                        reject(new Error('An error occurred while removing an image'));
                     }
                 });
             });
         }));
-    }
-
-    if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
+    } else {
+        throw new UserCancelledError();
     }
 }

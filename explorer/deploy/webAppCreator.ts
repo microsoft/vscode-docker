@@ -19,8 +19,6 @@ import { AzureAccountWrapper } from './azureAccountWrapper';
 import * as util from './util';
 import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
 
-const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
-
 export class WebAppCreator extends WizardBase {
     constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
         super(output);
@@ -496,7 +494,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
         }
     }
 
-    public async execute(): Promise<void> {
+    public async execute(): Promise<void> { //asdf
         this.wizard.writeline(`Creating new Web App "${this._website.name}"...`);
         const subscription = this.getSelectedSubscription();
         const rg = this.getSelectedResourceGroup();
@@ -540,18 +538,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         this.wizard.writeline(`Web App "${this._website.name}" ready: https://${this._website.defaultHostName}`);
         this.wizard.writeline('');
-
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
-
     }
 
     get website(): WebSiteModels.Site {

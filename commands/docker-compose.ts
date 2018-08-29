@@ -7,8 +7,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
-const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, null);
@@ -88,17 +86,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         selectedItems.forEach((item: Item) => {
             terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
         });
-        terminal.show();
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId + command
-            });
-        }
+        terminal.show(); //asdf
     }
 
 }

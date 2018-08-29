@@ -3,19 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import vscode = require('vscode');
+import { UserCancelledError } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
-import vscode = require('vscode');
-
-const teleCmdId: string = 'vscode-docker.container.stop';
-
 export async function stopContainer(context?: ContainerNode): Promise<void> {
-
-    let containersToStop: Docker.ContainerDesc[];
+    let containersToStop: Docker.ContainerDesc[]; //asdf
 
     if (context && context.containerDesc) {
         containersToStop = [context.containerDesc];
@@ -26,16 +22,14 @@ export async function stopContainer(context?: ContainerNode): Promise<void> {
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(true, opts);
-        if (selectedItem) {
-            if (selectedItem.label.toLowerCase().includes('all containers')) {
-                containersToStop = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToStop = [selectedItem.containerDesc];
-            }
+        if (selectedItem.label.toLowerCase().includes('all containers')) {
+            containersToStop = await docker.getContainerDescriptors(opts);
+        } else {
+            containersToStop = [selectedItem.containerDesc];
         }
     }
 
-    if (containersToStop) {
+    if (containersToStop.length) {
 
         const numContainers: number = containersToStop.length;
         let containerCounter: number = 0;
@@ -45,10 +39,9 @@ export async function stopContainer(context?: ContainerNode): Promise<void> {
                 // tslint:disable-next-line:no-function-expression // Grandfathered in
                 docker.getContainer(c.Id).stop(function (err: Error, data: any): void {
                     containerCounter++;
-                    if (err) {
-                        vscode.window.showErrorMessage(err.message);
+                    if (err) { //asdf
                         dockerExplorerProvider.refreshContainers();
-                        reject();
+                        reject(err);
                     }
                     if (containerCounter === numContainers) {
                         dockerExplorerProvider.refreshContainers();
@@ -57,16 +50,7 @@ export async function stopContainer(context?: ContainerNode): Promise<void> {
                 });
             });
         }));
-
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
+    } else {
+        throw new UserCancelledError();
     }
 }

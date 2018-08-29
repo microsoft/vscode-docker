@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as process from 'process';
 import * as vscode from 'vscode';
+import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-const teleCmdId: string = 'vscode-docker.container.open-shell';
 
 const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
 const engineTypeShellCommands = {
@@ -17,11 +17,16 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: configOptions.get('attachShellCommand.windowsContainer', 'powershell')
 }
 
-export async function openShellContainer(context?: ContainerNode): Promise<void> {
-    let containerToAttach: Docker.ContainerDesc;
+export async function openShellContainer(actionContext: IActionContext, node?: ContainerNode): Promise<void> {
+    let properties: {
+        platform?: string;
+        engineType?: string;
+    } & TelemetryProperties;
 
-    if (context && context.containerDesc) {
-        containerToAttach = context.containerDesc;
+    let containerToAttach: Docker.ContainerDesc; //asdf
+
+    if (node && node.containerDesc) {
+        containerToAttach = node.containerDesc;
     } else {
         const opts = {
             "filters": {
@@ -29,28 +34,15 @@ export async function openShellContainer(context?: ContainerNode): Promise<void>
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(false, opts);
-        if (selectedItem) {
-            containerToAttach = selectedItem.containerDesc;
-        }
+        containerToAttach = selectedItem.containerDesc;
     }
 
-    if (containerToAttach) {
-        docker.getEngineType().then((engineType: DockerEngineType) => {
-            const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);
-            terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
-            terminal.show();
-            if (reporter) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
-                      "dockerEngineType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleCmdId,
-                    dockerEngineType: engineTypeShellCommands[engineType]
-                });
-            }
-        });
-    }
+    let engineType: DockerEngineType = await docker.getEngineType();
+
+    properties.platform = process.platform;
+    properties.engineType = String(engineType); //asdf
+
+    const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);
+    terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
+    terminal.show();
 }
