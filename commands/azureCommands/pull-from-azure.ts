@@ -3,8 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
+import * as fs from 'fs';
+import * as path from "path";
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -22,11 +25,13 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
         registryName = context.registry.loginServer;
         registry = context.registry;
 
-        if (context.contextValue === "azureImageTagNode") { // Right Click on AzureImageNode
+        if (context instanceof AzureImageTagNode) { // Right Click on AzureImageNode
             imageName = context.label;
-        } else { // Right Click on AzureRepositoryNode
+        } else if (context instanceof AzureRepositoryNode) { // Right Click on AzureRepositoryNode
             console.log(context.repositoryName);
             imageName = `${context.label} -a`; // Pull all images in repository
+        } else {
+            assert.fail(`Unexpected node type: ${context}`);
         }
 
     } else { // Command Palette
@@ -38,19 +43,46 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
     }
 
     // Using loginCredentials function to get the username and password. This takes care of all users, even if they don't have the Azure CLI
-    const credentials = await acrTools.loginCredentials(registry);
+    const credentials = await acrTools.getLoginCredentials(registry);
     const username = credentials.username;
     const password = credentials.password;
 
-    // Send commands to terminal
+    // Check if user is logged into Docker and send appropriate commands to terminal
     const terminal = ext.terminalProvider.createTerminal("Docker");
     terminal.show();
+
     let cont = (err, stdout, stderr) => {
         ext.outputChannel.append(stdout);
         ext.outputChannel.append(stderr);
-        terminal.sendText(`docker pull ${registryName}/${imageName}`);
+    };
+
+    if (!isLoggedIntoDocker(registry)) {
+        try {
+            exec(`docker login ${registryName} -u ${username} -p ${password}`, cont);
+        } catch (error) {
+            console.log(error);
+        }
+        // exec(`docker login ${registryName} -u ${username} -p ${password}`, (err, stdout, stderr) => {
+        //     ext.outputChannel.append(stdout);
+        //     ext.outputChannel.append(stderr);
+        // });
+        console.log("*was not logged into docker, just completed dockerlogin")
+    }
+    terminal.sendText(`docker pull ${registryName}/${imageName}`);
+}
+
+function isLoggedIntoDocker(registry: Registry): boolean {
+    let home = process.env.HOMEPATH;
+    let configPath: string = path.join(home, '.docker', 'config.json');
+    let buffer: Buffer;
+    try {
+        buffer = fs.readFileSync(configPath);
+    } catch (err) {
+        return false; // If config.json is not found and not in the default location
     }
 
-    exec(`docker login ${registryName} -u ${username} -p ${password}`, cont);
-
+    let index = buffer.indexOf(registry.loginServer);
+    console.log("index:");
+    console.log(index);
+    return index !== -1; // Returns -1 if user is not logged into docker
 }

@@ -114,7 +114,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
-
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     if (azureAccount) {
@@ -124,11 +123,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerDockerCommands(azureAccount);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
-    if (azureAccount) {
-        AzureUtilityManager.getInstance().setAccount(azureAccount);
-        registerCommand('vscode-docker.pullFromAzure', pullFromAzure);
-    }
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
 }
@@ -195,6 +189,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
     registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
+    registerAzureCommand('vscode-docker.pull-ACR-Image', pullFromAzure);
 }
 
 async function consolidateDefaultRegistrySettings(): Promise<void> {

@@ -84,7 +84,7 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 
 //Credential management
 /** Obtains registry username and password compatible with docker login */
-export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
+export async function getLoginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
     const subscription: Subscription = getSubscriptionFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
