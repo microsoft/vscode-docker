@@ -8,15 +8,12 @@ import { DialogResponses } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
+import { askToSavePrefix } from './registrySettings';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode): Promise<void> {
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    let askToSaveRegistryPath: boolean = configOptions.get<boolean>('askToSaveRegistryPath');
-
-    let prefix = "";
     let imageToPush: Docker.ImageDesc;
     let imageName: string = "";
 
@@ -32,19 +29,22 @@ export async function pushImage(context?: ImageNode): Promise<void> {
     }
 
     if (imageName.includes('/')) {
-        prefix = imageName.substring(0, imageName.lastIndexOf('/'));
-    }
-    if (prefix && askToSaveRegistryPath !== false) { //account for undefined
-        let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage(`Would you like to save '${prefix}' as your default registry path?`, DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
-        if (userPrefixPreference === DialogResponses.yes || userPrefixPreference === DialogResponses.no) {
-            askToSaveRegistryPath = false;
-            await configOptions.update('askToSaveRegistryPath', false, vscode.ConfigurationTarget.Workspace);
+        await askToSavePrefix(imageName);
+    } else {
+        let addPrefixImagePush = "addPrefixImagePush";
+        let askToPushPrefix: boolean = ext.context.workspaceState.get(addPrefixImagePush, true);
+        if (askToPushPrefix) {
+            let useDefaultRegistry: vscode.MessageItem = { title: "Use default registry path" };
+            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`You are about to push the image to dockerhub. You may not have permissions to push this image. Continue pushing to dockerhub?`, DialogResponses.yes, useDefaultRegistry, DialogResponses.dontWarnAgain);
+            if (response === DialogResponses.dontWarnAgain) {
+                ext.context.workspaceState.update(addPrefixImagePush, false);
+            }
+            if (response === useDefaultRegistry) {
+                let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
+            }
         }
-        if (userPrefixPreference === DialogResponses.yes) {
-            await configOptions.update('defaultRegistryPath', prefix, vscode.ConfigurationTarget.Workspace);
-            vscode.window.showInformationMessage('Default registry path saved. You can change this value at any time via the docker.defaultRegistryPath setting.');
-        }
     }
+
     if (imageToPush) {
         const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);

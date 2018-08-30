@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { DialogResponses } from 'vscode-azureextensionui';
 import { AzureRegistryNode } from "../explorer/models/azureRegistryNodes";
 import { CustomRegistryNode } from "../explorer/models/customRegistryNodes";
 import { DockerHubOrgNode } from "../explorer/models/dockerHubNodes";
@@ -36,5 +37,26 @@ export async function consolidateDefaultRegistrySettings(): Promise<void> {
         await ext.context.workspaceState.update(hasCheckedRegistryPaths, true);
         await configOptions.update(defaultRegistryPathKey, updatedPath, vscode.ConfigurationTarget.Global);
         vscode.window.showInformationMessage("The 'docker.defaultRegistry' setting is now obsolete, and you should just use the 'docker.defaultRegistryPath' setting. Your settings have been updated to reflect this change.")
+    }
+}
+
+export async function askToSavePrefix(imagePath: string, promptForSave?: boolean): Promise<void> {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    let askToSaveRegistryPath: boolean = promptForSave || configOptions.get<boolean>('askToSaveRegistryPath');
+
+    let prefix = "";
+    if (imagePath.includes('/')) {
+        prefix = imagePath.substring(0, imagePath.lastIndexOf('/'));
+    }
+    if (prefix && askToSaveRegistryPath !== false) { //account for undefined
+        let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage(`Would you like to save '${prefix}' as your default registry path?`, DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
+        if (userPrefixPreference === DialogResponses.yes || userPrefixPreference === DialogResponses.no) {
+            askToSaveRegistryPath = false;
+            await configOptions.update('askToSaveRegistryPath', false, vscode.ConfigurationTarget.Workspace);
+        }
+        if (userPrefixPreference === DialogResponses.yes) {
+            await configOptions.update('defaultRegistryPath', prefix, vscode.ConfigurationTarget.Workspace);
+            vscode.window.showInformationMessage('Default registry path saved. You can change this value at any time via the docker.defaultRegistryPath setting.');
+        }
     }
 }
