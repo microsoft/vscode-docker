@@ -57,16 +57,16 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
     };
 
     if (!isLoggedIntoDocker(registry)) {
-        try {
-            exec(`docker login ${registryName} -u ${username} -p ${password}`, cont);
-        } catch (error) {
-            console.log(error);
-        }
-        // exec(`docker login ${registryName} -u ${username} -p ${password}`, (err, stdout, stderr) => {
-        //     ext.outputChannel.append(stdout);
-        //     ext.outputChannel.append(stderr);
-        // });
-        console.log("*was not logged into docker, just completed dockerlogin")
+        // try {
+        //     exec(`docker login ${registryName} -u ${username} -p ${password}`, cont);
+        // } catch (error) {
+        //     console.log(error);
+        // }
+        exec(`docker login ${registryName} -u ${username} -p ${password}`, (err, stdout, stderr) => {
+            ext.outputChannel.append(stdout);
+            ext.outputChannel.append(stderr);
+        });
+        console.log("*was not logged into docker, just completed dockerlogin");
     }
     terminal.sendText(`docker pull ${registryName}/${imageName}`);
 }
