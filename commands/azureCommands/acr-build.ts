@@ -42,6 +42,8 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length + 1);
     }
 
+    let osType: string = await vscode.window.showQuickPick(['Linux', 'Windows'], { 'canPickMany': false, 'placeHolder': 'Linux' });
+
     // Prompting for name so the image can then be pushed to a repository.
     const opt: vscode.InputBoxOptions = {
         prompt: 'Image name and tag in format  <name>:<tag>',
@@ -53,17 +55,13 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     status.appendLine("Uploading Source Code to " + tarFilePath);
     let uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
 
-    let osType = os.type()
-    if (osType === 'Windows_NT') {
-        osType = 'Windows'
-    }
     status.appendLine("Setting up Build Request");
     let buildRequest: QuickBuildRequest = {
         'type': 'QuickBuild',
         'imageNames': [name],
         'isPushEnabled': true,
         'sourceLocation': uploadedSourceLocation,
-        'platform': { 'osType': 'Linux' },
+        'platform': { 'osType': osType },
         'dockerFilePath': relativeDockerPath
     };
     status.appendLine("Queueing Build");
