@@ -1,8 +1,8 @@
 ## 0.1.0 - 26 July 2018
 * Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
 * Update to version 0.0.18 of the language server (thanks @rcjsuen) [#291](https://github.com/Microsoft/vscode-docker/pull/291).  This includes fixes for:
-  * command 'vscode-docker.configure' not found [#271](https://github.com/Microsoft/vscode-docker/issues/271)
-  * Dockerfile linting error in FROM [#269](https://github.com/Microsoft/vscode-docker/issues/269), #280, #288, and others
+  * Auto-complete/intellisense types too much - it repeats what's already written [#277](https://github.com/Microsoft/vscode-docker/issues/277)
+  * Dockerfile linting error in FROM [#269](https://github.com/Microsoft/vscode-docker/issues/269), [#280](https://github.com/Microsoft/vscode-docker/issues/280), [#288](https://github.com/Microsoft/vscode-docker/issues/288), and others
   * Other linting fixes
 * Update Linux post-install link in README.md (thanks @gregvanl) [#275](https://github.com/Microsoft/vscode-docker/pull/275)
 * Add docker.host setting as alternative for setting DOCKER_HOST environment variable (thanks @tfenster) [#304](https://github.com/Microsoft/vscode-docker/pull/304)

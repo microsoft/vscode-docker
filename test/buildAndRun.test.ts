@@ -17,7 +17,7 @@ import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
 import { configure } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
-import { getTestRootFolder, constants } from './global.test';
+import { getTestRootFolder, testInEmptyFolder } from './global.test';
 import { httpsRequestBinary } from '../utils/httpRequest';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 
@@ -64,7 +64,7 @@ async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFol
 }
 
 suite("Build Image", function (this: Suite): void {
-    this.timeout(60 * 1000);
+    this.timeout(2 * 60 * 1000);
 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
@@ -99,26 +99,9 @@ suite("Build Image", function (this: Suite): void {
 
         let { outputText, errorText } = await testTerminalProvider.currentTerminal.exit();
 
-        console.log("=== OUTPUT BEGIN ================================");
-        console.log(outputText ? outputText : '(NONE)');
-        console.log("=== OUTPUT END ==================================");
-
-        console.log("=== ERROR OUTPUT BEGIN ================================");
-        console.log(errorText ? errorText : '(NONE)');
-        console.log("=== ERROR OUTPUT END ==================================");
-
         assert.equal(errorText, '', 'Expected no errors from Build Image');
         assertEx.assertContains(outputText, 'Successfully built');
         assertEx.assertContains(outputText, 'Successfully tagged')
-    }
-
-    function testInEmptyFolder(name: string, func: () => Promise<void>): void {
-        test(name, async () => {
-            // Delete everything in the root testing folder
-            assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
-            await fse.emptyDir(testRootFolder);
-            await func();
-        });
     }
 
     // Go
@@ -131,9 +114,11 @@ suite("Build Image", function (this: Suite): void {
             ['3001'],
             ['testoutput:latest']
         );
+
+        // CONSIDER: Run the built image
     });
 
-    // NEEDED TESTS:
+    // CONSIDER TESTS:
     // 'Java'
     // '.NET Core Console'
     // 'ASP.NET Core'

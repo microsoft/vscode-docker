@@ -9,19 +9,28 @@ import * as vscode from 'vscode';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants'
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils';
+import { formatTag } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
 
+/**
+ * This is a child node of the "Docker Hub" node - i.e., it represents a namespace, e.g. a docker ID or an organization name
+ */
 export class DockerHubOrgNode extends NodeBase {
 
     constructor(
-        public readonly label: string,
-        public readonly contextValue: string,
-        public readonly iconPath: any = {}
+        public readonly label: string
     ) {
         super(label);
     }
 
-    public repository: string;
+    public static readonly contextValue: string = 'dockerHubOrgNode';
+    public readonly contextValue: string = DockerHubOrgNode.contextValue;
+
+    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+    };
+
     public userName: string;
     public password: string;
     public token: string;
@@ -46,11 +55,7 @@ export class DockerHubOrgNode extends NodeBase {
         for (let i = 0; i < myRepos.length; i++) {
             repoPool.addTask(async () => {
                 let myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
-                let iconPath = {
-                    light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
-                    dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
-                };
-                node = new DockerHubRepositoryNode(myRepo.name, 'dockerHubRepository', iconPath);
+                node = new DockerHubRepositoryNode(myRepo.name);
                 node.repository = myRepo;
                 node.userName = element.userName;
                 node.password = element.password;
@@ -65,13 +70,18 @@ export class DockerHubOrgNode extends NodeBase {
 export class DockerHubRepositoryNode extends NodeBase {
 
     constructor(
-        public readonly label: string,
-        public readonly contextValue: string,
-        public readonly iconPath: any = {}
+        public readonly label: string
     ) {
         super(label);
     }
 
+    public static readonly contextValue: string = 'dockerHubRepositoryNode';
+    public readonly contextValue: string = DockerHubRepositoryNode.contextValue;
+
+    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+    };
     public repository: any;
     public userName: string;
     public password: string;
@@ -85,48 +95,45 @@ export class DockerHubRepositoryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageNode[]> {
-        const imageNodes: DockerHubImageNode[] = [];
-        let node: DockerHubImageNode;
+    public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageTagNode[]> {
+        const imageNodes: DockerHubImageTagNode[] = [];
+        let node: DockerHubImageTagNode;
 
         const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
-        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-        for (let i = 0; i < myTags.length; i++) {
-            node = new DockerHubImageNode(`${element.repository.name}:${myTags[i].name}`, 'dockerHubImageTag');
+        for (let tag of myTags) {
+            node = new DockerHubImageTagNode(element.repository.name, tag.name);
             node.password = element.password;
             node.userName = element.userName;
             node.repository = element.repository;
-            node.created = moment(new Date(myTags[i].last_updated)).fromNow();
+            node.created = new Date(tag.last_updated);
             imageNodes.push(node);
         }
 
         return imageNodes;
-
     }
 }
 
-export class DockerHubImageNode extends NodeBase {
+export class DockerHubImageTagNode extends NodeBase {
     constructor(
-        public readonly label: string,
-        public readonly contextValue: string
+        public readonly repositoryName: string,
+        public readonly tag: string
     ) {
-        super(label);
+        super(`${repositoryName}:${tag}`);
     }
+
+    public static readonly contextValue: string = 'dockerHubImageTagNode';
+    public readonly contextValue: string = DockerHubImageTagNode.contextValue;
 
     // this needs to be empty string for Docker Hub
     public serverUrl: string = '';
     public userName: string;
     public password: string;
     public repository: any;
-    public created: string;
+    public created: Date;
 
     public getTreeItem(): vscode.TreeItem {
-        let displayName: string = this.label;
-
-        displayName = `${displayName} (${this.created})`;
-
         return {
-            label: `${displayName}`,
+            label: formatTag(this.label, this.created),
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: this.contextValue
         }
