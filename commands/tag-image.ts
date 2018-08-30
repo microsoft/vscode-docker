@@ -5,6 +5,7 @@
 
 import vscode = require('vscode');
 import { ImageNode } from "../explorer/models/imageNode";
+import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
@@ -30,53 +31,56 @@ export async function tagImage(context?: ImageNode): Promise<void> {
 
     if (imageToTag) {
 
-        const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-        const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+        let imageWithTag: string = await getTagFromUserInput(imageName);
+        let repo: string = imageWithTag;
+        let tag: string = 'latest';
 
-        let highlightEnd = imageName.indexOf('/');
-        if (defaultRegistryPath.length > 0 && highlightEnd < 0) {
-            imageName = defaultRegistryPath + '/' + imageName;
-            highlightEnd = defaultRegistryPath.length;
+        if (imageWithTag.lastIndexOf(':') > 0) {
+            repo = imageWithTag.slice(0, imageWithTag.lastIndexOf(':'));
+            tag = imageWithTag.slice(imageWithTag.lastIndexOf(':') + 1);
         }
 
-        let opt: vscode.InputBoxOptions = {
-            ignoreFocusOut: true,
-            placeHolder: imageName,
-            prompt: 'Tag image as...',
-            value: imageName,
-            valueSelection: [0, highlightEnd]
-        };
+        const image = docker.getImage(imageToTag.Id);
 
-        const value: string = await vscode.window.showInputBox(opt);
-        if (value) {
-            let repo: string = value;
-            let tag: string = 'latest';
-
-            if (value.lastIndexOf(':') > 0) {
-                repo = value.slice(0, value.lastIndexOf(':'));
-                tag = value.slice(value.lastIndexOf(':') + 1);
+        // tslint:disable-next-line:no-function-expression // Grandfathered in
+        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
+            if (err) {
+                // TODO: use parseError, proper error handling
+                vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
             }
+        });
 
-            const image = docker.getImage(imageToTag.Id);
-
-            // tslint:disable-next-line:no-function-expression // Grandfathered in
-            image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
-                if (err) {
-                    // TODO: use parseError, proper error handling
-                    vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
-                }
+        if (reporter) {
+            /* __GDPR__
+               "command" : {
+                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+               }
+             */
+            reporter.sendTelemetryEvent('command', {
+                command: teleCmdId
             });
-
-            if (reporter) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleCmdId
-                });
-            }
         }
     }
+}
+
+export async function getTagFromUserInput(imageName: string): Promise<string> {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+
+    let HighlightEnd = imageName.indexOf('/');
+    if (defaultRegistryPath.length > 0 && HighlightEnd < 0) {
+        imageName = defaultRegistryPath + '/' + imageName;
+        HighlightEnd = defaultRegistryPath.length;
+    }
+
+    let opt: vscode.InputBoxOptions = {
+        ignoreFocusOut: true,
+        placeHolder: imageName,
+        prompt: 'Tag image as...',
+        value: imageName,
+        valueSelection: [0, HighlightEnd + 1]  //include the '/'
+    };
+
+    const nameWithTag: string = await ext.ui.showInputBox(opt);
+    return nameWithTag;
 }

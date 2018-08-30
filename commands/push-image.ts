@@ -33,14 +33,15 @@ export async function pushImage(context?: ImageNode): Promise<void> {
     } else {
         let addPrefixImagePush = "addPrefixImagePush";
         let askToPushPrefix: boolean = ext.context.workspaceState.get(addPrefixImagePush, true);
-        if (askToPushPrefix) {
+        let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
+        if (askToPushPrefix && defaultRegistryPath) {
             let useDefaultRegistry: vscode.MessageItem = { title: "Use default registry path" };
             let response: vscode.MessageItem = await ext.ui.showWarningMessage(`You are about to push the image to dockerhub. You may not have permissions to push this image. Continue pushing to dockerhub?`, DialogResponses.yes, useDefaultRegistry, DialogResponses.dontWarnAgain);
             if (response === DialogResponses.dontWarnAgain) {
                 ext.context.workspaceState.update(addPrefixImagePush, false);
             }
             if (response === useDefaultRegistry) {
-                let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
+                imageName = defaultRegistryPath + '/' + imageName;
             }
         }
     }
