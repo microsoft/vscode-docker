@@ -18,6 +18,7 @@ import { composeDown, composeRestart, composeUp } from './commands/docker-compos
 import inspectImage from './commands/inspect-image';
 import { openShellContainer } from './commands/open-shell-container';
 import { pushImage } from './commands/push-image';
+import { consolidateDefaultRegistrySettings, setRegistryAsDefault } from './commands/registrySettings';
 import { removeContainer } from './commands/remove-container';
 import { removeImage } from './commands/remove-image';
 import { restartContainer } from './commands/restart-container';
@@ -193,28 +194,12 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
         browseAzurePortal(context);
     });
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
+    registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
     registerAzureCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
     registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
     registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
-}
-
-async function consolidateDefaultRegistrySettings(): Promise<void> {
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    let defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
-    let defaultRegistry = configOptions.get('defaultRegistry', '');
-
-    if (defaultRegistry) {
-        if (defaultRegistryPath) { // combine both the settings, then notify the user
-            await configOptions.update('defaultRegistryPath', `${defaultRegistry}/${defaultRegistryPath}`, vscode.ConfigurationTarget.Workspace);
-        }
-        if (!defaultRegistryPath) {// assign defaultRegistry to defaultRegistryPath
-            await configOptions.update('defaultRegistryPath', `${defaultRegistry}`, vscode.ConfigurationTarget.Workspace);
-        }
-        await configOptions.update('defaultRegistry', undefined, vscode.ConfigurationTarget.Workspace);
-        vscode.window.showInformationMessage("The 'docker.defaultRegistry' setting is now obsolete, and you should just use the 'docker.defaultRegistryPath' setting. Your settings have been updated to reflect this change.")
-    }
 }
 
 export async function deactivate(): Promise<void> {

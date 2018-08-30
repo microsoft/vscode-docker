@@ -57,6 +57,7 @@
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
+    "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations"
@@ -229,6 +230,10 @@
         {
           "command": "vscode-docker.connectCustomRegistry",
           "when": "view == dockerExplorer && viewItem == customRootNode"
+        },
+        {
+          "command": "vscode-docker.setRegistryAsDefault",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
@@ -613,6 +618,11 @@
       {
         "command": "vscode-docker.connectCustomRegistry",
         "title": "Connect to a Private Registry...",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.setRegistryAsDefault",
+        "title": "Set as default registry path",
         "category": "Docker"
       },
       {
