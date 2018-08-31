@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
@@ -11,9 +12,9 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage(context?: DockerodeImageDescriptor): Promise<string> {
+export async function tagImage(context?: IHasImageDescriptorAndLabel): Promise<string> {
 
-    let [imageToTag, name] = await contextToImageDescriptor(context);
+    let [imageToTag, name] = await getOrAskForImageAndTag(context);
 
     if (imageToTag) {
 
@@ -52,7 +53,7 @@ export async function tagImage(context?: DockerodeImageDescriptor): Promise<stri
 
 export async function getTagFromUserInput(imageName: string): Promise<string> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    const defaultRegistryPath = configOptions.get('defaultRegistryPath', '');
+    const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
 
     let HighlightEnd = imageName.indexOf('/');
     if (defaultRegistryPath.length > 0 && HighlightEnd < 0) {
@@ -72,12 +73,12 @@ export async function getTagFromUserInput(imageName: string): Promise<string> {
     return nameWithTag;
 }
 
-export interface DockerodeImageDescriptor {
+export interface IHasImageDescriptorAndLabel {
     imageDesc: Docker.ImageDesc,
     label: string
 }
 
-export async function contextToImageDescriptor(context?: DockerodeImageDescriptor): Promise<[Docker.ImageDesc, string]> {
+export async function getOrAskForImageAndTag(context?: IHasImageDescriptorAndLabel): Promise<[Docker.ImageDesc, string]> {
     let name: string;
     let description: Docker.ImageDesc;
 

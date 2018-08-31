@@ -18,6 +18,10 @@ export namespace keytarConstants {
     export const dockerHubPasswordKey: string = 'dockerhub.password';
 }
 
+export namespace configurationKeys {
+    export const defaultRegistryPath = "defaultRegistryPath";
+}
+
 //Credentials Constants
 export const NULL_GUID = '00000000-0000-0000-0000-000000000000';
 

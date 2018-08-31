@@ -4,24 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { askToSavePrefix } from './registrySettings';
-import { contextToImageDescriptor, DockerodeImageDescriptor, tagImage } from './tag-image';
+import { getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode): Promise<void> {
 
-    let [imageToPush, imageName] = await contextToImageDescriptor(context);
+    let [imageToPush, imageName] = await getOrAskForImageAndTag(context);
 
     if (imageName.includes('/')) {
         await askToSavePrefix(imageName);
     } else {
-        let addPrefixImagePush = "addPrefixImagePush";
-        let askToPushPrefix: boolean = ext.context.workspaceState.get(addPrefixImagePush, true);
-        let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
+        //let addPrefixImagePush = "addPrefixImagePush";
+        let askToPushPrefix: boolean = true; // ext.context.workspaceState.get(addPrefixImagePush, true);
+        let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get(configurationKeys.defaultRegistryPath);
         if (askToPushPrefix && defaultRegistryPath) {
             // let alwaysPush: vscode.MessageItem = { title: "Always push" };
             let tagFirst: vscode.MessageItem = { title: "Tag first" };
@@ -32,7 +33,7 @@ export async function pushImage(context?: ImageNode): Promise<void> {
             //     ext.context.workspaceState.update(addPrefixImagePush, false);
             // }
             if (response === tagFirst) {
-                imageName = await tagImage(<DockerodeImageDescriptor>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
+                imageName = await tagImage(<IHasImageDescriptorAndLabel>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
             }
         }
     }

@@ -6,6 +6,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
+import { configurationKeys } from "../constants";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
 import { askToSavePrefix } from "./registrySettings";
@@ -103,7 +104,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
     }
 
     const imageWithTag: string = await getTagFromUserInput(imageName + ":latest");
-    const defaultPath = configOptions.get('defaultRegistryPath', '');
+    const defaultPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
     if (!imageWithTag.includes(defaultPath)) { //user has entered a prefix different from stored
         await askToSavePrefix(imageWithTag);
     }
