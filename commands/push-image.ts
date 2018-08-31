@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { DialogResponses } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
@@ -15,9 +14,7 @@ const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode): Promise<void> {
 
-    let descriptor = await contextToImageDescriptor(context);
-    let imageToPush: Docker.ImageDesc = descriptor[0];
-    let imageName: string = descriptor[1];
+    let [imageToPush, imageName] = await contextToImageDescriptor(context);
 
     if (imageName.includes('/')) {
         await askToSavePrefix(imageName);
@@ -26,10 +23,11 @@ export async function pushImage(context?: ImageNode): Promise<void> {
         let askToPushPrefix: boolean = ext.context.workspaceState.get(addPrefixImagePush, true);
         let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
         if (askToPushPrefix && defaultRegistryPath) {
-            let alwaysPush: vscode.MessageItem = { title: "Always Push" };
+            let alwaysPush: vscode.MessageItem = { title: "Always push" };
             let tagFirst: vscode.MessageItem = { title: "Tag first" };
-            let options: vscode.MessageItem[] = [DialogResponses.yes, alwaysPush, tagFirst];
-            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`You are about to push the image to dockerhub. You may not have permissions to push this image. Continue pushing to dockerhub?`, ...options);
+            let pushAnyway: vscode.MessageItem = { title: "Push anyway" }
+            let options: vscode.MessageItem[] = [pushAnyway, alwaysPush, tagFirst];
+            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`This will attempt to push the image to the official public Docker Hub library (docker.io/library), which you may not have permissions for. If you want to push to one of your own repositories, you must push an image that has been tagged with your username or a registry server name.`, ...options);
             if (response === alwaysPush) {
                 ext.context.workspaceState.update(addPrefixImagePush, false);
             }

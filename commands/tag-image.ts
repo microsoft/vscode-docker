@@ -13,9 +13,7 @@ const teleCmdId: string = 'vscode-docker.image.tag';
 
 export async function tagImage(context?: DockerodeImageDescriptor): Promise<string> {
 
-    let descriptor = await contextToImageDescriptor(context);
-    let imageToTag: Docker.ImageDesc = descriptor[0];
-    let name: string = descriptor[1];
+    let [imageToTag, name] = await contextToImageDescriptor(context);
 
     if (imageToTag) {
 
