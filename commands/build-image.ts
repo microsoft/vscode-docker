@@ -6,8 +6,11 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
+import { configurationKeys } from "../constants";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
+import { askToSavePrefix } from "./registrySettings";
+import { getTagFromUserInput } from "./tag-image";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
@@ -100,15 +103,12 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
         imageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
     }
 
-    const opt: vscode.InputBoxOptions = {
-        placeHolder: imageName + ':latest',
-        prompt: 'Tag image as...',
-        value: imageName + ':latest'
-    };
-
-    const value: string = await ext.ui.showInputBox(opt);
-
+    const imageWithTag: string = await getTagFromUserInput(imageName + ":latest");
+    const defaultPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
+    if (!imageWithTag.includes(defaultPath)) { //user has entered a prefix different from stored
+        await askToSavePrefix(imageWithTag);
+    }
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-    terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${value} ${contextPath}`);
+    terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageWithTag} ${contextPath}`);
     terminal.show();
 }

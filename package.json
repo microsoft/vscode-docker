@@ -282,7 +282,7 @@
         "docker.defaultRegistryPath": {
           "type": "string",
           "default": "",
-          "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
+          "description": "Default registry and path when tagging an image"
         },
         "docker.askToSaveRegistryPath": {
           "type": "boolean",
@@ -622,7 +622,7 @@
       },
       {
         "command": "vscode-docker.setRegistryAsDefault",
-        "title": "Set as default registry path",
+        "title": "Set as Default Registry Path",
         "category": "Docker"
       },
       {
