@@ -4,16 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { askToSavePrefix } from './registrySettings';
-import { getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
+import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
-export async function pushImage(context?: ImageNode): Promise<void> {
+export async function pushImage(actionContext: IActionContext, context?: ImageNode): Promise<void> {
 
     let [imageToPush, imageName] = await getOrAskForImageAndTag(context);
 
@@ -33,12 +34,14 @@ export async function pushImage(context?: ImageNode): Promise<void> {
             //     ext.context.workspaceState.update(addPrefixImagePush, false);
             // }
             if (response === tagFirst) {
-                imageName = await tagImage(<IHasImageDescriptorAndLabel>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
+                imageName = await tagImage(actionContext, <IHasImageDescriptorAndLabel>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
             }
         }
     }
 
     if (imageToPush) {
+        addImageTaggingTelemetry(actionContext, imageName, '');
+
         const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();

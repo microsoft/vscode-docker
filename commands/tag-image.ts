@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
@@ -12,19 +13,21 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage(context?: IHasImageDescriptorAndLabel): Promise<string> {
+export async function tagImage(actionContext: IActionContext, context?: IHasImageDescriptorAndLabel): Promise<string> {
 
-    let [imageToTag, name] = await getOrAskForImageAndTag(context);
+    let [imageToTag, currentName] = await getOrAskForImageAndTag(context);
 
     if (imageToTag) {
+        addImageTaggingTelemetry(actionContext, currentName, '.before');
+        let newTaggedName: string = await getTagFromUserInput(currentName);
+        addImageTaggingTelemetry(actionContext, newTaggedName, '.after');
 
-        let imageWithTag: string = await getTagFromUserInput(name);
-        let repo: string = imageWithTag;
+        let repo: string = newTaggedName;
         let tag: string = 'latest';
 
-        if (imageWithTag.lastIndexOf(':') > 0) {
-            repo = imageWithTag.slice(0, imageWithTag.lastIndexOf(':'));
-            tag = imageWithTag.slice(imageWithTag.lastIndexOf(':') + 1);
+        if (newTaggedName.lastIndexOf(':') > 0) {
+            repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
+            tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
         }
 
         const image: Docker.Image = docker.getImage(imageToTag.Id);
@@ -47,7 +50,7 @@ export async function tagImage(context?: IHasImageDescriptorAndLabel): Promise<s
                 command: teleCmdId
             });
         }
-        return imageWithTag;
+        return newTaggedName;
     }
 }
 
@@ -95,4 +98,69 @@ export async function getOrAskForImageAndTag(context?: IHasImageDescriptorAndLab
     }
 
     return [description, name];
+}
+
+const KnownRegistries: { type: string, regex: RegExp }[] = [
+    { type: 'dockerhub-namespace', regex: /^[^/.:]+\/$/ },
+    { type: 'dockerhub-dockerio', regex: /^docker.io.*\// },
+    { type: 'gitlab', regex: /gitlab.*\// },
+    { type: 'ACR', regex: /azurecr\.io.*\// },
+    { type: 'GCR', regex: /gcr\.io.*\// },
+    { type: 'ECR', regex: /\.ecr\..*\// },
+    { type: 'localhost', regex: /localhost:.*\// },
+
+    // Has a port, probably a private registry
+    { type: 'privateWithPort', regex: /:[0-9]+\// },
+
+    // Match anything remaining
+    { type: 'other', regex: /\// }, // has a slash
+    { type: 'none', regex: /./ } // no slash
+];
+
+export function addImageTaggingTelemetry(actionContext: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
+    try {
+        let defaultRegistryPath: string = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath', '');
+        let properties: {
+            numSlashes?: string;
+            hasTag?: string;
+            isDefaultRegistryPathSet?: string; // docker.defaultRegistryPath has a value
+            isDefaultRegistryPathInName?: string;  // image name starts with defaultRegistryPath
+            safeTag?: string;
+            registryType?: string;
+        } = {};
+
+        let [repository, tag] = extractRegExGroups(fullImageName, /^(.*):(.*)$/, [fullImageName, '']);
+
+        if (!!tag.match(/^[0-9.-]*(|alpha|beta|latest|edge|v|version)?[0-9.-]*$/)) {
+            properties.safeTag = tag
+        }
+        properties.hasTag = String(!!tag);
+        properties.numSlashes = String(numberMatches(repository.match(/\//g)));
+        properties.isDefaultRegistryPathInName = String(repository.startsWith(`${defaultRegistryPath}/`));
+        properties.isDefaultRegistryPathSet = String(!!defaultRegistryPath);
+
+        let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
+        properties.registryType = knownRegistry.type;
+
+        for (let propertyName of Object.getOwnPropertyNames(properties)) {
+            actionContext.properties[propertyName + propertyPostfix] = properties[propertyName];
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function numberMatches(matches: RegExpMatchArray | null): number {
+    return matches ? matches.length : 0;
+}
+
+function extractRegExGroups(input: string, regex: RegExp, defaults: string[]): string[] {
+    let matches = input.match(regex);
+    if (matches) {
+        // Ignore first item, which is the text of the entire match
+        let [, ...groups] = matches;
+        return groups;
+    }
+
+    return defaults;
 }

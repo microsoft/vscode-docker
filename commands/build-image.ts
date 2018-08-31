@@ -10,7 +10,7 @@ import { configurationKeys } from "../constants";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
 import { askToSavePrefix } from "./registrySettings";
-import { getTagFromUserInput } from "./tag-image";
+import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
@@ -103,11 +103,17 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
         imageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
     }
 
-    const imageWithTag: string = await getTagFromUserInput(imageName + ":latest");
+    const suggestedName: string = imageName + ":latest";
+
+    addImageTaggingTelemetry(actionContext, suggestedName, '.before');
+    const imageWithTag: string = await getTagFromUserInput(suggestedName);
+    addImageTaggingTelemetry(actionContext, suggestedName, '.after');
+
     const defaultPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
     if (!imageWithTag.includes(defaultPath)) { //user has entered a prefix different from stored
         await askToSavePrefix(imageWithTag);
     }
+
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
     terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageWithTag} ${contextPath}`);
     terminal.show();
