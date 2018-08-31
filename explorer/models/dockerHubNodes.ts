@@ -63,6 +63,7 @@ export class DockerHubOrgNode extends NodeBase {
             });
         }
         await repoPool.runAll();
+        repoNodes.sort((a, b) => a.label.localeCompare(b.label));
         return repoNodes;
     }
 }
