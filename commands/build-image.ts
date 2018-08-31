@@ -8,8 +8,8 @@ import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
-import { getTagFromUserInput } from "./tag-image";
 import { askToSavePrefix } from "./registrySettings";
+import { getTagFromUserInput } from "./tag-image";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
