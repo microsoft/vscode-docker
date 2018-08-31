@@ -23,8 +23,8 @@ export async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegis
     }
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    await configOptions.update(defaultRegistryPathKey, registryName, vscode.ConfigurationTarget.Workspace);
-    vscode.window.showInformationMessage(`Updated defaultRegistryPath to ${registryName}`);
+    await configOptions.update(defaultRegistryPathKey, registryName, vscode.ConfigurationTarget.Global);
+    vscode.window.showInformationMessage(`Updated the defaultRegistryPath setting to ${registryName}`);
 }
 export async function consolidateDefaultRegistrySettings(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');

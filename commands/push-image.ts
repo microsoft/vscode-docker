@@ -9,24 +9,15 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { askToSavePrefix } from './registrySettings';
-import { ImageItem, quickPickImage } from './utils/quick-pick-image';
+import { contextToImageDescriptor, DockerodeImageDescriptor, tagImage } from './tag-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(context?: ImageNode): Promise<void> {
-    let imageToPush: Docker.ImageDesc;
-    let imageName: string = "";
 
-    if (context && context.imageDesc) {
-        imageToPush = context.imageDesc;
-        imageName = context.label;
-    } else {
-        const selectedItem: ImageItem = await quickPickImage();
-        if (selectedItem) {
-            imageToPush = selectedItem.imageDesc;
-            imageName = selectedItem.label;
-        }
-    }
+    let descriptor = await contextToImageDescriptor(context);
+    let imageToPush: Docker.ImageDesc = descriptor[0];
+    let imageName: string = descriptor[1];
 
     if (imageName.includes('/')) {
         await askToSavePrefix(imageName);
@@ -35,13 +26,15 @@ export async function pushImage(context?: ImageNode): Promise<void> {
         let askToPushPrefix: boolean = ext.context.workspaceState.get(addPrefixImagePush, true);
         let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath');
         if (askToPushPrefix && defaultRegistryPath) {
-            let useDefaultRegistry: vscode.MessageItem = { title: "Use default registry path" };
-            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`You are about to push the image to dockerhub. You may not have permissions to push this image. Continue pushing to dockerhub?`, DialogResponses.yes, useDefaultRegistry, DialogResponses.dontWarnAgain);
-            if (response === DialogResponses.dontWarnAgain) {
+            let alwaysPush: vscode.MessageItem = { title: "Always Push" };
+            let tagFirst: vscode.MessageItem = { title: "Tag first" };
+            let options: vscode.MessageItem[] = [DialogResponses.yes, alwaysPush, tagFirst];
+            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`You are about to push the image to dockerhub. You may not have permissions to push this image. Continue pushing to dockerhub?`, ...options);
+            if (response === alwaysPush) {
                 ext.context.workspaceState.update(addPrefixImagePush, false);
             }
-            if (response === useDefaultRegistry) {
-                imageName = defaultRegistryPath + '/' + imageName;
+            if (response === tagFirst) {
+                imageName = await tagImage(<DockerodeImageDescriptor>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second to pick an image
             }
         }
     }

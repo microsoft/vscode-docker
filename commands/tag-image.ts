@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { ImageNode } from "../explorer/models/imageNode";
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
@@ -12,26 +11,15 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage(context?: ImageNode): Promise<void> {
+export async function tagImage(context?: DockerodeImageDescriptor): Promise<string> {
 
-    let imageName: string;
-    let imageToTag: Docker.ImageDesc;
-
-    if (context && context.imageDesc) {
-        imageToTag = context.imageDesc;
-        imageName = context.label;
-    } else {
-        const selectedItem: ImageItem = await quickPickImage(false);
-        if (selectedItem) {
-            imageToTag = selectedItem.imageDesc
-            imageName = selectedItem.label;
-        }
-
-    }
+    let descriptor = await contextToImageDescriptor(context);
+    let imageToTag: Docker.ImageDesc = descriptor[0];
+    let name: string = descriptor[1];
 
     if (imageToTag) {
 
-        let imageWithTag: string = await getTagFromUserInput(imageName);
+        let imageWithTag: string = await getTagFromUserInput(name);
         let repo: string = imageWithTag;
         let tag: string = 'latest';
 
@@ -40,7 +28,7 @@ export async function tagImage(context?: ImageNode): Promise<void> {
             tag = imageWithTag.slice(imageWithTag.lastIndexOf(':') + 1);
         }
 
-        const image = docker.getImage(imageToTag.Id);
+        const image: Docker.Image = docker.getImage(imageToTag.Id);
 
         // tslint:disable-next-line:no-function-expression // Grandfathered in
         image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
@@ -60,6 +48,7 @@ export async function tagImage(context?: ImageNode): Promise<void> {
                 command: teleCmdId
             });
         }
+        return imageWithTag;
     }
 }
 
@@ -83,4 +72,28 @@ export async function getTagFromUserInput(imageName: string): Promise<string> {
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
     return nameWithTag;
+}
+
+export interface DockerodeImageDescriptor {
+    imageDesc: Docker.ImageDesc,
+    label: string
+}
+
+export async function contextToImageDescriptor(context?: DockerodeImageDescriptor): Promise<[Docker.ImageDesc, string]> {
+    let name: string;
+    let description: Docker.ImageDesc;
+
+    if (context && context.imageDesc) {
+        description = context.imageDesc;
+        name = context.label;
+    } else {
+        const selectedItem: ImageItem = await quickPickImage(false);
+        if (selectedItem) {
+            description = selectedItem.imageDesc
+            name = selectedItem.label;
+        }
+
+    }
+
+    return [description, name];
 }
