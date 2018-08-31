@@ -8,6 +8,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
 import * as fs from 'fs';
 import * as path from "path";
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -60,15 +61,16 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
     terminal.sendText(`docker pull ${registryName}/${imageName}`);
 }
 
-function isLoggedIntoDocker(registry: Registry): boolean {
+async function isLoggedIntoDocker(registry: Registry): Promise<boolean> {
     let home = process.env.HOMEPATH;
     let configPath: string = path.join(home, '.docker', 'config.json');
     let buffer: Buffer;
-    try {
+
+    await callWithTelemetryAndErrorHandling('findDockerConfig', async function (this: IActionContext): Promise<void> {
+        this.suppressTelemetry = true;
         buffer = fs.readFileSync(configPath);
-    } catch (err) {
-        return false; // If config.json is not found and not in the default location
     }
+    );
 
     let index = buffer.indexOf(registry.loginServer);
     return index !== -1; // Returns -1 if user is not logged into docker
