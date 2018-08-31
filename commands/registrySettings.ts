@@ -42,13 +42,13 @@ export async function consolidateDefaultRegistrySettings(): Promise<void> {
 
 export async function askToSavePrefix(imagePath: string, promptForSave?: boolean): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    let askToSaveRegistryPath: boolean = promptForSave || configOptions.get<boolean>('askToSaveRegistryPath');
+    let askToSaveRegistryPath: boolean = promptForSave || configOptions.get<boolean>('askToSaveRegistryPath', true);
 
     let prefix = "";
     if (imagePath.includes('/')) {
         prefix = imagePath.substring(0, imagePath.lastIndexOf('/'));
     }
-    if (prefix && askToSaveRegistryPath !== false) { //account for undefined
+    if (prefix && askToSaveRegistryPath !== false) {
         let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage(`Would you like to save '${prefix}' as your default registry path?`, DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
         if (userPrefixPreference === DialogResponses.yes || userPrefixPreference === DialogResponses.no) {
             askToSaveRegistryPath = false;

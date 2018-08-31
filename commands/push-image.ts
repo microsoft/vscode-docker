@@ -34,7 +34,7 @@ export async function pushImage(context?: ImageNode): Promise<void> {
                 ext.context.workspaceState.update(addPrefixImagePush, false);
             }
             if (response === tagFirst) {
-                imageName = await tagImage(<DockerodeImageDescriptor>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second to pick an image
+                imageName = await tagImage(<DockerodeImageDescriptor>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
             }
         }
     }
