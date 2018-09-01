@@ -110,7 +110,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
         imageName = prevImageName;
     }
 
-    const imageWithTag: string = await getTagFromUserInput(imageName);
+    const imageWithTag: string = await getTagFromUserInput(imageName, !prevImageName);
     await ext.context.globalState.update(dockerFileKey, imageWithTag);
 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');

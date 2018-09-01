@@ -18,7 +18,7 @@ export async function tagImage(context?: IHasImageDescriptorAndLabel): Promise<s
 
     if (imageToTag) {
 
-        let imageWithTag: string = await getTagFromUserInput(name);
+        let imageWithTag: string = await getTagFromUserInput(name, true);
         let repo: string = imageWithTag;
         let tag: string = 'latest';
 
@@ -51,23 +51,25 @@ export async function tagImage(context?: IHasImageDescriptorAndLabel): Promise<s
     }
 }
 
-export async function getTagFromUserInput(imageName: string): Promise<string> {
+export async function getTagFromUserInput(imageName: string, highlightRegistry: boolean): Promise<string> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
-
-    let HighlightEnd = imageName.indexOf('/');
-    if (defaultRegistryPath.length > 0 && HighlightEnd < 0) {
-        imageName = defaultRegistryPath + '/' + imageName;
-        HighlightEnd = defaultRegistryPath.length;
-    }
 
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         placeHolder: imageName,
         prompt: 'Tag image as...',
-        value: imageName,
-        valueSelection: [0, HighlightEnd + 1]  //include the '/'
+        value: imageName
     };
+    if (highlightRegistry) {
+        let highlightEnd: number = imageName.indexOf('/');
+        if (defaultRegistryPath.length > 0 && highlightEnd < 0) {
+            imageName = defaultRegistryPath + '/' + imageName;
+            highlightEnd = defaultRegistryPath.length;
+        }
+
+        opt.valueSelection = [0, highlightEnd + 1];  //include the '/'
+    }
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
     return nameWithTag;
