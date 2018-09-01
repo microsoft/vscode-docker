@@ -94,7 +94,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
         contextPath = defaultContextPath;
     }
     let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
-    let dockerFileKey = `dockerfile_${absFilePath}`;
+    let dockerFileKey = `buildTag_${absFilePath}`;
     let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
     let imageName: string;
 
