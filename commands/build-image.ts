@@ -6,10 +6,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
-import { configurationKeys } from "../constants";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from "../extensionVariables";
-import { askToSavePrefix } from "./registrySettings";
 import { getTagFromUserInput } from "./tag-image";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
@@ -95,19 +93,26 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     if (defaultContextPath && defaultContextPath !== '') {
         contextPath = defaultContextPath;
     }
-
-    // Get imageName based on name of subfolder containing the Dockerfile, or else workspacefolder
+    let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
+    let dockerFileKey = `buildTag_${absFilePath}`;
+    let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
     let imageName: string;
-    imageName = path.basename(dockerFileItem.relativeFolderPath).toLowerCase();
-    if (imageName === '.') {
-        imageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
+
+    if (!prevImageName) {
+        // Get imageName based on name of subfolder containing the Dockerfile, or else workspacefolder
+        imageName = path.basename(dockerFileItem.relativeFolderPath).toLowerCase();
+        if (imageName === '.') {
+            imageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
+        }
+
+        imageName += ":latest"
+    } else {
+        imageName = prevImageName;
     }
 
-    const imageWithTag: string = await getTagFromUserInput(imageName + ":latest");
-    const defaultPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
-    if (!imageWithTag.includes(defaultPath)) { //user has entered a prefix different from stored
-        await askToSavePrefix(imageWithTag);
-    }
+    const imageWithTag: string = await getTagFromUserInput(imageName, !prevImageName);
+    await ext.context.globalState.update(dockerFileKey, imageWithTag);
+
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
     terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageWithTag} ${contextPath}`);
     terminal.show();
