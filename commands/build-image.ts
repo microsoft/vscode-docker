@@ -32,7 +32,7 @@ function createDockerfileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Ur
     };
 }
 
-async function resolveImageItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri?: vscode.Uri): Promise<Item | undefined> {
+async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
     if (dockerFileUri) {
         return createDockerfileItem(rootFolder, dockerFileUri);
     }
@@ -52,7 +52,7 @@ async function resolveImageItem(rootFolder: vscode.WorkspaceFolder, dockerFileUr
     }
 }
 
-export async function buildImage(actionContext: IActionContext, dockerFileUri?: vscode.Uri): Promise<void> {
+export async function buildImage(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
     let dockerFileItem: Item | undefined;
@@ -78,7 +78,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri?: 
     }
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveImageItem(rootFolder, dockerFileUri);
+        let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {
