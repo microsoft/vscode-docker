@@ -55,6 +55,11 @@ export async function getTagFromUserInput(imageName: string, highlightRegistry: 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
 
+    let registryLength: number = imageName.indexOf('/');
+    if (defaultRegistryPath.length > 0 && registryLength < 0) {
+        imageName = defaultRegistryPath + '/' + imageName;
+        registryLength = defaultRegistryPath.length;
+    }
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         placeHolder: imageName,
@@ -62,13 +67,7 @@ export async function getTagFromUserInput(imageName: string, highlightRegistry: 
         value: imageName
     };
     if (highlightRegistry) {
-        let highlightEnd: number = imageName.indexOf('/');
-        if (defaultRegistryPath.length > 0 && highlightEnd < 0) {
-            imageName = defaultRegistryPath + '/' + imageName;
-            highlightEnd = defaultRegistryPath.length;
-        }
-
-        opt.valueSelection = [0, highlightEnd + 1];  //include the '/'
+        opt.valueSelection = [0, registryLength + 1];  //include the '/'
     }
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
