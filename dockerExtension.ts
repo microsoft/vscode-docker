@@ -176,7 +176,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerCommand('vscode-docker.container.show-logs', showLogsContainer);
     registerCommand('vscode-docker.container.open-shell', openShellContainer);
     registerCommand('vscode-docker.container.remove', removeContainer);
-    registerCommand('vscode-docker.image.build', async function (this: IActionContext): Promise<void> { await buildImage(this); });
+    registerCommand('vscode-docker.image.build', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await buildImage(this, item); });
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
     registerCommand('vscode-docker.image.push', pushImage);

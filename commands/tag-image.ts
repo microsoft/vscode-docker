@@ -19,7 +19,7 @@ export async function tagImage(actionContext: IActionContext, context?: IHasImag
 
     if (imageToTag) {
         addImageTaggingTelemetry(actionContext, currentName, '.before');
-        let newTaggedName: string = await getTagFromUserInput(currentName);
+        let newTaggedName: string = await getTagFromUserInput(currentName, true);
         addImageTaggingTelemetry(actionContext, newTaggedName, '.after');
 
         let repo: string = newTaggedName;
@@ -54,23 +54,25 @@ export async function tagImage(actionContext: IActionContext, context?: IHasImag
     }
 }
 
-export async function getTagFromUserInput(imageName: string): Promise<string> {
+export async function getTagFromUserInput(imageName: string, addRegistry: boolean): Promise<string> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
 
-    let HighlightEnd = imageName.indexOf('/');
-    if (defaultRegistryPath.length > 0 && HighlightEnd < 0) {
-        imageName = defaultRegistryPath + '/' + imageName;
-        HighlightEnd = defaultRegistryPath.length;
-    }
-
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
-        placeHolder: imageName,
         prompt: 'Tag image as...',
-        value: imageName,
-        valueSelection: [0, HighlightEnd + 1]  //include the '/'
     };
+    if (addRegistry) {
+        let registryLength: number = imageName.indexOf('/');
+        if (defaultRegistryPath.length > 0 && registryLength < 0) {
+            imageName = defaultRegistryPath + '/' + imageName;
+            registryLength = defaultRegistryPath.length;
+        }
+        opt.valueSelection = [0, registryLength + 1];  //include the '/'
+    }
+
+    opt.placeHolder = imageName;
+    opt.value = imageName;
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
     return nameWithTag;
