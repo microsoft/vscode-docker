@@ -7,6 +7,7 @@ import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { askToSavePrefix } from './registrySettings';
@@ -14,12 +15,12 @@ import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAn
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
-export async function pushImage(actionContext: IActionContext, context?: ImageNode): Promise<void> {
+export async function pushImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
     let properties: {
         pushWithoutRepositoryAnswer?: string;
     } & TelemetryProperties = actionContext.properties;
 
-    let [imageToPush, imageName] = await getOrAskForImageAndTag(context);
+    let [imageToPush, imageName] = await getOrAskForImageAndTag(context instanceof RootNode ? undefined : context);
 
     if (imageName.includes('/')) {
         await askToSavePrefix(imageName);

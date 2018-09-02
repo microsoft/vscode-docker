@@ -631,7 +631,7 @@ export interface ConfigureApiOptions {
     os?: OS;
 }
 
-export async function configure(actionContext: IActionContext, rootFolderPath?: string): Promise<void> {
+export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
         let folder: vscode.WorkspaceFolder;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
