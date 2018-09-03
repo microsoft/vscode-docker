@@ -9,7 +9,7 @@ import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
-import { queueBuild } from './commands/acr-build';
+import { queueBuild } from './commands/azureCommands/acr-build';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';

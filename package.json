@@ -632,7 +632,7 @@
       },
       {
         "command": "vscode-docker.queueBuild",
-        "title": "Lightweight Build",
+        "title": "Cloud Build",
         "category": "Docker"
       }
     ],
