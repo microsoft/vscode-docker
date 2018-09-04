@@ -5,14 +5,16 @@
 
 import * as Docker from 'dockerode';
 import vscode = require('vscode');
+import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
-    imageDesc: Docker.ImageDesc
+    label: string;
+    imageDesc: Docker.ImageDesc;
+    allImages: boolean;
 }
 
 function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
-
     return <ImageItem>{
         label: repoTag || '<none>',
         imageDesc: image
@@ -40,15 +42,19 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
 
     if (includeAll && images.length > 0) {
         items.unshift(<ImageItem>{
-            label: 'All Images'
+            label: 'All Images',
+            allImages: true
         });
     }
 
     return items;
 }
 
-export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
+export async function quickPickImage(actionContext: IActionContext, includeAll?: boolean): Promise<ImageItem> {
     let images: Docker.ImageDesc[];
+    let properties: {
+        allImages?: boolean;
+    } & TelemetryProperties = actionContext.properties;
 
     const imageFilters = {
         "filters": {
@@ -63,11 +69,12 @@ export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
             return;
         } else {
             const items: ImageItem[] = computeItems(images, includeAll);
-            return vscode.window.showQuickPick(items, { placeHolder: 'Choose image...' });
+            let response = await vscode.window.showQuickPick<ImageItem>(items, { placeHolder: 'Choose image...' });
+            properties.allContainers = includeAll ? String(response.allImages) : undefined;
+            return response;
         }
     } catch (error) {
         vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
         return;
     }
-
 }

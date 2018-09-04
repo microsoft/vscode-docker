@@ -4,17 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 const teleCmdId: string = 'vscode-docker.container.show-logs';
 
-export async function showLogsContainer(context?: ContainerNode): Promise<void> {
+export async function showLogsContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containerToLog: Docker.ContainerDesc;
 
-    if (context && context.containerDesc) {
+    if (context instanceof ContainerNode && context.containerDesc) {
         containerToLog = context.containerDesc;
     } else {
         const opts = {
@@ -22,7 +24,7 @@ export async function showLogsContainer(context?: ContainerNode): Promise<void> 
                 "status": ["running"]
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(false, opts);
+        const selectedItem: ContainerItem = await quickPickContainer(actionContext, false, opts);
         if (selectedItem) {
             containerToLog = selectedItem.containerDesc;
         }

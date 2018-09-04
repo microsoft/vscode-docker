@@ -7,7 +7,7 @@ import * as opn from 'opn';
 import * as path from 'path';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
@@ -42,9 +42,11 @@ import * as util from "./explorer/deploy/util";
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
+import { ContainerNode } from './explorer/models/containerNode';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
 import { ImageNode } from './explorer/models/imageNode';
+import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
@@ -160,6 +162,29 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode,
     }
 }
 
+function registerCommand(commandId: string, callback: (this: IActionContext, ...args: any[]) => any): void {
+    return uiRegisterCommand(
+        commandId,
+        // tslint:disable-next-line:no-function-expression
+        async function (this: IActionContext, ...args: any[]): Promise<any> {
+            if (args.length) {
+                let properties: {
+                    contextValue?: string;
+                } & TelemetryProperties = this.properties;
+                const contextArg = args[0];
+
+                if (contextArg instanceof NodeBase) {
+                    // Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed
+                    properties.contextValue = contextArg.contextValue;
+                } else if (contextArg instanceof vscode.Uri) {
+                    properties.contextValue = 'Uri';
+                }
+            }
+
+            return callback.call(this, ...args);
+        });
+}
+
 function registerDockerCommands(azureAccount: AzureAccount): void {
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
@@ -170,19 +195,19 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
         await configureApi(this, options);
     });
 
-    registerCommand('vscode-docker.container.start', startContainer);
-    registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
+    registerCommand('vscode-docker.container.start', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainer(this, node); });
+    registerCommand('vscode-docker.container.start.interactive', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainerInteractive(this, node); });
     registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
-    registerCommand('vscode-docker.container.stop', stopContainer);
-    registerCommand('vscode-docker.container.restart', restartContainer);
-    registerCommand('vscode-docker.container.show-logs', showLogsContainer);
-    registerCommand('vscode-docker.container.open-shell', openShellContainer);
-    registerCommand('vscode-docker.container.remove', removeContainer);
+    registerCommand('vscode-docker.container.stop', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await stopContainer(this, node); });
+    registerCommand('vscode-docker.container.restart', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await restartContainer(this, node); });
+    registerCommand('vscode-docker.container.show-logs', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await showLogsContainer(this, node); });
+    registerCommand('vscode-docker.container.open-shell', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await openShellContainer(this, node); });
+    registerCommand('vscode-docker.container.remove', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await removeContainer(this, node); });
     registerCommand('vscode-docker.image.build', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await buildImage(this, item); });
-    registerCommand('vscode-docker.image.inspect', inspectImage);
-    registerCommand('vscode-docker.image.remove', removeImage);
-    registerCommand('vscode-docker.image.push', async function (this: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> { await pushImage(this, context); });
-    registerCommand('vscode-docker.image.tag', async function (this: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> { await tagImage(this, context); });
+    registerCommand('vscode-docker.image.inspect', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await inspectImage(this, node); });
+    registerCommand('vscode-docker.image.remove', async function (this: IActionContext, node: ImageNode | RootNode | undefined): Promise<void> { await removeImage(this, node); });
+    registerCommand('vscode-docker.image.push', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await pushImage(this, node); });
+    registerCommand('vscode-docker.image.tag', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await tagImage(this, node); });
     registerCommand('vscode-docker.compose.up', composeUp);
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);
@@ -196,8 +221,8 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
         browseAzurePortal(context);
     });
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
-    registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
+    registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
     registerAzureCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
     registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
     registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);

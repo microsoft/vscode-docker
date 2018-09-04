@@ -7,7 +7,9 @@ import * as cp from 'child_process';
 import * as fs from 'fs';
 import os = require('os');
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
@@ -15,15 +17,23 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.container.start';
 
-export async function startContainer(context?: ImageNode, interactive?: boolean): Promise<void> {
+/**
+ * Image -> Run
+ */
+export async function startContainer(actionContext: IActionContext, context: RootNode | ImageNode | undefined): Promise<void> {
+    return await startContainerCore(actionContext, context, false);
+}
+
+export async function startContainerCore(actionContext: IActionContext, context: RootNode | ImageNode | undefined, interactive: boolean): Promise<void> {
+
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
-    if (context && context.imageDesc) {
+    if (context instanceof ImageNode && context.imageDesc) {
         imageToStart = context.imageDesc;
         imageName = context.label;
     } else {
-        const selectedItem: ImageItem = await quickPickImage(false)
+        const selectedItem: ImageItem = await quickPickImage(actionContext, false)
         if (selectedItem) {
             imageToStart = selectedItem.imageDesc;
             imageName = selectedItem.label;
@@ -57,8 +67,11 @@ export async function startContainer(context?: ImageNode, interactive?: boolean)
     }
 }
 
-export async function startContainerInteractive(context: ImageNode): Promise<void> {
-    await startContainer(context, true);
+/**
+ * Image -> Run Interactive
+ */
+export async function startContainerInteractive(actionContext: IActionContext, context: ImageNode): Promise<void> {
+    await startContainerCore(actionContext, context, true);
 }
 
 export async function startAzureCLI(): Promise<cp.ChildProcess> {
