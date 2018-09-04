@@ -292,27 +292,27 @@
         "docker.showExplorer": {
           "type": "boolean",
           "default": true,
-          "description": "Show or hide the Explorer."
+          "description": "Show or hide the Explorer"
         },
         "docker.explorerRefreshInterval": {
           "type": "number",
           "default": 1000,
-          "description": "Explorer refresh interval, default is 1000ms."
+          "description": "Explorer refresh interval, default is 1000ms"
         },
         "docker.imageBuildContextPath": {
           "type": "string",
           "default": "",
-          "description": "Build context PATH to pass to Docker build command."
+          "description": "Build context PATH to pass to Docker build command"
         },
         "docker.truncateLongRegistryPaths": {
           "type": "boolean",
           "default": false,
-          "description": "Truncate long Image and Container registry paths in the Explorer."
+          "description": "Truncate long Image and Container registry paths in the Explorer"
         },
         "docker.truncateMaxLength": {
           "type": "number",
           "default": 10,
-          "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis."
+          "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis"
         },
         "docker.host": {
           "type": "string",
@@ -328,7 +328,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction."
+          "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction"
         },
         "docker.languageserver.diagnostics.emptyContinuationLine": {
           "scope": "resource",
@@ -339,7 +339,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines."
+          "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines"
         },
         "docker.languageserver.diagnostics.directiveCasing": {
           "scope": "resource",
@@ -350,7 +350,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for parser directives that are not written in lowercase."
+          "description": "Controls the diagnostic severity for parser directives that are not written in lowercase"
         },
         "docker.languageserver.diagnostics.instructionCasing": {
           "scope": "resource",
@@ -361,7 +361,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for instructions that are not written in uppercase."
+          "description": "Controls the diagnostic severity for instructions that are not written in uppercase"
         },
         "docker.languageserver.diagnostics.instructionCmdMultiple": {
           "scope": "resource",
@@ -372,7 +372,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions"
         },
         "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
           "scope": "resource",
@@ -383,7 +383,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions"
         },
         "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
           "scope": "resource",
@@ -394,7 +394,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions"
         },
         "docker.languageserver.diagnostics.instructionJSONInSingleQuotes": {
           "scope": "resource",
@@ -405,7 +405,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes."
+          "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes"
         },
         "docker.languageserver.diagnostics.instructionWorkdirRelative": {
           "scope": "resource",
@@ -416,7 +416,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path."
+          "description": "Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path"
         },
         "docker.attachShellCommand.linuxContainer": {
           "type": "string",
