@@ -20,7 +20,7 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
         pushWithoutRepositoryAnswer?: string;
     } & TelemetryProperties = actionContext.properties;
 
-    let [imageToPush, imageName] = await getOrAskForImageAndTag(context instanceof RootNode ? undefined : context);
+    let [imageToPush, imageName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
 
     if (imageName.includes('/')) {
         await askToSavePrefix(imageName);

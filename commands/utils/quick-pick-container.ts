@@ -7,13 +7,15 @@ import * as Docker from 'dockerode';
 import { ContainerDesc } from 'dockerode';
 import * as os from 'os';
 import vscode = require('vscode');
-import { parseError } from 'vscode-azureextensionui';
+import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { openShellContainer } from '../open-shell-container';
 import { docker } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {
-    containerDesc: Docker.ContainerDesc
+    label: string;
+    containerDesc: Docker.ContainerDesc;
+    allContainers: boolean;
 }
 
 function createItem(container: Docker.ContainerDesc): ContainerItem {
@@ -33,14 +35,19 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): 
 
     if (includeAll && containers.length > 0) {
         items.unshift(<ContainerItem>{
-            label: 'All Containers'
+            label: 'All Containers',
+            allContainers: true
         });
     }
 
     return items;
 }
 
-export async function quickPickContainer(includeAll: boolean = false, opts?: {}): Promise<ContainerItem> {
+export async function quickPickContainer(actionContext: IActionContext, includeAll: boolean = false, opts?: {}): Promise<ContainerItem> {
+    let properties: {
+        allContainers?: string;
+    } & TelemetryProperties = actionContext.properties;
+
     let containers: ContainerDesc[];
 
     // "status": ["created", "restarting", "running", "paused", "exited", "dead"]
@@ -67,6 +74,8 @@ export async function quickPickContainer(includeAll: boolean = false, opts?: {})
         throw new Error('There are no Docker containers that apply to this command.');
     } else {
         const items: ContainerItem[] = computeItems(containers, includeAll);
-        return ext.ui.showQuickPick(items, { placeHolder: 'Choose container...' });
+        let response = await ext.ui.showQuickPick<ContainerItem>(items, { placeHolder: 'Choose container...' });
+        properties.allContainers = includeAll ? String(response.allContainers) : undefined;
+        return response;
     }
 }

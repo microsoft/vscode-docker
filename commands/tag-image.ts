@@ -17,7 +17,7 @@ const teleCmdId: string = 'vscode-docker.image.tag';
 
 export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndLabel | undefined): Promise<string> {
     // If a RootNode or no node is passed in, we ask the user to pick an image
-    let [imageToTag, currentName] = await getOrAskForImageAndTag(context instanceof RootNode ? undefined : context);
+    let [imageToTag, currentName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
 
     if (imageToTag) {
         addImageTaggingTelemetry(actionContext, currentName, '.before');
@@ -56,7 +56,7 @@ export async function tagImage(actionContext: IActionContext, context: ImageNode
     }
 }
 
-export async function getTagFromUserInput(imageName: string, addRegistry: boolean): Promise<string> {
+export async function getTagFromUserInput(imageName: string, addDefaultRegistry: boolean): Promise<string> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
 
@@ -64,16 +64,15 @@ export async function getTagFromUserInput(imageName: string, addRegistry: boolea
         ignoreFocusOut: true,
         prompt: 'Tag image as...',
     };
-    if (addRegistry) {
+    if (addDefaultRegistry) {
         let registryLength: number = imageName.indexOf('/');
         if (defaultRegistryPath.length > 0 && registryLength < 0) {
             imageName = defaultRegistryPath + '/' + imageName;
             registryLength = defaultRegistryPath.length;
         }
-        opt.valueSelection = [0, registryLength + 1];  //include the '/'
+        opt.valueSelection = registryLength < 0 ? undefined : [0, registryLength + 1];  //include the '/'
     }
 
-    opt.placeHolder = imageName;
     opt.value = imageName;
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
@@ -85,7 +84,7 @@ export interface IHasImageDescriptorAndLabel {
     label: string
 }
 
-export async function getOrAskForImageAndTag(context: IHasImageDescriptorAndLabel | undefined): Promise<[Docker.ImageDesc, string]> {
+export async function getOrAskForImageAndTag(actionContext: IActionContext, context: IHasImageDescriptorAndLabel | undefined): Promise<[Docker.ImageDesc, string]> {
     let name: string;
     let description: Docker.ImageDesc;
 
@@ -93,7 +92,7 @@ export async function getOrAskForImageAndTag(context: IHasImageDescriptorAndLabe
         description = context.imageDesc;
         name = context.label;
     } else {
-        const selectedItem: ImageItem = await quickPickImage(false);
+        const selectedItem: ImageItem = await quickPickImage(actionContext, false);
         if (selectedItem) {
             description = selectedItem.imageDesc
             name = selectedItem.label;
