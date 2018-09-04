@@ -26,7 +26,7 @@ import { showLogsContainer } from './commands/showlogs-container';
 import { startAzureCLI, startContainer, startContainerInteractive } from './commands/start-container';
 import { stopContainer } from './commands/stop-container';
 import { systemPrune } from './commands/system-prune';
-import { tagImage } from './commands/tag-image';
+import { IHasImageDescriptorAndLabel, tagImage } from './commands/tag-image';
 import { docker } from './commands/utils/docker-endpoint';
 import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
@@ -44,6 +44,8 @@ import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
+import { ImageNode } from './explorer/models/imageNode';
+import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
@@ -163,7 +165,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
 
-    registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this); });
+    registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this, undefined); });
     registerCommand('vscode-docker.api.configure', async function (this: IActionContext, options: ConfigureApiOptions): Promise<void> {
         await configureApi(this, options);
     });
@@ -179,8 +181,8 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerCommand('vscode-docker.image.build', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await buildImage(this, item); });
     registerCommand('vscode-docker.image.inspect', inspectImage);
     registerCommand('vscode-docker.image.remove', removeImage);
-    registerCommand('vscode-docker.image.push', pushImage);
-    registerCommand('vscode-docker.image.tag', tagImage);
+    registerCommand('vscode-docker.image.push', async function (this: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> { await pushImage(this, context); });
+    registerCommand('vscode-docker.image.tag', async function (this: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> { await tagImage(this, context); });
     registerCommand('vscode-docker.compose.up', composeUp);
     registerCommand('vscode-docker.compose.down', composeDown);
     registerCommand('vscode-docker.compose.restart', composeRestart);

@@ -6,6 +6,8 @@
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
+import { ImageNode } from '../explorer/models/imageNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
@@ -13,9 +15,9 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.tag';
 
-export async function tagImage(actionContext: IActionContext, context?: IHasImageDescriptorAndLabel): Promise<string> {
-
-    let [imageToTag, currentName] = await getOrAskForImageAndTag(context);
+export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndLabel | undefined): Promise<string> {
+    // If a RootNode or no node is passed in, we ask the user to pick an image
+    let [imageToTag, currentName] = await getOrAskForImageAndTag(context instanceof RootNode ? undefined : context);
 
     if (imageToTag) {
         addImageTaggingTelemetry(actionContext, currentName, '.before');
@@ -83,7 +85,7 @@ export interface IHasImageDescriptorAndLabel {
     label: string
 }
 
-export async function getOrAskForImageAndTag(context?: IHasImageDescriptorAndLabel): Promise<[Docker.ImageDesc, string]> {
+export async function getOrAskForImageAndTag(context: IHasImageDescriptorAndLabel | undefined): Promise<[Docker.ImageDesc, string]> {
     let name: string;
     let description: Docker.ImageDesc;
 

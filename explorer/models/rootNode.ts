@@ -131,14 +131,14 @@ export class RootNode extends NodeBase {
             for (let i = 0; i < images.length; i++) {
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
+                    let node = new ImageNode(`<none>:<none>`, this.eventEmitter);
                     node.imageDesc = images[i];
                     imageNodes.push(node);
                 } else {
                     // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let j = 0; j < images[i].RepoTags.length; j++) {
                         // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
+                        let node = new ImageNode(`${images[i].RepoTags[j]}`, this.eventEmitter);
                         node.imageDesc = images[i];
                         imageNodes.push(node);
                     }
