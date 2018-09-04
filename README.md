@@ -94,6 +94,7 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
 | `docker.defaultRegistryPath` | Default registry and path when tagging an image. | `""`
 | `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
+| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | `""`
 | `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
 | `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
 | `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
@@ -103,6 +104,7 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
 | `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
 | `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
+| `docker.languageserver.diagnostics.instructionWorkdirRelative` | Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path. | `warning`
 | `docker.promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
 | `docker.showExplorer` | Show or hide the Explorer. | `true`
 | `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
