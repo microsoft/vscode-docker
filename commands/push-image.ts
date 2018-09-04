@@ -10,7 +10,7 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
-import { askToSavePrefix } from './registrySettings';
+import { askToSaveRegistryPath } from './registrySettings';
 import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
 const teleCmdId: string = 'vscode-docker.image.push';
 const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
@@ -23,7 +23,7 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
     let [imageToPush, imageName] = await getOrAskForImageAndTag(context instanceof RootNode ? undefined : context);
 
     if (imageName.includes('/')) {
-        await askToSavePrefix(imageName);
+        await askToSaveRegistryPath(imageName);
     } else {
         //let addPrefixImagePush = "addPrefixImagePush";
         let askToPushPrefix: boolean = true; // ext.context.workspaceState.get(addPrefixImagePush, true);

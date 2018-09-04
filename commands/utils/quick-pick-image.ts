@@ -5,6 +5,7 @@
 
 import * as Docker from 'dockerode';
 import vscode = require('vscode');
+import { ext } from '../../extensionVariables';
 import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
@@ -63,7 +64,7 @@ export async function quickPickImage(includeAll?: boolean): Promise<ImageItem> {
             return;
         } else {
             const items: ImageItem[] = computeItems(images, includeAll);
-            return vscode.window.showQuickPick(items, { placeHolder: 'Choose image...' });
+            return ext.ui.showQuickPick(items, { placeHolder: 'Choose image...' });
         }
     } catch (error) {
         vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
