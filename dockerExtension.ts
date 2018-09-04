@@ -15,6 +15,8 @@ import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
 import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
+import { showBuildTaskProperties } from './commands/azureCommands/show-buildTask';
+import { TaskContentProvider } from './commands/azureCommands/task-utils/showTaskManager';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -45,6 +47,7 @@ import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
+import { BuildTaskNode } from './explorer/models/taskNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
@@ -125,6 +128,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
+    ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(TaskContentProvider.scheme, new TaskContentProvider()));
 
     if (azureAccount) {
         AzureUtilityManager.getInstance().setAccount(azureAccount);
@@ -202,6 +206,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
     registerAzureCommand('vscode-docker.queueBuild', queueBuild);
     registerAzureCommand('vscode-docker.pullFromAzure', pullFromAzure);
+    registerAzureCommand('vscode-docker.show-ACR-buildTask', showBuildTaskProperties);
 }
 
 async function consolidateDefaultRegistrySettings(): Promise<void> {

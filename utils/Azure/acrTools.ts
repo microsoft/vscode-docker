@@ -6,18 +6,19 @@
 import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
+import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
-import { addUserAgent } from "../addUserAgent";
 import { AzureUtilityManager } from '../azureUtilityManager';
 import { AzureImage } from "./models/image";
 import { Repository } from "./models/repository";
 
 //General helpers
-/** Gets the subscription for a given registry
+/**
+ * @param registry gets the subscription for a given registry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -29,8 +30,15 @@ export function getSubscriptionFromRegistry(registry: Registry): SubscriptionMod
     return subscription;
 }
 
-export function getResourceGroupName(registry: Registry): string {
+export function getResourceGroupName(registry: Registry): any {
     return registry.id.slice(registry.id.search('resourceGroups/') + 'resourceGroups/'.length, registry.id.search('/providers/'));
+}
+
+//Gets resource group object from registry and subscription
+export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup> { ///to do: move to acr tools
+    let resourceGroups: ResourceGroup[] = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
+    const resourceGroupName = getResourceGroupName(registry);
+    return resourceGroups.find((res) => { return res.name === resourceGroupName });
 }
 
 //Registry item management
@@ -61,7 +69,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
-/** Sends a custom html request to a registry
+/** Sends a custon html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -86,7 +94,7 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 
 //Credential management
 /** Obtains registry username and password compatible with docker login */
-export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
+export async function getLoginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
     const subscription: Subscription = getSubscriptionFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);

@@ -49,7 +49,7 @@ export class AzureRegistryNode extends NodeBase {
         };
 
         //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
-        let taskNode = new TaskRootNode("Build Tasks", "taskRootNode", element.subscription, element.azureAccount, element.registry, iconPath);
+        let taskNode = new TaskRootNode("Build Tasks", element.subscription, element.azureAccount, element.registry, iconPath);
         registryChildNodes.push(taskNode);
 
         if (!this.azureAccount) {
