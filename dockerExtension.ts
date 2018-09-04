@@ -162,9 +162,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode,
     }
 }
 
-/**
- * A wrapper on ui.registerCommand that adds additional telemetry for contextValue
- */
+// Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed
 function registerCommand(commandId: string, callback: (this: IActionContext, ...args: any[]) => any): void {
     return uiRegisterCommand(
         commandId,
@@ -177,7 +175,6 @@ function registerCommand(commandId: string, callback: (this: IActionContext, ...
                 const contextArg = args[0];
 
                 if (contextArg instanceof NodeBase) {
-                    // Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed
                     properties.contextValue = contextArg.contextValue;
                 } else if (contextArg instanceof vscode.Uri) {
                     properties.contextValue = 'Uri';
