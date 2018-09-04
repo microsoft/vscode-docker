@@ -35,7 +35,7 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
             let tagFirst: vscode.MessageItem = { title: "Tag first" };
             let pushAnyway: vscode.MessageItem = { title: "Push anyway" }
             let options: vscode.MessageItem[] = [tagFirst, pushAnyway];
-            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image with your username or a registry server name.`, ...options);
+            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image like <docker-id-or-registry-server>/<imagename>`, ...options);
             properties.pushWithoutRepositoryAnswer = response.title;
 
             // if (response === alwaysPush) {
