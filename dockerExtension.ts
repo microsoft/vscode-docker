@@ -162,6 +162,9 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode,
     }
 }
 
+/**
+ * A wrapper on ui.registerCommand that adds additional telemetry for contextValue
+ */
 function registerCommand(commandId: string, callback: (this: IActionContext, ...args: any[]) => any): void {
     return uiRegisterCommand(
         commandId,
