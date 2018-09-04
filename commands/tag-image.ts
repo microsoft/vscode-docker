@@ -75,8 +75,6 @@ export async function getTagFromUserInput(imageName: string, addDefaultRegistry:
 
     opt.value = imageName;
 
-    console.warn(JSON.stringify(opt, null, 2));
-
     const nameWithTag: string = await ext.ui.showInputBox(opt);
     return nameWithTag;
 }
