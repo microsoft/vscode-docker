@@ -8,6 +8,7 @@ import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
@@ -70,7 +71,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
  * @param username : registry username, can be in generic form of 0's, used to generate authorization header
  * @param password : registry password, can be in form of accessToken, used to generate authorization header
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<any> {
+export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<void> {
     let url: string = `https://${login_server}${path}`;
     let header = 'Bearer ' + bearerAccessToken;
     let opt = {
@@ -80,10 +81,10 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
     }
 
     if (http_method === 'delete') {
-        return await ext.request.delete(opt);
+        await ext.request.delete(opt);
     }
 
-    assert(false, 'sendRequestToRegistry: Unexpected http method');
+    throw new Error('sendRequestToRegistry: Unexpected http method');
 }
 
 //Credential management
@@ -113,7 +114,7 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
-        const credentials = <{ context: AuthenticationContext, username: string, clientId: string }><any>session.credentials;
+        const credentials = <ServiceClientCredentials & { context: AuthenticationContext, username: string, clientId: string }>session.credentials;
         const environment = session.environment;
         credentials.context.acquireToken(
             environment.activeDirectoryResourceId,

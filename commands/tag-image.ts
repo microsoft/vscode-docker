@@ -35,8 +35,8 @@ export async function tagImage(actionContext: IActionContext, context: ImageNode
 
         const image: Docker.Image = docker.getImage(imageToTag.Id);
 
-        // tslint:disable-next-line:no-function-expression // Grandfathered in
-        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
+        // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, _data: any): void {
             if (err) {
                 // TODO: use parseError, proper error handling
                 vscode.window.showErrorMessage('Docker Tag error: ' + err.message);

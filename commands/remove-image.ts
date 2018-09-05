@@ -37,8 +37,8 @@ export async function removeImage(actionContext: IActionContext, context: ImageN
 
         vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
-                // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, data: any): void {
+                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, _data: any): void {
                     imageCounter++;
                     if (err) {
                         // TODO: use parseError, proper error handling

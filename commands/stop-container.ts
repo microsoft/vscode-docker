@@ -43,8 +43,8 @@ export async function stopContainer(actionContext: IActionContext, context: Root
 
         vscode.window.setStatusBarMessage("Docker: Stopping Container(s)...", new Promise((resolve, reject) => {
             containersToStop.forEach((c) => {
-                // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getContainer(c.Id).stop(function (err: Error, data: any): void {
+                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+                docker.getContainer(c.Id).stop(function (err: Error, _data: any): void {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);

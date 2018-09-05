@@ -44,7 +44,8 @@ export async function restartContainer(actionContext: IActionContext, context: R
 
         vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
             containersToRestart.forEach((container) => {
-                docker.getContainer(container.Id).restart((err: Error, data: any) => {
+                // tslint:disable-next-line:no-any
+                docker.getContainer(container.Id).restart((err: Error, _data: any) => {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);
