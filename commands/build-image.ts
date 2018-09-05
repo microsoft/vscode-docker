@@ -7,6 +7,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { delay } from "../explorer/utils/utils";
 import { ext } from "../extensionVariables";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 
@@ -109,6 +110,9 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     } else {
         suggestedImageName = prevImageName;
     }
+
+    // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
+    await delay(500);
 
     addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
     const imageName: string = await getTagFromUserInput(suggestedImageName, !prevImageName);
