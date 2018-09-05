@@ -105,7 +105,7 @@ export async function getOrAskForImageAndTag(actionContext: IActionContext, cont
 
 const KnownRegistries: { type: string, regex: RegExp }[] = [
     // Like username/path
-    { type: 'dockerhub-namespace', regex: /^[^.:]+\/[^.:] + \/$/ },
+    { type: 'dockerhub-namespace', regex: /^[^.:]+\/[^.:]+\/$/ },
 
     { type: 'dockerhub-dockerio', regex: /^docker.io.*\// },
     { type: 'gitlab', regex: /gitlab.*\// },
