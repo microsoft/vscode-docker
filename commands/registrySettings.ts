@@ -40,19 +40,19 @@ export async function consolidateDefaultRegistrySettings(): Promise<void> {
     }
 }
 
-export async function askToSavePrefix(imagePath: string, promptForSave?: boolean): Promise<void> {
+export async function askToSaveRegistryPath(imagePath: string, promptForSave?: boolean): Promise<void> {
+    let askToSaveKey: string = 'docker.askToSaveRegistryPath';
+    let askToSavePath: boolean = promptForSave || ext.context.globalState.get<boolean>(askToSaveKey, true);
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    let askToSaveRegistryPath: boolean = promptForSave || configOptions.get<boolean>('askToSaveRegistryPath', true);
 
     let prefix = "";
     if (imagePath.includes('/')) {
         prefix = imagePath.substring(0, imagePath.lastIndexOf('/'));
     }
-    if (prefix && askToSaveRegistryPath !== false) {
+    if (prefix && askToSavePath) {
         let userPrefixPreference: vscode.MessageItem = await ext.ui.showWarningMessage(`Would you like to save '${prefix}' as your default registry path?`, DialogResponses.yes, DialogResponses.no, DialogResponses.skipForNow);
         if (userPrefixPreference === DialogResponses.yes || userPrefixPreference === DialogResponses.no) {
-            askToSaveRegistryPath = false;
-            await configOptions.update('askToSaveRegistryPath', false, vscode.ConfigurationTarget.Workspace);
+            await ext.context.globalState.update(askToSaveKey, false);
         }
         if (userPrefixPreference === DialogResponses.yes) {
             await configOptions.update(configurationKeys.defaultRegistryPath, prefix, vscode.ConfigurationTarget.Workspace);
