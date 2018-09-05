@@ -5,7 +5,8 @@
 
 import * as Docker from 'dockerode';
 import vscode = require('vscode');
-import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
@@ -64,17 +65,17 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
 
     try {
         images = await docker.getImageDescriptors(imageFilters);
-        if (!images || images.length === 0) {
-            vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
-            return;
-        } else {
-            const items: ImageItem[] = computeItems(images, includeAll);
-            let response = await vscode.window.showQuickPick<ImageItem>(items, { placeHolder: 'Choose image...' });
-            properties.allContainers = includeAll ? String(response.allImages) : undefined;
-            return response;
-        }
     } catch (error) {
-        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
+        error.message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
+        throw error;
+    }
+    if (!images || images.length === 0) {
+        vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
         return;
+    } else {
+        const items: ImageItem[] = computeItems(images, includeAll);
+        let response = await ext.ui.showQuickPick<ImageItem>(items, { placeHolder: 'Choose image...' });
+        properties.allContainers = includeAll ? String(response.allImages) : undefined;
+        return response;
     }
 }
