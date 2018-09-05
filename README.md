@@ -82,6 +82,10 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
+## Private registries (Preview)
+
+This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
+
 ## Configuration Settings
 
 The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
