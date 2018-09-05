@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
+import { delay } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
@@ -98,6 +99,8 @@ export async function getOrAskForImageAndTag(actionContext: IActionContext, cont
             name = selectedItem.label;
         }
 
+        // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
+        await delay(500);
     }
 
     return [description, name];
