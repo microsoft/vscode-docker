@@ -47,9 +47,9 @@ suite("Tagging telemetry", async function (this: Suite): Promise<void> {
 
         testRegistryType('samhouston/hello-world', 'dockerhub-namespace');
 
-        testRegistryType('markmichaelby/docker.io/hello-world', 'dockerhub-dockerio');
+        testRegistryType('docker.io/markmichaelby/hello-world', 'dockerhub-dockerio');
 
-        testRegistryType('docker.io/markmichaelby/hello-world', 'gitlab');
+        //testRegistryType('docker.io/markmichaelby/hello-world', 'gitlab');
 
         // { type: 'gitlab', regex: /gitlab.*\// },
         // { type: 'ACR', regex: /azurecr\.io.*\// },
