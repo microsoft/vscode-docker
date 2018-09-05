@@ -612,7 +612,7 @@
       },
       {
         "command": "vscode-docker.connectCustomRegistry",
-        "title": "Connect to a Private Registry...",
+        "title": "Connect to a Private Registry... (Preview)",
         "category": "Docker"
       },
       {
