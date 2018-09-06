@@ -20,6 +20,7 @@ import { Repository } from "./models/repository";
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
     let subscriptionId = registry.id.slice('/subscriptions/'.length, registry.id.search('/resourceGroups/'));
+
     const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     let subscription = subs.find((sub): boolean => {
         return sub.subscriptionId === subscriptionId;
@@ -37,6 +38,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
+
     const tags: TagInfo[] = await getTags('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
         image = new AzureImage(element, tag.tag, tag.created);
@@ -50,6 +52,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     let repo: Repository;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
     const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
+
     let allRepos: Repository[] = [];
     for (let tempRepo of repositories) {
         repo = new Repository(registry, tempRepo);
