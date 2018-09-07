@@ -8,6 +8,7 @@ import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
@@ -113,7 +114,7 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
-        const credentials = <{ context: AuthenticationContext, username: string, clientId: string }><any>session.credentials;
+        const credentials = <{ context: AuthenticationContext, username: string, clientId: string } & ServiceClientCredentials>session.credentials;
         const environment = session.environment;
         credentials.context.acquireToken(
             environment.activeDirectoryResourceId,
