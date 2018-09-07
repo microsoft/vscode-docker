@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
@@ -31,6 +32,16 @@ export async function quickPickACRRepository(registry: Registry, prompt?: string
     const quickPickRepoList = repositories.map(repo => <IAzureQuickPickItem<Repository>>{ label: repo.name, data: repo });
     let desiredRepo = await ext.ui.showQuickPick(quickPickRepoList, { 'canPickMany': false, 'placeHolder': placeHolder });
     return desiredRepo.data;
+}
+
+export async function quickPickBuildTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.BuildTask> {
+    const placeHolder = prompt ? prompt : 'Choose a Build Task';
+
+    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    let buildTasks: ContainerModels.BuildTask[] = await client.buildTasks.list(resourceGroup.name, registry.name);
+    const quickpPickBTList = buildTasks.map(buildTask => <IAzureQuickPickItem<ContainerModels.BuildTask>>{ label: buildTask.name, data: buildTask });
+    let desiredBuildTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
+    return desiredBuildTask.data;
 }
 
 export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
@@ -152,7 +163,6 @@ async function createNewResourceGroup(loc: string, subscription?: Subscription):
     };
 
     let resourceGroupName: string = await ext.ui.showInputBox(opt);
-
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
         location: loc,

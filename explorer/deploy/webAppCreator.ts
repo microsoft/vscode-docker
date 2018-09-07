@@ -9,6 +9,8 @@ import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'az
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
 import { reporter } from '../../telemetry/telemetry';
