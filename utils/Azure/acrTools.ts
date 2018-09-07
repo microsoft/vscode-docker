@@ -114,7 +114,7 @@ export async function acquireACRAccessTokenFromRegistry(registry: Registry, scop
 /** Obtains refresh and access tokens for Azure Active Directory. */
 export async function acquireAADTokens(session: AzureSession): Promise<{ aadAccessToken: string, aadRefreshToken: string }> {
     return new Promise<{ aadAccessToken: string, aadRefreshToken: string }>((resolve, reject) => {
-        const credentials = <ServiceClientCredentials & { context: AuthenticationContext, username: string, clientId: string }>session.credentials;
+        const credentials = <{ context: AuthenticationContext, username: string, clientId: string } & ServiceClientCredentials>session.credentials;
         const environment = session.environment;
         credentials.context.acquireToken(
             environment.activeDirectoryResourceId,

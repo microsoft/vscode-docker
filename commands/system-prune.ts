@@ -28,6 +28,7 @@ export async function systemPrune(): Promise<void> {
             }
         }
 
+        // EngineInfo in dockerode is incomplete
         const info = <Docker.EngineInfo & { ServerVersion: string }>await docker.getEngineInfo();
 
         // in docker 17.06.1 and higher you must specify the --volumes flag
