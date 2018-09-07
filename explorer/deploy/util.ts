@@ -61,7 +61,7 @@ export function getWebAppPublishCredential(azureAccount: AzureAccountWrapper, su
 }
 
 // Output channel for the extension
-const outputChannel = vscode.window.createOutputChannel("Azure App Service");
+const outputChannel = vscode.window.createOutputChannel("Docker");
 
 export function getOutputChannel(): vscode.OutputChannel {
     return outputChannel;

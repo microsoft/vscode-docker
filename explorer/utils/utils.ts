@@ -16,3 +16,11 @@ export function trimWithElipsis(str: string, max: number = 10): string {
 
     return front + elipsis + back;
 }
+
+export async function delay(ms: number): Promise<void> {
+    return new Promise<void>(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, ms);
+    });
+}

@@ -4,19 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
-export async function removeContainer(context?: ContainerNode): Promise<void> {
+export async function removeContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containersToRemove: Docker.ContainerDesc[];
 
-    if (context && context.containerDesc) {
+    if (context instanceof ContainerNode && context.containerDesc) {
         containersToRemove = [context.containerDesc];
     } else {
         const opts = {
@@ -24,9 +26,9 @@ export async function removeContainer(context?: ContainerNode): Promise<void> {
                 "status": ["created", "restarting", "running", "paused", "exited", "dead"]
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(true, opts);
+        const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
         if (selectedItem) {
-            if (selectedItem.label.toLowerCase().includes('all containers')) {
+            if (selectedItem.allContainers) {
                 containersToRemove = await docker.getContainerDescriptors(opts);
             } else {
                 containersToRemove = [selectedItem.containerDesc];

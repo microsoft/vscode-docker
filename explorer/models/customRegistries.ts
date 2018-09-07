@@ -30,7 +30,7 @@ export async function connectCustomRegistry(): Promise<void> {
 
     // tslint:disable-next-line:no-constant-condition
     let url = await ext.ui.showInputBox({
-        prompt: "Enter the URL for the registry",
+        prompt: "Enter the URL for the registry (OAuth not yet supported)",
         placeHolder: 'Example: http://localhost:5000',
         validateInput: (value: string): string | undefined => {
             let uri = vscode.Uri.parse(value);
@@ -61,7 +61,19 @@ export async function connectCustomRegistry(): Promise<void> {
         credentials: { userName, password }
     };
 
-    await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
+    try {
+        await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
+    } catch (err) {
+        let error: { statusCode?: number } = err;
+        let message = parseError(error).message;
+
+        if (error.statusCode === 401) {
+            message = 'OAuth support has not yet been implemented in this preview feature.  This registry does not appear to support basic authentication.';
+            throw new Error(message);
+        }
+
+        throw error;
+    }
 
     // Save
     if (ext.keytar) {

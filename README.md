@@ -82,6 +82,10 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
+## Private registries (Preview)
+
+This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
+
 ## Configuration Settings
 
 The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
@@ -92,22 +96,23 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
-| `docker.defaultRegistryPath` | Path within registry to push to. | `""`
-| `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
-| `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
-| `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
-| `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
-| `docker.languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines. | `warning`
-| `docker.languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase. | `warning`
-| `docker.languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
+| `docker.defaultRegistryPath` | Default registry and path when tagging an image | `""`
+| `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms | `1000`
+| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | `""`
+| `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command | `""`
+| `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction | `warning`
+| `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase | `warning`
+| `docker.languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines | `warning`
+| `docker.languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase | `warning`
+| `docker.languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions | `warning`
+| `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions | `warning`
+| `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions | `warning`
+| `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes | `warning`
+| `docker.languageserver.diagnostics.instructionWorkdirRelative` | Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path | `warning`
 | `docker.promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
-| `docker.showExplorer` | Show or hide the Explorer. | `true`
-| `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
-| `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
-| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) |
+| `docker.showExplorer` | Show or hide the Explorer | `true`
+| `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer | `false`
+| `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis | `10`
 
 ## Installation
 

@@ -8,7 +8,6 @@ import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
-import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 /**

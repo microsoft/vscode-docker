@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
+import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
@@ -17,10 +19,10 @@ const engineTypeShellCommands = {
     [DockerEngineType.Windows]: configOptions.get('attachShellCommand.windowsContainer', 'powershell')
 }
 
-export async function openShellContainer(context?: ContainerNode): Promise<void> {
+export async function openShellContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
     let containerToAttach: Docker.ContainerDesc;
 
-    if (context && context.containerDesc) {
+    if (context instanceof ContainerNode && context.containerDesc) {
         containerToAttach = context.containerDesc;
     } else {
         const opts = {
@@ -28,7 +30,7 @@ export async function openShellContainer(context?: ContainerNode): Promise<void>
                 "status": ["running"]
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(false, opts);
+        const selectedItem: ContainerItem = await quickPickContainer(actionContext, false, opts);
         if (selectedItem) {
             containerToAttach = selectedItem.containerDesc;
         }

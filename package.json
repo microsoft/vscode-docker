@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.1.1-alpha",
+  "version": "0.2.0",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -59,6 +59,7 @@
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
+    "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
@@ -67,8 +68,7 @@
   "main": "./out/dockerExtension",
   "contributes": {
     "menus": {
-      "commandPalette": [
-        {
+      "commandPalette": [{
           "command": "vscode-docker.browseDockerHub",
           "when": "false"
         },
@@ -81,8 +81,7 @@
           "when": "never"
         }
       ],
-      "editor/context": [
-        {
+      "editor/context": [{
           "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
@@ -123,8 +122,7 @@
           "group": "docker"
         }
       ],
-      "explorer/context": [
-        {
+      "explorer/context": [{
           "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
           "command": "vscode-docker.image.build",
           "group": "docker"
@@ -150,8 +148,7 @@
           "group": "docker"
         }
       ],
-      "view/title": [
-        {
+      "view/title": [{
           "command": "vscode-docker.explorer.refresh",
           "when": "view == dockerExplorer",
           "group": "navigation"
@@ -162,8 +159,7 @@
           "group": "navigation"
         }
       ],
-      "view/item/context": [
-        {
+      "view/item/context": [{
           "command": "vscode-docker.container.start",
           "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
         },
@@ -264,45 +260,43 @@
           "when": "view == dockerExplorer && viewItem == customRootNode"
         },
         {
+          "command": "vscode-docker.setRegistryAsDefault",
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/"
+        },
+        {
           "command": "vscode-docker.disconnectCustomRegistry",
           "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/"
         }
       ]
     },
-    "debuggers": [
-      {
-        "type": "docker",
-        "label": "Docker",
-        "configurationSnippets": [
-          {
-            "label": "Docker: Attach to Node",
-            "description": "Docker: Attach to Node",
-            "body": {
-              "type": "node",
-              "request": "attach",
-              "name": "Docker: Attach to Node",
-              "port": 9229,
-              "address": "localhost",
-              "localRoot": "^\"\\${workspaceFolder}\"",
-              "remoteRoot": "/usr/src/app",
-              "protocol": "inspector"
-            }
-          }
-        ]
-      }
-    ],
-    "languages": [
-      {
-        "id": "dockerfile",
-        "aliases": [
-          "Dockerfile"
-        ],
-        "filenamePatterns": [
-          "*.dockerfile",
-          "Dockerfile"
-        ]
-      }
-    ],
+    "debuggers": [{
+      "type": "docker",
+      "label": "Docker",
+      "configurationSnippets": [{
+        "label": "Docker: Attach to Node",
+        "description": "Docker: Attach to Node",
+        "body": {
+          "type": "node",
+          "request": "attach",
+          "name": "Docker: Attach to Node",
+          "port": 9229,
+          "address": "localhost",
+          "localRoot": "^\"\\${workspaceFolder}\"",
+          "remoteRoot": "/usr/src/app",
+          "protocol": "inspector"
+        }
+      }]
+    }],
+    "languages": [{
+      "id": "dockerfile",
+      "aliases": [
+        "Dockerfile"
+      ],
+      "filenamePatterns": [
+        "*.dockerfile",
+        "Dockerfile"
+      ]
+    }],
     "configuration": {
       "type": "object",
       "title": "Docker configuration options",
@@ -310,37 +304,32 @@
         "docker.defaultRegistryPath": {
           "type": "string",
           "default": "",
-          "description": "Default registry and path when tagging an image, empty string will target Docker Hub when pushing"
-        },
-        "docker.askToSaveRegistryPath": {
-          "type": "boolean",
-          "default": true,
-          "description": "Ask the user whether to store the path prefix in defaultRegsitryPath on first push"
+          "description": "Default registry and path when tagging an image"
         },
         "docker.showExplorer": {
           "type": "boolean",
           "default": true,
-          "description": "Show or hide the Explorer."
+          "description": "Show or hide the Explorer"
         },
         "docker.explorerRefreshInterval": {
           "type": "number",
           "default": 1000,
-          "description": "Explorer refresh interval, default is 1000ms."
+          "description": "Explorer refresh interval, default is 1000ms"
         },
         "docker.imageBuildContextPath": {
           "type": "string",
           "default": "",
-          "description": "Build context PATH to pass to Docker build command."
+          "description": "Build context PATH to pass to Docker build command"
         },
         "docker.truncateLongRegistryPaths": {
           "type": "boolean",
           "default": false,
-          "description": "Truncate long Image and Container registry paths in the Explorer."
+          "description": "Truncate long Image and Container registry paths in the Explorer"
         },
         "docker.truncateMaxLength": {
           "type": "number",
           "default": 10,
-          "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis."
+          "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis"
         },
         "docker.host": {
           "type": "string",
@@ -356,7 +345,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction."
+          "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction"
         },
         "docker.languageserver.diagnostics.emptyContinuationLine": {
           "scope": "resource",
@@ -367,7 +356,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines."
+          "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines"
         },
         "docker.languageserver.diagnostics.directiveCasing": {
           "scope": "resource",
@@ -378,7 +367,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for parser directives that are not written in lowercase."
+          "description": "Controls the diagnostic severity for parser directives that are not written in lowercase"
         },
         "docker.languageserver.diagnostics.instructionCasing": {
           "scope": "resource",
@@ -389,7 +378,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for instructions that are not written in uppercase."
+          "description": "Controls the diagnostic severity for instructions that are not written in uppercase"
         },
         "docker.languageserver.diagnostics.instructionCmdMultiple": {
           "scope": "resource",
@@ -400,7 +389,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions"
         },
         "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
           "scope": "resource",
@@ -411,7 +400,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions"
         },
         "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
           "scope": "resource",
@@ -422,7 +411,7 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions."
+          "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions"
         },
         "docker.languageserver.diagnostics.instructionJSONInSingleQuotes": {
           "scope": "resource",
@@ -433,7 +422,18 @@
             "warning",
             "error"
           ],
-          "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes."
+          "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes"
+        },
+        "docker.languageserver.diagnostics.instructionWorkdirRelative": {
+          "scope": "resource",
+          "type": "string",
+          "default": "warning",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "description": "Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path"
         },
         "docker.attachShellCommand.linuxContainer": {
           "type": "string",
@@ -462,8 +462,7 @@
         }
       }
     },
-    "commands": [
-      {
+    "commands": [{
         "command": "vscode-docker.configure",
         "title": "Add Docker files to workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
@@ -644,7 +643,12 @@
       },
       {
         "command": "vscode-docker.connectCustomRegistry",
-        "title": "Connect to a Private Registry...",
+        "title": "Connect to a Private Registry... (Preview)",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.setRegistryAsDefault",
+        "title": "Set as Default Registry Path",
         "category": "Docker"
       },
       {
@@ -659,22 +663,18 @@
       }
     ],
     "views": {
-      "dockerView": [
-        {
-          "id": "dockerExplorer",
-          "name": "Explorer",
-          "when": "config.docker.showExplorer == true"
-        }
-      ]
+      "dockerView": [{
+        "id": "dockerExplorer",
+        "name": "Explorer",
+        "when": "config.docker.showExplorer == true"
+      }]
     },
     "viewsContainers": {
-      "activitybar": [
-        {
-          "icon": "images/docker.svg",
-          "id": "dockerView",
-          "title": "Docker"
-        }
-      ]
+      "activitybar": [{
+        "icon": "images/docker.svg",
+        "id": "dockerView",
+        "title": "Docker"
+      }]
     }
   },
   "engines": {
@@ -716,8 +716,8 @@
     "azure-arm-containerregistry": "^2.3.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
+    "dockerfile-language-server-nodejs": "^0.0.19",
     "azure-storage": "^2.8.1",
-    "dockerfile-language-server-nodejs": "^0.0.18",
     "dockerode": "^2.5.1",
     "fs-extra": "^6.0.1",
     "glob": "7.1.2",

@@ -131,12 +131,12 @@ export class RootNode extends NodeBase {
 
             for (let image of images) {
                 if (!image.RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
+                    let node = new ImageNode(`<none>:<none>`, this.eventEmitter);
                     node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
                     for (let repoTag of image.RepoTags) {
-                        let node = new ImageNode(`${repoTag}`, "localImageNode", this.eventEmitter);
+                        let node = new ImageNode(`${repoTag}`, this.eventEmitter);
                         node.imageDesc = image;
                         imageNodes.push(node);
                     }

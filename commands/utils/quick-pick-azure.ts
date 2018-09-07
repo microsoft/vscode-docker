@@ -139,7 +139,7 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
 export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
-        placeHolder: 'Yes',
+        placeHolder: 'Enter "Yes"',
         value: 'No',
         prompt: yesOrNoPrompt + ' Enter yes to continue'
     };
