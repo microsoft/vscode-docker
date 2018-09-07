@@ -49,13 +49,9 @@ import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './exp
 import { ContainerNode } from './explorer/models/containerNode';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
-<<<<<<< HEAD
 import { ImageNode } from './explorer/models/imageNode';
 import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
-=======
-import { BuildTaskNode } from './explorer/models/taskNode';
->>>>>>> dev
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
