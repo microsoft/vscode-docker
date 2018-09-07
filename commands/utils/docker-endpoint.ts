@@ -5,6 +5,7 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
+import { callWithTelemetryAndErrorHandling, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 
 export enum DockerEngineType {
     Linux,
@@ -80,22 +81,35 @@ class DockerClient {
         return this.endPoint.getContainer(id);
     }
 
-    public getEngineType(): Thenable<DockerEngineType> {
-        if (process.platform === 'win32') {
-            return new Promise((resolve, reject) => {
-                this.endPoint.info((error, info) => {
-                    if (error) {
-                        return reject(error);
-                    }
+    public async getEngineType(): Promise<DockerEngineType> {
+        // tslint:disable-next-line:no-var-self
+        let me = this;
+        let engineType: DockerEngineType;
+        await callWithTelemetryAndErrorHandling('getEngineType', async function (this: IActionContext): Promise<void> {
+            let properties: {
+                engineType?: string;
+            } & TelemetryProperties = this.properties;
 
-                    return resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
+            if (process.platform === 'win32') {
+                engineType = await new Promise<DockerEngineType>((resolve, reject) => {
+                    me.endPoint.info((error, info) => {
+                        if (error) {
+                            return reject(error);
+                        }
+
+                        resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
+                    });
                 });
-            });
-        }
+            } else {
+                // On Linux or macOS, this can only ever be linux,
+                // so short-circuit the Docker call entirely.
+                engineType = DockerEngineType.Linux;
+            }
 
-        // On Linux or macOS, this can only ever be linux,
-        // so short-circuit the Docker call entirely.
-        return Promise.resolve(DockerEngineType.Linux);
+            properties.engineType = DockerEngineType[engineType];
+        });
+
+        return engineType;
     }
 
     public getEngineInfo(): Thenable<Docker.EngineInfo> {
