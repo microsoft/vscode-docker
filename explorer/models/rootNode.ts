@@ -8,9 +8,9 @@ import * as vscode from 'vscode';
 
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
-import { ContainerNode } from './containerNode';
+import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ImageNode } from './imageNode';
-import { NodeBase } from './nodeBase';
+import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 
 const imageFilters = {
@@ -216,8 +216,8 @@ export class RootNode extends NodeBase {
     private async getContainers(): Promise<ContainerNode[]> {
         const containerNodes: ContainerNode[] = [];
         let containers: Docker.ContainerDesc[];
-        let contextValue: string;
-        let iconPath: any = {};
+        let contextValue: ContainerNodeContextValue;
+        let iconPath: IconPath;
 
         try {
             containers = await docker.getContainerDescriptors(containerFilters);

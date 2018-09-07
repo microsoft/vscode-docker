@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// tslint:disable:no-unsafe-any // Grandfathered in and will be replaced
+
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { AzureAccountWrapper } from './azureAccountWrapper';

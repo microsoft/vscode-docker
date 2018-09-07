@@ -12,7 +12,7 @@ import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Az
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
 import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
-import { NodeBase } from './nodeBase';
+import { IconPath, NodeBase } from './nodeBase';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
@@ -25,7 +25,7 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public readonly contextValue: string = 'azureRegistryNode';
-    public readonly iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+    public readonly iconPath: IconPath = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
     };

@@ -68,6 +68,7 @@ export async function quickPickSubscription(): Promise<Subscription> {
     if (subscriptions.length === 0) {
         vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", "Open Portal").then(val => {
             if (val === "Open Portal") {
+                // tslint:disable-next-line:no-unsafe-any
                 opn('https://portal.azure.com/');
             }
         });

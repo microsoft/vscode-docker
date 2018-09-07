@@ -98,7 +98,7 @@ class DockerClient {
         return Promise.resolve(DockerEngineType.Linux);
     }
 
-    public getEngineInfo(): Thenable<any> {
+    public getEngineInfo(): Thenable<Docker.EngineInfo> {
         return new Promise((resolve, reject) => {
             this.endPoint.info((error, info) => {
                 if (error) {
@@ -111,8 +111,9 @@ class DockerClient {
 
     public getExposedPorts(imageId: string): Thenable<string[]> {
         return new Promise((resolve, reject) => {
-            this.getImage(imageId).inspect((error, { Config: { ExposedPorts = {} } }) => {
-                const ports = Object.keys(ExposedPorts);
+            this.getImage(imageId).inspect((error, data: { Config: { ExposedPorts: {} } }) => {
+                let exposedPorts = data.Config.ExposedPorts;
+                const ports = Object.keys(exposedPorts);
                 resolve(ports);
             });
         });

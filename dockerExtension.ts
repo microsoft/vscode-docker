@@ -7,7 +7,7 @@ import * as opn from 'opn';
 import * as path from 'path';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, createTelemetryReporter, IActionContext, parseError, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
@@ -103,7 +103,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 }
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    const installedExtensions: any[] = vscode.extensions.all;
+    const installedExtensions = vscode.extensions.all;
     let azureAccount: AzureAccount | undefined;
 
     initializeExtensionVariables(ctx);
@@ -113,9 +113,10 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
         const extension = installedExtensions[i];
         if (extension.id === 'ms-vscode.azure-account') {
             try {
-                azureAccount = await extension.activate();
+                // tslint:disable-next-line:no-unsafe-any
+                azureAccount = <AzureAccount>await extension.activate();
             } catch (error) {
-                console.log('Failed to activate the Azure Account Extension: ' + error);
+                console.log('Failed to activate the Azure Account Extension: ' + parseError(error).message);
             }
             break;
         }
@@ -156,6 +157,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode,
             const open: vscode.MessageItem = { title: "View in Marketplace" };
             const response = await vscode.window.showErrorMessage('Please install the Azure Account extension to deploy to Azure.', open);
             if (response === open) {
+                // tslint:disable-next-line:no-unsafe-any
                 opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
             }
         }

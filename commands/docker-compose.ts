@@ -50,7 +50,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
     if (vscode.workspace.workspaceFolders.length === 1) {
         folder = vscode.workspace.workspaceFolders[0];
     } else {
-        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+        folder = await vscode.window.showWorkspaceFolderPick();
     }
 
     if (!folder) {

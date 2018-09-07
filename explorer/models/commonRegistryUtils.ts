@@ -74,7 +74,7 @@ export async function getTags(registryUrl: string, repositoryName: string, crede
         pool.addTask(async (): Promise<void> => {
             try {
                 let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `v2/${repositoryName}/manifests/${tag}`, credentials);
-                let history: ManifestHistoryV1Compatibility = JSON.parse(manifest.history[0].v1Compatibility);
+                let history = <ManifestHistoryV1Compatibility>JSON.parse(manifest.history[0].v1Compatibility);
                 let created = new Date(history.created);
                 let info = <TagInfo>{
                     tag: tag,

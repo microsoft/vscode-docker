@@ -77,7 +77,7 @@
         "no-unnecessary-callback-wrapper": true,
         "no-unnecessary-initializer": true,
         "no-unnecessary-override": true,
-        // TODO: "no-unsafe-any": true,
+        "no-unsafe-any": true,
         "no-unsafe-finally": true,
         "no-unused-expression": true,
         "no-use-before-declare": false, // changed (recommended turned off: https://palantir.github.io/tslint/rules/no-use-before-declare/)

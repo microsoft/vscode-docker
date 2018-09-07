@@ -151,7 +151,7 @@ export function addImageTaggingTelemetry(actionContext: IActionContext, fullImag
         properties.registryType = knownRegistry.type;
 
         for (let propertyName of Object.getOwnPropertyNames(properties)) {
-            actionContext.properties[propertyName + propertyPostfix] = properties[propertyName];
+            actionContext.properties[propertyName + propertyPostfix] = <string>properties[propertyName];
         }
     } catch (error) {
         console.error(error);

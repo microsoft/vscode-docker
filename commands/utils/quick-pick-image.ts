@@ -66,7 +66,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        error.message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
+        (<{ message?: string }>error).message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
         throw error;
     }
     if (!images || images.length === 0) {
