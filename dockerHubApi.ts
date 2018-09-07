@@ -106,6 +106,7 @@ export interface IHubSearchResponseResult {
     description: string;
 }
 
+// tslint:disable-next-line:no-any
 let JSON_CACHE: { [key: string]: Promise<any> } = {};
 
 // tslint:disable-next-line:promise-function-async // Grandfathered in

@@ -18,6 +18,7 @@ export function isValidAzureName(value: string): { isValid: boolean, message?: s
 /** Uses consistent error handling from register command to replace callbacks for commands that have a dependency on azure account.
  * If the dependency is not found notifies users providing them with information to go download the extension.
  */
+// tslint:disable-next-line:no-any
 export function registerAzureCommand(commandId: string, callback: (...args: any[]) => any): void {
     let commandItem: (actionContext: IActionContext) => void;
 

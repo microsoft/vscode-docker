@@ -165,10 +165,11 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode,
 }
 
 // Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed
+// tslint:disable-next-line:no-any
 function registerCommand(commandId: string, callback: (this: IActionContext, ...args: any[]) => any): void {
     return uiRegisterCommand(
         commandId,
-        // tslint:disable-next-line:no-function-expression
+        // tslint:disable-next-line:no-function-expression no-any
         async function (this: IActionContext, ...args: any[]): Promise<any> {
             if (args.length) {
                 let properties: {

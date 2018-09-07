@@ -69,10 +69,12 @@ export class AzureAccountWrapper {
         return locations;
     }
 
+    // tslint:disable-next-line:no-any
     public registerSessionsChangedListener(listener: (e: void) => any, thisArg: any): Disposable {
         return this.accountApi.onSessionsChanged(listener, thisArg, this.extensionConext.subscriptions);
     }
 
+    // tslint:disable-next-line:no-any
     public registerFiltersChangedListener(listener: (e: void) => any, thisArg: any): Disposable {
         return this.accountApi.onFiltersChanged(listener, thisArg, this.extensionConext.subscriptions);
     }

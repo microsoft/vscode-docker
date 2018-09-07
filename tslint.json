@@ -37,7 +37,7 @@
         "match-default-export-name": true,
         "mocha-avoid-only": true,
         "mocha-no-side-effect-code": true,
-        // TODO: "no-any": true,
+        "no-any": true,
         "no-arg": true,
         "no-bitwise": true,
         "no-conditional-assignment": true,

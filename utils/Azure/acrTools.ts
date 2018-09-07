@@ -71,7 +71,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
  * @param username : registry username, can be in generic form of 0's, used to generate authorization header
  * @param password : registry password, can be in form of accessToken, used to generate authorization header
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<any> {
+export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<void> {
     let url: string = `https://${login_server}${path}`;
     let header = 'Bearer ' + bearerAccessToken;
     let opt = {
@@ -81,10 +81,10 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
     }
 
     if (http_method === 'delete') {
-        return await ext.request.delete(opt);
+        await ext.request.delete(opt);
     }
 
-    assert(false, 'sendRequestToRegistry: Unexpected http method');
+    throw new Error('sendRequestToRegistry: Unexpected http method');
 }
 
 //Credential management

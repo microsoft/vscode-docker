@@ -52,7 +52,7 @@ export interface RepositoryInfo {
     star_count: number
     pull_count: number
     last_updated: string
-    build_on_cloud: any
+    //build_on_cloud: any
     has_starred: boolean
     full_description: string
     affiliation: string
@@ -67,7 +67,7 @@ export interface Tag {
     creator: number
     full_size: number
     id: number
-    image_id: any
+    image_id: string
     images: Image[]
     last_updated: string
     last_updater: number
@@ -78,12 +78,12 @@ export interface Tag {
 
 export interface Image {
     architecture: string
-    features: any
+    //features: any
     os: string
-    os_features: any
-    os_version: any
+    //os_features: any
+    //os_version: any
     size: number
-    variant: any
+    //variant: any
 }
 
 export interface ManifestFsLayer {

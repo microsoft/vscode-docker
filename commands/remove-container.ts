@@ -43,8 +43,8 @@ export async function removeContainer(actionContext: IActionContext, context: Ro
 
         vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
             containersToRemove.forEach((c) => {
-                // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, data: any): void {
+                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
                     containerCounter++;
                     if (err) {
                         // TODO: parseError, proper error handling
