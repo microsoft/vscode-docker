@@ -52,6 +52,7 @@ import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from
 import { ImageNode } from './explorer/models/imageNode';
 import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
+import { BuildTaskNode } from './explorer/models/taskNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
