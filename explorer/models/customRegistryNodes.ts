@@ -40,8 +40,8 @@ export class CustomRegistryNode extends NodeBase {
 
     // Returns undefined if it's valid, otherwise returns an error message
     public static async verifyIsValidRegistryUrl(registry: CustomRegistry): Promise<void> {
-        // If the call succeeded, it's a V2 registry
-        await registryRequest<{}>(registry.url, 'v2', registry.credentials);
+        // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
+        await registryRequest<{}>(registry.url, 'v2/', registry.credentials);
     }
 
     public async getChildren(element: CustomRegistryNode): Promise<CustomRepositoryNode[]> {
