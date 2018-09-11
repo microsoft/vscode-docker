@@ -48,7 +48,7 @@ export type ConfigureTelemetryProperties = {
 
 // Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
 // tslint:disable-next-line:max-func-body-length
-function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageInfo): string { // testpoint
+function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageInfo): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -342,7 +342,7 @@ services:
 }
 
 // tslint:disable-next-line:max-func-body-length
-function genDockerComposeDebug(serviceName: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: PackageInfo): string { //testpoint
+function genDockerComposeDebug(serviceName: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: PackageInfo): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
 

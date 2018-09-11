@@ -83,12 +83,10 @@ export class RegistryRootNode extends NodeBase {
         if (!id) {
             id = await dockerHub.dockerHubLogin();
 
-            if (id && id.token) {
-                if (ext.keytar) {
-                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
-                }
+            if (id && id.token && ext.keytar) {
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
             } else {
                 return orgNodes;
             }
