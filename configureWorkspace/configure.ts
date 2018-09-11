@@ -14,12 +14,11 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
-import { nonNullValue } from '../utils/nonNull';
+import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
-import { configureAspDotNetCore } from './configure_asp.net.core';
+import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
-import { configureDotNetCoreConsole } from './configure_net.core.console';
 import { configureNode } from './configure_node';
 import { configurePython } from './configure_python';
 import { configureRuby } from './configure_ruby';
@@ -67,39 +66,29 @@ generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 
-//////////////////////////////////
-
-// Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
-// tslint:disable-next-line:max-func-body-length
-function genDockerFile(serviceName: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
-        return generators.genDockerFile(serviceName, platform, os, port, { cmd, author, version, artifactName });
+        return generators.genDockerFile(serviceNameAndRelativePath, platform, os, port, { cmd, author, version, artifactName });
     }
 }
 
-//////////////////////////////////
-
-function genDockerCompose(serviceName: string, platform: Platform, os: OS | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
-        return generators.genDockerCompose(serviceName, platform, os, port);
+        return generators.genDockerCompose(serviceNameAndRelativePath, platform, os, port);
     }
 }
 
-//////////////////////////////////
-
-function genDockerComposeDebug(serviceName: string, platform: Platform, os: OS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
-        return generators.genDockerComposeDebug(serviceName, platform, os, port, packageInfo);
+        return generators.genDockerComposeDebug(serviceNameAndRelativePath, platform, os, port, packageInfo);
     }
 }
-
-//////////////////////////////////
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string): string {
     return `node_modules
@@ -109,6 +98,9 @@ docker-compose*
 .dockerignore
 .git
 .gitignore
+.env
+*/bin
+*/obj
 README.md
 LICENSE
 .vscode`;
@@ -238,11 +230,11 @@ async function findCSProjFile(folderPath: string): Promise<string> {
 
     if (projectFiles.length > 1) {
         let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
-        const res = await ext.ui.showQuickPick(items, opt);
-        return res.label.slice(0, -'.csproj'.length);
+        let result = await ext.ui.showQuickPick(items, opt);
+        return result.label;
+    } else {
+        return projectFiles[0];
     }
-
-    return projectFiles[0].slice(0, -'.csproj'.length);
 }
 
 type GeneratorFunction = (serviceName: string, platform: Platform, os: OS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
@@ -349,12 +341,19 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         }
     }
 
+    let targetFramework: string;
     let serviceNameAndPathRelativeToOutput: string;
     {
         // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
         if (platformType.toLowerCase().includes('.net')) {
-            serviceNameAndPathRelativeToRoot = await findCSProjFile(rootFolderPath);
+            let csProjFilePath = await findCSProjFile(rootFolderPath);
+            serviceNameAndPathRelativeToRoot = csProjFilePath.slice(0, -'.csproj'.length);
+            let csProjFileContents = (await fse.readFile(path.join(rootFolderPath, csProjFilePath))).toString();
+
+            // Extract TargetFramework for version
+            [targetFramework] = extractRegExGroups(csProjFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+
             properties.packageFileType = '.csproj';
             properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
         } else {
@@ -383,14 +382,12 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         }
     }
 
+    if (targetFramework) {
+        packageInfo.version = targetFramework;
+    }
+
     let filesWritten: string[] = [];
-
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
-        if (platformType.toLowerCase().includes('.net') && fileName.includes('docker-compose')) {
-            // don't generate docker-compose files for .NET Core apps
-            return;
-        }
-
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
@@ -415,8 +412,11 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
         if (writeFile) {
             // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
-            fs.writeFileSync(filePath, generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo), { encoding: 'utf8' });
-            filesWritten.push(fileName);
+            let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
+            if (fileContents) {
+                fs.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
+                filesWritten.push(fileName);
+            }
         }
     }
 

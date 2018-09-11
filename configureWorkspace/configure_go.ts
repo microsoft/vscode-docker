@@ -11,8 +11,7 @@ export let configureGo = {
   genDockerComposeDebug
 };
 
-// Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
-function genDockerFile(serviceName: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
   return `
 #build stage
 FROM golang:alpine AS builder
@@ -27,28 +26,28 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
 ENTRYPOINT ./app
-LABEL Name=${serviceName} Version=${version}
+LABEL Name=${serviceNameAndRelativePath} Version=${version}
 EXPOSE ${port}
 `;
 }
 
-function genDockerCompose(serviceName: string, platform: string, os: string | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string): string {
   return `version: '2.1'
 
 services:
-  ${serviceName}:
-    image: ${serviceName}
+  ${serviceNameAndRelativePath}:
+    image: ${serviceNameAndRelativePath}
     build: .
     ports:
       - ${port}:${port}`;
 }
 
-function genDockerComposeDebug(serviceName: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
   return `version: '2.1'
 
 services:
-  ${serviceName}:
-    image: ${serviceName}
+  ${serviceNameAndRelativePath}:
+    image: ${serviceNameAndRelativePath}
     build:
       context: .
       dockerfile: Dockerfile

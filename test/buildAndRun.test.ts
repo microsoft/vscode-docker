@@ -24,7 +24,7 @@ import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 let testRootFolder: string = getTestRootFolder();
 
 /**
- * Downloads and then extracts only a specific subfolder and its folders.
+ * Downloads and then extracts only a specific folder and its subfolders.
  */
 async function unzipFileFromUrl(uri: Uri, sourceFolderInZip: string, outputFolder: string): Promise<void> {
     let zipContents = await httpsRequestBinary(uri.toString());
