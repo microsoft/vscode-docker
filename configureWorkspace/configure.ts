@@ -13,6 +13,7 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
+import { nonNullValue } from '../utils/nonNull';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 
 interface PackageInfo {
@@ -47,7 +48,7 @@ export type ConfigureTelemetryProperties = {
 
 // Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
 // tslint:disable-next-line:max-func-body-length
-function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageInfo): string {
+function genDockerFile(serviceName: string, platform: string, os: string, port: string, { cmd, author, version, artifactName }: PackageInfo): string { // testpoint
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -81,8 +82,7 @@ EXPOSE ${port}
 `;
 
         case '.net core console':
-
-            if (os.toLowerCase() === 'windows') {
+            if (nonNullValue(os, 'os Required for .Net Core Console').toLowerCase() === 'windows') {
                 return `
 
 FROM microsoft/dotnet:2.0-runtime-nanoserver-1709 AS base
@@ -129,7 +129,7 @@ ENTRYPOINT ["dotnet", "${serviceName}.dll"]
 
         case 'asp.net core':
 
-            if (os.toLowerCase() === 'windows') {
+            if (nonNullValue(os, 'os Required for ASP.NET Core').toLowerCase() === 'windows') {
                 return `
 FROM microsoft/aspnetcore:2.0-nanoserver-1709 AS base
 WORKDIR /app
@@ -253,7 +253,7 @@ CMD /usr/games/fortune -a | cowsay
     }
 }
 
-function genDockerCompose(serviceName: string, platform: string, os: string, port: string): string {
+function genDockerCompose(serviceName: string, platform: string, os: string | undefined, port: string): string {
     switch (platform.toLowerCase()) {
         case 'node.js':
             return `version: '2.1'
@@ -342,7 +342,7 @@ services:
 }
 
 // tslint:disable-next-line:max-func-body-length
-function genDockerComposeDebug(serviceName: string, platform: string, os: string, port: string, { fullCommand: cmd }: PackageInfo): string {
+function genDockerComposeDebug(serviceName: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: PackageInfo): string { //testpoint
     switch (platform.toLowerCase()) {
         case 'node.js':
 
@@ -459,7 +459,7 @@ services:
     }
 }
 
-function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string): string {
+function genDockerIgnoreFile(service: string, platformType: string, os: string | undefined, port: string): string {
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -473,7 +473,7 @@ LICENSE
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
-    return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, null);
+    return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, undefined);
 }
 
 function getDefaultPackageInfo(): PackageInfo {
@@ -603,7 +603,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     return projectFiles[0].slice(0, -'.csproj'.length);
 }
 
-type GeneratorFunction = (serviceName: string, platform: string, os: string, port: string, packageJson?: PackageInfo) => string;
+type GeneratorFunction = (serviceName: string, platform: string, os: string | undefined, port: string, packageJson?: PackageInfo) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -653,7 +653,7 @@ export interface ConfigureApiOptions {
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
-        let folder: vscode.WorkspaceFolder;
+        let folder: vscode.WorkspaceFolder | undefined;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
             folder = vscode.workspace.workspaceFolders[0];
         } else {
@@ -698,7 +698,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     }
     properties.configureOs = os;
 
-    let port: string = options.port;
+    let port: string | undefined = options.port;
     if (!port) {
         if (platformType.toLowerCase().includes('.net')) {
             port = await promptForPort(80);
@@ -763,7 +763,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
         if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }

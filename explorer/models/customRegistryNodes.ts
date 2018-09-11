@@ -136,6 +136,8 @@ export class CustomLoadingNode extends NodeBase {
         super('Loading...');
     }
 
+    public readonly contextValue: string = 'customLoadingNode';
+
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,

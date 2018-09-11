@@ -7,9 +7,9 @@ import * as vscode from 'vscode';
 
 export type IconPath = string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon;
 
-export class NodeBase {
+export abstract class NodeBase {
     public readonly label: string;
-    public readonly contextValue: string;
+    public abstract readonly contextValue: string;
 
     protected constructor(label: string) {
         this.label = label;

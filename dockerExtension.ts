@@ -188,7 +188,7 @@ function registerCommand(commandId: string, callback: (this: IActionContext, ...
         });
 }
 
-function registerDockerCommands(azureAccount: AzureAccount): void {
+function registerDockerCommands(azureAccount: AzureAccount | undefined): void {
     dockerExplorerProvider = new DockerExplorerProvider(azureAccount);
     vscode.window.registerTreeDataProvider('dockerExplorer', dockerExplorerProvider);
     registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());

@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
-import { callWithTelemetryAndErrorHandling, IActionContext, IAzureNode, parseError } from 'vscode-azureextensionui';
-import { keytarConstants, MAX_CONCURRENT_REQUESTS } from '../../constants'
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { keytarConstants } from '../../constants'
 import { ext } from '../../extensionVariables';
+import { nonNullValue } from '../../utils/nonNull';
 import { CustomRegistryNode } from './customRegistryNodes';
 
 interface CustomRegistryNonsensitive {
@@ -48,7 +48,7 @@ export async function connectCustomRegistry(): Promise<void> {
     let userName = await ext.ui.showInputBox({
         prompt: "Enter the username for connecting, or ENTER for none"
     });
-    let password: string;
+    let password: string = '';
     if (userName) {
         password = await ext.ui.showInputBox({
             prompt: "Enter the password",
@@ -118,7 +118,7 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
                 if (ext.keytar) {
                     let key = getUsernamePwdKey(reg.url);
                     let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
-                    let credentials = <CustomRegistryCredentials>JSON.parse(credentialsString);
+                    let credentials = <CustomRegistryCredentials>JSON.parse(nonNullValue(credentialsString, 'Invalid stored password'));
                     registries.push({
                         url: reg.url,
                         credentials
