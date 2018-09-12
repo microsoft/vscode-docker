@@ -70,8 +70,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
         throw error;
     }
     if (!images || images.length === 0) {
-        vscode.window.showInformationMessage('There are no docker images. Try Docker Build first.');
-        return;
+        throw new Error('There are no docker images. Try Docker Build first.');
     } else {
         const items: ImageItem[] = computeItems(images, includeAll);
         let response = await ext.ui.showQuickPick<ImageItem>(items, { placeHolder: 'Choose image...' });

@@ -5,6 +5,7 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
+import { nonNullValue } from '../../utils/nonNull';
 
 export enum DockerEngineType {
     Linux,
@@ -12,7 +13,11 @@ export enum DockerEngineType {
 }
 
 class DockerClient {
-    private endPoint: Docker;
+    private _endPoint: Docker | undefined;
+
+    private get endPoint(): Docker {
+        return nonNullValue(this._endPoint, 'endPoint');
+    }
 
     constructor() {
         this.refreshEndpoint();
@@ -36,14 +41,14 @@ class DockerClient {
                 if (isNaN(newPort)) {
                     vscode.window.showErrorMessage(errorMessage);
                 } else {
-                    this.endPoint = new Docker({ host: newHost, port: newPort });
+                    this._endPoint = new Docker({ host: newHost, port: newPort });
                 }
             }
         }
-        if (!this.endPoint || !value) {
+        if (!this._endPoint || !value) {
             // Pass no options so that the defaultOpts of docker-modem will be used if the endpoint wasn't created
             // or the user went from configured setting to empty settign
-            this.endPoint = new Docker();
+            this._endPoint = new Docker();
         }
     }
 

@@ -97,7 +97,7 @@ suite("Build Image", function (this: Suite): void {
         await commands.executeCommand('vscode-docker.image.build', dockerFile);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for Build Image');
 
-        let { outputText, errorText } = await testTerminalProvider.currentTerminal.exit();
+        let { outputText, errorText } = await testTerminalProvider.currentTerminal!.exit();
 
         assert.equal(errorText, '', 'Expected no errors from Build Image');
         assertEx.assertContains(outputText, 'Successfully built');

@@ -5,13 +5,14 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { UserCancelledError } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 const teleCmdId: string = 'vscode-docker.compose.'; // we append up or down when reporting telemetry
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, null);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, undefined);
 }
 
 interface Item extends vscode.QuickPickItem {
@@ -23,7 +24,7 @@ function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
     const filePath = folder ? path.join('.', uri.fsPath.substr(folder.uri.fsPath.length)) : uri.fsPath;
 
     return <Item>{
-        description: null,
+        description: undefined,
         file: filePath,
         label: filePath,
         path: path.dirname(filePath)
@@ -40,7 +41,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
 }
 
 async function compose(commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    let folder: vscode.WorkspaceFolder;
+    let folder: vscode.WorkspaceFolder | undefined;
 
     if (!vscode.workspace.workspaceFolders) {
         vscode.window.showErrorMessage('Docker compose can only run if VS Code is opened on a folder.');
@@ -54,7 +55,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
     }
 
     if (!folder) {
-        return;
+        throw new UserCancelledError();
     }
 
     let commandParameterFileUris: vscode.Uri[];

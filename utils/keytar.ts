@@ -15,7 +15,7 @@ export interface IKeytar {
      *
      * @returns A promise for the password string.
      */
-    getPassword(service: string, account: string): Promise<string | null>;
+    getPassword(service: string, account: string): Promise<string | undefined>;
 
     /**
      * Add the password for the service and account to the keychain.
@@ -64,8 +64,8 @@ export class Keytar implements IKeytar {
         }
     }
 
-    public async getPassword(service: string, account: string): Promise<string> {
-        return await this._keytar.getPassword(service, account);
+    public async getPassword(service: string, account: string): Promise<string | undefined> {
+        return await this._keytar.getPassword(service, account) || undefined;
     }
 
     public async setPassword(service: string, account: string, password: string): Promise<void> {
