@@ -47,12 +47,12 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, expectedOutputFiles, "The set of files in the project folder after configure was run is not correct.");
 
-            for (let file of projectFiles) {
-                console.log(file);
-                let filePath = path.join(testRootFolder, file);
-                let contents = fse.readFileSync(filePath).toString();
-                console.log(contents);
-            }
+            // for (let file of projectFiles) {
+            //     console.log(file);
+            //     let filePath = path.join(testRootFolder, file);
+            //     let contents = fse.readFileSync(filePath).toString();
+            //     console.log(contents);
+            // }
         }
     }
 
@@ -65,12 +65,12 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             let projectFiles = await getFilesInProject();
             assertEx.unorderedArraysEqual(projectFiles, expectedOutputFiles, "The set of files in the project folder after configure was run is not correct.");
 
-            for (let file of projectFiles) {
-                console.log(file);
-                let filePath = path.join(testRootFolder, file);
-                let contents = fse.readFileSync(filePath).toString();
-                console.log(contents);
-            }
+            // for (let file of projectFiles) {
+            //     console.log(file);
+            //     let filePath = path.join(testRootFolder, file);
+            //     let contents = fse.readFileSync(filePath).toString();
+            //     console.log(contents);
+            // }
         }
     }
 
