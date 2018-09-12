@@ -8,7 +8,8 @@ import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { isNullOrUndefined } from 'util';
 
 /**
- * Retrieves a property by name from an object and checks that it's not null and not undefined.
+ * Retrieves a property by name from an object and checks that it's not null and not undefined.  It is strongly typed
+ * for the property and will give a compile error if the given name is not a property of the source.
  */
 export function nonNullProp<TSource, TKey extends keyof TSource>(source: TSource, name: TKey): NonNullable<TSource[TKey]> {
     // tslint:disable-next-line:no-any
