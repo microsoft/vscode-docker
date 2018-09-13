@@ -38,7 +38,7 @@
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"c:/Repos/vscode-docker/out/**/*.js" //"${workspaceRoot}/out/**/*.js"
+				"${workspaceRoot}/out/**/*.js"
 			],
 			"preLaunchTask": "npm",
 			"env": {
