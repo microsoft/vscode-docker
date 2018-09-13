@@ -44,6 +44,7 @@ export async function openShellContainer(actionContext: IActionContext, context:
 
     if (containerToAttach) {
         let engineType = await docker.getEngineType();
+        actionContext.properties.engineType = DockerEngineType[engineType];
         const shellCommand = getEngineTypeShellCommands(engineType);
         actionContext.properties.shellCommand = shellCommand;
         const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);

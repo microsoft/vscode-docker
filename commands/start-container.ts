@@ -74,10 +74,11 @@ export async function startContainerInteractive(actionContext: IActionContext, c
     await startContainerCore(actionContext, context, true);
 }
 
-export async function startAzureCLI(): Promise<cp.ChildProcess> {
+export async function startAzureCLI(actionContext: IActionContext): Promise<cp.ChildProcess> {
 
     // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();
+    actionContext.properties.engineType = DockerEngineType[engineType];
 
     if (engineType === DockerEngineType.Windows) {
         const selected = await vscode.window.showErrorMessage<vscode.MessageItem>('Currently, you can only run the Azure CLI when running Linux based containers.',

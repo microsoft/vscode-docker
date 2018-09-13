@@ -82,32 +82,22 @@ class DockerClient {
     }
 
     public async getEngineType(): Promise<DockerEngineType> {
-        // tslint:disable-next-line:no-var-self
-        let me = this;
         let engineType: DockerEngineType;
-        await callWithTelemetryAndErrorHandling('getEngineType', async function (this: IActionContext): Promise<void> {
-            let properties: {
-                engineType?: string;
-            } & TelemetryProperties = this.properties;
+        if (process.platform === 'win32') {
+            engineType = await new Promise<DockerEngineType>((resolve, reject) => {
+                this.endPoint.info((error, info) => {
+                    if (error) {
+                        return reject(error);
+                    }
 
-            if (process.platform === 'win32') {
-                engineType = await new Promise<DockerEngineType>((resolve, reject) => {
-                    me.endPoint.info((error, info) => {
-                        if (error) {
-                            return reject(error);
-                        }
-
-                        resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
-                    });
+                    resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
                 });
-            } else {
-                // On Linux or macOS, this can only ever be linux,
-                // so short-circuit the Docker call entirely.
-                engineType = DockerEngineType.Linux;
-            }
-
-            properties.engineType = DockerEngineType[engineType];
-        });
+            });
+        } else {
+            // On Linux or macOS, this can only ever be linux,
+            // so short-circuit the Docker call entirely.
+            engineType = DockerEngineType.Linux;
+        }
 
         return engineType;
     }
