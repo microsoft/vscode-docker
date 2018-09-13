@@ -200,7 +200,7 @@ function registerDockerCommands(azureAccount: AzureAccount | undefined): void {
 
     registerCommand('vscode-docker.container.start', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainer(this, node); });
     registerCommand('vscode-docker.container.start.interactive', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainerInteractive(this, node); });
-    registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
+    registerCommand('vscode-docker.container.start.azurecli', async function (this: IActionContext): Promise<void> { await startAzureCLI(this); });
     registerCommand('vscode-docker.container.stop', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await stopContainer(this, node); });
     registerCommand('vscode-docker.container.restart', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await restartContainer(this, node); });
     registerCommand('vscode-docker.container.show-logs', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await showLogsContainer(this, node); });

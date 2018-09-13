@@ -85,22 +85,25 @@ class DockerClient {
         return this.endPoint.getContainer(id);
     }
 
-    public getEngineType(): Thenable<DockerEngineType> {
+    public async getEngineType(): Promise<DockerEngineType> {
+        let engineType: DockerEngineType;
         if (process.platform === 'win32') {
-            return new Promise((resolve, reject) => {
+            engineType = await new Promise<DockerEngineType>((resolve, reject) => {
                 this.endPoint.info((error, info) => {
                     if (error) {
                         return reject(error);
                     }
 
-                    return resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
+                    resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
                 });
             });
+        } else {
+            // On Linux or macOS, this can only ever be linux,
+            // so short-circuit the Docker call entirely.
+            engineType = DockerEngineType.Linux;
         }
 
-        // On Linux or macOS, this can only ever be linux,
-        // so short-circuit the Docker call entirely.
-        return Promise.resolve(DockerEngineType.Linux);
+        return engineType;
     }
 
     public getEngineInfo(): Thenable<Docker.EngineInfo> {
