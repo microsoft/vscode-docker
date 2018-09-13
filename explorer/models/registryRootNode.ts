@@ -34,6 +34,7 @@ export class RegistryRootNode extends NodeBase {
 
         this._azureAccount = azureAccount;
 
+        assert(!!azureAccount === !!eventEmitter, 'eventEmitter required iff azureAccount');
         if (this._azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
             this._azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
@@ -83,10 +84,12 @@ export class RegistryRootNode extends NodeBase {
         if (!id) {
             id = await dockerHub.dockerHubLogin();
 
-            if (id && id.token && ext.keytar) {
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
+            if (id && id.token) {
+                if (ext.keytar) {
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
+                }
             } else {
                 return orgNodes;
             }

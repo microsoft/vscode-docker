@@ -10,51 +10,40 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { delay } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
+import { nonNullValue } from '../utils/nonNull';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-
-const teleCmdId: string = 'vscode-docker.image.tag';
 
 export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndLabel | undefined): Promise<string> {
     // If a RootNode or no node is passed in, we ask the user to pick an image
     let [imageToTag, currentName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
 
-    if (imageToTag) {
-        addImageTaggingTelemetry(actionContext, currentName, '.before');
-        let newTaggedName: string = await getTagFromUserInput(currentName, true);
-        addImageTaggingTelemetry(actionContext, newTaggedName, '.after');
+    addImageTaggingTelemetry(actionContext, currentName, '.before');
+    let newTaggedName: string = await getTagFromUserInput(currentName, true);
+    addImageTaggingTelemetry(actionContext, newTaggedName, '.after');
 
-        let repo: string = newTaggedName;
-        let tag: string = 'latest';
+    let repo: string = newTaggedName;
+    let tag: string = 'latest';
 
-        if (newTaggedName.lastIndexOf(':') > 0) {
-            repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
-            tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
-        }
+    if (newTaggedName.lastIndexOf(':') > 0) {
+        repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
+        tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
+    }
 
-        const image: Docker.Image = docker.getImage(imageToTag.Id);
+    const image: Docker.Image = docker.getImage(imageToTag.Id);
 
-        // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, _data: any): void {
+    await new Promise(async (resolve, reject): Promise<void> => {
+        // tslint:disable-next-line:no-any
+        image.tag({ repo: repo, tag: tag }, (err: { message?: string }, _data: any): void => {
             if (err) {
-                // TODO: use parseError, proper error handling
-                vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
+                reject(err);
+            } else {
+                resolve();
             }
         });
+    });
 
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
-        return newTaggedName;
-    }
+    return newTaggedName;
 }
 
 export async function getTagFromUserInput(imageName: string, addDefaultRegistry: boolean): Promise<string> {
@@ -94,10 +83,8 @@ export async function getOrAskForImageAndTag(actionContext: IActionContext, cont
         name = context.label;
     } else {
         const selectedItem: ImageItem = await quickPickImage(actionContext, false);
-        if (selectedItem) {
-            description = selectedItem.imageDesc
-            name = selectedItem.label;
-        }
+        description = selectedItem.imageDesc
+        name = selectedItem.label;
 
         // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
         await delay(500);
@@ -148,7 +135,8 @@ export function addImageTaggingTelemetry(actionContext: IActionContext, fullImag
         properties.isDefaultRegistryPathSet = String(!!defaultRegistryPath);
 
         let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
-        properties.registryType = knownRegistry.type;
+        // Should always find at least 'none'
+        properties.registryType = nonNullValue(knownRegistry, 'registry type').type;
 
         for (let propertyName of Object.getOwnPropertyNames(properties)) {
             actionContext.properties[propertyName + propertyPostfix] = <string>properties[propertyName];

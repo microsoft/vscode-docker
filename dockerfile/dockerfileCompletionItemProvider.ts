@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import { CancellationToken, CompletionItem, CompletionItemProvider, Position, TextDocument } from 'vscode';
 import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 import helper = require('../helpers/suggestSupportHelper');

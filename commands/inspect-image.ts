@@ -11,7 +11,7 @@ import { quickPickImage } from "./utils/quick-pick-image";
 
 export default async function inspectImage(actionContext: IActionContext, context: ImageNode | undefined): Promise<void> {
 
-    let imageToInspect: Docker.ImageDesc;
+    let imageToInspect: Docker.ImageDesc | undefined;
 
     if (context && context.imageDesc) {
         imageToInspect = context.imageDesc;

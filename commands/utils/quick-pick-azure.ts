@@ -16,12 +16,13 @@ import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { nonNullProp } from '../../utils/nonNull';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
     const repoImages: AzureImage[] = await acrTools.getImagesByRepository(repository);
-    const imageListNames = repoImages.map(img => <IAzureQuickPickItem<AzureImage>>{ label: img.tag, data: img });
-    let desiredImage = await ext.ui.showQuickPick(imageListNames, { 'canPickMany': false, 'placeHolder': placeHolder });
+    const imageListItems = repoImages.map(img => <IAzureQuickPickItem<AzureImage>>{ label: img.tag, data: img });
+    let desiredImage = await ext.ui.showQuickPick(imageListItems, { 'canPickMany': false, 'placeHolder': placeHolder });
     return desiredImage.data;
 }
 
@@ -49,7 +50,8 @@ export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt
     if (desiredReg === createNewItem) {
         registry = <Registry>await vscode.commands.executeCommand("vscode-docker.create-ACR-Registry");
     } else {
-        registry = desiredReg.data;
+        // Only createNewItem has undefined for data
+        registry = nonNullProp(desiredReg, 'data');
     }
     return registry;
 }
@@ -88,7 +90,7 @@ export async function quickPickLocation(subscription: Subscription): Promise<str
     let quickPickLocList = locations.map(loc => <IAzureQuickPickItem<Location>>{ label: loc.displayName, data: loc });
 
     quickPickLocList.sort((loc1, loc2): number => {
-        return loc1.data.displayName.localeCompare(loc2.data.displayName);
+        return nonNullProp(loc1.data, 'displayName').localeCompare(nonNullProp(loc2.data, 'displayName'));
     });
 
     let desiredLocation: IAzureQuickPickItem<Location> = await ext.ui.showQuickPick(quickPickLocList, {
@@ -102,8 +104,13 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
     let resourceGroups = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
     let quickPickResourceGroups = resourceGroups.map(res => <IAzureQuickPickItem<ResourceGroup | undefined>>{ label: res.name, data: res });
 
-    let createNewItem: IAzureQuickPickItem<ResourceGroup | undefined> = { label: '+ Create new resource group', data: undefined };
-    if (canCreateNew) { quickPickResourceGroups.unshift(createNewItem); }
+    let createNewItem: IAzureQuickPickItem<ResourceGroup | undefined> = {
+        label: '+ Create new resource group',
+        data: undefined
+    };
+    if (canCreateNew) {
+        quickPickResourceGroups.unshift(createNewItem);
+    }
 
     let desiredResGroup: IAzureQuickPickItem<ResourceGroup | undefined> = await ext.ui.showQuickPick(quickPickResourceGroups, {
         'canPickMany': false,
@@ -118,7 +125,8 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
         const loc = await quickPickLocation(subscription);
         resourceGroup = await createNewResourceGroup(loc, subscription);
     } else {
-        resourceGroup = desiredResGroup.data;
+        // Only createNewItem has undefined data
+        resourceGroup = nonNullProp(desiredResGroup, 'data');
     }
     return resourceGroup;
 }
@@ -143,7 +151,7 @@ export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean>
 }
 
 /*Creates a new resource group within the current subscription */
-async function createNewResourceGroup(loc: string, subscription?: Subscription): Promise<ResourceGroup> {
+async function createNewResourceGroup(loc: string, subscription: Subscription): Promise<ResourceGroup> {
     const resourceGroupClient = AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
 
     let opt: vscode.InputBoxOptions = {
@@ -162,7 +170,7 @@ async function createNewResourceGroup(loc: string, subscription?: Subscription):
     return await resourceGroupClient.resourceGroups.createOrUpdate(resourceGroupName, newResourceGroup);
 }
 
-async function checkForValidResourcegroupName(resourceGroupName: string, resourceGroupClient: ResourceManagementClient): Promise<string> {
+async function checkForValidResourcegroupName(resourceGroupName: string, resourceGroupClient: ResourceManagementClient): Promise<string | undefined> {
     let check = isValidAzureName(resourceGroupName);
     if (!check.isValid) { return check.message; }
     let resourceGroupStatus: boolean = await resourceGroupClient.resourceGroups.checkExistence(resourceGroupName);

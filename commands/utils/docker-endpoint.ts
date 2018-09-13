@@ -60,9 +60,10 @@ class DockerClient {
 
             this.endPoint.listContainers(opts, (err, containers) => {
                 if (err) {
-                    return reject(err);
+                    reject(err);
+                } else {
+                    resolve(containers);
                 }
-                return resolve(containers);
             });
         });
     };
@@ -74,9 +75,10 @@ class DockerClient {
             }
             this.endPoint.listImages(opts, (err, images) => {
                 if (err) {
-                    return reject(err);
+                    reject(err);
+                } else {
+                    resolve(images);
                 }
-                return resolve(images);
             });
         });
     };

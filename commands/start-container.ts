@@ -27,7 +27,7 @@ export async function startContainer(actionContext: IActionContext, context: Roo
 export async function startContainerCore(actionContext: IActionContext, context: RootNode | ImageNode | undefined, interactive: boolean): Promise<void> {
 
     let imageName: string;
-    let imageToStart: Docker.ImageDesc;
+    let imageToStart: Docker.ImageDesc | undefined;
 
     if (context instanceof ImageNode && context.imageDesc) {
         imageToStart = context.imageDesc;
@@ -70,11 +70,11 @@ export async function startContainerCore(actionContext: IActionContext, context:
 /**
  * Image -> Run Interactive
  */
-export async function startContainerInteractive(actionContext: IActionContext, context: ImageNode): Promise<void> {
+export async function startContainerInteractive(actionContext: IActionContext, context: ImageNode | undefined): Promise<void> {
     await startContainerCore(actionContext, context, true);
 }
 
-export async function startAzureCLI(): Promise<cp.ChildProcess> {
+export async function startAzureCLI(): Promise<void> {
 
     // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();
@@ -92,7 +92,7 @@ export async function startAzureCLI(): Promise<cp.ChildProcess> {
         if (!selected || selected.isCloseAffordance) {
             return;
         }
-        return cp.exec('start https://docs.docker.com/docker-for-windows/#/switch-between-windows-and-linux-containers');
+        cp.exec('start https://docs.docker.com/docker-for-windows/#/switch-between-windows-and-linux-containers');
     } else {
         const option: string = process.platform === 'linux' ? '--net=host' : '';
 
