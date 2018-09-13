@@ -15,6 +15,7 @@ import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
 import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
+import { runBuildTask } from './commands/azureCommands/run-buildTask';
 import { showBuildTaskProperties } from './commands/azureCommands/show-buildTask';
 import { TaskContentProvider } from './commands/azureCommands/task-utils/showTaskManager';
 import { buildImage } from './commands/build-image';
@@ -235,6 +236,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
     registerAzureCommand('vscode-docker.queueBuild', queueBuild);
     registerAzureCommand('vscode-docker.pullFromAzure', pullFromAzure);
+    registerAzureCommand('vscode-docker.run-ACR-BuildTask', runBuildTask);
     registerAzureCommand('vscode-docker.show-ACR-buildTask', showBuildTaskProperties);
 }
 

@@ -56,6 +56,7 @@
     "onCommand:vscode-docker.explorer.refresh",
     "onCommand:vscode-docker.show-ACR-buildTask",
     "onCommand:vscode-docker.delete-ACR-Registry",
+    "onCommand:vscode-docker.run-ACR-BuildTask",
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
@@ -238,6 +239,10 @@
         {
           "command": "vscode-docker.delete-ACR-Image",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
+        },
+        {
+          "command": "vscode-docker.run-ACR-BuildTask",
+          "when": "view == dockerExplorer && viewItem == buildTaskNode"
         },
         {
           "command": "vscode-docker.show-ACR-buildTask",
@@ -624,6 +629,11 @@
       {
         "command": "vscode-docker.browseAzurePortal",
         "title": "Browse in the Azure Portal",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.run-ACR-BuildTask",
+        "title": "Run a Build Task",
         "category": "Docker"
       },
       {
