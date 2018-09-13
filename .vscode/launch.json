@@ -26,12 +26,14 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				// Temporarily using hard-coded paths to work around https://github.com/Microsoft/vscode/issues/58388#issuecomment-420709179.
-				// You'll need to change to your own local paths to debug tests with F5 until this is fixed.
-				// Just make sure you use a lowercase drive letter
-				"c:/Repos/vscode-docker/test/test.code-workspace", // "${workspaceRoot}/test/test.code-workspace",
-				"--extensionDevelopmentPath=c:/Repos/vscode-docker", // "--extensionDevelopmentPath=${workspaceRoot}",
-				"--extensionTestsPath=c:/Repos/vscode-docker/out/test" // "--extensionTestsPath=${workspaceRoot}/out/test"
+				// This isn't currently working on Windows due to https://github.com/Microsoft/vscode/issues/58388#issuecomment-420709179.
+				// To work around it, change to hard-coded local paths with a lower-case drive letter, e.g.:
+				// "c:/Repos/vscode-docker/test/test.code-workspace",
+				// "--extensionDevelopmentPath=c:/Repos/vscode-docker",
+				// "--extensionTestsPath=c:/Repos/vscode-docker/out/test"
+				"${workspaceRoot}/test/test.code-workspace",
+				"--extensionDevelopmentPath=${workspaceRoot}",
+				"--extensionTestsPath=${workspaceRoot}/out/test"
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
