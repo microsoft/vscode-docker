@@ -3,15 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
+import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { ServiceClientCredentials } from 'ms-rest';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
+import { getSubscriptionId, getTenantId } from './nonNull';
 
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
@@ -22,7 +25,7 @@ export class AzureUtilityManager {
 
     //SETUP
     private static _instance: AzureUtilityManager;
-    private azureAccount: AzureAccount;
+    private azureAccount: AzureAccount | undefined;
 
     private constructor() { }
 
@@ -44,14 +47,21 @@ export class AzureUtilityManager {
 
     //GETTERS
     public getAccount(): AzureAccount {
-        if (this.azureAccount) { return this.azureAccount; }
+        if (this.azureAccount) {
+            return this.azureAccount;
+        }
         throw new Error('Azure account is not present, you may have forgotten to call setAccount');
     }
 
     public getSession(subscription: SubscriptionModels.Subscription): AzureSession {
-        const tenantId: string = subscription.tenantId;
+        const tenantId: string = getTenantId(subscription);
         const azureAccount: AzureAccount = this.getAccount();
-        return azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        let foundSession = azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        if (!foundSession) {
+            throw new Error(`Could not find a session with tenantId "${tenantId}"`);
+        }
+
+        return foundSession;
     }
 
     public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
@@ -69,16 +79,16 @@ export class AzureUtilityManager {
     }
 
     public getContainerRegistryManagementClient(subscription: SubscriptionModels.Subscription): ContainerRegistryManagementClient {
-        let client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+        let client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription), getSubscriptionId(subscription));
         addExtensionUserAgent(client);
         return client;
     }
 
     public getResourceManagementClient(subscription: SubscriptionModels.Subscription): ResourceManagementClient {
-        return new ResourceManagementClient(this.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
+        return new ResourceManagementClient(this.getCredentialByTenantId(getTenantId(subscription)), getSubscriptionId(subscription));
     }
 
-    public async getRegistries(subscription?: SubscriptionModels.Subscription, resourceGroup?: string,
+    public async getRegistries(subscription?: Subscription, resourceGroup?: string,
         compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically): Promise<ContainerModels.Registry[]> {
 
         let registries: ContainerModels.Registry[] = [];
@@ -111,11 +121,11 @@ export class AzureUtilityManager {
         registries.sort(compareFn);
 
         //Return only non classic registries
-        return registries.filter((registry) => { return !registry.sku.tier.includes('Classic') });
+        return registries.filter((registry) => { return !registry.sku.tier || !registry.sku.tier.includes('Classic') });
     }
 
     private sortRegistriesAlphabetically(a: ContainerModels.Registry, b: ContainerModels.Registry): number {
-        return a.loginServer.localeCompare(b.loginServer);
+        return (a.loginServer || '').localeCompare(b.loginServer || '');
     }
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
@@ -138,8 +148,8 @@ export class AzureUtilityManager {
         return resourceGroups;
     }
 
-    public getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
-
+    public getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): ServiceClientCredentials {
+        let tenantId = typeof tenantIdOrSubscription === 'string' ? tenantIdOrSubscription : getTenantId(tenantIdOrSubscription);
         const session = this.getAccount().sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
@@ -150,9 +160,9 @@ export class AzureUtilityManager {
     }
 
     public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
-        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const credential = this.getCredentialByTenantId(getTenantId(subscription));
         const client = new SubscriptionClient(credential);
-        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(getSubscriptionId(subscription)));
         return locations;
     }
 

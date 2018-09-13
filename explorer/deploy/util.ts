@@ -8,6 +8,7 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
+import { getSubscriptionId, getTenantId, nonNullProp, nonNullValue } from '../../utils/nonNull';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 
 export interface PartialList<T> extends Array<T> {
@@ -29,8 +30,8 @@ export function waitForWebSiteState(webSiteManagementClient: WebSiteManagementCl
     // tslint:disable-next-line:promise-must-complete // false positive
     return new Promise((resolve, reject) => {
         const func = async (count: number) => {
-            const currentSite = await webSiteManagementClient.webApps.get(site.resourceGroup, site.name);
-            if (currentSite.state.toLowerCase() === state.toLowerCase()) {
+            const currentSite = await webSiteManagementClient.webApps.get(nonNullProp(site, 'resourceGroup'), nonNullProp(site, 'name'));
+            if (nonNullProp(currentSite, 'state').toLowerCase() === state.toLowerCase()) {
                 resolve();
             } else {
                 count += intervalMs;
@@ -55,9 +56,9 @@ export function getSignInCommandString(): string {
 
 // tslint:disable-next-line:promise-function-async // Grandfathered in
 export function getWebAppPublishCredential(azureAccount: AzureAccountWrapper, subscription: SubscriptionModels.Subscription, site: WebSiteModels.Site): Promise<WebSiteModels.User> {
-    const credentials = azureAccount.getCredentialByTenantId(subscription.tenantId);
-    const websiteClient = new WebSiteManagementClient(credentials, subscription.subscriptionId);
-    return websiteClient.webApps.listPublishingCredentials(site.resourceGroup, site.name);
+    const credentials = azureAccount.getCredentialByTenantId(subscription);
+    const websiteClient = new WebSiteManagementClient(credentials, getSubscriptionId(subscription));
+    return websiteClient.webApps.listPublishingCredentials(nonNullProp(site, 'resourceGroup'), nonNullProp(site, 'name'));
 }
 
 // Output channel for the extension
