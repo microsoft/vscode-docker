@@ -11,6 +11,7 @@ import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
+import { getLoginServer } from "../../utils/nonNull";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /** Function to delete an Azure hosted image
@@ -39,7 +40,7 @@ export async function deleteAzureImage(context?: AzureImageTagNode): Promise<voi
     if (shouldDelete === DialogResponses.deleteResponse) {
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
         const path = `/v2/_acr/${repoName}/tags/${tag}`;
-        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
+        await acrTools.sendRequestToRegistry('delete', getLoginServer(registry), path, acrAccessToken);
         vscode.window.showInformationMessage(`Successfully deleted image ${tag}`);
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);

@@ -5,7 +5,6 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
@@ -26,13 +25,13 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _sortedImageCache: Docker.ImageDesc[];
-    private _imageDebounceTimer: NodeJS.Timer;
-    private _imagesNode: RootNode;
-    private _containerCache: Docker.ContainerDesc[];
-    private _containerDebounceTimer: NodeJS.Timer;
-    private _containersNode: RootNode;
-    private _azureAccount: AzureAccount;
+    private _sortedImageCache: Docker.ImageDesc[] | undefined;
+    private _imageDebounceTimer: NodeJS.Timer | undefined;
+    private _imagesNode: RootNode | undefined;
+    private _containerCache: Docker.ContainerDesc[] | undefined;
+    private _containerDebounceTimer: NodeJS.Timer | undefined;
+    private _containersNode: RootNode | undefined;
+    private _azureAccount: AzureAccount | undefined;
 
     constructor(
         public readonly label: string,
@@ -59,7 +58,9 @@ export class RootNode extends NodeBase {
         //     return;
         // }
 
-        clearInterval(this._imageDebounceTimer);
+        if (this._imageDebounceTimer) {
+            clearInterval(this._imageDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
@@ -115,6 +116,7 @@ export class RootNode extends NodeBase {
             return this.getRegistries()
         }
 
+        throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
     private async getImages(): Promise<ImageNode[]> {
@@ -131,15 +133,13 @@ export class RootNode extends NodeBase {
             for (let i = 0; i < images.length; i++) {
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, this.eventEmitter);
-                    node.imageDesc = images[i];
+                    let node = new ImageNode(`<none>:<none>`, images[i], this.eventEmitter);
                     imageNodes.push(node);
                 } else {
                     // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let j = 0; j < images[i].RepoTags.length; j++) {
                         // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, this.eventEmitter);
-                        node.imageDesc = images[i];
+                        let node = new ImageNode(`${images[i].RepoTags[j]}`, images[i], this.eventEmitter);
                         imageNodes.push(node);
                     }
                 }
@@ -164,7 +164,9 @@ export class RootNode extends NodeBase {
         //     return;
         // }
 
-        clearInterval(this._containerDebounceTimer);
+        if (this._containerDebounceTimer) {
+            clearInterval(this._containerDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._containerDebounceTimer = setInterval(async () => {
@@ -241,8 +243,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, contextValue, iconPath);
-                containerNode.containerDesc = containers[i];
+                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, containers[i], contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 
@@ -259,13 +260,13 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", null));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode"));
 
         if (this._azureAccount) {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
         }
 
-        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', null));
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode'));
 
         return registryRootNodes;
     }

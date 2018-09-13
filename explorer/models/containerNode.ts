@@ -13,13 +13,12 @@ export class ContainerNode extends NodeBase {
 
     constructor(
         public readonly label: string,
+        public readonly containerDesc: Docker.ContainerDesc,
         public readonly contextValue: ContainerNodeContextValue,
         public readonly iconPath: IconPath
     ) {
         super(label)
     }
-
-    public containerDesc: Docker.ContainerDesc;
 
     public getTreeItem(): vscode.TreeItem {
         let displayName: string = this.label;

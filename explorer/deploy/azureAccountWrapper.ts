@@ -9,6 +9,8 @@ import { AzureEnvironment } from 'ms-rest-azure';
 import { Disposable, Extension, ExtensionContext, extensions } from 'vscode';
 import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 
+import { Subscription } from 'azure-arm-resource/lib/subscription/models';
+import { getSubscriptionId, getTenantId, nonNullValue } from '../../utils/nonNull';
 import * as util from './util';
 
 export class NotSignedInError extends Error { }
@@ -30,7 +32,8 @@ export class AzureAccountWrapper {
         return this.accountApi.sessions;
     }
 
-    public getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
+    public getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): ServiceClientCredentials {
+        let tenantId = typeof tenantIdOrSubscription === 'string' ? tenantIdOrSubscription : getTenantId(tenantIdOrSubscription);
         const session = this.getAzureSessions().find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
@@ -63,9 +66,9 @@ export class AzureAccountWrapper {
     }
 
     public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
-        const credential = this.getCredentialByTenantId(subscription.tenantId);
+        const credential = this.getCredentialByTenantId(subscription);
         const client = new SubscriptionClient(credential);
-        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(subscription.subscriptionId));
+        const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(getSubscriptionId(subscription)));
         return locations;
     }
 

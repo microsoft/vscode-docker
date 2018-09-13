@@ -17,7 +17,10 @@ import { NodeBase } from './nodeBase';
 export class DockerHubOrgNode extends NodeBase {
 
     constructor(
-        public readonly namespace: string
+        public readonly namespace: string,
+        public userName: string,
+        public password: string,
+        public token: string
     ) {
         super(namespace);
     }
@@ -30,10 +33,6 @@ export class DockerHubOrgNode extends NodeBase {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
     };
-
-    public userName: string;
-    public password: string;
-    public token: string;
 
     public getTreeItem(): vscode.TreeItem {
         return {

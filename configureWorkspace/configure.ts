@@ -14,6 +14,7 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
+import { nonNullValue } from '../utils/nonNull';
 import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 import { configureAspDotNetCore } from './configure_asp.net.core';
 import { configureGo } from './configure_go';
@@ -114,7 +115,7 @@ LICENSE
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
-    return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, null);
+    return vscode.workspace.findFiles(new vscode.RelativePattern(folderPath, 'package.json'), null, 1, undefined);
 }
 
 function getDefaultPackageInfo(): PackageInfo {
@@ -294,7 +295,7 @@ export interface ConfigureApiOptions {
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
-        let folder: vscode.WorkspaceFolder;
+        let folder: vscode.WorkspaceFolder | undefined;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
             folder = vscode.workspace.workspaceFolders[0];
         } else {
@@ -339,7 +340,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     }
     properties.configureOs = os;
 
-    let port: string = options.port;
+    let port: string | undefined = options.port;
     if (!port) {
         if (platformType.toLowerCase().includes('.net')) {
             port = await promptForPort(80);
@@ -404,7 +405,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
         if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }

@@ -11,7 +11,8 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
-import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
+import { getLoginServer, } from '../../utils/nonNull';
+import { formatTag } from './commonRegistryUtils';
 import { IconPath, NodeBase } from './nodeBase';
 
 export class AzureRegistryNode extends NodeBase {
@@ -101,7 +102,7 @@ export class AzureRepositoryNode extends NodeBase {
                 element,
                 img.subscription,
                 img.registry,
-                img.registry.loginServer,
+                getLoginServer(img.registry),
                 img.repository.name,
                 img.tag,
                 img.created);
@@ -143,6 +144,8 @@ export class AzureNotSignedInNode extends NodeBase {
         super('Click here to sign in to Azure...');
     }
 
+    public readonly contextValue: string = 'azureNotSignedInNode';
+
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
@@ -159,6 +162,8 @@ export class AzureLoadingNode extends NodeBase {
     constructor() {
         super('Loading...');
     }
+
+    public readonly contextValue: string = 'azureLoadingNode';
 
     public getTreeItem(): vscode.TreeItem {
         return {
