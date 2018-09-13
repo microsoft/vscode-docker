@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { DialogResponses } from 'vscode-azureextensionui';
@@ -6,6 +11,7 @@ import { AzureRegistryNode } from "../explorer/models/azureRegistryNodes";
 import { CustomRegistryNode } from "../explorer/models/customRegistryNodes";
 import { DockerHubOrgNode } from "../explorer/models/dockerHubNodes";
 import { ext } from '../extensionVariables';
+import { assertNever } from '../helpers/assertNever';
 
 const defaultRegistryKey = "defaultRegistry";
 const hasCheckedRegistryPaths = "hasCheckedRegistryPaths"
@@ -19,12 +25,12 @@ export async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegis
     } else if (node instanceof CustomRegistryNode) {
         registryName = node.registryName;
     } else {
-        assert.fail("Type of registry node encountered not handled");
+        return assertNever(node, 'type of registry node');
     }
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     await configOptions.update(configurationKeys.defaultRegistryPath, registryName, vscode.ConfigurationTarget.Global);
-    vscode.window.showInformationMessage(`Updated the docker.defaultRegistryPath setting to ${registryName}`);
+    vscode.window.showInformationMessage(`Updated the docker.defaultRegistryPath setting to "${registryName}"`);
 }
 export async function consolidateDefaultRegistrySettings(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');

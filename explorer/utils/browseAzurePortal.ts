@@ -5,13 +5,16 @@
 
 import * as opn from 'opn';
 import { AzureSession } from '../../typings/azure-account.api';
+import { getTenantId, nonNullValue } from '../../utils/nonNull';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 
 export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
 
-    if (node) {
-        const tenantId: string = node.subscription.tenantId;
-        const session: AzureSession = node.azureAccount.sessions.find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+    if (node && node.azureAccount) {
+        const tenantId: string = getTenantId(node.subscription);
+        const session: AzureSession = nonNullValue(
+            node.azureAccount.sessions.find(s => s.tenantId.toLowerCase() === tenantId.toLowerCase()),
+            `Unable to find session with tenantId ${tenantId}`);
         let url: string = `${session.environment.portalUrl}/${tenantId}/#resource${node.registry.id}`;
         if (node.contextValue === AzureImageTagNode.contextValue || node.contextValue === AzureRepositoryNode.contextValue) {
             url = `${url}/repository`;

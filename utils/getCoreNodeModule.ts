@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 /**
  * Returns a node module installed with VSCode, or undefined if it fails.
  */
-export function getCoreNodeModule(moduleName: string): {} {
+export function getCoreNodeModule(moduleName: string): {} | undefined {
     try {
         // tslint:disable-next-line:non-literal-require no-unsafe-any
         return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);

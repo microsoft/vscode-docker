@@ -6,7 +6,6 @@
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
@@ -14,6 +13,7 @@ import { ext } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { getLoginServer } from '../../utils/nonNull';
 import * as dockerHub from '../utils/dockerHubUtils'
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
 import { getCustomRegistries } from './customRegistries';
@@ -22,12 +22,12 @@ import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 
 export class RegistryRootNode extends NodeBase {
-    private _azureAccount: AzureAccount;
+    private _azureAccount: AzureAccount | undefined;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: 'dockerHubRootNode' | 'azureRegistryRootNode' | 'customRootNode',
-        public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
+        public readonly eventEmitter?: vscode.EventEmitter<NodeBase>,
         public readonly azureAccount?: AzureAccount
     ) {
         super(label);
@@ -35,7 +35,6 @@ export class RegistryRootNode extends NodeBase {
         this._azureAccount = azureAccount;
 
         if (this._azureAccount && this.eventEmitter && this.contextValue === 'azureRegistryRootNode') {
-
             this._azureAccount.onFiltersChanged((e) => {
                 this.eventEmitter.fire(this);
             });
@@ -70,15 +69,18 @@ export class RegistryRootNode extends NodeBase {
     private async getDockerHubOrgs(): Promise<DockerHubOrgNode[]> {
         const orgNodes: DockerHubOrgNode[] = [];
 
-        let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
+        let id: { username: string, password: string, token: string } | undefined;
 
         if (ext.keytar) {
-            id.token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-            id.username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
-            id.password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+            let token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+            let username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+            let password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+            if (token && username && password) {
+                id = { token, username, password };
+            }
         }
 
-        if (!id.token) {
+        if (!id) {
             id = await dockerHub.dockerHubLogin();
 
             if (id && id.token && ext.keytar) {
@@ -96,10 +98,7 @@ export class RegistryRootNode extends NodeBase {
         const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
         const namespaces = [...new Set(myRepos.map(item => item.namespace))];
         namespaces.forEach((namespace) => {
-            let node = new DockerHubOrgNode(`${namespace}`);
-            node.userName = id.username;
-            node.password = id.password;
-            node.token = id.token;
+            let node = new DockerHubOrgNode(`${namespace}`, id.username, id.password, id.token);
             orgNodes.push(node);
         });
 
@@ -164,10 +163,10 @@ export class RegistryRootNode extends NodeBase {
                 //Go through the registries and add them to the async pool
                 // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
-                    if (!registries[j].sku.tier.includes('Classic')) {
+                    if (!(registries[j].sku.tier || '').includes('Classic')) {
                         regPool.addTask(async () => {
                             let node = new AzureRegistryNode(
-                                registries[j].loginServer,
+                                getLoginServer(registries[j]),
                                 this._azureAccount,
                                 registries[j],
                                 subscription);
@@ -179,10 +178,12 @@ export class RegistryRootNode extends NodeBase {
             await regPool.runAll();
 
             function compareFn(a: AzureRegistryNode, b: AzureRegistryNode): number {
-                return a.registry.loginServer.localeCompare(b.registry.loginServer);
+                return getLoginServer(a.registry).localeCompare(getLoginServer(b.registry));
             }
             azureRegistryNodes.sort(compareFn);
             return azureRegistryNodes;
+        } else {
+            return [];
         }
     }
 }

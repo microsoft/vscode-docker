@@ -7,7 +7,16 @@
             "es7"
         ],
         "sourceMap": true,
-        "rootDir": "."
+        "rootDir": ".",
+        "alwaysStrict": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": false, // TODO
+        "noImplicitReturns": false, // TODO
+        "noImplicitThis": true,
+        "noUnusedLocals": false, // TODO
+        "noUnusedParameters": false, // TODO
+        "strictNullChecks": false, // TODO
+        "strict": true
     },
     "exclude": [
         "node_modules",

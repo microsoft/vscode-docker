@@ -54,7 +54,7 @@ export async function registryRequest<T>(
     return <T>response;
 }
 
-export async function getCatalog(registryUrl: string, credentials?: RegistryCredentials): Promise<string[]> {
+export async function getCatalog(registryUrl: string, credentials: RegistryCredentials): Promise<string[]> {
     // Note: Note that the contents of the response are specific to the registry implementation. Some registries may opt to provide a full
     //   catalog output, limit it based on the user’s access level or omit upstream results, if providing mirroring functionality.
     //   (https://docs.docker.com/registry/spec/api/#listing-repositories)
@@ -63,7 +63,7 @@ export async function getCatalog(registryUrl: string, credentials?: RegistryCred
     return response.repositories;
 }
 
-export async function getTags(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
+export async function getTags(registryUrl: string, repositoryName: string, credentials: RegistryCredentials): Promise<TagInfo[]> {
     let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=${PAGE_SIZE}&page=1`, credentials);
     let tags = result.tags;
     let tagInfos: TagInfo[] = [];

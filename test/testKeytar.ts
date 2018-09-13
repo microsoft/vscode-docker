@@ -8,7 +8,7 @@ import { IKeytar } from "../utils/keytar";
 export class TestKeytar implements IKeytar {
     private _services: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
 
-    public async getPassword(service: string, account: string): Promise<string> {
+    public async getPassword(service: string, account: string): Promise<string | undefined> {
         await this.delay();
         let foundService = this._services.get(service);
         if (foundService) {
