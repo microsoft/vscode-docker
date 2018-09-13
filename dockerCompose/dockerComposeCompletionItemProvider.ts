@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
 import { KeyInfo } from '../dockerExtension';
 import hub = require('../dockerHubApi');

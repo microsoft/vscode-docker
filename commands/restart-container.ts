@@ -10,7 +10,7 @@ import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { RootNode } from '../explorer/models/rootNode';
 
 const teleCmdId: string = 'vscode-docker.container.restart';
@@ -28,47 +28,41 @@ export async function restartContainer(actionContext: IActionContext, context: R
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
-        if (selectedItem) {
-            if (selectedItem.allContainers) {
-                containersToRestart = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToRestart = [selectedItem.containerDesc];
-            }
+        if (selectedItem.allContainers) {
+            containersToRestart = await docker.getContainerDescriptors(opts);
+        } else {
+            containersToRestart = [selectedItem.containerDesc];
         }
     }
 
-    if (containersToRestart) {
+    const numContainers: number = containersToRestart.length;
+    let containerCounter: number = 0;
 
-        const numContainers: number = containersToRestart.length;
-        let containerCounter: number = 0;
-
-        vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
-            containersToRestart.forEach((container) => {
-                // tslint:disable-next-line:no-any
-                docker.getContainer(container.Id).restart((err: Error, _data: any) => {
-                    containerCounter++;
-                    if (err) {
-                        vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers();
-                        reject();
-                    }
-                    if (containerCounter === numContainers) {
-                        dockerExplorerProvider.refreshContainers();
-                        resolve();
-                    }
-                });
-            });
-        }));
-
-        if (reporter) {
-            /* __GDPR__
-                "command" : {
-                    "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
+        containersToRestart.forEach((container) => {
+            // tslint:disable-next-line:no-any
+            docker.getContainer(container.Id).restart((err: Error, _data: any) => {
+                containerCounter++;
+                if (err) { // testpoint
+                    reject(parseError(err).message);
+                    dockerExplorerProvider.refreshContainers();
                 }
-            */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
+                if (containerCounter === numContainers) {
+                    dockerExplorerProvider.refreshContainers();
+                    resolve();
+                }
             });
-        }
+        });
+    }));
+
+    if (reporter) {
+        /* __GDPR__
+            "command" : {
+                "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+            }
+        */
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
+        });
     }
 }

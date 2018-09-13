@@ -25,24 +25,20 @@ export async function showLogsContainer(actionContext: IActionContext, context: 
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(actionContext, false, opts);
-        if (selectedItem) {
-            containerToLog = selectedItem.containerDesc;
-        }
+        containerToLog = selectedItem.containerDesc;
     }
 
-    if (containerToLog) {
-        const terminal = ext.terminalProvider.createTerminal(containerToLog.Image);
-        terminal.sendText(`docker logs -f ${containerToLog.Id}`);
-        terminal.show();
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
+    const terminal = ext.terminalProvider.createTerminal(containerToLog.Image);
+    terminal.sendText(`docker logs -f ${containerToLog.Id}`);
+    terminal.show();
+    if (reporter) {
+        /* __GDPR__
+           "command" : {
+              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+           }
+         */
+        reporter.sendTelemetryEvent('command', {
+            command: teleCmdId
+        });
     }
 }

@@ -31,9 +31,7 @@ export async function openShellContainer(actionContext: IActionContext, context:
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(actionContext, false, opts);
-        if (selectedItem) {
-            containerToAttach = selectedItem.containerDesc;
-        }
+        containerToAttach = selectedItem.containerDesc;
     }
 
     if (containerToAttach) {

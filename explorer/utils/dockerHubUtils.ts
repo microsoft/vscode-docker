@@ -10,10 +10,12 @@ import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
+import { wrapError } from '../../helpers/wrapError';
+import { Repository } from '../../utils/Azure/models/repository';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { NodeBase } from '../models/nodeBase';
 
-let _token: Token;
+let _token: Token | undefined;
 
 export interface Token {
     token: string
@@ -113,32 +115,29 @@ export async function dockerHubLogout(): Promise<void> {
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
-    _token = null;
+    _token = undefined;
 }
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
-
-    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
-    if (username) {
-        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
-        if (password) {
-            _token = await login(username, password);
-            if (_token) {
-                return { username: username, password: password, token: <string>_token.token };
-            }
-        }
-    }
-
-    return;
+    const username: string = await ext.ui.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
+    const password: string = await ext.ui.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
+    _token = await login(username, password);
+    return { username: username, password: password, token: <string>_token.token };
 }
 
 export function setDockerHubToken(token: string): void {
     _token = { token: token };
 }
 
-async function login(username: string, password: string): Promise<Token> {
-    let t: Token;
+function getToken(): Token {
+    if (!_token) {
+        throw new Error('You must log in to Docker Hub first');
+    }
 
+    return _token;
+}
+
+async function login(username: string, password: string): Promise<Token> {
     let options = {
         method: 'POST',
         uri: 'https://hub.docker.com/v2/users/login',
@@ -153,96 +152,77 @@ async function login(username: string, password: string): Promise<Token> {
 }
 
 export async function getUser(): Promise<User> {
-    let u: User;
-
     let options = {
         method: 'GET',
         uri: 'https://hub.docker.com/v2/user/',
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + getToken().token
         },
         json: true
     }
 
     try {
-        u = <User>await ext.request(options);
+        return <User>await ext.request(options);
     } catch (err) {
         let error = <{ statusCode?: number }>err;
-        console.log(error);
         if (error.statusCode === 401) {
-            throw new Error('Docker: Please log out of Docker Hub and then log in again.');
+            throw wrapError('Docker: Please log out of Docker Hub and then log in again.', error);
         }
 
         throw err;
     }
-
-    return u;
 }
 
 export async function getRepositories(username: string): Promise<Repository[]> {
-    let repos: Repository[];
-
     let options = {
         method: 'GET',
         uri: `https://hub.docker.com/v2/users/${username}/repositories/`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + getToken().token
         },
         json: true
     }
 
     try {
-        repos = <Repository[]>await ext.request(options);
+        return <Repository[]>await ext.request(options);
     } catch (error) {
-        console.log(error);
-        vscode.window.showErrorMessage('Docker: Unable to retrieve Repositories');
+        throw wrapError('Docker: Unable to retrieve Repositories', error);
     }
-
-    return repos;
 }
 
 export async function getRepositoryInfo(repository: Repository): Promise<RepositoryInfo> {
-    let info: RepositoryInfo;
-
     let options = {
         method: 'GET',
         uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + getToken().token
         },
         json: true
     }
 
     try {
-        info = <RepositoryInfo>await ext.request(options);
+        return <RepositoryInfo>await ext.request(options);
     } catch (error) {
-        console.log(error);
-        vscode.window.showErrorMessage('Docker: Unable to get Repository Details');
+        throw wrapError('Docker: Unable to get Repository Details', error);
     }
-
-    return info;
 }
 
 export async function getRepositoryTags(repository: Repository): Promise<Tag[]> {
-    let tagsPage: { results: Tag[] };
-
     let options = {
         method: 'GET',
         uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + getToken().token
         },
         json: true
     }
 
     try {
-        tagsPage = <{ results: Tag[] }>await ext.request(options);
+        let tagsPage = <{ results: Tag[] }>await ext.request(options);
+        return <Tag[]>tagsPage.results;
     } catch (error) {
-        console.log(error);
-        vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');
+        throw wrapError('Docker: Unable to retrieve Repository Tags', error);
     }
-
-    return <Tag[]>tagsPage.results;
 }
 
 export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {

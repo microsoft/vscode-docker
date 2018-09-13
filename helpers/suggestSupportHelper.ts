@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
+import * as assert from 'assert';
 import vscode = require('vscode');
 import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
 import hub = require('../dockerHubApi');
@@ -68,12 +67,12 @@ export class SuggestSupportHelper {
         // Detect <<image: [[something]]>>
         let originalValue = _parser.tokenValue(line, tokens[tokenIndex]);
 
-        let keyToken: string = null;
+        let keyToken: string | undefined;
         tokenIndex--;
         while (tokenIndex >= 0) {
             let type = tokens[tokenIndex].type;
             if (type === parser.TokenType.String || type === parser.TokenType.Text) {
-                return;
+                return Promise.resolve([]); // asdf test
             }
             if (type === parser.TokenType.Key) {
                 keyToken = _parser.tokenValue(line, tokens[tokenIndex]);
@@ -83,14 +82,19 @@ export class SuggestSupportHelper {
         }
 
         if (!keyToken) {
-            return;
+            return Promise.resolve([]); // asdf test
         }
         let keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
             let imageName: string;
 
             if (keyName === 'FROM') {
-                imageName = line.match(FROM_DIRECTIVE_PATTERN)[1];
+                let match = line.match(FROM_DIRECTIVE_PATTERN);
+                if (match) {
+                    imageName = match[1];
+                } else {
+                    assert.fail('Expected to find FROM directive in line'); // asdf test
+                }
             } else {
                 imageName = originalValue.replace(/^"/, '').replace(/"$/, '');
             }

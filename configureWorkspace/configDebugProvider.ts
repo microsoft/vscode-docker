@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvider {
 

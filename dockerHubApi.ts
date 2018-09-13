@@ -3,10 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import https = require('https');
-import vscode = require('vscode');
 import { httpsRequest } from './utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {

@@ -27,47 +27,41 @@ export async function removeContainer(actionContext: IActionContext, context: Ro
             }
         };
         const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
-        if (selectedItem) {
-            if (selectedItem.allContainers) {
-                containersToRemove = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToRemove = [selectedItem.containerDesc];
-            }
+        if (selectedItem.allContainers) {
+            containersToRemove = await docker.getContainerDescriptors(opts);
+        } else {
+            containersToRemove = [selectedItem.containerDesc];
         }
     }
 
-    if (containersToRemove) {
+    const numContainers: number = containersToRemove.length;
+    let containerCounter: number = 0;
 
-        const numContainers: number = containersToRemove.length;
-        let containerCounter: number = 0;
-
-        vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
-            containersToRemove.forEach((c) => {
-                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
-                    containerCounter++;
-                    if (err) {
-                        // TODO: parseError, proper error handling
-                        vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers();
-                        reject();
-                    }
-                    if (containerCounter === numContainers) {
-                        dockerExplorerProvider.refreshContainers();
-                        resolve();
-                    }
-                });
+    vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
+        containersToRemove.forEach((c) => {
+            // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+            docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
+                containerCounter++;
+                if (err) {
+                    // TODO: parseError, proper error handling
+                    vscode.window.showErrorMessage(err.message);
+                    dockerExplorerProvider.refreshContainers();
+                    reject();
+                }
+                if (containerCounter === numContainers) {
+                    dockerExplorerProvider.refreshContainers();
+                    resolve();
+                }
             });
-        }));
-    }
+        });
+    }));
+}
 
-    if (reporter) {
-        /* __GDPR__
-        "command" : {
-            "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-        }
-        */
-        reporter.sendTelemetryEvent("command", { command: teleCmdId });
+if (reporter) {
+    /* __GDPR__
+    "command" : {
+        "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
     }
-
+    */
+    reporter.sendTelemetryEvent("command", { command: teleCmdId });
 }

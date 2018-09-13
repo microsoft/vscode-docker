@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ImageNode } from "../explorer/models/imageNode";
 import { RootNode } from '../explorer/models/rootNode';
@@ -22,36 +22,30 @@ export async function removeImage(actionContext: IActionContext, context: ImageN
         imagesToRemove = [context.imageDesc];
     } else {
         const selectedItem: ImageItem = await quickPickImage(actionContext, true);
-        if (selectedItem) {
-            if (selectedItem.allImages) {
-                imagesToRemove = await docker.getImageDescriptors();
-            } else {
-                imagesToRemove = [selectedItem.imageDesc];
-            }
+        if (selectedItem.allImages) {
+            imagesToRemove = await docker.getImageDescriptors();
+        } else {
+            imagesToRemove = [selectedItem.imageDesc];
         }
     }
 
-    if (imagesToRemove) {
-        const numImages: number = imagesToRemove.length;
-        let imageCounter: number = 0;
+    const numImages: number = imagesToRemove.length;
+    let imageCounter: number = 0;
 
-        vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
-            imagesToRemove.forEach((img) => {
-                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, _data: any): void {
-                    imageCounter++;
-                    if (err) {
-                        // TODO: use parseError, proper error handling
-                        vscode.window.showErrorMessage(err.message);
-                        reject();
-                    }
-                    if (imageCounter === numImages) {
-                        resolve();
-                    }
-                });
+    vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
+        imagesToRemove.forEach((img) => {
+            // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+            docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, _data: any): void {
+                imageCounter++;
+                if (err) {
+                    reject(parseError(err).message);
+                }
+                if (imageCounter === numImages) {
+                    resolve();
+                }
             });
-        }));
-    }
+        });
+    }));
 
     if (reporter) {
         /* __GDPR__
