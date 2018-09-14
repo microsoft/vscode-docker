@@ -9,7 +9,7 @@ import { Location, Subscription } from 'azure-arm-resource/lib/subscription/mode
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { skus } from '../../constants'
+import { imageTagRegExp, skus } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -178,6 +178,26 @@ async function checkForValidResourcegroupName(resourceGroupName: string, resourc
 
     if (resourceGroupStatus) {
         return 'This resource group is already in use';
+    }
+    return undefined;
+
+}
+
+/*Creates a new resource group within the current subscription */
+export async function quickPickNewImageName(): Promise<string> {
+    let opt: vscode.InputBoxOptions = {
+        validateInput: checkForValidTag,
+        ignoreFocusOut: false,
+        prompt: 'Enter repository name and tag in format  <name>:<tag>'
+    };
+
+    let tag: string = await ext.ui.showInputBox(opt);
+    return tag;
+}
+function checkForValidTag(str: string): string {
+    if (!imageTagRegExp.test(str)) {
+        return 'Repository name must have 0-256 alpha-numeric characters, optionally separated by periods, dashes or underscores.'
+            + 'A tag name must have 0-128 alpha-numeric characters, digits, underscores, periods or dashes. A tag name may not start with a period or a dash.';
     }
     return undefined;
 

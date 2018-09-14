@@ -61,6 +61,7 @@ export class BuildTaskNode extends NodeBase {
     constructor(
         public task: ContainerModels.BuildTask,
         public registry: ContainerModels.Registry,
+
         public subscription: SubscriptionModels.Subscription,
         public parent: NodeBase
 

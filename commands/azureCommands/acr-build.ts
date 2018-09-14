@@ -8,65 +8,64 @@ import * as process from 'process';
 import * as tar from 'tar';
 import * as url from 'url';
 import * as vscode from "vscode";
-import { getBlobInfo, getResourceGroupName } from "../../utils/Azure/acrTools";
+import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
+import { getBlobInfo, getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { quickPickACRRegistry, quickPickSubscription } from '../utils/quick-pick-azure';
+import { resolveDockerFileItem } from '../build-image';
+import { quickPickACRRegistry, quickPickNewImageName, quickPickSubscription } from '../utils/quick-pick-azure';
+
 const idPrecision = 6;
-const status = vscode.window.createOutputChannel('status');
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
+const status = vscode.window.createOutputChannel('ACR Build status');
 
 // Prompts user to select a subscription, resource group, then registry from drop down. If there are multiple folders in the workspace, the source folder must also be selected.
 // The user is then asked to name & tag the image. A build is queued for the image in the selected registry.
 // Selected source code must contain a path to the desired dockerfile.
 export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
-    status.show();
-    status.appendLine("Obtaining Subscription and initializing management client");
+    //Acquire information from user
     const subscription = await quickPickSubscription();
+
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registry: Registry = await quickPickACRRegistry(true);
-    status.appendLine("Selected registry: " + registry.name);
 
     const resourceGroupName = getResourceGroupName(registry);
+
+    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
+    const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
+
+    const imageName: string = await quickPickNewImageName();
+
+    //Begin readying build
+    status.show();
+
     let folder: vscode.WorkspaceFolder;
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
         folder = vscode.workspace.workspaceFolders[0];
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
-    let sourceLocation: string = folder.uri.path;
-    let relativeDockerPath = 'Dockerfile';
-    if (dockerFileUri.path.indexOf(sourceLocation) !== 0) {
-        //Currently, there is no support for selecting source location folders that don't contain a path to the triggered dockerfile.
-        throw new Error("Source code path must be a parent of the Dockerfile path");
-    } else {
-        relativeDockerPath = dockerFileUri.path.toString().substring(sourceLocation.length + 1);
-    }
+    const dockerItem = await resolveDockerFileItem(folder, dockerFileUri);
+    const sourceLocation: string = folder.uri.path;
+    const tarFilePath = getTempSourceArchivePath();
 
-    let osType: string = await vscode.window.showQuickPick(['Linux', 'Windows'], { 'canPickMany': false, 'placeHolder': 'Linux' });
+    const uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
+    status.appendLine("Uploaded Source Code to " + tarFilePath);
 
-    // Prompting for name so the image can then be pushed to a repository.
-    const opt: vscode.InputBoxOptions = {
-        prompt: 'Image name and tag in format  <name>:<tag>',
-    };
-    const name: string = await vscode.window.showInputBox(opt);
-
-    let tarFilePath = getTempSourceArchivePath();
-
-    status.appendLine("Uploading Source Code to " + tarFilePath);
-    let uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
-
-    status.appendLine("Setting up Build Request");
-    let buildRequest: QuickBuildRequest = {
+    const buildRequest: QuickBuildRequest = {
         'type': 'QuickBuild',
-        'imageNames': [name],
+        'imageNames': [imageName],
         'isPushEnabled': true,
         'sourceLocation': uploadedSourceLocation,
         'platform': { 'osType': osType },
-        'dockerFilePath': relativeDockerPath
+        'dockerFilePath': dockerItem.relativeFilePath
     };
-    status.appendLine("Queueing Build");
-    await client.registries.queueBuild(resourceGroupName, registry.name, buildRequest);
-    status.appendLine('Success');
+    status.appendLine("Set up Build Request");
+
+    const build = await client.registries.queueBuild(resourceGroupName, registry.name, buildRequest);
+    status.appendLine("Queued Build " + build.buildId);
+
+    streamLogs(registry, build, status, client);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string, folder: vscode.WorkspaceFolder): Promise<string> {

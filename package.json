@@ -678,7 +678,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.queueBuild",
+        "command": "vscode-docker.ACR-Build",
         "title": "Cloud Build",
         "category": "Docker"
       }

@@ -27,3 +27,6 @@ export const NULL_GUID = '00000000-0000-0000-0000-000000000000';
 
 //Azure Container Registries
 export const skus = ["Standard", "Basic", "Premium"];
+
+//Repository + Tag format
+export const imageTagRegExp = new RegExp('^[a-zA-Z0-9.-_/]{1,256}:(?![.-])[a-zA-Z0-9.-_]{1,128}$');
