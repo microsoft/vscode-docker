@@ -1,5 +1,5 @@
 import vscode = require('vscode');
-import { AzureImageTagNode } from '../../explorer/models/AzureRegistryNodes';
+import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */

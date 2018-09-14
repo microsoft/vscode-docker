@@ -10,6 +10,8 @@ import * as vscode from 'vscode';
 import { AzureUserInput, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { queueBuild } from './commands/azureCommands/acr-build';
+import { viewBuildLogs } from './commands/azureCommands/acr-build-logs';
+import { LogContentProvider } from './commands/azureCommands/acr-build-logs-utils/logFileManager';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
@@ -134,6 +136,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
 
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
+    ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(LogContentProvider.scheme, new LogContentProvider()));
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(TaskContentProvider.scheme, new TaskContentProvider()));
 
     if (azureAccount) {
@@ -234,8 +237,8 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
     registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
-    registerAzureCommand('vscode-docker.queueBuild', queueBuild);
     registerAzureCommand('vscode-docker.pullFromAzure', pullFromAzure);
+    registerAzureCommand('vscode-docker.acrBuildLogs', viewBuildLogs);
     registerAzureCommand('vscode-docker.run-ACR-BuildTask', runBuildTask);
     registerAzureCommand('vscode-docker.show-ACR-buildTask', showBuildTaskProperties);
 }

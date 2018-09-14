@@ -6,7 +6,6 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { NodeBase } from './nodeBase';
-
 /* Single TaskRootNode under each Repository. Labeled "Build Tasks" */
 export class TaskRootNode extends NodeBase {
     public static readonly contextValue: string = 'taskRootNode';
@@ -23,7 +22,6 @@ export class TaskRootNode extends NodeBase {
     }
 
     public name: string;
-
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
@@ -37,7 +35,6 @@ export class TaskRootNode extends NodeBase {
     public async getChildren(element: TaskRootNode): Promise<BuildTaskNode[]> {
         const buildTaskNodes: BuildTaskNode[] = [];
         let buildTasks: ContainerModels.BuildTask[] = [];
-
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
         buildTasks = await client.buildTasks.list(resourceGroup, element.registry.name);
