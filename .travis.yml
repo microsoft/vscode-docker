@@ -1,6 +1,9 @@
 language: node_js
 
-sudo: false
+sudo: required
+
+services:
+  - docker
 
 node_js:
   - 'stable'

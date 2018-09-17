@@ -1,44 +1,54 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from 'vscode';
+import { docker } from '../commands/utils/docker-endpoint';
+import { AzureAccount } from '../typings/azure-account.api';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
-import { AzureAccount } from '../typings/azure-account.api';
 
 export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase> {
 
     private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
-    readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
-    private _imagesNode: RootNode;
-    private _containersNode: RootNode;
-    private _registriesNode: RootNode
-    private _azureAccount: AzureAccount;
+    public readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
+    private _imagesNode: RootNode | undefined;
+    private _containersNode: RootNode | undefined;
+    private _registriesNode: RootNode | undefined;
+    private _azureAccount: AzureAccount | undefined;
 
-    constructor(azureAccount) {
+    constructor(azureAccount: AzureAccount | undefined) {
         this._azureAccount = azureAccount;
     }
 
-    refresh(): void {
+    public refresh(): void {
+        this.refreshImages();
+        this.refreshContainers();
+        this.refreshRegistries();
+    }
+
+    public refreshImages(): void {
         this._onDidChangeTreeData.fire(this._imagesNode);
+    }
+
+    public refreshContainers(): void {
         this._onDidChangeTreeData.fire(this._containersNode);
+    }
+
+    public refreshRegistries(): void {
         this._onDidChangeTreeData.fire(this._registriesNode);
     }
 
-    refreshImages(): void {
-        this._onDidChangeTreeData.fire(this._imagesNode);
+    public refreshNode(element: NodeBase): void {
+        this._onDidChangeTreeData.fire(element);
     }
 
-    refreshContainers(): void {
-        this._onDidChangeTreeData.fire(this._imagesNode);
-    }
-
-    refreshRegistries(): void {
-        this._onDidChangeTreeData.fire(this._registriesNode);
-    }
-
-    getTreeItem(element: NodeBase): vscode.TreeItem {
+    public getTreeItem(element: NodeBase): vscode.TreeItem {
         return element.getTreeItem();
     }
 
-    async getChildren(element?: NodeBase): Promise<NodeBase[]> {
+    public async getChildren(element?: NodeBase): Promise<NodeBase[]> {
         if (!element) {
             return this.getRootNodes();
         }

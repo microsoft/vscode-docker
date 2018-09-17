@@ -1,14 +1,16 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 'use strict';
 
-import vscode = require('vscode');
 import https = require('https');
+import vscode = require('vscode');
+import { httpsRequest } from './utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
-    var tags: string[] = [];
+    let tags: string[] = [];
     if (image.is_automated) {
         tags.push('Automated');
     } else if (image.is_trusted) {
@@ -22,16 +24,17 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
     return '';
 }
 
-export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult> {
+// tslint:disable-next-line:promise-function-async // Grandfathered in
+export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult | undefined> {
     return invokeHubSearch(imageName, 1, cache).then((data) => {
         if ((<IHubSearchResponseResult[]>data.results).length === 0) {
-            return;
+            return undefined;
         }
         return data.results[0];
     });
 }
 
-var popular = [
+let popular = [
     { "is_automated": false, "name": "redis", "is_trusted": false, "is_official": true, "star_count": 1300, "description": "Redis is an open source key-value store that functions as a data structure server." },
     { "is_automated": false, "name": "ubuntu", "is_trusted": false, "is_official": true, "star_count": 2600, "description": "Ubuntu is a Debian-based Linux operating system based on free software." },
     { "is_automated": false, "name": "wordpress", "is_trusted": false, "is_official": true, "star_count": 582, "description": "The WordPress rich content management system can utilize plugins, widgets, and themes." },
@@ -44,6 +47,7 @@ var popular = [
     { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": "ASP.NET is an open source server-side Web application framework" }
 ];
 
+// tslint:disable-next-line:promise-function-async // Grandfathered in
 export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promise<IHubSearchResponseResult[]> {
     if (prefix.length === 0) {
         // return the popular images if user invoked intellisense
@@ -75,6 +79,7 @@ export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promi
 //     "query": "redis",
 //     "page": 1
 // }
+// tslint:disable-next-line:promise-function-async // Grandfathered in
 function invokeHubSearch(imageName: string, count: number, cache: boolean): Promise<IHubSearchResponse> {
     // https://registry.hub.docker.com/v1/search?q=redis&n=1
     return fetchHttpsJson<IHubSearchResponse>({
@@ -101,14 +106,16 @@ export interface IHubSearchResponseResult {
     description: string;
 }
 
-var JSON_CACHE: any = {};
+// tslint:disable-next-line:no-any
+let JSON_CACHE: { [key: string]: Promise<any> } = {};
 
+// tslint:disable-next-line:promise-function-async // Grandfathered in
 function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<T> {
     if (!cache) {
         return doFetchHttpsJson(opts);
     }
 
-    var cache_key = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
+    let cache_key = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
     if (!JSON_CACHE[cache_key]) {
         JSON_CACHE[cache_key] = doFetchHttpsJson(opts);
     }
@@ -119,27 +126,11 @@ function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<
     });
 }
 
+// tslint:disable-next-line:promise-function-async // Grandfathered in
 function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
     opts.headers = opts.headers || {};
-    opts.headers['Accept'] = 'application/json';
-    return httpsRequestAsPromise(opts).then((data) => {
+    opts.headers.Accept = 'application/json';
+    return httpsRequest(opts).then((data) => {
         return JSON.parse(data);
     })
-}
-
-function httpsRequestAsPromise(opts: https.RequestOptions): Promise<string> {
-
-    return new Promise<string>((resolve, reject) => {
-        var req = https.request(opts, (res) => {
-            var data = '';
-            res.on('data', (d: string) => {
-                data += d;
-            })
-            res.on('end', () => {
-                resolve(data);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
 }

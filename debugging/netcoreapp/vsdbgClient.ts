@@ -4,12 +4,12 @@
 
 import * as path from 'path';
 import * as process from 'process';
-import * as request from 'request-promise';
-import { ProcessProvider } from './processProvider';
+import * as request from 'request-promise-native';
+import { Memento } from 'vscode';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
-import { Memento } from 'vscode';
 import { OutputManager } from './outputManager';
+import { ProcessProvider } from './processProvider';
 
 export interface VsDbgClient {
     getVsDbgVersion(version: string, runtime: string): Promise<string>;
@@ -23,7 +23,8 @@ type VsDbgScriptPlatformOptions = {
 };
 
 export class RemoteVsDbgClient implements VsDbgClient {
-    private static readonly stateKey = 'RemoteVsDbgClient';
+    private static readonly stateKey: string = 'RemoteVsDbgClient';
+    private static readonly winDir: string = 'WINDIR';
 
     private readonly vsdbgPath: string;
     private readonly options: VsDbgScriptPlatformOptions;
@@ -40,7 +41,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
                 name: 'GetVsDbg.ps1',
                 url: 'https://aka.ms/getvsdbgps1',
                 getAcquisitionCommand: (vsdbgAcquisitionScriptPath: string, version: string, runtime: string, vsdbgVersionPath: string) => {
-                    const powershellCommand = `${process.env['WINDIR']}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
+                    const powershellCommand = `${process.env[RemoteVsDbgClient.winDir]}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
                     return Promise.resolve(`${powershellCommand} -NonInteractive -NoProfile -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File \"${vsdbgAcquisitionScriptPath}\" -Version ${version} -RuntimeID ${runtime} -InstallPath \"${vsdbgVersionPath}\"`);
                 }
             }
@@ -56,7 +57,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
             };
     }
 
-    async getVsDbgVersion(version: string, runtime: string): Promise<string> {
+    public async getVsDbgVersion(version: string, runtime: string): Promise<string> {
         const vsdbgVersionPath = path.join(this.vsdbgPath, runtime, version);
         const vsdbgVersionExists = await this.fileSystemProvider.dirExists(vsdbgVersionPath);
 
@@ -128,7 +129,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
         return false;
     }
 
-    private get lastScriptAcquisitionKey() {
+    private get lastScriptAcquisitionKey(): string {
         return `${RemoteVsDbgClient.stateKey}.lastScriptAcquisition`;
     }
 

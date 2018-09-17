@@ -28,7 +28,8 @@
         "react-no-dangerous-html": true,
         "await-promise": [
             true,
-            "Thenable" // changed
+            "Thenable", // changed
+            "RequestPromise" // changed
         ],
         "forin": true,
         "jquery-deferred-must-complete": true,
@@ -36,7 +37,7 @@
         "match-default-export-name": true,
         "mocha-avoid-only": true,
         "mocha-no-side-effect-code": true,
-        // TODO: "no-any": true,
+        "no-any": true,
         "no-arg": true,
         "no-bitwise": true,
         "no-conditional-assignment": true,
@@ -56,7 +57,7 @@
         "no-duplicate-super": true,
         "no-duplicate-variable": true,
         "no-empty": false, // changed
-        // TODO: "no-floating-promises": true,
+        "no-floating-promises": true,
         "no-for-in-array": true,
         "no-import-side-effect": true,
         "no-increment-decrement": false, // changed
@@ -70,19 +71,19 @@
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
         "no-stateless-class": true,
-        "no-string-literal": false, // TODO
+        "no-string-literal": true,
         "no-string-throw": true,
         "no-unnecessary-bind": true,
         "no-unnecessary-callback-wrapper": true,
         "no-unnecessary-initializer": true,
         "no-unnecessary-override": true,
-        // TODO: "no-unsafe-any": true,
+        "no-unsafe-any": true,
         "no-unsafe-finally": true,
-        // TODO: "no-unused-expression": true,
-        // TODO: "no-use-before-declare": true,
+        "no-unused-expression": true,
+        "no-use-before-declare": false, // changed (recommended turned off: https://palantir.github.io/tslint/rules/no-use-before-declare/)
         "no-with-statement": true,
-        // TODO:"promise-function-async": true,
-        // TODO: "promise-must-complete": true,
+        "promise-function-async": true,
+        "promise-must-complete": true,
         "radix": true,
         "react-this-binding-issue": true,
         "react-unused-props-and-state": true,
@@ -95,7 +96,7 @@
         ],
         "switch-default": true,
         "triple-equals": [
-            false, // TODO: true,
+            true,
             "allow-null-check"
         ],
         "use-isnan": true,
@@ -137,7 +138,7 @@
             false, // changed
             140
         ],
-        // TODO: "member-access": true,
+        "member-access": true,
         "member-ordering": [
             false, // changed
             {
@@ -166,25 +167,25 @@
         "no-unnecessary-qualifier": true,
         "no-unsupported-browser-code": true,
         "no-useless-files": true,
-        // TODO: "no-var-keyword": true,
-        // TODO: "no-var-requires": true,
+        "no-var-keyword": true,
+        "no-var-requires": true,
         "no-var-self": true,
         "no-void-expression": [
             false, // changed
             "ignore-arrow-function-shorthand" // changed
         ],
         "object-literal-sort-keys": false,
-         "one-variable-per-declaration": false, // changed
+        "one-variable-per-declaration": false, // changed
         "only-arrow-functions": false,
-        // TODO: "ordered-imports": true,
+        "ordered-imports": true,
         "prefer-array-literal": true,
         "prefer-const": false, // changed
-        // TODO: "prefer-for-of": true,
+        "prefer-for-of": true,
         "prefer-method-signature": true,
         "prefer-template": false, // changed
         "return-undefined": false,
         "typedef": [
-            false, // TODO: true,
+            true,
             "call-signature",
             // "arrow-call-signature", changed
             "parameter",
@@ -220,7 +221,7 @@
             "arguments",
             "statements"
         ],
-        "curly": false, // TODO
+        "curly": true,
         "eofline": false, // changed
         "import-spacing": true,
         "indent": [
@@ -251,7 +252,7 @@
         ],
         "react-tsx-curly-spacing": true,
         "semicolon": [
-            false, // TODO: true,
+            false, // changed
             "always"
         ],
         "trailing-comma": [

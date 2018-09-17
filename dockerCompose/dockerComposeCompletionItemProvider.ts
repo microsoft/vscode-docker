@@ -1,29 +1,32 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 'use strict';
 
-import { TextDocument, Position, CancellationToken, CompletionItem, CompletionItemProvider, CompletionItemKind, Uri } from 'vscode';
-import composeVersions from './dockerComposeKeyInfo';
-import helper = require('../helpers/suggestSupportHelper');
+import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
+import { KeyInfo } from '../dockerExtension';
 import hub = require('../dockerHubApi');
+import helper = require('../helpers/suggestSupportHelper');
+import composeVersions from './dockerComposeKeyInfo';
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {
 
     public triggerCharacters: string[] = [];
     public excludeTokens: string[] = [];
 
+    // tslint:disable-next-line:promise-function-async // Grandfathered in
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
-        var yamlSuggestSupport = new helper.SuggestSupportHelper();
+        let yamlSuggestSupport = new helper.SuggestSupportHelper();
 
         // Determine the schema version of the current compose file,
         // based on the existence of a top-level "version" property.
-        var versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
-        var version = versionMatch ? versionMatch[2] : "1";
+        let versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
+        let version = versionMatch ? versionMatch[2] : "1";
 
         // Get the line where intellisense was invoked on (e.g. 'image: u').
-        var line = document.lineAt(position.line).text;
+        let line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
@@ -35,14 +38,14 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         // Get the text where intellisense was invoked on (e.g. 'u').
         let word = range && document.getText(range) || '';
 
-        var textBefore = line.substring(0, position.character);
+        let textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
             return Promise.resolve(this.suggestKeys(word, version));
         }
 
         // Matches strings like: 'image: "ubuntu'
-        var imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
+        let imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
 
         if (imageTextWithQuoteMatchYaml) {
             let imageText = imageTextWithQuoteMatchYaml[1];
@@ -50,7 +53,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         }
 
         // Matches strings like: 'image: ubuntu'
-        var imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
+        let imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
 
         if (imageTextWithoutQuoteMatch) {
             let imageText = imageTextWithoutQuoteMatch[1];
@@ -63,10 +66,10 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     private suggestKeys(word: string, version: string): CompletionItem[] {
         // Attempt to grab the keys for the requested schema version,
         // otherwise, fall back to showing a composition of all possible keys.
-        const keys = composeVersions[`v${version}`] || composeVersions.All;
+        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.All;
 
         return Object.keys(keys).map(ruleName => {
-            var completionItem = new CompletionItem(ruleName);
+            let completionItem = new CompletionItem(ruleName);
             completionItem.kind = CompletionItemKind.Keyword;
             completionItem.insertText = ruleName + ': ';
             completionItem.documentation = keys[ruleName];

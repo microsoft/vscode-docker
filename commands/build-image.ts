@@ -1,67 +1,73 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as path from "path";
 import * as vscode from "vscode";
-import { reporter } from '../telemetry/telemetry';
+import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
-
-const teleCmdId: string = 'vscode-docker.image.build';
+import { delay } from "../explorer/utils/utils";
+import { ext } from "../extensionVariables";
+import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), null, 1000, null);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
 }
 
 interface Item extends vscode.QuickPickItem {
-    file: string,
-    path: string
+    relativeFilePath: string;
+    relativeFolderPath: string;
 }
 
-function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
-    let filePath = path.join(".", uri.fsPath.substr(folder.uri.fsPath.length));
+function createDockerfileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
+    let relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.uri.fsPath.length));
 
     return <Item>{
-        description: null,
-        file: filePath,
-        label: filePath,
-        path: path.dirname(filePath)
+        description: undefined,
+        relativeFilePath: relativeFilePath,
+        label: relativeFilePath,
+        relativeFolderPath: path.dirname(relativeFilePath)
     };
 }
 
-function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscode.QuickPickItem[] {
-    let items: vscode.QuickPickItem[] = [];
-    for (let i = 0; i < uris.length; i++) {
-        items.push(createItem(folder, uris[i]));
-    }
-    return items;
-}
-
-async function resolveImageItem(folder: vscode.WorkspaceFolder, dockerFileUri?: vscode.Uri): Promise<Item> {
+async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
     if (dockerFileUri) {
-        return createItem(folder, dockerFileUri);
+        return createDockerfileItem(rootFolder, dockerFileUri);
     }
 
-    const uris: vscode.Uri[] = await getDockerFileUris(folder);
+    const uris: vscode.Uri[] = await getDockerFileUris(rootFolder);
 
-    if (!uris || uris.length == 0) {
-        vscode.window.showInformationMessage('Couldn\'t find a Dockerfile in your workspace.');
-        return;
+    if (!uris || uris.length === 0) {
+        return undefined;
     } else {
-        const res: vscode.QuickPickItem = await vscode.window.showQuickPick(computeItems(folder, uris), { placeHolder: 'Choose Dockerfile to build' });
-        return <Item>res;
+        let items: Item[] = uris.map(uri => createDockerfileItem(rootFolder, uri));
+        if (items.length === 1) {
+            return items[0];
+        } else {
+            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' });
+            return <Item>res;
+        }
     }
-
 }
 
-export async function buildImage(dockerFileUri?: vscode.Uri) {
+export async function buildImage(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
+    let dockerFileItem: Item | undefined;
 
-    let folder: vscode.WorkspaceFolder;
+    let rootFolder: vscode.WorkspaceFolder;
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-        folder = vscode.workspace.workspaceFolders[0];
+        rootFolder = vscode.workspace.workspaceFolders[0];
     } else {
-        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+        let selected = await vscode.window.showWorkspaceFolderPick();
+        if (!selected) {
+            throw new UserCancelledError();
+        }
+        rootFolder = selected;
     }
 
-    if (!folder) {
+    if (!rootFolder) {
         if (!vscode.workspace.workspaceFolders) {
             vscode.window.showErrorMessage('Docker files can only be built if VS Code is opened on a folder.');
         } else {
@@ -70,51 +76,51 @@ export async function buildImage(dockerFileUri?: vscode.Uri) {
         return;
     }
 
-    const uri: Item = await resolveImageItem(folder, dockerFileUri);
-    if (!uri) return;
-
-    let contextPath: string = uri.path;
-    if (defaultContextPath && defaultContextPath != '') {
-        contextPath = defaultContextPath;
-    }
-
-    let imageName: string;
-    if (process.platform === 'win32') {
-        imageName = uri.path.split('\\').pop().toLowerCase();
-    } else {
-        imageName = uri.path.split('/').pop().toLowerCase();
-    }
-
-    if (imageName === '.') {
-        if (process.platform === 'win32') {
-            imageName = folder.uri.fsPath.split('\\').pop().toLowerCase();
+    while (!dockerFileItem) {
+        let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);
+        if (resolvedItem) {
+            dockerFileItem = resolvedItem;
         } else {
-            imageName = folder.uri.fsPath.split('/').pop().toLowerCase();
+            let msg = "Couldn't find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?";
+            actionContext.properties.cancelStep = msg;
+            await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
+            actionContext.properties.cancelStep = undefined;
+            await vscode.commands.executeCommand('vscode-docker.configure');
+            // Try again
         }
     }
 
-    const opt: vscode.InputBoxOptions = {
-        placeHolder: imageName + ':latest',
-        prompt: 'Tag image as...',
-        value: imageName + ':latest'
-    };
-
-    const value: string = await vscode.window.showInputBox(opt);
-
-    if (!value) return;
-
-    const terminal: vscode.Terminal = vscode.window.createTerminal('Docker');
-    terminal.sendText(`docker build --rm -f ${uri.file} -t ${value} ${contextPath}`);
-    terminal.show();
-
-    if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
+    let contextPath: string = dockerFileItem.relativeFolderPath;
+    if (defaultContextPath && defaultContextPath !== '') {
+        contextPath = defaultContextPath;
     }
+    let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
+    let dockerFileKey = `buildTag_${absFilePath}`;
+    let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
+    let suggestedImageName: string;
+
+    if (!prevImageName) {
+        // Get imageName based on name of subfolder containing the Dockerfile, or else workspacefolder
+        suggestedImageName = path.basename(dockerFileItem.relativeFolderPath).toLowerCase();
+        if (suggestedImageName === '.') {
+            suggestedImageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
+        }
+
+        suggestedImageName += ":latest"
+    } else {
+        suggestedImageName = prevImageName;
+    }
+
+    // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
+    await delay(500);
+
+    addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
+    const imageName: string = await getTagFromUserInput(suggestedImageName, !prevImageName);
+    addImageTaggingTelemetry(actionContext, imageName, '.after');
+
+    await ext.context.globalState.update(dockerFileKey, imageName);
+
+    const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
+    terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageName} ${contextPath}`);
+    terminal.show();
 }

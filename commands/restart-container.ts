@@ -1,18 +1,25 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
+import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-import { reporter } from '../telemetry/telemetry';
-import { ContainerNode } from '../explorer/models/containerNode';
-import { dockerExplorerProvider } from '../dockerExtension';
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
+import { RootNode } from '../explorer/models/rootNode';
 
 const teleCmdId: string = 'vscode-docker.container.restart';
 
-export async function restartContainer(context?: ContainerNode) {
+export async function restartContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containersToRestart: Docker.ContainerDesc[];
 
-    if (context && context.containerDesc) {
+    if (context instanceof ContainerNode && context.containerDesc) {
         containersToRestart = [context.containerDesc];
     } else {
         const opts = {
@@ -20,9 +27,9 @@ export async function restartContainer(context?: ContainerNode) {
                 "status": ["running", "paused", "exited"]
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(true, opts);
+        const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
         if (selectedItem) {
-            if (selectedItem.label.toLocaleLowerCase().includes("all containers")) {
+            if (selectedItem.allContainers) {
                 containersToRestart = await docker.getContainerDescriptors(opts);
             } else {
                 containersToRestart = [selectedItem.containerDesc];
@@ -37,7 +44,8 @@ export async function restartContainer(context?: ContainerNode) {
 
         vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
             containersToRestart.forEach((container) => {
-                docker.getContainer(container.Id).restart((err: Error, data: any) => {
+                // tslint:disable-next-line:no-any
+                docker.getContainer(container.Id).restart((err: Error, _data: any) => {
                     containerCounter++;
                     if (err) {
                         vscode.window.showErrorMessage(err.message);

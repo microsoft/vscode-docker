@@ -4,7 +4,8 @@ declare module Docker {
 	}
 
 	interface DockerOptions {
-		socketPath: string;
+		host: string;
+		port: number;
 	}
 
 	interface HostConfig {
@@ -117,7 +118,7 @@ declare class Docker {
 
 	listImages(options: {}, cb: (err:Error , images: Docker.ImageDesc[])=>void): void;
 	getImage(id:string): Docker.Image;
-	
+
 	createContainer(options: Docker.CreateContainerOptions, cb: (err: Error, container: Docker.Container)=>void): void;
 	listContainers(options: {}, cb: (err:Error , containers: Docker.ContainerDesc[])=>void): void;
 	getContainer(id: string): Docker.Container;
