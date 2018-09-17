@@ -552,11 +552,6 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.delete-ACR-Image",
-        "title": "Delete Azure Image",
-        "category": "Docker"
-      },
-      {
         "command": "vscode-docker.image.push",
         "title": "Push",
         "description": "Push an image to a registry",
