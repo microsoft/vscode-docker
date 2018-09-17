@@ -1,9 +1,17 @@
-import * as vscode from 'vscode';
-import * as keytarType from 'keytar';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as assert from 'assert';
+// tslint:disable-next-line:no-require-imports
 import * as opn from 'opn';
-import request = require('request-promise');
-import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
-import { getCoreNodeModule } from './utils';
+import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
+import { keytarConstants, PAGE_SIZE } from '../../constants';
+import { ext } from '../../extensionVariables';
+import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
+import { NodeBase } from '../models/nodeBase';
 
 let _token: Token;
 
@@ -44,7 +52,7 @@ export interface RepositoryInfo {
     star_count: number
     pull_count: number
     last_updated: string
-    build_on_cloud: any
+    //build_on_cloud: any
     has_starred: boolean
     full_description: string
     affiliation: string
@@ -59,7 +67,7 @@ export interface Tag {
     creator: number
     full_size: number
     id: number
-    image_id: any
+    image_id: string
     images: Image[]
     last_updated: string
     last_updater: number
@@ -70,30 +78,49 @@ export interface Tag {
 
 export interface Image {
     architecture: string
-    features: any
+    //features: any
     os: string
-    os_features: any
-    os_version: any
+    //os_features: any
+    //os_version: any
     size: number
-    variant: any
+    //variant: any
 }
 
-export function dockerHubLogout(): void {
+export interface ManifestFsLayer {
+    blobSum: string;
+}
 
-    const keytar: typeof keytarType = getCoreNodeModule('keytar');
-    if (keytar) {
-        keytar.deletePassword('vscode-docker', 'dockerhub.token');
-        keytar.deletePassword('vscode-docker', 'dockerhub.password');
-        keytar.deletePassword('vscode-docker', 'dockerhub.username');
+export interface ManifestHistory {
+    v1Compatibility: string; // stringified ManifestHistoryV1Compatibility
+}
+
+export interface ManifestHistoryV1Compatibility {
+    created: string;
+}
+
+export interface Manifest {
+    name: string;
+    tag: string;
+    architecture: string;
+    fsLayers: ManifestFsLayer[];
+    history: ManifestHistory[];
+    schemaVersion: number;
+}
+
+export async function dockerHubLogout(): Promise<void> {
+    if (ext.keytar) {
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
     _token = null;
 }
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
 
-    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Username' });
+    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
     if (username) {
-        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Password', password: true });
+        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
         if (password) {
             _token = await login(username, password);
             if (_token) {
@@ -103,10 +130,9 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
     }
 
     return;
-
 }
 
-export function setDockerHubToken(token: string) {
+export function setDockerHubToken(token: string): void {
     _token = { token: token };
 }
 
@@ -123,15 +149,7 @@ async function login(username: string, password: string): Promise<Token> {
         json: true
     }
 
-    try {
-        t = await request(options);
-    } catch (error) {
-        console.log(error);
-        vscode.window.showErrorMessage(error.error.detail);
-    }
-
-    return t;
-
+    return <Token>await ext.request(options);
 }
 
 export async function getUser(): Promise<User> {
@@ -147,16 +165,18 @@ export async function getUser(): Promise<User> {
     }
 
     try {
-        u = await request(options);
-    } catch (error) {
+        u = <User>await ext.request(options);
+    } catch (err) {
+        let error = <{ statusCode?: number }>err;
         console.log(error);
         if (error.statusCode === 401) {
-            vscode.window.showErrorMessage('Docker: Please logout of DockerHub and then log in again.');
+            throw new Error('Docker: Please log out of Docker Hub and then log in again.');
         }
+
+        throw err;
     }
 
     return u;
-
 }
 
 export async function getRepositories(username: string): Promise<Repository[]> {
@@ -172,7 +192,7 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     }
 
     try {
-        repos = await request(options);
+        repos = <Repository[]>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repositories');
@@ -181,9 +201,8 @@ export async function getRepositories(username: string): Promise<Repository[]> {
     return repos;
 }
 
-export async function getRepositoryInfo(repository: Repository): Promise<any> {
-
-    let res: any;
+export async function getRepositoryInfo(repository: Repository): Promise<RepositoryInfo> {
+    let info: RepositoryInfo;
 
     let options = {
         method: 'GET',
@@ -195,21 +214,21 @@ export async function getRepositoryInfo(repository: Repository): Promise<any> {
     }
 
     try {
-        res = await request(options);
+        info = <RepositoryInfo>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to get Repository Details');
     }
 
-    return res;
+    return info;
 }
 
 export async function getRepositoryTags(repository: Repository): Promise<Tag[]> {
-    let tagsPage: any;
+    let tagsPage: { results: Tag[] };
 
     let options = {
         method: 'GET',
-        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=100&page=1`,
+        uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
             Authorization: 'JWT ' + _token.token
         },
@@ -217,34 +236,29 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     try {
-        tagsPage = await request(options);
+        tagsPage = <{ results: Tag[] }>await ext.request(options);
     } catch (error) {
         console.log(error);
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
-export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) {
-
-    if (context) {
+export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+    if (node) {
         let url: string = 'https://hub.docker.com/';
-        const repo: RepositoryInfo = context.repository;
-        switch (context.contextValue) {
-            case 'dockerHubNamespace':
-                url = `${url}u/${context.userName}`;
-                break;
-            case 'dockerHubRepository':
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}`;
-                break;
-            case 'dockerHubImageTag':
-                url = `${url}r/${context.repository.namespace}/${context.repository.name}/tags`;
-                break;
-            default:
-                break;
+        if (node instanceof DockerHubOrgNode) {
+            url = `${url}u/${node.userName}`;
+        } else if (node instanceof DockerHubRepositoryNode) {
+            url = `${url}r/${node.repository.namespace}/${node.repository.name}`;
+        } else if (node instanceof DockerHubImageTagNode) {
+            url = `${url}r/${node.repository.namespace}/${node.repository.name}/tags`;
+        } else {
+            assert(false, `browseDockerHub: Unexpected node type, contextValue=${(<NodeBase>node).contextValue}`)
         }
+
+        // tslint:disable-next-line:no-unsafe-any
         opn(url);
     }
 }

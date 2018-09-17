@@ -1,5 +1,7 @@
 # Docker Support for Visual Studio Code
 
+[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://travis-ci.org/Microsoft/vscode-docker.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-docker)
+
 The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for example:
 
 * Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press `F1` and search for `Docker: Add Docker files to Workspace`)
@@ -8,6 +10,8 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing Images, running Containers, and Docker Hub registries
 * Deploy images from Docker Hub and Azure Container Registries directly to Azure App Service
+* [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
+
 
 ## Generating Docker Files
 
@@ -41,23 +45,22 @@ You can move the View up or down by dragging the Docker icon and you can hide th
 
 ![show and hide the view](images/viewRightClick.png)
 
-The `showExplorer` configuration setting controls the visibility of the Explorer within the Docker View.
+The `showExplorer` configuration setting controls the visibility of the Docker View.
 
 ``` json
 "docker.showExplorer": false
 ```
 
-> Note: This setting was introduced prior to the View. Setting it to `false` will hide the Explorer within the Docker View. It does not control whether or not the View itself is visible. Future releases of the extension may be able to support a setting to toggle the visibility of the view [48704](https://github.com/Microsoft/vscode/issues/48704).
-
-## Deploying images to Azure App Service
-
-With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries, directly to an Azure App Service instance. This functionality requires installing the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension and an Azure Subscription. If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a free 30 day account and get $200 in Azure Credits to try out any combination of Azure services.
-
-The first time you expand the Docker Hub node you'll be prompted to log into your Docker Hub account.
+## Docker Hub Login
+The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
 
 ![Docker Hub Login](images/dockerHubLogin.gif)
 
 Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
+
+## Deploying images to Azure App Service
+
+With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance, as detailed in this [getting started](https://code.visualstudio.com/tutorials/docker-extension/getting-started) guide. This functionality requires installing the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension and an Azure Subscription. If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a free 30 day account and get $200 in Azure Credits to try out any combination of Azure services.
 
 To log into Azure, press `F1` and search for `Azure Sign In`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
 
@@ -79,6 +82,10 @@ Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a 
 
 After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
+## Private registries (Preview)
+
+This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
+
 ## Configuration Settings
 
 The Docker extension comes with a number of useful configuration settings allowing you to customize your workflow.
@@ -89,22 +96,23 @@ The Docker extension comes with a number of useful configuration settings allowi
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
-| `docker.defaultRegistry` | Default registry when tagging an image, empty string will target Docker Hub when pushing. | `""`
-| `docker.defaultRegistryPath` | Path within registry to push to. | `""`
-| `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms. | `1000`
-| `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command. | `""`
-| `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction. | `warning`
-| `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase. | `warning`
-| `docker.languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines. | `warning`
-| `docker.languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase. | `warning`
-| `docker.languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions. | `warning`
-| `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes. | `warning`
+| `docker.defaultRegistryPath` | Default registry and path when tagging an image | `""`
+| `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms | `1000`
+| `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | `""`
+| `docker.imageBuildContextPath` | Build context PATH to pass to Docker build command | `""`
+| `docker.languageserver.diagnostics.deprecatedMaintainer` | Controls the diagnostic severity for the deprecated MAINTAINER instruction | `warning`
+| `docker.languageserver.diagnostics.directiveCasing` | Controls the diagnostic severity for parser directives that are not written in lowercase | `warning`
+| `docker.languageserver.diagnostics.emptyContinuationLine` | Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines | `warning`
+| `docker.languageserver.diagnostics.instructionCasing` | Controls the diagnostic severity for instructions that are not written in uppercase | `warning`
+| `docker.languageserver.diagnostics.instructionCmdMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions | `warning`
+| `docker.languageserver.diagnostics.instructionEntrypointMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions | `warning`
+| `docker.languageserver.diagnostics.instructionHealthcheckMultiple` | Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions | `warning`
+| `docker.languageserver.diagnostics.instructionJSONInSingleQuotes` | Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes | `warning`
+| `docker.languageserver.diagnostics.instructionWorkdirRelative` | Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path | `warning`
 | `docker.promptOnSystemPrune` | Prompt for confirmation when running System Prune command | `true`
-| `docker.showExplorer` | Show or hide the Explorer. | `true`
-| `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer. | `false`
-| `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis. | `10`
+| `docker.showExplorer` | Show or hide the Explorer | `true`
+| `docker.truncateLongRegistryPaths` | Truncate long Image and Container registry paths in the Explorer | `false`
+| `docker.truncateMaxLength` | Maximum number of characters for long registry paths in the Explorer, including ellipsis | `10`
 
 ## Installation
 
@@ -118,7 +126,9 @@ By default, Docker runs as the root user, requiring other users to access it wit
 
 ## Connecting to `docker-machine`
 
-The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host.
+The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host or if you set the `docker.host` configuration setting.
+
+If the docker daemon is using TLS, the DOCKER_CERT_PATH environment variable must also be set (e.g. `$HOME\.docker\machine\machines\default`). See [docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
 
 ## Contributing
 
@@ -131,6 +141,27 @@ There are a couple of ways you can contribute to this repository:
 ## Legal
 
 Before we can accept your pull request you will need to sign a **Contribution License Agreement**. All you need to do is to submit a pull request, then the PR will get appropriately labelled (for example `cla-required`, `cla-norequired`, `cla-signed`, `cla-already-signed`). If you already signed the agreement we will continue with reviewing the PR, otherwise system will tell you how you can sign the CLA. Once you sign the CLA all future PR's will be labeled as `cla-signed`.
+
+## Troubleshooting
+
+### I get "unauthorized: authentication required" in the terminal when executing some commands, such as "Docker: push".
+
+Make sure you are signed in to the Docker Hub or Azure container registry from the docker CLI via `docker login` (using your username, not your e-mail address).
+
+If you are using an Azure container registry, you will need to get the username and password from Azure by right-clicking on the Azure container registry in the extension and selecting "Browse in the Azure Portal", then selecting the "Access Keys" tab.
+![Getting Azure username and password](images/AzureUsernamePassword.png)
+
+Finally, execute `docker login`, for example:
+
+```bash
+docker login exampleazurecontainerregistry.azurecr.io
+```
+
+and respond with the username and password specified by Azure.
+
+### I'm on Linux and get the error "Unable to connect to Docker, is the Docker daemon running?"
+
+Since VS Code runs as a non-root user, you will need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://docs.docker.com/install/linux/linux-postinstall/) for the extension to be able to access docker.
 
 ## Telemetry
 

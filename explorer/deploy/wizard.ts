@@ -1,11 +1,13 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// tslint:disable:no-unsafe-any // Grandfathered in and will be replaced
+
+import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { AzureAccountWrapper } from './azureAccountWrapper';
-import { SubscriptionModels } from 'azure-arm-resource';
 
 export type WizardStatus = 'PromptCompleted' | 'Completed' | 'Faulted' | 'Cancelled';
 
@@ -15,9 +17,10 @@ export class WizardBase {
 
     protected constructor(protected readonly output: vscode.OutputChannel) { }
 
-    async run(promptOnly = false): Promise<WizardResult> {
+    public async run(promptOnly: boolean = false): Promise<WizardResult> {
         // Go through the prompts...
-        for (var i = 0; i < this.steps.length; i++) {
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
+        for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
 
             try {
@@ -50,10 +53,10 @@ export class WizardBase {
         return this.execute();
     }
 
-    async execute(): Promise<WizardResult> {
+    public async execute(): Promise<WizardResult> {
         // Execute each step...
         this.output.show(true);
-        for (var i = 0; i < this.steps.length; i++) {
+        for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
 
             try {
@@ -91,7 +94,7 @@ export class WizardBase {
         return this._steps;
     }
 
-    findStep(predicate: (step: WizardStep) => boolean, errorMessage: string): WizardStep {
+    public findStep(predicate: (step: WizardStep) => boolean, errorMessage: string): WizardStep {
         const step = this.steps.find(predicate);
 
         if (!step) {
@@ -101,17 +104,17 @@ export class WizardBase {
         return step;
     }
 
-    write(text: string) {
+    public write(text: string): void {
         this.output.append(text);
     }
 
-    writeline(text: string) {
+    public writeline(text: string): void {
         this.output.appendLine(text);
     }
 
-    protected beforeExecute(step: WizardStep, stepIndex: number) { }
+    protected beforeExecute(step: WizardStep, stepIndex: number): void { }
 
-    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error) { }
+    protected onExecuteError(step: WizardStep, stepIndex: number, error: Error): void { }
 }
 
 export interface WizardResult {
@@ -123,8 +126,8 @@ export interface WizardResult {
 export class WizardStep {
     protected constructor(readonly wizard: WizardBase, readonly stepTitle: string) { }
 
-    async prompt(): Promise<void> { }
-    async execute(): Promise<void> { }
+    public async prompt(): Promise<void> { }
+    public async execute(): Promise<void> { }
 
     get stepIndex(): number {
         return this.wizard.steps.findIndex(step => step === this);
@@ -134,7 +137,7 @@ export class WizardStep {
         return `Step ${this.stepIndex + 1}/${this.wizard.steps.length}`;
     }
 
-    async showQuickPick<T>(items: QuickPickItemWithData<T>[], options: vscode.QuickPickOptions, token?: vscode.CancellationToken): Promise<QuickPickItemWithData<T>> {
+    public async showQuickPick<T>(items: QuickPickItemWithData<T>[], options: vscode.QuickPickOptions, token?: vscode.CancellationToken): Promise<QuickPickItemWithData<T>> {
         const result = await vscode.window.showQuickPick(items, options, token);
 
         if (!result) {
@@ -144,7 +147,7 @@ export class WizardStep {
         return result;
     }
 
-    async showInputBox(options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> {
+    public async showInputBox(options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> {
         const result = await vscode.window.showInputBox(options, token);
 
         if (!result) {

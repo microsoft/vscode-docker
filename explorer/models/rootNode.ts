@@ -1,12 +1,16 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-import { ContainerNode } from './containerNode';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { docker } from '../../commands/utils/docker-endpoint';
-import { ImageNode } from './imageNode';
-import { NodeBase } from './nodeBase';
-import { RegistryRootNode } from './registryRootNode';
 import { AzureAccount } from '../../typings/azure-account.api';
+import { ContainerNode, ContainerNodeContextValue } from './containerNode';
+import { ImageNode } from './imageNode';
+import { IconPath, NodeBase } from './nodeBase';
+import { RegistryRootNode } from './registryRootNode';
 
 const imageFilters = {
     "filters": {
@@ -21,17 +25,17 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _imageCache: Docker.ImageDesc[];
-    private _imageDebounceTimer: NodeJS.Timer;
-    private _imagesNode: RootNode;
-    private _containerCache: Docker.ContainerDesc[];
-    private _containerDebounceTimer: NodeJS.Timer;
-    private _containersNode: RootNode;
-    private _azureAccount: AzureAccount;
+    private _sortedImageCache: Docker.ImageDesc[] | undefined;
+    private _imageDebounceTimer: NodeJS.Timer | undefined;
+    private _imagesNode: RootNode | undefined;
+    private _containerCache: Docker.ContainerDesc[] | undefined;
+    private _containerDebounceTimer: NodeJS.Timer | undefined;
+    private _containersNode: RootNode | undefined;
+    private _azureAccount: AzureAccount | undefined;
 
     constructor(
         public readonly label: string,
-        public readonly contextValue: string,
+        public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
         public eventEmitter: vscode.EventEmitter<NodeBase>,
         public azureAccount?: AzureAccount
     ) {
@@ -44,7 +48,7 @@ export class RootNode extends NodeBase {
         this._azureAccount = azureAccount;
     }
 
-    autoRefreshImages(): void {
+    public autoRefreshImages(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
 
@@ -54,7 +58,9 @@ export class RootNode extends NodeBase {
         //     return;
         // }
 
-        clearInterval(this._imageDebounceTimer);
+        if (this._imageDebounceTimer) {
+            clearInterval(this._imageDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
@@ -62,34 +68,26 @@ export class RootNode extends NodeBase {
                 let found: boolean = false;
 
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
-
-                if (!this._imageCache) {
-                    this._imageCache = images;
-                }
-
-                if (this._imageCache.length !== images.length) {
-                    needToRefresh = true;
-                } else {
-                    for (let i: number = 0; i < this._imageCache.length; i++) {
-                        let before: string = JSON.stringify(this._imageCache[i]);
-                        for (let j: number = 0; j < images.length; j++) {
-                            let after: string = JSON.stringify(images[j]);
-                            if (before === after) {
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (!found) {
-                            needToRefresh = true;
-                            break
-                        }
+                images.sort((img1, img2) => {
+                    if (img1.Id > img2.Id) {
+                        return -1;
+                    } else if (img1.Id < img2.Id) {
+                        return 1;
+                    } else {
+                        return 0;
                     }
+                });
+
+                if (!this._sortedImageCache) {
+                    this._sortedImageCache = images;
+                    return;
                 }
 
-                if (needToRefresh) {
+                let imagesAsJson = JSON.stringify(images);
+                let cacheAsJson = JSON.stringify(this._sortedImageCache);
+                if (imagesAsJson !== cacheAsJson) {
                     this.eventEmitter.fire(this._imagesNode);
-                    this._imageCache = images;
+                    this._sortedImageCache = images;
                 }
 
             }, refreshInterval);
@@ -97,7 +95,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -106,7 +104,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    async getChildren(element): Promise<NodeBase[]> {
+    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
 
         if (element.contextValue === 'imagesRootNode') {
             return this.getImages();
@@ -118,6 +116,7 @@ export class RootNode extends NodeBase {
             return this.getRegistries()
         }
 
+        throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
     private async getImages(): Promise<ImageNode[]> {
@@ -130,15 +129,17 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < images.length; i++) {
+                // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, "localImageNode", this.eventEmitter);
-                    node.imageDesc = images[i];
+                    let node = new ImageNode(`<none>:<none>`, images[i], this.eventEmitter);
                     imageNodes.push(node);
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, "localImageNode", this.eventEmitter);
-                        node.imageDesc = images[i];
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
+                        let node = new ImageNode(`${images[i].RepoTags[j]}`, images[i], this.eventEmitter);
                         imageNodes.push(node);
                     }
                 }
@@ -153,7 +154,7 @@ export class RootNode extends NodeBase {
         return imageNodes;
     }
 
-    autoRefreshContainers(): void {
+    public autoRefreshContainers(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
 
@@ -163,7 +164,9 @@ export class RootNode extends NodeBase {
         //     return;
         // }
 
-        clearInterval(this._containerDebounceTimer);
+        if (this._containerDebounceTimer) {
+            clearInterval(this._containerDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._containerDebounceTimer = setInterval(async () => {
@@ -180,8 +183,10 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
+                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
                     for (let i = 0; i < this._containerCache.length; i++) {
                         let ctr: Docker.ContainerDesc = this._containerCache[i];
+                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
                         for (let j = 0; j < containers.length; j++) {
                             // can't do a full object compare because "Status" keeps changing for running containers
                             if (ctr.Id === containers[j].Id &&
@@ -213,15 +218,16 @@ export class RootNode extends NodeBase {
     private async getContainers(): Promise<ContainerNode[]> {
         const containerNodes: ContainerNode[] = [];
         let containers: Docker.ContainerDesc[];
-        let contextValue: string;
-        let iconPath: any = {};
+        let contextValue: ContainerNodeContextValue;
+        let iconPath: IconPath;
 
         try {
             containers = await docker.getContainerDescriptors(containerFilters);
-            if (!containers || containers.length == 0) {
+            if (!containers || containers.length === 0) {
                 return [];
             }
 
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < containers.length; i++) {
                 if (['exited', 'dead'].includes(containers[i].State)) {
                     contextValue = "stoppedLocalContainerNode";
@@ -237,8 +243,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, contextValue, iconPath);
-                containerNode.containerDesc = containers[i];
+                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, containers[i], contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 
@@ -255,11 +260,13 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", null));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode"));
 
         if (this._azureAccount) {
             registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
         }
+
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode'));
 
         return registryRootNodes;
     }

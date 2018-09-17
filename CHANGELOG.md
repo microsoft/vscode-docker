@@ -1,5 +1,55 @@
-## 0.0.28 - XX May 2018
+## 0.2.0 - 5 September 2018
+
+### Added
+* Add preview support for connecting to private registries
+* Improved workflow for Tag Image:
+  - User will be asked on the first usage of Tag Image with a registry to save it to the `docker.defaultRegistryPath` setting
+  - User will be prompted to tag an image if attempting to push an image with no registry or username
+  - New `Set as Default Registry Path` menu on registries
+  - When default registry path is prefixed to the image name, it is selected for easy removal or editing
+* Improved workflow for Build Image:
+  - Previous image name will be remembered
+* Azure container registries can now be browsed without having "Admin user" turned on. However, deploying to Azure app service currently still requires it, and you still need to log in to Azure in docker [#359](https://github.com/Microsoft/vscode-docker/issues/359)
+* A new [API](docs\api.md) has been added for other extensions to be able to control the "Add Docker Files to Workspace" functionality.
+* You can now create and delete Azure (ACR) registries and delete Azure repositories and images directly from the extension.
+
+### Fixed
+* Images list does not refresh after tagging an image [#371](https://github.com/Microsoft/vscode-docker/issues/371)
+* Don't prompt for Dockerfile if only one in project (command palette->Build Image) [#377](https://github.com/Microsoft/vscode-docker/issues/377)
+* Docker Hub repos are not alphabetized consistently [#410](https://github.com/Microsoft/vscode-docker/issues/410)
+* Obsolete usage of `go-wrapper` removed from Go Dockerfile (thanks @korservick)
+* Error when listing Azure Registries when some of the accounts do not have appropriate permissions (thanks @estebanreyl) [#336](https://github.com/Microsoft/vscode-docker/issues/336)
+* UDP exposed ports not launching correctly [#284](https://github.com/Microsoft/vscode-docker/issues/284)
+* Adopt version 0.0.19 of the language server (thanks @rcjsuen) [#392](https://github.com/Microsoft/vscode-docker/pull/392). This fix includes:
+  - Folding support for comments
+  - Fix for [#338 Multi-line LABEL directives highlight as errors](https://github.com/Microsoft/vscode-docker/issues/338)
+  - Support for handling SCTP ports in EXPOSE instructions per Docker CE 18.03
+  - Optional warning/error for WORKDIR instructions that are not absolute paths (to try to enforce good practices per the official guidelines and recommendations document for Dockerfiles
+  - New `docker.languageserver.diagnostics.instructionWorkdirRelative` configuration setting
+* Output title corrected [#428](https://github.com/Microsoft/vscode-docker/pull/428)
+
+### Changed
+* The `docker.defaultRegistry` setting is now obsolete. Instead of using a combination of `docker.defaultRegistry` and `docker.defaultRegistryPath`, now simply use `docker.defaultRegistryPath`. This will be suggested automatically the first time the extension is run.
+
+## 0.1.0 - 26 July 2018
 * Update .NET Core Dockerfile generation [#264](https://github.com/Microsoft/vscode-docker/issues/264). Per the .NET team, don't generate `docker-compose` files for .NET Core
+* Update to version 0.0.18 of the language server (thanks @rcjsuen) [#291](https://github.com/Microsoft/vscode-docker/pull/291).  This includes fixes for:
+  * Auto-complete/intellisense types too much - it repeats what's already written [#277](https://github.com/Microsoft/vscode-docker/issues/277)
+  * Dockerfile linting error in FROM [#269](https://github.com/Microsoft/vscode-docker/issues/269), [#280](https://github.com/Microsoft/vscode-docker/issues/280), [#288](https://github.com/Microsoft/vscode-docker/issues/288), and others
+  * Other linting fixes
+* Update Linux post-install link in README.md (thanks @gregvanl) [#275](https://github.com/Microsoft/vscode-docker/pull/275)
+* Add docker.host setting as alternative for setting DOCKER_HOST environment variable (thanks @tfenster) [#304](https://github.com/Microsoft/vscode-docker/pull/304)
+* Basic Dockerfile for Ruby (thanks @MiguelSavignano) [#276](https://github.com/Microsoft/vscode-docker/pull/276)
+* Azure container registries bugfixes and enhancements (thanks @estebanreyl, @julialieberman) [#299](https://github.com/Microsoft/vscode-docker/pull/299)
+  * Fixes [#266](https://github.com/Microsoft/vscode-docker/issues/266) to fix error when expanding empty container registry
+  * Improves Azure explorer expansion speed by parallelizing network calls
+  * Alphabetically organized registries listed from azure and organized tags by date of creation
+* Add "Docker: Compose Restart" command [#316](https://github.com/Microsoft/vscode-docker/pull/316)
+* Add link to extension docs and Azure publish tutorial to readme
+* Fix [#295](https://github.com/Microsoft/vscode-docker/issues/295) to provide proper error handling if project file can't be found adding Dockerfile to project
+* Fix [#302](https://github.com/Microsoft/vscode-docker/issues/302) so that Compose Up/Down work correctly from the text editor context menu
+* Clarify README documentation on DOCKER_HOST to note that DOCKER_CER_PATH may be required for TLS (thanks @mikepatrick) [#324](https://github.com/Microsoft/vscode-docker/pull/324)
+* Engineering improvements (tests and lint fixes)
 
 ## 0.0.27 - 19 May 2018
 
