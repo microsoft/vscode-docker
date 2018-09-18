@@ -169,6 +169,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let sdkImageNameFormat: string;
 
     if (platform === 'ASP.NET Core') {
+        // See https://github.com/aspnet/Announcements/issues/298 - 2.1 and newer use microsoft/dotnet repo
         if (semver.lt(netCoreAppVersion, '2.1.0')) {
             baseImageFormat = AspNetCoreRuntimeImageFormat;
             sdkImageNameFormat = AspNetCoreSdkImageFormat;
