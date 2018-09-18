@@ -366,7 +366,7 @@ const gradleWithJarContents = removeIndentation(`
     }
 `);
 
-suite("configure (Add Docker files to Workspace)", function (this: Suite): void {
+suite("Configure (Add Docker files to Workspace)", function (this: Suite): void {
     this.timeout(30 * 1000);
 
     test('add tests for compose files');
@@ -577,7 +577,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertNotFileContains('Dockerfile', 'projectFolder1');
             assertFileContains('Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
             assertFileContains('Dockerfile', 'RUN dotnet restore projectFolder2/aspnetapp.csproj');
-            assertFileContains('Dockerfile', `ENTRYPOINT ["dotnet", "projectFolder2/aspnetapp.dll"]`);
+            assertFileContains('Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
         });
     });
 
@@ -609,7 +609,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "ConsoleApp1Folder/ConsoleApp1.dll"]
+                    ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
@@ -639,7 +639,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "ConsoleApp1Folder/ConsoleApp1.dll"]
+                    ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
@@ -674,7 +674,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "subfolder/projectFolder/ConsoleApp1.dll"]
+                    ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
@@ -704,7 +704,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "subfolder/projectFolder/ConsoleApp1.dll"]
+                    ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
@@ -794,7 +794,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "AspNetApp1/project1.dll"]
+                    ENTRYPOINT ["dotnet", "project1.dll"]
                 `));
         });
 
@@ -823,7 +823,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM base AS final
                     WORKDIR /app
                     COPY --from=publish /app .
-                    ENTRYPOINT ["dotnet", "project2/project2.dll"]
+                    ENTRYPOINT ["dotnet", "project2.dll"]
                 `));
         });
     });
@@ -1070,7 +1070,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ],
                     ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
                 );
-                assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "projectFolder2/aspnetapp.dll"]');
+                assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 assertNotFileContains('Dockerfile', 'projectFolder1');
             });
 
@@ -1129,7 +1129,7 @@ suite("configure (Add Docker files to Workspace)", function (this: Suite): void 
                         ['.NET Core Console'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
-                    assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "subfolder1/aspnetapp.dll"]');
+                    assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });
 
                 testInEmptyFolder(".csproj file in subfolder, output to subfolder", async () => {

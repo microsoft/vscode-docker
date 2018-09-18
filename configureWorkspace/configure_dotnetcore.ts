@@ -149,7 +149,8 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let serviceName = path.basename(serviceNameAndRelativePath);
     let projectDirectory = path.dirname(serviceNameAndRelativePath);
     let projectFileName = `${serviceName}.csproj`;
-    let assemblyNameNoExtension = serviceNameAndRelativePath;
+    // We don't want the project folder in $assembly_name$ because the assembly is in /app and WORKDIR has been set to that
+    let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
     let exposeStatements = `EXPOSE ${port}`;
