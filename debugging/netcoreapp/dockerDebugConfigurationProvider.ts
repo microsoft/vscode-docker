@@ -97,7 +97,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             : this.osProvider.pathJoin(os, 'bin', 'Debug', 'netcoreapp2.0', `${appName}.dll`); // TODO: Infer build configuration.
 
         const result = await this.dockerManager.prepareForLaunch({
-            appFolder,
+            appFolder: resolvedAppFolder,
             appOutput,
             build: {
                 context: resolvedContext,
