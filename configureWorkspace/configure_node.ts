@@ -11,8 +11,7 @@ export let configureNode = {
   genDockerComposeDebug
 };
 
-// Note: serviceName includes the path of the service relative to the generated file, e.g. 'projectFolder1/myAspNetService'
-function genDockerFile(serviceName: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
   return `FROM node:8.9-alpine
 ENV NODE_ENV production
 WORKDIR /usr/src/app
@@ -23,12 +22,12 @@ EXPOSE ${port}
 CMD ${cmd}`;
 }
 
-function genDockerCompose(serviceName: string, platform: string, os: string | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string): string {
   return `version: '2.1'
 
 services:
-  ${serviceName}:
-    image: ${serviceName}
+  ${serviceNameAndRelativePath}:
+    image: ${serviceNameAndRelativePath}
     build: .
     environment:
       NODE_ENV: production
@@ -36,7 +35,7 @@ services:
       - ${port}:${port}`;
 }
 
-function genDockerComposeDebug(serviceName: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
 
   const cmdArray: string[] = cmd.split(' ');
   if (cmdArray[0].toLowerCase() === 'node') {
@@ -49,8 +48,8 @@ function genDockerComposeDebug(serviceName: string, platform: string, os: string
   return `version: '2.1'
 
 services:
-${serviceName}:
-image: ${serviceName}
+${serviceNameAndRelativePath}:
+image: ${serviceNameAndRelativePath}
 build: .
 environment:
 NODE_ENV: development
