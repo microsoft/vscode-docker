@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
@@ -29,10 +30,9 @@ const DotNetCoreAspNetRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-aspnetcore-
 const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 
 function GetWindowsImageTag(): string {
-    assert(isWindows());
-
-    // You need to match the host OS version with the version of .NET core in the virtual machine
-    if (isWindows10RS4OrNewer()) {
+    // The host OS version needs to match the version of .NET core images being created
+    if (!isWindows() || isWindows10RS4OrNewer()) {
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS4 host
         return "-nanoserver-1803";
     } else if (isWindows10RS3OrNewer()) {
         return "-nanoserver-1709";
@@ -50,7 +50,7 @@ function formatVersion(format: string, version: string, tagForWindowsVersion: st
 
 //#region ASP.NET Core templates
 
-//AT-DockerCore: /src/Microsoft.Docker/Templates/windows/dotnetcore/aspnetcore/Dockerfile
+//AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
@@ -75,7 +75,7 @@ COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/linux/dotnetcore/aspnetcore/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
@@ -101,7 +101,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#region .NET Core Console templates
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/windows/dotnetcore/console/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
@@ -126,7 +126,7 @@ COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/linux/dotnetcore/console/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
@@ -164,7 +164,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
-    let exposeStatements = `EXPOSE ${port}`;
+    let exposeStatements = port ? `EXPOSE ${port}` : '';
 
     // Parse version from TargetFramework
     // Example: netcoreapp1.0
@@ -225,6 +225,9 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$project_file_name\$/g, projectFileName)
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
+
+    // Remove multiple empty lines, as might be produced if there's no EXPOSE statement
+    contents = contents.replace(/$$/gm, nodeOs.EOL);
 
     let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
     if (unreplacedToken[0]) {

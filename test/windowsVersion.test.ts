@@ -52,11 +52,17 @@ suite("windowsVersion", () => {
         testIsWindows10RS4OrNewer('9.9.17135', false);
         testIsWindows10RS4OrNewer('10.1.0', true);
         testIsWindows10RS4OrNewer('11.1.0', true);
+
+        testIsWindows10RS4OrNewer('10.0.14393', false); // Windows Server 2016
+        testIsWindows10RS4OrNewer('10.0.17134', true); // Windows 10 Version 1803 (build 17134.285)
     });
 
     suite('isWindows10RS3OrNewer', () => {
         testIsWindows10RS3OrNewer('10.0.16299', true);
         testIsWindows10RS3OrNewer('10.0.16300', true);
         testIsWindows10RS3OrNewer('10.0.16298', false);
+
+        testIsWindows10RS3OrNewer('10.0.14393', false); // Windows Server 2016
+        testIsWindows10RS3OrNewer('10.0.17134', true); // Windows 10 Version 1803 (build 17134.285)
     });
 });
