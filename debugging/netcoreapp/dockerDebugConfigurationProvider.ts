@@ -33,7 +33,8 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     constructor(
         private readonly dockerManager: DockerManager,
-        private readonly osProvider: OSProvider) {
+        private readonly osProvider: OSProvider,
+        private readonly dependencyCheck: () => Promise<boolean>) {
     }
 
     provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
@@ -48,11 +49,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
-        if (folder) {
-            return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
-        }
-
-        return undefined;
+        return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
     }
 
     private static resolveFolderPath(folderPath: string, folder: WorkspaceFolder): string {
@@ -60,6 +57,16 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async resolveDockerDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration> {
+        if (!folder) {
+            return undefined;
+        }
+
+        const dependenciesSatisfied = await this.dependencyCheck();
+
+        if (!dependenciesSatisfied) {
+            return undefined;
+        }
+
         const appFolder = this.inferAppFolder(folder, debugConfiguration);
 
         const resolvedAppFolder = DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder);

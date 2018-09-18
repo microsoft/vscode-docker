@@ -67,6 +67,7 @@ import { addUserAgent } from './utils/addUserAgent';
 import { registerAzureCommand } from './utils/Azure/common';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { Keytar } from './utils/keytar';
+import { BrowserClient, OpnBrowserClient } from './debugging/netcoreapp/browserClient';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -331,7 +332,32 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                 'docker-netcoreapp',
                 new DockerDebugConfigurationProvider(
                     dockerManager,
-                    osProvider)));
+                    osProvider,
+                    async () => {
+                        // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
+                        //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.
+                        //       Hence, we only check for its existence if/when asked to debug .NET Core in Docker containers.
+                        // TODO: Remove this check once debugging is enabled-by-default (and then add a package.json extension dependency).
+                        const dependenciesSatisfied = vscode.extensions.getExtension('ms-vscode.csharp') !== undefined;
+
+                        if (!dependenciesSatisfied) {
+                            const openExtensionInGallery: vscode.MessageItem = {
+                                title: 'View extension in gallery'
+                            };
+
+                            const result = await vscode.window.showErrorMessage(
+                                'To debug .NET Core in Docker containers, install the C# extension for VS Code.',
+                                openExtensionInGallery);
+
+                            if (result === openExtensionInGallery) {
+                                const browserClient: BrowserClient = new OpnBrowserClient();
+
+                                browserClient.openBrowser('https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp');
+                            }
+                        }
+
+                        return dependenciesSatisfied;
+                    })));
 
         ctx.subscriptions.push(
             vscode.debug.onDidChangeActiveDebugSession(
