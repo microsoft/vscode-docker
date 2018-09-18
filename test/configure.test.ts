@@ -11,7 +11,7 @@ import * as path from 'path';
 import { Platform, OS } from "../configureWorkspace/config-utils";
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
-import { configure, ConfigureTelemetryProperties, configureApi, ConfigureApiOptions } from '../configureWorkspace/configure';
+import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { globAsync } from '../helpers/async';
 import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';

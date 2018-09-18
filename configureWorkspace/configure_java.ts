@@ -3,24 +3,26 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PackageInfo } from './configure';
+import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
-export let configureJava = {
+export let configureJava: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
-  genDockerComposeDebug
+  genDockerComposeDebug,
+  defaultPort: '3000'
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-
+  let exposeStatements = getExposeStatements(port);
   const artifact = artifactName ? artifactName : `${serviceNameAndRelativePath}.jar`;
+
   return `
 FROM openjdk:8-jdk-alpine
 VOLUME /tmp
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
 ADD ${artifact} ${serviceNameAndRelativePath}.jar
-EXPOSE ${port}
+${exposeStatements}
 ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceNameAndRelativePath}.jar
 # For Spring-Boot project, use the entrypoint below to reduce Tomcat startup time.
 #ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar ${serviceNameAndRelativePath}.jar
