@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
-import { Build, BuildGetLogResult, Registry } from "azure-arm-containerregistry/lib/models";
+import { Registry, Run, RunGetLogResult } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
@@ -184,10 +184,10 @@ export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuf
  * streamed in which prevents updating of already appended lines. Usure if this can be fixed. Nonetheless
  * logs do load in chunks every 1 second.
  */
-export async function streamLogs(registry: Registry, build: Build, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
+export async function streamLogs(registry: Registry, run: Run, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
     //Prefer passed in client to avoid initialization but if not added obtains own
     let client = providedClient ? providedClient : AzureUtilityManager.getInstance().getContainerRegistryManagementClient(getSubscriptionFromRegistry(registry));
-    let temp: BuildGetLogResult = await client.builds.getLogLink(getResourceGroupName(registry), registry.name, build.buildId);
+    let temp: RunGetLogResult = await client.runs.getLogSasUrl(getResourceGroupName(registry), registry.name, run.runId);
     const link = temp.logLink;
     let blobInfo = getBlobInfo(link);
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);

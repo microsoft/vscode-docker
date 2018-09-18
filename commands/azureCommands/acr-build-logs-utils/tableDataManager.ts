@@ -1,5 +1,5 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
-import { Build, BuildGetLogResult, BuildListResult, Registry } from "azure-arm-containerregistry/lib/models";
+import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
 import request = require('request-promise');
 import { registryRequest } from "../../../explorer/models/commonRegistryUtils";
 import { Manifest } from "../../../explorer/utils/dockerHubUtils";
@@ -9,7 +9,7 @@ export class LogData {
     public registry: Registry;
     public resourceGroup: string;
     public links: { requesting: boolean, url?: string }[];
-    public logs: Build[];
+    public logs: Run[];
     public client: ContainerRegistryManagementClient;
     private nextLink: string;
 
@@ -36,49 +36,49 @@ export class LogData {
         if (this.links[itemNumber].requesting) { return 'requesting' }
 
         this.links[itemNumber].requesting = true;
-        const temp: BuildGetLogResult = await this.client.builds.getLogLink(this.resourceGroup, this.registry.name, this.logs[itemNumber].buildId);
+        const temp: RunGetLogResult = await this.client.runs.getLogSasUrl(this.resourceGroup, this.registry.name, this.logs[itemNumber].runId);
         this.links[itemNumber].url = temp.logLink;
         this.links[itemNumber].requesting = false;
         return this.links[itemNumber].url
     }
 
-    //contains(BuildTaskName, 'testTask')
-    //`BuildTaskName eq 'testTask'
+    //contains(TaskName, 'testTask')
+    //`TaskName eq 'testTask'
     //
     /** Loads logs from azure
      * @param loadNext Determines if the next page of logs should be loaded, will throw an error if there are no more logs to load
      * @param removeOld Cleans preexisting information on links and logs imediately before new requests, if loadNext is specified
      * the next page of logs will be saved and all preexisting data will be deleted.
-     * @param filter Specifies a filter for log items, if build Id is specified this will take precedence
+     * @param filter Specifies a filter for log items, if run Id is specified this will take precedence
      */
     public async loadLogs(loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
-        let buildListResult: BuildListResult;
+        let runListResult: RunListResult;
         let options: any = {};
         if (filter && Object.keys(filter).length) {
-            if (!filter.buildId) {
+            if (!filter.runId) {
                 options.filter = await this.parseFilter(filter);
-                buildListResult = await this.client.builds.list(this.resourceGroup, this.registry.name, options);
+                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
-                buildListResult = [];
-                buildListResult.push(await this.client.builds.get(this.resourceGroup, this.registry.name, filter.buildId));
+                runListResult = [];
+                runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
             }
         } else {
             if (loadNext) {
                 if (this.nextLink) {
-                    buildListResult = await this.client.builds.listNext(this.nextLink);
+                    runListResult = await this.client.runs.listNext(this.nextLink);
                 } else {
                     throw new Error('No more logs to show');
                 }
             } else {
-                buildListResult = await this.client.builds.list(this.resourceGroup, this.registry.name);
+                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name);
             }
         }
         if (removeOld) { this.clearLogItems() }
-        this.nextLink = buildListResult.nextLink;
-        this.addLogs(buildListResult);
+        this.nextLink = runListResult.nextLink;
+        this.addLogs(runListResult);
     }
 
-    public addLogs(logs: Build[]): void {
+    public addLogs(logs: Run[]): void {
         this.logs = this.logs.concat(logs);
 
         const itemCount = logs.length;
@@ -99,8 +99,8 @@ export class LogData {
 
     private async parseFilter(filter: Filter): Promise<string> {
         let parsedFilter = "";
-        if (filter.buildTask) { // Build Task id
-            parsedFilter = `BuildTaskName eq '${filter.buildTask}'`;
+        if (filter.task) { //Task id
+            parsedFilter = `TaskName eq '${filter.task}'`;
         } else if (filter.image) { //Image
             let items: string[] = filter.image.split(':')
             const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(this.registry, 'repository:' + items[0] + ':pull');
@@ -126,6 +126,6 @@ export class LogData {
 
 export interface Filter {
     image?: string;
-    buildId?: string;
-    buildTask?: string;
+    runId?: string;
+    task?: string;
 }

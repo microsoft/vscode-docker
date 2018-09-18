@@ -34,14 +34,14 @@ export async function quickPickACRRepository(registry: Registry, prompt?: string
     return desiredRepo.data;
 }
 
-export async function quickPickBuildTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.BuildTask> {
-    const placeHolder = prompt ? prompt : 'Choose a Build Task';
+export async function quickPickTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.Task> {
+    const placeHolder = prompt ? prompt : 'Choose a Task';
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    let buildTasks: ContainerModels.BuildTask[] = await client.buildTasks.list(resourceGroup.name, registry.name);
-    const quickpPickBTList = buildTasks.map(buildTask => <IAzureQuickPickItem<ContainerModels.BuildTask>>{ label: buildTask.name, data: buildTask });
-    let desiredBuildTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
-    return desiredBuildTask.data;
+    let tasks: ContainerModels.Task[] = await client.tasks.list(resourceGroup.name, registry.name);
+    const quickpPickBTList = tasks.map(task => <IAzureQuickPickItem<ContainerModels.Task>>{ label: task.name, data: task });
+    let desiredTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
+    return desiredTask.data;
 }
 
 export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {

@@ -31,6 +31,7 @@
     "onLanguage:yaml",
     "onCommand:vscode-docker.acrBuildLogs",
     "onCommand:vscode-docker.api.configure",
+    "onCommand:vscode-docker.ACR-queueBuild",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -86,6 +87,11 @@
       "editor/context": [
         {
           "when": "editorLangId == dockerfile",
+          "command": "vscode-docker.ACR-queueBuild",
+          "group": "docker"
+        },
+        {
+          "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
         },
@@ -121,6 +127,11 @@
         }
       ],
       "explorer/context": [
+        {
+          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
+          "command": "vscode-docker.ACR-queueBuild",
+          "group": "docker"
+        },
         {
           "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
           "command": "vscode-docker.image.build",
@@ -237,11 +248,11 @@
         },
         {
           "command": "vscode-docker.run-ACR-BuildTask",
-          "when": "view == dockerExplorer && viewItem == buildTaskNode"
+          "when": "view == dockerExplorer && viewItem == taskNode"
         },
         {
           "command": "vscode-docker.show-ACR-buildTask",
-          "when": "view == dockerExplorer && viewItem == buildTaskNode"
+          "when": "view == dockerExplorer && viewItem == taskNode"
         },
         {
           "command": "vscode-docker.delete-ACR-Registry",
@@ -257,7 +268,7 @@
         },
         {
           "command": "vscode-docker.acrBuildLogs",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|buildTaskNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
@@ -484,6 +495,12 @@
         "title": "Add Docker files to Workspace (API)"
       },
       {
+        "command": "vscode-docker.ACR-queueBuild",
+        "title": "Queue Build",
+        "description": "Queue a build from a Dockerfile",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.image.build",
         "title": "Build Image",
         "description": "Build a Docker image from a Dockerfile",
@@ -639,12 +656,12 @@
       },
       {
         "command": "vscode-docker.run-ACR-BuildTask",
-        "title": "Run a Build Task",
+        "title": "Run a Task",
         "category": "Docker"
       },
       {
         "command": "vscode-docker.show-ACR-buildTask",
-        "title": "Show Build Task Properties",
+        "title": "Show Task Properties",
         "category": "Docker"
       },
       {
@@ -659,7 +676,7 @@
       },
       {
         "command": "vscode-docker.acrBuildLogs",
-        "title": "ACR build logs",
+        "title": "ACR run logs",
         "category": "Docker"
       },
       {
@@ -679,7 +696,7 @@
       },
       {
         "command": "vscode-docker.ACR-Build",
-        "title": "Cloud Build",
+        "title": "Cloud run",
         "category": "Docker"
       }
     ],
@@ -738,7 +755,7 @@
     "vscode": "^1.1.18"
   },
   "dependencies": {
-    "azure-arm-containerregistry": "^2.4.0",
+    "azure-arm-containerregistry": "^3.0.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
     "dockerfile-language-server-nodejs": "^0.0.19",

@@ -1,8 +1,8 @@
-import { Build, Registry } from "azure-arm-containerregistry/lib/models";
+import { Registry, Run } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { BuildTaskNode } from "../../explorer/models/taskNode";
+import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickACRRegistry } from '../utils/quick-pick-azure'
@@ -11,7 +11,7 @@ import { LogData } from "./acr-build-logs-utils/tableDataManager";
 import { LogTableWebview } from "./acr-build-logs-utils/tableViewManager";
 
 /**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view build logs for a given item. */
-export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNode | BuildTaskNode): Promise<void> {
+export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
     let registry: Registry;
     let subscription: Subscription;
     if (!context) {
@@ -31,17 +31,17 @@ export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNo
         await logData.loadLogs(false, false, { image: context.tag });
         if (!hasValidLogContent(context, logData)) { return; }
         logData.getLink(0).then((url) => {
-            accessLog(url, logData.logs[0].buildId, false);
+            accessLog(url, logData.logs[0].runId, false);
         });
     } else {
-        if (context && context instanceof BuildTaskNode) {
-            await logData.loadLogs(false, false, { buildTask: context.label });
+        if (context && context instanceof TaskNode) {
+            await logData.loadLogs(false, false, { task: context.label });
         } else {
             await logData.loadLogs(false);
         }
         if (!hasValidLogContent(context, logData)) { return; }
         let webViewTitle: string = registry.name;
-        if (context instanceof BuildTaskNode) {
+        if (context instanceof TaskNode) {
             webViewTitle += '/' + context.label;
         }
         let webview = new LogTableWebview(webViewTitle, logData);
@@ -51,7 +51,7 @@ export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNo
 function hasValidLogContent(context: any, logData: LogData): boolean {
     if (logData.logs.length === 0) {
         let itemType: string;
-        if (context && context instanceof BuildTaskNode) {
+        if (context && context instanceof TaskNode) {
             itemType = 'task';
         } else if (context && context instanceof AzureImageTagNode) {
             itemType = 'image';

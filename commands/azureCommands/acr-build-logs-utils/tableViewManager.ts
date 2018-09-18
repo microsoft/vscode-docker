@@ -1,5 +1,5 @@
 
-import { Build, ImageDescriptor } from "azure-arm-containerregistry/lib/models";
+import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
@@ -32,7 +32,7 @@ export class LogTableWebview {
                 const itemNumber: number = +message.logRequest.id;
                 this.logData.getLink(itemNumber).then((url) => {
                     if (url !== 'requesting') {
-                        accessLog(url, this.logData.logs[itemNumber].buildId, message.logRequest.download);
+                        accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
                     }
                 });
 
@@ -70,7 +70,7 @@ export class LogTableWebview {
         }
     }
 
-    private getImageOutputTable(log: Build): string {
+    private getImageOutputTable(log: Run): string {
         let imageOutput: string = '';
         if (log.outputImages) {
             //Adresses strange error where the image list can exist and contain only one null item.
@@ -150,11 +150,11 @@ export class LogTableWebview {
         </body>`;
     }
 
-    private getLogTableItem(log: Build, logId: number): string {
-        const task: string = log.buildTask ? log.buildTask : '';
+    private getLogTableItem(log: Run, logId: number): string {
+        const task: string = log.task ? log.task : '';
         const prettyDate: string = log.createTime ? this.getPrettyDate(log.createTime) : '';
         const timeElapsed: string = log.startTime && log.finishTime ? Math.ceil((log.finishTime.valueOf() - log.startTime.valueOf()) / 1000).toString() + 's' : '';
-        const osType: string = log.platform.osType ? log.platform.osType : '';
+        const osType: string = log.platform.os ? log.platform.os : '';
         const name: string = log.name ? log.name : '';
         const imageOutput: string = this.getImageOutputTable(log);
         const statusIcon: string = this.getLogStatusIcon(log.status);

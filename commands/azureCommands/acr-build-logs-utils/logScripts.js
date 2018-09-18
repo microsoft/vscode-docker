@@ -96,7 +96,7 @@ function sortTable(n, dir = "asc", holdDir = false) {
 function acquireCompareFunction(n) {
     switch (n) {
         case 0: //Name
-        case 1: //Build Task
+        case 1: //Task
             return (x, y) => {
                 return x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()
             }
@@ -285,15 +285,15 @@ function setInputListeners() {
 
 /*interface Filter
     image?: string;
-    buildId?: string;
-    buildTask?: string;
+    runId?: string;
+    runTask?: string;
 */
 function getFilterString(inputFields) {
     let filter = {};
-    if (inputFields[0].value.length > 0) { //Build Id
-        filter.buildId = inputFields[0].value;
-    } else if (inputFields[1].value.length > 0) { // Build Task id
-        filter.buildTask = inputFields[1].value;
+    if (inputFields[0].value.length > 0) { //Run Id
+        filter.runId = inputFields[0].value;
+    } else if (inputFields[1].value.length > 0) { //Task id
+        filter.task = inputFields[1].value;
     } else if (inputFields[2].value.length > 0) { //Image
         filter.image = inputFields[2].value;
     }

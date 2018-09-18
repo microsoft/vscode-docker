@@ -1,16 +1,16 @@
-import { BuildTaskBuildRequest } from "azure-arm-containerregistry/lib/models";
+import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import vscode = require('vscode');
-import { BuildTaskNode } from "../../explorer/models/taskNode";
+import { TaskNode } from "../../explorer/models/taskNode";
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { quickPickACRRegistry, quickPickBuildTask, quickPickSubscription } from '../utils/quick-pick-azure';
+import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
 
-export async function runBuildTask(context?: BuildTaskNode): Promise<any> {
-    let buildTaskName: string;
+export async function runBuildTask(context?: TaskNode): Promise<any> {
+    let taskName: string;
     let subscription: Subscription;
     let resourceGroup: ResourceGroup;
     let registry: Registry;
@@ -19,25 +19,25 @@ export async function runBuildTask(context?: BuildTaskNode): Promise<any> {
         subscription = context.subscription;
         registry = context.registry;
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
-        buildTaskName = context.task.name;
+        taskName = context.task.name;
     } else { // Command Palette
         subscription = await quickPickSubscription();
         registry = await quickPickACRRegistry();
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
-        buildTaskName = (await quickPickBuildTask(registry, subscription, resourceGroup)).name;
+        taskName = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    let buildRequest: BuildTaskBuildRequest = {
-        'type': 'BuildTask',
-        'buildTaskName': buildTaskName
+    let runRequest: TaskRunRequest = {
+        type: 'Task',
+        taskName: taskName
     };
 
     try {
-        await client.registries.queueBuild(resourceGroup.name, registry.name, buildRequest);
+        await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
     } catch (err) {
         ext.outputChannel.append(err);
     }
-    vscode.window.showInformationMessage(`Successfully ran the Build Task, ${buildTaskName}`);
+    vscode.window.showInformationMessage(`Successfully ran the Task, ${taskName}`);
 
 }

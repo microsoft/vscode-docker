@@ -6,7 +6,7 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { NodeBase } from './nodeBase';
-/* Single TaskRootNode under each Repository. Labeled "Build Tasks" */
+/* Single TaskRootNode under each Repository. Labeled "Tasks" */
 export class TaskRootNode extends NodeBase {
     public static readonly contextValue: string = 'taskRootNode';
     private _onDidChangeTreeData: vscode.EventEmitter<NodeBase> = new vscode.EventEmitter<NodeBase>();
@@ -31,35 +31,35 @@ export class TaskRootNode extends NodeBase {
         }
     }
 
-    /* Making a list view of BuildTaskNodes, or the Build Tasks of the current registry */
-    public async getChildren(element: TaskRootNode): Promise<BuildTaskNode[]> {
-        const buildTaskNodes: BuildTaskNode[] = [];
-        let buildTasks: ContainerModels.BuildTask[] = [];
+    /* Making a list view of TaskNodes, or the Tasks of the current registry */
+    public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
+        const taskNodes: TaskNode[] = [];
+        let tasks: ContainerModels.Task[] = [];
         const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
-        buildTasks = await client.buildTasks.list(resourceGroup, element.registry.name);
-        if (buildTasks.length === 0) {
-            vscode.window.showInformationMessage(`You do not have any Build Tasks in the registry, '${element.registry.name}'. You can create one with ACR Build. `, "Learn More").then(val => {
+        tasks = await client.tasks.list(resourceGroup, element.registry.name);
+        if (tasks.length === 0) {
+            vscode.window.showInformationMessage(`You do not have any Tasks in the registry, '${element.registry.name}'. You can create one with ACR Task. `, "Learn More").then(val => {
                 if (val === "Learn More") {
-                    opn('https://aka.ms/acr/buildtask');
+                    opn('https://aka.ms/acr/task');
                 }
             })
         }
 
-        for (let buildTask of buildTasks) {
-            let node = new BuildTaskNode(buildTask, element.registry, element.subscription, element);
-            buildTaskNodes.push(node);
+        for (let task of tasks) {
+            let node = new TaskNode(task, element.registry, element.subscription, element);
+            taskNodes.push(node);
         }
-        return buildTaskNodes;
+        return taskNodes;
     }
 }
 
-export class BuildTaskNode extends NodeBase {
-    public static readonly contextValue: string = 'buildTaskNode';
+export class TaskNode extends NodeBase {
+    public static readonly contextValue: string = 'taskNode';
     public label: string;
 
     constructor(
-        public task: ContainerModels.BuildTask,
+        public task: ContainerModels.Task,
         public registry: ContainerModels.Registry,
 
         public subscription: SubscriptionModels.Subscription,
@@ -73,7 +73,7 @@ export class BuildTaskNode extends NodeBase {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
-            contextValue: BuildTaskNode.contextValue,
+            contextValue: TaskNode.contextValue,
             iconPath: null
         }
     }

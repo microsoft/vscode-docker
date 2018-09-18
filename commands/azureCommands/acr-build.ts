@@ -1,5 +1,5 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
-import { QuickBuildRequest } from "azure-arm-containerregistry/lib/models/quickBuildRequest";
+import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models/dockerBuildRequest";
 import { Registry } from 'azure-arm-containerregistry/lib/models/registry';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
@@ -52,20 +52,20 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     const uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
     status.appendLine("Uploaded Source Code to " + tarFilePath);
 
-    const buildRequest: QuickBuildRequest = {
-        'type': 'QuickBuild',
-        'imageNames': [imageName],
-        'isPushEnabled': true,
-        'sourceLocation': uploadedSourceLocation,
-        'platform': { 'osType': osType },
-        'dockerFilePath': dockerItem.relativeFilePath
+    const runRequest: DockerBuildRequest = {
+        type: 'DockerBuildRequest',
+        imageNames: [imageName],
+        isPushEnabled: true,
+        sourceLocation: uploadedSourceLocation,
+        platform: { os: osType },
+        dockerFilePath: dockerItem.relativeFilePath
     };
-    status.appendLine("Set up Build Request");
+    status.appendLine("Set up Run Request");
 
-    const build = await client.registries.queueBuild(resourceGroupName, registry.name, buildRequest);
-    status.appendLine("Queued Build " + build.buildId);
+    const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
+    status.appendLine("Schedule Run " + run.runId);
 
-    streamLogs(registry, build, status, client);
+    streamLogs(registry, run, status, client);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string, folder: vscode.WorkspaceFolder): Promise<string> {
