@@ -29,7 +29,7 @@ export async function runBuildTask(context?: TaskNode): Promise<any> {
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let runRequest: TaskRunRequest = {
-        type: 'TaskRunReques',
+        type: 'TaskRunRequest',
         taskName: taskName
     };
 
