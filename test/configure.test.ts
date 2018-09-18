@@ -15,9 +15,14 @@ import { configure, ConfigureTelemetryProperties, configureApi, ConfigureApiOpti
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { globAsync } from '../helpers/async';
 import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';
+import { win32 } from 'path';
 
 // Can be useful for testing
 const outputAllGeneratedFileContents = false;
+
+const windowsServer2016 = '10.0.14393';
+const windows10RS3 = '10.0.16299';
+const windows10RS4 = '10.0.17134';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -388,7 +393,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 packageFileType: '.csproj',
                 packageFileSubfolderDepth: '1'
             },
-            [os, '1234'],
+            [os, '' /* no port */],
             ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
         );
 
@@ -398,25 +403,35 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         }
     }
 
-    async function testAspNetCore(os: OS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
-        await writeFile(projectFolder, projectFileName, projectFileContents);
-        await writeFile(projectFolder, 'Program.cs', dotNetCoreConsole_10_ProjectFileContents);
+    async function testAspNetCore(os: OS, hostOs: OS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+        let previousOs = ext.os;
+        ext.os = {
+            platform: hostOs === 'Windows' ? 'win32' : 'linux',
+            release: hostOsRelease
+        };
+        try {
 
-        await testConfigureDocker(
-            'ASP.NET Core',
-            {
-                configurePlatform: 'ASP.NET Core',
-                configureOs: os,
-                packageFileType: '.csproj',
-                packageFileSubfolderDepth: '1'
-            },
-            [os, '1234'],
-            ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
-        );
+            await writeFile(projectFolder, projectFileName, projectFileContents);
+            await writeFile(projectFolder, 'Program.cs', dotNetCoreConsole_10_ProjectFileContents);
 
-        let dockerFileContents = await readFile('Dockerfile');
-        if (expectedDockerFileContents) {
-            assert.equal(dockerFileContents, expectedDockerFileContents);
+            await testConfigureDocker(
+                'ASP.NET Core',
+                {
+                    configurePlatform: 'ASP.NET Core',
+                    configureOs: os,
+                    packageFileType: '.csproj',
+                    packageFileSubfolderDepth: '1'
+                },
+                [os, '1234'],
+                ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
+            );
+
+            let dockerFileContents = await readFile('Dockerfile');
+            if (expectedDockerFileContents) {
+                assert.equal(dockerFileContents, expectedDockerFileContents);
+            }
+        } finally {
+            ext.os = previousOs;
         }
     }
 
@@ -578,7 +593,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
 
             assertNotFileContains('Dockerfile', 'projectFolder1');
             assertFileContains('Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
-            assertFileContains('Dockerfile', 'RUN dotnet restore projectFolder2/aspnetapp.csproj');
+            assertFileContains('Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
             assertFileContains('Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
         });
     });
@@ -592,7 +607,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 dotNetCoreConsole_21_ProjectFileContents,
                 removeIndentation(`
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-                    #For more information, please see http://aka.ms/containercompat
+                    #For more information, please see https://aka.ms/containercompat
 
                     FROM microsoft/dotnet:2.1-runtime-nanoserver-1803 AS base
                     WORKDIR /app
@@ -600,13 +615,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.1-sdk-nanoserver-1803 AS build
                     WORKDIR /src
                     COPY ["ConsoleApp1Folder/ConsoleApp1.csproj", "ConsoleApp1Folder/"]
-                    RUN dotnet restore ConsoleApp1Folder/ConsoleApp1.csproj
+                    RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
                     COPY . .
-                    WORKDIR /src/ConsoleApp1Folder
-                    RUN dotnet build ConsoleApp1.csproj -c Release -o /app
+                    WORKDIR "/src/ConsoleApp1Folder"
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish ConsoleApp1.csproj -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -630,13 +645,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.1-sdk AS build
                     WORKDIR /src
                     COPY ["ConsoleApp1Folder/ConsoleApp1.csproj", "ConsoleApp1Folder/"]
-                    RUN dotnet restore ConsoleApp1Folder/ConsoleApp1.csproj
+                    RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
                     COPY . .
-                    WORKDIR /src/ConsoleApp1Folder
-                    RUN dotnet build ConsoleApp1.csproj -c Release -o /app
+                    WORKDIR "/src/ConsoleApp1Folder"
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish ConsoleApp1.csproj -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -657,7 +672,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 dotNetCoreConsole_20_ProjectFileContents,
                 removeIndentation(`
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-                    #For more information, please see http://aka.ms/containercompat
+                    #For more information, please see https://aka.ms/containercompat
 
                     FROM microsoft/dotnet:2.0-runtime-nanoserver-1803 AS base
                     WORKDIR /app
@@ -665,13 +680,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.0-sdk-nanoserver-1803 AS build
                     WORKDIR /src
                     COPY ["subfolder/projectFolder/ConsoleApp1.csproj", "subfolder/projectFolder/"]
-                    RUN dotnet restore subfolder/projectFolder/ConsoleApp1.csproj
+                    RUN dotnet restore "subfolder/projectFolder/ConsoleApp1.csproj"
                     COPY . .
-                    WORKDIR /src/subfolder/projectFolder
-                    RUN dotnet build ConsoleApp1.csproj -c Release -o /app
+                    WORKDIR "/src/subfolder/projectFolder"
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish ConsoleApp1.csproj -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -695,13 +710,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.0-sdk AS build
                     WORKDIR /src
                     COPY ["subfolder/projectFolder/ConsoleApp1.csproj", "subfolder/projectFolder/"]
-                    RUN dotnet restore subfolder/projectFolder/ConsoleApp1.csproj
+                    RUN dotnet restore "subfolder/projectFolder/ConsoleApp1.csproj"
                     COPY . .
-                    WORKDIR /src/subfolder/projectFolder
-                    RUN dotnet build ConsoleApp1.csproj -c Release -o /app
+                    WORKDIR "/src/subfolder/projectFolder"
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish ConsoleApp1.csproj -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -768,15 +783,17 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // ASP.NET Core
 
     suite("ASP.NET Core 2.2", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolder("Windows 10 RS4", async () => {
             await testAspNetCore(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'AspNetApp1',
                 'project1.csproj',
                 aspNet_22_ProjectFileContents,
                 removeIndentation(`
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-                    #For more information, please see http://aka.ms/containercompat
+                    #For more information, please see https://aka.ms/containercompat
 
                     FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base
                     WORKDIR /app
@@ -785,13 +802,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build
                     WORKDIR /src
                     COPY ["AspNetApp1/project1.csproj", "AspNetApp1/"]
-                    RUN dotnet restore AspNetApp1/project1.csproj
+                    RUN dotnet restore "AspNetApp1/project1.csproj"
                     COPY . .
-                    WORKDIR /src/AspNetApp1
-                    RUN dotnet build project1.csproj -c Release -o /app
+                    WORKDIR "/src/AspNetApp1"
+                    RUN dotnet build "project1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish project1.csproj -c Release -o /app
+                    RUN dotnet publish "project1.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -803,6 +820,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testAspNetCore(
                 'Linux',
+                'Linux',
+                '',
                 'project2',
                 'project2.csproj',
                 aspNet_22_ProjectFileContents,
@@ -814,13 +833,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM microsoft/dotnet:2.2-sdk AS build
                     WORKDIR /src
                     COPY ["project2/project2.csproj", "project2/"]
-                    RUN dotnet restore project2/project2.csproj
+                    RUN dotnet restore "project2/project2.csproj"
                     COPY . .
-                    WORKDIR /src/project2
-                    RUN dotnet build project2.csproj -c Release -o /app
+                    WORKDIR "/src/project2"
+                    RUN dotnet build "project2.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish project2.csproj -c Release -o /app
+                    RUN dotnet publish "project2.csproj" -c Release -o /app
 
                     FROM base AS final
                     WORKDIR /app
@@ -828,12 +847,53 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "project2.dll"]
                 `));
         });
+
+        testInEmptyFolder("Windows 10 RS3", async () => {
+            await testAspNetCore(
+                'Windows',
+                'Windows',
+                windows10RS3,
+                'AspNetApp1',
+                'project1.csproj',
+                aspNet_22_ProjectFileContents);
+
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1709 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1709 AS build');
+        });
+
+        testInEmptyFolder("Windows Server 2016", async () => {
+            await testAspNetCore(
+                'Windows',
+                'Windows',
+                windowsServer2016,
+                'AspNetApp1',
+                'project1.csproj',
+                aspNet_22_ProjectFileContents);
+
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-sac2016 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-sac2016 AS build');
+        });
+
+        testInEmptyFolder("Host=Linux", async () => {
+            await testAspNetCore(
+                'Windows',
+                'Linux',
+                '',
+                'AspNetApp1',
+                'project1.csproj',
+                aspNet_22_ProjectFileContents);
+
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build');
+        });
     });
 
     suite("ASP.NET Core 1.1", async () => {
         testInEmptyFolder("Windows", async () => {
             await testAspNetCore(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'AspNetApp1',
                 'project1.csproj',
                 aspNet_10_ProjectFileContents);
@@ -847,6 +907,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testAspNetCore(
                 'Linux',
+                'Linux',
+                '',
                 'project2',
                 'project2.csproj',
                 aspNet_20_ProjectFileContents);
@@ -855,6 +917,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore-build:2.0 AS build');
         });
     });
+
 
     // Java
 

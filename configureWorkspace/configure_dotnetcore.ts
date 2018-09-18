@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
+import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/windowsVersion';
 import { OS, Platform } from './config-utils';
 import { PackageInfo } from './configure';
 
@@ -28,8 +30,15 @@ const DotNetCoreAspNetRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-aspnetcore-
 const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 
 function GetWindowsImageTag(): string {
-    // Windows 10 RS4 or newer
-    return "-nanoserver-1803";
+    // The host OS version needs to match the version of .NET core images being created
+    if (!isWindows() || isWindows10RS4OrNewer()) {
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS4 host
+        return "-nanoserver-1803";
+    } else if (isWindows10RS3OrNewer()) {
+        return "-nanoserver-1709";
+    } else {
+        return "-nanoserver-sac2016";
+    }
 }
 
 function formatVersion(format: string, version: string, tagForWindowsVersion: string): string {
@@ -41,9 +50,9 @@ function formatVersion(format: string, version: string, tagForWindowsVersion: st
 
 //#region ASP.NET Core templates
 
-//AT-DockerCore: /src/Microsoft.Docker/Templates/windows/dotnetcore/aspnetcore/Dockerfile
+//AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see http://aka.ms/containercompat
+#For more information, please see https://aka.ms/containercompat
 
 FROM $base_image_name$ AS base
 WORKDIR /app
@@ -52,13 +61,13 @@ $expose_statements$
 FROM $sdk_image_name$ AS build
 WORKDIR /src
 $copy_project_commands$
-RUN dotnet restore $container_project_directory$/$project_file_name$
+RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
-WORKDIR /src/$container_project_directory$
-RUN dotnet build $project_file_name$ -c Release -o /app
+WORKDIR "/src/$container_project_directory$"
+RUN dotnet build "$project_file_name$" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish $project_file_name$ -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
@@ -66,7 +75,7 @@ COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/linux/dotnetcore/aspnetcore/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
@@ -74,13 +83,13 @@ $expose_statements$
 FROM $sdk_image_name$ AS build
 WORKDIR /src
 $copy_project_commands$
-RUN dotnet restore $container_project_directory$/$project_file_name$
+RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
-WORKDIR /src/$container_project_directory$
-RUN dotnet build $project_file_name$ -c Release -o /app
+WORKDIR "/src/$container_project_directory$"
+RUN dotnet build "$project_file_name$" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish $project_file_name$ -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
@@ -92,23 +101,24 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#region .NET Core Console templates
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/windows/dotnetcore/console/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see http://aka.ms/containercompat
+#For more information, please see https://aka.ms/containercompat
 
 FROM $base_image_name$ AS base
 WORKDIR /app
+$expose_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
 $copy_project_commands$
-RUN dotnet restore $container_project_directory$/$project_file_name$
+RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
-WORKDIR /src/$container_project_directory$
-RUN dotnet build $project_file_name$ -c Release -o /app
+WORKDIR "/src/$container_project_directory$"
+RUN dotnet build "$project_file_name$" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish $project_file_name$ -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
@@ -116,20 +126,21 @@ COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-// AT-DockerCore: /src/Microsoft.Docker/Templates/linux/dotnetcore/console/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
+$expose_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
 $copy_project_commands$
-RUN dotnet restore $container_project_directory$/$project_file_name$
+RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
-WORKDIR /src/$container_project_directory$
-RUN dotnet build $project_file_name$ -c Release -o /app
+WORKDIR "/src/$container_project_directory$"
+RUN dotnet build "$project_file_name$" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish $project_file_name$ -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
@@ -153,7 +164,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
-    let exposeStatements = `EXPOSE ${port}`;
+    let exposeStatements = port ? `EXPOSE ${port}` : '';
 
     // Parse version from TargetFramework
     // Example: netcoreapp1.0
@@ -214,6 +225,9 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$project_file_name\$/g, projectFileName)
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
+
+    // Remove multiple empty lines, as might be produced if there's no EXPOSE statement
+    contents = contents.replace(new RegExp(`${nodeOs.EOL}\{3\}`, 'g'), `${nodeOs.EOL}${nodeOs.EOL}`);
 
     let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
     if (unreplacedToken[0]) {
