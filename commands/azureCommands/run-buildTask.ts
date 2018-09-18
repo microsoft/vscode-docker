@@ -29,15 +29,15 @@ export async function runBuildTask(context?: TaskNode): Promise<any> {
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let runRequest: TaskRunRequest = {
-        type: 'Task',
+        type: 'TaskRunReques',
         taskName: taskName
     };
 
     try {
-        await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
+        let taskRun = await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
+        vscode.window.showInformationMessage(`Successfully ran the Task: ${taskName} with ID: ${taskRun.runId}`);
     } catch (err) {
         ext.outputChannel.append(err);
+        vscode.window.showErrorMessage(`Failed to ran the Task: ${taskName}`);
     }
-    vscode.window.showInformationMessage(`Successfully ran the Task, ${taskName}`);
-
 }
