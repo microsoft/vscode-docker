@@ -676,7 +676,7 @@
       },
       {
         "command": "vscode-docker.acrBuildLogs",
-        "title": "ACR run logs",
+        "title": "View Azure logs",
         "category": "Docker"
       },
       {

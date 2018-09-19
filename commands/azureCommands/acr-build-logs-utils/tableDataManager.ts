@@ -57,6 +57,7 @@ export class LogData {
         if (filter && Object.keys(filter).length) {
             if (!filter.runId) {
                 options.filter = await this.parseFilter(filter);
+                options.top = 1;
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
                 runListResult = [];
