@@ -6,12 +6,12 @@ import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickACRRegistry } from '../utils/quick-pick-azure'
-import { accessLog } from "./acr-build-logs-utils/logFileManager";
-import { LogData } from "./acr-build-logs-utils/tableDataManager";
-import { LogTableWebview } from "./acr-build-logs-utils/tableViewManager";
+import { accessLog } from "./acr-logs-utils/logFileManager";
+import { LogData } from "./acr-logs-utils/tableDataManager";
+import { LogTableWebview } from "./acr-logs-utils/tableViewManager";
 
-/**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view build logs for a given item. */
-export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
+/**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view ACR logs for a given item. */
+export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
     let registry: Registry;
     let subscription: Subscription;
     if (!context) {
@@ -61,7 +61,7 @@ function hasValidLogContent(context: any, logData: LogData): boolean {
         } else {
             itemType = 'registry';
         }
-        vscode.window.showInformationMessage(`This ${itemType} has no associated build logs`);
+        vscode.window.showInformationMessage(`This ${itemType} has no associated logs`);
         return false;
     }
     return true;

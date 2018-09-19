@@ -1,45 +1,43 @@
+import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import vscode = require('vscode');
 import { TaskNode } from "../../explorer/models/taskNode";
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
-import { openTask } from "./task-utils/showTaskManager";
 
-export async function showBuildTaskProperties(context?: TaskNode): Promise<any> {
+export async function runTask(context?: TaskNode): Promise<any> {
+    let taskName: string;
     let subscription: Subscription;
-    let registry: Registry;
     let resourceGroup: ResourceGroup;
-    let task: string;
+    let registry: Registry;
 
-    if (context) { // Right click
+    if (context) { // Right Click
         subscription = context.subscription;
         registry = context.registry;
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
-        task = context.task.name;
-    } else { // Command palette
+        taskName = context.task.name;
+    } else { // Command Palette
         subscription = await quickPickSubscription();
         registry = await quickPickACRRegistry();
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
-        task = (await quickPickTask(registry, subscription, resourceGroup)).name;
+        taskName = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    let item: any = await client.tasks.get(resourceGroup.name, registry.name, task);
+    let runRequest: TaskRunRequest = {
+        type: 'TaskRunRequest',
+        taskName: taskName
+    };
 
-    /*
     try {
-        const steps = await client.buildSteps.get(resourceGroup.name, registry.name, buildTask, `${buildTask}StepName`);
-        item.properties = steps;
-    } catch (error) {
-        ext.outputChannel.append(error);
-        ext.outputChannel.append("Build Step not available for this image due to update in API");
+        let taskRun = await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
+        vscode.window.showInformationMessage(`Successfully ran the Task: ${taskName} with ID: ${taskRun.runId}`);
+    } catch (err) {
+        ext.outputChannel.append(err);
+        vscode.window.showErrorMessage(`Failed to ran the Task: ${taskName}`);
     }
-    */
-
-    let indentation = 1;
-    let replacer;
-    openTask(JSON.stringify(item, replacer, indentation), task);
 }

@@ -29,7 +29,7 @@
   "activationEvents": [
     "onLanguage:dockerfile",
     "onLanguage:yaml",
-    "onCommand:vscode-docker.acrBuildLogs",
+    "onCommand:vscode-docker.acrLogs",
     "onCommand:vscode-docker.api.configure",
     "onCommand:vscode-docker.ACR-queueBuild",
     "onCommand:vscode-docker.image.build",
@@ -55,9 +55,9 @@
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.explorer.refresh",
-    "onCommand:vscode-docker.show-ACR-buildTask",
+    "onCommand:vscode-docker.show-ACR-Task",
     "onCommand:vscode-docker.delete-ACR-Registry",
-    "onCommand:vscode-docker.run-ACR-BuildTask",
+    "onCommand:vscode-docker.run-ACR-Task",
     "onCommand:vscode-docker.delete-ACR-Repository",
     "onCommand:vscode-docker.delete-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
@@ -247,11 +247,11 @@
           "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
-          "command": "vscode-docker.run-ACR-BuildTask",
+          "command": "vscode-docker.run-ACR-Task",
           "when": "view == dockerExplorer && viewItem == taskNode"
         },
         {
-          "command": "vscode-docker.show-ACR-buildTask",
+          "command": "vscode-docker.show-ACR-Task",
           "when": "view == dockerExplorer && viewItem == taskNode"
         },
         {
@@ -267,7 +267,7 @@
           "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageNode)$/"
         },
         {
-          "command": "vscode-docker.acrBuildLogs",
+          "command": "vscode-docker.acrLogs",
           "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/"
         },
         {
@@ -655,12 +655,12 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.run-ACR-BuildTask",
+        "command": "vscode-docker.run-ACR-Task",
         "title": "Run Task",
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.show-ACR-buildTask",
+        "command": "vscode-docker.show-ACR-Task",
         "title": "Show Task Properties",
         "category": "Docker"
       },
@@ -675,7 +675,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.acrBuildLogs",
+        "command": "vscode-docker.acrLogs",
         "title": "View Azure logs",
         "category": "Docker"
       },

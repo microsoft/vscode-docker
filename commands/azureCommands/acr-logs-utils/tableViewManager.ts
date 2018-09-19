@@ -15,10 +15,10 @@ export class LogTableWebview {
 
         //Get path to resource on disk
         let extensionPath = vscode.extensions.getExtension("PeterJausovec.vscode-docker").extensionPath;
-        const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-build-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const resizingScript = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-build-logs-utils', 'resizable.js')).with({ scheme: 'vscode-resource' });
-        const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-build-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
-        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-build-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
+        const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
+        const resizingScript = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'resizable.js')).with({ scheme: 'vscode-resource' });
+        const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
+        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
         this.panel.webview.html = this.getBaseHtml(scriptFile, resizingScript, styleFile, iconStyle);
         this.setupIncomingListeners();
@@ -89,7 +89,7 @@ export class LogTableWebview {
     }
 
     //HTML Content Loaders
-    /** Create the table in which to push the build logs */
+    /** Create the table in which to push the logs */
     private getBaseHtml(scriptFile: vscode.Uri, resizingScript: vscode.Uri, stylesheet: vscode.Uri, iconStyles: vscode.Uri): string {
         return `<!DOCTYPE html>
         <html lang="en">
@@ -129,7 +129,7 @@ export class LogTableWebview {
 
                     <thead id = "tableHead" class = 'fixed solidBackground'>
                         <td></td>
-                        <th><span class="colTitle" tabindex="0">Build ID<span class="sort">  </span></span></th>
+                        <th><span class="colTitle" tabindex="0">ID<span class="sort">  </span></span></th>
                         <th><span class="colTitle" tabindex="0">Task<span class="sort">  </span></span></th>
                         <th><span class="colTitle" tabindex="0">Status<span class="sort">  </span></span></th>
                         <th><span class="colTitle" tabindex="0">Created<span class="sort">&#160<i class="ms-Icon ms-Icon--ChevronDown"></i></span></span></th>
