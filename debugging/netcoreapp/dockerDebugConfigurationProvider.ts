@@ -6,6 +6,9 @@ import * as path from 'path';
 import { WorkspaceFolder, DebugConfigurationProvider, DebugConfiguration, CancellationToken, ProviderResult } from 'vscode';
 import { DockerManager, LaunchResult } from './dockerManager';
 import { PlatformType, OSProvider } from './osProvider';
+import { FileSystemProvider } from './fsProvider';
+import { debug } from 'util';
+import { NetCoreProjectProvider } from './netCoreProjectProvider';
 
 interface DockerDebugBuildOptions {
     context?: string;
@@ -22,6 +25,7 @@ interface DockerDebugRunOptions {
 interface DockerDebugOptions {
     appFolder?: string;
     appOutput?: string;
+    appProject?: string;
     build?: DockerDebugBuildOptions;
     run?: DockerDebugRunOptions;
 }
@@ -33,7 +37,9 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     constructor(
         private readonly dockerManager: DockerManager,
+        private readonly fsProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
+        private readonly netCoreProjectProvider: NetCoreProjectProvider,
         private readonly dependencyCheck: () => Promise<boolean>) {
     }
 
@@ -71,6 +77,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const resolvedAppFolder = DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder);
 
+        const appProject = await this.inferAppProject(debugConfiguration, resolvedAppFolder);
+
+        const resolvedAppProject = DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder);
+
         const context = this.inferContext(folder, resolvedAppFolder, debugConfiguration);
 
         const resolvedContext = DockerDebugConfigurationProvider.resolveFolderPath(context, folder);
@@ -85,7 +95,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ? debugConfiguration.dockerOptions.build.target
             : 'base'; // TODO: Omit target if not specified, or possibly infer from Dockerfile.
 
-        const appName = path.basename(resolvedAppFolder);
+        const appName = path.basename(resolvedAppProject);
 
         const tag = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.build && debugConfiguration.dockerOptions.build.tag
             ? debugConfiguration.dockerOptions.build.tag
@@ -99,9 +109,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ? debugConfiguration.dockerOptions.run.os
             : 'Linux';
 
-        const appOutput = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.appOutput
-            ? debugConfiguration.dockerOptions.appOutput
-            : this.osProvider.pathJoin(os, 'bin', 'Debug', 'netcoreapp2.0', `${appName}.dll`); // TODO: Infer build configuration.
+        const appOutput = await this.inferAppOutput(debugConfiguration, resolvedAppProject);
 
         const result = await this.dockerManager.prepareForLaunch({
             appFolder: resolvedAppFolder,
@@ -122,9 +130,46 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {
-        return configuration.dockerOptions && configuration.dockerOptions.appFolder
-            ? configuration.dockerOptions.appFolder
-            : folder.uri.fsPath;
+        if (configuration.dockerOptions) {
+            if (configuration.dockerOptions.appFolder) {
+                return configuration.dockerOptions.appFolder;
+            }
+
+            if (configuration.dockerOptions.appProject) {
+                return path.dirname(configuration.dockerOptions.appProject);
+            }
+        }
+
+        return folder.uri.fsPath;
+    }
+
+    private async inferAppOutput(configuration: DockerDebugConfiguration, resolvedAppProject: string): Promise<string> {
+        if (configuration.dockerOptions && configuration.dockerOptions.appOutput) {
+            return configuration.dockerOptions.appOutput;
+        }
+
+        const targetPath = await this.netCoreProjectProvider.getTargetPath(resolvedAppProject);
+        const relativeTargetPath = path.relative(path.dirname(resolvedAppProject), targetPath);
+
+        return relativeTargetPath;
+    }
+
+    private async inferAppProject(configuration: DockerDebugConfiguration, resolvedAppFolder: string): Promise<string> {
+        if (configuration.dockerOptions) {
+            if (configuration.dockerOptions.appProject) {
+                return configuration.dockerOptions.appProject;
+            }
+        }
+
+        const files = await this.fsProvider.readDir(resolvedAppFolder);
+
+        const projectFile = files.find(file => path.extname(file) === '.csproj');
+
+        if (projectFile) {
+            return path.join(resolvedAppFolder, projectFile);
+        }
+
+        throw new Error('Unable to infer the appliction project file. It must be explicitly set in the Docker debug configuration.');
     }
 
     private inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
@@ -156,10 +201,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
-    private createConfiguration(debugConfiguration: DockerDebugConfiguration, appFolder: string, result: LaunchResult) {
+    private createConfiguration(debugConfiguration: DockerDebugConfiguration, appFolder: string, result: LaunchResult): DebugConfiguration {
         const launchBrowser = this.createLaunchBrowserConfiguration(result);
 
-        const dockerDebugConfiguration: DebugConfiguration = {
+        return {
             name: debugConfiguration.name,
             type: 'coreclr',
             request: 'launch',
@@ -179,8 +224,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 '/app/Views': path.join(appFolder, 'Views')
             }
         };
-
-        return dockerDebugConfiguration;
     }
 }
 

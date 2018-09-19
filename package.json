@@ -292,6 +292,10 @@
                     "type": "string",
                     "description": "Path to the output assembly for the application."
                   },
+                  "appProject": {
+                    "type": "string",
+                    "description": "Path to the application project file."
+                  },
                   "build": {
                     "description": "Options for building the Docker image used for debugging.",
                     "properties": {

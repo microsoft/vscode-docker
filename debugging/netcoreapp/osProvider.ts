@@ -9,6 +9,7 @@ export type PlatformType = 'Windows' | 'Linux';
 export interface OSProvider {
     homedir: string;
     os: PlatformType;
+    tmpdir: string;
     pathJoin(os: PlatformType, ...paths: string[]): string;
 }
 
@@ -21,7 +22,11 @@ export class LocalOSProvider implements OSProvider {
         return os.platform() === 'win32' ? 'Windows' : 'Linux';
     }
 
-    pathJoin(pathOS: PlatformType, ...paths: string[]): string {
+    get tmpdir(): string {
+        return os.tmpdir();
+    }
+
+    public pathJoin(pathOS: PlatformType, ...paths: string[]): string {
         return paths.join(pathOS === 'Windows' ? '\\' : '/');
     }
 }

@@ -32,11 +32,14 @@ import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure, configureApi, ConfigureApiOptions } from './configureWorkspace/configure';
 import { DefaultAppStorageProvider } from './debugging/netcoreapp/appStorage';
+import { BrowserClient, OpnBrowserClient } from './debugging/netcoreapp/browserClient';
 import { DefaultDebuggerClient } from './debugging/netcoreapp/debuggerClient';
 import CliDockerClient from './debugging/netcoreapp/dockerClient';
 import DockerDebugConfigurationProvider from './debugging/netcoreapp/dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './debugging/netcoreapp/dockerManager';
 import { LocalFileSystemProvider } from './debugging/netcoreapp/fsProvider';
+import { CommandLineMSBuildClient } from './debugging/netcoreapp/msBuildClient';
+import { MsBuildNetCoreProjectProvider } from './debugging/netcoreapp/netCoreProjectProvider';
 import LocalOSProvider from './debugging/netcoreapp/osProvider';
 import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
 import ChildProcessProvider from './debugging/netcoreapp/processProvider';
@@ -67,7 +70,6 @@ import { addUserAgent } from './utils/addUserAgent';
 import { registerAzureCommand } from './utils/Azure/common';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { Keytar } from './utils/keytar';
-import { BrowserClient, OpnBrowserClient } from './debugging/netcoreapp/browserClient';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
@@ -332,7 +334,12 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                 'docker-netcoreapp',
                 new DockerDebugConfigurationProvider(
                     dockerManager,
+                    fileSystemProvider,
                     osProvider,
+                    new MsBuildNetCoreProjectProvider(
+                        fileSystemProvider,
+                        new CommandLineMSBuildClient(processProvider),
+                        osProvider),
                     async () => {
                         // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
                         //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.
