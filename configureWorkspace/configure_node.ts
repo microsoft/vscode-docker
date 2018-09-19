@@ -48,13 +48,13 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: str
   return `version: '2.1'
 
 services:
-${serviceNameAndRelativePath}:
-image: ${serviceNameAndRelativePath}
-build: .
-environment:
-NODE_ENV: development
-ports:
-- ${port}:${port}
-- 9229:9229
-${cmd}`;
+  ${serviceNameAndRelativePath}:
+    image: ${serviceNameAndRelativePath}
+    build: .
+    environment:
+      NODE_ENV: development
+    ports:
+      - ${port}:${port}
+      - 9229:9229
+    ${cmd}`;
 }
