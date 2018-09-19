@@ -28,15 +28,18 @@ export async function viewBuildLogs(context: AzureRegistryNode | AzureImageTagNo
 
     // Fuiltering provided
     if (context && context instanceof AzureImageTagNode) {
-        await logData.loadLogs(false, false, { image: context.tag });
+        //ACR Image Logs
+        let imageRun = await logData.loadLogs(false, false, { image: context.label });
         if (!hasValidLogContent(context, logData)) { return; }
         logData.getLink(0).then((url) => {
             accessLog(url, logData.logs[0].runId, false);
         });
     } else {
         if (context && context instanceof TaskNode) {
+            //ACR Task Logs
             await logData.loadLogs(false, false, { task: context.label });
         } else {
+            //ACR Registry Logs
             await logData.loadLogs(false);
         }
         if (!hasValidLogContent(context, logData)) { return; }
