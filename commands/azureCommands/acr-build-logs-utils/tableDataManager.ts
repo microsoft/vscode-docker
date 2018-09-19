@@ -109,8 +109,8 @@ export class LogData {
                 auth: {
                     bearer: acrAccessToken
                 },
-                accept: {
-                    application: 'vnd.docker.distribution.manifest.v2+json'
+                headers: {
+                    accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
                 }
             }, (err, httpResponse, body) => {
                 digest = httpResponse.headers['docker-content-digest'];
