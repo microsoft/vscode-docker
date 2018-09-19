@@ -656,7 +656,7 @@
       },
       {
         "command": "vscode-docker.run-ACR-BuildTask",
-        "title": "Run a Task",
+        "title": "Run Task",
         "category": "Docker"
       },
       {
