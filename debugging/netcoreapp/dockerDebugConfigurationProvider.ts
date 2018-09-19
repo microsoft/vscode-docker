@@ -3,12 +3,12 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
-import { WorkspaceFolder, DebugConfigurationProvider, DebugConfiguration, CancellationToken, ProviderResult } from 'vscode';
-import { DockerManager, LaunchResult } from './dockerManager';
-import { PlatformType, OSProvider } from './osProvider';
-import { FileSystemProvider } from './fsProvider';
 import { debug } from 'util';
+import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { DockerManager, LaunchResult } from './dockerManager';
+import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
+import { OSProvider, PlatformType  } from './osProvider';
 
 interface DockerDebugBuildOptions {
     context?: string;
@@ -30,6 +30,18 @@ interface DockerDebugOptions {
     run?: DockerDebugRunOptions;
 }
 
+interface DebugConfigurationBrowserBaseOptions {
+    enabled?: boolean;
+    command?: string;
+    args?: string;
+}
+
+interface DebugConfigurationBrowserOptions extends DebugConfigurationBrowserBaseOptions {
+    windows?: DebugConfigurationBrowserBaseOptions;
+    osx?: DebugConfigurationBrowserBaseOptions;
+    linux?: DebugConfigurationBrowserBaseOptions;
+}
+
 interface DockerDebugConfiguration extends DebugConfiguration {
     dockerOptions?: DockerDebugOptions;
 }
@@ -43,7 +55,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         private readonly dependencyCheck: () => Promise<boolean>) {
     }
 
-    provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+    public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         return [
             {
                 name: 'Docker: Launch .NET Core',
@@ -54,7 +66,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         ];
     }
 
-    resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
+    public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
         return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
     }
 
@@ -180,7 +192,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 : path.dirname(resolvedAppFolder);  // The context defaults to the application's parent (i.e. solution) folder.
     }
 
-    private createLaunchBrowserConfiguration(result: LaunchResult) {
+    private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {
         return result.browserUrl
         ? {
             enabled: true,

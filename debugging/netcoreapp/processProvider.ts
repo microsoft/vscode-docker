@@ -19,7 +19,7 @@ export class ChildProcessProvider implements ProcessProvider {
         return process.env;
     }
 
-    exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }> {
+    public exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }> {
         return new Promise<{ stdout: string, stderr: string }>(
             (resolve, reject) => {
                 const p = cp.exec(

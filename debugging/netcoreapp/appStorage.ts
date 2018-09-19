@@ -20,7 +20,7 @@ export class DefaultAppStorage implements MementoAsync {
         private readonly fileSystemProvider: FileSystemProvider) {
     }
 
-    async get<T>(name: string, defaultValue?: T): Promise<T | undefined> {
+    public async get<T>(name: string, defaultValue?: T): Promise<T | undefined> {
         const itemPath = this.createItemPath(name);
 
         if (await this.fileSystemProvider.fileExists(itemPath)) {
@@ -32,7 +32,7 @@ export class DefaultAppStorage implements MementoAsync {
         return defaultValue;
     }
 
-    async update<T>(name: string, item: T | undefined): Promise<void> {
+    public async update<T>(name: string, item: T | undefined): Promise<void> {
         const itemPath = this.createItemPath(name);
 
         if (item) {
@@ -57,7 +57,7 @@ export class DefaultAppStorageProvider implements AppStorageProvider {
     constructor(private readonly fileSystemProvider: FileSystemProvider) {
     }
 
-    getStorage(appFolder: string): Promise<MementoAsync> {
+    public getStorage(appFolder: string): Promise<MementoAsync> {
         return Promise.resolve(new DefaultAppStorage(appFolder, this.fileSystemProvider));
     }
 }

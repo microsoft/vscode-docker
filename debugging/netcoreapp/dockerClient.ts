@@ -50,7 +50,7 @@ export class CliDockerClient implements DockerClient {
     constructor(private readonly processProvider: ProcessProvider) {
     }
 
-    async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {
+    public async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {
         let command = `docker build --rm`;
 
         if (options && options.dockerfile) {
@@ -95,7 +95,7 @@ export class CliDockerClient implements DockerClient {
         return imageId;
     }
 
-    async inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined> {
+    public async inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined> {
         let command = 'docker inspect';
 
         if (options && options.format) {
@@ -114,7 +114,7 @@ export class CliDockerClient implements DockerClient {
         }
     }
 
-    async listContainers(options?: DockerContainersListOptions): Promise<string> {
+    public async listContainers(options?: DockerContainersListOptions): Promise<string> {
         let command = 'docker ps -a';
 
         if (options && options.format) {
@@ -126,7 +126,7 @@ export class CliDockerClient implements DockerClient {
         return output.stdout;
     }
 
-    matchId(id1: string, id2: string): boolean {
+    public matchId(id1: string, id2: string): boolean {
         const validateArgument =
             id => {
                 if (id === undefined || id1.length < 12) {
@@ -142,7 +142,7 @@ export class CliDockerClient implements DockerClient {
             : id1.startsWith(id2);
     }
 
-    async removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void> {
+    public async removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void> {
         let command = 'docker rm';
 
         if (options && options.force) {
@@ -154,7 +154,7 @@ export class CliDockerClient implements DockerClient {
         await this.processProvider.exec(command, {});
     }
 
-    async runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string> {
+    public async runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string> {
         let command = 'docker run -dt -P';
 
         if (options && options.containerName) {
@@ -186,7 +186,7 @@ export class CliDockerClient implements DockerClient {
         return containerId;
     }
 
-    trimId(id: string): string {
+    public trimId(id: string): string {
         return id.substring(0, 12);
     }
 }

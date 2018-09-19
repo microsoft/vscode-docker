@@ -6,7 +6,7 @@ export interface BrowserClient {
 }
 
 export class OpnBrowserClient implements BrowserClient {
-    openBrowser(url: string): void {
+    public openBrowser(url: string): void {
         const uri = Uri.parse(url);
 
         if (uri.scheme === 'http' || uri.scheme === 'https') {

@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 export class Lazy<T> {
-    private _isValueCreated = false;
+    private _isValueCreated: boolean = false;
     private _value: T | undefined;
 
     constructor(private readonly valueFactory: () => T) {

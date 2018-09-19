@@ -13,13 +13,13 @@ export interface OutputManager {
 }
 
 export class DefaultOutputManager implements OutputManager {
-    private skipFirstLine = false;
-    private isShown = false;
+    private skipFirstLine: boolean = false;
+    private isShown: boolean = false;
 
     constructor(private readonly outputChannel: vscode.OutputChannel, private readonly level: number = 0) {
     }
 
-    append(content: string): void {
+    public append(content: string): void {
         if (this.level) {
             const split = content.split(/[\n\r]/g);
             const generateContent =
@@ -43,7 +43,7 @@ export class DefaultOutputManager implements OutputManager {
         }
     }
 
-    appendLine(content: string): void {
+    public appendLine(content: string): void {
         if (this.level) {
             this.outputChannel.append(this.generatePrefix());
         }
@@ -51,7 +51,7 @@ export class DefaultOutputManager implements OutputManager {
         this.outputChannel.appendLine(content);
     }
 
-    async performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T> {
+    public async performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T> {
         if (!this.isShown) {
             this.outputChannel.show(true);
             this.isShown = true;
