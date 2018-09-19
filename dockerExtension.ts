@@ -43,6 +43,7 @@ import { MsBuildNetCoreProjectProvider } from './debugging/netcoreapp/netCorePro
 import LocalOSProvider from './debugging/netcoreapp/osProvider';
 import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
 import ChildProcessProvider from './debugging/netcoreapp/processProvider';
+import { OSTempFileProvider } from './debugging/netcoreapp/tempFileProvider';
 import { RemoteVsDbgClient } from './debugging/netcoreapp/vsdbgClient';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
@@ -339,7 +340,9 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                     new MsBuildNetCoreProjectProvider(
                         fileSystemProvider,
                         new CommandLineMSBuildClient(processProvider),
-                        osProvider),
+                        new OSTempFileProvider(
+                            osProvider,
+                            processProvider)),
                     async () => {
                         // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
                         //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.

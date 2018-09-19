@@ -3,7 +3,6 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
-import { debug } from 'util';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { DockerManager, LaunchResult } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';

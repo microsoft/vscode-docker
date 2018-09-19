@@ -5,7 +5,7 @@
 import * as path from 'path';
 import { FileSystemProvider } from "./fsProvider";
 import { MSBuildClient } from "./msBuildClient";
-import { OSProvider } from "./osProvider";
+import { TempFileProvider } from './tempFileProvider';
 
 const getTargetPathProjectFileContent =
 `<Project>
@@ -32,12 +32,12 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
     constructor(
         private readonly fsProvider: FileSystemProvider,
         private readonly msBuildClient: MSBuildClient,
-        private readonly osProvider: OSProvider) {
+        private readonly tempFileProvider: TempFileProvider) {
     }
 
     public async getTargetPath(projectFile: string): Promise<string> {
-        const getTargetPathProjectFile = path.join(this.osProvider.tmpdir, "test.csproj");
-        const targetOutputFilename = path.join(this.osProvider.tmpdir, "test.txt");
+        const getTargetPathProjectFile = this.tempFileProvider.getTempFilename();
+        const targetOutputFilename = this.tempFileProvider.getTempFilename();
         await this.fsProvider.writeFile(getTargetPathProjectFile, getTargetPathProjectFileContent);
         try {
             await this.msBuildClient.execTarget(
