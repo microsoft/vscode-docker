@@ -18,11 +18,11 @@ export class CommandLineMSBuildClient implements MSBuildClient {
     }
 
     public async execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void> {
-        let command = `msbuild ${projectFile}`;
+        let command = `dotnet msbuild "${projectFile}"`;
 
         if (options) {
             if (options.target) {
-                command += ` /t:${options.target}`;
+                command += ` "/t:${options.target}"`;
             }
 
             if (options.properties) {

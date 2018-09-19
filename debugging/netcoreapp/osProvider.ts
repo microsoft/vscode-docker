@@ -11,6 +11,7 @@ export interface OSProvider {
     os: PlatformType;
     tmpdir: string;
     pathJoin(os: PlatformType, ...paths: string[]): string;
+    pathNormalize(os: PlatformType, path: string): string;
 }
 
 export class LocalOSProvider implements OSProvider {
@@ -28,6 +29,12 @@ export class LocalOSProvider implements OSProvider {
 
     public pathJoin(pathOS: PlatformType, ...paths: string[]): string {
         return paths.join(pathOS === 'Windows' ? '\\' : '/');
+    }
+
+    public pathNormalize(pathOS: PlatformType, path: string): string {
+        return path.replace(
+            pathOS === 'Windows' ? /\//g : /\\/g,
+            pathOS === 'Windows' ? '\\' : '/');
     }
 }
 

@@ -120,7 +120,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ? debugConfiguration.dockerOptions.run.os
             : 'Linux';
 
-        const appOutput = await this.inferAppOutput(debugConfiguration, resolvedAppProject);
+        const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
 
         const result = await this.dockerManager.prepareForLaunch({
             appFolder: resolvedAppFolder,
@@ -154,13 +154,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return folder.uri.fsPath;
     }
 
-    private async inferAppOutput(configuration: DockerDebugConfiguration, resolvedAppProject: string): Promise<string> {
+    private async inferAppOutput(configuration: DockerDebugConfiguration, targetOS: PlatformType, resolvedAppProject: string): Promise<string> {
         if (configuration.dockerOptions && configuration.dockerOptions.appOutput) {
             return configuration.dockerOptions.appOutput;
         }
 
         const targetPath = await this.netCoreProjectProvider.getTargetPath(resolvedAppProject);
-        const relativeTargetPath = path.relative(path.dirname(resolvedAppProject), targetPath);
+        const relativeTargetPath = this.osProvider.pathNormalize(targetOS, path.relative(path.dirname(resolvedAppProject), targetPath));
 
         return relativeTargetPath;
     }

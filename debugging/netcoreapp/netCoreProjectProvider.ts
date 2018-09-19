@@ -52,7 +52,7 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
 
             const targetOutputContent = await this.fsProvider.readFile(targetOutputFilename);
 
-            return targetOutputContent.split('\n')[0];
+            return targetOutputContent.split(/\r?\n/)[0];
         }
         finally {
             await this.fsProvider.unlinkFile(getTargetPathProjectFile);
