@@ -180,7 +180,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return path.join(resolvedAppFolder, projectFile);
         }
 
-        throw new Error('Unable to infer the appliction project file. It must be explicitly set in the Docker debug configuration.');
+        throw new Error('Unable to infer the application project file. It must be explicitly set in the Docker debug configuration.');
     }
 
     private inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
