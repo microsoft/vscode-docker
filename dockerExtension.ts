@@ -27,15 +27,15 @@ import {
   TransportKind
 } from "vscode-languageclient/lib/main";
 import { queueBuild } from "./commands/azureCommands/acr-build";
-import { viewBuildLogs } from "./commands/azureCommands/acr-build-logs";
-import { LogContentProvider } from "./commands/azureCommands/acr-build-logs-utils/logFileManager";
+import { viewACRLogs } from "./commands/azureCommands/acr-logs";
+import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from "./commands/azureCommands/create-registry";
 import { deleteAzureImage } from "./commands/azureCommands/delete-image";
 import { deleteAzureRegistry } from "./commands/azureCommands/delete-registry";
 import { deleteRepository } from "./commands/azureCommands/delete-repository";
 import { pullFromAzure } from "./commands/azureCommands/pull-from-azure";
-import { runBuildTask } from "./commands/azureCommands/run-buildTask";
-import { showBuildTaskProperties } from "./commands/azureCommands/show-buildTask";
+import { runTask } from "./commands/azureCommands/run-task";
+import { showTaskProperties } from "./commands/azureCommands/show-task";
 import { TaskContentProvider } from "./commands/azureCommands/task-utils/showTaskManager";
 import { buildImage } from "./commands/build-image";
 import {
@@ -440,9 +440,9 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
   registerAzureCommand("vscode-docker.delete-ACR-Repository", deleteRepository);
   registerAzureCommand("vscode-docker.create-ACR-Registry", createRegistry);
   registerAzureCommand("vscode-docker.pullFromAzure", pullFromAzure);
-  registerAzureCommand("vscode-docker.acrBuildLogs", viewBuildLogs);
-  registerAzureCommand("vscode-docker.run-ACR-BuildTask", runBuildTask);
-  registerAzureCommand("vscode-docker.show-ACR-buildTask", showBuildTaskProperties);
+  registerAzureCommand("vscode-docker.acrLogs", viewACRLogs);
+  registerAzureCommand("vscode-docker.run-ACR-Task", runTask);
+  registerAzureCommand("vscode-docker.show-ACR-Task", showTaskProperties);
   registerCommand("vscode-docker.ACR-queueBuild", queueBuild);
 }
 
