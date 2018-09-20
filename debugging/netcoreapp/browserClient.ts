@@ -14,6 +14,7 @@ export class OpnBrowserClient implements BrowserClient {
         const uri = Uri.parse(url);
 
         if (uri.scheme === 'http' || uri.scheme === 'https') {
+            // tslint:disable-next-line:no-unsafe-any
             opn(url);
         }
     }

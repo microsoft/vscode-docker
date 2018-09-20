@@ -23,7 +23,7 @@ export class DefaultOutputManager implements OutputManager {
         if (this.level) {
             const split = content.split(/[\n\r]/g);
             const generateContent =
-                c => {
+                (c: string) => {
                     return this.skipFirstLine ? c : this.generatePrefix(c);
                 };
 
@@ -69,7 +69,7 @@ export class DefaultOutputManager implements OutputManager {
             return result;
         } catch (error) {
             if (errorContent) {
-                this.appendLine(typeof errorContent === 'string' ? errorContent : errorContent(error));
+                this.appendLine(typeof errorContent === 'string' ? errorContent : errorContent(<Error>error));
             }
 
             throw error;

@@ -24,8 +24,8 @@ export class ChildProcessProvider implements ProcessProvider {
         return process.pid;
     }
 
-    public exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }> {
-        return new Promise<{ stdout: string, stderr: string }>(
+    public async exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }> {
+        return await new Promise<{ stdout: string, stderr: string }>(
             (resolve, reject) => {
                 const p = cp.exec(
                     command,

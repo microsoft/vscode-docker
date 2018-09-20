@@ -26,7 +26,7 @@ export class DefaultAppStorage implements MementoAsync {
         if (await this.fileSystemProvider.fileExists(itemPath)) {
             const itemData = await this.fileSystemProvider.readFile(itemPath);
 
-            return JSON.parse(itemData);
+            return <T>JSON.parse(itemData);
         }
 
         return defaultValue;
@@ -57,7 +57,7 @@ export class DefaultAppStorageProvider implements AppStorageProvider {
     constructor(private readonly fileSystemProvider: FileSystemProvider) {
     }
 
-    public getStorage(appFolder: string): Promise<MementoAsync> {
-        return Promise.resolve(new DefaultAppStorage(appFolder, this.fileSystemProvider));
+    public async getStorage(appFolder: string): Promise<MementoAsync> {
+        return await Promise.resolve(new DefaultAppStorage(appFolder, this.fileSystemProvider));
     }
 }

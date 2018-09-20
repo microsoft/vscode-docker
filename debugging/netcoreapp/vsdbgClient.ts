@@ -40,16 +40,16 @@ export class RemoteVsDbgClient implements VsDbgClient {
             ? {
                 name: 'GetVsDbg.ps1',
                 url: 'https://aka.ms/getvsdbgps1',
-                getAcquisitionCommand: (vsdbgAcquisitionScriptPath: string, version: string, runtime: string, vsdbgVersionPath: string) => {
+                getAcquisitionCommand: async (vsdbgAcquisitionScriptPath: string, version: string, runtime: string, vsdbgVersionPath: string) => {
                     const powershellCommand = `${process.env[RemoteVsDbgClient.winDir]}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
-                    return Promise.resolve(`${powershellCommand} -NonInteractive -NoProfile -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File \"${vsdbgAcquisitionScriptPath}\" -Version ${version} -RuntimeID ${runtime} -InstallPath \"${vsdbgVersionPath}\"`);
+                    return await Promise.resolve(`${powershellCommand} -NonInteractive -NoProfile -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File \"${vsdbgAcquisitionScriptPath}\" -Version ${version} -RuntimeID ${runtime} -InstallPath \"${vsdbgVersionPath}\"`);
                 }
             }
             : {
                 name: 'getvsdbg.sh',
                 url: 'https://aka.ms/getvsdbgsh',
-                getAcquisitionCommand: (vsdbgAcquisitionScriptPath: string, version: string, runtime: string, vsdbgVersionPath: string) => {
-                    return Promise.resolve(`${vsdbgAcquisitionScriptPath} -v ${version} -r ${runtime} -l \"${vsdbgVersionPath}\"`);
+                getAcquisitionCommand: async (vsdbgAcquisitionScriptPath: string, version: string, runtime: string, vsdbgVersionPath: string) => {
+                    return await Promise.resolve(`${vsdbgAcquisitionScriptPath} -v ${version} -r ${runtime} -l \"${vsdbgVersionPath}\"`);
                 },
                 onScriptAcquired: async (scriptPath: string) => {
                     await this.processProvider.exec(`chmod +x \"${scriptPath}\"`, { cwd: this.vsdbgPath });
@@ -78,7 +78,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
 
                 await this.processProvider.exec(acquisitionCommand, { cwd: this.vsdbgPath });
 
-                this.updateDate(this.lastDebuggerAcquisitionKey(version, runtime), new Date());
+                await this.updateDate(this.lastDebuggerAcquisitionKey(version, runtime), new Date());
 
                 return vsdbgVersionPath;
             },
@@ -109,7 +109,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
             await this.options.onScriptAcquired(vsdbgAcquisitionScriptPath);
         }
 
-        this.updateDate(this.lastScriptAcquisitionKey, new Date());
+        await this.updateDate(this.lastScriptAcquisitionKey, new Date());
     }
 
     private async isUpToDate(key: string): Promise<boolean> {
@@ -137,10 +137,10 @@ export class RemoteVsDbgClient implements VsDbgClient {
         return `${RemoteVsDbgClient.stateKey}.lastDebuggerAcquisition(${version}, ${runtime})`;
     }
 
-    private getDate(key: string): Promise<Date | undefined> {
+    private async getDate(key: string): Promise<Date | undefined> {
         const dateString = this.globalState.get<string>(key);
 
-        return Promise.resolve(dateString ? new Date(dateString) : undefined);
+        return await Promise.resolve(dateString ? new Date(dateString) : undefined);
     }
 
     private async updateDate(key: string, timestamp: Date): Promise<void> {

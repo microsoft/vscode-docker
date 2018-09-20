@@ -17,8 +17,8 @@ export class DefaultDebuggerClient {
     constructor(private readonly vsdbgClient: VsDbgClient) {
     }
 
-    public getDebugger(os: PlatformType): Promise<string> {
-        return this.vsdbgClient.getVsDbgVersion(
+    public async getDebugger(os: PlatformType): Promise<string> {
+        return await this.vsdbgClient.getVsDbgVersion(
             DefaultDebuggerClient.debuggerVersion,
             os === 'Windows' ? DefaultDebuggerClient.debuggerWindowsRuntime : DefaultDebuggerClient.debuggerLinuxRuntime);
     }

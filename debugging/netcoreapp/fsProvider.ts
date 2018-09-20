@@ -18,8 +18,8 @@ export interface FileSystemProvider {
 }
 
 export class LocalFileSystemProvider implements FileSystemProvider {
-    public dirExists(path: string): Promise<boolean> {
-        return new Promise(
+    public async dirExists(path: string): Promise<boolean> {
+        return await new Promise<boolean>(
             (resolve, reject) => {
                 fs.stat(
                     path,
@@ -37,8 +37,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             });
     }
 
-    public fileExists(path: string): Promise<boolean> {
-        return new Promise(
+    public async fileExists(path: string): Promise<boolean> {
+        return await new Promise<boolean>(
             (resolve, reject) => {
                 fs.stat(
                     path,
@@ -66,8 +66,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
         return hash.digest('hex');
     }
 
-    public makeDir(path: string): Promise<void> {
-        return new Promise(
+    public async makeDir(path: string): Promise<void> {
+        return await new Promise<void>(
             (resolve, reject) => {
                 fs.mkdir(
                     path,
@@ -81,8 +81,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             });
     }
 
-    public readDir(path: string): Promise<string[]> {
-        return new Promise(
+    public async readDir(path: string): Promise<string[]> {
+        return await new Promise<string[]>(
             (resolve, reject) => {
                 fs.readdir(
                     path,
@@ -96,8 +96,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             });
     }
 
-    public readFile(filename: string, encoding?: string): Promise<string> {
-        return new Promise(
+    public async readFile(filename: string, encoding?: string): Promise<string> {
+        return await new Promise<string>(
             (resolve, reject) => {
                 fs.readFile(
                     filename,
@@ -112,8 +112,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             });
     }
 
-    public unlinkFile(filename: string): Promise<boolean> {
-        return new Promise(
+    public async unlinkFile(filename: string): Promise<boolean> {
+        return await new Promise<boolean>(
             (resolve, reject) => {
                 fs.unlink(
                     filename,
@@ -132,8 +132,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
     }
 
     // tslint:disable-next-line:no-any
-    public writeFile(filename: string, data: any): Promise<void> {
-        return new Promise(
+    public async writeFile(filename: string, data: any): Promise<void> {
+        return await new Promise<void>(
             (resolve, reject) => {
                 fs.writeFile(
                     filename,

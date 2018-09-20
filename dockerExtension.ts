@@ -373,7 +373,9 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
             vscode.debug.onDidChangeActiveDebugSession(
                 session => {
                     if (session === undefined) {
-                        dockerManager.cleanupAfterLaunch();
+                        dockerManager
+                            .cleanupAfterLaunch()
+                            .catch(reason => console.log(`Unable to cleanup Docker images after launch: ${reason}`));
                     }
                 }));
     }

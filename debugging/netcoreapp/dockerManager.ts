@@ -86,7 +86,7 @@ export class DefaultDockerManager implements DockerManager {
         const buildMetadata = await cache.get<LastImageBuildMetadata>('build');
         const dockerIgnorePath = path.join(options.context, '.dockerignore');
 
-        const dockerfileHasher = new Lazy(() => this.fileSystemProvider.hashFile(options.dockerfile));
+        const dockerfileHasher = new Lazy(async () => await this.fileSystemProvider.hashFile(options.dockerfile));
         const dockerIgnoreHasher = new Lazy(
             async () => {
                 if (await this.fileSystemProvider.fileExists(dockerIgnorePath)) {
@@ -118,7 +118,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const imageId = await this.dockerOutputManager.performOperation(
             'Building Docker image...',
-            outputManager => this.dockerClient.buildImage(options, content => outputManager.append(content)),
+            async outputManager => await this.dockerClient.buildImage(options, content => outputManager.append(content)),
             id => `Docker image ${this.dockerClient.trimId(id)} built.`,
             err => `Failed to build Docker image: ${err}`);
 
