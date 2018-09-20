@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as osNode from 'os';
 import { RequestAPI, RequiredUriUrl } from 'request';
 import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel, Terminal } from "vscode";
@@ -27,4 +28,12 @@ export namespace ext {
      * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)
      */
     export let request: requestPromise;
+
+    /**
+     * An test-injectable structure defining the current operating system and version
+     */
+    export let os = {
+        platform: osNode.platform(),
+        release: osNode.release()
+    };
 }

@@ -1,7 +1,19 @@
-## 0.2.1 - 17 September 2018
+## 0.3.1 - xx September 2018
 
 ### Added
 * Adds experimental debugging support for .NET Core web applications running in Linux Docker containers, enabled via the `docker.debugging.enabled` configuration setting.
+
+## 0.3.0 - 21 September 2018
+
+### Added
+
+* Add Docker Files to Workspace
+  - Support multiple versions of .NET Core (ASP .NET and Console apps)
+
+### Fixed
+* Some private registries returning 404 error [#471](https://github.com/Microsoft/vscode-docker/issues/471)
+* You shouldn't have to reload vscode in order for changes to docker.attachShellCommand.{linux,windows}Container to take effect [#463](https://github.com/microsoft/vscode-docker/issues/463)
+* Engineering improvements (lint, tests, work toward strict null checking, etc.)
 
 ## 0.2.0 - 5 September 2018
 
