@@ -226,8 +226,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
 
-    // Remove multiple empty lines, as might be produced if there's no EXPOSE statement
-    contents = contents.replace(new RegExp(`${nodeOs.EOL}\{3\}`, 'g'), `${nodeOs.EOL}${nodeOs.EOL}`);
+    // Remove multiple empty lines with single empty lines, as might be produced
+    // if $expose_statements$ or another template variable is an empty string
+    contents = contents.replace(/(\r\n){3}/g, "\r\n\r\n")
+        .replace(/(\n){3}/g, "\n\n");
 
     let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
     if (unreplacedToken[0]) {

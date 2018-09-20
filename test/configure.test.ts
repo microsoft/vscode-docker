@@ -1070,7 +1070,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // Ruby
 
     suite("Ruby", () => {
-        testInEmptyFolder("Ruby", async () => {
+        testInEmptyFolder("Ruby, empty folder", async () => {
             await testConfigureDocker(
                 'Ruby',
                 {
