@@ -5,6 +5,7 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
+import { parseError } from 'vscode-azureextensionui';
 import { nonNullValue } from '../../utils/nonNull';
 
 export enum DockerEngineType {
@@ -117,12 +118,20 @@ class DockerClient {
         });
     }
 
-    public getExposedPorts(imageId: string): Thenable<string[]> {
-        return new Promise((resolve, reject) => {
-            this.getImage(imageId).inspect((error, data: { Config: { ExposedPorts: {} } }) => {
-                let exposedPorts = data.Config.ExposedPorts;
-                const ports = Object.keys(exposedPorts);
-                resolve(ports);
+    public async getExposedPorts(imageId: string): Promise<string[]> {
+        return await new Promise<string[]>((resolve, reject) => {
+            this.getImage(imageId).inspect((error: {}, data: { Config: { ExposedPorts: {} } }) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    let exposedPorts = data.Config.ExposedPorts;
+                    if (!exposedPorts) {
+                        resolve([]);
+                    } else {
+                        const ports = Object.keys(exposedPorts);
+                        resolve(ports);
+                    }
+                }
             });
         });
     }

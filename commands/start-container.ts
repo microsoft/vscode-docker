@@ -7,15 +7,13 @@ import * as cp from 'child_process';
 import * as fs from 'fs';
 import os = require('os');
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-
-const teleCmdId: string = 'vscode-docker.container.start';
 
 /**
  * Image -> Run
@@ -41,29 +39,23 @@ export async function startContainerCore(actionContext: IActionContext, context:
     }
 
     if (imageToStart) {
-        docker.getExposedPorts(imageToStart.Id).then((ports: string[]) => {
-            let options = `--rm ${interactive ? '-it' : '-d'}`;
-            if (ports.length) {
-                const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`); //'port' is of the form number/protocol, eg. 8080/udp.
-                // In the command, the host port has just the number (mentioned in the EXPOSE step), while the destination port can specify the protocol too
-                options += ` ${portMappings.join(' ')}`;
-            }
+        let ports: string[] = [];
+        try {
+            ports = await docker.getExposedPorts(imageToStart.Id);
+        } catch (error) {
+            vscode.window.showWarningMessage(`Unable to retrieve exposed ports: ${parseError(error).message}`);
+        }
 
-            const terminal = ext.terminalProvider.createTerminal(imageName);
-            terminal.sendText(`docker run ${options} ${imageName}`);
-            terminal.show();
+        let options = `--rm ${interactive ? '-it' : '-d'}`;
+        if (ports.length) {
+            const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`); //'port' is of the form number/protocol, eg. 8080/udp.
+            // In the command, the host port has just the number (mentioned in the EXPOSE step), while the destination port can specify the protocol too
+            options += ` ${portMappings.join(' ')}`;
+        }
 
-            if (reporter) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: interactive ? teleCmdId + '.interactive' : teleCmdId
-                });
-            }
-        });
+        const terminal = ext.terminalProvider.createTerminal(imageName);
+        terminal.sendText(`docker run ${options} ${imageName}`);
+        terminal.show();
     }
 }
 
@@ -115,15 +107,5 @@ export async function startAzureCLI(actionContext: IActionContext): Promise<cp.C
         const terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
         terminal.sendText(cmd);
         terminal.show();
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId + '.azurecli'
-            });
-        }
     }
 }

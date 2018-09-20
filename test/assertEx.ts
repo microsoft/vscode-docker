@@ -78,15 +78,12 @@ export function assertNotContains(s: string, searchString: string): void {
     assert(!s.includes(searchString), `Unexpected text '${searchString}' found in '${s}'`);
 }
 
-function fileContains(filePath: string, text: string): boolean {
-    let contents = fse.readFileSync(filePath).toString();
-    return contents.indexOf(text) >= 0;
-}
-
 export function assertFileContains(filePath: string, text: string): void {
-    assert(fileContains(filePath, text), `Expected to find '${text}' in file ${filePath}`);
+    let contents = fse.readFileSync(filePath).toString();
+    assert(contents.indexOf(text) >= 0, `Expected to find '${text}' in file ${filePath}, but found:\n${contents}`);
 }
 
 export function assertNotFileContains(filePath: string, text: string): void {
-    assert(!fileContains(filePath, text), `Unexpected text '${text}' found in file ${filePath}`);
+    let contents = fse.readFileSync(filePath).toString();
+    assert(contents.indexOf(text) < 0, `Unexpected text '${text}' found in file ${filePath}`);
 }
