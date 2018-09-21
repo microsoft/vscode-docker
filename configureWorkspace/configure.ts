@@ -73,7 +73,7 @@ generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, exposeStatements: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
@@ -88,19 +88,19 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, exposeStatements: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
-        return generators.genDockerCompose(serviceNameAndRelativePath, platform, os, exposeStatements);
+        return generators.genDockerCompose(serviceNameAndRelativePath, platform, os, port);
     }
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, exposeStatements: string, packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
-        return generators.genDockerComposeDebug(serviceNameAndRelativePath, platform, os, exposeStatements, packageInfo);
+        return generators.genDockerComposeDebug(serviceNameAndRelativePath, platform, os, port, packageInfo);
     }
 }
 
@@ -251,7 +251,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     }
 }
 
-type GeneratorFunction = (serviceName: string, platform: Platform, os: OS | undefined, exposeStatements: string, packageJson?: Partial<PackageInfo>) => string;
+type GeneratorFunction = (serviceName: string, platform: Platform, os: OS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
