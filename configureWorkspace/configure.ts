@@ -77,7 +77,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
-        let contents = generators.genDockerFile(serviceNameAndRelativePath, platform, os, exposeStatements, { cmd, author, version, artifactName });
+        let contents = generators.genDockerFile(serviceNameAndRelativePath, platform, os, port, { cmd, author, version, artifactName });
 
         // Remove multiple empty lines with single empty lines, as might be produced
         // if $expose_statements$ or another template variable is an empty string
