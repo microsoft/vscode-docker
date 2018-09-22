@@ -142,12 +142,22 @@
         {
           "command": "vscode-docker.explorer.refresh",
           "when": "view == dockerExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "vscode-docker.container.start.azurecli",
+          "when": "view == dockerExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "vscode-docker.configure",
+          "when": "view == dockerExplorer",
+          "group": "navigation@2"
         },
         {
           "command": "vscode-docker.system.prune",
           "when": "view == dockerExplorer",
-          "group": "navigation"
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
@@ -445,7 +455,11 @@
         "command": "vscode-docker.configure",
         "title": "Add Docker files to workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
-        "category": "Docker"
+        "category": "Docker",
+        "icon": {
+          "light": "images/light/FileGroup_16x_nohalo.svg",
+          "dark": "images/dark/FileGroup_16x_darkp.svg"
+        }
       },
       {
         "command": "vscode-docker.api.configure",
@@ -489,9 +503,13 @@
       },
       {
         "command": "vscode-docker.container.start.azurecli",
-        "title": "Azure CLI",
+        "title": "Run Azure CLI",
         "description": "Starts a container from the Azure CLI image and runs it interactively",
-        "category": "Docker"
+        "category": "Docker",
+        "icon": {
+          "light": "images/light/ImmediateWindow_16x_nohalo.svg",
+          "dark": "images/dark/ImmediateWindow_16x_darkp.svg"
+        }
       },
       {
         "command": "vscode-docker.container.stop",
