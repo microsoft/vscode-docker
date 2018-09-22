@@ -11,7 +11,7 @@ import * as path from 'path';
 import { Platform, OS } from "../configureWorkspace/config-utils";
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
-import { configure, ConfigureTelemetryProperties, configureApi, ConfigureApiOptions } from '../configureWorkspace/configure';
+import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { globAsync } from '../helpers/async';
 import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';
@@ -393,7 +393,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 packageFileType: '.csproj',
                 packageFileSubfolderDepth: '1'
             },
-            [os, '' /* no port */],
+            [os, undefined /* no port */],
             ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
         );
 
@@ -599,6 +599,17 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.1", async () => {
+        testInEmptyFolder("Default port (none)", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                '.NET Core Console',
+                undefined,
+                ['Windows', undefined]
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
@@ -783,6 +794,28 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // ASP.NET Core
 
     suite("ASP.NET Core 2.2", async () => {
+        testInEmptyFolder("Default port (80)", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                'ASP.NET Core',
+                undefined,
+                ['Windows', undefined]
+            );
+
+            assertFileContains('Dockerfile', 'EXPOSE 80');
+        });
+
+        testInEmptyFolder("No port", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                'ASP.NET Core',
+                undefined,
+                ['Windows', '']
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
         testInEmptyFolder("Windows 10 RS4", async () => {
             await testAspNetCore(
                 'Windows',
@@ -922,6 +955,28 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // Java
 
     suite("Java", () => {
+        testInEmptyFolder("No port", async () => {
+            await testConfigureDocker(
+                'Java',
+                undefined,
+                [''],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
+        testInEmptyFolder("Default port", async () => {
+            await testConfigureDocker(
+                'Java',
+                undefined,
+                [undefined],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+            );
+
+            assertFileContains('Dockerfile', 'EXPOSE 3000');
+        });
+
         testInEmptyFolder("No pom file", async () => {
             await testConfigureDocker(
                 'Java',
