@@ -136,6 +136,11 @@
           "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
+        },
+        {
+          "when": "explorerResourceIsFolder && explorerResourceIsRoot",
+          "command": "vscode-docker.configure",
+          "group": "docker"
         }
       ],
       "view/title": [
@@ -453,7 +458,7 @@
     "commands": [
       {
         "command": "vscode-docker.configure",
-        "title": "Add Docker files to workspace",
+        "title": "Add Docker files to workspace...",
         "description": "Add Dockerfile, docker-compose.yml files",
         "category": "Docker",
         "icon": {
