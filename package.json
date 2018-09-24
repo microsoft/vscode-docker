@@ -415,7 +415,7 @@
         },
         "docker.attachShellCommand.linuxContainer": {
           "type": "string",
-          "default": "/bin/sh",
+          "default": "/bin/bash",
           "description": "Attach command to use for Linux containers"
         },
         "docker.attachShellCommand.windowsContainer": {
