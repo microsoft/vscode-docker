@@ -41,7 +41,6 @@ as the easier to read:
             sub-indented text
         `;
 */
-
 function removeIndentation(text: string): string {
     while (text[0] === '\r' || text[0] === '\n') {
         text = text.substr(1);
@@ -1142,6 +1141,70 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'COPY Gemfile Gemfile.lock ./');
             assertFileContains('Dockerfile', 'RUN bundle install');
             assertFileContains('Dockerfile', 'CMD ["ruby", "testoutput.rb"]');
+        });
+    });
+
+    suite("'Other'", () => {
+        testInEmptyFolder("with package.json", async () => {
+            await writeFile('', 'package.json', JSON.stringify({
+                "name": "myexpressapp",
+                "version": "1.2.3",
+                "private": true,
+                "scripts": {
+                    "start": "node ./bin/www"
+                },
+                "dependencies": {
+                    "cookie-parser": "~1.4.3",
+                    "debug": "~2.6.9",
+                    "express": "~4.16.0",
+                    "http-errors": "~1.6.2",
+                    "jade": "~1.11.0",
+                    "morgan": "~1.9.0"
+                }
+            }))
+            await testConfigureDocker(
+                'Other',
+                {
+                    configurePlatform: 'Other',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                [undefined /*port*/],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'package.json']);
+
+            let dockerfileContents = await readFile('Dockerfile');
+            let composeContents = await readFile('docker-compose.yml');
+            let debugComposeContents = await readFile('docker-compose.debug.yml');
+
+            assert.strictEqual(dockerfileContents, removeIndentation(`
+                FROM docker/whalesay:latest
+                LABEL Name=testoutput Version=1.2.3
+                RUN apt-get -y update && apt-get install -y fortunes
+                CMD /usr/games/fortune -a | cowsay
+                `));
+            assert.strictEqual(composeContents, removeIndentation(`
+                version: '2.1'
+
+                services:
+                  testoutput:
+                    image: testoutput
+                    build: .
+                    ports:
+                      - 3000:3000
+                `));
+            assert.strictEqual(debugComposeContents, removeIndentation(`
+                version: '2.1'
+
+                services:
+                  testoutput:
+                    image: testoutput
+                    build:
+                      context: .
+                      dockerfile: Dockerfile
+                    ports:
+                      - 3000:3000
+                `));
         });
     });
 
