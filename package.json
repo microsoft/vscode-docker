@@ -145,14 +145,9 @@
       ],
       "view/title": [
         {
-          "command": "vscode-docker.explorer.refresh",
-          "when": "view == dockerExplorer",
-          "group": "navigation@1"
-        },
-        {
           "command": "vscode-docker.container.start.azurecli",
           "when": "view == dockerExplorer",
-          "group": "navigation@3"
+          "group": "navigation@1"
         },
         {
           "command": "vscode-docker.configure",
@@ -161,6 +156,11 @@
         },
         {
           "command": "vscode-docker.system.prune",
+          "when": "view == dockerExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "vscode-docker.explorer.refresh",
           "when": "view == dockerExplorer",
           "group": "navigation@4"
         }
