@@ -7,7 +7,7 @@
 
 import vscode = require('vscode');
 import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
-import hub = require('../dockerHubApi');
+import hub = require('../dockerHubSearch');
 import parser = require('../parser');
 
 export class SuggestSupportHelper {
