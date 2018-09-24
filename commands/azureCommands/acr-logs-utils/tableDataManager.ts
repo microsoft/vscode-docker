@@ -53,11 +53,12 @@ export class LogData {
      */
     public async loadLogs(loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
         let runListResult: RunListResult;
+        // tslint:disable-next-line:no-any
         let options: any = {};
         if (filter && Object.keys(filter).length) {
             if (!filter.runId) {
                 options.filter = await this.parseFilter(filter);
-                options.top = 1;
+                if (filter.image) { options.top = 1; }
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
                 runListResult = [];
