@@ -10,18 +10,23 @@ import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/windowsVersion';
 import { OS, Platform } from './config-utils';
-import { PackageInfo } from './configure';
+import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 // This file handles both ASP.NET core and .NET Core Console
 
-let configureDotNetCore = {
+export const configureAspDotNetCore: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
-    genDockerComposeDebug: undefined // We don't generate compose files for .net core
+    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
+    defaultPort: '80'
 };
 
-export let configureAspDotNetCore = configureDotNetCore;
-export let configureDotNetCoreConsole = configureDotNetCore;
+export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
+    genDockerFile,
+    genDockerCompose: undefined, // We don't generate compose files for .net core
+    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
+    defaultPort: ''
+};
 
 const AspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
 const AspNetCoreSdkImageFormat = "microsoft/aspnetcore-build:{0}.{1}{2}";
@@ -164,7 +169,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
-    let exposeStatements = port ? `EXPOSE ${port}` : '';
+    let exposeStatements = getExposeStatements(port);
 
     // Parse version from TargetFramework
     // Example: netcoreapp1.0
@@ -225,11 +230,6 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$project_file_name\$/g, projectFileName)
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
-
-    // Remove multiple empty lines with single empty lines, as might be produced
-    // if $expose_statements$ or another template variable is an empty string
-    contents = contents.replace(/(\r\n){3}/g, "\r\n\r\n")
-        .replace(/(\n){3}/g, "\n\n");
 
     let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
     if (unreplacedToken[0]) {

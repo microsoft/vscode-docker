@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.3.1",
+  "version": "0.3.1-alpha",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -415,7 +415,7 @@
         },
         "docker.attachShellCommand.linuxContainer": {
           "type": "string",
-          "default": "/bin/sh",
+          "default": "/bin/bash",
           "description": "Attach command to use for Linux containers"
         },
         "docker.attachShellCommand.windowsContainer": {
@@ -674,7 +674,7 @@
     "mocha": "5.2.0",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "5.0.1",
-    "typescript": "^2.1.5",
+    "typescript": "^3.0.0",
     "vsce": "^1.37.5",
     "vscode": "^1.1.18"
   },
