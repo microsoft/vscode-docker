@@ -133,17 +133,15 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < images.length; i++) {
-                // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, images[i], this.eventEmitter);
+            for (let image of images) {
+                if (!image.RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, image, this.eventEmitter);
+                    node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, images[i], this.eventEmitter);
+                    for (let repoTag of image.RepoTags) {
+                        let node = new ImageNode(`${repoTag}`, image, this.eventEmitter);
+                        node.imageDesc = image;
                         imageNodes.push(node);
                     }
                 }
@@ -229,9 +227,8 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < containers.length; i++) {
-                if (['exited', 'dead'].includes(containers[i].State)) {
+            for (let container of containers) {
+                if (['exited', 'dead'].includes(container.State)) {
                     contextValue = "stoppedLocalContainerNode";
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
@@ -245,7 +242,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, containers[i], contextValue, iconPath);
+                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 
