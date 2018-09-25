@@ -20,6 +20,7 @@ import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
 import { configureNode } from './configure_node';
+import { configureOther } from './configure_other';
 import { configurePython } from './configure_python';
 import { configureRuby } from './configure_ruby';
 
@@ -65,6 +66,7 @@ generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
 generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
+generatorsByPlatform.set('Other', configureOther);
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
