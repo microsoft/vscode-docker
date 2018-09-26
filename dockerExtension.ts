@@ -26,7 +26,7 @@ import {
   ServerOptions,
   TransportKind
 } from "vscode-languageclient/lib/main";
-import { queueBuild } from "./commands/azureCommands/acr-build";
+import { queueBuild, runYaml } from "./commands/azureCommands/acr-build";
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from "./commands/azureCommands/create-registry";
@@ -117,6 +117,7 @@ import { Keytar } from "./utils/keytar";
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = "**/[dD]ocker-[cC]ompose*.{yaml,yml}";
 export const DOCKERFILE_GLOB_PATTERN = "**/{*.dockerfile,[dD]ocker[fF]ile}";
+export const YAML_GLOB_PATTER = "/\\.ya*ml$/i";
 
 export let dockerExplorerProvider: DockerExplorerProvider;
 
@@ -444,6 +445,7 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
   registerAzureCommand("vscode-docker.run-ACR-Task", runTask);
   registerAzureCommand("vscode-docker.show-ACR-Task", showTaskProperties);
   registerCommand("vscode-docker.ACR-queueBuild", queueBuild);
+  registerCommand("vscode-docker.ACR-runYaml", runYaml);
 }
 
 export async function deactivate(): Promise<void> {

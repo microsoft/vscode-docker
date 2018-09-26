@@ -1,5 +1,6 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
 import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models/dockerBuildRequest";
+import { FileTaskRunRequest } from "azure-arm-containerregistry/lib/models/fileTaskRunRequest";
 import { Registry } from 'azure-arm-containerregistry/lib/models/registry';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
@@ -12,7 +13,7 @@ import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { getBlobInfo, getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { resolveDockerFileItem } from '../build-image';
+import { resolveDockerFileItem, resolveYamlFileItem } from '../build-image';
 import { quickPickACRRegistry, quickPickNewImageName, quickPickSubscription } from '../utils/quick-pick-azure';
 
 const idPrecision = 6;
@@ -61,6 +62,50 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
         dockerFilePath: dockerItem.relativeFilePath
     };
     status.appendLine("Set up Run Request");
+
+    const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
+    status.appendLine("Schedule Run " + run.runId);
+
+    streamLogs(registry, run, status, client);
+}
+
+// Runs the selected yaml file. Equivalent to az acr run -f <yaml file> <directory>
+// Selected source code must contain a path to the desired dockerfile.
+export async function runYaml(yamlFileUri?: vscode.Uri): Promise<void> {
+    //Acquire information from user
+    const subscription = await quickPickSubscription();
+
+    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const registry: Registry = await quickPickACRRegistry(true);
+
+    const resourceGroupName = getResourceGroupName(registry);
+
+    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
+    const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
+
+    //Begin readying build
+    status.show();
+
+    let folder: vscode.WorkspaceFolder;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+        folder = vscode.workspace.workspaceFolders[0];
+    } else {
+        folder = await (<any>vscode).window.showWorkspaceFolderPick();
+    }
+    const yamlItem = await resolveYamlFileItem(folder, yamlFileUri);
+    const sourceLocation: string = folder.uri.path;
+    const tarFilePath = getTempSourceArchivePath();
+
+    const uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
+    status.appendLine("Uploaded Source Code to " + tarFilePath);
+
+    const runRequest: FileTaskRunRequest = {
+        type: 'FileTaskRunRequest',
+        taskFilePath: yamlItem.relativeFilePath,
+        //valuesFilePath: yamlItem.relativeFolderPath,
+        sourceLocation: uploadedSourceLocation,
+        platform: { os: osType }
+    };
 
     const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
     status.appendLine("Schedule Run " + run.runId);

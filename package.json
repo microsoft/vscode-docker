@@ -32,6 +32,7 @@
     "onCommand:vscode-docker.acrLogs",
     "onCommand:vscode-docker.api.configure",
     "onCommand:vscode-docker.ACR-queueBuild",
+    "onCommand:vscode-docker.ACR-runYaml",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -91,6 +92,11 @@
           "group": "docker"
         },
         {
+          "when": "editorLangId == yaml",
+          "command": "vscode-docker.ACR-runYaml",
+          "group": "docker"
+        },
+        {
           "when": "editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
@@ -128,12 +134,17 @@
       ],
       "explorer/context": [
         {
-          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
+          "when": "resourceFilename =~ /\\.*dockerfile$/i",
           "command": "vscode-docker.ACR-queueBuild",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
+          "when": "resourceFilename =~ /\\.ya*ml$/i",
+          "command": "vscode-docker.ACR-runYaml",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /\\.*dockerfile$/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         },
@@ -498,6 +509,12 @@
         "command": "vscode-docker.ACR-queueBuild",
         "title": "Queue Build",
         "description": "Queue a build from a Dockerfile",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.ACR-runYaml",
+        "title": "run",
+        "description": "Run a yaml file.",
         "category": "Docker"
       },
       {
