@@ -12,7 +12,7 @@ import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as vscode from "vscode";
 import { NULL_GUID } from "../../constants";
-import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
+import { getCatalog, getTagAttributes, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
 import { AzureUtilityManager } from '../azureUtilityManager';
@@ -50,7 +50,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
-    const tags: TagInfo[] = await getTags('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
+    const tags: TagInfo[] = await getTagAttributes('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
         image = new AzureImage(element, tag.tag, tag.created);
         allImages.push(image);

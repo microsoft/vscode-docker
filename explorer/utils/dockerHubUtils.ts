@@ -96,9 +96,18 @@ export interface ManifestHistoryV1Compatibility {
     created: string;
 }
 
+export interface ManifestTag {
+    changeableAttributes: string;
+    createdTime: string;
+    digest: string;
+    lastUpdateTime: string;
+    name: string;
+    signed: boolean;
+}
+
 export interface Manifest {
     name: string;
-    tag: string;
+    tag: ManifestTag;
     architecture: string;
     fsLayers: ManifestFsLayer[];
     history: ManifestHistory[];
