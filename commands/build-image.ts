@@ -34,32 +34,22 @@ function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): It
     };
 }
 
-export async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
+export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined, fileType: string): Promise<Item | undefined> {
     if (dockerFileUri) {
         return createFileItem(rootFolder, dockerFileUri);
     }
 
-    const uris: vscode.Uri[] = await getDockerFileUris(rootFolder);
-
-    if (!uris || uris.length === 0) {
-        return undefined;
-    } else {
-        let items: Item[] = uris.map(uri => createFileItem(rootFolder, uri));
-        if (items.length === 1) {
-            return items[0];
-        } else {
-            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' });
-            return <Item>res;
+    let uris: vscode.Uri[];
+    let message: string;
+    if (fileType) {
+        if (fileType === 'Dockerfile') {
+            uris = await getDockerFileUris(rootFolder);
+            message = 'Choose a Dockerfile to build.';
+        } else if (fileType === 'Yaml') {
+            uris = await getYamlFileUris(rootFolder);
+            message = 'Choose a Yaml file to run.'
         }
     }
-}
-
-export async function resolveYamlFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
-    if (dockerFileUri) {
-        return createFileItem(rootFolder, dockerFileUri);
-    }
-
-    const uris: vscode.Uri[] = await getYamlFileUris(rootFolder);
 
     if (!uris || uris.length === 0) {
         return undefined;
@@ -68,7 +58,7 @@ export async function resolveYamlFileItem(rootFolder: vscode.WorkspaceFolder, do
         if (items.length === 1) {
             return items[0];
         } else {
-            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: 'Choose Yaml file to run.' });
+            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: message });
             return <Item>res;
         }
     }
@@ -100,7 +90,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     }
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, "Dockerfile");
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {

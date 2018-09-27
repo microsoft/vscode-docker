@@ -31,8 +31,8 @@
     "onLanguage:yaml",
     "onCommand:vscode-docker.acrLogs",
     "onCommand:vscode-docker.api.configure",
-    "onCommand:vscode-docker.ACR-queueBuild",
-    "onCommand:vscode-docker.ACR-runYaml",
+    "onCommand:vscode-docker.queue-ACR-Build",
+    "onCommand:vscode-docker.run-ACR-TaskFile",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -88,12 +88,12 @@
       "editor/context": [
         {
           "when": "editorLangId == dockerfile",
-          "command": "vscode-docker.ACR-queueBuild",
+          "command": "vscode-docker.queue-ACR-Build",
           "group": "docker"
         },
         {
           "when": "editorLangId == yaml",
-          "command": "vscode-docker.ACR-runYaml",
+          "command": "vscode-docker.run-ACR-TaskFile",
           "group": "docker"
         },
         {
@@ -135,12 +135,12 @@
       "explorer/context": [
         {
           "when": "resourceFilename =~ /\\.*dockerfile$/i",
-          "command": "vscode-docker.ACR-queueBuild",
+          "command": "vscode-docker.queue-ACR-Build",
           "group": "docker"
         },
         {
           "when": "resourceFilename =~ /\\.ya*ml$/i",
-          "command": "vscode-docker.ACR-runYaml",
+          "command": "vscode-docker.run-ACR-TaskFile",
           "group": "docker"
         },
         {
@@ -506,15 +506,15 @@
         "title": "Add Docker files to Workspace (API)"
       },
       {
-        "command": "vscode-docker.ACR-queueBuild",
+        "command": "vscode-docker.queue-ACR-Build",
         "title": "Queue Build",
         "description": "Queue a build from a Dockerfile",
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.ACR-runYaml",
-        "title": "run",
-        "description": "Run a yaml file.",
+        "command": "vscode-docker.run-ACR-TaskFile",
+        "title": "Run Task File",
+        "description": "Run a task from a yaml file.",
         "category": "Docker"
       },
       {

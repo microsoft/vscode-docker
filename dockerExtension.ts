@@ -26,7 +26,7 @@ import {
   ServerOptions,
   TransportKind
 } from "vscode-languageclient/lib/main";
-import { queueBuild, runYaml } from "./commands/azureCommands/acr-build";
+import { queueBuild } from "./commands/azureCommands/acr-build";
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from "./commands/azureCommands/create-registry";
@@ -34,7 +34,7 @@ import { deleteAzureImage } from "./commands/azureCommands/delete-image";
 import { deleteAzureRegistry } from "./commands/azureCommands/delete-registry";
 import { deleteRepository } from "./commands/azureCommands/delete-repository";
 import { pullFromAzure } from "./commands/azureCommands/pull-from-azure";
-import { runTask } from "./commands/azureCommands/run-task";
+import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
 import { TaskContentProvider } from "./commands/azureCommands/task-utils/showTaskManager";
 import { buildImage } from "./commands/build-image";
@@ -444,8 +444,8 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
   registerAzureCommand("vscode-docker.acrLogs", viewACRLogs);
   registerAzureCommand("vscode-docker.run-ACR-Task", runTask);
   registerAzureCommand("vscode-docker.show-ACR-Task", showTaskProperties);
-  registerCommand("vscode-docker.ACR-queueBuild", queueBuild);
-  registerCommand("vscode-docker.ACR-runYaml", runYaml);
+  registerCommand("vscode-docker.queue-ACR-Build", queueBuild);
+  registerCommand("vscode-docker.run-ACR-TaskFile", runTaskFile);
 }
 
 export async function deactivate(): Promise<void> {
