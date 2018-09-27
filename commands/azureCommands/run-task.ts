@@ -1,26 +1,19 @@
-import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
 import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { FileTaskRunRequest } from "azure-arm-containerregistry/lib/models/fileTaskRunRequest";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
-import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import * as fs from 'fs';
-import * as os from 'os';
-import * as tar from 'tar';
-import * as url from 'url';
 import vscode = require('vscode');
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { TaskNode } from "../../explorer/models/taskNode";
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
-import { getBlobInfo, getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
+import { getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { resolveFileItem } from '../build-image';
+import { getTempSourceArchivePath, uploadSourceCode } from '../utils/OutputChannel';
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
 
-const idPrecision = 6;
-const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
 const status = vscode.window.createOutputChannel('Run ACR Task status');
 
 export async function runTask(context?: TaskNode): Promise<any> {
@@ -81,9 +74,9 @@ export async function runTaskFile(yamlFileUri?: vscode.Uri): Promise<void> {
     }
     const yamlItem = await resolveFileItem(folder, yamlFileUri, "Yaml");
     const sourceLocation: string = folder.uri.path;
-    const tarFilePath = getTempSourceArchivePath();
+    const tarFilePath = getTempSourceArchivePath(status);
 
-    const uploadedSourceLocation = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
+    const uploadedSourceLocation = await uploadSourceCode(status, client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
     status.appendLine("Uploaded Source Code to " + tarFilePath);
 
     const runRequest: FileTaskRunRequest = {
@@ -98,51 +91,4 @@ export async function runTaskFile(yamlFileUri?: vscode.Uri): Promise<void> {
     status.appendLine("Schedule Run " + run.runId);
 
     streamLogs(registry, run, status, client);
-}
-
-async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string, folder: vscode.WorkspaceFolder): Promise<string> {
-    status.appendLine("   Sending source code to temp file");
-    let source = sourceLocation.substring(1);
-    let current = process.cwd();
-    process.chdir(source);
-    fs.readdir(source, (err, items) => {
-        items = filter(items);
-        tar.c(
-            {},
-            items
-        ).pipe(fs.createWriteStream(tarFilePath));
-        process.chdir(current);
-    });
-
-    status.appendLine("   Getting Build Source Upload Url ");
-    let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
-    let upload_url = sourceUploadLocation.uploadUrl;
-    let relative_path = sourceUploadLocation.relativePath;
-
-    status.appendLine("   Getting blob info from Upload Url ");
-    // Right now, accountName and endpointSuffix are unused, but will be used for streaming logs later.
-    let { accountName, endpointSuffix, containerName, blobName, sasToken, host } = getBlobInfo(upload_url);
-    status.appendLine("   Creating Blob Service ");
-    let blob: BlobService = createBlobServiceWithSas(host, sasToken);
-    status.appendLine("   Creating Block Blob ");
-    blob.createBlockBlobFromLocalFile(containerName, blobName, tarFilePath, (): void => { });
-    return relative_path;
-}
-
-function getTempSourceArchivePath(): string {
-    /* tslint:disable-next-line:insecure-random */
-    let id = Math.floor(Math.random() * Math.pow(10, idPrecision));
-    status.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
-    let tarFilePath = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
-    return tarFilePath;
-}
-
-function filter(list: string[]): string[] {
-    let result = [];
-    for (let file of list) {
-        if (vcsIgnoreList.indexOf(file) === -1) {
-            result.push(file);
-        }
-    }
-    return result;
 }

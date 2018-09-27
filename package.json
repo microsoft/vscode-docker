@@ -60,7 +60,7 @@
     "onCommand:vscode-docker.delete-ACR-Registry",
     "onCommand:vscode-docker.run-ACR-Task",
     "onCommand:vscode-docker.delete-ACR-Repository",
-    "onCommand:vscode-docker.delete-ACR-Image",
+    "onCommand:vscode-docker.untag-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
     "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
@@ -238,7 +238,7 @@
           "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
         },
         {
-          "command": "vscode-docker.delete-ACR-Image",
+          "command": "vscode-docker.untag-ACR-Image",
           "when": "view == dockerExplorer && viewItem == azureImageTagNode"
         },
         {
@@ -254,7 +254,7 @@
           "when": "view == dockerExplorer && viewItem == dockerHubRepository"
         },
         {
-          "command": "vscode-docker.delete-ACR-Image",
+          "command": "vscode-docker.untag-ACR-Image",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
@@ -618,8 +618,8 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.delete-ACR-Image",
-        "title": "Delete Azure Image",
+        "command": "vscode-docker.untag-ACR-Image",
+        "title": "Untag Azure Image",
         "category": "Docker"
       },
       {
@@ -687,7 +687,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.delete-ACR-Image",
+        "command": "vscode-docker.untag-ACR-Image",
         "title": "Delete Azure Image",
         "category": "Docker"
       },
