@@ -42,6 +42,7 @@ import { CommandLineMSBuildClient } from './debugging/netcoreapp/msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './debugging/netcoreapp/netCoreProjectProvider';
 import LocalOSProvider from './debugging/netcoreapp/osProvider';
 import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
+import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite } from './debugging/netcoreapp/prereqManager';
 import ChildProcessProvider from './debugging/netcoreapp/processProvider';
 import { OSTempFileProvider } from './debugging/netcoreapp/tempFileProvider';
 import { RemoteVsDbgClient } from './debugging/netcoreapp/vsdbgClient';
@@ -343,30 +344,12 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                         new OSTempFileProvider(
                             osProvider,
                             processProvider)),
-                    async () => {
-                        // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
-                        //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.
-                        //       Hence, we only check for its existence if/when asked to debug .NET Core in Docker containers.
-                        const dependenciesSatisfied = vscode.extensions.getExtension('ms-vscode.csharp') !== undefined;
-
-                        if (!dependenciesSatisfied) {
-                            const openExtensionInGallery: vscode.MessageItem = {
-                                title: 'View extension in gallery'
-                            };
-
-                            const result = await vscode.window.showErrorMessage(
-                                'To debug .NET Core in Docker containers, install the C# extension for VS Code.',
-                                openExtensionInGallery);
-
-                            if (result === openExtensionInGallery) {
-                                const browserClient: BrowserClient = new OpnBrowserClient();
-
-                                browserClient.openBrowser('https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp');
-                            }
-                        }
-
-                        return dependenciesSatisfied;
-                    })));
+                    new AggregatePrerequisite(
+                        new DotNetExtensionInstalledPrerequisite(
+                            new OpnBrowserClient(),
+                            vscode.extensions.getExtension,
+                            vscode.window.showErrorMessage)
+                    ))));
 
         ctx.subscriptions.push(
             vscode.debug.onDidChangeActiveDebugSession(

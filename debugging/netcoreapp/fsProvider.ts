@@ -24,6 +24,7 @@ export class LocalFileSystemProvider implements FileSystemProvider {
 
             return stats.isDirectory();
         } catch (err) {
+            // tslint:disable-next-line:no-unsafe-any
             if (err.code === "ENOENT") {
                 return false;
             }
@@ -36,6 +37,7 @@ export class LocalFileSystemProvider implements FileSystemProvider {
 
             return stats.isFile();
         } catch (err) {
+            // tslint:disable-next-line:no-unsafe-any
             if (err.code === "ENOENT") {
                 return false;
             }

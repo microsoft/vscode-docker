@@ -8,6 +8,7 @@ import { DockerManager, LaunchResult } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { OSProvider, PlatformType  } from './osProvider';
+import { Prerequisite } from './prereqManager';
 
 interface DockerDebugBuildOptions {
     context?: string;
@@ -51,7 +52,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         private readonly fsProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
         private readonly netCoreProjectProvider: NetCoreProjectProvider,
-        private readonly dependencyCheck: () => Promise<boolean>) {
+        private readonly prerequisite: Prerequisite) {
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
@@ -78,9 +79,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return undefined;
         }
 
-        const dependenciesSatisfied = await this.dependencyCheck();
+        const prerequisiteSatisfied = await this.prerequisite.checkPrerequisite();
 
-        if (!dependenciesSatisfied) {
+        if (!prerequisiteSatisfied) {
             return undefined;
         }
 
