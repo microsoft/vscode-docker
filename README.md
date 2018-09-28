@@ -127,7 +127,7 @@ The Docker extension comes with a number of useful configuration settings allowi
 | --- |---|---|
 | `docker.attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
-| `docker.debugging.enabled` | Whether debugging within Docker images is enabled. | `false`
+| `docker.debugging.enabled` | Whether debugging within Docker images is enabled. (Note: changing this value requires restarting VS Code.) | `false`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
 | `docker.defaultRegistryPath` | Default registry and path when tagging an image | `""`

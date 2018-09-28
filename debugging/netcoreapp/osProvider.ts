@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as os from 'os';
+import * as path from 'path';
 
 export type PlatformType = 'Windows' | 'Linux';
 
@@ -11,7 +12,7 @@ export interface OSProvider {
     os: PlatformType;
     tmpdir: string;
     pathJoin(os: PlatformType, ...paths: string[]): string;
-    pathNormalize(os: PlatformType, path: string): string;
+    pathNormalize(os: PlatformType, rawPath: string): string;
 }
 
 export class LocalOSProvider implements OSProvider {
@@ -28,11 +29,11 @@ export class LocalOSProvider implements OSProvider {
     }
 
     public pathJoin(pathOS: PlatformType, ...paths: string[]): string {
-        return paths.join(pathOS === 'Windows' ? '\\' : '/');
+        return pathOS === 'Windows' ? path.win32.join(...paths) : path.posix.join(...paths);
     }
 
-    public pathNormalize(pathOS: PlatformType, path: string): string {
-        return path.replace(
+    public pathNormalize(pathOS: PlatformType, rawPath: string): string {
+        return rawPath.replace(
             pathOS === 'Windows' ? /\//g : /\\/g,
             pathOS === 'Windows' ? '\\' : '/');
     }

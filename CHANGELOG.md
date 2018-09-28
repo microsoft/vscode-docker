@@ -1,4 +1,4 @@
-## 0.3.1 - xx September 2018
+## 0.x.x - Unreleased
 
 ### Added
 * Adds experimental debugging support for .NET Core web applications running in Linux Docker containers, enabled via the `docker.debugging.enabled` configuration setting.

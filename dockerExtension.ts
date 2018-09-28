@@ -347,7 +347,6 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                         // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
                         //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.
                         //       Hence, we only check for its existence if/when asked to debug .NET Core in Docker containers.
-                        // TODO: Remove this check once debugging is enabled-by-default (and then add a package.json extension dependency).
                         const dependenciesSatisfied = vscode.extensions.getExtension('ms-vscode.csharp') !== undefined;
 
                         if (!dependenciesSatisfied) {
