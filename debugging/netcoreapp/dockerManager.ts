@@ -67,6 +67,8 @@ export interface DockerManager {
     cleanupAfterLaunch(): Promise<void>;
 }
 
+export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
+
 export class DefaultDockerManager implements DockerManager {
     private static readonly DebugContainersKey: string = 'DefaultDockerManager.debugContainers';
 
@@ -299,7 +301,7 @@ export class DefaultDockerManager implements DockerManager {
         };
 
         const nugetFallbackVolume: DockerContainerVolume = {
-            localPath: this.osProvider.os === 'Windows' ? path.join(this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable], 'dotnet', 'sdk', 'NuGetFallbackFolder') : '/usr/local/share/dotnet/sdk/NuGetFallbackFolder',
+            localPath: this.osProvider.os === 'Windows' ? path.join(this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable], 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
             containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };

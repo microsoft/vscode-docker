@@ -42,7 +42,7 @@ import { CommandLineMSBuildClient } from './debugging/netcoreapp/msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './debugging/netcoreapp/netCoreProjectProvider';
 import LocalOSProvider from './debugging/netcoreapp/osProvider';
 import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
-import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite } from './debugging/netcoreapp/prereqManager';
+import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './debugging/netcoreapp/prereqManager';
 import ChildProcessProvider from './debugging/netcoreapp/processProvider';
 import { OSTempFileProvider } from './debugging/netcoreapp/tempFileProvider';
 import { RemoteVsDbgClient } from './debugging/netcoreapp/vsdbgClient';
@@ -348,6 +348,10 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                         new DotNetExtensionInstalledPrerequisite(
                             new OpnBrowserClient(),
                             vscode.extensions.getExtension,
+                            vscode.window.showErrorMessage),
+                        new MacNuGetFallbackFolderSharedPrerequisite(
+                            fileSystemProvider,
+                            osProvider,
                             vscode.window.showErrorMessage)
                     ))));
 
