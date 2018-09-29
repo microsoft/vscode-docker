@@ -513,8 +513,8 @@
       },
       {
         "command": "vscode-docker.run-ACR-TaskFile",
-        "title": "Run Task File",
-        "description": "Run a task from a yaml file.",
+        "title": "Run ACR Task File",
+        "description": "Run an ACR task from a yaml file.",
         "category": "Docker"
       },
       {
