@@ -108,6 +108,7 @@ export interface ManifestTag {
 export interface Manifest {
     name: string;
     tag: ManifestTag;
+    tags: string[];
     architecture: string;
     fsLayers: ManifestFsLayer[];
     history: ManifestHistory[];

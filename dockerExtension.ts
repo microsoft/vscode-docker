@@ -30,7 +30,7 @@ import { queueBuild } from "./commands/azureCommands/acr-build";
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from "./commands/azureCommands/create-registry";
-import { deleteAzureImage } from "./commands/azureCommands/delete-image";
+import { deleteAzureImage, untagAzureImage } from "./commands/azureCommands/delete-image";
 import { deleteAzureRegistry } from "./commands/azureCommands/delete-registry";
 import { deleteRepository } from "./commands/azureCommands/delete-repository";
 import { pullFromAzure } from "./commands/azureCommands/pull-from-azure";
@@ -437,7 +437,8 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     "vscode-docker.delete-ACR-Registry",
     deleteAzureRegistry
   );
-  registerAzureCommand("vscode-docker.untag-ACR-Image", deleteAzureImage);
+  registerAzureCommand("vscode-docker.untag-ACR-Image", untagAzureImage);
+  registerAzureCommand("vscode-docker.delete-ACR-Image", deleteAzureImage);
   registerAzureCommand("vscode-docker.delete-ACR-Repository", deleteRepository);
   registerAzureCommand("vscode-docker.create-ACR-Registry", createRegistry);
   registerAzureCommand("vscode-docker.pullFromAzure", pullFromAzure);

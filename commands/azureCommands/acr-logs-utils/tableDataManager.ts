@@ -1,9 +1,8 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
-import request = require('request-promise');
-import { registryRequest } from "../../../explorer/models/commonRegistryUtils";
-import { Manifest } from "../../../explorer/utils/dockerHubUtils";
-import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
+import { getImageDigest } from "../../../utils/Azure/acrTools";
+import { AzureImage } from "../../../utils/Azure/models/image";
+import { Repository } from "../../../utils/Azure/models/repository";
 /** Class to manage data and data acquisition for logs */
 export class LogData {
     public registry: Registry;
@@ -104,22 +103,11 @@ export class LogData {
             parsedFilter = `TaskName eq '${filter.task}'`;
         } else if (filter.image) { //Image
             let items: string[] = filter.image.split(':')
-            const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(this.registry, 'repository:' + items[0] + ':pull');
-            let digest;
-            await request.get('https://' + this.registry.loginServer + `/v2/${items[0]}/manifests/${items[1]}`, {
-                auth: {
-                    bearer: acrAccessToken
-                },
-                headers: {
-                    accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
-                }
-            }, (err, httpResponse, body) => {
-                digest = httpResponse.headers['docker-content-digest'];
-            });
+            const image = new AzureImage(new Repository(this.registry, items[0]), items[1]);
+            const digest: string = await getImageDigest(image);
 
-            //let manifest: any = await registryRequest<any>(this.registry.loginServer, `v2/${items[0]}/manifests/${items[1]}`, { bearer: acrAccessToken });
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }
-            parsedFilter += `contains(OutputImageManifests, '${items[0]}@${digest}')`;
+            parsedFilter += `contains(OutputImageManifests, '${image.repository.name}@${digest}')`;
         }
         return parsedFilter;
     }
