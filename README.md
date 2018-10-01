@@ -28,15 +28,13 @@ Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ![IntelliSense for DockerFiles](images/intelliSense.gif)
 
-## Debugging
-
-> Note: This feature is currently experimental and must be enabled by setting the [`docker.debugging.enabled`](#configuration-settings) configuration value to `true`.
+## Debugging (Preview)
 
 To debug a .NET Core web application running in a Linux Docker container, add a Docker .NET Core launch configuration:
 
 1. Switch to the debugging tab.
 1. Select `Add configuration...`
-1. Select `Docker: Launch .NET Core`
+1. Select `Docker: Launch .NET Core (Preview)`
 1. Set a breakpoint.
 1. Start debugging.
 
@@ -129,7 +127,6 @@ The Docker extension comes with a number of useful configuration settings allowi
 | --- |---|---|
 | `docker.attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
-| `docker.debugging.enabled` | Whether debugging within Docker images is enabled. (Note: changing this value requires restarting VS Code.) | `false`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
 | `docker.defaultRegistryPath` | Default registry and path when tagging an image | `""`

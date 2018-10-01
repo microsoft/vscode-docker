@@ -61,7 +61,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         return [
             {
-                name: 'Docker: Launch .NET Core',
+                name: 'Docker: Launch .NET Core (Preview)',
                 type: 'docker-netcoreapp',
                 request: 'launch',
                 preLaunchTask: 'build'
