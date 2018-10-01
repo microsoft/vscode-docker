@@ -3,7 +3,9 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchResult } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
@@ -48,6 +50,7 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     constructor(
+        private readonly debugSessionManager: DebugSessionManager,
         private readonly dockerManager: DockerManager,
         private readonly fsProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
@@ -138,7 +141,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             }
         });
 
-        return this.createConfiguration(debugConfiguration, appFolder, result);
+        const configuration = this.createConfiguration(debugConfiguration, appFolder, result);
+
+        this.debugSessionManager.startListening();
+
+        return configuration;
     }
 
     private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {

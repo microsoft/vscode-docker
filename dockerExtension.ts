@@ -34,6 +34,7 @@ import { configure, configureApi, ConfigureApiOptions } from './configureWorkspa
 import { DefaultAppStorageProvider } from './debugging/netcoreapp/appStorage';
 import { BrowserClient, OpnBrowserClient } from './debugging/netcoreapp/browserClient';
 import { DefaultDebuggerClient } from './debugging/netcoreapp/debuggerClient';
+import { DockerDebugSessionManager } from './debugging/netcoreapp/debugSessionManager';
 import CliDockerClient from './debugging/netcoreapp/dockerClient';
 import DockerDebugConfigurationProvider from './debugging/netcoreapp/dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './debugging/netcoreapp/dockerManager';
@@ -331,10 +332,18 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                 processProvider,
                 ctx.workspaceState);
 
+        const debugSessionManager = new DockerDebugSessionManager(
+            vscode.debug.onDidTerminateDebugSession,
+            dockerManager
+        );
+
+        ctx.subscriptions.push(debugSessionManager);
+
         ctx.subscriptions.push(
             vscode.debug.registerDebugConfigurationProvider(
                 'docker-netcoreapp',
                 new DockerDebugConfigurationProvider(
+                    debugSessionManager,
                     dockerManager,
                     fileSystemProvider,
                     osProvider,
@@ -354,16 +363,6 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
                             osProvider,
                             vscode.window.showErrorMessage)
                     ))));
-
-        ctx.subscriptions.push(
-            vscode.debug.onDidChangeActiveDebugSession(
-                session => {
-                    if (session === undefined) {
-                        dockerManager
-                            .cleanupAfterLaunch()
-                            .catch(reason => console.log(`Unable to cleanup Docker images after launch: ${reason}`));
-                    }
-                }));
     }
 }
 
