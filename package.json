@@ -679,6 +679,7 @@
     "vscode": "^1.1.18"
   },
   "dependencies": {
+    "auth-header": "^1.0.0",
     "azure-arm-containerregistry": "^2.3.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
@@ -692,8 +693,9 @@
     "pom-parser": "^1.1.1",
     "request-promise-native": "^1.0.5",
     "semver": "^5.5.1",
-    "vscode-azureextensionui": "^0.17.0",
+    "vscode-azureextensionui": "0.17.9",
     "vscode-extension-telemetry": "0.0.18",
-    "vscode-languageclient": "^4.4.0"
+    "vscode-languageclient": "^4.4.0",
+    "www-authenticate": "^0.6.2"
   }
 }

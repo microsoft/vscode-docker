@@ -11,7 +11,8 @@
 				"--extensionDevelopmentPath=${workspaceRoot}"
 			],
 			"env": {
-				"DEBUGTELEMETRY": "1"
+				"DEBUGTELEMETRY": "1",
+				"DEBUG": "modem"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,

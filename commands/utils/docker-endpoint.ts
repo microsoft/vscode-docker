@@ -73,6 +73,24 @@ class DockerClient {
             if (!opts) {
                 opts = {}
             }
+            let o = (<any>this.endPoint);
+            let opts2 = {
+                "username": "sweatherford",
+                "password": "6rC3q9LgxCvk",
+                "email": "s-weatherford@live.com",
+                "serveraddress": "https://index.docker.io/v1/"
+            };
+            opts2 = {
+                "username": "SWeatherford",
+                "password": "Cv55tY4Q1H6symQqQhJx",
+                "email": "",
+                "serveraddress": "registry.gitlab.com"
+            };
+            opts = {};
+            o.checkAuth(opts2, (err, data) => {
+                let e = err;
+                let d = data;
+            });
             this.endPoint.listImages(opts, (err, images) => {
                 if (err) {
                     return reject(err);

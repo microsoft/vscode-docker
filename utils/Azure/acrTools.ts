@@ -23,7 +23,7 @@ import { Repository } from "./models/repository";
 /** Gets the subscription for a given registry
  * @returns a subscription object
  */
-export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
+export function getSubscriptionIdFromRegistry(registry: Registry): SubscriptionModels.Subscription {
     let id = getId(registry);
     let subscriptionId = id.slice('/subscriptions/'.length, id.search('/resourceGroups/'));
     const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
@@ -98,7 +98,7 @@ export async function sendRequestToRegistry(http_method: 'delete', login_server:
 //Credential management
 /** Obtains registry username and password compatible with docker login */
 export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
-    const subscription: Subscription = getSubscriptionFromRegistry(registry);
+    const subscription: Subscription = getSubscriptionIdFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     const acrRefreshToken = await acquireACRRefreshToken(getLoginServer(registry), session.tenantId, aadRefreshToken, aadAccessToken);
@@ -111,7 +111,7 @@ export async function loginCredentials(registry: Registry): Promise<{ password: 
  * @returns acrRefreshToken: For use as a Password for docker registry access , acrAccessToken: For use with docker API
  */
 export async function acquireACRAccessTokenFromRegistry(registry: Registry, scope: string): Promise<{ acrRefreshToken: string, acrAccessToken: string }> {
-    const subscription: Subscription = getSubscriptionFromRegistry(registry);
+    const subscription: Subscription = getSubscriptionIdFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription);
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     let loginServer = getLoginServer(registry);

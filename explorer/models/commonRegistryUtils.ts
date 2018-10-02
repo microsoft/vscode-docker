@@ -2,14 +2,17 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+import { RequestOptions } from 'https';
 import * as moment from 'moment';
+import { Response } from 'request';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { ext } from '../../extensionVariables';
+import { extractRegExGroups } from '../../helpers/extractRegExGroups';
 import { AsyncPool } from '../../utils/asyncpool';
-import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
+import { nonNullProp, nonNullValue } from '../../utils/nonNull';
+import { Manifest, ManifestHistoryV1Compatibility } from '../utils/dockerHubUtils';
 
 interface RegistryNonsensitiveInfo {
     url: string,
@@ -36,22 +39,140 @@ export async function registryRequest<T>(
     relativeUrl: string,
     credentials: RegistryCredentials
 ): Promise<T> {
+    let url = `${registryUrl}/${relativeUrl}`;
+    try {
+        return await coreRegistryRequest<T>(url, credentials);
+    } catch (errResponse) {
+        let response: Response = errResponse.response;
+        let wwwAuthenticate = response.headers["www-authenticate"];
+
+        if (errResponse.statusCode === 401 && wwwAuthenticate) {
+            // Example www-authenticate header: Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
+            let { realm, service, scope } = parseWwwAuthenticateHeader(wwwAuthenticate);
+            let token = await requestOAuthToken(realm, service, scope, credentials);
+            credentials.bearer = token; // todo
+
+            try {
+                return await coreRegistryRequest<T>(url, credentials);
+            } catch (errResponse2) {
+                let wwwAuthenticate2 = response.headers["www-authenticate"];
+                if (errResponse2.statusCode === 401 && wwwAuthenticate2) {
+                    // Example www-authenticate header: Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
+                    let { error: error2, scope: scope2 } = parseWwwAuthenticateHeader(wwwAuthenticate);
+                    switch (error2) {
+                        case 'insufficient_scope':
+                            throw new Error(`You don't have sufficient permissions to perform operations with scope "${scope2}"`);
+                        default:
+                            throw new Error(error2); // asdf
+                    }
+                    credentials.bearer = token; // todo
+                }
+            }
+        }
+
+        throw errResponse;
+    }
+}
+
+async function coreRegistryRequest<T>(
+    url: string,
+    credentials: RegistryCredentials
+): Promise<T> {
     let httpSettings = vscode.workspace.getConfiguration('http');
     let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
 
-    let response = await ext.request.get(
-        `${registryUrl}/${relativeUrl}`,
+    let auth = credentials.bearer ? {
+        bearer: credentials.bearer
+    } : {
+            user: credentials.userName,
+            pass: credentials.password
+        };
+
+    //try {
+    return await ext.request.get(
+        url,
         {
             json: true,
             resolveWithFullResponse: false,
             strictSSL: strictSSL,
-            auth: {
-                bearer: credentials.bearer,
-                user: credentials.userName,
-                pass: credentials.password
-            }
+            auth: auth
         });
-    return <T>response;
+    // } catch (errResponse) {
+    //     // TODO: move to shared
+    //     let error: { errors?: unknown[] } = errResponse.error;
+    //     if (error && Array.isArray(error.errors)) {
+    //         error = error.errors[0];
+    //     }
+    //     // let response: Response = errResponse.response;
+
+    //     // if (errResponse.statusCode === 401) {
+    //     //     let wwwAuthenticate = response.headers["www-authenticate"];
+    //     //     if (wwwAuthenticate) {
+    //     //         // Example www-authenticate header: Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
+    //     //         let { realm, service, scope } = parseWwwAuthenticateHeader(wwwAuthenticate);
+    //     //         let credentials = await requestOAuthToken(realm, service, scope);
+    //     //     }
+    //     // }
+
+    //     // throw error;
+}
+
+async function requestOAuthToken(realm: string, service: string, scope: string, credentials: RegistryCredentials): Promise<string> {
+    let url = `${realm}?service=${service || ''}&scope=${scope || ''}`;
+    let passwordCredentials = {
+        userName: credentials.userName,
+        password: credentials.password,
+        // String identifying the client. This client_id does not need to be registered with the authorization server but should be set to a meaningful value in order to allow auditing keys created by unregistered clients.
+        // (https://docs.docker.com/registry/spec/auth/token/#requesting-a-token)
+        clientId: 'vscode-docker'
+    };
+    let response: {
+        token?: string;
+        access_token?: string;
+        expires_in?: number; // seconds
+        issued_at?: string;
+        refresh_token?: string; // only if `offline_token=true` set in request
+
+    } = await coreRegistryRequest(url, passwordCredentials);
+
+    return nonNullProp(response, 'token');
+}
+
+// TODO: there can be multiple scopes, see https://docs.docker.com/registry/spec/auth/token/#requesting-a-token
+function parseWwwAuthenticateHeader(header: string): { realm: string, service: string, scope: string, error: string } {
+    // see https://docs.docker.com/registry/spec/auth/token, https://tools.ietf.org/html/rfc2617, https://oauth.net/2/
+    // Example www-authenticate headers:
+    //   Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
+    //   Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:username/my-app:pull,push"
+    //   Bearer realm="https://gitlab.com/jwt/auth",service="container_registry",scope="registry:catalog:*",error="insufficient_scope""
+
+    let [scheme, challenge] = extractRegExGroups(header, /^(\w+) (.*$)/, ['', '']);
+    if (scheme.toLowerCase() !== 'bearer') {
+        throw new Error(`Unrecognized authentication scheme "${scheme}"`)
+    }
+
+    let valuePairs = new Map<string, string>();
+
+    let valuePairExpression = `(\\w+)="([^"]*)"`;
+    let remainingValuePairs = challenge;
+    while (remainingValuePairs) {
+        let matches = remainingValuePairs.match(`^${valuePairExpression}(,(.*))?$`);
+        if (matches) {
+            let key: string;
+            let value: string;
+            [, key, value, , remainingValuePairs] = matches;
+            valuePairs.set(key, value);
+        } else {
+            throw new Error(`Unrecognized authorization challenge format: ${remainingValuePairs}`);
+        }
+    }
+
+    return { // asdf
+        realm: valuePairs.get('realm'),
+        service: valuePairs.get('service'),
+        scope: valuePairs.get('scope'),
+        error: valuePairs.get('error')
+    }
 }
 
 export async function getCatalog(registryUrl: string, credentials: RegistryCredentials): Promise<string[]> {

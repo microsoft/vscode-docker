@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// tslint:disable-next-line:no-var-requires
+let www_authenticate = require('www-authenticate');
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { keytarConstants } from '../../constants'
@@ -30,6 +32,7 @@ export async function connectCustomRegistry(): Promise<void> {
 
     // tslint:disable-next-line:no-constant-condition
     let url = await ext.ui.showInputBox({
+        value: 'https://registry.gitlab.com',
         prompt: "Enter the URL for the registry (OAuth not yet supported)",
         placeHolder: 'Example: http://localhost:5000',
         validateInput: (value: string): string | undefined => {
@@ -46,11 +49,13 @@ export async function connectCustomRegistry(): Promise<void> {
         }
     });
     let userName = await ext.ui.showInputBox({
+        value: 'SWeatherford',
         prompt: "Enter the username for connecting, or ENTER for none"
     });
     let password: string = '';
     if (userName) {
         password = await ext.ui.showInputBox({
+            value: 'SwissyLabory',
             prompt: "Enter the password",
             password: true
         });
@@ -61,19 +66,7 @@ export async function connectCustomRegistry(): Promise<void> {
         credentials: { userName, password }
     };
 
-    try {
-        await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
-    } catch (err) {
-        let error = <{ statusCode?: number }>err;
-        let message = parseError(error).message;
-
-        if (error.statusCode === 401) {
-            message = 'OAuth support has not yet been implemented in this preview feature.  This registry does not appear to support basic authentication.';
-            throw new Error(message);
-        }
-
-        throw error;
-    }
+    await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
 
     // Save
     if (ext.keytar) {
