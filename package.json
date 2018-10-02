@@ -61,7 +61,7 @@
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations",
-    "onDebugResolve:docker-netcoreapp"
+    "onDebugResolve:docker-coreclr"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -264,7 +264,7 @@
         ]
       },
       {
-        "type": "docker-netcoreapp",
+        "type": "docker-coreclr",
         "label": "Docker: Launch .NET Core (Preview)",
         "configurationSnippets": [
           {
@@ -272,7 +272,7 @@
             "description": "Docker: Launch .NET Core (Preview)",
             "body": {
               "name": "Docker: Launch .NET Core (Preview)",
-              "type": "docker-netcoreapp",
+              "type": "docker-coreclr",
               "request": "launch",
               "preLaunchTask": "build"
             }

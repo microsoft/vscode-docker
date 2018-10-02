@@ -9,7 +9,7 @@ import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchResult } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
-import { OSProvider, PlatformType  } from './osProvider';
+import { OSProvider, PlatformType } from './osProvider';
 import { Prerequisite } from './prereqManager';
 
 interface DockerDebugBuildOptions {
@@ -62,7 +62,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return [
             {
                 name: 'Docker: Launch .NET Core (Preview)',
-                type: 'docker-netcoreapp',
+                type: 'docker-coreclr',
                 request: 'launch',
                 preLaunchTask: 'build'
             }
@@ -201,23 +201,23 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {
         return result.browserUrl
-        ? {
-            enabled: true,
-            args: result.browserUrl,
-            windows: {
-                command: 'cmd.exe',
-                args: `/C start ${result.browserUrl}`
-            },
-            osx: {
-                command: 'open'
-            },
-            linux: {
-                command: 'xdg-open'
+            ? {
+                enabled: true,
+                args: result.browserUrl,
+                windows: {
+                    command: 'cmd.exe',
+                    args: `/C start ${result.browserUrl}`
+                },
+                osx: {
+                    command: 'open'
+                },
+                linux: {
+                    command: 'xdg-open'
+                }
             }
-        }
-        : {
-            enabled: false
-        };
+            : {
+                enabled: false
+            };
     }
 
     private createConfiguration(debugConfiguration: DockerDebugConfiguration, appFolder: string, result: LaunchResult): DebugConfiguration {

@@ -49,7 +49,7 @@ Most properties of the configuration are optional will be inferred from the proj
     "configurations": [
         {
             "name": "Docker: Launch .NET Core",
-            "type": "docker-netcoreapp",
+            "type": "docker-coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "dockerOptions": {

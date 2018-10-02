@@ -338,7 +338,7 @@ function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void 
 
     ctx.subscriptions.push(
         vscode.debug.registerDebugConfigurationProvider(
-            'docker-netcoreapp',
+            'docker-coreclr',
             new DockerDebugConfigurationProvider(
                 debugSessionManager,
                 dockerManager,
