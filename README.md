@@ -42,7 +42,7 @@ To debug a .NET Core web application running in a Linux Docker container, add a 
 
 Upon debugging, a Docker image will be built and a container run based on that image.  The container will have a volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigated to the application's initial page.
 
-Most properties of the configuration are optional will be inferred from the project. If not, or if there are additional customizations to the Docker image build or container run process to be made, those can be added under the `dockerOptions` property of the configuration.
+Most properties of the configuration are optional will be inferred from the project. If not, or if there are additional customizations to the Docker image build or container run process to be made, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
 
 ```json
 {
@@ -52,8 +52,11 @@ Most properties of the configuration are optional will be inferred from the proj
             "type": "docker-coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "dockerOptions": {
-                // Add customizations here.
+            "dockerBuild": {
+                // Add Docker image build customizations here.
+            },
+            "dockerRun": {
+                // Add Docker container run customizations here.
             }
         }
     ]

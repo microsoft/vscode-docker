@@ -281,50 +281,45 @@
         "configurationAttributes": {
           "launch": {
             "properties": {
-              "dockerOptions": {
-                "description": "Options for debugging within a Docker container.",
+              "appFolder": {
+                "type": "string",
+                "description": "Path to the folder for the application."
+              },
+              "appOutput": {
+                "type": "string",
+                "description": "Path to the output assembly for the application."
+              },
+              "appProject": {
+                "type": "string",
+                "description": "Path to the application project file."
+              },
+              "dockerBuild": {
+                "description": "Options for building the Docker image used for debugging.",
                 "properties": {
-                  "appFolder": {
+                  "context": {
                     "type": "string",
-                    "description": "Path to the folder for the application."
+                    "description": "Path to the Docker build context."
                   },
-                  "appOutput": {
+                  "dockerfile": {
                     "type": "string",
-                    "description": "Path to the output assembly for the application."
+                    "description": "Path to the Dockerfile used for the build."
                   },
-                  "appProject": {
+                  "tag": {
                     "type": "string",
-                    "description": "Path to the application project file."
+                    "description": "Tag applied to the Docker image used for debugging."
                   },
-                  "build": {
-                    "description": "Options for building the Docker image used for debugging.",
-                    "properties": {
-                      "context": {
-                        "type": "string",
-                        "description": "Path to the Docker build context."
-                      },
-                      "dockerfile": {
-                        "type": "string",
-                        "description": "Path to the Dockerfile used for the build."
-                      },
-                      "tag": {
-                        "type": "string",
-                        "description": "Tag applied to the Docker image used for debugging."
-                      },
-                      "target": {
-                        "type": "string",
-                        "description": "Docker build target (stage) used for debugging."
-                      }
-                    }
-                  },
-                  "run": {
-                    "description": "Options for running the Docker container used for debugging.",
-                    "properties": {
-                      "containerName": {
-                        "type": "string",
-                        "description": "Name of the container used for debugging."
-                      }
-                    }
+                  "target": {
+                    "type": "string",
+                    "description": "Docker build target (stage) used for debugging."
+                  }
+                }
+              },
+              "dockerRun": {
+                "description": "Options for running the Docker container used for debugging.",
+                "properties": {
+                  "containerName": {
+                    "type": "string",
+                    "description": "Name of the container used for debugging."
                   }
                 }
               }

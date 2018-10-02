@@ -24,14 +24,6 @@ interface DockerDebugRunOptions {
     os?: PlatformType;
 }
 
-interface DockerDebugOptions {
-    appFolder?: string;
-    appOutput?: string;
-    appProject?: string;
-    build?: DockerDebugBuildOptions;
-    run?: DockerDebugRunOptions;
-}
-
 interface DebugConfigurationBrowserBaseOptions {
     enabled?: boolean;
     command?: string;
@@ -45,7 +37,11 @@ interface DebugConfigurationBrowserOptions extends DebugConfigurationBrowserBase
 }
 
 interface DockerDebugConfiguration extends DebugConfiguration {
-    dockerOptions?: DockerDebugOptions;
+    appFolder?: string;
+    appOutput?: string;
+    appProject?: string;
+    dockerBuild?: DockerDebugBuildOptions;
+    dockerRun?: DockerDebugRunOptions;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -100,28 +96,28 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const resolvedContext = DockerDebugConfigurationProvider.resolveFolderPath(context, folder);
 
-        let dockerfile = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.build && debugConfiguration.dockerOptions.build.dockerfile
-            ? DockerDebugConfigurationProvider.resolveFolderPath(debugConfiguration.dockerOptions.build.dockerfile, folder)
+        let dockerfile = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.dockerfile
+            ? DockerDebugConfigurationProvider.resolveFolderPath(debugConfiguration.dockerBuild.dockerfile, folder)
             : path.join(appFolder, 'Dockerfile'); // TODO: Omit dockerfile argument if not specified or possibly infer from context.
 
         dockerfile = DockerDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
 
-        const target = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.build && debugConfiguration.dockerOptions.build.target
-            ? debugConfiguration.dockerOptions.build.target
+        const target = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.target
+            ? debugConfiguration.dockerBuild.target
             : 'base'; // TODO: Omit target if not specified, or possibly infer from Dockerfile.
 
         const appName = path.basename(resolvedAppProject);
 
-        const tag = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.build && debugConfiguration.dockerOptions.build.tag
-            ? debugConfiguration.dockerOptions.build.tag
+        const tag = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.tag
+            ? debugConfiguration.dockerBuild.tag
             : `${appName.toLowerCase()}:dev`;
 
-        const containerName = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.run && debugConfiguration.dockerOptions.run.containerName
-            ? debugConfiguration.dockerOptions.run.containerName
+        const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
+            ? debugConfiguration.dockerRun.containerName
             : `${appName}-dev`; // TODO: Use unique ID instead?
 
-        const os = debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.run && debugConfiguration.dockerOptions.run.os
-            ? debugConfiguration.dockerOptions.run.os
+        const os = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.os
+            ? debugConfiguration.dockerRun.os
             : 'Linux';
 
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
@@ -149,13 +145,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {
-        if (configuration.dockerOptions) {
-            if (configuration.dockerOptions.appFolder) {
-                return configuration.dockerOptions.appFolder;
+        if (configuration) {
+            if (configuration.appFolder) {
+                return configuration.appFolder;
             }
 
-            if (configuration.dockerOptions.appProject) {
-                return path.dirname(configuration.dockerOptions.appProject);
+            if (configuration.appProject) {
+                return path.dirname(configuration.appProject);
             }
         }
 
@@ -163,8 +159,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferAppOutput(configuration: DockerDebugConfiguration, targetOS: PlatformType, resolvedAppProject: string): Promise<string> {
-        if (configuration.dockerOptions && configuration.dockerOptions.appOutput) {
-            return configuration.dockerOptions.appOutput;
+        if (configuration && configuration.appOutput) {
+            return configuration.appOutput;
         }
 
         const targetPath = await this.netCoreProjectProvider.getTargetPath(resolvedAppProject);
@@ -174,9 +170,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferAppProject(configuration: DockerDebugConfiguration, resolvedAppFolder: string): Promise<string> {
-        if (configuration.dockerOptions) {
-            if (configuration.dockerOptions.appProject) {
-                return configuration.dockerOptions.appProject;
+        if (configuration) {
+            if (configuration.appProject) {
+                return configuration.appProject;
             }
         }
 
@@ -192,8 +188,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
-        return configuration.dockerOptions && configuration.dockerOptions.build && configuration.dockerOptions.build.context
-            ? configuration.dockerOptions.build.context
+        return configuration && configuration.dockerBuild && configuration.dockerBuild.context
+            ? configuration.dockerBuild.context
             : path.normalize(resolvedAppFolder) === path.normalize(folder.uri.fsPath)
                 ? resolvedAppFolder                 // The context defaults to the application folder if it's the same as the workspace folder (i.e. there's no solution folder).
                 : path.dirname(resolvedAppFolder);  // The context defaults to the application's parent (i.e. solution) folder.
