@@ -31,22 +31,7 @@ import { docker } from './commands/utils/docker-endpoint';
 import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure, configureApi, ConfigureApiOptions } from './configureWorkspace/configure';
-import { DefaultAppStorageProvider } from './debugging/netcoreapp/appStorage';
-import { BrowserClient, OpnBrowserClient } from './debugging/netcoreapp/browserClient';
-import { DefaultDebuggerClient } from './debugging/netcoreapp/debuggerClient';
-import { DockerDebugSessionManager } from './debugging/netcoreapp/debugSessionManager';
-import CliDockerClient from './debugging/netcoreapp/dockerClient';
-import DockerDebugConfigurationProvider from './debugging/netcoreapp/dockerDebugConfigurationProvider';
-import { DefaultDockerManager } from './debugging/netcoreapp/dockerManager';
-import { LocalFileSystemProvider } from './debugging/netcoreapp/fsProvider';
-import { CommandLineMSBuildClient } from './debugging/netcoreapp/msBuildClient';
-import { MsBuildNetCoreProjectProvider } from './debugging/netcoreapp/netCoreProjectProvider';
-import LocalOSProvider from './debugging/netcoreapp/osProvider';
-import { DefaultOutputManager } from './debugging/netcoreapp/outputManager';
-import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './debugging/netcoreapp/prereqManager';
-import ChildProcessProvider from './debugging/netcoreapp/processProvider';
-import { OSTempFileProvider } from './debugging/netcoreapp/tempFileProvider';
-import { RemoteVsDbgClient } from './debugging/netcoreapp/vsdbgClient';
+import { registerDebugConfigurationProvider } from './debugging/netcoreapp/registerDebugger';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
@@ -297,69 +282,6 @@ namespace Configuration {
             configurationListener.dispose();
         }
     }
-}
-
-function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext): void {
-    const fileSystemProvider = new LocalFileSystemProvider();
-
-    const processProvider = new ChildProcessProvider();
-    const dockerClient = new CliDockerClient(processProvider);
-    const osProvider = new LocalOSProvider();
-
-    const dockerOutputChannel = vscode.window.createOutputChannel('Docker');
-
-    ctx.subscriptions.push(dockerOutputChannel);
-
-    const dockerOutputManager = new DefaultOutputManager(dockerOutputChannel);
-
-    const dockerManager =
-        new DefaultDockerManager(
-            new DefaultAppStorageProvider(fileSystemProvider),
-            new DefaultDebuggerClient(
-                new RemoteVsDbgClient(
-                    dockerOutputManager,
-                    fileSystemProvider,
-                    ctx.globalState,
-                    osProvider,
-                    processProvider)),
-            dockerClient,
-            dockerOutputManager,
-            fileSystemProvider,
-            osProvider,
-            processProvider,
-            ctx.workspaceState);
-
-    const debugSessionManager = new DockerDebugSessionManager(
-        vscode.debug.onDidTerminateDebugSession,
-        dockerManager
-    );
-
-    ctx.subscriptions.push(debugSessionManager);
-
-    ctx.subscriptions.push(
-        vscode.debug.registerDebugConfigurationProvider(
-            'docker-coreclr',
-            new DockerDebugConfigurationProvider(
-                debugSessionManager,
-                dockerManager,
-                fileSystemProvider,
-                osProvider,
-                new MsBuildNetCoreProjectProvider(
-                    fileSystemProvider,
-                    new CommandLineMSBuildClient(processProvider),
-                    new OSTempFileProvider(
-                        osProvider,
-                        processProvider)),
-                new AggregatePrerequisite(
-                    new DotNetExtensionInstalledPrerequisite(
-                        new OpnBrowserClient(),
-                        vscode.extensions.getExtension,
-                        vscode.window.showErrorMessage),
-                    new MacNuGetFallbackFolderSharedPrerequisite(
-                        fileSystemProvider,
-                        osProvider,
-                        vscode.window.showErrorMessage)
-                ))));
 }
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
