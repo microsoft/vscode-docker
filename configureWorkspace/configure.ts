@@ -404,13 +404,6 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
-    // Don't wait
-    vscode.window.showInformationMessage(
-        filesWritten.length ?
-            `The following files were written into the workspace:${EOL}${EOL}${filesWritten.join(', ')}` :
-            "No files were written"
-    );
-
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
