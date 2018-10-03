@@ -408,7 +408,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
         if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }
