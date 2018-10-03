@@ -664,7 +664,7 @@
     "@types/glob": "5.0.35",
     "@types/keytar": "^4.0.1",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^8.0.34",
+    "@types/node": "^8.10.34",
     "@types/request-promise-native": "^1.0.15",
     "@types/semver": "^5.5.0",
     "adm-zip": "^0.4.11",
@@ -674,8 +674,8 @@
     "mocha": "5.2.0",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "5.0.1",
-    "typescript": "^3.0.0",
-    "vsce": "^1.37.5",
+    "typescript": "^3.1.1",
+    "vsce": "^1.51.1",
     "vscode": "^1.1.18"
   },
   "dependencies": {
@@ -693,7 +693,7 @@
     "request-promise-native": "^1.0.5",
     "semver": "^5.5.1",
     "vscode-azureextensionui": "^0.17.0",
-    "vscode-extension-telemetry": "0.0.18",
+    "vscode-extension-telemetry": "^0.0.22",
     "vscode-languageclient": "^4.4.0"
   }
 }
