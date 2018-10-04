@@ -11,7 +11,7 @@ import * as path from 'path';
 import { Platform, OS } from "../configureWorkspace/config-utils";
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
-import { configure, ConfigureTelemetryProperties, configureApi, ConfigureApiOptions } from '../configureWorkspace/configure';
+import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { globAsync } from '../helpers/async';
 import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';
@@ -41,7 +41,6 @@ as the easier to read:
             sub-indented text
         `;
 */
-
 function removeIndentation(text: string): string {
     while (text[0] === '\r' || text[0] === '\n') {
         text = text.substr(1);
@@ -393,7 +392,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 packageFileType: '.csproj',
                 packageFileSubfolderDepth: '1'
             },
-            [os, '' /* no port */],
+            [os, undefined /* no port */],
             ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
         );
 
@@ -599,6 +598,17 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.1", async () => {
+        testInEmptyFolder("Default port (none)", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                '.NET Core Console',
+                undefined,
+                ['Windows', undefined]
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
@@ -783,6 +793,28 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // ASP.NET Core
 
     suite("ASP.NET Core 2.2", async () => {
+        testInEmptyFolder("Default port (80)", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                'ASP.NET Core',
+                undefined,
+                ['Windows', undefined]
+            );
+
+            assertFileContains('Dockerfile', 'EXPOSE 80');
+        });
+
+        testInEmptyFolder("No port", async () => {
+            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
+            await testConfigureDocker(
+                'ASP.NET Core',
+                undefined,
+                ['Windows', '']
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
         testInEmptyFolder("Windows 10 RS4", async () => {
             await testAspNetCore(
                 'Windows',
@@ -922,6 +954,28 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // Java
 
     suite("Java", () => {
+        testInEmptyFolder("No port", async () => {
+            await testConfigureDocker(
+                'Java',
+                undefined,
+                [''],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+            );
+
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+
+        testInEmptyFolder("Default port", async () => {
+            await testConfigureDocker(
+                'Java',
+                undefined,
+                [undefined],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+            );
+
+            assertFileContains('Dockerfile', 'EXPOSE 3000');
+        });
+
         testInEmptyFolder("No pom file", async () => {
             await testConfigureDocker(
                 'Java',
@@ -1070,7 +1124,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // Ruby
 
     suite("Ruby", () => {
-        testInEmptyFolder("Ruby", async () => {
+        testInEmptyFolder("Ruby, empty folder", async () => {
             await testConfigureDocker(
                 'Ruby',
                 {
@@ -1087,6 +1141,70 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'COPY Gemfile Gemfile.lock ./');
             assertFileContains('Dockerfile', 'RUN bundle install');
             assertFileContains('Dockerfile', 'CMD ["ruby", "testoutput.rb"]');
+        });
+    });
+
+    suite("'Other'", () => {
+        testInEmptyFolder("with package.json", async () => {
+            await writeFile('', 'package.json', JSON.stringify({
+                "name": "myexpressapp",
+                "version": "1.2.3",
+                "private": true,
+                "scripts": {
+                    "start": "node ./bin/www"
+                },
+                "dependencies": {
+                    "cookie-parser": "~1.4.3",
+                    "debug": "~2.6.9",
+                    "express": "~4.16.0",
+                    "http-errors": "~1.6.2",
+                    "jade": "~1.11.0",
+                    "morgan": "~1.9.0"
+                }
+            }))
+            await testConfigureDocker(
+                'Other',
+                {
+                    configurePlatform: 'Other',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                [undefined /*port*/],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'package.json']);
+
+            let dockerfileContents = await readFile('Dockerfile');
+            let composeContents = await readFile('docker-compose.yml');
+            let debugComposeContents = await readFile('docker-compose.debug.yml');
+
+            assert.strictEqual(dockerfileContents, removeIndentation(`
+                FROM docker/whalesay:latest
+                LABEL Name=testoutput Version=1.2.3
+                RUN apt-get -y update && apt-get install -y fortunes
+                CMD /usr/games/fortune -a | cowsay
+                `));
+            assert.strictEqual(composeContents, removeIndentation(`
+                version: '2.1'
+
+                services:
+                  testoutput:
+                    image: testoutput
+                    build: .
+                    ports:
+                      - 3000:3000
+                `));
+            assert.strictEqual(debugComposeContents, removeIndentation(`
+                version: '2.1'
+
+                services:
+                  testoutput:
+                    image: testoutput
+                    build:
+                      context: .
+                      dockerfile: Dockerfile
+                    ports:
+                      - 3000:3000
+                `));
         });
     });
 

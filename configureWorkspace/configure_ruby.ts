@@ -3,19 +3,22 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PackageInfo } from './configure';
+import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
-export let configureRuby = {
+export let configureRuby: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
-  genDockerComposeDebug
+  genDockerComposeDebug,
+  defaultPort: '3000'
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+  let exposeStatements = getExposeStatements(port);
+
   return `FROM ruby:2.5-slim
 
 LABEL Name=${serviceNameAndRelativePath} Version=${version}
-EXPOSE ${port}
+${exposeStatements}
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN bundle config --global frozen 1
