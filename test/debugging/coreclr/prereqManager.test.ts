@@ -13,10 +13,12 @@ suite('debugging', () => {
         suite('prereqManager', () => {
             suite('MacNuGetFallbackFolderSharedPrerequisite', () => {
                 const generateTest = (name: string, fileContents: string | undefined, result: boolean) => {
+                    const settingsPath = '/Users/User/Library/Group Containers/group.com.docker/settings.json';
+
                     test(name, async () => {
                         const fsProvider = <FileSystemProvider>{
                             fileExists: (path: string) => {
-                                assert.equal('/Users/User/Library/Group Containers/group.com.docker/settings.json', path, 'The prerequisite should check for the settings file in the user\'s home directory.');
+                                assert.equal(settingsPath, path, 'The prerequisite should check for the settings file in the user\'s home directory.');
 
                                 return Promise.resolve(fileContents !== undefined);
                             },
@@ -25,7 +27,7 @@ suite('debugging', () => {
                                     assert.fail('The prerequisite should not attempt to read a file that does not exist.');
                                 }
 
-                                assert.equal('/Users/User/Library/Group Containers/group.com.docker/settings.json', path, 'The prerequisite should read the settings file in the user\'s home directory.');
+                                assert.equal(settingsPath, path, 'The prerequisite should read the settings file in the user\'s home directory.');
 
                                 return Promise.resolve(fileContents);
                             }
