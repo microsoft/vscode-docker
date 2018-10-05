@@ -100,7 +100,6 @@ import {
 import { ImageNode } from "./explorer/models/imageNode";
 import { NodeBase } from "./explorer/models/nodeBase";
 import { RootNode } from "./explorer/models/rootNode";
-import { TaskNode } from "./explorer/models/taskNode";
 import { browseAzurePortal } from "./explorer/utils/browseAzurePortal";
 import {
   browseDockerHub,
@@ -115,9 +114,9 @@ import { AzureUtilityManager } from "./utils/azureUtilityManager";
 import { Keytar } from "./utils/keytar";
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
-export const COMPOSE_FILE_GLOB_PATTERN = "**/[dD]ocker-[cC]ompose*.{yaml,yml}";
-export const DOCKERFILE_GLOB_PATTERN = "**/{*.dockerfile,[dD]ocker[fF]ile}";
-export const YAML_GLOB_PATTER = "/\\.ya*ml$/i";
+export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}';
+export const YAML_GLOB_PATTER = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
 

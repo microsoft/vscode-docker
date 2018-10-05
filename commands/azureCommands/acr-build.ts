@@ -5,9 +5,9 @@ import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { resolveFileItem } from '../build-image';
-import { getTempSourceArchivePath, uploadSourceCode } from '../utils/OutputChannel';
+import { FileType, resolveFileItem } from '../build-image';
 import { quickPickACRRegistry, quickPickNewImageName, quickPickSubscription } from '../utils/quick-pick-azure';
+import { getTempSourceArchivePath, uploadSourceCode } from '../utils/SourceArchiveUtility';
 
 const status = vscode.window.createOutputChannel('ACR Build status');
 
@@ -37,7 +37,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
-    const dockerItem = await resolveFileItem(folder, dockerFileUri, "DockerFile");
+    const dockerItem = await resolveFileItem(folder, dockerFileUri, FileType.Dockerfile);
     const sourceLocation: string = folder.uri.path;
     const tarFilePath = getTempSourceArchivePath(status);
 

@@ -11,6 +11,11 @@ import { delay } from "../explorer/utils/utils";
 import { ext } from "../extensionVariables";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 
+export enum FileType {
+    Dockerfile = 'DockerFile',
+    Yaml = 'Yaml File'
+}
+
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
 }
@@ -34,21 +39,20 @@ function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): It
     };
 }
 
-export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined, fileType: string): Promise<Item | undefined> {
+export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined, fileType: FileType): Promise<Item | undefined> {
     if (dockerFileUri) {
         return createFileItem(rootFolder, dockerFileUri);
     }
 
     let uris: vscode.Uri[];
     let message: string;
-    if (fileType) {
-        if (fileType === 'Dockerfile') {
-            uris = await getDockerFileUris(rootFolder);
-            message = 'Choose a Dockerfile to build.';
-        } else if (fileType === 'Yaml') {
-            uris = await getYamlFileUris(rootFolder);
-            message = 'Choose a Yaml file to run.'
-        }
+    if (!fileType) { throw new Error("File type was not defined."); }
+    if (fileType === 'DockerFile') {
+        uris = await getDockerFileUris(rootFolder);
+        message = 'Choose a Dockerfile to build.';
+    } else if (fileType === 'Yaml File') {
+        uris = await getYamlFileUris(rootFolder);
+        message = 'Choose a Yaml file to run.'
     }
 
     if (!uris || uris.length === 0) {
@@ -90,7 +94,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     }
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, "Dockerfile");
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, FileType.Dockerfile);
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {

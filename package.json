@@ -134,17 +134,17 @@
       ],
       "explorer/context": [
         {
-          "when": "resourceFilename =~ /\\.*dockerfile$/i",
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.queue-ACR-Build",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /\\.ya*ml$/i",
+          "when": "resourceFilename =~ /\\.ya?ml$/i",
           "command": "vscode-docker.run-ACR-TaskFile",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /\\.*dockerfile$/i",
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         },
