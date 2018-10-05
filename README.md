@@ -38,9 +38,11 @@ To debug a .NET Core ASP.NET application running in a Linux Docker container, ad
 1. Set a breakpoint.
 1. Start debugging.
 
-> Mac OS X users: before debugging, add `/usr/local/share/dotnet/sdk/NuGetFallbackFolder` as a shared folder in your Docker preferences.
-
 > All users: before debugging, install the [C# VS Code extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp) which includes support for attaching to the .NET Core debugger.
+
+> Mac OS X users: before debugging, add `/usr/local/share/dotnet/sdk/NuGetFallbackFolder` as a shared folder in your Docker preferences.
+>
+> ![Docker Shared Folders](images/dockerSharedFolders.png)
 
 Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigate to the application's initial page.
 
