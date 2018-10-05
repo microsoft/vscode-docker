@@ -28,40 +28,75 @@ Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ![IntelliSense for DockerFiles](images/intelliSense.gif)
 
-## Debugging (Preview)
+## Debugging .NET Core ASP.NET (Preview)
 
-To debug a .NET Core web application running in a Linux Docker container, add a Docker .NET Core launch configuration:
+To debug a .NET Core ASP.NET application running in a Linux Docker container, add a Docker .NET Core launch configuration:
 
 1. Switch to the debugging tab.
 1. Select `Add configuration...`
-1. Select `Docker: Launch .NET Core (Preview)`
+1. Select `Docker: Launch .NET Core ASP.NET (Preview)`
 1. Set a breakpoint.
 1. Start debugging.
 
 > Mac OS X users: before debugging, add `/usr/local/share/dotnet/sdk/NuGetFallbackFolder` as a shared folder in your Docker preferences.
 
-Upon debugging, a Docker image will be built and a container run based on that image.  The container will have a volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigated to the application's initial page.
+> All users: before debugging, install the [C# VS Code extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp) which includes support for attaching to the .NET Core debugger.
 
-Most properties of the configuration are optional will be inferred from the project. If not, or if there are additional customizations to the Docker image build or container run process to be made, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
+Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigate to the application's initial page.
+
+Most properties of the configuration are optional and will be inferred from the project. If not, or if there are additional customizations to be made to the Docker image build or container run process, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
 
 ```json
 {
     "configurations": [
         {
-            "name": "Docker: Launch .NET Core",
+            "name": "Docker: Launch .NET Core ASP.NET (Preview)",
             "type": "docker-coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "dockerBuild": {
-                // Add Docker image build customizations here.
+                // Image customizations
             },
             "dockerRun": {
-                // Add Docker container run customizations here.
+                // Container customizations
             }
         }
     ]
 }
 ```
+
+### Application Customizations
+
+When possible, the location and output of the application will be inferred from the workspace folder opened in VS Code. When they cannot be inferred, these properties can be used to make them explicit:
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `appFolder` | The root folder of the application | The workspace folder |
+| `appProject` | The path to the project file | The first `.csproj` found in the application folder |
+| `appOutput` | The application folder relative path to the output assembly | The `TargetPath` MS Build property |
+
+> You can specify either `appFolder` or `appProject` but should not specify *both*.
+
+### Docker Build Customizations
+
+Customize the Docker image build process by adding properties under the `dockerBuild` configuration property.
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `context` | The Docker context used during the build process. | The workspace folder, if the same as the application folder; otherwise, the application's parent (i.e. solution) folder |
+| `dockerfile` | The path to the Dockerfile used to build the image. | The file `Dockerfile` in the application folder |
+| `tag` | The tag added to the image. | `<Application Name>:dev` |
+| `target` | The target (stage) of the Dockerfile from which to build the image. | `base`
+
+
+### Docker Run Customization
+
+Customize the Docker container run process by adding properties under the `dockerRun` configuration property.
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `containerName` | The name of the container. | `<Application Name>-dev` |
+| `os` | The OS of the container. | `Linux` |
 
 ## Docker commands
 
