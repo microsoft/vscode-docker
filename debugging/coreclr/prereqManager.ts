@@ -18,8 +18,7 @@ export type ShowErrorMessageFunction = (message: string, ...items: vscode.Messag
 export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
     constructor(
         private readonly browserClient: BrowserClient,
-        // tslint:disable-next-line:no-any
-        private readonly getExtension: (extensionId: string) => vscode.Extension<any> | undefined,
+        private readonly getExtension: (extensionId: string) => vscode.Extension<unknown> | undefined,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 
