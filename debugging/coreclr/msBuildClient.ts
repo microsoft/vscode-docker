@@ -26,7 +26,9 @@ export class CommandLineMSBuildClient implements MSBuildClient {
             }
 
             if (options.properties) {
-                command += Object.keys(options.properties).map(key => ` "/p:${key}=${options.properties[key]}"`).join('');
+                const properties = options.properties;
+
+                command += Object.keys(properties).map(key => ` "/p:${key}=${properties[key]}"`).join('');
             }
         }
 

@@ -69,7 +69,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         ];
     }
 
-    public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
+    public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
         return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
     }
 
@@ -77,7 +77,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return folderPath.replace(/\$\{workspaceFolder\}/g, folder.uri.fsPath);
     }
 
-    private async resolveDockerDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration> {
+    private async resolveDockerDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration | undefined> {
         if (!folder) {
             return undefined;
         }

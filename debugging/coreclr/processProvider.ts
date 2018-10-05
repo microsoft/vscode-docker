@@ -8,7 +8,7 @@ import * as process from 'process';
 export type ProcessProviderExecOptions = cp.ExecOptions & { progress?(content: string): void };
 
 export interface ProcessProvider {
-    env: { [key: string]: string };
+    env: { [key: string]: string | undefined };
     pid: number;
 
     exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }>;
@@ -16,7 +16,7 @@ export interface ProcessProvider {
 
 export class ChildProcessProvider implements ProcessProvider {
 
-    get env(): { [key: string]: string } {
+    get env(): { [key: string]: string | undefined } {
         return process.env;
     }
 

@@ -144,6 +144,8 @@ export class DefaultDockerManager implements DockerManager {
             throw new Error('No container name was provided.');
         }
 
+        const containerName = options.containerName;
+
         const debuggerFolder = await this.debuggerClient.getDebugger(options.os);
 
         const command = options.os === 'Windows'
@@ -161,8 +163,8 @@ export class DefaultDockerManager implements DockerManager {
             async () => {
                 const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
 
-                if (containers.find(container => container === options.containerName)) {
-                    await this.dockerClient.removeContainer(options.containerName, { force: true });
+                if (containers.find(container => container === containerName)) {
+                    await this.dockerClient.removeContainer(containerName, { force: true });
                 }
 
                 return await this.dockerClient.runContainer(
@@ -299,8 +301,18 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
+        let programFilesEnvironmentVariable: string | undefined;
+
+        if (this.osProvider.os === 'Windows') {
+            programFilesEnvironmentVariable = this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable];
+
+            if (programFilesEnvironmentVariable === undefined) {
+                throw new Error(`The environment variable '${DefaultDockerManager.ProgramFilesEnvironmentVariable}' is not defined. This variable is used to locate the NuGet fallback folder.`);
+            }
+        }
+
         const nugetFallbackVolume: DockerContainerVolume = {
-            localPath: this.osProvider.os === 'Windows' ? path.join(this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable], 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
+            localPath: this.osProvider.os === 'Windows' ? path.join(<string>programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
             containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };

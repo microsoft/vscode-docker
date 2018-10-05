@@ -6,7 +6,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
 import { OSProvider, PlatformType } from '../../../debugging/coreclr/osProvider';
-import { MacNuGetFallbackFolderSharedPrerequisite } from '../../../debugging/coreclr/prereqManager';
+import { MacNuGetFallbackFolderSharedPrerequisite, ShowErrorMessageFunction } from '../../../debugging/coreclr/prereqManager';
 
 suite('debugging', () => {
     suite('coreclr', () => {
@@ -40,9 +40,9 @@ suite('debugging', () => {
 
                         let shown = false;
 
-                        const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem> => {
+                        const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
                             shown = true;
-                            return undefined;
+                            return Promise.resolve<vscode.MessageItem | undefined>(undefined);
                         };
 
                         const prereq = new MacNuGetFallbackFolderSharedPrerequisite(fsProvider, osProvider, showErrorMessage);
@@ -64,7 +64,12 @@ suite('debugging', () => {
                         os: 'Windows'
                     };
 
-                    const prereq = new MacNuGetFallbackFolderSharedPrerequisite(undefined, osProvider, undefined);
+                    const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                        assert.fail('Should not be called on Windows.');
+                        return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                    };
+
+                    const prereq = new MacNuGetFallbackFolderSharedPrerequisite(<FileSystemProvider>{}, osProvider, showErrorMessage);
 
                     const result = await prereq.checkPrerequisite();
 

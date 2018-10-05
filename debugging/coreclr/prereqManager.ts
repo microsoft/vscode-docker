@@ -13,14 +13,14 @@ export interface Prerequisite {
     checkPrerequisite(): Promise<boolean>;
 }
 
-type showErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem>;
+export type ShowErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem | undefined>;
 
 export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
     constructor(
         private readonly browserClient: BrowserClient,
         // tslint:disable-next-line:no-any
-        private readonly getExtension: (extensionId: string) => vscode.Extension<any>,
-        private readonly showErrorMessage: showErrorMessageFunction) {
+        private readonly getExtension: (extensionId: string) => vscode.Extension<any> | undefined,
+        private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
@@ -58,7 +58,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
     constructor(
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
-        private readonly showErrorMessage: showErrorMessageFunction) {
+        private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 
     public async checkPrerequisite(): Promise<boolean> {

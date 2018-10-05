@@ -11,7 +11,7 @@ export interface DebugSessionManager {
 }
 
 export class DockerDebugSessionManager implements DebugSessionManager, vscode.Disposable {
-    private eventSubscription: vscode.Disposable;
+    private eventSubscription: vscode.Disposable | undefined;
 
     constructor(
         private readonly debugSessionTerminated: vscode.Event<vscode.DebugSession>,

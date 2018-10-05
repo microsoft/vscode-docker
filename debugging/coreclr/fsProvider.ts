@@ -28,6 +28,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             if (err.code === "ENOENT") {
                 return false;
             }
+
+            throw err;
         }
     }
 
@@ -41,6 +43,8 @@ export class LocalFileSystemProvider implements FileSystemProvider {
             if (err.code === "ENOENT") {
                 return false;
             }
+
+            throw err;
         }
     }
 
@@ -64,7 +68,7 @@ export class LocalFileSystemProvider implements FileSystemProvider {
 
     public async readFile(filename: string, encoding?: string): Promise<string> {
         // NOTE: If encoding is specified, output is a string; if omitted, output is a Buffer.
-        return (await fse.readFile(filename, encoding)).toString();
+        return (await (encoding ? fse.readFile(filename, encoding) : fse.readFile(filename))).toString();
     }
 
     public async unlinkFile(filename: string): Promise<void> {
