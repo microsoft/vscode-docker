@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { isNumber } from 'util';
 import vscode = require('vscode');
 import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
@@ -22,11 +23,18 @@ export type Platform =
  * Prompts for a port number
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function promptForPort(port: number): Promise<string> {
+export async function promptForPort(port: string): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         placeHolder: `${port}`,
-        prompt: 'What port does your app listen on?',
-        value: `${port}`
+        prompt: 'What port does your app listen on? ENTER for none.',
+        value: `${port}`,
+        validateInput: (value: string): string | undefined => {
+            if (value && (!Number.isInteger(Number(value)) || Number(value) <= 0)) {
+                return 'Port must be a positive integer or else empty for no exposed port';
+            }
+
+            return undefined;
+        }
     }
 
     return ext.ui.showInputBox(opt);
