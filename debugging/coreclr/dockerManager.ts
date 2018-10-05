@@ -165,7 +165,6 @@ export class DefaultDockerManager implements DockerManager {
                     await this.dockerClient.removeContainer(options.containerName, { force: true });
                 }
 
-                // TODO: Manage merge of user-supplied entrypoint or volumes
                 return await this.dockerClient.runContainer(
                     imageTagOrId,
                     {

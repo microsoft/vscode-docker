@@ -25,8 +25,9 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 
     public async checkPrerequisite(): Promise<boolean> {
         // NOTE: Debugging .NET Core in Docker containers requires the C# (i.e. .NET Core debugging) extension.
-        //       As Docker debugging is experimental, we don't want the extension as a whole to depend on it.
-        //       Hence, we only check for its existence if/when asked to debug .NET Core in Docker containers.
+        //       As this extension targets Docker in general and not .NET Core in particular, we don't want the
+        //       extension as a whole to depend on it.  Hence, we only check for its existence if/when asked to
+        //       debug .NET Core in Docker containers.
         const dependenciesSatisfied = this.getExtension('ms-vscode.csharp') !== undefined;
 
         if (!dependenciesSatisfied) {

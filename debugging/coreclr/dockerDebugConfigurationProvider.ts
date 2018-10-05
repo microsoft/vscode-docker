@@ -102,13 +102,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         let dockerfile = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.dockerfile
             ? DockerDebugConfigurationProvider.resolveFolderPath(debugConfiguration.dockerBuild.dockerfile, folder)
-            : path.join(appFolder, 'Dockerfile'); // TODO: Omit dockerfile argument if not specified or possibly infer from context.
+            : path.join(appFolder, 'Dockerfile'); // CONSIDER: Omit dockerfile argument if not specified or possibly infer from context.
 
         dockerfile = DockerDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
 
         const target = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.target
             ? debugConfiguration.dockerBuild.target
-            : 'base'; // TODO: Omit target if not specified, or possibly infer from Dockerfile.
+            : 'base'; // CONSIDER: Omit target if not specified, or possibly infer from Dockerfile.
 
         const appName = path.basename(resolvedAppProject);
 
@@ -118,7 +118,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
             ? debugConfiguration.dockerRun.containerName
-            : `${appName}-dev`; // TODO: Use unique ID instead?
+            : `${appName}-dev`; // CONSIDER: Use unique ID instead?
 
         const os = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.os
             ? debugConfiguration.dockerRun.os
@@ -188,7 +188,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return path.join(resolvedAppFolder, projectFile);
         }
 
-        throw new Error('Unable to infer the application project file. It must be explicitly set in the Docker debug configuration.');
+        throw new Error('Unable to infer the application project file. Set either the `appFolder` or appProject` property in the Docker debug configuration.');
     }
 
     private inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {

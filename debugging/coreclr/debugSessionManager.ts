@@ -28,7 +28,7 @@ export class DockerDebugSessionManager implements DebugSessionManager, vscode.Di
                 () => {
                     this.dockerManager
                         .cleanupAfterLaunch()
-                        .catch(reason => console.log(`Unable to cleanup Docker images after launch: ${reason}`));
+                        .catch(reason => console.log(`Unable to clean up Docker images after launch: ${reason}`));
 
                     this.stopListening();
                 });
