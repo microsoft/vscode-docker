@@ -28,6 +28,65 @@ Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ![IntelliSense for DockerFiles](images/intelliSense.gif)
 
+## Docker commands
+
+Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
+
+![IntelliSense](images/commands.gif)
+
+## Docker View
+
+The Docker extension contributes a new `Docker` View to VS Code. Within the View, the Explorer lets you view and manage your Images, Containers, and browse your Docker Hub registry. If the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension is installed, you can browse your [Azure Container Registries](https://docs.microsoft.com/en-us/azure/container-registry/) as well.
+
+The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
+
+![explorer integration](images/explorer.png)
+
+You can move the View up or down by dragging the Docker icon and you can hide the View by right clicking on the icon and choosing `Hide`. To bring it back, right click on the Activity Bar area and check the `Docker` item.
+
+![show and hide the view](images/viewRightClick.png)
+
+The `showExplorer` configuration setting controls the visibility of the Docker View.
+
+``` json
+"docker.showExplorer": false
+```
+
+## Docker Hub Login
+The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
+
+![Docker Hub Login](images/dockerHubLogin.gif)
+
+Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
+
+## Deploying images to Azure App Service
+
+With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance, as detailed in this [getting started](https://code.visualstudio.com/tutorials/docker-extension/getting-started) guide. This functionality requires installing the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension and an Azure Subscription. If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a free 30 day account and get $200 in Azure Credits to try out any combination of Azure services.
+
+To log into Azure, press `F1` and search for `Azure Sign In`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
+
+![Azure Login](images/devicelogin.png)
+
+Paste in the access code and continue the sign in process.
+
+![Azure Login](images/devicelogin2.png)
+
+You can now right click on an image in Docker Hub or an Azure Container Registry and choose "Deploy Image to Azure App Service".
+
+![Deploy to Azure](images/deploytoazure.png)
+
+From here you will be prompted for a Resource Group, location, an App Service Plan, and a globally unique website name.
+
+## Azure CLI
+
+Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container.
+
+After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
+
+## Private registries (Preview)
+
+This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
+
 ## Debugging .NET Core ASP.NET (Preview)
 
 To debug a .NET Core ASP.NET application running in a Linux Docker container, add a Docker .NET Core launch configuration:
@@ -99,65 +158,6 @@ Customize the Docker container run process by adding properties under the `docke
 | --- | --- | --- |
 | `containerName` | The name of the container. | `<Application Name>-dev` |
 | `os` | The OS of the container. | `Linux` |
-
-## Docker commands
-
-Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
-
-![IntelliSense](images/commands.gif)
-
-## Docker View
-
-The Docker extension contributes a new `Docker` View to VS Code. Within the View, the Explorer lets you view and manage your Images, Containers, and browse your Docker Hub registry. If the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension is installed, you can browse your [Azure Container Registries](https://docs.microsoft.com/en-us/azure/container-registry/) as well.
-
-The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
-
-![explorer integration](images/explorer.png)
-
-You can move the View up or down by dragging the Docker icon and you can hide the View by right clicking on the icon and choosing `Hide`. To bring it back, right click on the Activity Bar area and check the `Docker` item.
-
-![show and hide the view](images/viewRightClick.png)
-
-The `showExplorer` configuration setting controls the visibility of the Docker View.
-
-``` json
-"docker.showExplorer": false
-```
-
-## Docker Hub Login
-The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
-
-![Docker Hub Login](images/dockerHubLogin.gif)
-
-Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
-
-## Deploying images to Azure App Service
-
-With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance, as detailed in this [getting started](https://code.visualstudio.com/tutorials/docker-extension/getting-started) guide. This functionality requires installing the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension and an Azure Subscription. If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a free 30 day account and get $200 in Azure Credits to try out any combination of Azure services.
-
-To log into Azure, press `F1` and search for `Azure Sign In`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
-
-![Azure Login](images/devicelogin.png)
-
-Paste in the access code and continue the sign in process.
-
-![Azure Login](images/devicelogin2.png)
-
-You can now right click on an image in Docker Hub or an Azure Container Registry and choose "Deploy Image to Azure App Service".
-
-![Deploy to Azure](images/deploytoazure.png)
-
-From here you will be prompted for a Resource Group, location, an App Service Plan, and a globally unique website name.
-
-## Azure CLI
-
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container.
-
-After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
-
-## Private registries (Preview)
-
-This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
 
 ## Configuration Settings
 
