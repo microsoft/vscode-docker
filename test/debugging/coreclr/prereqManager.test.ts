@@ -5,7 +5,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
-import { OSProvider, PlatformType } from '../../../debugging/coreclr/osProvider';
+import { OSProvider } from '../../../debugging/coreclr/osProvider';
 import { MacNuGetFallbackFolderSharedPrerequisite, ShowErrorMessageFunction } from '../../../debugging/coreclr/prereqManager';
 
 suite('debugging', () => {

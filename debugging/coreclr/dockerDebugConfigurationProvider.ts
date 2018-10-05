@@ -5,11 +5,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { PlatformOS } from '../../utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchResult } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
-import { OSProvider, PlatformType } from './osProvider';
+import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
 
 interface DockerDebugBuildOptions {
@@ -21,7 +22,7 @@ interface DockerDebugBuildOptions {
 
 interface DockerDebugRunOptions {
     containerName?: string;
-    os?: PlatformType;
+    os?: PlatformOS;
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -162,7 +163,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return folder.uri.fsPath;
     }
 
-    private async inferAppOutput(configuration: DockerDebugConfiguration, targetOS: PlatformType, resolvedAppProject: string): Promise<string> {
+    private async inferAppOutput(configuration: DockerDebugConfiguration, targetOS: PlatformOS, resolvedAppProject: string): Promise<string> {
         if (configuration && configuration.appOutput) {
             return configuration.appOutput;
         }

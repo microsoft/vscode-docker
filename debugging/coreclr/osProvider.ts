@@ -4,15 +4,14 @@
 
 import * as os from 'os';
 import * as path from 'path';
-
-export type PlatformType = 'Windows' | 'Linux';
+import { PlatformOS } from '../../utils/platform';
 
 export interface OSProvider {
     homedir: string;
-    os: PlatformType;
+    os: PlatformOS;
     tmpdir: string;
-    pathJoin(os: PlatformType, ...paths: string[]): string;
-    pathNormalize(os: PlatformType, rawPath: string): string;
+    pathJoin(os: PlatformOS, ...paths: string[]): string;
+    pathNormalize(os: PlatformOS, rawPath: string): string;
 }
 
 export class LocalOSProvider implements OSProvider {
@@ -20,7 +19,7 @@ export class LocalOSProvider implements OSProvider {
         return os.homedir();
     }
 
-    get os(): PlatformType {
+    get os(): PlatformOS {
         return os.platform() === 'win32' ? 'Windows' : 'Linux';
     }
 
@@ -28,11 +27,11 @@ export class LocalOSProvider implements OSProvider {
         return os.tmpdir();
     }
 
-    public pathJoin(pathOS: PlatformType, ...paths: string[]): string {
+    public pathJoin(pathOS: PlatformOS, ...paths: string[]): string {
         return pathOS === 'Windows' ? path.win32.join(...paths) : path.posix.join(...paths);
     }
 
-    public pathNormalize(pathOS: PlatformType, rawPath: string): string {
+    public pathNormalize(pathOS: PlatformOS, rawPath: string): string {
         return rawPath.replace(
             pathOS === 'Windows' ? /\//g : /\\/g,
             pathOS === 'Windows' ? '\\' : '/');

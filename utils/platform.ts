@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export type OS = 'Windows' | 'Linux';
+export type PlatformOS = 'Windows' | 'Linux';
 export type Platform =
     'Go' |
     'Java' |

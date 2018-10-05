@@ -15,7 +15,7 @@ import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { OS, Platform } from '../utils/platform';
+import { Platform, PlatformOS } from '../utils/platform';
 import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
 import { configureGo } from './configure_go';
@@ -49,7 +49,7 @@ interface PomXmlContents {
 
 export type ConfigureTelemetryProperties = {
     configurePlatform?: Platform;
-    configureOs?: OS;
+    configureOs?: PlatformOS;
     packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj'
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
@@ -67,7 +67,7 @@ generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
@@ -75,7 +75,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
@@ -83,7 +83,7 @@ function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform
     }
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
@@ -238,7 +238,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     }
 }
 
-type GeneratorFunction = (serviceName: string, platform: Platform, os: OS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
+type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -283,7 +283,7 @@ export interface ConfigureApiOptions {
     /**
      * The OS for the images. Currently only needed for .NET platforms.
      */
-    os?: OS;
+    os?: PlatformOS;
 }
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
@@ -327,7 +327,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     const platformType: Platform = options.platform || await quickPickPlatform();
     properties.configurePlatform = platformType;
 
-    let os: OS | undefined = options.os;
+    let os: PlatformOS | undefined = options.os;
     if (!os && platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
     }

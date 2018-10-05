@@ -2,11 +2,11 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { PlatformType } from "./osProvider";
-import { VsDbgClient } from "./vsdbgClient";
+import { PlatformOS } from '../../utils/platform';
+import { VsDbgClient } from './vsdbgClient';
 
 export interface DebuggerClient {
-    getDebugger(os: PlatformType): Promise<string>;
+    getDebugger(os: PlatformOS): Promise<string>;
 }
 
 export class DefaultDebuggerClient {
@@ -17,7 +17,7 @@ export class DefaultDebuggerClient {
     constructor(private readonly vsdbgClient: VsDbgClient) {
     }
 
-    public async getDebugger(os: PlatformType): Promise<string> {
+    public async getDebugger(os: PlatformOS): Promise<string> {
         return await this.vsdbgClient.getVsDbgVersion(
             DefaultDebuggerClient.debuggerVersion,
             os === 'Windows' ? DefaultDebuggerClient.debuggerWindowsRuntime : DefaultDebuggerClient.debuggerLinuxRuntime);

@@ -4,12 +4,13 @@
 
 import * as path from 'path';
 import { Memento } from 'vscode';
+import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { DebuggerClient } from './debuggerClient';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./dockerClient";
 import { FileSystemProvider } from './fsProvider';
 import Lazy from './lazy';
-import { OSProvider, PlatformType } from './osProvider';
+import { OSProvider } from './osProvider';
 import { OutputManager } from './outputManager';
 import { ProcessProvider } from './processProvider';
 
@@ -25,7 +26,7 @@ export type DockerManagerRunContainerOptions
     = DockerRunContainerOptions
     & {
         appFolder: string;
-        os: PlatformType;
+        os: PlatformOS;
     };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;

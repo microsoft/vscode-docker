@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { ext } from '../extensionVariables';
-import { OS, Platform } from '../utils/platform';
+import { PlatformOS, Platform } from '../utils/platform';
 import { Suite } from 'mocha';
 import { configure, ConfigureTelemetryProperties, configureApi, ConfigureApiOptions } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
@@ -381,7 +381,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
 
-    async function testDotNetCoreConsole(os: OS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+    async function testDotNetCoreConsole(os: PlatformOS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
         await writeFile(projectFolder, projectFileName, projectFileContents);
         await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
 
@@ -403,7 +403,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         }
     }
 
-    async function testAspNetCore(os: OS, hostOs: OS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+    async function testAspNetCore(os: PlatformOS, hostOs: PlatformOS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
         let previousOs = ext.os;
         ext.os = {
             platform: hostOs === 'Windows' ? 'win32' : 'linux',

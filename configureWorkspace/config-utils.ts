@@ -6,7 +6,7 @@
 import vscode = require('vscode');
 import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
-import { OS, Platform } from '../utils/platform';
+import { Platform, PlatformOS } from '../utils/platform';
 
 /**
  * Prompts for a port number
@@ -53,15 +53,15 @@ export async function quickPickPlatform(): Promise<Platform> {
  * Prompts for an OS
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function quickPickOS(): Promise<OS> {
+export async function quickPickOS(): Promise<PlatformOS> {
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Operating System'
     }
 
-    const OSes: OS[] = ['Windows', 'Linux'];
-    const items = OSes.map(p => <IAzureQuickPickItem<OS>>{ label: p, data: p });
+    const OSes: PlatformOS[] = ['Windows', 'Linux'];
+    const items = OSes.map(p => <IAzureQuickPickItem<PlatformOS>>{ label: p, data: p });
 
     let response = await ext.ui.showQuickPick(items, opt);
     return response.data;
