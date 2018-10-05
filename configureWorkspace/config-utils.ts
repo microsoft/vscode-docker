@@ -6,17 +6,7 @@
 import vscode = require('vscode');
 import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
-
-export type OS = 'Windows' | 'Linux';
-export type Platform =
-    'Go' |
-    'Java' |
-    '.NET Core Console' |
-    'ASP.NET Core' |
-    'Node.js' |
-    'Python' |
-    'Ruby' |
-    'Other';
+import { OS, Platform } from '../utils/platform';
 
 /**
  * Prompts for a port number
