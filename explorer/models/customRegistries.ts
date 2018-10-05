@@ -12,6 +12,10 @@ import { ext } from '../../extensionVariables';
 import { nonNullValue } from '../../utils/nonNull';
 import { CustomRegistryNode } from './customRegistryNodes';
 
+let previousUrl: string = '';
+let previousUserName: string;
+let previousPassword: string;
+
 interface CustomRegistryNonsensitive {
     url: string,
 }
@@ -30,14 +34,18 @@ const customRegistriesKey = 'customRegistries';
 export async function connectCustomRegistry(): Promise<void> {
     let registries = await getCustomRegistries();
 
+    let url: string;
     // tslint:disable-next-line:no-constant-condition
-    let url = await ext.ui.showInputBox({
-        value: 'https://registry.gitlab.com',
-        prompt: "Enter the URL for the registry (OAuth not yet supported)",
-        placeHolder: 'Example: http://localhost:5000',
-        validateInput: (value: string): string | undefined => {
-            let uri = vscode.Uri.parse(value);
-            if (!uri.scheme || !uri.authority || !uri.path) {
+    url = await ext.ui.showInputBox({
+        value: previousUrl,
+        prompt: "Enter the registry server",
+        validateInput: async (value: string): Promise<string | undefined> => {
+            try {
+                let uri = vscode.Uri.parse(prependHttps(value));
+                if (!uri.scheme || !uri.authority || !uri.path) {
+                    return "Please enter a valid URL";
+                }
+            } catch (error) {
                 return "Please enter a valid URL";
             }
 
@@ -48,25 +56,38 @@ export async function connectCustomRegistry(): Promise<void> {
             return undefined;
         }
     });
+
+    url = prependHttps(url);
+    if (previousUrl !== url) {
+        previousUrl = url;
+        previousUserName = '';
+        previousPassword = '';
+    }
+
     let userName = await ext.ui.showInputBox({
-        value: 'SWeatherford',
-        prompt: "Enter the username for connecting, or ENTER for none"
+        value: previousUserName,
+        prompt: "Enter the username, or ENTER for none"
     });
+
+    previousUserName = userName;
+
     let password: string = '';
     if (userName) {
         password = await ext.ui.showInputBox({
-            value: 'SwissyLabory',
+            value: previousPassword,
             prompt: "Enter the password",
             password: true
         });
     }
+
+    previousPassword = password;
 
     let newRegistry: CustomRegistry = {
         url,
         credentials: { userName, password }
     };
 
-    await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
+    await CustomRegistryNode.verifyCanAccessRegistry(newRegistry);
 
     // Save
     if (ext.keytar) {
@@ -78,6 +99,15 @@ export async function connectCustomRegistry(): Promise<void> {
     }
 
     await refresh();
+}
+
+function prependHttps(url: string): string {
+    url = url.trim();
+    if (!url.match(/\w+:\/\//)) {
+        url = `https://${url}`;
+    }
+
+    return url;
 }
 
 export async function disconnectCustomRegistry(node: CustomRegistryNode): Promise<void> {

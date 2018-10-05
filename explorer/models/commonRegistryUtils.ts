@@ -43,10 +43,12 @@ export async function registryRequest<T>(
     try {
         return await coreRegistryRequest<T>(url, credentials);
     } catch (errResponse) {
-        let response: Response = errResponse.response;
+        let error = errResponse.error;
+        let statusCode = errResponse.statusCode;
+        let response: Response = (errResponse && errResponse.response) || {};
         let wwwAuthenticate = response.headers["www-authenticate"];
 
-        if (errResponse.statusCode === 401 && wwwAuthenticate) {
+        if (statusCode === 401 && wwwAuthenticate) { // TODO: handle 403
             // Example www-authenticate header: Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
             let { realm, service, scope } = parseWwwAuthenticateHeader(wwwAuthenticate);
             let token = await requestOAuthToken(realm, service, scope, credentials);
@@ -70,6 +72,10 @@ export async function registryRequest<T>(
             }
         }
 
+        if (error) {
+            throw error;
+        }
+
         throw errResponse;
     }
 }
@@ -88,7 +94,6 @@ async function coreRegistryRequest<T>(
             pass: credentials.password
         };
 
-    //try {
     return await ext.request.get(
         url,
         {
@@ -97,24 +102,6 @@ async function coreRegistryRequest<T>(
             strictSSL: strictSSL,
             auth: auth
         });
-    // } catch (errResponse) {
-    //     // TODO: move to shared
-    //     let error: { errors?: unknown[] } = errResponse.error;
-    //     if (error && Array.isArray(error.errors)) {
-    //         error = error.errors[0];
-    //     }
-    //     // let response: Response = errResponse.response;
-
-    //     // if (errResponse.statusCode === 401) {
-    //     //     let wwwAuthenticate = response.headers["www-authenticate"];
-    //     //     if (wwwAuthenticate) {
-    //     //         // Example www-authenticate header: Bearer realm="https://gitlab.com/jwt/auth",service="container_registry"
-    //     //         let { realm, service, scope } = parseWwwAuthenticateHeader(wwwAuthenticate);
-    //     //         let credentials = await requestOAuthToken(realm, service, scope);
-    //     //     }
-    //     // }
-
-    //     // throw error;
 }
 
 async function requestOAuthToken(realm: string, service: string, scope: string, credentials: RegistryCredentials): Promise<string> {
@@ -147,8 +134,9 @@ function parseWwwAuthenticateHeader(header: string): { realm: string, service: s
     //   Bearer realm="https://gitlab.com/jwt/auth",service="container_registry",scope="registry:catalog:*",error="insufficient_scope""
 
     let [scheme, challenge] = extractRegExGroups(header, /^(\w+) (.*$)/, ['', '']);
-    if (scheme.toLowerCase() !== 'bearer') {
-        throw new Error(`Unrecognized authentication scheme "${scheme}"`)
+    scheme = scheme.toLowerCase();
+    if (scheme !== 'bearer') {
+        throw new Error(`Not authorized (authentication scheme="${scheme}")`)
     }
 
     let valuePairs = new Map<string, string>();
@@ -195,8 +183,11 @@ export async function getTags(registryUrl: string, repositoryName: string, crede
         pool.addTask(async (): Promise<void> => {
             try {
                 let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `v2/${repositoryName}/manifests/${tag}`, credentials);
-                let history = <ManifestHistoryV1Compatibility>JSON.parse(manifest.history[0].v1Compatibility);
-                let created = new Date(history.created);
+                let created: Date | undefined;
+                if (manifest.history && manifest.history.length) { // TODO: history not available for ECS
+                    let history = <ManifestHistoryV1Compatibility>JSON.parse(manifest.history[0].v1Compatibility);
+                    created = new Date(history.created);
+                }
                 let info = <TagInfo>{
                     tag: tag,
                     created

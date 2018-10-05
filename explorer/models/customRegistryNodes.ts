@@ -41,8 +41,23 @@ export class CustomRegistryNode extends NodeBase {
         }
     }
 
-    // Returns undefined if it's valid, otherwise returns an error message
-    public static async verifyIsValidRegistryUrl(registry: CustomRegistry): Promise<void> {
+    // public static async verifyRegistryExists(serverUrl: string): Promise<void> {
+    //     try {
+    //         let registry: CustomRegistry = {
+    //             url: serverUrl,
+    //             credentials: { userName: '', password: '' }
+    //         }
+    //         await CustomRegistryNode.verifyCanAccessRegistryWithCredentials(registry);
+    //     } catch (error) {
+    //         if (error.code === 'ENOTFOUND') {
+    //             throw new Error(`No registry exists at ${serverUrl}`);
+    //         }
+
+    //         throw error;
+    //     }
+    // }
+
+    public static async verifyCanAccessRegistry(registry: CustomRegistry): Promise<void> {
         // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
         await registryRequest<{}>(registry.url, 'v2/', registry.credentials);
     }
