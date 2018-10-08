@@ -12,6 +12,7 @@ import * as path from "path";
 import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFolder';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
@@ -303,21 +304,7 @@ export interface ConfigureApiOptions {
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
-        let folder: vscode.WorkspaceFolder | undefined;
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-            folder = vscode.workspace.workspaceFolders[0];
-        } else {
-            folder = await vscode.window.showWorkspaceFolderPick();
-        }
-
-        if (!folder) {
-            if (!vscode.workspace.workspaceFolders) {
-                throw new Error('Docker files can only be generated if VS Code is opened on a folder.');
-            } else {
-                throw new Error('Docker files can only be generated if a workspace folder is picked in VS Code.');
-            }
-        }
-
+        let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
         rootFolderPath = folder.uri.fsPath;
     }
 
