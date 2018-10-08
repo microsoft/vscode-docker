@@ -271,7 +271,8 @@
         ],
         "filenamePatterns": [
           "*.dockerfile",
-          "Dockerfile"
+          "Dockerfile",
+          "Dockerfile.*"
         ]
       }
     ],
