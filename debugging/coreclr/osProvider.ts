@@ -8,6 +8,7 @@ import { PlatformOS } from '../../utils/platform';
 
 export interface OSProvider {
     homedir: string;
+    isMac: boolean;
     os: PlatformOS;
     tmpdir: string;
     pathJoin(os: PlatformOS, ...paths: string[]): string;
@@ -17,6 +18,10 @@ export interface OSProvider {
 export class LocalOSProvider implements OSProvider {
     get homedir(): string {
         return os.homedir();
+    }
+
+    get isMac(): boolean {
+        return os.platform() === 'darwin';
     }
 
     get os(): PlatformOS {

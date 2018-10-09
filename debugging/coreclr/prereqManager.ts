@@ -61,7 +61,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
-        if (this.osProvider.os !== 'Linux') {
+        if (!this.osProvider.isMac) {
             return true;
         }
 

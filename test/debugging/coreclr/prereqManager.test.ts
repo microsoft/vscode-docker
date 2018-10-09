@@ -35,7 +35,7 @@ suite('debugging', () => {
 
                         const osProvider = <OSProvider>{
                             homedir: '/Users/User',
-                            os: 'Linux'
+                            isMac: true
                         };
 
                         let shown = false;
@@ -59,13 +59,13 @@ suite('debugging', () => {
                 generateTest('Mac: no NuGetFallbackFolder in Docker settings file', '{ "filesharingDirectories": [] }', false);
                 generateTest('Mac: NuGetFallbackFolder in Docker settings file', '{ "filesharingDirectories": [ "/usr/local/share/dotnet/sdk/NuGetFallbackFolder" ] }', true);
 
-                test('Windows: No-op', async () => {
+                test('Non-Mac: No-op', async () => {
                     const osProvider = <OSProvider>{
-                        os: 'Windows'
+                        isMac: false
                     };
 
                     const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
-                        assert.fail('Should not be called on Windows.');
+                        assert.fail('Should not be called on non-Mac.');
                         return Promise.resolve<vscode.MessageItem | undefined>(undefined);
                     };
 
@@ -73,7 +73,7 @@ suite('debugging', () => {
 
                     const result = await prereq.checkPrerequisite();
 
-                    assert.equal(true, result, 'The prerequisite should return `true` on Windows.');
+                    assert.equal(true, result, 'The prerequisite should return `true` on non-Mac.');
                 });
             });
         });
