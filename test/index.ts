@@ -1,6 +1,3 @@
-import { endianness } from "os";
-import { isNumber } from "util";
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
