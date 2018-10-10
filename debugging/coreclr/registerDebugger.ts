@@ -15,7 +15,7 @@ import CommandLineMSBuildClient from './msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import LocalOSProvider from './osProvider';
 import { DefaultOutputManager } from './outputManager';
-import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
+import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
 import ChildProcessProvider from './processProvider';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';
@@ -79,6 +79,10 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                     new MacNuGetFallbackFolderSharedPrerequisite(
                         fileSystemProvider,
                         osProvider,
+                        vscode.window.showErrorMessage),
+                    new LinuxUserInDockerGroupPrerequisite(
+                        osProvider,
+                        processProvider,
                         vscode.window.showErrorMessage)
                 ))));
 }

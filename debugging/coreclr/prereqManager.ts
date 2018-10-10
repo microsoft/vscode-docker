@@ -8,6 +8,7 @@ import { BrowserClient } from './browserClient';
 import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
+import { ProcessProvider } from './processProvider';
 
 export interface Prerequisite {
     checkPrerequisite(): Promise<boolean>;
@@ -52,6 +53,32 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 type DockerSettings = {
     filesharingDirectories?: string[];
 };
+
+export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
+    constructor(
+        private readonly osProvider: OSProvider,
+        private readonly processProvider: ProcessProvider,
+        private readonly showErrorMessage: ShowErrorMessageFunction) {
+    }
+
+    public async checkPrerequisite(): Promise<boolean> {
+        if (this.osProvider.os !== 'Linux' || this.osProvider.isMac) {
+            return true;
+        }
+
+        const result = await this.processProvider.exec('id -Gn', {});
+        const groups = result.stdout.trim().split(' ');
+        const inDockerGroup = groups.find(group => group === 'docker') !== undefined;
+
+        if (inDockerGroup) {
+            return true;
+        }
+
+        this.showErrorMessage('The current user is not a member of the "docker" group. Add it using the command "sudo usermod -a -G docker $USER".')
+
+        return false;
+    }
+}
 
 export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
     constructor(
