@@ -6,11 +6,64 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
 import { OSProvider } from '../../../debugging/coreclr/osProvider';
-import { MacNuGetFallbackFolderSharedPrerequisite, ShowErrorMessageFunction } from '../../../debugging/coreclr/prereqManager';
+import { ProcessProvider } from '../../../debugging/coreclr/processProvider';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction } from '../../../debugging/coreclr/prereqManager';
+import { PlatformOS } from '../../../utils/platform';
 
 suite('debugging', () => {
     suite('coreclr', () => {
         suite('prereqManager', () => {
+            suite('LinuxUserInDockerGroupPrerequisite', () => {
+                const generateTest = (name: string, result: boolean, os: PlatformOS, isMac?: boolean, inGroup?: boolean) => {
+                    test(name, async () => {
+                        const osProvider = <OSProvider> {
+                            os,
+                            isMac
+                        }
+
+                        let processProvider: ProcessProvider;
+                        let listed = false;
+
+                        if (os === 'Linux' && !isMac) {
+                            processProvider = <ProcessProvider>{
+                                exec: (command: string, _) => {
+                                    listed = true;
+
+                                    assert.equal(command, 'id -Gn', 'The prerequisite should list the user\'s groups.')
+
+                                    const groups = inGroup ? 'groupA docker groupB' : 'groupA groupB';
+
+                                    return Promise.resolve({ stdout: groups, stderr: ''});
+                                }
+                            };
+                        }
+
+                        let shown = false;
+
+                        const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                            shown = true;
+                            return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                        };
+
+                        const prerequisite = new LinuxUserInDockerGroupPrerequisite(osProvider, processProvider, showErrorMessage);
+
+                        const prereqResult = await prerequisite.checkPrerequisite();
+
+                        if (os === 'Linux' && !isMac) {
+                            assert.equal(listed, true, 'The user\'s groups should have been listed.');
+                        }
+
+                        assert.equal(prereqResult, result, 'The prerequisite should return `false`.');
+                        assert.equal(shown, !result, `An error message should ${result ? 'not ' : ''} have been shown.`);
+                    });
+                };
+
+                generateTest('Windows: No-op', true, 'Windows');
+                generateTest('Mac: No-op', true, 'Linux', true);
+                generateTest('Linux: In group', true, 'Linux', false, true);
+                generateTest('Linux: Not in group', false, 'Linux', false, false);
+            });
+
             suite('MacNuGetFallbackFolderSharedPrerequisite', () => {
                 const generateTest = (name: string, fileContents: string | undefined, result: boolean) => {
                     const settingsPath = '/Users/User/Library/Group Containers/group.com.docker/settings.json';
@@ -49,8 +102,8 @@ suite('debugging', () => {
 
                         const prereqResult = await prereq.checkPrerequisite();
 
-                        assert.equal(result, prereqResult, 'The prerequisite should return `false` on Mac with no Docker settings file.');
-                        assert.equal(!result, shown, `An error message should ${result ? 'not ' : ''} have been shown.`);
+                        assert.equal(prereqResult, result, 'The prerequisite should return `false`.');
+                        assert.equal(shown, !result, `An error message should ${result ? 'not ' : ''} have been shown.`);
                     });
                 }
 
