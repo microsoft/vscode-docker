@@ -9,12 +9,33 @@ import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { ProcessProvider } from './processProvider';
+import { DockerClient } from './dockerClient';
 
 export interface Prerequisite {
     checkPrerequisite(): Promise<boolean>;
 }
 
 export type ShowErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem | undefined>;
+
+export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
+    constructor(
+        private readonly dockerClient: DockerClient,
+        private readonly showErrorMessage: ShowErrorMessageFunction) {
+    }
+
+    public async checkPrerequisite(): Promise<boolean> {
+        const daemonOsJson = await this.dockerClient.getVersion({ format: '{{json .Server.Os}}' });
+        const daemonOs = JSON.parse(daemonOsJson.trim());
+
+        if (daemonOs === 'linux') {
+            return true;
+        }
+
+        this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core ASP.NET debugging.')
+
+        return false;
+    }
+}
 
 export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
     constructor(

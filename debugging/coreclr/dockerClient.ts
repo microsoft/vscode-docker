@@ -36,8 +36,13 @@ export type DockerRunContainerOptions = {
     volumes?: DockerContainerVolume[];
 };
 
+export type DockerVersionOptions = {
+    format?: string;
+}
+
 export interface DockerClient {
     buildImage(options: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string>;
+    getVersion(options?: DockerVersionOptions): Promise<string>;
     inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined>;
     listContainers(options?: DockerContainersListOptions): Promise<string>;
     matchId(id1: string, id2: string): boolean;
@@ -93,6 +98,18 @@ export class CliDockerClient implements DockerClient {
         }
 
         return imageId;
+    }
+
+    public async getVersion(options?: DockerVersionOptions): Promise<string> {
+        let command = 'docker version';
+
+        if (options && options.format) {
+            command += ` --format "${options.format}"`;
+        }
+
+        const result = await this.processProvider.exec(command, {});
+
+        return result.stdout;
     }
 
     public async inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined> {
@@ -177,7 +194,8 @@ export class CliDockerClient implements DockerClient {
 
         const result = await this.processProvider.exec(command, {});
 
-        const containerId = result.stdout.substr(0, result.stdout.length - 1 /* Exclude trailing <CR>. */);
+        // The '-d' option returns the container ID (with whitespace) upon completion.
+        const containerId = result.stdout.trim();
 
         if (!containerId) {
             throw new Error('The Docker container was run successfully but the container ID could not be retrieved.')

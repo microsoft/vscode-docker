@@ -7,16 +7,54 @@ import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
 import { OSProvider } from '../../../debugging/coreclr/osProvider';
 import { ProcessProvider } from '../../../debugging/coreclr/processProvider';
-import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction } from '../../../debugging/coreclr/prereqManager';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction, DockerDaemonIsLinuxPrerequisite } from '../../../debugging/coreclr/prereqManager';
 import { PlatformOS } from '../../../utils/platform';
+import { DockerClient } from '../../../debugging/coreclr/dockerClient';
 
 suite('debugging', () => {
     suite('coreclr', () => {
         suite('prereqManager', () => {
+            suite('DockerDaemonIsLinuxPrerequisite', () => {
+                const generateTest = (name: string, result: boolean, os: PlatformOS) => {
+                    test(name, async () => {
+                        let gotVersion = false;
+
+                        const dockerClient = <DockerClient>{
+                            getVersion: (options) => {
+                                gotVersion = true;
+
+                                assert.deepEqual(options, { format: '{{json .Server.Os}}' }, 'The server OS should be requested, in JSON format.');
+
+                                return Promise.resolve(`"${os.toLowerCase()}"`);
+                            }
+                        };
+
+                        let shown = false;
+
+                        const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                            shown = true;
+                            return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                        };
+
+                        const prerequisite = new DockerDaemonIsLinuxPrerequisite(dockerClient, showErrorMessage);
+
+                        const prereqResult = await prerequisite.checkPrerequisite();
+
+                        assert.equal(gotVersion, true, 'The Docker version should have been requested.');
+
+                        assert.equal(prereqResult, result, 'The prerequisite should return `false`.');
+                        assert.equal(shown, !result, `An error message should ${result ? 'not ' : ''} have been shown.`);
+                    });
+                }
+
+                generateTest('Linux daemon', true, 'Linux');
+                generateTest('Windows daemon', false, 'Windows');
+            });
+
             suite('LinuxUserInDockerGroupPrerequisite', () => {
                 const generateTest = (name: string, result: boolean, os: PlatformOS, isMac?: boolean, inGroup?: boolean) => {
                     test(name, async () => {
-                        const osProvider = <OSProvider> {
+                        const osProvider = <OSProvider>{
                             os,
                             isMac
                         }

@@ -15,7 +15,7 @@ import CommandLineMSBuildClient from './msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import LocalOSProvider from './osProvider';
 import { DefaultOutputManager } from './outputManager';
-import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
+import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite, DockerDaemonIsLinuxPrerequisite } from './prereqManager';
 import ChildProcessProvider from './processProvider';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';
@@ -72,6 +72,9 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                         osProvider,
                         processProvider)),
                 new AggregatePrerequisite(
+                    new DockerDaemonIsLinuxPrerequisite(
+                        dockerClient,
+                        vscode.window.showErrorMessage),
                     new DotNetExtensionInstalledPrerequisite(
                         new OpnBrowserClient(),
                         vscode.extensions.getExtension,
