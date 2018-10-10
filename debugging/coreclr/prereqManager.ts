@@ -89,18 +89,27 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
 
     public async checkPrerequisite(): Promise<boolean> {
         if (!this.osProvider.isMac) {
+            // Only Mac requires this folder be specifically shared.
             return true;
         }
 
         const settingsPath = path.join(this.osProvider.homedir, 'Library/Group Containers/group.com.docker/settings.json');
 
-        if (await this.fileSystemProvider.fileExists(settingsPath)) {
-            const settingsContent = await this.fileSystemProvider.readFile(settingsPath);
-            const settings = <DockerSettings>JSON.parse(settingsContent);
+        if (!await this.fileSystemProvider.fileExists(settingsPath)) {
+            // Docker versions earlier than 17.12.0-ce-mac46 may not have the settings file.
+            return true;
+        }
 
-            if (settings.filesharingDirectories && settings.filesharingDirectories.find(directory => directory === MacNuGetPackageFallbackFolderPath) !== undefined) {
-                return true;
-            }
+        const settingsContent = await this.fileSystemProvider.readFile(settingsPath);
+        const settings = <DockerSettings>JSON.parse(settingsContent);
+
+        if (settings === undefined || settings.filesharingDirectories === undefined) {
+            // Docker versions earlier than 17.12.0-ce-mac46 may not have the property.
+            return true;
+        }
+
+        if (settings.filesharingDirectories.find(directory => directory === MacNuGetPackageFallbackFolderPath) !== undefined) {
+            return true;
         }
 
         this.showErrorMessage(`To debug .NET Core in Docker containers, add "${MacNuGetPackageFallbackFolderPath}" as a shared folder in your Docker preferences.`);

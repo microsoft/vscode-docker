@@ -107,8 +107,8 @@ suite('debugging', () => {
                     });
                 }
 
-                generateTest('Mac: no Docker settings file', undefined, false);
-                generateTest('Mac: no shared folders in Docker settings file', '{}', false);
+                generateTest('Mac: no Docker settings file', undefined, true);
+                generateTest('Mac: no shared folders in Docker settings file', '{}', true);
                 generateTest('Mac: no NuGetFallbackFolder in Docker settings file', '{ "filesharingDirectories": [] }', false);
                 generateTest('Mac: NuGetFallbackFolder in Docker settings file', '{ "filesharingDirectories": [ "/usr/local/share/dotnet/sdk/NuGetFallbackFolder" ] }', true);
 
