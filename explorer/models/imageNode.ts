@@ -25,7 +25,7 @@ export class ImageNode extends NodeBase {
 
     public getTreeItem(): vscode.TreeItem {
         let config = vscode.workspace.getConfiguration('docker');
-        let displayName: string = getImageOrContainerDisplayName(this.label, config.get('truncateLongRegistryPaths'), config.get('truncateMaxLength', 10));
+        let displayName: string = getImageOrContainerDisplayName(this.label, config.get('truncateLongRegistryPaths'), config.get('truncateMaxLength'));
 
         displayName = `${displayName} (${moment(new Date(this.imageDesc.Created * 1000)).fromNow()})`;
 
