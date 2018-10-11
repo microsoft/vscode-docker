@@ -3,9 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// tslint:disable-next-line:no-var-requires
-let www_authenticate = require('www-authenticate');
-
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';

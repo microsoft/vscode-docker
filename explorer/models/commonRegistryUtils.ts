@@ -100,15 +100,25 @@ async function coreRegistryRequest<T>(
             json: true,
             resolveWithFullResponse: false,
             strictSSL: strictSSL,
-            auth: auth
+            auth: auth,
+            headers: { "Content-Type": "application/vnd.docker.distribution.manifest.v2+json" }, //asdf
         });
 }
 
 async function requestOAuthToken(realm: string, service: string, scope: string, credentials: RegistryCredentials): Promise<string> {
-    let url = `${realm}?service=${service || ''}&scope=${scope || ''}`;
+    let url = `${realm}?`;
+
+    // Note: some registries don't like '?value=' format for empty query string values, so make sure to only add query strings
+    // that are non-empty
+    let serviceQuery: string = service && `service=${service}`;
+    let scopeQuery: string = scope && `scope=${scope}`;
+    let queries = [serviceQuery, scopeQuery].filter(query => !!query).join('&');
+    url += queries;
+
     let passwordCredentials = {
         userName: credentials.userName,
         password: credentials.password,
+
         // String identifying the client. This client_id does not need to be registered with the authorization server but should be set to a meaningful value in order to allow auditing keys created by unregistered clients.
         // (https://docs.docker.com/registry/spec/auth/token/#requesting-a-token)
         clientId: 'vscode-docker'
