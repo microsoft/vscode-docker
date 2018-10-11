@@ -1,14 +1,13 @@
-import { Registry } from "azure-arm-containerregistry/lib/models";
+import { Registry, Task } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { TaskNode } from "../../explorer/models/taskNode";
-import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
 import { openTask } from "./task-utils/showTaskManager";
 
-export async function showTaskProperties(context?: TaskNode): Promise<any> {
+export async function showTaskProperties(context?: TaskNode): Promise<void> {
     let subscription: Subscription;
     let registry: Registry;
     let resourceGroup: ResourceGroup;
@@ -27,7 +26,7 @@ export async function showTaskProperties(context?: TaskNode): Promise<any> {
     }
 
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
-    let item: any = await client.tasks.get(resourceGroup.name, registry.name, task);
+    let item: Task = await client.tasks.get(resourceGroup.name, registry.name, task);
     let indentation = 1;
     let replacer;
     openTask(JSON.stringify(item, replacer, indentation), task);

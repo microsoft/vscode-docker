@@ -3,7 +3,7 @@ import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
-import { accessLog, downloadLog } from './logFileManager';
+import { accessLog } from './logFileManager';
 import { LogData } from './tableDataManager'
 export class LogTableWebview {
     private logData: LogData;

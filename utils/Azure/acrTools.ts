@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationContext } from 'adal-node';
-import * as assert from 'assert';
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { Registry, Run, RunGetLogResult } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
@@ -185,16 +184,32 @@ export async function acquireACRAccessToken(registryUrl: string, scope: string, 
     return acrAccessTokenResponse.access_token;
 }
 
+export interface IBlobInfo {
+    accountName: string;
+    endpointSuffix: string;
+    containerName: string;
+    blobName: string;
+    sasToken: string;
+    host: string;
+}
+
 /** Parses information into a readable format from a blob url */
-export function getBlobInfo(blobUrl: string): { accountName: string, endpointSuffix: string, containerName: string, blobName: string, sasToken: string, host: string } {
+export function getBlobInfo(blobUrl: string): IBlobInfo {
     let items: string[] = blobUrl.slice(blobUrl.search('https://') + 'https://'.length).split('/');
-    let accountName: string = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
-    let endpointSuffix: string = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
-    let containerName: string = items[1];
-    let blobName: string = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
-    let sasToken: string = items[4].slice(items[4].search('[?]') + 1);
-    let host: string = accountName + '.blob.' + endpointSuffix;
-    return { accountName, endpointSuffix, containerName, blobName, sasToken, host };
+    const accountName = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
+    const endpointSuffix = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
+    const containerName = items[1];
+    const blobName = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
+    const sasToken = items[4].slice(items[4].search('[?]') + 1);
+    const host = accountName + '.blob.' + endpointSuffix;
+    return {
+        accountName: accountName,
+        endpointSuffix: endpointSuffix,
+        containerName: containerName,
+        blobName: blobName,
+        sasToken: sasToken,
+        host: host
+    };
 }
 
 /** Stream logs from a blob into output channel.
@@ -207,7 +222,7 @@ export async function streamLogs(registry: Registry, run: Run, outputChannel: vs
     let client = providedClient ? providedClient : AzureUtilityManager.getInstance().getContainerRegistryManagementClient(getSubscriptionFromRegistry(registry));
     let temp: RunGetLogResult = await client.runs.getLogSasUrl(getResourceGroupName(registry), registry.name, run.runId);
     const link = temp.logLink;
-    let blobInfo = getBlobInfo(link);
+    let blobInfo: IBlobInfo = getBlobInfo(link);
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
     let available = 0;
     let start = 0;
@@ -238,8 +253,8 @@ export async function streamLogs(registry: Registry, run: Run, outputChannel: vs
 }
 
 // Promisify getBlobToText for readability and error handling purposes
-async function getBlobToText(blobInfo: any, blob: BlobService, rangeStart: number): Promise<string> {
-    return new Promise<any>((resolve, reject) => {
+async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
         blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
             (error, result) => {
                 if (error) { reject() } else { resolve(result); }
@@ -248,8 +263,8 @@ async function getBlobToText(blobInfo: any, blob: BlobService, rangeStart: numbe
 }
 
 // Promisify getBlobProperties for readability and error handling purposes
-async function getBlobProperties(blobInfo: any, blob: BlobService): Promise<BlobService.BlobResult> {
-    return new Promise<any>((resolve, reject) => {
+async function getBlobProperties(blobInfo: IBlobInfo, blob: BlobService): Promise<BlobService.BlobResult> {
+    return new Promise<BlobService.BlobResult>((resolve, reject) => {
         blob.getBlobProperties(blobInfo.containerName, blobInfo.blobName, (error, result) => {
             if (error) { reject(error) } else { resolve(result); }
         });

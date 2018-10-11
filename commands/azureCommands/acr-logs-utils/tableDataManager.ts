@@ -1,8 +1,6 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
 import request = require('request-promise');
-import { registryRequest } from "../../../explorer/models/commonRegistryUtils";
-import { Manifest } from "../../../explorer/utils/dockerHubUtils";
 import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
 /** Class to manage data and data acquisition for logs */
 export class LogData {
@@ -53,8 +51,13 @@ export class LogData {
      */
     public async loadLogs(loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
         let runListResult: RunListResult;
-        // tslint:disable-next-line:no-any
-        let options: any = {};
+        let options: {
+            filter?: string,
+            top?: number,
+            customHeaders?: {
+                [headerName: string]: string;
+            };
+        } = {};
         if (filter && Object.keys(filter).length) {
             if (!filter.runId) {
                 options.filter = await this.parseFilter(filter);
@@ -114,11 +117,10 @@ export class LogData {
                 headers: {
                     accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
                 }
-            }, (err, httpResponse, body) => {
+            }, (err, httpResponse: { headers: string }, body) => {
                 digest = httpResponse.headers['docker-content-digest'];
             });
 
-            //let manifest: any = await registryRequest<any>(this.registry.loginServer, `v2/${items[0]}/manifests/${items[1]}`, { bearer: acrAccessToken });
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }
             parsedFilter += `contains(OutputImageManifests, '${items[0]}@${digest}')`;
         }

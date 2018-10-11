@@ -1,3 +1,5 @@
+"use strict";
+
 import { Registry, Run } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
@@ -29,11 +31,10 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     // Fuiltering provided
     if (context && context instanceof AzureImageTagNode) {
         //ACR Image Logs
-        let imageRun = await logData.loadLogs(false, false, { image: context.label });
+        await logData.loadLogs(false, false, { image: context.label });
         if (!hasValidLogContent(context, logData)) { return; }
-        logData.getLink(0).then((url) => {
-            accessLog(url, logData.logs[0].runId, false);
-        });
+        const url = await logData.getLink(0);
+        accessLog(url, logData.logs[0].runId, false);
     } else {
         if (context && context instanceof TaskNode) {
             //ACR Task Logs
@@ -51,7 +52,7 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     }
 }
 
-function hasValidLogContent(context: any, logData: LogData): boolean {
+function hasValidLogContent(context: AzureRegistryNode | AzureImageTagNode | TaskNode, logData: LogData): boolean {
     if (logData.logs.length === 0) {
         let itemType: string;
         if (context && context instanceof TaskNode) {

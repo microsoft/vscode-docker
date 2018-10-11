@@ -3,7 +3,7 @@ import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
-export async function pullFromAzure(context?: AzureImageTagNode): Promise<any> {
+export async function pullFromAzure(context?: AzureImageTagNode): Promise<void> {
 
     // Step 1: Using getLoginCredentials function to get the username and password. This takes care of all users, even if they don't have the Azure CLI
     const credentials = await acrTools.getLoginCredentials(context.registry);
@@ -15,8 +15,8 @@ export async function pullFromAzure(context?: AzureImageTagNode): Promise<any> {
     terminal.show();
 
     // Step 2: docker login command
-    await terminal.sendText(`docker login ${registry} -u ${username} -p ${password}`);
+    terminal.sendText(`docker login ${registry} -u ${username} -p ${password}`);
 
     // Step 3: docker pull command
-    await terminal.sendText(`docker pull ${registry}/${context.label}`);
+    terminal.sendText(`docker pull ${registry}/${context.label}`);
 }

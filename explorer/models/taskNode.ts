@@ -1,3 +1,4 @@
+import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as opn from 'opn';
@@ -42,7 +43,7 @@ export class TaskRootNode extends NodeBase {
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
         const taskNodes: TaskNode[] = [];
         let tasks: ContainerModels.Task[] = [];
-        const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
+        const client: ContainerRegistryManagementClient = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
         tasks = await client.tasks.list(resourceGroup, element.registry.name);
         if (tasks.length === 0) {

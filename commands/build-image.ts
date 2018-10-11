@@ -15,7 +15,7 @@ async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
 }
 
-interface Item extends vscode.QuickPickItem {
+export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
     relativeFolderPath: string;
 }
