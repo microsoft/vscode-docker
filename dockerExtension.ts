@@ -13,6 +13,7 @@ import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
+import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
 import { buildImage } from './commands/build-image';
 import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
@@ -127,7 +128,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
     ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
     ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
-
     ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
     if (azureAccount) {
@@ -137,7 +137,6 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     registerDockerCommands(azureAccount);
 
     ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
 }
@@ -230,6 +229,7 @@ function registerDockerCommands(azureAccount: AzureAccount | undefined): void {
     registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
     registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
     registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
+    registerAzureCommand('vscode-docker.pull-ACR-Image', pullFromAzure);
 }
 
 export async function deactivate(): Promise<void> {

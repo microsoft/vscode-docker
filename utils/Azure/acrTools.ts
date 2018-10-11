@@ -21,6 +21,7 @@ import { Repository } from "./models/repository";
 
 //General helpers
 /** Gets the subscription for a given registry
+ * @param registry gets the subscription for a given regsitry
  * @returns a subscription object
  */
 export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
@@ -49,6 +50,7 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
     let allImages: AzureImage[] = [];
     let image: AzureImage;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
+
     const tags: TagInfo[] = await getTags('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
         image = new AzureImage(element, tag.tag, tag.created);
@@ -62,6 +64,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     let repo: Repository;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
     const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
+
     let allRepos: Repository[] = [];
     for (let tempRepo of repositories) {
         repo = new Repository(registry, tempRepo);
@@ -97,7 +100,7 @@ export async function sendRequestToRegistry(http_method: 'delete', login_server:
 
 //Credential management
 /** Obtains registry username and password compatible with docker login */
-export async function loginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
+export async function getLoginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
     const subscription: Subscription = getSubscriptionFromRegistry(registry);
     const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
