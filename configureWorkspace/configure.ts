@@ -325,7 +325,7 @@ export async function configure(actionContext: IActionContext, rootFolderPath: s
     try {
         let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
         if (dockerfile) {
-            vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
+            await vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
         }
     } catch (err) {
         // Ignore
@@ -407,6 +407,8 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
+    return filesWritten;
+
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
@@ -424,7 +426,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
             let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
             if (fileContents) {
                 fs.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
-                filesWritten.push(fileName);
+                filesWritten.push(filePath);
             }
         }
     }
