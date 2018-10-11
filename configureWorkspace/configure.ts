@@ -300,6 +300,11 @@ export interface ConfigureApiOptions {
      * The OS for the images. Currently only needed for .NET platforms.
      */
     os?: OS;
+
+    /**
+     * Open the Dockerfile that was generated
+     */
+    openDockerFile?: boolean;
 }
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
@@ -308,20 +313,31 @@ export async function configure(actionContext: IActionContext, rootFolderPath: s
         rootFolderPath = folder.uri.fsPath;
     }
 
-    return configureCore(
+    let filesWritten = await configureCore(
         actionContext,
         {
             rootPath: rootFolderPath,
-            outputFolder: rootFolderPath
+            outputFolder: rootFolderPath,
+            openDockerFile: true
         });
+
+    // Open the dockerfile (if written)
+    try {
+        let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
+        if (dockerfile) {
+            vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
+        }
+    } catch (err) {
+        // Ignore
+    }
 }
 
 export async function configureApi(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    return configureCore(actionContext, options);
+    await configureCore(actionContext, options);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
+async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
     let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
     let rootFolderPath: string = options.rootPath;
     let outputFolder = options.outputFolder;
