@@ -242,7 +242,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     const projectFiles: string[] = await globAsync('**/*.csproj', { cwd: folderPath });
 
     if (!projectFiles || !projectFiles.length) {
-        throw new Error("No .csproj file could be found.");
+        throw new Error("No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform.");
     }
 
     if (projectFiles.length > 1) {
