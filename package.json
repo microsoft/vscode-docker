@@ -23,7 +23,8 @@
     "multi-root ready"
   ],
   "repository": {
-    "url": "https://github.com/microsoft/vscode-docker.git"
+    "type": "git",
+    "url": "https://github.com/microsoft/vscode-docker"
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
   "activationEvents": [

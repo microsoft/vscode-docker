@@ -7,7 +7,7 @@ import * as opn from 'opn';
 import * as path from 'path';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, createTelemetryReporter, IActionContext, parseError, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, parseError, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage } from './commands/azureCommands/delete-image';
@@ -109,36 +109,40 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     initializeExtensionVariables(ctx);
 
-    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-    for (let i = 0; i < installedExtensions.length; i++) {
-        const extension = installedExtensions[i];
-        if (extension.id === 'ms-vscode.azure-account') {
-            try {
-                // tslint:disable-next-line:no-unsafe-any
-                azureAccount = <AzureAccount>await extension.activate();
-            } catch (error) {
-                console.log('Failed to activate the Azure Account Extension: ' + parseError(error).message);
+    await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
+        this.properties.isActivationEvent = 'true';
+
+        // tslint:disable-next-line:prefer-for-of // Grandfathered in
+        for (let i = 0; i < installedExtensions.length; i++) {
+            const extension = installedExtensions[i];
+            if (extension.id === 'ms-vscode.azure-account') {
+                try {
+                    // tslint:disable-next-line:no-unsafe-any
+                    azureAccount = <AzureAccount>await extension.activate();
+                } catch (error) {
+                    console.log('Failed to activate the Azure Account Extension: ' + parseError(error).message);
+                }
+                break;
             }
-            break;
         }
-    }
-    ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
+        ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new DockerfileCompletionItemProvider(), '.'));
 
-    const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
-    let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
-    ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
-    ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
-    ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
+        const YAML_MODE_ID: vscode.DocumentFilter = { language: 'yaml', scheme: 'file', pattern: COMPOSE_FILE_GLOB_PATTERN };
+        let yamlHoverProvider = new DockerComposeHoverProvider(new DockerComposeParser(), composeVersionKeys.All);
+        ctx.subscriptions.push(vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider));
+        ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(YAML_MODE_ID, new DockerComposeCompletionItemProvider(), '.'));
+        ctx.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DOCKER_INSPECT_SCHEME, new DockerInspectDocumentContentProvider()));
 
-    if (azureAccount) {
-        AzureUtilityManager.getInstance().setAccount(azureAccount);
-    }
+        if (azureAccount) {
+            AzureUtilityManager.getInstance().setAccount(azureAccount);
+        }
 
-    registerDockerCommands(azureAccount);
+        registerDockerCommands(azureAccount);
 
-    ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
-    await consolidateDefaultRegistrySettings();
-    activateLanguageClient(ctx);
+        ctx.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('docker', new DockerDebugConfigProvider()));
+        await consolidateDefaultRegistrySettings();
+        activateLanguageClient(ctx);
+    });
 }
 
 async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode, azureAccount?: AzureAccount): Promise<void> {
