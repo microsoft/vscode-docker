@@ -4,24 +4,26 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ImageNode } from "../explorer/models/imageNode";
+import { RootNode } from '../explorer/models/rootNode';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
 const teleCmdId: string = 'vscode-docker.image.remove';
 
-export async function removeImage(context?: ImageNode): Promise<void> {
+export async function removeImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
 
     let imagesToRemove: Docker.ImageDesc[];
 
-    if (context && context.imageDesc) {
+    if (context instanceof ImageNode && context.imageDesc) {
         imagesToRemove = [context.imageDesc];
     } else {
-        const selectedItem: ImageItem = await quickPickImage(true);
+        const selectedItem: ImageItem = await quickPickImage(actionContext, true);
         if (selectedItem) {
-            if (selectedItem.label.toLowerCase().includes('all containers')) {
+            if (selectedItem.allImages) {
                 imagesToRemove = await docker.getImageDescriptors();
             } else {
                 imagesToRemove = [selectedItem.imageDesc];
@@ -35,8 +37,8 @@ export async function removeImage(context?: ImageNode): Promise<void> {
 
         vscode.window.setStatusBarMessage("Docker: Removing Image(s)...", new Promise((resolve, reject) => {
             imagesToRemove.forEach((img) => {
-                // tslint:disable-next-line:no-function-expression // Grandfathered in
-                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, data: any): void {
+                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+                docker.getImage(img.Id).remove({ force: true }, function (err: { message?: string }, _data: any): void {
                     imageCounter++;
                     if (err) {
                         // TODO: use parseError, proper error handling

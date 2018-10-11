@@ -36,7 +36,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
     }
 
     suite("localhost", async function (this: Suite): Promise<void> {
-        this.timeout(Math.max(60 * 1000 * 2, this.timeout()));
+        this.timeout(Math.max(60 * 1000 * 5, this.timeout()));
 
         suiteSetup(async function (this: Context): Promise<void> {
             await stopRegistry();
@@ -72,9 +72,6 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
         });
 
         test("Connect, no auth - keytar not available", async function (this: Context) {
-            // Make sure extension activated
-            await commands.executeCommand('vscode-docker.explorer.refresh');
-
             let oldKeytar = ext.keytar;
             try {
                 ext.keytar = undefined;

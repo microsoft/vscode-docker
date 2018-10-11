@@ -26,6 +26,11 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+				// This isn't currently working on Windows due to https://github.com/Microsoft/vscode/issues/58388#issuecomment-420709179.
+				// To work around it, change to hard-coded local paths with a lower-case drive letter, e.g.:
+				// "c:/Repos/vscode-docker/test/test.code-workspace",
+				// "--extensionDevelopmentPath=c:/Repos/vscode-docker",
+				// "--extensionTestsPath=c:/Repos/vscode-docker/out/test"
 				"${workspaceRoot}/test/test.code-workspace",
 				"--extensionDevelopmentPath=${workspaceRoot}",
 				"--extensionTestsPath=${workspaceRoot}/out/test"
@@ -39,7 +44,8 @@
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty for all)
 				"MOCHA_enableTimeouts": "0", // Disable time-outs
-				"DEBUGTELEMETRY": "1"
+				"DEBUGTELEMETRY": "1",
+				"NODE_DEBUG": ""
 			}
 		}
 	]

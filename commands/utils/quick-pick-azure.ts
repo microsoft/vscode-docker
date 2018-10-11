@@ -68,6 +68,7 @@ export async function quickPickSubscription(): Promise<Subscription> {
     if (subscriptions.length === 0) {
         vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", "Open Portal").then(val => {
             if (val === "Open Portal") {
+                // tslint:disable-next-line:no-unsafe-any
                 opn('https://portal.azure.com/');
             }
         });
@@ -128,7 +129,7 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
 export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
-        placeHolder: 'Yes',
+        placeHolder: 'Enter "Yes"',
         value: 'No',
         prompt: yesOrNoPrompt + ' Enter yes to continue'
     };

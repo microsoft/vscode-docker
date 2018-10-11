@@ -43,7 +43,7 @@ for (let envVar of Object.keys(process.env)) {
     let match = envVar.match(/^mocha_(.+)/i);
     if (match) {
         let [, option] = match;
-        let value: string | number = process.env[envVar];
+        let value: string | number = process.env[envVar] || '';
         if (!isNaN(parseInt(value))) {
             value = parseInt(value);
         }

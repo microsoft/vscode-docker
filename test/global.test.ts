@@ -61,16 +61,22 @@ export function testInEmptyFolder(name: string, func?: () => Promise<void>): voi
 }
 
 // Runs before all tests
-suiteSetup(function (this: mocha.IHookCallbackContext): void {
+suiteSetup(async function (this: mocha.IHookCallbackContext): Promise<void> {
+    this.timeout(60 * 1000);
     console.log('global.test.ts: suiteSetup');
 
     // Otherwise the app can blocking asking for keychain access
     ext.keytar = new TestKeytar();
+
+    console.log("Refreshing tree to make sure extension is activated");
+    await vscode.commands.executeCommand('vscode-docker.explorer.refresh');
+    console.log("Refresh done");
+    assert(!!ext.context, "Extension not activated");
 });
 
 // Runs after all tests
-suiteTeardown(function (this: mocha.IHookCallbackContext): void {
-    console.log('global.test.ts: suiteTestdown');
+suiteTeardown(async function (this: mocha.IHookCallbackContext): Promise<void> {
+    console.log('global.test.ts: suiteTeardown');
 
     if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {
         fse.emptyDir(testRootFolder);

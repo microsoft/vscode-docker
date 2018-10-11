@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
-import { callWithTelemetryAndErrorHandling, IActionContext, IAzureNode, parseError } from 'vscode-azureextensionui';
-import { keytarConstants, MAX_CONCURRENT_REQUESTS } from '../../constants'
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { keytarConstants } from '../../constants'
 import { ext } from '../../extensionVariables';
+import { nonNullValue } from '../../utils/nonNull';
 import { CustomRegistryNode } from './customRegistryNodes';
 
 interface CustomRegistryNonsensitive {
@@ -30,7 +30,7 @@ export async function connectCustomRegistry(): Promise<void> {
 
     // tslint:disable-next-line:no-constant-condition
     let url = await ext.ui.showInputBox({
-        prompt: "Enter the URL for the registry",
+        prompt: "Enter the URL for the registry (OAuth not yet supported)",
         placeHolder: 'Example: http://localhost:5000',
         validateInput: (value: string): string | undefined => {
             let uri = vscode.Uri.parse(value);
@@ -48,7 +48,7 @@ export async function connectCustomRegistry(): Promise<void> {
     let userName = await ext.ui.showInputBox({
         prompt: "Enter the username for connecting, or ENTER for none"
     });
-    let password: string;
+    let password: string = '';
     if (userName) {
         password = await ext.ui.showInputBox({
             prompt: "Enter the password",
@@ -61,7 +61,19 @@ export async function connectCustomRegistry(): Promise<void> {
         credentials: { userName, password }
     };
 
-    await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
+    try {
+        await CustomRegistryNode.verifyIsValidRegistryUrl(newRegistry);
+    } catch (err) {
+        let error = <{ statusCode?: number }>err;
+        let message = parseError(error).message;
+
+        if (error.statusCode === 401) {
+            message = 'OAuth support has not yet been implemented in this preview feature.  This registry does not appear to support basic authentication.';
+            throw new Error(message);
+        }
+
+        throw error;
+    }
 
     // Save
     if (ext.keytar) {
@@ -106,7 +118,7 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
                 if (ext.keytar) {
                     let key = getUsernamePwdKey(reg.url);
                     let credentialsString = await ext.keytar.getPassword(keytarConstants.serviceId, key);
-                    let credentials: CustomRegistryCredentials = JSON.parse(credentialsString);
+                    let credentials = <CustomRegistryCredentials>JSON.parse(nonNullValue(credentialsString, 'Invalid stored password'));
                     registries.push({
                         url: reg.url,
                         credentials

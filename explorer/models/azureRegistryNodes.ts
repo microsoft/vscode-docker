@@ -11,8 +11,9 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
-import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
-import { NodeBase } from './nodeBase';
+import { getLoginServer, } from '../../utils/nonNull';
+import { formatTag } from './commonRegistryUtils';
+import { IconPath, NodeBase } from './nodeBase';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
@@ -25,7 +26,7 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public readonly contextValue: string = 'azureRegistryNode';
-    public readonly iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+    public readonly iconPath: IconPath = {
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
     };
@@ -101,7 +102,7 @@ export class AzureRepositoryNode extends NodeBase {
                 element,
                 img.subscription,
                 img.registry,
-                img.registry.loginServer,
+                getLoginServer(img.registry),
                 img.repository.name,
                 img.tag,
                 img.created);
@@ -147,6 +148,8 @@ export class AzureNotSignedInNode extends NodeBase {
         super('Click here to sign in to Azure...');
     }
 
+    public readonly contextValue: string = 'azureNotSignedInNode';
+
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
@@ -163,6 +166,8 @@ export class AzureLoadingNode extends NodeBase {
     constructor() {
         super('Loading...');
     }
+
+    public readonly contextValue: string = 'azureLoadingNode';
 
     public getTreeItem(): vscode.TreeItem {
         return {

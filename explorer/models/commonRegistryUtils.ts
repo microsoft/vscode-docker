@@ -3,19 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import { SubscriptionModels } from 'azure-arm-resource';
 import * as moment from 'moment';
-import * as path from 'path';
-import * as request from 'request-promise';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
-import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
+import { ext } from '../../extensionVariables';
 import { AsyncPool } from '../../utils/asyncpool';
 import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
-import { NodeBase } from './nodeBase';
-import { RegistryType } from './registryType';
 
 interface RegistryNonsensitiveInfo {
     url: string,
@@ -45,7 +39,7 @@ export async function registryRequest<T>(
     let httpSettings = vscode.workspace.getConfiguration('http');
     let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
 
-    let response = await request.get(
+    let response = await ext.request.get(
         `${registryUrl}/${relativeUrl}`,
         {
             json: true,
@@ -60,7 +54,7 @@ export async function registryRequest<T>(
     return <T>response;
 }
 
-export async function getCatalog(registryUrl: string, credentials?: RegistryCredentials): Promise<string[]> {
+export async function getCatalog(registryUrl: string, credentials: RegistryCredentials): Promise<string[]> {
     // Note: Note that the contents of the response are specific to the registry implementation. Some registries may opt to provide a full
     //   catalog output, limit it based on the user’s access level or omit upstream results, if providing mirroring functionality.
     //   (https://docs.docker.com/registry/spec/api/#listing-repositories)
@@ -69,7 +63,7 @@ export async function getCatalog(registryUrl: string, credentials?: RegistryCred
     return response.repositories;
 }
 
-export async function getTags(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
+export async function getTags(registryUrl: string, repositoryName: string, credentials: RegistryCredentials): Promise<TagInfo[]> {
     let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=${PAGE_SIZE}&page=1`, credentials);
     let tags = result.tags;
     let tagInfos: TagInfo[] = [];
@@ -80,7 +74,7 @@ export async function getTags(registryUrl: string, repositoryName: string, crede
         pool.addTask(async (): Promise<void> => {
             try {
                 let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `v2/${repositoryName}/manifests/${tag}`, credentials);
-                let history: ManifestHistoryV1Compatibility = JSON.parse(manifest.history[0].v1Compatibility);
+                let history = <ManifestHistoryV1Compatibility>JSON.parse(manifest.history[0].v1Compatibility);
                 let created = new Date(history.created);
                 let info = <TagInfo>{
                     tag: tag,

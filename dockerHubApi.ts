@@ -106,7 +106,8 @@ export interface IHubSearchResponseResult {
     description: string;
 }
 
-let JSON_CACHE: any = {};
+// tslint:disable-next-line:no-any
+let JSON_CACHE: { [key: string]: Promise<any> } = {};
 
 // tslint:disable-next-line:promise-function-async // Grandfathered in
 function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<T> {

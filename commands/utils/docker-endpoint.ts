@@ -5,6 +5,8 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
+import { parseError } from 'vscode-azureextensionui';
+import { nonNullValue } from '../../utils/nonNull';
 
 export enum DockerEngineType {
     Linux,
@@ -12,7 +14,11 @@ export enum DockerEngineType {
 }
 
 class DockerClient {
-    private endPoint: Docker;
+    private _endPoint: Docker | undefined;
+
+    private get endPoint(): Docker {
+        return nonNullValue(this._endPoint, 'endPoint');
+    }
 
     constructor() {
         this.refreshEndpoint();
@@ -36,14 +42,14 @@ class DockerClient {
                 if (isNaN(newPort)) {
                     vscode.window.showErrorMessage(errorMessage);
                 } else {
-                    this.endPoint = new Docker({ host: newHost, port: newPort });
+                    this._endPoint = new Docker({ host: newHost, port: newPort });
                 }
             }
         }
-        if (!this.endPoint || !value) {
+        if (!this._endPoint || !value) {
             // Pass no options so that the defaultOpts of docker-modem will be used if the endpoint wasn't created
             // or the user went from configured setting to empty settign
-            this.endPoint = new Docker();
+            this._endPoint = new Docker();
         }
     }
 
@@ -80,25 +86,28 @@ class DockerClient {
         return this.endPoint.getContainer(id);
     }
 
-    public getEngineType(): Thenable<DockerEngineType> {
+    public async getEngineType(): Promise<DockerEngineType> {
+        let engineType: DockerEngineType;
         if (process.platform === 'win32') {
-            return new Promise((resolve, reject) => {
+            engineType = await new Promise<DockerEngineType>((resolve, reject) => {
                 this.endPoint.info((error, info) => {
                     if (error) {
                         return reject(error);
                     }
 
-                    return resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
+                    resolve(info.OSType === "windows" ? DockerEngineType.Windows : DockerEngineType.Linux);
                 });
             });
+        } else {
+            // On Linux or macOS, this can only ever be linux,
+            // so short-circuit the Docker call entirely.
+            engineType = DockerEngineType.Linux;
         }
 
-        // On Linux or macOS, this can only ever be linux,
-        // so short-circuit the Docker call entirely.
-        return Promise.resolve(DockerEngineType.Linux);
+        return engineType;
     }
 
-    public getEngineInfo(): Thenable<any> {
+    public getEngineInfo(): Thenable<Docker.EngineInfo> {
         return new Promise((resolve, reject) => {
             this.endPoint.info((error, info) => {
                 if (error) {
@@ -109,11 +118,20 @@ class DockerClient {
         });
     }
 
-    public getExposedPorts(imageId: string): Thenable<string[]> {
-        return new Promise((resolve, reject) => {
-            this.getImage(imageId).inspect((error, { Config: { ExposedPorts = {} } }) => {
-                const ports = Object.keys(ExposedPorts);
-                resolve(ports);
+    public async getExposedPorts(imageId: string): Promise<string[]> {
+        return await new Promise<string[]>((resolve, reject) => {
+            this.getImage(imageId).inspect((error: {}, data: { Config: { ExposedPorts: {} } }) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    let exposedPorts = data.Config.ExposedPorts;
+                    if (!exposedPorts) {
+                        resolve([]);
+                    } else {
+                        const ports = Object.keys(exposedPorts);
+                        resolve(ports);
+                    }
+                }
             });
         });
     }
