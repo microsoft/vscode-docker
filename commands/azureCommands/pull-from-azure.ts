@@ -9,7 +9,8 @@ import { exec } from 'child_process';
 import * as fs from 'fs';
 import * as path from "path";
 import vscode = require('vscode');
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { UserCancelledError } from '../../explorer/deploy/wizard';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -51,26 +52,42 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
 }
 
 async function pullImage(registryName: string, imageName: string, username: string, password: string): Promise<void> {
-    const terminal = ext.terminalProvider.createTerminal("Docker");
-    terminal.show();
-
     // Check if user is logged into Docker and send appropriate commands to terminal
     let result = await isLoggedIntoDocker(registryName);
-    if (!result.loggedIn) { // If not logged into Docker
-        let childProcess = exec(`docker login ${registryName} --username ${username} --password-stdin`, (err, stdout, stderr) => {
-            ext.outputChannel.append(stdout);
-            ext.outputChannel.append(stderr);
-            if (err && err.message.includes("Error saving credentials: error storing credentials - err: exit status 1, out: `The stub received bad data.`")) { // Temporary fix for this error- same as Azure CLI
-                vscode.window.showErrorMessage(`In order to login to Docker, go to \n${result.configPath} and remove "credsStore": "wincred" from the config.json file, then try again. \nThis operation will disable wincred and use the file system to store Docker credentials. All registries that are currently logged in will be logged out.`);
-            } else {
-                terminal.sendText(`docker pull ${registryName}/${imageName}`);
-            }
+    if (!result.loggedIn) { // If not logged in to Docker
+        let login: vscode.MessageItem = { title: 'Log in to Docker CLI' };
+        let msg = `You are not currently logged in to "${registryName}" in the Docker CLI.`;
+        let response = await vscode.window.showErrorMessage(msg, login)
+        if (response !== login) {
+            throw new UserCancelledError(msg);
+        }
+
+        await new Promise((resolve, reject) => {
+            let childProcess = exec(`docker login ${registryName} --username ${username} --password-stdin`, (err, stdout, stderr) => {
+                ext.outputChannel.append(stdout);
+                ext.outputChannel.append(stderr);
+                if (err && err.message.match(/error storing credentials.*The stub received bad data/)) {
+                    // Temporary work-around for this error- same as Azure CLI
+                    // See https://github.com/Azure/azure-cli/issues/4843
+                    reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \n${result.configPath} and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
+                } else if (err) {
+                    reject(err);
+                } else if (stderr) {
+                    reject(stderr);
+                }
+
+                resolve();
+            });
+
+            childProcess.stdin.write(password); // Prevents insecure password error
+            childProcess.stdin.end();
         });
-        childProcess.stdin.write(password); // Prevents insecure password error
-        childProcess.stdin.end();
-    } else {
-        terminal.sendText(`docker pull ${registryName}/${imageName}`);
     }
+
+    const terminal: vscode.Terminal = ext.terminalProvider.createTerminal("docker pull");
+    terminal.show();
+
+    terminal.sendText(`docker pull ${registryName}/${imageName}`);
 }
 
 async function isLoggedIntoDocker(registryName: string): Promise<{ configPath: string, loggedIn: boolean }> {
