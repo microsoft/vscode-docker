@@ -300,6 +300,11 @@ export interface ConfigureApiOptions {
      * The OS for the images. Currently only needed for .NET platforms.
      */
     os?: OS;
+
+    /**
+     * Open the Dockerfile that was generated
+     */
+    openDockerFile?: boolean;
 }
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
@@ -308,20 +313,31 @@ export async function configure(actionContext: IActionContext, rootFolderPath: s
         rootFolderPath = folder.uri.fsPath;
     }
 
-    return configureCore(
+    let filesWritten = await configureCore(
         actionContext,
         {
             rootPath: rootFolderPath,
-            outputFolder: rootFolderPath
+            outputFolder: rootFolderPath,
+            openDockerFile: true
         });
+
+    // Open the dockerfile (if written)
+    try {
+        let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
+        if (dockerfile) {
+            await vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
+        }
+    } catch (err) {
+        // Ignore
+    }
 }
 
 export async function configureApi(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    return configureCore(actionContext, options);
+    await configureCore(actionContext, options);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
+async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
     let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
     let rootFolderPath: string = options.rootPath;
     let outputFolder = options.outputFolder;
@@ -391,18 +407,13 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
-    // Don't wait
-    vscode.window.showInformationMessage(
-        filesWritten.length ?
-            `The following files were written into the workspace:${EOL}${EOL}${filesWritten.join(', ')}` :
-            "No files were written"
-    );
+    return filesWritten;
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
         if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }
@@ -415,7 +426,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
             let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
             if (fileContents) {
                 fs.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
-                filesWritten.push(fileName);
+                filesWritten.push(filePath);
             }
         }
     }
