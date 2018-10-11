@@ -19,7 +19,7 @@ import { Repository } from "../../utils/Azure/models/repository";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
-export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositoryNode): Promise<any> {
+export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositoryNode): Promise<void> {
     let registryName: string;
     let registry: Registry;
     let imageName: string;
@@ -48,7 +48,7 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
     const credentials = await acrTools.getLoginCredentials(registry);
     const username = credentials.username;
     const password = credentials.password;
-    pullImage(registryName, imageName, username, password);
+    await pullImage(registryName, imageName, username, password);
 }
 
 async function pullImage(registryName: string, imageName: string, username: string, password: string): Promise<void> {
