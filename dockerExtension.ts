@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+let loadStartTime = Date.now();
+
 import * as opn from 'opn';
 import * as path from 'path';
 import * as request from 'request-promise-native';
@@ -104,6 +106,8 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 }
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+    let activateStartTime = Date.now();
+
     const installedExtensions = vscode.extensions.all;
     let azureAccount: AzureAccount | undefined;
 
@@ -111,14 +115,20 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
 
     await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
         this.properties.isActivationEvent = 'true';
+        this.measurements.mainFileLoad = (loadEndTime - loadStartTime) / 1000;
+        this.measurements.mainFileLoadedToActivate = (activateStartTime - loadEndTime) / 1000;
 
         // tslint:disable-next-line:prefer-for-of // Grandfathered in
         for (let i = 0; i < installedExtensions.length; i++) {
             const extension = installedExtensions[i];
             if (extension.id === 'ms-vscode.azure-account') {
                 try {
+                    let activateAccountExtStart = Date.now();
                     // tslint:disable-next-line:no-unsafe-any
                     azureAccount = <AzureAccount>await extension.activate();
+                    let activateAccountExtEnd = Date.now();
+
+                    this.measurements.activateAccountExt = (activateAccountExtEnd - activateAccountExtStart) / 1000;
                 } catch (error) {
                     console.log('Failed to activate the Azure Account Extension: ' + parseError(error).message);
                 }
@@ -316,3 +326,5 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     });
     client.start();
 }
+
+let loadEndTime = Date.now();
