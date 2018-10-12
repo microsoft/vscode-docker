@@ -9,6 +9,18 @@ import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
 
+export type OS = 'Windows' | 'Linux';
+export type Platform =
+    'Go' |
+    'Java' |
+    '.NET Core Console' |
+    'ASP.NET Core' |
+    'Node.js' |
+    'Python' |
+    'Ruby' |
+    'Cpp' |
+    'Other';
+
 /**
  * Prompts for a port number
  * @throws `UserCancelledError` if the user cancels.
@@ -49,6 +61,7 @@ export async function quickPickPlatform(): Promise<Platform> {
         'Node.js',
         'Python',
         'Ruby',
+        'Cpp',
         'Other'
     ];
 

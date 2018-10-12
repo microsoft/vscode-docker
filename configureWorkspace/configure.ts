@@ -19,6 +19,7 @@ import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { Platform, PlatformOS } from '../utils/platform';
 import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
+import { configureCpp } from './configure_cpp';
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
 import { configureNode } from './configure_node';
@@ -69,6 +70,7 @@ export function getExposeStatements(port: string): string {
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
 generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
+generatorsByPlatform.set('Cpp', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
 generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
