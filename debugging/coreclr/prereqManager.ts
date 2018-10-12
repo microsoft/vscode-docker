@@ -5,11 +5,11 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { BrowserClient } from './browserClient';
+import { DockerClient } from './dockerClient';
 import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { ProcessProvider } from './processProvider';
-import { DockerClient } from './dockerClient';
 
 export interface Prerequisite {
     checkPrerequisite(): Promise<boolean>;
@@ -114,7 +114,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
             return true;
         }
 
-        const settingsPath = path.join(this.osProvider.homedir, 'Library/Group Containers/group.com.docker/settings.json');
+        const settingsPath = path.posix.join(this.osProvider.homedir, 'Library/Group Containers/group.com.docker/settings.json');
 
         if (!await this.fileSystemProvider.fileExists(settingsPath)) {
             // Docker versions earlier than 17.12.0-ce-mac46 may not have the settings file.

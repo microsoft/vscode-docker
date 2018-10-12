@@ -15,7 +15,7 @@ import CommandLineMSBuildClient from './msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import LocalOSProvider from './osProvider';
 import { DefaultOutputManager } from './outputManager';
-import { AggregatePrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite, DockerDaemonIsLinuxPrerequisite } from './prereqManager';
+import { AggregatePrerequisite, DockerDaemonIsLinuxPrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
 import ChildProcessProvider from './processProvider';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';
