@@ -14,8 +14,8 @@ export interface OutputManager {
 }
 
 export class DefaultOutputManager implements OutputManager, vscode.Disposable {
-    private readonly lineSplitter = new LineSplitter();
-    private isShown = false;
+    private readonly lineSplitter: LineSplitter = new LineSplitter();
+    private isShown: boolean = false;
 
     constructor(private readonly outputChannel: vscode.OutputChannel, private readonly level: number = 0) {
         this.lineSplitter.onLine(line => this.outputChannel.appendLine(this.generatePrefix(line)));
