@@ -58,7 +58,6 @@ import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
 import { addUserAgent } from './utils/addUserAgent';
-import { registerAzureCommand } from './utils/Azure/common';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { Keytar } from './utils/keytar';
 
@@ -208,19 +207,19 @@ function registerDockerCommands(): void {
     registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     });
-    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode) => {
-        browseAzurePortal(context);
-    });
     registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
     registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
     registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
 
-    registerAzureCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context));
-    registerAzureCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
-    registerAzureCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
-    registerAzureCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
-    registerAzureCommand('vscode-docker.create-ACR-Registry', createRegistry);
-    registerAzureCommand('vscode-docker.pull-ACR-Image', pullFromAzure);
+    registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode) => {
+        browseAzurePortal(context);
+    });
+    registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context));
+    registerCommand('vscode-docker.delete-ACR-Registry', deleteAzureRegistry);
+    registerCommand('vscode-docker.delete-ACR-Image', deleteAzureImage);
+    registerCommand('vscode-docker.delete-ACR-Repository', deleteRepository);
+    registerCommand('vscode-docker.create-ACR-Registry', createRegistry);
+    registerCommand('vscode-docker.pull-ACR-Image', pullFromAzure);
 }
 
 export async function deactivate(): Promise<void> {

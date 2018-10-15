@@ -12,7 +12,7 @@ import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as opn from 'opn';
 import * as vscode from 'vscode';
-import { addExtensionUserAgent, callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { addExtensionUserAgent, callWithTelemetryAndErrorHandling, IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
@@ -76,7 +76,7 @@ export class AzureUtilityManager {
                 opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
             }
 
-            throw new Error(msg);
+            throw new UserCancelledError(msg);
         }
     }
 
