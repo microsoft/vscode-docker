@@ -113,7 +113,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ? debugConfiguration.dockerBuild.target
             : 'base'; // CONSIDER: Omit target if not specified, or possibly infer from Dockerfile.
 
-        const appName = path.basename(resolvedAppProject);
+        const appName = path.basename(resolvedAppProject, '.csproj');
 
         const tag = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.tag
             ? debugConfiguration.dockerBuild.tag
