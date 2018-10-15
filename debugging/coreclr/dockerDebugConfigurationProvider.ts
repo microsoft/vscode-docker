@@ -75,12 +75,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private static resolveFolderPath(folderPath: string, folder: WorkspaceFolder): string {
-        return folderPath.replace(/\$\{workspaceFolder\}/g, folder.uri.fsPath);
+        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
     }
 
     private async resolveDockerDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration | undefined> {
         if (!folder) {
-            return undefined;
+            throw new Error('No workspace folder is associated with debugging.');
         }
 
         const prerequisiteSatisfied = await this.prerequisite.checkPrerequisite();

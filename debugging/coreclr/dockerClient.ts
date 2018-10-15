@@ -54,6 +54,7 @@ export interface DockerClient {
 
 export class CliDockerClient implements DockerClient {
     constructor(private readonly processProvider: ProcessProvider) {
+        // CONSIDER: Use dockerode client as basis for debugging.
     }
 
     public async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {
@@ -214,6 +215,16 @@ export class CliDockerClient implements DockerClient {
     }
 
     public trimId(id: string): string {
+        if (!id) {
+            throw new Error('The ID to be trimmed must be non-empty.');
+        }
+
+        const trimmedId = id.trim();
+
+        if (trimmedId.length < 12) {
+            throw new Error('The ID to be trimmed must be at least 12 characters.');
+        }
+
         return id.substring(0, 12);
     }
 }
