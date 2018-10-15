@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import { ProcessProvider } from "./processProvider";
+import { LineSplitter } from "./lineSplitter";
 
 export type DockerBuildImageOptions = {
     context?: string;
@@ -76,22 +77,30 @@ export class CliDockerClient implements DockerClient {
 
         let imageId: string | undefined;
 
-        // TODO: Handle case where content may not be whole lines.
+        const lineSplitter = new LineSplitter();
+
+        lineSplitter.onLine(
+            line => {
+                // Expected output is: 'Successfully built 7cc5654ca3b6'
+                const buildSuccessPrefix = 'Successfully built ';
+
+                if (line.startsWith(buildSuccessPrefix)) {
+                    imageId = line.substr(buildSuccessPrefix.length, 12);
+                }
+            });
+
         const buildProgress =
             (content: string) => {
                 if (progress) {
                     progress(content);
                 }
 
-                // Last line of expected output is: 'Successfully built 7cc5654ca3b6'
-                const buildSuccessPrefix = 'Successfully built ';
-
-                if (content.startsWith(buildSuccessPrefix)) {
-                    imageId = content.substr(buildSuccessPrefix.length, 12);
-                }
+                lineSplitter.write(content);
             };
 
         await this.processProvider.exec(command, { progress: buildProgress });
+
+        lineSplitter.close();
 
         if (!imageId) {
             throw new Error('The Docker image was built successfully but the image ID could not be retrieved.');
