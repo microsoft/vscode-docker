@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { trimWithElipsis } from '../utils/utils';
+import { getImageOrContainerDisplayName } from './getImageOrContainerDisplayName';
 import { IconPath, NodeBase } from './nodeBase';
 
 export type ContainerNodeContextValue = 'stoppedLocalContainerNode' | 'runningLocalContainerNode';
@@ -21,14 +22,8 @@ export class ContainerNode extends NodeBase {
     }
 
     public getTreeItem(): vscode.TreeItem {
-        let displayName: string = this.label;
-
-        if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {
-            if (/\//.test(displayName)) {
-                let parts: string[] = this.label.split(/\//);
-                displayName = trimWithElipsis(parts[0], vscode.workspace.getConfiguration('docker').get('truncateMaxLength', 10)) + '/' + parts[1];
-            }
-        }
+        let config = vscode.workspace.getConfiguration('docker');
+        let displayName: string = getImageOrContainerDisplayName(this.label, config.get('truncateLongRegistryPaths'), config.get('truncateMaxLength'));
 
         return {
             label: `${displayName}`,
