@@ -4,9 +4,23 @@ import LineSplitter from '../../../debugging/coreclr/lineSplitter';
 suite('debugging', () => {
     suite('coreclr', () => {
         suite('LineSplitter', () => {
-            const testCase = (name: string, input: string, output: string[]) => {
+            const testCase = (name: string, input: string | string[], output: string[]) => {
                 test(name, () => {
-                    const lines = LineSplitter.splitLines(input);
+                    const splitter = new LineSplitter();
+
+                    const lines: string[] = [];
+
+                    splitter.onLine(line => lines.push(line));
+
+                    if (typeof input === 'string') {
+                        splitter.write(input);
+                    } else {
+                        for (let i = 0; i < input.length; i++) {
+                            splitter.write(input[i]);
+                        }
+                    }
+
+                    splitter.close();
 
                     assert.deepEqual(lines, output, 'The number or contents of the lines are not the same.');
                 });
@@ -24,6 +38,7 @@ suite('debugging', () => {
             testCase('Trailing CR & LF', 'line one\r\n', ['line one']);
             testCase('Multiple lines with LF', 'line one\nline two', ['line one', 'line two']);
             testCase('Multiple lines with CR & LF', 'line one\r\nline two', ['line one', 'line two']);
+            testCase('CR & LF spanning writes', ['line one\r', '\nline two'], ['line one', 'line two']);
         });
     });
 });
