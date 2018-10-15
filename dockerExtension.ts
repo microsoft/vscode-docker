@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+let loadStartTime = Date.now();
+
 import * as opn from 'opn';
 import * as path from 'path';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import {
   AzureUserInput,
+  callWithTelemetryAndErrorHandling,
   createTelemetryReporter,
   IActionContext,
   parseError,
@@ -162,85 +165,91 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 }
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+  let activateStartTime = Date.now();
   const installedExtensions: vscode.Extension<unknown>[] = vscode.extensions.all;
   let azureAccount: AzureAccount | undefined;
 
   initializeExtensionVariables(ctx);
 
-  // tslint:disable-next-line:prefer-for-of // Grandfathered in
-  for (let i = 0; i < installedExtensions.length; i++) {
-    const extension = installedExtensions[i];
-    if (extension.id === "ms-vscode.azure-account") {
-      try {
-        azureAccount = <AzureAccount>await extension.activate();
-      } catch (error) {
-        console.log("Failed to activate the Azure Account Extension: " + parseError(error).message);
+  await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
+    this.properties.isActivationEvent = 'true';
+    this.measurements.mainFileLoad = (loadEndTime - loadStartTime) / 1000;
+    this.measurements.mainFileLoadedToActivate = (activateStartTime - loadEndTime) / 1000;
+    // tslint:disable-next-line:prefer-for-of // Grandfathered in
+    for (let i = 0; i < installedExtensions.length; i++) {
+      const extension = installedExtensions[i];
+      if (extension.id === "ms-vscode.azure-account") {
+        try {
+          azureAccount = <AzureAccount>await extension.activate();
+        } catch (error) {
+          console.log("Failed to activate the Azure Account Extension: " + parseError(error).message);
+        }
+        break;
       }
-      break;
     }
-  }
-  ctx.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      DOCUMENT_SELECTOR,
-      new DockerfileCompletionItemProvider(),
-      '.'
-    )
-  );
+    ctx.subscriptions.push(
+      vscode.languages.registerCompletionItemProvider(
+        DOCUMENT_SELECTOR,
+        new DockerfileCompletionItemProvider(),
+        '.'
+      )
+    );
 
-  const YAML_MODE_ID: vscode.DocumentFilter = {
-    language: 'yaml',
-    scheme: 'file',
-    pattern: COMPOSE_FILE_GLOB_PATTERN
-  };
-  let yamlHoverProvider = new DockerComposeHoverProvider(
-    new DockerComposeParser(),
-    composeVersionKeys.All
-  );
-  ctx.subscriptions.push(
-    vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider)
-  );
-  ctx.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      YAML_MODE_ID,
-      new DockerComposeCompletionItemProvider(),
-      "."
-    )
-  );
+    const YAML_MODE_ID: vscode.DocumentFilter = {
+      language: 'yaml',
+      scheme: 'file',
+      pattern: COMPOSE_FILE_GLOB_PATTERN
+    };
+    let yamlHoverProvider = new DockerComposeHoverProvider(
+      new DockerComposeParser(),
+      composeVersionKeys.All
+    );
+    ctx.subscriptions.push(
+      vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider)
+    );
+    ctx.subscriptions.push(
+      vscode.languages.registerCompletionItemProvider(
+        YAML_MODE_ID,
+        new DockerComposeCompletionItemProvider(),
+        "."
+      )
+    );
 
-  ctx.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider(
-      DOCKER_INSPECT_SCHEME,
-      new DockerInspectDocumentContentProvider()
-    )
-  );
-  ctx.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider(
-      LogContentProvider.scheme,
-      new LogContentProvider()
-    )
-  );
-  ctx.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider(
-      TaskContentProvider.scheme,
-      new TaskContentProvider()
-    )
-  );
+    ctx.subscriptions.push(
+      vscode.workspace.registerTextDocumentContentProvider(
+        DOCKER_INSPECT_SCHEME,
+        new DockerInspectDocumentContentProvider()
+      )
+    );
+    ctx.subscriptions.push(
+      vscode.workspace.registerTextDocumentContentProvider(
+        LogContentProvider.scheme,
+        new LogContentProvider()
+      )
+    );
+    ctx.subscriptions.push(
+      vscode.workspace.registerTextDocumentContentProvider(
+        TaskContentProvider.scheme,
+        new TaskContentProvider()
+      )
+    );
 
-  if (azureAccount) {
-    AzureUtilityManager.getInstance().setAccount(azureAccount);
-  }
+    if (azureAccount) {
+      AzureUtilityManager.getInstance().setAccount(azureAccount);
+    }
 
-  registerDockerCommands(azureAccount);
+    registerDockerCommands(azureAccount);
 
-  ctx.subscriptions.push(
-    vscode.debug.registerDebugConfigurationProvider(
-      'docker',
-      new DockerDebugConfigProvider()
-    )
-  );
+    ctx.subscriptions.push(
+      vscode.debug.registerDebugConfigurationProvider(
+        'docker',
+        new DockerDebugConfigProvider()
+      )
+    );
 
-  await consolidateDefaultRegistrySettings();
-  activateLanguageClient(ctx);
+    await consolidateDefaultRegistrySettings();
+    activateLanguageClient(ctx);
+  });
 }
 
 async function createWebApp(
@@ -545,3 +554,5 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
   });
   client.start();
 }
+
+let loadEndTime = Date.now();

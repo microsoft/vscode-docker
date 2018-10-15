@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { trimWithElipsis } from '../utils/utils';
+import { getImageOrContainerDisplayName } from './getImageOrContainerDisplayName';
 import { NodeBase } from './nodeBase';
 
 export class ImageNode extends NodeBase {
@@ -23,14 +24,8 @@ export class ImageNode extends NodeBase {
     public readonly contextValue: string = ImageNode.contextValue;
 
     public getTreeItem(): vscode.TreeItem {
-        let displayName: string = this.label;
-
-        if (vscode.workspace.getConfiguration('docker').get('truncateLongRegistryPaths', false)) {
-            if (/\//.test(displayName)) {
-                let parts: string[] = this.label.split(/\//);
-                displayName = trimWithElipsis(parts[0], vscode.workspace.getConfiguration('docker').get('truncateMaxLength', 10)) + '/' + parts[1];
-            }
-        }
+        let config = vscode.workspace.getConfiguration('docker');
+        let displayName: string = getImageOrContainerDisplayName(this.label, config.get('truncateLongRegistryPaths'), config.get('truncateMaxLength'));
 
         displayName = `${displayName} (${moment(new Date(this.imageDesc.Created * 1000)).fromNow()})`;
 
