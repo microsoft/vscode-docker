@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 
 export class LineSplitter implements vscode.Disposable {
-    private readonly emitter = new vscode.EventEmitter<string>();
+    private readonly emitter: vscode.EventEmitter<string> = new vscode.EventEmitter<string>();
     private buffer: string;
 
     public get onLine(): vscode.Event<string> {
@@ -64,4 +64,3 @@ export class LineSplitter implements vscode.Disposable {
 }
 
 export default LineSplitter;
-
