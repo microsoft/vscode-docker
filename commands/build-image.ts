@@ -10,6 +10,7 @@ import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
 import { delay } from "../explorer/utils/utils";
 import { ext } from "../extensionVariables";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
+import { quickPickWorkspaceFolder } from "./utils/quickPickWorkspaceFolder";
 
 async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
@@ -56,25 +57,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
     let dockerFileItem: Item | undefined;
 
-    let rootFolder: vscode.WorkspaceFolder;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-        rootFolder = vscode.workspace.workspaceFolders[0];
-    } else {
-        let selected = await vscode.window.showWorkspaceFolderPick();
-        if (!selected) {
-            throw new UserCancelledError();
-        }
-        rootFolder = selected;
-    }
-
-    if (!rootFolder) {
-        if (!vscode.workspace.workspaceFolders) {
-            vscode.window.showErrorMessage('Docker files can only be built if VS Code is opened on a folder.');
-        } else {
-            vscode.window.showErrorMessage('Docker files can only be built if a workspace folder is picked in VS Code.');
-        }
-        return;
-    }
+    let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To build Docker files you must first open a folder or workspace in VS Code.');
 
     while (!dockerFileItem) {
         let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);

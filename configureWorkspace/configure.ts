@@ -12,6 +12,7 @@ import * as path from "path";
 import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFolder';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
@@ -20,6 +21,7 @@ import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
 import { configureNode } from './configure_node';
+import { configureOther } from './configure_other';
 import { configurePython } from './configure_python';
 import { configureRuby } from './configure_ruby';
 
@@ -53,11 +55,18 @@ export type ConfigureTelemetryProperties = {
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
 
-const generatorsByPlatform = new Map<Platform, {
+export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
-    genDockerComposeDebug: GeneratorFunction
-}>();
+    genDockerComposeDebug: GeneratorFunction,
+    defaultPort: string
+}
+
+export function getExposeStatements(port: string): string {
+    return port ? `EXPOSE ${port}` : '';
+}
+
+const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
 generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
@@ -65,12 +74,20 @@ generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
 generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
+generatorsByPlatform.set('Other', configureOther);
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
-        return generators.genDockerFile(serviceNameAndRelativePath, platform, os, port, { cmd, author, version, artifactName });
+        let contents = generators.genDockerFile(serviceNameAndRelativePath, platform, os, port, { cmd, author, version, artifactName });
+
+        // Remove multiple empty lines with single empty lines, as might be produced
+        // if $expose_statements$ or another template variable is an empty string
+        contents = contents.replace(/(\r\n){3}/g, "\r\n\r\n")
+            .replace(/(\n){3}/g, "\n\n");
+
+        return contents;
     }
 }
 
@@ -283,48 +300,51 @@ export interface ConfigureApiOptions {
      * The OS for the images. Currently only needed for .NET platforms.
      */
     os?: OS;
+
+    /**
+     * Open the Dockerfile that was generated
+     */
+    openDockerFile?: boolean;
 }
 
 export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
-        let folder: vscode.WorkspaceFolder | undefined;
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-            folder = vscode.workspace.workspaceFolders[0];
-        } else {
-            folder = await vscode.window.showWorkspaceFolderPick();
-        }
-
-        if (!folder) {
-            if (!vscode.workspace.workspaceFolders) {
-                throw new Error('Docker files can only be generated if VS Code is opened on a folder.');
-            } else {
-                throw new Error('Docker files can only be generated if a workspace folder is picked in VS Code.');
-            }
-        }
-
+        let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
         rootFolderPath = folder.uri.fsPath;
     }
 
-    return configureCore(
+    let filesWritten = await configureCore(
         actionContext,
         {
             rootPath: rootFolderPath,
-            outputFolder: rootFolderPath
+            outputFolder: rootFolderPath,
+            openDockerFile: true
         });
+
+    // Open the dockerfile (if written)
+    try {
+        let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
+        if (dockerfile) {
+            await vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
+        }
+    } catch (err) {
+        // Ignore
+    }
 }
 
 export async function configureApi(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    return configureCore(actionContext, options);
+    await configureCore(actionContext, options);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
+async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
     let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
     let rootFolderPath: string = options.rootPath;
     let outputFolder = options.outputFolder;
 
     const platformType: Platform = options.platform || await quickPickPlatform();
     properties.configurePlatform = platformType;
+    let generatorInfo = generatorsByPlatform.get(platformType);
 
     let os: OS | undefined = options.os;
     if (!os && platformType.toLowerCase().includes('.net')) {
@@ -334,11 +354,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
     let port: string | undefined = options.port;
     if (!port) {
-        if (platformType.toLowerCase().includes('.net')) {
-            port = await promptForPort(80);
-        } else {
-            port = await promptForPort(3000);
-        }
+        port = await promptForPort(generatorInfo.defaultPort);
     }
 
     let targetFramework: string;
@@ -391,18 +407,13 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
 
-    // Don't wait
-    vscode.window.showInformationMessage(
-        filesWritten.length ?
-            `The following files were written into the workspace:${EOL}${EOL}${filesWritten.join(', ')}` :
-            "No files were written"
-    );
+    return filesWritten;
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
         const filePath = path.join(outputFolder, fileName);
         let writeFile = false;
         if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists.Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
             if (response === YES_PROMPT) {
                 writeFile = true;
             }
@@ -415,7 +426,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
             let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
             if (fileContents) {
                 fs.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
-                filesWritten.push(fileName);
+                filesWritten.push(filePath);
             }
         }
     }

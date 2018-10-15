@@ -53,7 +53,7 @@
         "no-constant-condition": true,
         "no-control-regex": true,
         "no-debugger": true,
-        "no-duplicate-case": true,
+        "no-duplicate-switch-case": true,
         "no-duplicate-super": true,
         "no-duplicate-variable": true,
         "no-empty": false, // changed
@@ -70,7 +70,7 @@
         "no-reference-import": true,
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
-        "no-stateless-class": true,
+        "no-unnecessary-class": true,
         "no-string-literal": true,
         "no-string-throw": true,
         "no-unnecessary-bind": true,
@@ -101,7 +101,7 @@
         ],
         "use-isnan": true,
         "use-named-parameter": true,
-        "valid-typeof": true,
+        "typeof-compare": true,
         "adjacent-overload-signatures": true,
         "array-type": [
             true,
@@ -169,7 +169,7 @@
         "no-useless-files": true,
         "no-var-keyword": true,
         "no-var-requires": true,
-        "no-var-self": true,
+        "no-this-assignment": true,
         "no-void-expression": [
             false, // changed
             "ignore-arrow-function-shorthand" // changed

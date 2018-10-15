@@ -128,11 +128,15 @@ export class AzureImageTagNode extends NodeBase {
         public readonly tag: string,
         public readonly created: Date,
     ) {
-        super(`${repositoryName}:${tag}`);
+        super(AzureImageTagNode.getImageNameWithTag(repositoryName, tag));
     }
 
     public static readonly contextValue: string = 'azureImageTagNode';
     public readonly contextValue: string = AzureImageTagNode.contextValue;
+
+    public static getImageNameWithTag(repositoryName: string, tag: string): string {
+        return `${repositoryName}:${tag}`;
+    }
 
     public getTreeItem(): vscode.TreeItem {
         return {
