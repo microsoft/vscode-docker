@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
-import * as vscode from 'vscode';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchResult } from './dockerManager';
@@ -71,7 +71,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-        return this.resolveDockerDebugConfiguration(folder, debugConfiguration);
+        return callWithTelemetryAndErrorHandling(
+            'debugCoreClr',
+            async () => await this.resolveDockerDebugConfiguration(folder, debugConfiguration));
     }
 
     private static resolveFolderPath(folderPath: string, folder: WorkspaceFolder): string {
