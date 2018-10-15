@@ -13,32 +13,37 @@ export class LineSplitter {
     }
 
     public close(): void {
-        if (this.buffer) {
+        if (this.buffer !== undefined) {
             this.emitter.fire(this.buffer);
             this.buffer = undefined;
         }
     }
 
     public write(data: string): void {
+        if (data === undefined) {
+            return;
+        }
+
+        this.buffer = this.buffer !== undefined ? this.buffer + data : data;
+
         let index = 0;
         let lineStart = 0;
-        while (index < data.length) {
-            if (data[index] === '\n') {
-                const dataSegment = data.substring(lineStart, index);
-                const line = this.buffer ? this.buffer + dataSegment : dataSegment;
+
+        while (index < this.buffer.length) {
+            if (this.buffer[index] === '\n') {
+                const line = index === 0 || this.buffer[index - 1] !== '\r'
+                    ? this.buffer.substring(lineStart, index)
+                    : this.buffer.substring(lineStart, index - 1);
 
                 this.emitter.fire(line);
 
-                this.buffer = undefined;
                 lineStart = index + 1;
             }
 
             index++;
         }
 
-        if (lineStart < index) {
-            this.buffer = data.substring(lineStart);
-        }
+        this.buffer = lineStart < index ? this.buffer.substring(lineStart) : undefined;
     }
 
     public static splitLines(data: string): string[] {

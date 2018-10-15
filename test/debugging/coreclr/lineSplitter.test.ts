@@ -13,12 +13,17 @@ suite('debugging', () => {
             };
 
             testCase('Empty string', '', []);
-            testCase('Only CR', '\n', ['']);
-            testCase('Multiple CRs', '\n\n', ['', '']);
+            testCase('Only LF', '\n', ['']);
+            testCase('CR & LF', '\r\n', ['']);
+            testCase('Multiple LFs', '\n\n', ['', '']);
+            testCase('Multiple CR & LFs', '\r\n\r\n', ['', '']);
             testCase('Single line', 'line one', ['line one']);
-            testCase('Leading CR', '\nline two', ['', 'line two']);
-            testCase('Trailing CR', 'line one\n', ['line one']);
-            testCase('Multiple lines', 'line one\nline two', ['line one', 'line two']);
+            testCase('Leading LF', '\nline two', ['', 'line two']);
+            testCase('Leading CR & LF', '\r\nline two', ['', 'line two']);
+            testCase('Trailing LF', 'line one\n', ['line one']);
+            testCase('Trailing CR & LF', 'line one\r\n', ['line one']);
+            testCase('Multiple lines with LF', 'line one\nline two', ['line one', 'line two']);
+            testCase('Multiple lines with CR & LF', 'line one\r\nline two', ['line one', 'line two']);
         });
     });
 });
