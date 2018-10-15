@@ -23,7 +23,8 @@
     "multi-root ready"
   ],
   "repository": {
-    "url": "https://github.com/microsoft/vscode-docker.git"
+    "type": "git",
+    "url": "https://github.com/microsoft/vscode-docker"
   },
   "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
   "activationEvents": [
@@ -59,6 +60,7 @@
     "onCommand:vscode-docker.connectCustomRegistry",
     "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
+    "onCommand:vscode-docker.pull-ACR-Image",
     "onView:dockerExplorer",
     "onDebugInitialConfigurations",
     "onDebugResolve:docker-coreclr"
@@ -227,6 +229,10 @@
         {
           "command": "vscode-docker.browseAzurePortal",
           "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
+        },
+        {
+          "command": "vscode-docker.pull-ACR-Image",
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|azureRepositoryNode)$/"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
@@ -688,6 +694,11 @@
         "command": "vscode-docker.disconnectCustomRegistry",
         "title": "Disconnect from Private Registry",
         "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.pull-ACR-Image",
+        "title": "Pull image from Azure",
+        "category": "Docker"
       }
     ],
     "views": {
@@ -742,7 +753,7 @@
     "gulp": "^3.9.1",
     "mocha": "5.2.0",
     "tslint": "^5.11.0",
-    "tslint-microsoft-contrib": "5.0.1",
+    "tslint-microsoft-contrib": "^5.2.1",
     "typescript": "^3.1.1",
     "vsce": "^1.51.1",
     "vscode": "^1.1.18"

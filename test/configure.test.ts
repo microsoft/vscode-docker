@@ -565,13 +565,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     },
                     ['Windows', '1234']
                 ),
-                { message: "No .csproj file could be found." }
+                { message: "No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
         testInEmptyFolder("ASP.NET Core no project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', '1234']),
-                { message: "No .csproj file could be found." }
+                { message: "No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
