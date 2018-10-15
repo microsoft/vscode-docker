@@ -1,6 +1,7 @@
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IActionContext, registerCommand } from "vscode-azureextensionui";
+import { UserCancelledError } from '../../explorer/deploy/wizard';
 import { AzureUtilityManager } from "../azureUtilityManager";
 
 let alphaNum = new RegExp('^[a-zA-Z0-9]*$');
@@ -20,22 +21,25 @@ export function isValidAzureName(value: string): { isValid: boolean, message?: s
  */
 // tslint:disable-next-line:no-any
 export function registerAzureCommand(commandId: string, callback: (...args: any[]) => any): void {
-    let commandItem: (actionContext: IActionContext) => void;
-
-    if (!AzureUtilityManager.hasLoadedUtilityManager()) {
-        commandItem = () => {
+    // tslint:disable-next-line:no-function-expression
+    registerCommand(commandId, async function (this: IActionContext): Promise<void> {
+        if (!await AzureUtilityManager.getInstance().tryGetAzureAccount()) {
             const open: vscode.MessageItem = { title: "View in Marketplace" };
-            vscode.window.showErrorMessage('Please install the Azure Account extension to use Azure features.', open).then((response) => {
-                if (response === open) {
-                    // tslint:disable-next-line:no-unsafe-any
-                    opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
-                }
-            });
+            const msg = 'Please install the Azure Account extension to use Azure features.';
+            let response = await vscode.window.showErrorMessage(msg, open);
+            let viewInMarketplace = response === open;
+            this.properties.viewInMarketplace = viewInMarketplace ? 'true' : 'false';
+            if (viewInMarketplace) {
+                // tslint:disable-next-line:no-unsafe-any
+                opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+            }
+
+            this.rethrowError = false;
+            this.suppressErrorDisplay = true;
+            throw new Error(msg);
+        } else {
+            // tslint:disable-next-line:no-unsafe-any
+            await callback();
         }
-
-    } else {
-        commandItem = callback;
-    }
-
-    registerCommand(commandId, commandItem);
+    });
 }

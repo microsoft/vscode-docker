@@ -18,7 +18,7 @@ import { IconPath, NodeBase } from './nodeBase';
 export class AzureRegistryNode extends NodeBase {
     constructor(
         public readonly label: string,
-        public readonly azureAccount: AzureAccount | undefined,
+        public readonly azureAccount: AzureAccount,
         public readonly registry: ContainerModels.Registry,
         public readonly subscription: SubscriptionModels.Subscription
     ) {
@@ -94,7 +94,7 @@ export class AzureRepositoryNode extends NodeBase {
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
         const imageNodes: AzureImageTagNode[] = [];
         let node: AzureImageTagNode;
-        let repo = new Repository(element.registry, element.label);
+        let repo = await Repository.Create(element.registry, element.label);
         let images: AzureImage[] = await getImagesByRepository(repo);
         for (let img of images) {
             node = new AzureImageTagNode(

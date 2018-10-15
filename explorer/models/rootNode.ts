@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
@@ -31,13 +32,11 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[] | undefined;
     private _containerDebounceTimer: NodeJS.Timer | undefined;
     private _containersNode: RootNode | undefined;
-    private _azureAccount: AzureAccount | undefined;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
-        public eventEmitter: vscode.EventEmitter<NodeBase>,
-        public azureAccount?: AzureAccount
+        public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
         if (this.contextValue === 'imagesRootNode') {
@@ -45,7 +44,6 @@ export class RootNode extends NodeBase {
         } else if (this.contextValue === 'containersRootNode') {
             this._containersNode = this;
         }
-        this._azureAccount = azureAccount;
     }
 
     public autoRefreshImages(): void {
@@ -260,13 +258,14 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode"));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined));
 
-        if (this._azureAccount) {
-            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
+        let azureAccount: AzureAccount = await AzureUtilityManager.getInstance().tryGetAzureAccount();
+        if (azureAccount) {
+            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, azureAccount));
         }
 
-        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode'));
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', undefined, undefined));
 
         return registryRootNodes;
     }
