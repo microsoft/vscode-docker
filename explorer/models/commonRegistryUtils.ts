@@ -9,7 +9,7 @@ import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { AsyncPool } from '../../utils/asyncpool';
-import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
+import { Manifest } from '../utils/dockerHubUtils';
 
 interface RegistryNonsensitiveInfo {
     url: string,
@@ -63,7 +63,7 @@ export async function getCatalog(registryUrl: string, credentials?: RegistryCred
     return response.repositories;
 }
 
-export async function getTags(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
+export async function getTagAttributes(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
     let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=${PAGE_SIZE}&page=1`, credentials);
     let tags = result.tags;
     let tagInfos: TagInfo[] = [];
@@ -73,9 +73,8 @@ export async function getTags(registryUrl: string, repositoryName: string, crede
     for (let tag of tags) {
         pool.addTask(async (): Promise<void> => {
             try {
-                let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `v2/${repositoryName}/manifests/${tag}`, credentials);
-                let history: ManifestHistoryV1Compatibility = JSON.parse(manifest.history[0].v1Compatibility);
-                let created = new Date(history.created);
+                let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `/acr/v1/${repositoryName}/_tags/${tag}`, credentials);
+                let created = new Date(manifest.tag.lastUpdateTime);
                 let info = <TagInfo>{
                     tag: tag,
                     created

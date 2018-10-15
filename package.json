@@ -31,7 +31,8 @@
     "onLanguage:yaml",
     "onCommand:vscode-docker.acrLogs",
     "onCommand:vscode-docker.api.configure",
-    "onCommand:vscode-docker.ACR-queueBuild",
+    "onCommand:vscode-docker.queue-ACR-Build",
+    "onCommand:vscode-docker.run-ACR-TaskFile",
     "onCommand:vscode-docker.image.build",
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.remove",
@@ -59,7 +60,7 @@
     "onCommand:vscode-docker.delete-ACR-Registry",
     "onCommand:vscode-docker.run-ACR-Task",
     "onCommand:vscode-docker.delete-ACR-Repository",
-    "onCommand:vscode-docker.delete-ACR-Image",
+    "onCommand:vscode-docker.untag-ACR-Image",
     "onCommand:vscode-docker.connectCustomRegistry",
     "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.disconnectCustomRegistry",
@@ -87,7 +88,12 @@
       "editor/context": [
         {
           "when": "editorLangId == dockerfile",
-          "command": "vscode-docker.ACR-queueBuild",
+          "command": "vscode-docker.queue-ACR-Build",
+          "group": "docker"
+        },
+        {
+          "when": "editorLangId == yaml",
+          "command": "vscode-docker.run-ACR-TaskFile",
           "group": "docker"
         },
         {
@@ -128,12 +134,17 @@
       ],
       "explorer/context": [
         {
-          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
-          "command": "vscode-docker.ACR-queueBuild",
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
+          "command": "vscode-docker.queue-ACR-Build",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /[dD]ocker[fF]ile/",
+          "when": "resourceFilename =~ /\\.ya?ml$/i",
+          "command": "vscode-docker.run-ACR-TaskFile",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         },
@@ -227,7 +238,7 @@
           "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
         },
         {
-          "command": "vscode-docker.delete-ACR-Image",
+          "command": "vscode-docker.untag-ACR-Image",
           "when": "view == dockerExplorer && viewItem == azureImageTagNode"
         },
         {
@@ -243,7 +254,7 @@
           "when": "view == dockerExplorer && viewItem == dockerHubRepository"
         },
         {
-          "command": "vscode-docker.delete-ACR-Image",
+          "command": "vscode-docker.untag-ACR-Image",
           "when": "view == dockerExplorer && viewItem == azureImageNode"
         },
         {
@@ -495,9 +506,15 @@
         "title": "Add Docker files to Workspace (API)"
       },
       {
-        "command": "vscode-docker.ACR-queueBuild",
+        "command": "vscode-docker.queue-ACR-Build",
         "title": "Queue Build",
         "description": "Queue a build from a Dockerfile",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.run-ACR-TaskFile",
+        "title": "Run ACR Task File",
+        "description": "Run an ACR task from a yaml file.",
         "category": "Docker"
       },
       {
@@ -601,8 +618,8 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.delete-ACR-Image",
-        "title": "Delete Azure Image",
+        "command": "vscode-docker.untag-ACR-Image",
+        "title": "Untag Azure Image",
         "category": "Docker"
       },
       {
@@ -670,7 +687,7 @@
         "category": "Docker"
       },
       {
-        "command": "vscode-docker.delete-ACR-Image",
+        "command": "vscode-docker.untag-ACR-Image",
         "title": "Delete Azure Image",
         "category": "Docker"
       },

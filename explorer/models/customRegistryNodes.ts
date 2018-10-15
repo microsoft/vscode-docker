@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { formatTag, getCatalog, getTags, registryRequest } from './commonRegistryUtils';
+import { formatTag, getCatalog, getTagAttributes, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
@@ -88,7 +88,7 @@ export class CustomRepositoryNode extends NodeBase {
         let node: CustomImageTagNode;
 
         try {
-            let tagInfos = await getTags(this.registry.url, this.repositoryName, this.registry.credentials);
+            let tagInfos = await getTagAttributes(this.registry.url, this.repositoryName, this.registry.credentials);
             for (let tagInfo of tagInfos) {
                 node = new CustomImageTagNode(this.registry, this.repositoryName, tagInfo.tag, tagInfo.created);
                 imageNodes.push(node);

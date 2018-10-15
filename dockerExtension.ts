@@ -34,7 +34,7 @@ import { deleteAzureImage } from "./commands/azureCommands/delete-image";
 import { deleteAzureRegistry } from "./commands/azureCommands/delete-registry";
 import { deleteRepository } from "./commands/azureCommands/delete-repository";
 import { pullFromAzure } from "./commands/azureCommands/pull-from-azure";
-import { runTask } from "./commands/azureCommands/run-task";
+import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
 import { TaskContentProvider } from "./commands/azureCommands/task-utils/showTaskManager";
 import { buildImage } from "./commands/build-image";
@@ -100,7 +100,6 @@ import {
 import { ImageNode } from "./explorer/models/imageNode";
 import { NodeBase } from "./explorer/models/nodeBase";
 import { RootNode } from "./explorer/models/rootNode";
-import { TaskNode } from "./explorer/models/taskNode";
 import { browseAzurePortal } from "./explorer/utils/browseAzurePortal";
 import {
   browseDockerHub,
@@ -115,8 +114,9 @@ import { AzureUtilityManager } from "./utils/azureUtilityManager";
 import { Keytar } from "./utils/keytar";
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
-export const COMPOSE_FILE_GLOB_PATTERN = "**/[dD]ocker-[cC]ompose*.{yaml,yml}";
-export const DOCKERFILE_GLOB_PATTERN = "**/{*.dockerfile,[dD]ocker[fF]ile}";
+export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}';
+export const YAML_GLOB_PATTER = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
 
@@ -436,14 +436,15 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     "vscode-docker.delete-ACR-Registry",
     deleteAzureRegistry
   );
-  registerAzureCommand("vscode-docker.delete-ACR-Image", deleteAzureImage);
+  registerAzureCommand("vscode-docker.untag-ACR-Image", deleteAzureImage);
   registerAzureCommand("vscode-docker.delete-ACR-Repository", deleteRepository);
   registerAzureCommand("vscode-docker.create-ACR-Registry", createRegistry);
   registerAzureCommand("vscode-docker.pullFromAzure", pullFromAzure);
   registerAzureCommand("vscode-docker.acrLogs", viewACRLogs);
   registerAzureCommand("vscode-docker.run-ACR-Task", runTask);
   registerAzureCommand("vscode-docker.show-ACR-Task", showTaskProperties);
-  registerCommand("vscode-docker.ACR-queueBuild", queueBuild);
+  registerCommand("vscode-docker.queue-ACR-Build", queueBuild);
+  registerCommand("vscode-docker.run-ACR-TaskFile", runTaskFile);
 }
 
 export async function deactivate(): Promise<void> {

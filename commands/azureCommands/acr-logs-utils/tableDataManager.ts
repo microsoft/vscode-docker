@@ -57,7 +57,7 @@ export class LogData {
         if (filter && Object.keys(filter).length) {
             if (!filter.runId) {
                 options.filter = await this.parseFilter(filter);
-                //Add top filter for image #87
+                if (filter.image) { options.top = 1; }
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
                 runListResult = [];

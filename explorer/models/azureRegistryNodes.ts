@@ -11,7 +11,7 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
-import { formatTag, getCatalog, getTags } from './commonRegistryUtils';
+import { formatTag } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
 import { TaskRootNode } from './taskNode';
 
