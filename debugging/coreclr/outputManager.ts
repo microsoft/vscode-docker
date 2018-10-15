@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { LineSplitter } from './lineSplitter';
 
 type outputCallback<T> = (result: T) => string;
 
@@ -12,32 +13,17 @@ export interface OutputManager {
     performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T>;
 }
 
-export class DefaultOutputManager implements OutputManager {
-    private skipFirstLine: boolean = false;
-    private isShown: boolean = false;
+export class DefaultOutputManager implements OutputManager, vscode.Disposable {
+    private readonly lineSplitter = new LineSplitter();
+    private isShown = false;
 
     constructor(private readonly outputChannel: vscode.OutputChannel, private readonly level: number = 0) {
+        this.lineSplitter.onLine(line => this.outputChannel.appendLine(this.generatePrefix(line)));
     }
 
     public append(content: string): void {
         if (this.level) {
-            const split = content.split(/[\n\r]/g);
-            const generateContent =
-                (c: string) => {
-                    return this.skipFirstLine ? c : this.generatePrefix(c);
-                };
-
-            for (let i = 0; i < split.length; i++) {
-                if (i < split.length - 1) {
-                    this.outputChannel.appendLine(generateContent(split[i]));
-                    this.skipFirstLine = false;
-                } else if (split[i].length > 0) {
-                    this.outputChannel.append(generateContent(split[i]));
-                    this.skipFirstLine = true;
-                } else {
-                    this.skipFirstLine = false;
-                }
-            }
+            this.lineSplitter.write(content);
         } else {
             this.outputChannel.append(content);
         }
@@ -45,10 +31,14 @@ export class DefaultOutputManager implements OutputManager {
 
     public appendLine(content: string): void {
         if (this.level) {
-            this.outputChannel.append(this.generatePrefix());
+            this.lineSplitter.write(content + '\n');
+        } else {
+            this.outputChannel.appendLine(content);
         }
+    }
 
-        this.outputChannel.appendLine(content);
+    public dispose(): void {
+        this.lineSplitter.close();
     }
 
     public async performOperation<T>(startContent: string, operation: (outputManager: OutputManager) => Promise<T>, endContent?: string | outputCallback<T>, errorContent?: string | outputCallback<Error>): Promise<T> {
@@ -60,7 +50,17 @@ export class DefaultOutputManager implements OutputManager {
         this.appendLine(startContent);
 
         try {
-            const result = await operation(new DefaultOutputManager(this.outputChannel, this.level + 1));
+            const nextLevelOutputManager = new DefaultOutputManager(this.outputChannel, this.level + 1);
+
+            let result: T;
+
+            try {
+
+                result = await operation(nextLevelOutputManager);
+            }
+            finally {
+                nextLevelOutputManager.dispose();
+            }
 
             if (endContent) {
                 this.appendLine(typeof endContent === 'string' ? endContent : endContent(result));

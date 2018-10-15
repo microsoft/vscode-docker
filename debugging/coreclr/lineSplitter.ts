@@ -4,7 +4,7 @@
 
 import * as vscode from 'vscode';
 
-export class LineSplitter {
+export class LineSplitter implements vscode.Disposable {
     private readonly emitter = new vscode.EventEmitter<string>();
     private buffer: string;
 
@@ -17,6 +17,10 @@ export class LineSplitter {
             this.emitter.fire(this.buffer);
             this.buffer = undefined;
         }
+    }
+
+    public dispose(): void {
+        this.close();
     }
 
     public write(data: string): void {
