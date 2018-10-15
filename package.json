@@ -628,7 +628,7 @@
       },
       {
         "command": "vscode-docker.pull-ACR-Image",
-        "title": "Pull image from Azure",
+        "title": "Pull Image from Azure",
         "category": "Docker"
       }
     ],
