@@ -11,6 +11,7 @@ export type MSBuildExecOptions = {
 
 export interface MSBuildClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
+    getVersion(): Promise<string | undefined>;
 }
 
 export class CommandLineMSBuildClient implements MSBuildClient {
@@ -33,6 +34,19 @@ export class CommandLineMSBuildClient implements MSBuildClient {
         }
 
         await this.processProvider.exec(command, {});
+    }
+
+    public async getVersion(): Promise<string | undefined> {
+        try {
+
+            const command = `dotnet --version`;
+
+            const result = await this.processProvider.exec(command, {});
+
+            return result.stdout.trim();
+        } catch {
+            return undefined;
+        }
     }
 }
 

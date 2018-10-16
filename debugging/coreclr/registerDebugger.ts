@@ -15,7 +15,7 @@ import CommandLineMSBuildClient from './msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import LocalOSProvider from './osProvider';
 import { DefaultOutputManager } from './outputManager';
-import { AggregatePrerequisite, DockerDaemonIsLinuxPrerequisite, DotNetExtensionInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
+import { AggregatePrerequisite, DockerDaemonIsLinuxPrerequisite, DotNetExtensionInstalledPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
 import ChildProcessProvider from './processProvider';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';
@@ -25,6 +25,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
 
     const processProvider = new ChildProcessProvider();
     const dockerClient = new CliDockerClient(processProvider);
+    const msBuildClient = new CommandLineMSBuildClient(processProvider);
     const osProvider = new LocalOSProvider();
 
     const dockerOutputChannel = vscode.window.createOutputChannel('Docker');
@@ -67,7 +68,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                 osProvider,
                 new MsBuildNetCoreProjectProvider(
                     fileSystemProvider,
-                    new CommandLineMSBuildClient(processProvider),
+                    msBuildClient,
                     new OSTempFileProvider(
                         osProvider,
                         processProvider)),
@@ -78,6 +79,9 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                     new DotNetExtensionInstalledPrerequisite(
                         new OpnBrowserClient(),
                         vscode.extensions.getExtension,
+                        vscode.window.showErrorMessage),
+                    new DotNetSdkInstalledPrerequisite(
+                        msBuildClient,
                         vscode.window.showErrorMessage),
                     new MacNuGetFallbackFolderSharedPrerequisite(
                         fileSystemProvider,

@@ -8,6 +8,7 @@ import { BrowserClient } from './browserClient';
 import { DockerClient } from './dockerClient';
 import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
+import { MSBuildClient } from './msBuildClient';
 import { OSProvider } from './osProvider';
 import { ProcessProvider } from './processProvider';
 
@@ -68,6 +69,25 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
         }
 
         return await Promise.resolve(dependenciesSatisfied);
+    }
+}
+
+export class DotNetSdkInstalledPrerequisite implements Prerequisite {
+    constructor(
+        private readonly msbuildClient: MSBuildClient,
+        private readonly showErrorMessage: ShowErrorMessageFunction) {
+    }
+
+    public async checkPrerequisite(): Promise<boolean> {
+        const result = await this.msbuildClient.getVersion();
+
+        if (result) {
+            return true;
+        }
+
+        this.showErrorMessage('The .NET Core SDK must be installed to debug .NET Core applications running within Docker containers.');
+
+        return false;
     }
 }
 

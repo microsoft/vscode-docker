@@ -7,9 +7,10 @@ import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
 import { OSProvider } from '../../../debugging/coreclr/osProvider';
 import { ProcessProvider } from '../../../debugging/coreclr/processProvider';
-import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction, DockerDaemonIsLinuxPrerequisite } from '../../../debugging/coreclr/prereqManager';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction, DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../debugging/coreclr/prereqManager';
 import { PlatformOS } from '../../../utils/platform';
 import { DockerClient } from '../../../debugging/coreclr/dockerClient';
+import { MSBuildClient } from '../../../debugging/coreclr/msBuildClient';
 
 suite('debugging', () => {
     suite('coreclr', () => {
@@ -49,6 +50,48 @@ suite('debugging', () => {
 
                 generateTest('Linux daemon', true, 'Linux');
                 generateTest('Windows daemon', false, 'Windows');
+            });
+
+            suite('DotNetSdkInstalledPrerequisite', () => {
+                test('Installed', async () => {
+                    const msBuildClient = <MSBuildClient>{
+                        getVersion: () => Promise.resolve('2.1.402')
+                    };
+
+                    let shown = false;
+
+                    const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                        shown = true;
+                        return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                    };
+
+                    const prerequisite = new DotNetSdkInstalledPrerequisite(msBuildClient, showErrorMessage);
+
+                    const prereqResult = await prerequisite.checkPrerequisite();
+
+                    assert.equal(prereqResult, true, 'The prerequisite should pass if the SDK is installed.');
+                    assert.equal(shown, false, 'No error should be shown.');
+                });
+
+                test('Not installed', async () => {
+                    const msBuildClient = <MSBuildClient>{
+                        getVersion: () => Promise.resolve(undefined)
+                    };
+
+                    let shown = false;
+
+                    const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                        shown = true;
+                        return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                    };
+
+                    const prerequisite = new DotNetSdkInstalledPrerequisite(msBuildClient, showErrorMessage);
+
+                    const prereqResult = await prerequisite.checkPrerequisite();
+
+                    assert.equal(prereqResult, false, 'The prerequisite should fail if no SDK is installed.');
+                    assert.equal(shown, true, 'An error should be shown.');
+                });
             });
 
             suite('LinuxUserInDockerGroupPrerequisite', () => {
