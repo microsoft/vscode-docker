@@ -7,8 +7,8 @@ import * as vscode from 'vscode';
 import { BrowserClient } from './browserClient';
 import { DockerClient } from './dockerClient';
 import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
+import { DotNetClient } from './dotNetClient';
 import { FileSystemProvider } from './fsProvider';
-import { MSBuildClient } from './msBuildClient';
 import { OSProvider } from './osProvider';
 import { ProcessProvider } from './processProvider';
 
@@ -74,7 +74,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 
 export class DotNetSdkInstalledPrerequisite implements Prerequisite {
     constructor(
-        private readonly msbuildClient: MSBuildClient,
+        private readonly msbuildClient: DotNetClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 

@@ -9,12 +9,12 @@ export type MSBuildExecOptions = {
     properties?: { [key: string]: string };
 };
 
-export interface MSBuildClient {
+export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
 }
 
-export class CommandLineMSBuildClient implements MSBuildClient {
+export class CommandLineDotNetClient implements DotNetClient {
     constructor(private readonly processProvider: ProcessProvider) {
     }
 
@@ -50,4 +50,4 @@ export class CommandLineMSBuildClient implements MSBuildClient {
     }
 }
 
-export default CommandLineMSBuildClient;
+export default CommandLineDotNetClient;

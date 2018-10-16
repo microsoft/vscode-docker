@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
+import { DotNetClient } from "./dotNetClient";
 import { FileSystemProvider } from "./fsProvider";
-import { MSBuildClient } from "./msBuildClient";
 import { TempFileProvider } from './tempFileProvider';
 
 const getTargetPathProjectFileContent =
@@ -31,7 +31,7 @@ export interface NetCoreProjectProvider {
 export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
     constructor(
         private readonly fsProvider: FileSystemProvider,
-        private readonly msBuildClient: MSBuildClient,
+        private readonly msBuildClient: DotNetClient,
         private readonly tempFileProvider: TempFileProvider) {
     }
 

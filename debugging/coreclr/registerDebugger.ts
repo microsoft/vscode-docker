@@ -10,8 +10,8 @@ import { DockerDebugSessionManager } from './debugSessionManager';
 import CliDockerClient from './dockerClient';
 import DockerDebugConfigurationProvider from './dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './dockerManager';
+import CommandLineDotNetClient from './dotNetClient';
 import { LocalFileSystemProvider } from './fsProvider';
-import CommandLineMSBuildClient from './msBuildClient';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import LocalOSProvider from './osProvider';
 import { DefaultOutputManager } from './outputManager';
@@ -25,7 +25,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
 
     const processProvider = new ChildProcessProvider();
     const dockerClient = new CliDockerClient(processProvider);
-    const msBuildClient = new CommandLineMSBuildClient(processProvider);
+    const msBuildClient = new CommandLineDotNetClient(processProvider);
     const osProvider = new LocalOSProvider();
 
     const dockerOutputChannel = vscode.window.createOutputChannel('Docker');

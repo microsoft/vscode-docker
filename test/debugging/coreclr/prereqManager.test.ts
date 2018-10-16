@@ -10,7 +10,7 @@ import { ProcessProvider } from '../../../debugging/coreclr/processProvider';
 import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction, DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../debugging/coreclr/prereqManager';
 import { PlatformOS } from '../../../utils/platform';
 import { DockerClient } from '../../../debugging/coreclr/dockerClient';
-import { MSBuildClient } from '../../../debugging/coreclr/msBuildClient';
+import { DotNetClient } from '../../../debugging/coreclr/dotNetClient';
 
 suite('debugging', () => {
     suite('coreclr', () => {
@@ -54,7 +54,7 @@ suite('debugging', () => {
 
             suite('DotNetSdkInstalledPrerequisite', () => {
                 test('Installed', async () => {
-                    const msBuildClient = <MSBuildClient>{
+                    const msBuildClient = <DotNetClient>{
                         getVersion: () => Promise.resolve('2.1.402')
                     };
 
@@ -74,7 +74,7 @@ suite('debugging', () => {
                 });
 
                 test('Not installed', async () => {
-                    const msBuildClient = <MSBuildClient>{
+                    const msBuildClient = <DotNetClient>{
                         getVersion: () => Promise.resolve(undefined)
                     };
 
