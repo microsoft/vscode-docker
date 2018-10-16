@@ -102,7 +102,7 @@ suite('debugging', () => {
                             isMac
                         }
 
-                        let processProvider: ProcessProvider;
+                        let processProvider = <ProcessProvider>{};
                         let listed = false;
 
                         if (os === 'Linux' && !isMac) {

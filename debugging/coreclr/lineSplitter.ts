@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 export class LineSplitter implements vscode.Disposable {
     private readonly emitter: vscode.EventEmitter<string> = new vscode.EventEmitter<string>();
-    private buffer: string;
+    private buffer: string | undefined;
 
     public get onLine(): vscode.Event<string> {
         return this.emitter.event;
