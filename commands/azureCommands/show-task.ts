@@ -28,6 +28,5 @@ export async function showTaskProperties(context?: TaskNode): Promise<void> {
     const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let item: Task = await client.tasks.get(resourceGroup.name, registry.name, task);
     let indentation = 1;
-    let replacer;
-    openTask(JSON.stringify(item, replacer, indentation), task);
+    openTask(<string>JSON.stringify(item, undefined, indentation), task);
 }

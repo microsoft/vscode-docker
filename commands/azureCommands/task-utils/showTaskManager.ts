@@ -7,7 +7,7 @@ export class TaskContentProvider implements vscode.TextDocumentContentProvider {
     constructor() { }
 
     public provideTextDocumentContent(uri: vscode.Uri): string {
-        const parse: { content: string } = JSON.parse(uri.query);
+        const parse: { content: string } = <{ content: string }>JSON.parse(uri.query);
         return decodeBase64(parse.content);
     }
 

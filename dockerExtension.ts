@@ -280,9 +280,8 @@ async function createWebApp(
         open
       );
       if (response === open) {
-        opn(
-          'https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account'
-        );
+        // tslint:disable-next-line:no-unsafe-any
+        opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
       }
     }
   }

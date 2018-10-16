@@ -11,7 +11,6 @@ import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 

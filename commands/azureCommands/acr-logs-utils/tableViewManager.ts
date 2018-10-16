@@ -4,7 +4,7 @@ import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
 import { accessLog } from './logFileManager';
-import { LogData } from './tableDataManager'
+import { Filter, LogData } from './tableDataManager'
 export class LogTableWebview {
     private logData: LogData;
     private panel: vscode.WebviewPanel;
@@ -27,16 +27,17 @@ export class LogTableWebview {
     //Post Opening communication from webview
     /** Setup communication with the webview sorting out received mesages from its javascript file */
     private setupIncomingListeners(): void {
-        this.panel.webview.onDidReceiveMessage(async (message) => {
+        this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
             if (message.logRequest) {
                 const itemNumber: number = +message.logRequest.id;
-                this.logData.getLink(itemNumber).then((url) => {
+                await this.logData.getLink(itemNumber).then((url) => {
                     if (url !== 'requesting') {
                         accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
                     }
                 });
 
             } else if (message.copyRequest) {
+                // tslint:disable-next-line:no-unsafe-any
                 clipboardy.writeSync(message.copyRequest.text);
 
             } else if (message.loadMore) {
@@ -259,4 +260,11 @@ export class LogTableWebview {
         if (secs < 63072000) { return "1 year ago"; }
         return Math.floor(secs / 31536000) + " years ago";
     }
+}
+
+interface IMessage {
+    logRequest?: { id: number; download: boolean };
+    copyRequest?: { text: string };
+    loadMore?: string;
+    loadFiltered?: { filterString: Filter };
 }

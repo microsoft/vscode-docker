@@ -110,6 +110,7 @@ export class LogData {
             let items: string[] = filter.image.split(':')
             const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(this.registry, 'repository:' + items[0] + ':pull');
             let digest;
+            // tslint:disable-next-line:no-unsafe-any
             await request.get('https://' + this.registry.loginServer + `/v2/${items[0]}/manifests/${items[1]}`, {
                 auth: {
                     bearer: acrAccessToken

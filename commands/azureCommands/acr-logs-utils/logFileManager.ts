@@ -10,7 +10,7 @@ export class LogContentProvider implements vscode.TextDocumentContentProvider {
     constructor() { }
 
     public provideTextDocumentContent(uri: vscode.Uri): string {
-        let parse: { log: string } = JSON.parse(uri.query);
+        let parse: { log: string } = <{ log: string }>JSON.parse(uri.query);
         return decodeBase64(parse.log);
     }
 
@@ -39,7 +39,7 @@ export function accessLog(url: string, title: string, download: boolean): void {
     blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, async (error, text, result, response) => {
         if (response) {
             if (download) {
-                downloadLog(text, title);
+                await downloadLog(text, title);
             } else {
                 openLogInNewWindow(text, title);
             }

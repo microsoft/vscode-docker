@@ -13,6 +13,7 @@ import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
 import * as vscode from "vscode";
+import { parseError } from 'vscode-azureextensionui';
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
@@ -235,9 +236,10 @@ export async function streamLogs(registry: Registry, run: Run, outputChannel: vs
         try {
             props = await getBlobProperties(blobInfo, blob);
             metadata = props.metadata;
-        } catch (error) {
+        } catch (err) {
+            const error = parseError(err);
             //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
-            if (error.code === "NotFound") { return; } else { throw error; }
+            if (error.errorType === "NotFound") { return; } else { throw error; }
         }
         available = +props.contentLength;
         let text: string;

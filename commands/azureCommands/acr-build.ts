@@ -1,7 +1,6 @@
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
-import { Run, SourceUploadDefinition } from 'azure-arm-containerregistry/lib/models';
-import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models/dockerBuildRequest";
-import { Registry } from 'azure-arm-containerregistry/lib/models/registry';
+import { Registry, Run, SourceUploadDefinition } from 'azure-arm-containerregistry/lib/models';
+import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fs from 'fs';
@@ -67,7 +66,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     const run: Run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
     status.appendLine("Schedule Run " + run.runId);
 
-    streamLogs(registry, run, status, client);
+    await streamLogs(registry, run, status, client);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string, folder: vscode.WorkspaceFolder): Promise<string> {
@@ -77,10 +76,8 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     process.chdir(source);
     fs.readdir(source, (err, items) => {
         items = filter(items);
-        tar.c(
-            {},
-            items
-        ).pipe(fs.createWriteStream(tarFilePath));
+        // tslint:disable-next-line:no-unsafe-any
+        tar.c({}, items).pipe(fs.createWriteStream(tarFilePath));
         process.chdir(current);
     });
 
