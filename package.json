@@ -62,7 +62,8 @@
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onCommand:vscode-docker.pull-ACR-Image",
     "onView:dockerExplorer",
-    "onDebugInitialConfigurations"
+    "onDebugInitialConfigurations",
+    "onDebugResolve:docker-coreclr"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -250,7 +251,7 @@
     "debuggers": [
       {
         "type": "docker",
-        "label": "Docker",
+        "label": "Docker: Node.js",
         "configurationSnippets": [
           {
             "label": "Docker: Attach to Node",
@@ -267,6 +268,74 @@
             }
           }
         ]
+      },
+      {
+        "type": "docker-coreclr",
+        "label": "Docker: Launch .NET Core ASP.NET (Preview)",
+        "configurationSnippets": [
+          {
+            "label": "Docker: Launch .NET Core ASP.NET (Preview)",
+            "description": "Docker: Launch .NET Core ASP.NET (Preview)",
+            "body": {
+              "name": "Docker: Launch .NET Core ASP.NET (Preview)",
+              "type": "docker-coreclr",
+              "request": "launch",
+              "preLaunchTask": "build",
+              "dockerBuild": {
+              },
+              "dockerRun": {
+              }
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "appFolder": {
+                "type": "string",
+                "description": "Path to the folder for the application."
+              },
+              "appOutput": {
+                "type": "string",
+                "description": "Path to the output assembly for the application."
+              },
+              "appProject": {
+                "type": "string",
+                "description": "Path to the application project file."
+              },
+              "dockerBuild": {
+                "description": "Options for building the Docker image used for debugging.",
+                "properties": {
+                  "context": {
+                    "type": "string",
+                    "description": "Path to the Docker build context."
+                  },
+                  "dockerfile": {
+                    "type": "string",
+                    "description": "Path to the Dockerfile used for the build."
+                  },
+                  "tag": {
+                    "type": "string",
+                    "description": "Tag applied to the Docker image used for debugging."
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "Docker build target (stage) used for debugging."
+                  }
+                }
+              },
+              "dockerRun": {
+                "description": "Options for running the Docker container used for debugging.",
+                "properties": {
+                  "containerName": {
+                    "type": "string",
+                    "description": "Name of the container used for debugging."
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     ],
     "languages": [

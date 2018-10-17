@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/windowsVersion';
-import { OS, Platform } from './config-utils';
+import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 // This file handles both ASP.NET core and .NET Core Console
@@ -155,7 +155,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string, { version }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {

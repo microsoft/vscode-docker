@@ -1,3 +1,8 @@
+## 0.x.x - Unreleased
+
+### Added
+* Adds preview support for debugging .NET Core web applications running in Linux Docker containers.
+
 ## 0.3.1 - 25 September 2018
 
 ### Fixed

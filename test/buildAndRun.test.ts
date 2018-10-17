@@ -12,7 +12,7 @@ import { Uri } from 'vscode';
 import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
 import * as path from 'path';
-import { Platform } from "../configureWorkspace/config-utils";
+import { Platform } from '../utils/platform';
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
 import { configure } from '../configureWorkspace/configure';
