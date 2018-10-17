@@ -25,7 +25,7 @@ export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
     genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPort: ''
+    defaultPort: undefined
 };
 
 const AspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";

@@ -59,7 +59,7 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
-    defaultPort: string
+    defaultPort: string | undefined // '' = defaults to empty but still asks user if they want a port, undefined = don't ask at all
 }
 
 export function getExposeStatements(port: string): string {
@@ -353,7 +353,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     properties.configureOs = os;
 
     let port: string | undefined = options.port;
-    if (!port) {
+    if (!port && generatorInfo.defaultPort !== undefined) {
         port = await promptForPort(generatorInfo.defaultPort);
     }
 
