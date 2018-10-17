@@ -15,12 +15,19 @@ export class Repository {
         public password?: string;
         public username?: string;
 
-        constructor(registry: Registry, repository: string, password?: string, username?: string) {
-                this.registry = registry;
-                this.resourceGroupName = acrTools.getResourceGroupName(registry);
-                this.subscription = acrTools.getSubscriptionFromRegistry(registry);
-                this.name = repository;
-                if (password) { this.password = password; }
-                if (username) { this.username = username; }
+        private constructor() {
+        }
+
+        public static async Create(registry: Registry, repositoryName: string, password?: string, username?: string): Promise<Repository> {
+                let repository = new Repository();
+
+                repository.registry = registry;
+                repository.resourceGroupName = acrTools.getResourceGroupName(registry);
+                repository.subscription = await acrTools.getSubscriptionFromRegistry(registry);
+                repository.name = repositoryName;
+                repository.password = password;
+                repository.username = username;
+
+                return repository;
         }
 }

@@ -9,7 +9,6 @@ import { getTenantId, nonNullValue } from '../../utils/nonNull';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 
 export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
-
     if (node && node.azureAccount) {
         const tenantId: string = getTenantId(node.subscription);
         const session: AzureSession = nonNullValue(
@@ -22,5 +21,4 @@ export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode
         // tslint:disable-next-line:no-unsafe-any
         opn(url);
     }
-
 }

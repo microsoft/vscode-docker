@@ -10,7 +10,9 @@ import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { ServiceClientCredentials } from 'ms-rest';
-import { addExtensionUserAgent } from 'vscode-azureextensionui';
+import * as opn from 'opn';
+import * as vscode from 'vscode';
+import { addExtensionUserAgent, callWithTelemetryAndErrorHandling, IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
 import { AzureAccount, AzureSession } from '../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
@@ -22,15 +24,28 @@ import { getSubscriptionId, getTenantId } from './nonNull';
 */
 
 export class AzureUtilityManager {
-
-    //SETUP
     private static _instance: AzureUtilityManager;
-    private azureAccount: AzureAccount | undefined;
+    private _azureAccountPromise: Promise<AzureAccount>;
 
     private constructor() { }
 
-    public static hasLoadedUtilityManager(): boolean {
-        if (AzureUtilityManager._instance) { return true; } else { return false; }
+    private async loadAzureAccountExtension(): Promise<AzureAccount> {
+        let azureAccount: AzureAccount | undefined;
+
+        // tslint:disable-next-line:no-function-expression
+        await callWithTelemetryAndErrorHandling('docker.loadAzureAccountExt', async function (this: IActionContext): Promise<void> {
+            try {
+                let azureAccountExtension = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
+                this.properties.found = azureAccountExtension ? 'true' : 'false';
+                if (azureAccountExtension) {
+                    azureAccount = <AzureAccount>await azureAccountExtension.activate();
+                }
+            } catch (error) {
+                throw new Error('Failed to activate the Azure Account Extension: ' + parseError(error).message);
+            }
+        });
+
+        return azureAccount;
     }
 
     public static getInstance(): AzureUtilityManager {
@@ -40,22 +55,34 @@ export class AzureUtilityManager {
         return AzureUtilityManager._instance;
     }
 
-    //This function has to be called explicitly before using the singleton.
-    public setAccount(azureAccount: AzureAccount): void {
-        this.azureAccount = azureAccount;
-    }
-
-    //GETTERS
-    public getAccount(): AzureAccount {
-        if (this.azureAccount) {
-            return this.azureAccount;
+    public async tryGetAzureAccount(): Promise<AzureAccount | undefined> {
+        if (!this._azureAccountPromise) {
+            this._azureAccountPromise = this.loadAzureAccountExtension();
         }
-        throw new Error('Azure account is not present, you may have forgotten to call setAccount');
+
+        return await this._azureAccountPromise;
     }
 
-    public getSession(subscription: SubscriptionModels.Subscription): AzureSession {
+    public async requireAzureAccount(): Promise<AzureAccount | undefined> {
+        let azureAccount = await this.tryGetAzureAccount();
+        if (azureAccount) {
+            return azureAccount;
+        } else {
+            const open: vscode.MessageItem = { title: "View in Marketplace" };
+            const msg = 'This functionality requires installing the Azure Account extension.';
+            let response = await vscode.window.showErrorMessage(msg, open);
+            if (response === open) {
+                // tslint:disable-next-line:no-unsafe-any
+                opn('https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account');
+            }
+
+            throw new UserCancelledError(msg);
+        }
+    }
+
+    public async getSession(subscription: SubscriptionModels.Subscription): Promise<AzureSession> {
         const tenantId: string = getTenantId(subscription);
-        const azureAccount: AzureAccount = this.getAccount();
+        const azureAccount: AzureAccount = await this.requireAzureAccount();
         let foundSession = azureAccount.sessions.find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
         if (!foundSession) {
             throw new Error(`Could not find a session with tenantId "${tenantId}"`);
@@ -64,8 +91,8 @@ export class AzureUtilityManager {
         return foundSession;
     }
 
-    public getFilteredSubscriptionList(): SubscriptionModels.Subscription[] {
-        return this.getAccount().filters.map<SubscriptionModels.Subscription>(filter => {
+    public async getFilteredSubscriptionList(): Promise<SubscriptionModels.Subscription[]> {
+        return (await this.requireAzureAccount()).filters.map<SubscriptionModels.Subscription>(filter => {
             return {
                 id: filter.subscription.id,
                 subscriptionId: filter.subscription.subscriptionId,
@@ -78,39 +105,40 @@ export class AzureUtilityManager {
         });
     }
 
-    public getContainerRegistryManagementClient(subscription: SubscriptionModels.Subscription): ContainerRegistryManagementClient {
-        let client = new ContainerRegistryManagementClient(this.getCredentialByTenantId(subscription), getSubscriptionId(subscription));
+    public async getContainerRegistryManagementClient(subscription: SubscriptionModels.Subscription): Promise<ContainerRegistryManagementClient> {
+        let client = new ContainerRegistryManagementClient(await this.getCredentialByTenantId(subscription), getSubscriptionId(subscription));
         addExtensionUserAgent(client);
         return client;
     }
 
-    public getResourceManagementClient(subscription: SubscriptionModels.Subscription): ResourceManagementClient {
-        return new ResourceManagementClient(this.getCredentialByTenantId(getTenantId(subscription)), getSubscriptionId(subscription));
+    public async getResourceManagementClient(subscription: SubscriptionModels.Subscription): Promise<ResourceManagementClient> {
+        return new ResourceManagementClient(await this.getCredentialByTenantId(getTenantId(subscription)), getSubscriptionId(subscription));
     }
 
     public async getRegistries(subscription?: Subscription, resourceGroup?: string,
-        compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically): Promise<ContainerModels.Registry[]> {
+        compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically
+    ): Promise<ContainerModels.Registry[]> {
 
         let registries: ContainerModels.Registry[] = [];
 
         if (subscription && resourceGroup) {
             //Get all registries under one resourcegroup
-            const client = this.getContainerRegistryManagementClient(subscription);
+            const client = await this.getContainerRegistryManagementClient(subscription);
             registries = await client.registries.listByResourceGroup(resourceGroup);
 
         } else if (subscription) {
             //Get all registries under one subscription
-            const client = this.getContainerRegistryManagementClient(subscription);
+            const client = await this.getContainerRegistryManagementClient(subscription);
             registries = await client.registries.list();
 
         } else {
             //Get all registries for all subscriptions
-            const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptionList();
+            const subs: SubscriptionModels.Subscription[] = await this.getFilteredSubscriptionList();
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
 
             for (let sub of subs) {
                 subPool.addTask(async () => {
-                    const client = this.getContainerRegistryManagementClient(sub);
+                    const client = await this.getContainerRegistryManagementClient(sub);
                     let subscriptionRegistries: ContainerModels.Registry[] = await client.registries.list();
                     registries = registries.concat(subscriptionRegistries);
                 });
@@ -130,16 +158,16 @@ export class AzureUtilityManager {
 
     public async getResourceGroups(subscription?: SubscriptionModels.Subscription): Promise<ResourceGroup[]> {
         if (subscription) {
-            const resourceClient = this.getResourceManagementClient(subscription);
+            const resourceClient = await this.getResourceManagementClient(subscription);
             return await resourceClient.resourceGroups.list();
         }
-        const subs = this.getFilteredSubscriptionList();
+        const subs = await this.getFilteredSubscriptionList();
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
         for (let sub of subs) {
             subPool.addTask(async () => {
-                const resourceClient = this.getResourceManagementClient(sub);
+                const resourceClient = await this.getResourceManagementClient(sub);
                 const internalGroups = await resourceClient.resourceGroups.list();
                 resourceGroups = resourceGroups.concat(internalGroups);
             });
@@ -148,9 +176,9 @@ export class AzureUtilityManager {
         return resourceGroups;
     }
 
-    public getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): ServiceClientCredentials {
+    public async getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): Promise<ServiceClientCredentials> {
         let tenantId = typeof tenantIdOrSubscription === 'string' ? tenantIdOrSubscription : getTenantId(tenantIdOrSubscription);
-        const session = this.getAccount().sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session = (await this.requireAzureAccount()).sessions.find((azureSession) => azureSession.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
             return session.credentials;
@@ -160,7 +188,7 @@ export class AzureUtilityManager {
     }
 
     public async getLocationsBySubscription(subscription: SubscriptionModels.Subscription): Promise<SubscriptionModels.Location[]> {
-        const credential = this.getCredentialByTenantId(getTenantId(subscription));
+        const credential = await this.getCredentialByTenantId(getTenantId(subscription));
         const client = new SubscriptionClient(credential);
         const locations = <SubscriptionModels.Location[]>(await client.subscriptions.listLocations(getSubscriptionId(subscription)));
         return locations;
@@ -169,9 +197,10 @@ export class AzureUtilityManager {
     //CHECKS
     //Provides a unified check for login that should be called once before using the rest of the singletons capabilities
     public async waitForLogin(): Promise<boolean> {
-        if (!this.azureAccount) {
+        let account = await this.tryGetAzureAccount();
+        if (!account) {
             return false;
         }
-        return await this.azureAccount.waitForLogin();
+        return await account.waitForLogin();
     }
 }

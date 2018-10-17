@@ -18,7 +18,7 @@ import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubsc
 export async function createRegistry(): Promise<Registry> {
     const subscription: SubscriptionModels.Subscription = await quickPickSubscription();
     const resourceGroup: ResourceGroup = await quickPickResourceGroup(true, subscription);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registryName: string = await acquireRegistryName(client);
     const sku: string = await quickPickSKU();
     const location = await quickPickLocation(subscription);

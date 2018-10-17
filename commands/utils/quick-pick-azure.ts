@@ -64,7 +64,7 @@ export async function quickPickSKU(): Promise<string> {
 }
 
 export async function quickPickSubscription(): Promise<Subscription> {
-    const subscriptions = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+    const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
         vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", "Open Portal").then(val => {
             if (val === "Open Portal") {
@@ -144,7 +144,7 @@ export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean>
 
 /*Creates a new resource group within the current subscription */
 async function createNewResourceGroup(loc: string, subscription?: Subscription): Promise<ResourceGroup> {
-    const resourceGroupClient = AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
+    const resourceGroupClient = await AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
 
     let opt: vscode.InputBoxOptions = {
         validateInput: async (value: string) => { return await checkForValidResourcegroupName(value, resourceGroupClient) },
