@@ -34,6 +34,8 @@ export class AzureUtilityManager {
 
         // tslint:disable-next-line:no-function-expression
         await callWithTelemetryAndErrorHandling('docker.loadAzureAccountExt', async function (this: IActionContext): Promise<void> {
+            this.properties.isActivationEvent = 'true';
+
             try {
                 let azureAccountExtension = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
                 this.properties.found = azureAccountExtension ? 'true' : 'false';
