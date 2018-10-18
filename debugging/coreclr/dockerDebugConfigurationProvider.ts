@@ -14,6 +14,7 @@ import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
 
 interface DockerDebugBuildOptions {
+    args?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
     labels?: { [key: string]: string };
@@ -130,6 +131,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
 
+        const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
         const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
             || { 'com.microsoft.created-by': 'visual-studio-code' };
 
@@ -137,6 +139,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             appFolder: resolvedAppFolder,
             appOutput,
             build: {
+                args,
                 context: resolvedContext,
                 dockerfile,
                 labels,

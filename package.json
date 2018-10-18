@@ -304,6 +304,13 @@
               "dockerBuild": {
                 "description": "Options for building the Docker image used for debugging.",
                 "properties": {
+                  "args": {
+                    "type": "object",
+                    "description": "Build arguments applied to the Docker image used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
                   "context": {
                     "type": "string",
                     "description": "Path to the Docker build context."

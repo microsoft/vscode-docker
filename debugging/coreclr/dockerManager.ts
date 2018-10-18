@@ -315,6 +315,10 @@ export class DefaultDockerManager implements DockerManager {
             return false;
         }
 
+        if (!DefaultDockerManager.compareDictionary(options1, options2, options => options.args)) {
+            return false;
+        }
+
         if (!DefaultDockerManager.compareProperty(options1, options2, options => options.tag)) {
             return false;
         }

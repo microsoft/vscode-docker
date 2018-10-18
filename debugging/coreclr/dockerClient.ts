@@ -6,6 +6,7 @@ import { LineSplitter } from "./lineSplitter";
 import { ProcessProvider } from "./processProvider";
 
 export type DockerBuildImageOptions = {
+    args?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
     labels?: { [key: string]: string };
@@ -63,6 +64,10 @@ export class CliDockerClient implements DockerClient {
 
         if (options && options.dockerfile) {
             command += ` -f ${options.dockerfile}`;
+        }
+
+        if (options && options.args) {
+            command += Object.keys(options.args).map(arg => ` --build-arg "${arg}=${options.args[arg]}"`).join(' ');
         }
 
         if (options && options.labels) {
