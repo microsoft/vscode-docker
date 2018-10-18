@@ -135,17 +135,17 @@
       ],
       "explorer/context": [
         {
-          "when": "resourceFilename =~ /\\.*dockerfile$/i",
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.queue-ACR-Build",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /\\.ya*ml$/i",
+          "when": "resourceFilename =~ /\\.ya?ml$/i",
           "command": "vscode-docker.run-ACR-TaskFile",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /\\.*dockerfile$/i",
+          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         },
@@ -514,8 +514,8 @@
       },
       {
         "command": "vscode-docker.run-ACR-TaskFile",
-        "title": "Run Task File",
-        "description": "Run a task from a yaml file.",
+        "title": "Run ACR Task File",
+        "description": "Run an ACR task from a yaml file.",
         "category": "Docker"
       },
       {

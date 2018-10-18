@@ -10,9 +10,9 @@ import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { resolveFileItem } from '../build-image';
-import { getTempSourceArchivePath, uploadSourceCode } from '../utils/OutputChannel';
+import { FileType, resolveFileItem } from '../build-image';
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
+import { getTempSourceArchivePath, uploadSourceCode } from '../utils/SourceArchiveUtility';
 
 const status = vscode.window.createOutputChannel('Run ACR Task status');
 
@@ -72,7 +72,7 @@ export async function runTaskFile(yamlFileUri?: vscode.Uri): Promise<void> {
     } else {
         folder = await (<any>vscode).window.showWorkspaceFolderPick();
     }
-    const yamlItem = await resolveFileItem(folder, yamlFileUri, "Yaml");
+    const yamlItem = await resolveFileItem(folder, yamlFileUri, FileType.Yaml);
     const sourceLocation: string = folder.uri.path;
     const tarFilePath = getTempSourceArchivePath(status);
 
