@@ -155,6 +155,7 @@ Customize the Docker image build process by adding properties under the `dockerB
 | --- | --- | --- |
 | `context` | The Docker context used during the build process. | The workspace folder, if the same as the application folder; otherwise, the application's parent (i.e. solution) folder |
 | `dockerfile` | The path to the Dockerfile used to build the image. | The file `Dockerfile` in the application folder |
+| `labels` | The set of labels added to the image. | `com.microsoft.created-by` = `visual-studio-code` |
 | `tag` | The tag added to the image. | `<Application Name>:dev` |
 | `target` | The target (stage) of the Dockerfile from which to build the image. | `base`
 

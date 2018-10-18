@@ -8,6 +8,7 @@ import { ProcessProvider } from "./processProvider";
 export type DockerBuildImageOptions = {
     context?: string;
     dockerfile?: string;
+    labels?: { [key: string]: string };
     tag?: string;
     target?: string;
 };
@@ -62,6 +63,10 @@ export class CliDockerClient implements DockerClient {
 
         if (options && options.dockerfile) {
             command += ` -f ${options.dockerfile}`;
+        }
+
+        if (options && options.labels) {
+            command += Object.keys(options.labels).map(label => ` --label "${label}=${options.labels[label]}"`).join(' ');
         }
 
         if (options && options.tag) {

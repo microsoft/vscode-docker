@@ -281,10 +281,8 @@
               "type": "docker-coreclr",
               "request": "launch",
               "preLaunchTask": "build",
-              "dockerBuild": {
-              },
-              "dockerRun": {
-              }
+              "dockerBuild": {},
+              "dockerRun": {}
             }
           }
         ],
@@ -313,6 +311,13 @@
                   "dockerfile": {
                     "type": "string",
                     "description": "Path to the Dockerfile used for the build."
+                  },
+                  "labels": {
+                    "type": "object",
+                    "description": "Labels applied to the Docker image used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   },
                   "tag": {
                     "type": "string",
