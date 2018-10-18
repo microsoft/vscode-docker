@@ -37,6 +37,7 @@ export type DockerRunContainerOptions = {
     containerName?: string;
     entrypoint?: string;
     env?: { [key: string]: string };
+    envFiles?: string[];
     volumes?: DockerContainerVolume[];
 };
 
@@ -68,11 +69,11 @@ export class CliDockerClient implements DockerClient {
         }
 
         if (options && options.args) {
-            command += Object.keys(options.args).map(arg => ` --build-arg "${arg}=${options.args[arg]}"`).join(' ');
+            command += Object.keys(options.args).map(arg => ` --build-arg "${arg}=${options.args[arg]}"`).join('');
         }
 
         if (options && options.labels) {
-            command += Object.keys(options.labels).map(label => ` --label "${label}=${options.labels[label]}"`).join(' ');
+            command += Object.keys(options.labels).map(label => ` --label "${label}=${options.labels[label]}"`).join('');
         }
 
         if (options && options.tag) {
@@ -200,7 +201,11 @@ export class CliDockerClient implements DockerClient {
         }
 
         if (options && options.env) {
-            command += Object.keys(options.env).map(envvar => ` -e "${envvar}=${options.env[envvar]}"`).join(' ');
+            command += Object.keys(options.env).map(envvar => ` -e "${envvar}=${options.env[envvar]}"`).join('');
+        }
+
+        if (options && options.envFiles) {
+            command += options.envFiles.map(envFile => ` --env-file "${envFile}"`).join('');
         }
 
         if (options && options.volumes) {

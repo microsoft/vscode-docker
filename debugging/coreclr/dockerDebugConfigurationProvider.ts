@@ -25,6 +25,7 @@ interface DockerDebugBuildOptions {
 interface DockerDebugRunOptions {
     containerName?: string;
     env?: { [key: string]: string };
+    envFiles?: string[];
     os?: PlatformOS;
 }
 
@@ -137,6 +138,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
             || { 'com.microsoft.created-by': 'visual-studio-code' };
 
+        const envFiles = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.envFiles
+            ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
+            : undefined;
+
         const result = await this.dockerManager.prepareForLaunch({
             appFolder: resolvedAppFolder,
             appOutput,
@@ -151,6 +156,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             run: {
                 containerName,
                 env,
+                envFiles,
                 os,
             }
         });

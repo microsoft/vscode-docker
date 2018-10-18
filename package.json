@@ -349,6 +349,13 @@
                     "additionalProperties": {
                       "type": "string"
                     }
+                  },
+                  "envFiles": {
+                    "type": "array",
+                    "description": "Files of environment variables read in and applied to the Docker container used for debugging.",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }

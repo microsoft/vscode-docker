@@ -171,6 +171,7 @@ export class DefaultDockerManager implements DockerManager {
                         containerName: options.containerName,
                         entrypoint,
                         env: options.env,
+                        envFiles: options.envFiles,
                         volumes
                     });
             },
