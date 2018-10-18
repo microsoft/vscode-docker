@@ -356,6 +356,13 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "labels": {
+                    "type": "object",
+                    "description": "Labels applied to the Docker container used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 }
               }

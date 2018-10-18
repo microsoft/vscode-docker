@@ -12,6 +12,7 @@ import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
+import { debug } from 'util';
 
 interface DockerDebugBuildOptions {
     args?: { [key: string]: string };
@@ -26,6 +27,7 @@ interface DockerDebugRunOptions {
     containerName?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
+    labels?: { [key: string]: string };
     os?: PlatformOS;
 }
 
@@ -135,12 +137,15 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
         const env = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.env;
-        const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
-            || { 'com.microsoft.created-by': 'visual-studio-code' };
-
         const envFiles = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.envFiles
             ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
             : undefined;
+
+        const defaultLabels = { 'com.microsoft.created-by': 'visual-studio-code' };
+        const buildLabels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
+            || defaultLabels;
+        const runLabels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
+            || defaultLabels;
 
         const result = await this.dockerManager.prepareForLaunch({
             appFolder: resolvedAppFolder,
@@ -149,7 +154,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 args,
                 context: resolvedContext,
                 dockerfile,
-                labels,
+                labels: buildLabels,
                 tag,
                 target
             },
@@ -157,6 +162,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 containerName,
                 env,
                 envFiles,
+                labels: runLabels,
                 os,
             }
         });

@@ -198,6 +198,7 @@ Customize the Docker container run process by adding properties under the `docke
 | `containerName` | The name of the container. | `<Application Name>-dev` |
 | `env` | Environment variables applied to the container. | None |
 | `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
+| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
 
 Example run customization:
 
@@ -217,7 +218,11 @@ Example run customization:
                 },
                 "envFiles": [
                     "${workspaceFolder}/staging.env"
-                ]
+                ],
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                }
             }
         }
     ]

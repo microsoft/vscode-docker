@@ -38,6 +38,7 @@ export type DockerRunContainerOptions = {
     entrypoint?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
+    labels?: { [key: string]: string };
     volumes?: DockerContainerVolume[];
 };
 
@@ -206,6 +207,10 @@ export class CliDockerClient implements DockerClient {
 
         if (options && options.envFiles) {
             command += options.envFiles.map(envFile => ` --env-file "${envFile}"`).join('');
+        }
+
+        if (options && options.labels) {
+            command += Object.keys(options.labels).map(label => ` --label "${label}=${options.labels[label]}"`).join('');
         }
 
         if (options && options.volumes) {
