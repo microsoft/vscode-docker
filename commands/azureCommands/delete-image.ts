@@ -17,21 +17,21 @@ import * as quickPicks from '../utils/quick-pick-azure';
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function untagAzureImage(context?: AzureImageTagNode): Promise<void> {
-    removeImage(context, true);
+    await removeImage(context, true);
 }
 
 /** Function to delete an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
-    removeImage(context, false);
+    await removeImage(context, false);
 }
 
 /** Function to delete an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  * @param untag : if true deletes the image tag, otherwise removes digest and all other tags associeted to the image selected.
  */
-async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<boolean> {
+async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<void> {
     let action: string = (untag) ? "untag" : "delete";
     let registry: Registry;
     let repo: Repository;
@@ -58,7 +58,7 @@ async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<
     } else {
         digest = await acrTools.getImageDigest(image);
         let images = await acrTools.getImagesByDigest(repo, digest);
-        message = `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.toString()}? `;
+        message = `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.toString()}?`;
         path = `/v2/${repo.name}/manifests/${digest}`;
     }
 
@@ -77,5 +77,4 @@ async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<
             dockerExplorerProvider.refreshRegistries();
         }
     }
-    return true;
 }

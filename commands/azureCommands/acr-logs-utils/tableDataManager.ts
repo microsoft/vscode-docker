@@ -102,7 +102,10 @@ export class LogData {
         if (filter.task) { //Task id
             parsedFilter = `TaskName eq '${filter.task}'`;
         } else if (filter.image) { //Image
-            let items: string[] = filter.image.split(':')
+            let items: string[] = filter.image.split(':');
+            if (items.length !== 2) {
+                throw new Error('Wrong format: It should be <image>:<tag>')
+            }
             const image = new AzureImage(new Repository(this.registry, items[0]), items[1]);
             const digest: string = await getImageDigest(image);
 
