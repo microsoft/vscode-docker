@@ -105,7 +105,7 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
 /** Sends a custom html request to a registry, and retrieves the image's digest.
  * @param image : The targeted image.
  */
-export async function getImageDigest(image: AzureImage): Promise<any> {
+export async function getImageDigest(image: AzureImage): Promise<string> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(image.registry, `repository:${image.repository.name}:pull`);
     let digest: string;
     // tslint:disable-next-line:no-unsafe-any
