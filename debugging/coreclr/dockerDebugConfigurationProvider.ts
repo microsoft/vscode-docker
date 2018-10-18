@@ -24,6 +24,7 @@ interface DockerDebugBuildOptions {
 
 interface DockerDebugRunOptions {
     containerName?: string;
+    env?: { [key: string]: string };
     os?: PlatformOS;
 }
 
@@ -132,6 +133,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
 
         const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
+        const env = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.env;
         const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
             || { 'com.microsoft.created-by': 'visual-studio-code' };
 
@@ -148,6 +150,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             },
             run: {
                 containerName,
+                env,
                 os,
             }
         });

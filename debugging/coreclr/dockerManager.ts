@@ -170,20 +170,12 @@ export class DefaultDockerManager implements DockerManager {
                         command,
                         containerName: options.containerName,
                         entrypoint,
+                        env: options.env,
                         volumes
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
             err => `Unable to start container: ${err}`);
-
-        const cache = await this.appCacheFactory.getStorage(options.appFolder);
-
-        await cache.update<LastContainerRunMetadata>(
-            'run',
-            {
-                containerId,
-                options
-            });
 
         return containerId;
     }

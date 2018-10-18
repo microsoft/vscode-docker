@@ -168,6 +168,7 @@ Customize the Docker container run process by adding properties under the `docke
 | Property | Description | Default |
 | --- | --- | --- |
 | `containerName` | The name of the container. | `<Application Name>-dev` |
+| `env` | Environment variables applied to the container. | None |
 
 ## Configuration Settings
 

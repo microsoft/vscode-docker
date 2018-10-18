@@ -342,6 +342,13 @@
                   "containerName": {
                     "type": "string",
                     "description": "Name of the container used for debugging."
+                  },
+                  "env": {
+                    "type": "object",
+                    "description": "Environment variables applied to the Docker container used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 }
               }
