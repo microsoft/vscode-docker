@@ -31,11 +31,14 @@ export type DockerManagerRunContainerOptions
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
+export type LaunchBuildOptions = Omit<DockerManagerBuildImageOptions, 'appFolder'>;
+export type LaunchRunOptions = Omit<DockerManagerRunContainerOptions, 'appFolder'>;
+
 export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
-    build: Omit<DockerManagerBuildImageOptions, 'appFolder'>;
-    run: Omit<DockerManagerRunContainerOptions, 'appFolder'>;
+    build: LaunchBuildOptions;
+    run: LaunchRunOptions;
 };
 
 export type LaunchResult = {
