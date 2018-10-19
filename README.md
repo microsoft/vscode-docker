@@ -87,7 +87,7 @@ After the container is started, you will be prompted to login to your Azure acco
 
 This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
 
-## Debugging .NET Core ASP.NET (Preview)
+## Debugging .NET Core (Preview)
 
 > Note that Windows containers are **not** currently supported, only Linux containers.
 
@@ -104,15 +104,17 @@ This build includes preview support for connecting to private registries (such a
 
 ### Starting the Debugger
 
-To debug a .NET Core ASP.NET application running in a Linux Docker container, add a Docker .NET Core launch configuration:
+To debug a .NET Core application running in a Linux Docker container, add a Docker .NET Core launch configuration:
 
 1. Switch to the debugging tab.
 1. Select `Add configuration...`
-1. Select `Docker: Launch .NET Core ASP.NET (Preview)`
+1. Select `Docker: Launch .NET Core (Preview)`
 1. Set a breakpoint.
 1. Start debugging.
 
-Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigate to the application's initial page.
+Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  If the Docker container exposes port 80, after the debugger is attached the browser will be launched and navigate to the application's initial page.
+
+> NOTE: you may see errors in the debug console when debugging ends (e.g. "`Error from pipe program 'docker': ...`"). This appears due to debugger issue [#2439](https://github.com/OmniSharp/omnisharp-vscode/issues/2439) and should not impact debugging.
 
 Most properties of the configuration are optional and will be inferred from the project. If not, or if there are additional customizations to be made to the Docker image build or container run process, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
 
@@ -120,7 +122,7 @@ Most properties of the configuration are optional and will be inferred from the 
 {
     "configurations": [
         {
-            "name": "Docker: Launch .NET Core ASP.NET (Preview)",
+            "name": "Docker: Launch .NET Core (Preview)",
             "type": "docker-coreclr",
             "request": "launch",
             "preLaunchTask": "build",

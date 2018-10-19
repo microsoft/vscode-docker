@@ -32,7 +32,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
             return true;
         }
 
-        this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core ASP.NET debugging.')
+        this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core debugging.')
 
         return false;
     }
