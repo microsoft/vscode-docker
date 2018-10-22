@@ -16,11 +16,17 @@ suite('debugging', () => {
     suite('coreclr', () => {
         suite('prereqManager', () => {
             suite('DockerDaemonIsLinuxPrerequisite', () => {
-                const generateTest = (name: string, result: boolean, os: PlatformOS) => {
+                const generateTest = (name: string, result: boolean, os: PlatformOS, lcowEnabled?: boolean) => {
                     test(name, async () => {
+                        let gotInfo = false;
                         let gotVersion = false;
 
                         const dockerClient = <DockerClient>{
+                            getInfo: (options) => {
+                                gotInfo = true;
+
+                                return Promise.resolve(lcowEnabled ? '"windowsfilter (Windows) lcow (Linux)"' : '"windowsfilter (Windows)"');
+                            },
                             getVersion: (options) => {
                                 gotVersion = true;
 
@@ -30,7 +36,9 @@ suite('debugging', () => {
                             }
                         };
 
-                        const osProvider = <OSProvider>{};
+                        const osProvider = <OSProvider>{
+                            os
+                        }
 
                         let shown = false;
 
@@ -44,6 +52,7 @@ suite('debugging', () => {
                         const prereqResult = await prerequisite.checkPrerequisite();
 
                         assert.equal(gotVersion, true, 'The Docker version should have been requested.');
+                        assert.equal(gotInfo, os === 'Windows', 'Info should be requested only if using Windows.');
 
                         assert.equal(prereqResult, result, 'The prerequisite should return `false`.');
                         assert.equal(shown, !result, `An error message should ${result ? 'not ' : ''} have been shown.`);
@@ -52,6 +61,7 @@ suite('debugging', () => {
 
                 generateTest('Linux daemon', true, 'Linux');
                 generateTest('Windows daemon', false, 'Windows');
+                generateTest('Windows daemon', true, 'Windows', true);
             });
 
             suite('DotNetSdkInstalledPrerequisite', () => {
