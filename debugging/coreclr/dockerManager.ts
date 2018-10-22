@@ -14,8 +14,9 @@ import { OSProvider } from './osProvider';
 import { OutputManager } from './outputManager';
 import { ProcessProvider } from './processProvider';
 
-export type DockerManagerBuildImageOptions = {
+type DockerManagerBuildImageOptions = {
     appFolder: string;
+    buildPlatform?: string;
     context: string;
     dockerfile: string;
     platform: PlatformOS;
@@ -23,12 +24,13 @@ export type DockerManagerBuildImageOptions = {
     target?: string;
 };
 
-export type DockerManagerRunContainerOptions = {
+type DockerManagerRunContainerOptions = {
     appFolder: string;
     command?: string;
     containerName?: string;
     entryPoint?: string;
     platform: PlatformOS;
+    runPlatform?: string;
 };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -37,8 +39,8 @@ export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
     platform: PlatformOS;
-    build: Omit<DockerManagerBuildImageOptions, 'appFolder' | 'platform'>;
-    run: Omit<DockerManagerRunContainerOptions, 'appFolder' | 'platform'>;
+    build: Omit<DockerManagerBuildImageOptions, 'appFolder' | 'buildPlatform' | 'platform'>;
+    run: Omit<DockerManagerRunContainerOptions, 'appFolder' | 'platform' | 'runPlatform '>;
 };
 
 export type LaunchResult = {
@@ -65,8 +67,6 @@ type LastContainerRunMetadata = {
 }
 
 export interface DockerManager {
-    buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
-    runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string>;
     prepareForLaunch(options: LaunchOptions): Promise<LaunchResult>;
     cleanupAfterLaunch(): Promise<void>;
 }
@@ -87,7 +87,7 @@ export class DefaultDockerManager implements DockerManager {
         private readonly workspaceState: Memento) {
     }
 
-    public async buildImage(options: DockerManagerBuildImageOptions): Promise<string> {
+    private async buildImage(options: DockerManagerBuildImageOptions): Promise<string> {
         const cache = await this.appCacheFactory.getStorage(options.appFolder);
         const buildMetadata = await cache.get<LastImageBuildMetadata>('build');
         const dockerIgnorePath = path.join(options.context, '.dockerignore');
@@ -123,7 +123,7 @@ export class DefaultDockerManager implements DockerManager {
             }
         }
 
-        const buildOptions: DockerBuildImageOptions = { ...options, platform: await this.getDockerPlatform(options.platform) };
+        const buildOptions: DockerBuildImageOptions = { ...options, platform: options.buildPlatform };
 
         const imageId = await this.dockerOutputManager.performOperation(
             'Building Docker image...',
@@ -146,7 +146,7 @@ export class DefaultDockerManager implements DockerManager {
         return imageId;
     }
 
-    public async runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string> {
+    private async runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string> {
         if (options.containerName === undefined) {
             throw new Error('No container name was provided.');
         }
@@ -180,7 +180,7 @@ export class DefaultDockerManager implements DockerManager {
                     command,
                     containerName: options.containerName,
                     entrypoint,
-                    platform: await this.getDockerPlatform(options.platform),
+                    platform: options.runPlatform,
                     volumes
                 };
 
@@ -202,9 +202,11 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
-        const imageId = await this.buildImage({ appFolder: options.appFolder, platform: options.platform, ...options.build });
+        const dockerPlatform = await this.getDockerPlatform(options.platform);
 
-        const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, platform: options.platform, ...options.run });
+        const imageId = await this.buildImage({...options.build, appFolder: options.appFolder, buildPlatform: dockerPlatform, platform: options.platform });
+
+        const containerId = await this.runContainer(imageId, {...options.run, appFolder: options.appFolder, platform: options.platform, runPlatform: dockerPlatform });
 
         await this.addToDebugContainers(containerId);
 
