@@ -14,28 +14,31 @@ import { OSProvider } from './osProvider';
 import { OutputManager } from './outputManager';
 import { ProcessProvider } from './processProvider';
 
-export type DockerManagerBuildImageOptions
-    = DockerBuildImageOptions
-    & {
-        appFolder: string;
-        context: string;
-        dockerfile: string;
-    };
+export type DockerManagerBuildImageOptions = {
+    appFolder: string;
+    context: string;
+    dockerfile: string;
+    platform: PlatformOS;
+    tag?: string;
+    target?: string;
+};
 
-export type DockerManagerRunContainerOptions
-    = DockerRunContainerOptions
-    & {
-        appFolder: string;
-        os: PlatformOS;
-    };
+export type DockerManagerRunContainerOptions = {
+    appFolder: string;
+    command?: string;
+    containerName?: string;
+    entryPoint?: string;
+    platform: PlatformOS;
+};
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
-    build: Omit<DockerManagerBuildImageOptions, 'appFolder'>;
-    run: Omit<DockerManagerRunContainerOptions, 'appFolder'>;
+    platform: PlatformOS;
+    build: Omit<DockerManagerBuildImageOptions, 'appFolder' | 'platform'>;
+    run: Omit<DockerManagerRunContainerOptions, 'appFolder' | 'platform'>;
 };
 
 export type LaunchResult = {
@@ -105,6 +108,7 @@ export class DefaultDockerManager implements DockerManager {
             if (imageObject
                 && buildMetadata.options
                 && buildMetadata.options.context === options.context
+                && buildMetadata.options.platform === options.platform
                 && buildMetadata.options.tag === options.tag
                 && buildMetadata.options.target === options.target) {
                 const currentDockerfileHash = await dockerfileHasher.value;
@@ -119,9 +123,11 @@ export class DefaultDockerManager implements DockerManager {
             }
         }
 
+        const buildOptions: DockerBuildImageOptions = { ...options, platform: await this.getDockerPlatform(options.platform) };
+
         const imageId = await this.dockerOutputManager.performOperation(
             'Building Docker image...',
-            async outputManager => await this.dockerClient.buildImage(options, content => outputManager.append(content)),
+            async outputManager => await this.dockerClient.buildImage(buildOptions, content => outputManager.append(content)),
             id => `Docker image ${this.dockerClient.trimId(id)} built.`,
             err => `Failed to build Docker image: ${err}`);
 
@@ -147,13 +153,13 @@ export class DefaultDockerManager implements DockerManager {
 
         const containerName = options.containerName;
 
-        const debuggerFolder = await this.debuggerClient.getDebugger(options.os);
+        const debuggerFolder = await this.debuggerClient.getDebugger(options.platform);
 
-        const command = options.os === 'Windows'
+        const command = options.platform === 'Windows'
             ? '-t localhost'
             : '-f /dev/null';
 
-        const entrypoint = options.os === 'Windows'
+        const entrypoint = options.platform === 'Windows'
             ? 'ping'
             : 'tail';
 
@@ -168,14 +174,17 @@ export class DefaultDockerManager implements DockerManager {
                     await this.dockerClient.removeContainer(containerName, { force: true });
                 }
 
-                return await this.dockerClient.runContainer(
-                    imageTagOrId,
-                    {
-                        command,
-                        containerName: options.containerName,
-                        entrypoint,
-                        volumes
-                    });
+                const runOptions: DockerRunContainerOptions = {
+                    ...options,
+
+                    command,
+                    containerName: options.containerName,
+                    entrypoint,
+                    platform: await this.getDockerPlatform(options.platform),
+                    volumes
+                };
+
+                return await this.dockerClient.runContainer(imageTagOrId, runOptions);
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
             err => `Unable to start container: ${err}`);
@@ -193,15 +202,15 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
-        const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
+        const imageId = await this.buildImage({ appFolder: options.appFolder, platform: options.platform, ...options.build });
 
-        const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
+        const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, platform: options.platform, ...options.run });
 
         await this.addToDebugContainers(containerId);
 
         const browserUrl = await this.getContainerWebEndpoint(containerId);
 
-        const additionalProbingPaths = options.run.os === 'Windows'
+        const additionalProbingPaths = options.platform === 'Windows'
         ? [
             'C:\\.nuget\\packages',
             'C:\\.nuget\\fallbackpackages'
@@ -212,13 +221,13 @@ export class DefaultDockerManager implements DockerManager {
         ];
         const additionalProbingPathsArgs = additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
 
-        const containerAppOutput = options.run.os === 'Windows'
-            ? this.osProvider.pathJoin(options.run.os, 'C:\\app', options.appOutput)
-            : this.osProvider.pathJoin(options.run.os, '/app', options.appOutput);
+        const containerAppOutput = options.platform === 'Windows'
+            ? this.osProvider.pathJoin(options.platform, 'C:\\app', options.appOutput)
+            : this.osProvider.pathJoin(options.platform, '/app', options.appOutput);
 
         return {
             browserUrl,
-            debuggerPath: options.run.os === 'Windows' ? 'C:\\remote_debugger\\vsdbg' : '/remote_debugger/vsdbg',
+            debuggerPath: options.platform === 'Windows' ? 'C:\\remote_debugger\\vsdbg' : '/remote_debugger/vsdbg',
             // tslint:disable-next-line:no-invalid-template-strings
             pipeArgs: ['exec', '-i', containerId, '${debuggerCommand}'],
             // tslint:disable-next-line:no-invalid-template-strings
@@ -226,7 +235,7 @@ export class DefaultDockerManager implements DockerManager {
             pipeProgram: 'docker',
             program: 'dotnet',
             programArgs: [additionalProbingPathsArgs, containerAppOutput],
-            programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app'
+            programCwd: options.platform === 'Windows' ? 'C:\\app' : '/app'
         };
     }
 
@@ -260,6 +269,20 @@ export class DefaultDockerManager implements DockerManager {
         await this.workspaceState.update(DefaultDockerManager.DebugContainersKey, remainingContainers);
     }
 
+    private async getDockerPlatform(platform: PlatformOS): Promise<string | undefined> {
+        if (platform === 'Linux' && this.osProvider.os === 'Windows') {
+            const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
+            const driver: string = JSON.parse(driverJson.trim());
+
+            if (driver.toLowerCase().search('lcow') >= 0) {
+                // Docker for Windows is using Windows containers by default but has LCOW enabled, so 'linux' platform must be explicitly specified...
+                return 'linux';
+            }
+        }
+
+        return undefined;
+    }
+
     private async addToDebugContainers(containerId: string): Promise<void> {
         const runningContainers = this.workspaceState.get<string[]>(DefaultDockerManager.DebugContainersKey, []);
 
@@ -286,19 +309,19 @@ export class DefaultDockerManager implements DockerManager {
     private getVolumes(debuggerFolder: string, options: DockerManagerRunContainerOptions): DockerContainerVolume[] {
         const appVolume: DockerContainerVolume = {
             localPath: options.appFolder,
-            containerPath: options.os === 'Windows' ? 'C:\\app' : '/app',
+            containerPath: options.platform === 'Windows' ? 'C:\\app' : '/app',
             permissions: 'rw'
         };
 
         const debuggerVolume: DockerContainerVolume = {
             localPath: debuggerFolder,
-            containerPath: options.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
+            containerPath: options.platform === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
             permissions: 'ro'
         };
 
         const nugetVolume: DockerContainerVolume = {
             localPath: path.join(this.osProvider.homedir, '.nuget', 'packages'),
-            containerPath: options.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
+            containerPath: options.platform === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
             permissions: 'ro'
         };
 
@@ -314,7 +337,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const nugetFallbackVolume: DockerContainerVolume = {
             localPath: this.osProvider.os === 'Windows' ? path.join(<string>programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
-            containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
+            containerPath: options.platform === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };
 

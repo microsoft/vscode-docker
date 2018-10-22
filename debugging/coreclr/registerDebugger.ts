@@ -75,6 +75,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                 new AggregatePrerequisite(
                     new DockerDaemonIsLinuxPrerequisite(
                         dockerClient,
+                        osProvider,
                         vscode.window.showErrorMessage),
                     new DotNetExtensionInstalledPrerequisite(
                         new OpnBrowserClient(),

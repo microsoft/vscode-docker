@@ -21,15 +21,26 @@ export type ShowErrorMessageFunction = (message: string, ...items: vscode.Messag
 export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
     constructor(
         private readonly dockerClient: DockerClient,
+        private readonly osProvider: OSProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
         const daemonOsJson = await this.dockerClient.getVersion({ format: '{{json .Server.Os}}' });
-        const daemonOs = JSON.parse(daemonOsJson.trim());
+        const daemonOs: string = JSON.parse(daemonOsJson.trim());
 
         if (daemonOs === 'linux') {
             return true;
+        }
+
+        if (this.osProvider.os === 'Windows') {
+            const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
+            const driver: string = JSON.parse(driverJson.trim());
+
+            if (driver.toLowerCase().search('lcow') >= 0) {
+                // Docker for Windows is using Windows containers by default but has LCOW enabled, allowing Linux containers...
+                return true;
+            }
         }
 
         this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core debugging.')

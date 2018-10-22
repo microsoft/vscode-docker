@@ -22,7 +22,6 @@ interface DockerDebugBuildOptions {
 
 interface DockerDebugRunOptions {
     containerName?: string;
-    os?: PlatformOS;
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -123,11 +122,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ? debugConfiguration.dockerRun.containerName
             : `${appName}-dev`; // CONSIDER: Use unique ID instead?
 
-        const os = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.os
-            ? debugConfiguration.dockerRun.os
-            : 'Linux';
+        const platform: PlatformOS = "Linux"; // NOTE: We only support Linux containers at this time
 
-        const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
+        const appOutput = await this.inferAppOutput(debugConfiguration, platform, resolvedAppProject);
 
         const result = await this.dockerManager.prepareForLaunch({
             appFolder: resolvedAppFolder,
@@ -138,9 +135,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 tag,
                 target
             },
+            platform,
             run: {
                 containerName,
-                os,
             }
         });
 

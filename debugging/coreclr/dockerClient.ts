@@ -8,9 +8,14 @@ import { ProcessProvider } from "./processProvider";
 export type DockerBuildImageOptions = {
     context?: string;
     dockerfile?: string;
+    platform?: string;
     tag?: string;
     target?: string;
 };
+
+export type DockerInfoOptions = {
+    format?: string;
+}
 
 export type DockerInspectObjectOptions = {
     format?: string;
@@ -34,6 +39,7 @@ export type DockerRunContainerOptions = {
     command?: string;
     containerName?: string;
     entrypoint?: string;
+    platform?: string;
     volumes?: DockerContainerVolume[];
 };
 
@@ -43,6 +49,7 @@ export type DockerVersionOptions = {
 
 export interface DockerClient {
     buildImage(options: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string>;
+    getInfo(options?: DockerInfoOptions): Promise<string>;
     getVersion(options?: DockerVersionOptions): Promise<string>;
     inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined>;
     listContainers(options?: DockerContainersListOptions): Promise<string>;
@@ -62,6 +69,10 @@ export class CliDockerClient implements DockerClient {
 
         if (options && options.dockerfile) {
             command += ` -f ${options.dockerfile}`;
+        }
+
+        if (options && options.platform) {
+            command += ` --platform "${options.platform}"`;
         }
 
         if (options && options.tag) {
@@ -108,6 +119,18 @@ export class CliDockerClient implements DockerClient {
         }
 
         return imageId;
+    }
+
+    public async getInfo(options?: DockerInfoOptions): Promise<string> {
+        let command = 'docker info';
+
+        if (options && options.format) {
+            command += ` --format "${options.format}"`;
+        }
+
+        const result = await this.processProvider.exec(command, {});
+
+        return result.stdout;
     }
 
     public async getVersion(options?: DockerVersionOptions): Promise<string> {
@@ -186,6 +209,10 @@ export class CliDockerClient implements DockerClient {
 
         if (options && options.containerName) {
             command += ` --name ${options.containerName}`;
+        }
+
+        if (options && options.platform) {
+            command += ` --platform "${options.platform}"`;
         }
 
         if (options && options.volumes) {

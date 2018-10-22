@@ -30,6 +30,8 @@ suite('debugging', () => {
                             }
                         };
 
+                        const osProvider = <OSProvider>{};
+
                         let shown = false;
 
                         const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
@@ -37,7 +39,7 @@ suite('debugging', () => {
                             return Promise.resolve<vscode.MessageItem | undefined>(undefined);
                         };
 
-                        const prerequisite = new DockerDaemonIsLinuxPrerequisite(dockerClient, showErrorMessage);
+                        const prerequisite = new DockerDaemonIsLinuxPrerequisite(dockerClient, osProvider, showErrorMessage);
 
                         const prereqResult = await prerequisite.checkPrerequisite();
 
