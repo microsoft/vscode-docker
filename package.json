@@ -766,7 +766,7 @@
     "glob": "7.1.2",
     "gradle-to-js": "^1.0.1",
     "moment": "^2.19.3",
-    "opn": "^5.2.0",
+    "opn": "^5.4.0",
     "pom-parser": "^1.1.1",
     "request-promise-native": "^1.0.5",
     "semver": "^5.5.1",
