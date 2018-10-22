@@ -274,7 +274,7 @@ export class DefaultDockerManager implements DockerManager {
     private async getDockerPlatform(platform: PlatformOS): Promise<string | undefined> {
         if (platform === 'Linux' && this.osProvider.os === 'Windows') {
             const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
-            const driver: string = JSON.parse(driverJson.trim());
+            const driver = <string>JSON.parse(driverJson.trim());
 
             if (driver.toLowerCase().search('lcow') >= 0) {
                 // Docker for Windows is using Windows containers by default but has LCOW enabled, so 'linux' platform must be explicitly specified...

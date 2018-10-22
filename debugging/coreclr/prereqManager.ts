@@ -27,7 +27,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
 
     public async checkPrerequisite(): Promise<boolean> {
         const daemonOsJson = await this.dockerClient.getVersion({ format: '{{json .Server.Os}}' });
-        const daemonOs: string = JSON.parse(daemonOsJson.trim());
+        const daemonOs = <string>JSON.parse(daemonOsJson.trim());
 
         if (daemonOs === 'linux') {
             return true;
@@ -35,7 +35,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
 
         if (this.osProvider.os === 'Windows') {
             const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
-            const driver: string = JSON.parse(driverJson.trim());
+            const driver = <string>JSON.parse(driverJson.trim());
 
             if (driver.toLowerCase().search('lcow') >= 0) {
                 // Docker for Windows is using Windows containers by default but has LCOW enabled, allowing Linux containers...
