@@ -35,8 +35,10 @@ export class CommandLineBuilder {
         return this.withArgFactory(() => values ? values.map(value => `${name} "${formatter(value)}"`).join(' ') : undefined);
     }
 
-    public withArgFactory(factory: CommandLineArgFactory): CommandLineBuilder {
-        this.args.push(factory);
+    public withArgFactory(factory: CommandLineArgFactory | undefined): CommandLineBuilder {
+        if (factory) {
+            this.args.push(factory);
+        }
 
         return this;
     }
