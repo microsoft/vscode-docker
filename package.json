@@ -346,6 +346,12 @@
           "*.dockerfile",
           "Dockerfile"
         ]
+      },
+      {
+        "id": "ignore",
+        "filenames": [
+          ".dockerignore"
+        ]
       }
     ],
     "configuration": {
