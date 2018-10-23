@@ -6,9 +6,7 @@ export class CommandLineBuilder {
     public static create(...args: (undefined | string | CommandLineArgFactory)[]): CommandLineBuilder {
         let builder = new CommandLineBuilder();
 
-        for (let i = 0; i < args.length; i++) {
-            const arg = args[i];
-
+        for (let arg of args) {
             if (arg) {
                 if (typeof arg === 'string') {
                     builder = builder.withArg(arg);
@@ -29,7 +27,7 @@ export class CommandLineBuilder {
         return this.withArgFactory(() => arg);
     }
 
-    public withArrayArgs<T>(name: string, values: T[] | undefined, formatter?: (T) => string): CommandLineBuilder {
+    public withArrayArgs<T>(name: string, values: T[] | undefined, formatter?: (value: T) => string): CommandLineBuilder {
         formatter = formatter || ((value: T) => value.toString());
 
         return this.withArgFactory(() => values ? values.map(value => `${name} "${formatter(value)}"`).join(' ') : undefined);
@@ -43,7 +41,7 @@ export class CommandLineBuilder {
         return this;
     }
 
-    public withFlagArg(name: string, value: boolean | undefined) {
+    public withFlagArg(name: string, value: boolean | undefined): CommandLineBuilder {
         return this.withArgFactory(() => value ? name : undefined);
     }
 
@@ -65,7 +63,7 @@ export class CommandLineBuilder {
         return this.withArgFactory(() => value ? `${name} "${value}"` : undefined);
     }
 
-    public withQuotedArg(value: string | undefined) {
+    public withQuotedArg(value: string | undefined): CommandLineBuilder {
         return this.withArgFactory(() => value ? `"${value}"` : undefined);
     }
 }

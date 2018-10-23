@@ -2,10 +2,9 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import CommandLineBuilder from "./commandLineBuilder";
 import { LineSplitter } from "./lineSplitter";
 import { ProcessProvider } from "./processProvider";
-import CommandLineBuilder from "./commandLineBuilder";
-import { Command } from "vscode-languageclient";
 
 export type DockerBuildImageOptions = {
     args?: { [key: string]: string };
