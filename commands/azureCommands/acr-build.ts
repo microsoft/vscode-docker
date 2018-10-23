@@ -42,7 +42,6 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     const tarFilePath = getTempSourceArchivePath(status);
 
     const uploadedSourceLocation = await uploadSourceCode(status, client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
-    status.appendLine("Uploaded Source Code to " + tarFilePath);
 
     const runRequest: DockerBuildRequest = {
         type: 'DockerBuildRequest',

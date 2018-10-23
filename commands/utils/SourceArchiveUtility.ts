@@ -36,6 +36,7 @@ export async function uploadSourceCode(status: vscode.OutputChannel, client: Con
     let blob: BlobService = createBlobServiceWithSas(host, sasToken);
     status.appendLine("   Creating Block Blob ");
     blob.createBlockBlobFromLocalFile(containerName, blobName, tarFilePath, (): void => { });
+    status.appendLine("Uploaded Source Code to " + tarFilePath);
     return relative_path;
 }
 

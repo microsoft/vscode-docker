@@ -92,6 +92,12 @@ export async function getTagAttributes(registryUrl: string, repositoryName: stri
     return tagInfos;
 }
 
+export async function getAssociatedTags(registryUrl: string, repositoryName: string, digest: string, credentials?: RegistryCredentials): Promise<string[]> {
+    let result = await registryRequest<{ manifest: Manifest }>(registryUrl, `/acr/v1/${repositoryName}/_manifests/${digest}`, credentials);
+    let tags: string[] = result.manifest.tags;
+    return tags;
+}
+
 function compareTagsReverse(a: TagInfo, b: TagInfo): number {
     if (a.created < b.created) {
         return 1;

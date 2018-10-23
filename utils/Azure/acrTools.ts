@@ -10,9 +10,11 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
+import { IncomingMessage } from 'http';
+import { Request } from 'request';
 import * as vscode from "vscode";
 import { NULL_GUID } from "../../constants";
-import { getCatalog, getTagAttributes, TagInfo } from "../../explorer/models/commonRegistryUtils";
+import { getAssociatedTags, getCatalog, getTagAttributes, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
 import { AzureUtilityManager } from '../azureUtilityManager';
@@ -48,42 +50,47 @@ export async function getResourceGroup(registry: Registry, subscription: Subscri
 /** List images under a specific Repository */
 export async function getImagesByRepository(element: Repository): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
-    let image: AzureImage;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
     const tags: TagInfo[] = await getTagAttributes('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
     for (let tag of tags) {
-        image = new AzureImage(element, tag.tag, tag.created);
-        allImages.push(image);
+        allImages.push(new AzureImage(element, tag.tag, tag.created));
     }
     return allImages;
 }
 
 /** List repositories on a given Registry. */
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
-    let repo: Repository;
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
     const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
     let allRepos: Repository[] = [];
     for (let tempRepo of repositories) {
-        repo = new Repository(registry, tempRepo);
-        allRepos.push(repo);
+        allRepos.push(new Repository(registry, tempRepo));
     }
     //Note these are ordered by default in alphabetical order
     return allRepos;
 }
 
-/** Sends a custon html request to a registry
+/** List images under a specific digest */
+export async function getImagesByDigest(repo: Repository, digest: string): Promise<AzureImage[]> {
+    let allImages: AzureImage[] = [];
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
+    const tags: string[] = await getAssociatedTags('https://' + repo.registry.loginServer, repo.name, digest, { bearer: acrAccessToken });
+    for (let tag of tags) {
+        allImages.push(new AzureImage(repo, tag));
+    }
+    return allImages;
+}
+
+/** Sends a custom html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
- * @param username : registry username, can be in generic form of 0's, used to generate authorization header
- * @param password : registry password, can be in form of accessToken, used to generate authorization header
+ * @param accessToken : Bearer access token.
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, bearerAccessToken: string): Promise<any> {
+export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, accessToken: string): Promise<Request> {
     let url: string = `https://${login_server}${path}`;
-    let header = 'Bearer ' + bearerAccessToken;
     let opt = {
-        headers: { 'Authorization': header },
+        headers: { 'Authorization': `Bearer ${accessToken}` },
         http_method: http_method,
         url: url
     }
@@ -93,6 +100,26 @@ export async function sendRequestToRegistry(http_method: string, login_server: s
     }
 
     assert(false, 'sendRequestToRegistry: Unexpected http method');
+}
+
+/** Sends a custom html request to a registry, and retrieves the image's digest.
+ * @param image : The targeted image.
+ */
+export async function getImageDigest(image: AzureImage): Promise<string> {
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(image.registry, `repository:${image.repository.name}:pull`);
+    let digest: string;
+    // tslint:disable-next-line:no-unsafe-any
+    await ext.request.get('https://' + image.registry.loginServer + `/v2/${image.repository.name}/manifests/${image.tag}`, {
+        auth: {
+            bearer: acrAccessToken
+        },
+        headers: {
+            accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6, application/vnd.oci.image.manifest.v1+json; 0.7'
+        }
+    }, (_err, _httpResponse: IncomingMessage, _body) => {
+        digest = <string>_httpResponse.headers['docker-content-digest'];
+    });
+    return digest;
 }
 
 //Credential management
