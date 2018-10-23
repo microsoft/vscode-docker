@@ -57,37 +57,54 @@ export interface DockerClient {
     trimId(id: string): string;
 }
 
+type CommandLineArg = undefined | string | (() => (string | undefined));
+
+function buildCommandLine(...args: CommandLineArg[]): string {
+    return args
+        .filter(arg => arg !== undefined)
+        .map(arg => typeof arg === 'string' ? arg : arg())
+        .filter(arg => arg !== undefined)
+        .join(' ');
+}
+
+function buildNamedArg(name: string, value: string | undefined): string | undefined {
+    return value ? `${name} "${value}"` : undefined;
+}
+
+function buildKeyValueArgs(name: string, values: { [key: string]: string }): string | undefined {
+    if (values) {
+        const keys = Object.keys(values);
+
+        if (keys.length > 0) {
+            return keys.map(key => `${name} "${key}=${values[key]}"`).join(' ');
+        }
+    }
+
+    return undefined;
+}
+
+function buildFileArg(value: string) {
+    return value ? `"${value}"` : undefined;
+}
+
 export class CliDockerClient implements DockerClient {
     constructor(private readonly processProvider: ProcessProvider) {
         // CONSIDER: Use dockerode client as basis for debugging.
     }
 
     public async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {
-        let command = `docker build --rm`;
+        options = options || {};
 
-        if (options && options.dockerfile) {
-            command += ` -f ${options.dockerfile}`;
-        }
-
-        if (options && options.args) {
-            command += Object.keys(options.args).map(arg => ` --build-arg "${arg}=${options.args[arg]}"`).join('');
-        }
-
-        if (options && options.labels) {
-            command += Object.keys(options.labels).map(label => ` --label "${label}=${options.labels[label]}"`).join('');
-        }
-
-        if (options && options.tag) {
-            command += ` -t ${options.tag}`;
-        }
-
-        if (options && options.target) {
-            command += ` --target ${options.target}`;
-        }
-
-        if (options && options.context) {
-            command += ` ${options.context}`;
-        }
+        let command = buildCommandLine(
+            'docker',
+            'build',
+            '--rm',
+            buildNamedArg('-f', options.dockerfile),
+            buildKeyValueArgs('--build-arg', options.args),
+            buildKeyValueArgs('--label', options.labels),
+            buildNamedArg('-t', options.tag),
+            buildNamedArg('--target', options.target),
+            buildFileArg(options.context));
 
         let imageId: string | undefined;
 
