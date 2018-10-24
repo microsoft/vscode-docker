@@ -155,11 +155,41 @@ Customize the Docker image build process by adding properties under the `dockerB
 
 | Property | Description | Default |
 | --- | --- | --- |
+| `args` | Build arguments applied to the image. | None |
 | `context` | The Docker context used during the build process. | The workspace folder, if the same as the application folder; otherwise, the application's parent (i.e. solution) folder |
 | `dockerfile` | The path to the Dockerfile used to build the image. | The file `Dockerfile` in the application folder |
+| `labels` | The set of labels added to the image. | `com.microsoft.created-by` = `visual-studio-code` |
 | `tag` | The tag added to the image. | `<Application Name>:dev` |
 | `target` | The target (stage) of the Dockerfile from which to build the image. | `base`
 
+Example build customizations:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerBuild": {
+                "args": {
+                    "arg1": "value1",
+                    "arg2": "value2"
+                },
+                "context": "${workspaceFolder}/src",
+                "dockerfile": "${workspaceFolder}/src/Dockerfile",
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                },
+                "tag": "mytag",
+                "target": "publish"
+            }
+        }
+    ]
+}
+```
 
 ### Docker Run Customization
 
@@ -168,6 +198,38 @@ Customize the Docker container run process by adding properties under the `docke
 | Property | Description | Default |
 | --- | --- | --- |
 | `containerName` | The name of the container. | `<Application Name>-dev` |
+| `env` | Environment variables applied to the container. | None |
+| `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
+| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+
+Example run customization:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerRun": {
+                "containerName": "my-container",
+                "env": {
+                    "var1": "value1",
+                    "var2": "value2"
+                },
+                "envFiles": [
+                    "${workspaceFolder}/staging.env"
+                ],
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                }
+            }
+        }
+    ]
+}
+```
 
 ## Configuration Settings
 
