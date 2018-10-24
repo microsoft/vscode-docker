@@ -73,6 +73,61 @@ export interface DockerManager {
 
 export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
 
+function compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
+    const prop1 = obj1 ? getter(obj1) : undefined;
+    const prop2 = obj2 ? getter(obj2) : undefined;
+
+    return prop1 === prop2;
+}
+
+function compareDictionary<T>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => ({ [key: string]: string } | undefined)): boolean {
+    const dict1 = (obj1 ? getter(obj1) : {}) || {};
+    const dict2 = (obj2 ? getter(obj2) : {}) || {};
+
+    const keys1 = Object.keys(dict1).sort();
+    const keys2 = Object.keys(dict2).sort();
+
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    for (let i = 0; i < keys1.length; i++) {
+        if (keys1[i] !== keys2[i]) {
+            return false;
+        }
+
+        if (dict1[keys1[i]] !== dict2[keys1[i]]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+export function compareBuildImageOptions(options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined): boolean {
+    if (!compareProperty(options1, options2, options => options.context)) {
+        return false;
+    }
+
+    if (!compareDictionary(options1, options2, options => options.args)) {
+        return false;
+    }
+
+    if (!compareProperty(options1, options2, options => options.tag)) {
+        return false;
+    }
+
+    if (!compareProperty(options1, options2, options => options.target)) {
+        return false;
+    }
+
+    if (!compareDictionary(options1, options2, options => options.labels)) {
+        return false;
+    }
+
+    return true;
+}
+
 export class DefaultDockerManager implements DockerManager {
     private static readonly DebugContainersKey: string = 'DefaultDockerManager.debugContainers';
 
@@ -105,7 +160,7 @@ export class DefaultDockerManager implements DockerManager {
         if (buildMetadata && buildMetadata.imageId) {
             const imageObject = await this.dockerClient.inspectObject(buildMetadata.imageId);
 
-            if (imageObject && DefaultDockerManager.compareBuildImageOptions(buildMetadata.options, options)) {
+            if (imageObject && compareBuildImageOptions(buildMetadata.options, options)) {
                 const currentDockerfileHash = await dockerfileHasher.value;
                 const currentDockerIgnoreHash = await dockerIgnoreHasher.value;
 
@@ -275,61 +330,6 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     private static readonly ProgramFilesEnvironmentVariable: string = 'ProgramFiles';
-
-    private static compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
-        const prop1 = obj1 ? getter(obj1) : undefined;
-        const prop2 = obj2 ? getter(obj2) : undefined;
-
-        return prop1 === prop2;
-    }
-
-    private static compareDictionary<T>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => ({ [key: string]: string } | undefined)): boolean {
-        const dict1 = (obj1 ? getter(obj1) : {}) || {};
-        const dict2 = (obj2 ? getter(obj2) : {}) || {};
-
-        const keys1 = Object.keys(dict1).sort();
-        const keys2 = Object.keys(dict2).sort();
-
-        if (keys1.length !== keys2.length) {
-            return false;
-        }
-
-        for (let i = 0; i < keys1.length; i++) {
-            if (keys1[i] !== keys2[i]) {
-                return false;
-            }
-
-            if (dict1[i] !== dict2[i]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static compareBuildImageOptions(options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined): boolean {
-        if (!DefaultDockerManager.compareProperty(options1, options2, options => options.context)) {
-            return false;
-        }
-
-        if (!DefaultDockerManager.compareDictionary(options1, options2, options => options.args)) {
-            return false;
-        }
-
-        if (!DefaultDockerManager.compareProperty(options1, options2, options => options.tag)) {
-            return false;
-        }
-
-        if (!DefaultDockerManager.compareProperty(options1, options2, options => options.target)) {
-            return false;
-        }
-
-        if (!DefaultDockerManager.compareDictionary(options1, options2, options => options.labels)) {
-            return false;
-        }
-
-        return true;
-    }
 
     private getVolumes(debuggerFolder: string, options: DockerManagerRunContainerOptions): DockerContainerVolume[] {
         const appVolume: DockerContainerVolume = {
