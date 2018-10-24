@@ -6,6 +6,7 @@
 import * as Docker from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
+import { getDockerConnectionError } from '../../explorer/utils/getDockerConnectionError';
 import { ext } from '../../extensionVariables';
 import { docker } from './docker-endpoint';
 
@@ -66,8 +67,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        (<{ message?: string }>error).message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
-        throw error;
+        throw getDockerConnectionError(error);
     }
     if (!images || images.length === 0) {
         throw new Error('There are no docker images. Try Docker Build first.');

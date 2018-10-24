@@ -5,10 +5,13 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { getDockerConnectionError } from '../utils/getDockerConnectionError';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
+import { ErrorNode } from './errorNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
@@ -117,7 +120,7 @@ export class RootNode extends NodeBase {
         throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
-    private async getImages(): Promise<ImageNode[]> {
+    private async getImages(): Promise<(ImageNode | ErrorNode)[]> {
         const imageNodes: ImageNode[] = [];
         let images: Docker.ImageDesc[];
 
@@ -143,8 +146,9 @@ export class RootNode extends NodeBase {
                 }
             }
         } catch (error) {
-            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-            return [];
+            let wrappedError = getDockerConnectionError(error);
+            vscode.window.showErrorMessage(parseError(wrappedError).message);
+            return [new ErrorNode(wrappedError, ErrorNode.getImagesErrorContextValue)]
         }
 
         this.autoRefreshImages();
@@ -213,7 +217,7 @@ export class RootNode extends NodeBase {
 
     }
 
-    private async getContainers(): Promise<ContainerNode[]> {
+    private async getContainers(): Promise<(ContainerNode | ErrorNode)[]> {
         const containerNodes: ContainerNode[] = [];
         let containers: Docker.ContainerDesc[];
         let contextValue: ContainerNodeContextValue;
@@ -246,8 +250,9 @@ export class RootNode extends NodeBase {
             }
 
         } catch (error) {
-            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-            return [];
+            let wrappedError = getDockerConnectionError(error);
+            vscode.window.showErrorMessage(parseError(wrappedError).message);
+            return [new ErrorNode(wrappedError, ErrorNode.getContainersErrorContextValue)]
         }
 
         this.autoRefreshContainers();

@@ -5,11 +5,9 @@
 
 import * as semver from 'semver';
 import vscode = require('vscode');
+import { getDockerConnectionError } from '../explorer/utils/getDockerConnectionError';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
-
-const teleCmdId: string = 'vscode-docker.system.prune';
 
 export async function systemPrune(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
@@ -41,18 +39,6 @@ export async function systemPrune(): Promise<void> {
         terminal.show();
 
     } catch (error) {
-        vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-        console.log(error);
-    }
-
-    if (reporter) {
-        /* __GDPR__
-           "command" : {
-              "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-           }
-         */
-        reporter.sendTelemetryEvent('command', {
-            command: teleCmdId
-        });
+        throw getDockerConnectionError(error);
     }
 }
