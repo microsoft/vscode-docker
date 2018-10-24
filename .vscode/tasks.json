@@ -22,8 +22,8 @@
 			"args": [
 				"run",
 				"compile",
-				//"--loglevel",
-				//"silent"
+				"--loglevel",
+				"silent"
 			],
 			"isBackground": true,
 			"presentation": {
@@ -34,10 +34,7 @@
 		{
 			"type": "npm",
 			"script": "lint",
-			"problemMatcher": {
-				"base": "$tslint5",
-				"fileLocation": "absolute"
-			}
+			"problemMatcher": "$tslint5"
 		}
 	]
 }
