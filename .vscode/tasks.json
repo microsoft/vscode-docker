@@ -22,8 +22,8 @@
 			"args": [
 				"run",
 				"compile",
-				"--loglevel",
-				"silent"
+				//"--loglevel",
+				//"silent"
 			],
 			"isBackground": true,
 			"presentation": {
