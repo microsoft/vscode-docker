@@ -10,14 +10,14 @@ const connectionMessage = 'Unable to connect to Docker, is the Docker daemon run
 
 export namespace internal {
     // Exported for testing
-    export const connectionUrl = 'https://github.com/Microsoft/vscode-docker#im-on-linux-and-get-the-error-unable-to-connect-to-docker-is-the-docker-daemon-running';
+    export const connectionUrl = 'https://docs.docker.com/install/linux/linux-postinstall/';
 }
 
 export function getDockerConnectionError(error?: unknown): unknown {
     let message = connectionMessage;
 
     if (isLinux()) {
-        message = `${message} Please see ${internal.connectionUrl} for a possible cause and solution.`;
+        message = `${message} Please make sure you've followed the instructions in "Manage Docker as a non-root user" at ${internal.connectionUrl}.`;
     }
 
     return wrapError(error, message);
