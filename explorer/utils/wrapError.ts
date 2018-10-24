@@ -12,7 +12,8 @@ import { parseError } from "vscode-azureextensionui";
  *   let wrapped = wrapError(new Error('CPU on strike'), 'Unable to process banking account.');
  *   console.log(parseError(wrapped).message) => 'Unable to process banking account. Details: CPU on strike'
  */
-export function wrapError(innerError: unknown, outerMessage: string): unknown {
+// tslint:disable-next-line:no-any
+export function wrapError(innerError: any, outerMessage: string): Error {
     let parsed = parseError(innerError);
     let mergedMessage = `${outerMessage} Details: ${parsed.message}`;
 

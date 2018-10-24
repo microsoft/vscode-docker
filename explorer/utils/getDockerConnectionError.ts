@@ -13,7 +13,8 @@ export namespace internal {
     export const connectionUrl = 'https://docs.docker.com/install/linux/linux-postinstall/';
 }
 
-export function getDockerConnectionError(error?: unknown): unknown {
+// tslint:disable-next-line:no-any no-unsafe-any
+export function getDockerConnectionError(error?: any): Error {
     let message = connectionMessage;
 
     if (isLinux()) {
