@@ -2,6 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
@@ -84,27 +85,12 @@ function compareDictionary<T>(obj1: T | undefined, obj2: T | undefined, getter: 
     const dict1 = (obj1 ? getter(obj1) : {}) || {};
     const dict2 = (obj2 ? getter(obj2) : {}) || {};
 
-    const keys1 = Object.keys(dict1).sort();
-    const keys2 = Object.keys(dict2).sort();
-
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-
-    for (let i = 0; i < keys1.length; i++) {
-        if (keys1[i] !== keys2[i]) {
-            return false;
-        }
-
-        if (dict1[keys1[i]] !== dict2[keys1[i]]) {
-            return false;
-        }
-    }
-
-    return true;
+    return deepEqual(dict1, dict2);
 }
 
 export function compareBuildImageOptions(options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined): boolean {
+    // NOTE: We do not compare options.dockerfile as it (i.e. the name itself) has no impact on the built image.
+
     if (!compareProperty(options1, options2, options => options.context)) {
         return false;
     }
