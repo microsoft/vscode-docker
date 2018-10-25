@@ -6,12 +6,14 @@ import CommandLineBuilder from "./commandLineBuilder";
 import { LineSplitter } from "./lineSplitter";
 import { ProcessProvider } from "./processProvider";
 
+export type DockerPlatform = 'linux' | 'windows';
+
 export type DockerBuildImageOptions = {
     args?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
     labels?: { [key: string]: string };
-    platform?: string;
+    platform?: DockerPlatform;
     tag?: string;
     target?: string;
 };
@@ -45,7 +47,7 @@ export type DockerRunContainerOptions = {
     env?: { [key: string]: string };
     envFiles?: string[];
     labels?: { [key: string]: string };
-    platform?: string;
+    platform?: DockerPlatform;
     volumes?: DockerContainerVolume[];
 };
 

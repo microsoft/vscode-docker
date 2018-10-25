@@ -107,9 +107,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const appName = path.basename(resolvedAppProject, '.csproj');
 
-        const platform: PlatformOS = "Linux"; // NOTE: We only support Linux containers at this time
+        const os: PlatformOS = "Linux"; // NOTE: We only support Linux containers at this time
 
-        const appOutput = await this.inferAppOutput(debugConfiguration, platform, resolvedAppProject);
+        const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
 
         const buildOptions = DockerDebugConfigurationProvider.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
         const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName);
@@ -118,7 +118,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             appFolder: resolvedAppFolder,
             appOutput,
             build: buildOptions,
-            platform,
+            os,
             run: runOptions
         });
 
