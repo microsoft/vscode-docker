@@ -7,21 +7,26 @@ import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, Prov
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
-import { DockerManager, LaunchResult } from './dockerManager';
+import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
 
 interface DockerDebugBuildOptions {
+    args?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
+    labels?: { [key: string]: string };
     tag?: string;
     target?: string;
 }
 
 interface DockerDebugRunOptions {
     containerName?: string;
+    env?: { [key: string]: string };
+    envFiles?: string[];
+    labels?: { [key: string]: string };
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -45,6 +50,8 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
+    private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
+
     constructor(
         private readonly debugSessionManager: DebugSessionManager,
         private readonly dockerManager: DockerManager,
@@ -98,8 +105,32 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const resolvedAppProject = DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder);
 
-        const context = this.inferContext(folder, resolvedAppFolder, debugConfiguration);
+        const appName = path.basename(resolvedAppProject, '.csproj');
 
+        const platform: PlatformOS = "Linux"; // NOTE: We only support Linux containers at this time
+
+        const appOutput = await this.inferAppOutput(debugConfiguration, platform, resolvedAppProject);
+
+        const buildOptions = DockerDebugConfigurationProvider.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
+        const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName);
+
+        const result = await this.dockerManager.prepareForLaunch({
+            appFolder: resolvedAppFolder,
+            appOutput,
+            build: buildOptions,
+            platform,
+            run: runOptions
+        });
+
+        const configuration = this.createConfiguration(debugConfiguration, appFolder, result);
+
+        this.debugSessionManager.startListening();
+
+        return configuration;
+    }
+
+    private static inferBuildOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appFolder: string, resolvedAppFolder: string, appName: string): LaunchBuildOptions {
+        const context = DockerDebugConfigurationProvider.inferContext(folder, resolvedAppFolder, debugConfiguration);
         const resolvedContext = DockerDebugConfigurationProvider.resolveFolderPath(context, folder);
 
         let dockerfile = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.dockerfile
@@ -108,44 +139,48 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         dockerfile = DockerDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
 
-        const target = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.target
-            ? debugConfiguration.dockerBuild.target
-            : 'base'; // CONSIDER: Omit target if not specified, or possibly infer from Dockerfile.
+        const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
 
-        const appName = path.basename(resolvedAppProject, '.csproj');
+        const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
+            || DockerDebugConfigurationProvider.defaultLabels;
 
         const tag = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.tag
             ? debugConfiguration.dockerBuild.tag
             : `${appName.toLowerCase()}:dev`;
 
+        const target = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.target
+            ? debugConfiguration.dockerBuild.target
+            : 'base'; // CONSIDER: Omit target if not specified, or possibly infer from Dockerfile.
+
+        return {
+            args,
+            context: resolvedContext,
+            dockerfile,
+            labels,
+            tag,
+            target
+        };
+    }
+
+    private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string): LaunchRunOptions {
         const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
             ? debugConfiguration.dockerRun.containerName
             : `${appName}-dev`; // CONSIDER: Use unique ID instead?
 
-        const platform: PlatformOS = "Linux"; // NOTE: We only support Linux containers at this time
+        const env = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.env;
+        const envFiles = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.envFiles
+            ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
+            : undefined;
 
-        const appOutput = await this.inferAppOutput(debugConfiguration, platform, resolvedAppProject);
+        const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
+            || DockerDebugConfigurationProvider.defaultLabels;
 
-        const result = await this.dockerManager.prepareForLaunch({
-            appFolder: resolvedAppFolder,
-            appOutput,
-            build: {
-                context: resolvedContext,
-                dockerfile,
-                tag,
-                target
-            },
-            platform,
-            run: {
-                containerName,
-            }
-        });
-
-        const configuration = this.createConfiguration(debugConfiguration, appFolder, result);
-
-        this.debugSessionManager.startListening();
-
-        return configuration;
+        return {
+            containerName,
+            env,
+            envFiles,
+            labels
+        };
     }
 
     private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {
@@ -191,7 +226,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         throw new Error('Unable to infer the application project file. Set either the `appFolder` or `appProject` property in the Docker debug configuration.');
     }
 
-    private inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
+    private static inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
         return configuration && configuration.dockerBuild && configuration.dockerBuild.context
             ? configuration.dockerBuild.context
             : path.normalize(resolvedAppFolder) === path.normalize(folder.uri.fsPath)

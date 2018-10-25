@@ -17,6 +17,7 @@ gulp.task('package', async () => {
 });
 
 gulp.task('upload-vsix', (callback) => {
+    let callbackArg;
     if (process.env.TRAVIS_PULL_REQUEST_BRANCH) {
         console.log('Skipping upload-vsix for PR build.');
     } else {
@@ -32,11 +33,11 @@ gulp.task('upload-vsix', (callback) => {
             const blobService = azureStorage.createBlobService(process.env.STORAGE_NAME, process.env.STORAGE_KEY);
             blobService.createContainerIfNotExists(containerName, { publicAccessLevel: "blob" }, (err) => {
                 if (err) {
-                    callback(err);
+                    callbackArg = err;
                 } else {
                     blobService.createBlockBlobFromLocalFile(containerName, blobPath, vsixName, (err) => {
                         if (err) {
-                            callback(err);
+                            callbackArg = err;
                         } else {
                             console.log();
                             console.log(brightYellowFormatting, '================================================ vsix url ================================================');
@@ -51,4 +52,5 @@ gulp.task('upload-vsix', (callback) => {
             });
         }
     }
+    callback(callbackArg);
 });

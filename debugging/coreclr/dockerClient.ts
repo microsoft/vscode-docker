@@ -2,12 +2,15 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import CommandLineBuilder from "./commandLineBuilder";
 import { LineSplitter } from "./lineSplitter";
 import { ProcessProvider } from "./processProvider";
 
 export type DockerBuildImageOptions = {
+    args?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
+    labels?: { [key: string]: string };
     platform?: string;
     tag?: string;
     target?: string;
@@ -39,6 +42,9 @@ export type DockerRunContainerOptions = {
     command?: string;
     containerName?: string;
     entrypoint?: string;
+    env?: { [key: string]: string };
+    envFiles?: string[];
+    labels?: { [key: string]: string };
     platform?: string;
     volumes?: DockerContainerVolume[];
 };
@@ -65,27 +71,18 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {
-        let command = `docker build --rm`;
+        options = options || {};
 
-        if (options && options.dockerfile) {
-            command += ` -f ${options.dockerfile}`;
-        }
-
-        if (options && options.platform) {
-            command += ` --platform "${options.platform}"`;
-        }
-
-        if (options && options.tag) {
-            command += ` -t ${options.tag}`;
-        }
-
-        if (options && options.target) {
-            command += ` --target ${options.target}`;
-        }
-
-        if (options && options.context) {
-            command += ` ${options.context}`;
-        }
+        let command = CommandLineBuilder
+            .create('docker', 'build', '--rm')
+            .withNamedArg('-f', options.dockerfile)
+            .withKeyValueArgs('--build-arg', options.args)
+            .withKeyValueArgs('--label', options.labels)
+            .withNamedArg('--platform', options.platform)
+            .withNamedArg('-t', options.tag)
+            .withNamedArg('--target', options.target)
+            .withQuotedArg(options.context)
+            .build();
 
         let imageId: string | undefined;
 
@@ -134,11 +131,12 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async getVersion(options?: DockerVersionOptions): Promise<string> {
-        let command = 'docker version';
+        options = options || {};
 
-        if (options && options.format) {
-            command += ` --format "${options.format}"`;
-        }
+        const command = CommandLineBuilder
+            .create('docker', 'version')
+            .withNamedArg('--format', options.format)
+            .build();
 
         const result = await this.processProvider.exec(command, {});
 
@@ -146,13 +144,13 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async inspectObject(nameOrId: string, options?: DockerInspectObjectOptions): Promise<string | undefined> {
-        let command = 'docker inspect';
+        options = options || {};
 
-        if (options && options.format) {
-            command += ` \"--format=${options.format}\"`;
-        }
-
-        command += ` ${nameOrId}`;
+        const command = CommandLineBuilder
+            .create('docker', 'inspect')
+            .withNamedArg('--format', options.format)
+            .withQuotedArg(nameOrId)
+            .build();
 
         try {
             const output = await this.processProvider.exec(command, {});
@@ -165,11 +163,12 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async listContainers(options?: DockerContainersListOptions): Promise<string> {
-        let command = 'docker ps -a';
+        options = options || {};
 
-        if (options && options.format) {
-            command += ` \"--format=${options.format}\"`;
-        }
+        const command = CommandLineBuilder
+            .create('docker', 'ps', '-a')
+            .withNamedArg('--format', options.format)
+            .build();
 
         const output = await this.processProvider.exec(command, {});
 
@@ -193,41 +192,32 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void> {
-        let command = 'docker rm';
+        options = options || {};
 
-        if (options && options.force) {
-            command += ' --force';
-        }
-
-        command += ` ${containerNameOrId}`;
+        const command = CommandLineBuilder
+            .create('docker', 'rm')
+            .withFlagArg('--force', options.force)
+            .withQuotedArg(containerNameOrId)
+            .build();
 
         await this.processProvider.exec(command, {});
     }
 
     public async runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string> {
-        let command = 'docker run -dt -P';
+        options = options || {};
 
-        if (options && options.containerName) {
-            command += ` --name ${options.containerName}`;
-        }
-
-        if (options && options.platform) {
-            command += ` --platform "${options.platform}"`;
-        }
-
-        if (options && options.volumes) {
-            command += ' ' + options.volumes.map(volume => `-v \"${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}\"`).join(' ');
-        }
-
-        if (options && options.entrypoint) {
-            command += ` --entrypoint ${options.entrypoint}`;
-        }
-
-        command += ' ' + imageTagOrId;
-
-        if (options && options.command) {
-            command += ' ' + options.command;
-        }
+        const command = CommandLineBuilder
+            .create('docker', 'run', '-dt', '-P')
+            .withNamedArg('--name', options.containerName)
+            .withKeyValueArgs('-e', options.env)
+            .withArrayArgs('--env-file', options.envFiles)
+            .withKeyValueArgs('--label', options.labels)
+            .withNamedArg('--platform', options.platform)
+            .withArrayArgs('-v', options.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
+            .withNamedArg('--entrypoint', options.entrypoint)
+            .withQuotedArg(imageTagOrId)
+            .withArg(options.command)
+            .build();
 
         const result = await this.processProvider.exec(command, {});
 

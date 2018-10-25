@@ -2,6 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
@@ -16,9 +17,11 @@ import { ProcessProvider } from './processProvider';
 
 type DockerManagerBuildImageOptions = {
     appFolder: string;
+    args?: { [key: string]: string };
     buildPlatform?: string;
     context: string;
     dockerfile: string;
+    labels?: { [key: string]: string };
     platform: PlatformOS;
     tag?: string;
     target?: string;
@@ -29,18 +32,24 @@ type DockerManagerRunContainerOptions = {
     command?: string;
     containerName?: string;
     entryPoint?: string;
+    env?: { [key: string]: string };
+    envFiles?: string[];
+    labels?: { [key: string]: string };
     platform: PlatformOS;
     runPlatform?: string;
 };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
+export type LaunchBuildOptions = Omit<DockerManagerBuildImageOptions, 'appFolder' | 'buildPlatform' | 'platform'>;
+export type LaunchRunOptions = Omit<DockerManagerRunContainerOptions, 'appFolder' | 'platform' | 'runPlatform '>;
+
 export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
     platform: PlatformOS;
-    build: Omit<DockerManagerBuildImageOptions, 'appFolder' | 'buildPlatform' | 'platform'>;
-    run: Omit<DockerManagerRunContainerOptions, 'appFolder' | 'platform' | 'runPlatform '>;
+    build: LaunchBuildOptions;
+    run: LaunchRunOptions;
 };
 
 export type LaunchResult = {
@@ -72,6 +81,50 @@ export interface DockerManager {
 }
 
 export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
+
+function compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
+    const prop1 = obj1 ? getter(obj1) : undefined;
+    const prop2 = obj2 ? getter(obj2) : undefined;
+
+    return prop1 === prop2;
+}
+
+function compareDictionary<T>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => ({ [key: string]: string } | undefined)): boolean {
+    const dict1 = (obj1 ? getter(obj1) : {}) || {};
+    const dict2 = (obj2 ? getter(obj2) : {}) || {};
+
+    return deepEqual(dict1, dict2);
+}
+
+export function compareBuildImageOptions(options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined): boolean {
+    // NOTE: We do not compare options.dockerfile as it (i.e. the name itself) has no impact on the built image.
+
+    if (!compareProperty(options1, options2, options => options.context)) {
+        return false;
+    }
+
+    if (!compareDictionary(options1, options2, options => options.args)) {
+        return false;
+    }
+
+    if (!compareProperty(options1, options2, options => options.platform)) {
+        return false;
+    }
+
+    if (!compareProperty(options1, options2, options => options.tag)) {
+        return false;
+    }
+
+    if (!compareProperty(options1, options2, options => options.target)) {
+        return false;
+    }
+
+    if (!compareDictionary(options1, options2, options => options.labels)) {
+        return false;
+    }
+
+    return true;
+}
 
 export class DefaultDockerManager implements DockerManager {
     private static readonly DebugContainersKey: string = 'DefaultDockerManager.debugContainers';
@@ -105,12 +158,7 @@ export class DefaultDockerManager implements DockerManager {
         if (buildMetadata && buildMetadata.imageId) {
             const imageObject = await this.dockerClient.inspectObject(buildMetadata.imageId);
 
-            if (imageObject
-                && buildMetadata.options
-                && buildMetadata.options.context === options.context
-                && buildMetadata.options.platform === options.platform
-                && buildMetadata.options.tag === options.tag
-                && buildMetadata.options.target === options.target) {
+            if (imageObject && compareBuildImageOptions(buildMetadata.options, options)) {
                 const currentDockerfileHash = await dockerfileHasher.value;
                 const currentDockerIgnoreHash = await dockerIgnoreHasher.value;
 
@@ -174,29 +222,19 @@ export class DefaultDockerManager implements DockerManager {
                     await this.dockerClient.removeContainer(containerName, { force: true });
                 }
 
-                const runOptions: DockerRunContainerOptions = {
-                    ...options,
+                return await this.dockerClient.runContainer(
+                    imageTagOrId,
+                    {
+                        ...options,
 
-                    command,
-                    containerName: options.containerName,
-                    entrypoint,
-                    platform: options.runPlatform,
-                    volumes
-                };
-
-                return await this.dockerClient.runContainer(imageTagOrId, runOptions);
+                        command,
+                        entrypoint,
+                        platform: options.runPlatform,
+                        volumes
+                    });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
             err => `Unable to start container: ${err}`);
-
-        const cache = await this.appCacheFactory.getStorage(options.appFolder);
-
-        await cache.update<LastContainerRunMetadata>(
-            'run',
-            {
-                containerId,
-                options
-            });
 
         return containerId;
     }
