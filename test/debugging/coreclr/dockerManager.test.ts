@@ -138,6 +138,7 @@ suite('debugging/coreclr/dockerManager', () => {
 
         testComparisonOfProperty('context');
         testComparisonOfProperty('dockerfile', false);
+        testComparisonOfProperty('platform');
         testComparisonOfProperty('tag');
 
         testComparisonOfDictionary('args');

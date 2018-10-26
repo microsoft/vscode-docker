@@ -128,11 +128,12 @@ export class CliDockerClient implements DockerClient {
     }
 
     public async getInfo(options?: DockerInfoOptions): Promise<string> {
-        let command = 'docker info';
+        options = options || {};
 
-        if (options && options.format) {
-            command += ` --format "${options.format}"`;
-        }
+        const command = CommandLineBuilder
+            .create('docker', 'info')
+            .withNamedArg('--format', options.format)
+            .build();
 
         const result = await this.processProvider.exec(command, {});
 
