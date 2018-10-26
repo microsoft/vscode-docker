@@ -5,7 +5,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { BrowserClient } from './browserClient';
-import { DockerClient } from './dockerClient';
+import { DockerClient, isLcowEnabled } from './dockerClient';
 import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { DotNetClient } from './dotNetClient';
 import { FileSystemProvider } from './fsProvider';
@@ -33,14 +33,9 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
             return true;
         }
 
-        if (this.osProvider.os === 'Windows') {
-            const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
-            const driver = <string>JSON.parse(driverJson.trim());
-
-            if (driver.toLowerCase().search('lcow') >= 0) {
-                // Docker for Windows is using Windows containers by default but has LCOW enabled, allowing Linux containers...
-                return true;
-            }
+        if (this.osProvider.os === 'Windows' && await isLcowEnabled(this.dockerClient)) {
+            // Docker for Windows is using Windows containers by default but has LCOW enabled, allowing Linux containers...
+            return true;
         }
 
         this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core debugging.')

@@ -8,7 +8,7 @@ import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { DebuggerClient } from './debuggerClient';
-import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerPlatform, DockerRunContainerOptions } from "./dockerClient";
+import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerPlatform, DockerRunContainerOptions, isLcowEnabled } from "./dockerClient";
 import { FileSystemProvider } from './fsProvider';
 import Lazy from './lazy';
 import { OSProvider } from './osProvider';
@@ -308,14 +308,9 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     private async getDockerPlatform(os: PlatformOS): Promise<DockerPlatform | undefined> {
-        if (os === 'Linux' && this.osProvider.os === 'Windows') {
-            const driverJson = await this.dockerClient.getInfo({ format: '{{json .Driver}}' });
-            const driver = <string>JSON.parse(driverJson.trim());
-
-            if (driver.toLowerCase().search('lcow') >= 0) {
-                // Docker for Windows is using Windows containers by default but has LCOW enabled, so 'linux' platform must be explicitly specified...
-                return 'linux';
-            }
+        if (os === 'Linux' && this.osProvider.os === 'Windows' && await isLcowEnabled(this.dockerClient)) {
+            // Docker for Windows is using Windows containers by default but has LCOW enabled, so 'linux' platform must be explicitly specified...
+            return 'linux';
         }
 
         return undefined;

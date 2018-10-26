@@ -67,6 +67,13 @@ export interface DockerClient {
     trimId(id: string): string;
 }
 
+export async function isLcowEnabled(dockerClient: DockerClient): Promise<boolean> {
+    const driverJson = await dockerClient.getInfo({ format: '{{json .Driver}}' });
+    const driver = <string>JSON.parse(driverJson.trim());
+
+    return  driver.toLowerCase().search('lcow') >= 0;
+}
+
 export class CliDockerClient implements DockerClient {
     constructor(private readonly processProvider: ProcessProvider) {
         // CONSIDER: Use dockerode client as basis for debugging.
