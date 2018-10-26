@@ -28,10 +28,10 @@ import { Repository } from "./models/repository";
  * @param registry gets the subscription for a given regsitry
  * @returns a subscription object
  */
-export function getSubscriptionFromRegistry(registry: Registry): SubscriptionModels.Subscription {
+export async function getSubscriptionFromRegistry(registry: Registry): Promise<SubscriptionModels.Subscription> {
     let id = getId(registry);
     let subscriptionId = id.slice('/subscriptions/'.length, id.search('/resourceGroups/'));
-    const subs = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+    const subs = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     let subscription = subs.find((sub): boolean => {
         return sub.subscriptionId === subscriptionId;
     });
@@ -78,7 +78,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
 
     let allRepos: Repository[] = [];
     for (let tempRepo of repositories) {
-        repo = new Repository(registry, tempRepo);
+        repo = await Repository.Create(registry, tempRepo);
         allRepos.push(repo);
     }
     //Note these are ordered by default in alphabetical order
@@ -112,8 +112,8 @@ export async function sendRequestToRegistry(http_method: 'delete', login_server:
 //Credential management
 /** Obtains registry username and password compatible with docker login */
 export async function getLoginCredentials(registry: Registry): Promise<{ password: string, username: string }> {
-    const subscription: Subscription = getSubscriptionFromRegistry(registry);
-    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription)
+    const subscription: Subscription = await getSubscriptionFromRegistry(registry);
+    const session: AzureSession = await AzureUtilityManager.getInstance().getSession(subscription)
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     const acrRefreshToken = await acquireACRRefreshToken(getLoginServer(registry), session.tenantId, aadRefreshToken, aadAccessToken);
     return { 'password': acrRefreshToken, 'username': NULL_GUID };
@@ -125,8 +125,8 @@ export async function getLoginCredentials(registry: Registry): Promise<{ passwor
  * @returns acrRefreshToken: For use as a Password for docker registry access , acrAccessToken: For use with docker API
  */
 export async function acquireACRAccessTokenFromRegistry(registry: Registry, scope: string): Promise<{ acrRefreshToken: string, acrAccessToken: string }> {
-    const subscription: Subscription = getSubscriptionFromRegistry(registry);
-    const session: AzureSession = AzureUtilityManager.getInstance().getSession(subscription);
+    const subscription: Subscription = await getSubscriptionFromRegistry(registry);
+    const session: AzureSession = await AzureUtilityManager.getInstance().getSession(subscription);
     const { aadAccessToken, aadRefreshToken } = await acquireAADTokens(session);
     let loginServer = getLoginServer(registry);
     const acrRefreshToken = await acquireACRRefreshToken(loginServer, session.tenantId, aadRefreshToken, aadAccessToken);
@@ -222,7 +222,8 @@ export function getBlobInfo(blobUrl: string): IBlobInfo {
  */
 export async function streamLogs(registry: Registry, run: Run, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
     //Prefer passed in client to avoid initialization but if not added obtains own
-    let client = providedClient ? providedClient : AzureUtilityManager.getInstance().getContainerRegistryManagementClient(getSubscriptionFromRegistry(registry));
+    const subscription = await getSubscriptionFromRegistry(registry);
+    let client = providedClient ? providedClient : await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let temp: RunGetLogResult = await client.runs.getLogSasUrl(getResourceGroupName(registry), registry.name, run.runId);
     const link = temp.logLink;
     let blobInfo: IBlobInfo = getBlobInfo(link);

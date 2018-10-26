@@ -43,7 +43,7 @@ export class TaskRootNode extends NodeBase {
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
         const taskNodes: TaskNode[] = [];
         let tasks: ContainerModels.Task[] = [];
-        const client: ContainerRegistryManagementClient = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
+        const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
         tasks = await client.tasks.list(resourceGroup, element.registry.name);
         if (tasks.length === 0) {

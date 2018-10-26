@@ -16,7 +16,8 @@ import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFo
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { OS, Platform, promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
+import { Platform, PlatformOS } from '../utils/platform';
+import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
@@ -50,7 +51,7 @@ interface PomXmlContents {
 
 export type ConfigureTelemetryProperties = {
     configurePlatform?: Platform;
-    configureOs?: OS;
+    configureOs?: PlatformOS;
     packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj'
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
@@ -59,7 +60,7 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
-    defaultPort: string
+    defaultPort: string | undefined // '' = defaults to empty but still asks user if they want a port, undefined = don't ask at all
 }
 
 export function getExposeStatements(port: string): string {
@@ -76,7 +77,7 @@ generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('Other', configureOther);
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
@@ -91,7 +92,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
@@ -99,7 +100,7 @@ function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform
     }
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: OS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
@@ -254,7 +255,7 @@ async function findCSProjFile(folderPath: string): Promise<string> {
     }
 }
 
-type GeneratorFunction = (serviceName: string, platform: Platform, os: OS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
+type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -299,7 +300,7 @@ export interface ConfigureApiOptions {
     /**
      * The OS for the images. Currently only needed for .NET platforms.
      */
-    os?: OS;
+    os?: PlatformOS;
 
     /**
      * Open the Dockerfile that was generated
@@ -346,14 +347,14 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     properties.configurePlatform = platformType;
     let generatorInfo = generatorsByPlatform.get(platformType);
 
-    let os: OS | undefined = options.os;
+    let os: PlatformOS | undefined = options.os;
     if (!os && platformType.toLowerCase().includes('.net')) {
         os = await quickPickOS();
     }
     properties.configureOs = os;
 
     let port: string | undefined = options.port;
-    if (!port) {
+    if (!port && generatorInfo.defaultPort !== undefined) {
         port = await promptForPort(generatorInfo.defaultPort);
     }
 

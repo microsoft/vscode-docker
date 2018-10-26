@@ -8,8 +8,8 @@ import * as assertEx from './assertEx';
 import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { Platform, OS } from "../configureWorkspace/config-utils";
 import { ext } from '../extensionVariables';
+import { PlatformOS, Platform } from '../utils/platform';
 import { Suite } from 'mocha';
 import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '../configureWorkspace/configure';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
@@ -380,7 +380,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
 
-    async function testDotNetCoreConsole(os: OS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+    async function testDotNetCoreConsole(os: PlatformOS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
         await writeFile(projectFolder, projectFileName, projectFileContents);
         await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
 
@@ -392,7 +392,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 packageFileType: '.csproj',
                 packageFileSubfolderDepth: '1'
             },
-            [os, undefined /* no port */],
+            [os /* it doesn't ask for a port, so we don't specify one here */],
             ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
         );
 
@@ -402,7 +402,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         }
     }
 
-    async function testAspNetCore(os: OS, hostOs: OS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+    async function testAspNetCore(os: PlatformOS, hostOs: PlatformOS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
         let previousOs = ext.os;
         ext.os = {
             platform: hostOs === 'Windows' ? 'win32' : 'linux',
@@ -563,7 +563,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                         packageFileType: undefined,
                         packageFileSubfolderDepth: undefined
                     },
-                    ['Windows', '1234']
+                    ['Windows']
                 ),
                 { message: "No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform." }
             );
@@ -586,7 +586,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
-                ['Windows', '1234', 'projectFolder2/aspnetapp.csproj'],
+                ['Windows', 'projectFolder2/aspnetapp.csproj'],
                 ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
             );
 
@@ -598,17 +598,6 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.1", async () => {
-        testInEmptyFolder("Default port (none)", async () => {
-            await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
-            await testConfigureDocker(
-                '.NET Core Console',
-                undefined,
-                ['Windows', undefined]
-            );
-
-            assertNotFileContains('Dockerfile', 'EXPOSE');
-        });
-
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
@@ -1248,13 +1237,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                         os: "Linux"
                     },
                     [
-                        "555", // port
                         'projectFolder2/aspnetapp.csproj'
                     ],
                     ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
                 );
                 assertFileContains('Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 assertNotFileContains('Dockerfile', 'projectFolder1');
+                assertNotFileContains('Dockerfile', 'EXPOSE');
             });
 
             testInEmptyFolder("Only port specified, others come from user", async () => {

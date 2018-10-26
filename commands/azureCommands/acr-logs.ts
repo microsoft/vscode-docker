@@ -3,7 +3,7 @@
 import { Registry, Run } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
-import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
+import { AzureImageTagNode, AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
@@ -19,13 +19,13 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     if (!context) {
         registry = await quickPickACRRegistry();
         if (!registry) { return; }
-        subscription = getSubscriptionFromRegistry(registry);
+        subscription = await getSubscriptionFromRegistry(registry);
     } else {
         registry = context.registry;
         subscription = context.subscription;
     }
     let resourceGroup: string = getResourceGroupName(registry);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let logData: LogData = new LogData(client, registry, resourceGroup);
 
     // Fuiltering provided

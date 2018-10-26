@@ -25,7 +25,7 @@ export async function showTaskProperties(context?: TaskNode): Promise<void> {
         task = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }
 
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let item: Task = await client.tasks.get(resourceGroup.name, registry.name, task);
     let indentation = 1;
     openTask(<string>JSON.stringify(item, undefined, indentation), task);

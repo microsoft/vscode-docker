@@ -66,7 +66,8 @@
     "onCommand:vscode-docker.disconnectCustomRegistry",
     "onCommand:vscode-docker.pullFromAzure",
     "onView:dockerExplorer",
-    "onDebugInitialConfigurations"
+    "onDebugInitialConfigurations",
+    "onDebugResolve:docker-coreclr"
   ],
   "main": "./out/dockerExtension",
   "contributes": {
@@ -280,7 +281,7 @@
     "debuggers": [
       {
         "type": "docker",
-        "label": "Docker",
+        "label": "Docker: Node.js",
         "configurationSnippets": [
           {
             "label": "Docker: Attach to Node",
@@ -297,6 +298,107 @@
             }
           }
         ]
+      },
+      {
+        "type": "docker-coreclr",
+        "label": "Docker: Launch .NET Core (Preview)",
+        "configurationSnippets": [
+          {
+            "label": "Docker: Launch .NET Core (Preview)",
+            "description": "Docker: Launch .NET Core (Preview)",
+            "body": {
+              "name": "Docker: Launch .NET Core (Preview)",
+              "type": "docker-coreclr",
+              "request": "launch",
+              "preLaunchTask": "build",
+              "dockerBuild": {},
+              "dockerRun": {}
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "appFolder": {
+                "type": "string",
+                "description": "Path to the folder for the application."
+              },
+              "appOutput": {
+                "type": "string",
+                "description": "Path to the output assembly for the application."
+              },
+              "appProject": {
+                "type": "string",
+                "description": "Path to the application project file."
+              },
+              "dockerBuild": {
+                "description": "Options for building the Docker image used for debugging.",
+                "properties": {
+                  "args": {
+                    "type": "object",
+                    "description": "Build arguments applied to the Docker image used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "context": {
+                    "type": "string",
+                    "description": "Path to the Docker build context."
+                  },
+                  "dockerfile": {
+                    "type": "string",
+                    "description": "Path to the Dockerfile used for the build."
+                  },
+                  "labels": {
+                    "type": "object",
+                    "description": "Labels applied to the Docker image used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "tag": {
+                    "type": "string",
+                    "description": "Tag applied to the Docker image used for debugging."
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "Docker build target (stage) used for debugging."
+                  }
+                }
+              },
+              "dockerRun": {
+                "description": "Options for running the Docker container used for debugging.",
+                "properties": {
+                  "containerName": {
+                    "type": "string",
+                    "description": "Name of the container used for debugging."
+                  },
+                  "env": {
+                    "type": "object",
+                    "description": "Environment variables applied to the Docker container used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "envFiles": {
+                    "type": "array",
+                    "description": "Files of environment variables read in and applied to the Docker container used for debugging.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "labels": {
+                    "type": "object",
+                    "description": "Labels applied to the Docker container used for debugging.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     ],
     "languages": [
@@ -308,6 +410,12 @@
         "filenamePatterns": [
           "*.dockerfile",
           "Dockerfile"
+        ]
+      },
+      {
+        "id": "ignore",
+        "filenames": [
+          ".dockerignore"
         ]
       }
     ],
@@ -736,6 +844,7 @@
   ],
   "devDependencies": {
     "@types/adm-zip": "^0.4.31",
+    "@types/deep-equal": "^1.0.1",
     "@types/dockerode": "^2.5.5",
     "@types/fs-extra": "^5.0.4",
     "@types/glob": "5.0.35",
@@ -746,7 +855,7 @@
     "@types/semver": "^5.5.0",
     "adm-zip": "^0.4.11",
     "cross-env": "^5.2.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "mocha": "5.2.0",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "^5.2.1",
@@ -758,6 +867,7 @@
     "azure-arm-containerregistry": "^3.0.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
+    "deep-equal": "^1.0.1",
     "dockerfile-language-server-nodejs": "^0.0.19",
     "azure-storage": "^2.8.1",
     "clipboardy": "^1.2.3",

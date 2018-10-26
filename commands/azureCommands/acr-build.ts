@@ -27,7 +27,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     //Acquire information from user
     const subscription: Subscription = await quickPickSubscription();
 
-    const client: ContainerRegistryManagementClient = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registry: Registry = await quickPickACRRegistry(true);
 
     const resourceGroupName: string = getResourceGroupName(registry);

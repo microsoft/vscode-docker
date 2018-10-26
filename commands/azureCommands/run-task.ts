@@ -5,7 +5,6 @@ import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import vscode = require('vscode');
 import { parseError } from "vscode-azureextensionui";
 import { TaskNode } from "../../explorer/models/taskNode";
-import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
@@ -28,7 +27,7 @@ export async function runTask(context?: TaskNode): Promise<void> {
         taskName = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }
 
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let runRequest: TaskRunRequest = {
         type: 'TaskRunRequest',
         taskName: taskName

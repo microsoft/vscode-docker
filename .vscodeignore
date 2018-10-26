@@ -6,3 +6,4 @@ typings/**
 tsconfig.json
 test/**
 testOutput/**
+.github/**
