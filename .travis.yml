@@ -6,24 +6,33 @@ services:
   - docker
 
 node_js:
-  - 'stable'
+  - "stable"
+  - "7"
 
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
-      export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
-      sh -e /etc/init.d/xvfb start;
-      sleep 3;
+    export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
+    sh -e /etc/init.d/xvfb start;
+    sleep 3;
     fi
 
-install:
-  - npm install
+jobs:
+  include:
+    - stage: "build"
+      name: Build
+      script: npm run build
 
-script:
-  - npm run build
-  - gulp package
-  - gulp upload-vsix
-  - npm run lint
-  - npm test
+    - stage: "gulp package"
+      name: Gulp package
+      script: gulp package
+
+    - stage: "gulp upload-vsix"
+      name: Gulp upload vsix
+      script: gulp upload-vsix
+
+    - stage: "lint"
+      name: Check lint syntax
+      script: npm run lint
 
 notifications:
   email:
