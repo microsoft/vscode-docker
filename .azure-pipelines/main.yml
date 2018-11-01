@@ -5,7 +5,8 @@ jobs:
   steps:
   - template: common/build.yml
   - template: common/lint.yml
-  # Re-enable after tests are fixed - template: common/test.yml
+  # https://github.com/Microsoft/vscode-docker/issues/606
+  # - template: common/test.yml
 
 - job: Linux
   pool:
@@ -22,4 +23,5 @@ jobs:
   steps:
   - template: common/build.yml
   - template: common/lint.yml
-  # Re-enable after tests are fixed - template: common/test.yml
+  # https://github.com/Microsoft/vscode-docker/issues/606
+  # - template: common/test.yml
