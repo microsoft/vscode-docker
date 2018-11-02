@@ -7,3 +7,5 @@ tsconfig.json
 test/**
 testOutput/**
 .github/**
+test-results.xml
+.azure-pipelines/**
