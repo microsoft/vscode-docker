@@ -3,6 +3,7 @@ import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
+import { ext } from "../../../extensionVariables";
 import { accessLog } from './logFileManager';
 import { Filter, LogData } from './tableDataManager'
 export class LogTableWebview {
@@ -14,13 +15,11 @@ export class LogTableWebview {
         this.panel = vscode.window.createWebviewPanel('log Viewer', webviewName, vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
 
         //Get path to resource on disk
-        let extensionPath = vscode.extensions.getExtension("PeterJausovec.vscode-docker").extensionPath;
-        const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const resizingScript = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'resizable.js')).with({ scheme: 'vscode-resource' });
-        const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
-        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
+        const scriptFile = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
+        const styleFile = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
+        const iconStyle = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
-        this.panel.webview.html = this.getBaseHtml(scriptFile, resizingScript, styleFile, iconStyle);
+        this.panel.webview.html = this.getBaseHtml(scriptFile, styleFile, iconStyle);
         this.setupIncomingListeners();
         this.addLogsToWebView();
     }
@@ -91,7 +90,7 @@ export class LogTableWebview {
 
     //HTML Content Loaders
     /** Create the table in which to push the logs */
-    private getBaseHtml(scriptFile: vscode.Uri, resizingScript: vscode.Uri, stylesheet: vscode.Uri, iconStyles: vscode.Uri): string {
+    private getBaseHtml(scriptFile: vscode.Uri, stylesheet: vscode.Uri, iconStyles: vscode.Uri): string {
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -113,10 +112,6 @@ export class LogTableWebview {
                     <div class = "middle">
                         Filter by Task:<br>
                         <input type="text" name="task">
-                    </div>
-                    <div>
-                        Filter by Image:<br>
-                        <input type="text" name="date">
                     </div>
                 </form>
                 <table id='core' class='resizable'>
@@ -146,7 +141,6 @@ export class LogTableWebview {
             <div class = 'loadMoreBtn'>
                 <button id= "loadBtn" class="viewLog">Load More Logs</button>
             </div>
-            <script src= "${resizingScript}"></script>
             <script src= "${scriptFile}"></script>
         </body>`;
     }

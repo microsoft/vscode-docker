@@ -3,7 +3,7 @@ import { Registry, Run, SourceUploadDefinition } from 'azure-arm-containerregist
 import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as process from 'process';
 import * as tar from 'tar';
@@ -15,15 +15,16 @@ import { getBlobInfo, getResourceGroupName, IBlobInfo, streamLogs } from "../../
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { Item, resolveDockerFileItem } from '../build-image';
 import { quickPickACRRegistry, quickPickNewImageName, quickPickSubscription } from '../utils/quick-pick-azure';
+import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 
 const idPrecision = 6;
-const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
-const status = vscode.window.createOutputChannel('ACR Build status');
+const vcsIgnoreList: Set<String> = new Set(['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']);
+const status = vscode.window.createOutputChannel('ACR Build Status');
 
 // Prompts user to select a subscription, resource group, then registry from drop down. If there are multiple folders in the workspace, the source folder must also be selected.
 // The user is then asked to name & tag the image. A build is queued for the image in the selected registry.
 // Selected source code must contain a path to the desired dockerfile.
-export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
+export async function quickBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     //Acquire information from user
     const subscription: Subscription = await quickPickSubscription();
 
@@ -40,12 +41,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     //Begin readying build
     status.show();
 
-    let folder: vscode.WorkspaceFolder;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-        folder = vscode.workspace.workspaceFolders[0];
-    } else {
-        folder = await vscode.window.showWorkspaceFolderPick();
-    }
+    let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
     const dockerItem: Item = await resolveDockerFileItem(folder, dockerFileUri);
     const sourceLocation: string = folder.uri.path;
     const tarFilePath: string = getTempSourceArchivePath();
@@ -64,7 +60,7 @@ export async function queueBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     status.appendLine("Set up Run Request");
 
     const run: Run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
-    status.appendLine("Schedule Run " + run.runId);
+    status.appendLine("Scheduled Run " + run.runId);
 
     await streamLogs(registry, run, status, client);
 }
@@ -75,7 +71,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let current: string = process.cwd();
     process.chdir(source);
     fs.readdir(source, (err, items) => {
-        items = filter(items);
+        items = items.filter(i => !(i in vcsIgnoreList));
         // tslint:disable-next-line:no-unsafe-any
         tar.c({}, items).pipe(fs.createWriteStream(tarFilePath));
         process.chdir(current);
@@ -102,14 +98,4 @@ function getTempSourceArchivePath(): string {
     status.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
     let tarFilePath: string = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
     return tarFilePath;
-}
-
-function filter(list: string[]): string[] {
-    let result: string[] = [];
-    for (let file of list) {
-        if (vcsIgnoreList.indexOf(file) === -1) {
-            result.push(file);
-        }
-    }
-    return result;
 }

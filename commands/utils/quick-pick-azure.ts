@@ -17,6 +17,7 @@ import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { createRegistry } from '../azureCommands/create-registry';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
@@ -58,7 +59,7 @@ export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt
     });
     let registry: Registry;
     if (desiredReg === createNewItem) {
-        registry = <Registry>await vscode.commands.executeCommand("vscode-docker.create-ACR-Registry");
+        registry = await createRegistry();
     } else {
         registry = desiredReg.data;
     }
@@ -189,7 +190,7 @@ export async function quickPickNewImageName(): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         validateInput: checkForValidTag,
         ignoreFocusOut: false,
-        prompt: 'Enter repository name and tag in format  <name>:<tag>'
+        prompt: 'Enter repository name and tag in format <name>:<tag>'
     };
 
     let tag: string = await ext.ui.showInputBox(opt);

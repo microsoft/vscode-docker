@@ -1,6 +1,6 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
-import request = require('request-promise');
+import { ext } from "../../../extensionVariables";
 import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
 /** Class to manage data and data acquisition for logs */
 export class LogData {
@@ -109,18 +109,25 @@ export class LogData {
         } else if (filter.image) { //Image
             let items: string[] = filter.image.split(':')
             const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(this.registry, 'repository:' + items[0] + ':pull');
-            let digest;
-            // tslint:disable-next-line:no-unsafe-any
-            await request.get('https://' + this.registry.loginServer + `/v2/${items[0]}/manifests/${items[1]}`, {
+            let digest = await new Promise<string>((resolve, reject) => ext.request.get('https://' + this.registry.loginServer + `/v2/${items[0]}/manifests/${items[1]}`, {
                 auth: {
                     bearer: acrAccessToken
                 },
                 headers: {
                     accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
                 }
-            }, (err, httpResponse: { headers: string }, body) => {
-                digest = httpResponse.headers['docker-content-digest'];
-            });
+            }, (err, httpResponse, body) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const imageDigest = httpResponse.headers['docker-content-digest'];
+                    if (imageDigest instanceof Array) {
+                        reject(new Error('docker-content-digest should be a string not an array.'))
+                    } else {
+                        resolve(imageDigest);
+                    }
+                }
+            }));
 
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }
             parsedFilter += `contains(OutputImageManifests, '${items[0]}@${digest}')`;

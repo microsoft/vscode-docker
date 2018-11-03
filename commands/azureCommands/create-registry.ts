@@ -7,6 +7,7 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
+import { skus } from '../../constants';
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
@@ -32,7 +33,6 @@ export async function createRegistry(): Promise<Registry> {
     return registry;
 }
 async function acquireSKU(): Promise<string> {
-    let skus: string[] = ["Standard", "Basic", "Premium"];
     let sku: string;
     sku = await vscode.window.showQuickPick(skus, { 'canPickMany': false, 'placeHolder': 'Choose a SKU' });
     if (sku === undefined) { throw new Error('User exit'); }

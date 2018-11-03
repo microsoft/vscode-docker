@@ -18,7 +18,6 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     let subscription: Subscription;
     if (!context) {
         registry = await quickPickACRRegistry();
-        if (!registry) { return; }
         subscription = await getSubscriptionFromRegistry(registry);
     } else {
         registry = context.registry;
@@ -28,7 +27,7 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let logData: LogData = new LogData(client, registry, resourceGroup);
 
-    // Fuiltering provided
+    // Filtering provided
     if (context && context instanceof AzureImageTagNode) {
         //ACR Image Logs
         await logData.loadLogs(false, false, { image: context.label });
@@ -44,11 +43,11 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
             await logData.loadLogs(false);
         }
         if (!hasValidLogContent(context, logData)) { return; }
-        let webViewTitle: string = registry.name;
+        let webViewTitle = registry.name;
         if (context instanceof TaskNode) {
             webViewTitle += '/' + context.label;
         }
-        let webview = new LogTableWebview(webViewTitle, logData);
+        const webview = new LogTableWebview(webViewTitle, logData);
     }
 }
 

@@ -114,11 +114,9 @@ export class RootNode extends NodeBase {
                 return this.getRegistries();
             }
             default: {
-                break;
+                throw new Error(`Unexpected contextValue ${element.contextValue}`);
             }
         }
-
-        throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
     private async getImages(): Promise<ImageNode[]> {

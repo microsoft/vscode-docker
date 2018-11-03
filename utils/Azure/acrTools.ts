@@ -49,7 +49,7 @@ export function getResourceGroupName(registry: Registry): string {
 }
 
 //Gets resource group object from registry and subscription
-export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup> { ///to do: move to acr tools
+export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup> {
     let resourceGroups: ResourceGroup[] = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
     const resourceGroupName = getResourceGroupName(registry);
     return resourceGroups.find((res) => { return res.name === resourceGroupName });
@@ -85,7 +85,7 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
-/** Sends a custon html request to a registry
+/** Sends a custom html request to a registry
  * @param http_method : the http method, this function currently only uses delete
  * @param login_server: the login server of the registry
  * @param path : the URL path
@@ -262,7 +262,7 @@ async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart:
     return new Promise<string>((resolve, reject) => {
         blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
             (error, result) => {
-                if (error) { reject() } else { resolve(result); }
+                if (error) { reject(error) } else { resolve(result); }
             });
     });
 }

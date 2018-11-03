@@ -1,5 +1,5 @@
 import { BlobService, createBlobServiceWithSas } from 'azure-storage';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import { getBlobInfo, IBlobInfo } from '../../../utils/Azure/acrTools';
 
