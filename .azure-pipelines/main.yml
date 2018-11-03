@@ -1,0 +1,27 @@
+jobs:
+- job: Windows
+  pool:
+    vmImage: VS2017-Win2016
+  steps:
+  - template: common/build.yml
+  - template: common/lint.yml
+  # https://github.com/Microsoft/vscode-docker/issues/606
+  # - template: common/test.yml
+
+- job: Linux
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - template: common/build.yml
+  - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
+  - template: common/lint.yml
+  - template: linux/test-linux.yml
+
+- job: macOS
+  pool:
+    vmImage: macOS 10.13
+  steps:
+  - template: common/build.yml
+  - template: common/lint.yml
+  # https://github.com/Microsoft/vscode-docker/issues/606
+  # - template: common/test.yml

@@ -1,0 +1,11 @@
+steps:
+- task: Gulp@0
+  displayName: 'Test'
+  inputs:
+    targets: 'test'
+  env:
+    SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
+    SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
+    SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
+
+- template: publish-test-results.yml

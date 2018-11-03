@@ -630,7 +630,7 @@
       },
       {
         "command": "vscode-docker.api.configure",
-        "title": "Add Docker files to Workspace (API)"
+        "title": "Add Docker Files to Workspace (API)"
       },
       {
         "command": "vscode-docker.browseDockerHub",
@@ -662,7 +662,7 @@
       },
       {
         "command": "vscode-docker.configure",
-        "title": "Add Docker files to workspace",
+        "title": "Add Docker Files to Workspace",
         "description": "Add Dockerfile, docker-compose.yml files",
         "category": "Docker"
       },
@@ -811,13 +811,13 @@
     "vscode": "^1.25.0"
   },
   "scripts": {
-    "vscode:prepublish": "tsc -p ./",
     "build": "tsc -p ./",
     "compile": "tsc -watch -p ./",
+    "package": "vsce package",
     "lint": "tslint --project tsconfig.json -t verbose",
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace DEBUGTELEMETRY=1 node ./node_modules/vscode/bin/test",
+    "test": "gulp test",
     "all": "npm i && npm run lint && npm test"
   },
   "extensionDependencies": [
@@ -836,9 +836,11 @@
     "@types/request-promise-native": "^1.0.15",
     "@types/semver": "^5.5.0",
     "adm-zip": "^0.4.11",
-    "cross-env": "^5.2.0",
-    "gulp": "^4.0.0",
-    "mocha": "5.2.0",
+    "gulp": "^3.9.1",
+    "gulp-decompress": "^2.0.2",
+    "gulp-download": "^0.0.1",
+    "mocha": "^2.3.3",
+    "mocha-junit-reporter": "^1.18.0",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "^5.2.1",
     "typescript": "^3.1.1",
@@ -864,7 +866,6 @@
     "semver": "^5.5.1",
     "vscode-azureextensionui": "^0.17.0",
     "tar": "^4.4.6",
-    "vscode-extension-telemetry": "^0.0.22",
     "vscode-languageclient": "^4.4.0"
   }
 }
