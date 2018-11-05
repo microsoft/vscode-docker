@@ -230,6 +230,12 @@ export class RootNode extends NodeBase {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
                         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
                     };
+                } else if (container.Status.includes('(unhealthy)')) {
+                    contextValue = "runningLocalContainerNode";
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
+                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'unhealthyContainer.svg')
+                    };
                 } else {
                     contextValue = "runningLocalContainerNode";
                     iconPath = {
