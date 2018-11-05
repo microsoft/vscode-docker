@@ -41,6 +41,8 @@ export class AzureUtilityManager {
                 if (azureAccountExtension) {
                     azureAccount = <AzureAccount>await azureAccountExtension.activate();
                 }
+
+                vscode.commands.executeCommand('setContext', 'isAzureAccountInstalled', !!azureAccount);
             } catch (error) {
                 throw new Error('Failed to activate the Azure Account Extension: ' + parseError(error).message);
             }
