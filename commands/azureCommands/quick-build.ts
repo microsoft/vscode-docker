@@ -3,18 +3,19 @@ import { Registry, Run, SourceUploadDefinition } from 'azure-arm-containerregist
 import { DockerBuildRequest } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import * as fs from 'fs-extra';
+import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as process from 'process';
 import * as tar from 'tar';
 import * as url from 'url';
 import * as vscode from "vscode";
-import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { getBlobInfo, getResourceGroupName, IBlobInfo, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { Item, resolveDockerFileItem } from '../build-image';
-import { quickPickACRRegistry, quickPickNewImageName, quickPickSubscription } from '../utils/quick-pick-azure';
+import { Item } from '../build-image';
+import { quickPickACRRegistry, quickPickSubscription } from '../utils/quick-pick-azure';
+import { quickPickDockerFileItem, quickPickImageName } from '../utils/quick-pick-image';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 
 const idPrecision = 6;
@@ -24,8 +25,13 @@ const status = vscode.window.createOutputChannel('ACR Build Status');
 // Prompts user to select a subscription, resource group, then registry from drop down. If there are multiple folders in the workspace, the source folder must also be selected.
 // The user is then asked to name & tag the image. A build is queued for the image in the selected registry.
 // Selected source code must contain a path to the desired dockerfile.
-export async function quickBuild(dockerFileUri?: vscode.Uri): Promise<void> {
+export async function quickBuild(actionContext: IActionContext, dockerFileUri?: vscode.Uri | undefined): Promise<void> {
     //Acquire information from user
+    let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
+    const dockerItem: Item = await quickPickDockerFileItem(actionContext, dockerFileUri, rootFolder);
+    const sourceLocation: string = rootFolder.uri.path;
+    const tarFilePath: string = getTempSourceArchivePath();
+
     const subscription: Subscription = await quickPickSubscription();
 
     const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
@@ -36,17 +42,12 @@ export async function quickBuild(dockerFileUri?: vscode.Uri): Promise<void> {
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
 
-    const imageName: string = await quickPickNewImageName();
+    const imageName: string = await quickPickImageName(actionContext, rootFolder, dockerItem);
 
     //Begin readying build
     status.show();
 
-    let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
-    const dockerItem: Item = await resolveDockerFileItem(folder, dockerFileUri);
-    const sourceLocation: string = folder.uri.path;
-    const tarFilePath: string = getTempSourceArchivePath();
-
-    const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
+    const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, rootFolder);
     status.appendLine("Uploaded Source Code to " + tarFilePath);
 
     const runRequest: DockerBuildRequest = {
@@ -70,10 +71,10 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let source: string = sourceLocation.substring(1);
     let current: string = process.cwd();
     process.chdir(source);
-    fs.readdir(source, (err, items) => {
+    fse.readdir(source, (err, items) => {
         items = items.filter(i => !(i in vcsIgnoreList));
         // tslint:disable-next-line:no-unsafe-any
-        tar.c({}, items).pipe(fs.createWriteStream(tarFilePath));
+        tar.c({}, items).pipe(fse.createWriteStream(tarFilePath));
         process.chdir(current);
     });
 

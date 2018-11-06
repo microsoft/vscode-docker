@@ -49,7 +49,7 @@ export function getResourceGroupName(registry: Registry): string {
 }
 
 //Gets resource group object from registry and subscription
-export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup> {
+export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup | undefined> {
     let resourceGroups: ResourceGroup[] = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
     const resourceGroupName = getResourceGroupName(registry);
     return resourceGroups.find((res) => { return res.name === resourceGroupName });
@@ -258,7 +258,7 @@ export async function streamLogs(registry: Registry, run: Run, outputChannel: vs
 }
 
 // Promisify getBlobToText for readability and error handling purposes
-async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
+export async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
             (error, result) => {

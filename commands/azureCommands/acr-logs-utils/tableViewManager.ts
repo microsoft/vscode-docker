@@ -15,9 +15,10 @@ export class LogTableWebview {
         this.panel = vscode.window.createWebviewPanel('log Viewer', webviewName, vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
 
         //Get path to resource on disk
-        const scriptFile = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const styleFile = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
-        const iconStyle = vscode.Uri.file(path.join(ext.context.extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
+        const extensionPath = ext.context.extensionPath;
+        const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
+        const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
+        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
         this.panel.webview.html = this.getBaseHtml(scriptFile, styleFile, iconStyle);
         this.setupIncomingListeners();
@@ -29,9 +30,9 @@ export class LogTableWebview {
         this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
             if (message.logRequest) {
                 const itemNumber: number = +message.logRequest.id;
-                await this.logData.getLink(itemNumber).then((url) => {
+                await this.logData.getLink(itemNumber).then(async (url) => {
                     if (url !== 'requesting') {
-                        accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
+                        await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
                     }
                 });
 

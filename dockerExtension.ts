@@ -244,7 +244,7 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
   registerCommand('vscode-docker.acr.deleteRepository', deleteRepository);
   registerCommand('vscode-docker.acr.pullImage', pullFromAzure);
-  registerCommand('vscode-docker.acr.quickBuild', quickBuild);
+  registerCommand('vscode-docker.acr.quickBuild', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await quickBuild(this, item); });
   registerCommand('vscode-docker.acr.runTask', runTask);
   registerCommand('vscode-docker.acr.showTask', showTaskProperties);
   registerCommand('vscode-docker.acr.viewLogs', viewACRLogs);
@@ -264,7 +264,7 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.container.restart', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await restartContainer(this, node); });
   registerCommand('vscode-docker.container.show-logs', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await showLogsContainer(this, node); });
   registerCommand('vscode-docker.container.start', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainer(this, node); });
-  registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
+  registerCommand('vscode-docker.container.start.azurecli', async function (this: IActionContext): Promise<void> { await startAzureCLI(this); });
   registerCommand('vscode-docker.container.start.interactive', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await startContainerInteractive(this, node); });
   registerCommand('vscode-docker.container.stop', async function (this: IActionContext, node: ContainerNode | RootNode | undefined): Promise<void> { await stopContainer(this, node); });
 

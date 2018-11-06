@@ -1,5 +1,6 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
+import { parseError } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
 /** Class to manage data and data acquisition for logs */
@@ -65,7 +66,14 @@ export class LogData {
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
                 runListResult = [];
-                runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
+                // Temporal fix. Issue documented: runId must exist in the registry.
+                try {
+                    runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
+                } catch (err) {
+                    if (parseError(err).errorType !== "EntityNotFound") {
+                        throw err;
+                    }
+                }
             }
         } else {
             if (loadNext) {
@@ -78,28 +86,27 @@ export class LogData {
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name);
             }
         }
-        if (removeOld) { this.clearLogItems() }
+        if (removeOld) {
+            //Clear Log Items
+            this.logs = [];
+            this.links = [];
+            this.nextLink = '';
+        }
         this.nextLink = runListResult.nextLink;
-        this.addLogs(runListResult);
-    }
+        this.logs = this.logs.concat(runListResult);
 
-    public addLogs(logs: Run[]): void {
-        this.logs = this.logs.concat(logs);
-
-        const itemCount = logs.length;
+        const itemCount = runListResult.length;
         for (let i = 0; i < itemCount; i++) {
             this.links.push({ 'requesting': false });
         }
     }
 
-    public clearLogItems(): void {
-        this.logs = [];
-        this.links = [];
-        this.nextLink = '';
-    }
-
     public hasNextPage(): boolean {
         return this.nextLink !== undefined;
+    }
+
+    public isEmpty(): boolean {
+        return this.logs.length === 0;
     }
 
     private async parseFilter(filter: Filter): Promise<string> {

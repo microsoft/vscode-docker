@@ -35,10 +35,8 @@ export async function runTask(context?: TaskNode): Promise<void> {
 
     try {
         let taskRun = await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
-        vscode.window.showInformationMessage(`Successfully scheduled the Task: ${taskName} with ID: ${taskRun.runId}`);
+        vscode.window.showInformationMessage(`Successfully scheduled the Task '${taskName}' with ID '${taskRun.runId}'.`);
     } catch (err) {
-        const error = parseError(err);
-        vscode.window.showErrorMessage(`Failed to schedule the Task: ${taskName}\nError: ${error.message}`);
-        throw error;
+        throw new Error(`Failed to schedule the Task '${taskName}'\nError: '${parseError(err).message}'`);
     }
 }

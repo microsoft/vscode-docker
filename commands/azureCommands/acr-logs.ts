@@ -33,7 +33,7 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
         await logData.loadLogs(false, false, { image: context.label });
         if (!hasValidLogContent(context, logData)) { return; }
         const url = await logData.getLink(0);
-        accessLog(url, logData.logs[0].runId, false);
+        await accessLog(url, logData.logs[0].runId, false);
     } else {
         if (context && context instanceof TaskNode) {
             //ACR Task Logs

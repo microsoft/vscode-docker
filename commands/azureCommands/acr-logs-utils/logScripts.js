@@ -283,8 +283,6 @@ function getFilterString(inputFields) {
         filter.runId = inputFields[0].value;
     } else if (inputFields[1].value.length > 0) { //Task id
         filter.task = inputFields[1].value;
-    } else if (inputFields[2].value.length > 0) { //Image
-        filter.image = inputFields[2].value;
     }
     return filter;
 }

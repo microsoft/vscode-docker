@@ -609,7 +609,7 @@
       },
       {
         "command": "vscode-docker.acr.quickBuild",
-        "title": "ACR: Quick Build",
+        "title": "ACR Tasks: Build Image",
         "description": "Queue an Azure build from a Dockerfile",
         "category": "Docker"
       },
