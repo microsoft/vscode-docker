@@ -89,7 +89,7 @@
       ],
       "editor/context": [
         {
-          "when": "editorLangId == dockerfile",
+          "when": "editorLangId == dockerfile && isAzureAccountInstalled",
           "command": "vscode-docker.acr.quickBuild",
           "group": "docker"
         },
