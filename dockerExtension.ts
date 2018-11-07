@@ -83,8 +83,6 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 ];
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
-    registerUIExtensionVariables(ext);
-
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
@@ -100,16 +98,18 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.keytar = Keytar.tryCreate();
     }
 
-    // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
-    let defaultRequestOptions = {};
-    addUserAgent(defaultRequestOptions);
-    ext.request = request.defaults(defaultRequestOptions);
+    registerUIExtensionVariables(ext);
 }
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
     let activateStartTime = Date.now();
 
     initializeExtensionVariables(ctx);
+
+    // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
+    let defaultRequestOptions = {};
+    addUserAgent(defaultRequestOptions);
+    ext.request = request.defaults(defaultRequestOptions);
 
     await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
         this.properties.isActivationEvent = 'true';
