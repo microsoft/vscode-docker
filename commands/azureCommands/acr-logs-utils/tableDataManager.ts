@@ -1,5 +1,6 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
+import vscode = require('vscode');
 import { parseError } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
@@ -50,7 +51,7 @@ export class LogData {
      * the next page of logs will be saved and all preexisting data will be deleted.
      * @param filter Specifies a filter for log items, if run Id is specified this will take precedence
      */
-    public async loadLogs(loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
+    public async loadLogs(webViewEvent: boolean, loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
         let runListResult: RunListResult;
         let options: {
             filter?: string,
@@ -66,12 +67,14 @@ export class LogData {
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
             } else {
                 runListResult = [];
-                // Temporal fix. Issue documented: runId must exist in the registry.
                 try {
                     runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
                 } catch (err) {
-                    if (parseError(err).errorType !== "EntityNotFound") {
+                    const error = parseError(err);
+                    if (!webViewEvent) {
                         throw err;
+                    } else if (error.errorType !== "EntityNotFound") {
+                        vscode.window.showErrorMessage(`Error '${error.errorType}': ${error.message}`);
                     }
                 }
             }
@@ -79,6 +82,8 @@ export class LogData {
             if (loadNext) {
                 if (this.nextLink) {
                     runListResult = await this.client.runs.listNext(this.nextLink);
+                } else if (webViewEvent) {
+                    vscode.window.showErrorMessage("No more logs to show.");
                 } else {
                     throw new Error('No more logs to show');
                 }

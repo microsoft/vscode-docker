@@ -30,17 +30,17 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     // Filtering provided
     if (context && context instanceof AzureImageTagNode) {
         //ACR Image Logs
-        await logData.loadLogs(false, false, { image: context.label });
+        await logData.loadLogs(false, false, false, { image: context.label });
         if (!hasValidLogContent(context, logData)) { return; }
         const url = await logData.getLink(0);
         await accessLog(url, logData.logs[0].runId, false);
     } else {
         if (context && context instanceof TaskNode) {
             //ACR Task Logs
-            await logData.loadLogs(false, false, { task: context.label });
+            await logData.loadLogs(false, false, false, { task: context.label });
         } else {
             //ACR Registry Logs
-            await logData.loadLogs(false);
+            await logData.loadLogs(false, false);
         }
         if (!hasValidLogContent(context, logData)) { return; }
         let webViewTitle = registry.name;
