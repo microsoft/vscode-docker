@@ -1,6 +1,6 @@
 "use strict";
 
-import { Registry, Run } from "azure-arm-containerregistry/lib/models";
+import { Registry } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
 import { AzureImageTagNode, AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
@@ -30,17 +30,30 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     // Filtering provided
     if (context && context instanceof AzureImageTagNode) {
         //ACR Image Logs
-        await logData.loadLogs(false, false, false, { image: context.label });
+        await logData.loadLogs({
+            webViewEvent: false,
+            loadNext: false,
+            removeOld: false,
+            filter: { image: context.label }
+        });
         if (!hasValidLogContent(context, logData)) { return; }
         const url = await logData.getLink(0);
         await accessLog(url, logData.logs[0].runId, false);
     } else {
         if (context && context instanceof TaskNode) {
             //ACR Task Logs
-            await logData.loadLogs(false, false, false, { task: context.label });
+            await logData.loadLogs({
+                webViewEvent: false,
+                loadNext: false,
+                removeOld: false,
+                filter: { task: context.label }
+            });
         } else {
             //ACR Registry Logs
-            await logData.loadLogs(false, false);
+            await logData.loadLogs({
+                webViewEvent: false,
+                loadNext: false
+            });
         }
         if (!hasValidLogContent(context, logData)) { return; }
         let webViewTitle = registry.name;

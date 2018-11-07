@@ -51,27 +51,28 @@ export class LogData {
      * the next page of logs will be saved and all preexisting data will be deleted.
      * @param filter Specifies a filter for log items, if run Id is specified this will take precedence
      */
-    public async loadLogs(webViewEvent: boolean, loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
+    public async loadLogs(options: { webViewEvent: boolean, loadNext: boolean, removeOld?: boolean, filter?: Filter }): Promise<void> {
         let runListResult: RunListResult;
-        let options: {
-            filter?: string,
-            top?: number,
-            customHeaders?: {
-                [headerName: string]: string;
-            };
-        } = {};
-        if (filter && Object.keys(filter).length) {
-            if (!filter.runId) {
-                options.filter = await this.parseFilter(filter);
-                if (filter.image) { options.top = 1; }
-                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
+
+        if (options.filter && Object.keys(options.filter).length) {
+            if (!options.filter.runId) {
+                let runOptions: {
+                    filter?: string,
+                    top?: number,
+                    customHeaders?: {
+                        [headerName: string]: string;
+                    };
+                } = {};
+                runOptions.filter = await this.parseFilter(options.filter);
+                if (options.filter.image) { runOptions.top = 1; }
+                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, runOptions);
             } else {
                 runListResult = [];
                 try {
-                    runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
+                    runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, options.filter.runId));
                 } catch (err) {
                     const error = parseError(err);
-                    if (!webViewEvent) {
+                    if (!options.webViewEvent) {
                         throw err;
                     } else if (error.errorType !== "EntityNotFound") {
                         vscode.window.showErrorMessage(`Error '${error.errorType}': ${error.message}`);
@@ -79,10 +80,10 @@ export class LogData {
                 }
             }
         } else {
-            if (loadNext) {
+            if (options.loadNext) {
                 if (this.nextLink) {
                     runListResult = await this.client.runs.listNext(this.nextLink);
-                } else if (webViewEvent) {
+                } else if (options.webViewEvent) {
                     vscode.window.showErrorMessage("No more logs to show.");
                 } else {
                     throw new Error('No more logs to show');
@@ -91,7 +92,7 @@ export class LogData {
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name);
             }
         }
-        if (removeOld) {
+        if (options.removeOld) {
             //Clear Log Items
             this.logs = [];
             this.links = [];

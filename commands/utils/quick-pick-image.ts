@@ -104,15 +104,15 @@ export async function quickPickImageName(actionContext: IActionContext, rootFold
     await delay(500);
 
     addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
-    const imageName: string = await getTagFromUserInput(suggestedImageName, !prevImageName);
+    const imageName: string = await getTagFromUserInput(suggestedImageName, false);
     addImageTaggingTelemetry(actionContext, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);
     return imageName;
 }
 
-export async function quickPickDockerFileItem(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item | undefined> {
-    let dockerFileItem: Item | undefined;
+export async function quickPickDockerFileItem(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
+    let dockerFileItem: Item;
 
     while (!dockerFileItem) {
         let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);

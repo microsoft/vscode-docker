@@ -29,25 +29,20 @@ export async function quickBuild(actionContext: IActionContext, dockerFileUri?: 
     //Acquire information from user
     let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
     const dockerItem: Item = await quickPickDockerFileItem(actionContext, dockerFileUri, rootFolder);
-    const sourceLocation: string = rootFolder.uri.path;
-    const tarFilePath: string = getTempSourceArchivePath();
-
     const subscription: Subscription = await quickPickSubscription();
-
-    const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registry: Registry = await quickPickACRRegistry(true);
-
-    const resourceGroupName: string = getResourceGroupName(registry);
-
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
-
     const imageName: string = await quickPickImageName(actionContext, rootFolder, dockerItem);
+
+    const resourceGroupName: string = getResourceGroupName(registry);
+    const tarFilePath: string = getTempSourceArchivePath();
+    const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
 
     //Begin readying build
     status.show();
 
-    const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, sourceLocation, tarFilePath, rootFolder);
+    const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, rootFolder, tarFilePath);
     status.appendLine("Uploaded Source Code to " + tarFilePath);
 
     const runRequest: DockerBuildRequest = {
@@ -66,9 +61,9 @@ export async function quickBuild(actionContext: IActionContext, dockerFileUri?: 
     await streamLogs(registry, run, status, client);
 }
 
-async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, sourceLocation: string, tarFilePath: string, folder: vscode.WorkspaceFolder): Promise<string> {
+async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
     status.appendLine("   Sending source code to temp file");
-    let source: string = sourceLocation.substring(1);
+    let source: string = rootFolder.uri.fsPath;
     let current: string = process.cwd();
     process.chdir(source);
     fse.readdir(source, (err, items) => {

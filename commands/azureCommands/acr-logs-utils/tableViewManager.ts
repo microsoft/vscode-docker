@@ -47,11 +47,19 @@ export class LogTableWebview {
 
             } else if (message.loadMore) {
                 const alreadyLoaded = this.logData.logs.length;
-                await this.logData.loadLogs(true, true);
+                await this.logData.loadLogs({
+                    webViewEvent: true,
+                    loadNext: true
+                });
                 this.addLogsToWebView(alreadyLoaded);
 
             } else if (message.loadFiltered) {
-                await this.logData.loadLogs(true, false, true, message.loadFiltered.filterString);
+                await this.logData.loadLogs({
+                    webViewEvent: true,
+                    loadNext: false,
+                    removeOld: true,
+                    filter: message.loadFiltered.filterString
+                });
                 this.addLogsToWebView();
             }
         });
