@@ -187,7 +187,8 @@ export class RootNode extends NodeBase {
                             // can't do a full object compare because "Status" keeps changing for running containers
                             if (ctr.Id === cont.Id &&
                                 ctr.Image === cont.Image &&
-                                ctr.State === cont.State) {
+                                ctr.State === cont.State &&
+                                ctr.Status.includes('(unhealthy)') === cont.Status.includes('(unhealthy)')) {
                                 found = true;
                                 break;
                             }
