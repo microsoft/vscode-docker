@@ -6,6 +6,8 @@
 import * as keytarType from 'keytar';
 import { getCoreNodeModule } from './getCoreNodeModule';
 
+declare function getCoreNodeModule(moduleName: string): unknown | undefined;
+
 export interface IKeytar {
     /**
      * Get the stored password for the service and account.

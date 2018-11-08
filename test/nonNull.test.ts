@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import { Suite, Test, Context } from 'mocha';
-import { nonNullProp } from '../utils/nonNull';
+import { nonNullProp } from '../extension';
 
 suite("nonNull", async function (this: Suite): Promise<void> {
     type TestSubscription = {

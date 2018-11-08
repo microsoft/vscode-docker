@@ -6,6 +6,7 @@
 import * as moment from 'moment';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { imagesPath } from '../../constants';
 import { trimWithElipsis } from '../utils/utils';
 import { getImageOrContainerDisplayName } from './getImageOrContainerDisplayName';
 import { NodeBase } from './nodeBase';
@@ -34,8 +35,8 @@ export class ImageNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: "localImageNode",
             iconPath: {
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'application.svg'),
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'application.svg')
+                light: path.join(imagesPath, 'light', 'application.svg'),
+                dark: path.join(imagesPath, 'dark', 'application.svg')
             }
         }
     }

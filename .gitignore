@@ -8,5 +8,8 @@ coverage/**
 # Artifacts from running vscode extension tests
 .vscode-test
 testOutput
+
 .vs
 test-results.xml
+dist
+stats.json

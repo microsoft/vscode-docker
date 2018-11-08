@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-import { AsyncPool } from '../utils/asyncpool'
-import { TIMEOUT } from 'dns';
+
+import { AsyncPool } from '../extension';
 
 suite("AsyncPool Tests", () => {
 

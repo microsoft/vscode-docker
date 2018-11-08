@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import assert = require("assert");
-import { DockerBuildImageOptions } from "../../../debugging/coreclr/dockerClient";
-import { compareBuildImageOptions } from "../../../debugging/coreclr/dockerManager";
+import { DockerBuildImageOptions } from "../../../extension";
+import { compareBuildImageOptions } from "../../../extension";
 
 suite('debugging/coreclr/dockerManager', () => {
     suite('compareBuildImageOptions', () => {

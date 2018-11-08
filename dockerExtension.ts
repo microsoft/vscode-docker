@@ -3,11 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-let loadStartTime = Date.now();
-
 import * as assert from 'assert';
 import * as fse from 'fs-extra';
-import * as https from 'https';
 import * as path from 'path';
 import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
@@ -64,15 +61,13 @@ import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
-import { wrapError } from './explorer/utils/wrapError';
 import { ext } from './extensionVariables';
-import { globAsync } from './helpers/async';
-import { isLinux, isMac, isWindows } from './helpers/osVersion';
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
+import { wrapError } from './utils/wrapError';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
@@ -114,7 +109,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   registerUIExtensionVariables(ext);
 }
 
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+export async function activate(ctx: vscode.ExtensionContext, loadStartTime: number, loadEndTime: number): Promise<void> {
   let activateStartTime = Date.now();
 
   initializeExtensionVariables(ctx);
@@ -380,55 +375,59 @@ namespace Configuration {
 }
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
-  let serverModule = ctx.asAbsolutePath(
-    path.join(
-      "node_modules",
-      "dockerfile-language-server-nodejs",
-      "lib",
-      "server.js"
-    )
-  );
-  let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
+  // Don't wait
+  // tslint:disable-next-line:no-function-expression
+  callWithTelemetryAndErrorHandling('docker.languageclient.activate', async function (this: IActionContext): Promise<void> {
+    let serverModule = ctx.asAbsolutePath(
+      path.join(
+        "dist",
+        "dockerfile-language-server-nodejs",
+        "lib",
+        "server.js"
+      )
+    );
+    assert(true === await fse.pathExists(serverModule), "Could not find language client module");
 
-  let serverOptions: ServerOptions = {
-    run: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      args: ["--node-ipc"]
-    },
-    debug: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: debugOptions
-    }
-  };
+    let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
-  let middleware: Middleware = {
-    workspace: {
-      configuration: Configuration.computeConfiguration
-    }
-  };
+    let serverOptions: ServerOptions = {
+      run: {
+        module: serverModule,
+        transport: TransportKind.ipc,
+        args: ["--node-ipc"]
+      },
+      debug: {
+        module: serverModule,
+        transport: TransportKind.ipc,
+        options: debugOptions
+      }
+    };
 
-  let clientOptions: LanguageClientOptions = {
-    documentSelector: DOCUMENT_SELECTOR,
-    synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc")
-    },
-    middleware: middleware
-  };
+    let middleware: Middleware = {
+      workspace: {
+        configuration: Configuration.computeConfiguration
+      }
+    };
 
-  client = new LanguageClient(
-    "dockerfile-langserver",
-    "Dockerfile Language Server",
-    serverOptions,
-    clientOptions
-  );
-  // tslint:disable-next-line:no-floating-promises
-  client.onReady().then(() => {
-    // attach the VS Code settings listener
-    Configuration.initialize();
+    let clientOptions: LanguageClientOptions = {
+      documentSelector: DOCUMENT_SELECTOR,
+      synchronize: {
+        fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc")
+      },
+      middleware: middleware
+    };
+
+    client = new LanguageClient(
+      "dockerfile-langserver",
+      "Dockerfile Language Server",
+      serverOptions,
+      clientOptions
+    );
+    // tslint:disable-next-line:no-floating-promises
+    client.onReady().then(() => {
+      // attach the VS Code settings listener
+      Configuration.initialize();
+    });
+    client.start();
   });
-  client.start();
 }
-
-let loadEndTime = Date.now();
