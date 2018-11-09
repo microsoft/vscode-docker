@@ -12,7 +12,6 @@ import { isNullOrUndefined } from 'util';
  * for the property and will give a compile error if the given name is not a property of the source.
  */
 export function nonNullProp<TSource, TKey extends keyof TSource>(source: TSource, name: TKey): NonNullable<TSource[TKey]> {
-    // tslint:disable-next-line:no-any
     let value = <NonNullable<TSource[TKey]>>source[name];
     return nonNullValue(value, <string>name);
 }
@@ -20,7 +19,6 @@ export function nonNullProp<TSource, TKey extends keyof TSource>(source: TSource
 /**
  * Validates that a given value is not null and not undefined.
  */
-// tslint:disable-next-line:no-any
 export function nonNullValue<T>(value: T | undefined, propertyNameOrMessage?: string): T {
     if (isNullOrUndefined(value)) {
         throw new Error(

@@ -7,6 +7,7 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
+import { skus } from '../../constants';
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
@@ -18,7 +19,7 @@ import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubsc
 export async function createRegistry(): Promise<Registry> {
     const subscription: SubscriptionModels.Subscription = await quickPickSubscription();
     const resourceGroup: ResourceGroup = await quickPickResourceGroup(true, subscription);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registryName: string = await acquireRegistryName(client);
     const sku: string = await quickPickSKU();
     const location = await quickPickLocation(subscription);

@@ -1,6 +1,3 @@
-import { endianness } from "os";
-import { isNumber } from "util";
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
@@ -18,7 +15,8 @@ import { isNumber } from "util";
 // to report the results back to the caller. When the tests are finished, return
 // a possible error to the callback or null if none.
 
-var testRunner = require('vscode/lib/testrunner');
+// tslint:disable-next-line:no-require-imports no-var-requires
+let testRunner = require('vscode/lib/testrunner');
 
 let options: { [key: string]: string | boolean | number } = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
@@ -39,19 +37,21 @@ let options: { [key: string]: string | boolean | number } = {
 //
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for all available options
 
-for (let envVar of Object.keys(process.env)) {
+let environmentVariables = <{ [key: string]: string }>process.env;
+for (let envVar of Object.keys(environmentVariables)) {
     let match = envVar.match(/^mocha_(.+)/i);
     if (match) {
         let [, option] = match;
-        let value: string | number = process.env[envVar] || '';
-        if (!isNaN(parseInt(value))) {
-            value = parseInt(value);
+        let value: string | number = environmentVariables[envVar];
+        if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
+            value = parseInt(value, undefined);
         }
         options[option] = value;
     }
 }
 console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
 
+// tslint:disable-next-line: no-unsafe-any
 testRunner.configure(options);
 
 module.exports = testRunner;

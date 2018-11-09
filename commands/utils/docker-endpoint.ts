@@ -5,7 +5,6 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
-import { parseError } from 'vscode-azureextensionui';
 import { nonNullValue } from '../../utils/nonNull';
 
 export enum DockerEngineType {

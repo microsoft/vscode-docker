@@ -23,7 +23,10 @@ export namespace configurationKeys {
 }
 
 //Credentials Constants
-export const NULL_GUID = '00000000-0000-0000-0000-000000000000';
+export const NULL_GUID = '00000000-0000-0000-0000-000000000000'; //Empty GUID is a special username to indicate the login credential is based on JWT token.
 
 //Azure Container Registries
 export const skus = ["Standard", "Basic", "Premium"];
+
+//Repository + Tag format
+export const imageTagRegExp = new RegExp('^[a-zA-Z0-9.-_/]{1,256}:(?![.-])[a-zA-Z0-9.-_]{1,128}$');

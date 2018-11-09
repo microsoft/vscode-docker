@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
@@ -31,13 +32,11 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[] | undefined;
     private _containerDebounceTimer: NodeJS.Timer | undefined;
     private _containersNode: RootNode | undefined;
-    private _azureAccount: AzureAccount | undefined;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
-        public eventEmitter: vscode.EventEmitter<NodeBase>,
-        public azureAccount?: AzureAccount
+        public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
         if (this.contextValue === 'imagesRootNode') {
@@ -45,7 +44,6 @@ export class RootNode extends NodeBase {
         } else if (this.contextValue === 'containersRootNode') {
             this._containersNode = this;
         }
-        this._azureAccount = azureAccount;
     }
 
     public autoRefreshImages(): void {
@@ -104,19 +102,21 @@ export class RootNode extends NodeBase {
 
     }
 
-    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
-
-        if (element.contextValue === 'imagesRootNode') {
-            return this.getImages();
+    public async getChildren(element: RootNode): Promise<NodeBase[]> {
+        switch (element.contextValue) {
+            case 'imagesRootNode': {
+                return this.getImages();
+            }
+            case 'containersRootNode': {
+                return this.getContainers();
+            }
+            case 'registriesRootNode': {
+                return this.getRegistries();
+            }
+            default: {
+                throw new Error(`Unexpected contextValue ${element.contextValue}`);
+            }
         }
-        if (element.contextValue === 'containersRootNode') {
-            return this.getContainers();
-        }
-        if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries()
-        }
-
-        throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
     private async getImages(): Promise<ImageNode[]> {
@@ -129,17 +129,15 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < images.length; i++) {
-                // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, images[i], this.eventEmitter);
+            for (let image of images) {
+                if (!image.RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, image, this.eventEmitter);
+                    node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, images[i], this.eventEmitter);
+                    for (let repoTag of image.RepoTags) {
+                        let node = new ImageNode(`${repoTag}`, image, this.eventEmitter);
+                        node.imageDesc = image;
                         imageNodes.push(node);
                     }
                 }
@@ -183,15 +181,13 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < this._containerCache.length; i++) {
-                        let ctr: Docker.ContainerDesc = this._containerCache[i];
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j = 0; j < containers.length; j++) {
+                    for (let cachedContainer of this._containerCache) {
+                        let ctr: Docker.ContainerDesc = cachedContainer;
+                        for (let cont of containers) {
                             // can't do a full object compare because "Status" keeps changing for running containers
-                            if (ctr.Id === containers[j].Id &&
-                                ctr.Image === containers[j].Image &&
-                                ctr.State === containers[j].State) {
+                            if (ctr.Id === cont.Id &&
+                                ctr.Image === cont.Image &&
+                                ctr.State === cont.State) {
                                 found = true;
                                 break;
                             }
@@ -227,9 +223,8 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < containers.length; i++) {
-                if (['exited', 'dead'].includes(containers[i].State)) {
+            for (let container of containers) {
+                if (['exited', 'dead'].includes(container.State)) {
                     contextValue = "stoppedLocalContainerNode";
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
@@ -243,7 +238,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, containers[i], contextValue, iconPath);
+                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 
@@ -260,13 +255,14 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode"));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined));
 
-        if (this._azureAccount) {
-            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
+        let azureAccount: AzureAccount = await AzureUtilityManager.getInstance().tryGetAzureAccount();
+        if (azureAccount) {
+            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, azureAccount));
         }
 
-        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode'));
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', undefined, undefined));
 
         return registryRootNodes;
     }

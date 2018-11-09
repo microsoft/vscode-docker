@@ -14,11 +14,12 @@ import { Repository } from '../../utils/Azure/models/repository';
 import { getLoginServer, } from '../../utils/nonNull';
 import { formatTag } from './commonRegistryUtils';
 import { IconPath, NodeBase } from './nodeBase';
+import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
     constructor(
         public readonly label: string,
-        public readonly azureAccount: AzureAccount | undefined,
+        public readonly azureAccount: AzureAccount,
         public readonly registry: ContainerModels.Registry,
         public readonly subscription: SubscriptionModels.Subscription
     ) {
@@ -40,8 +41,12 @@ export class AzureRegistryNode extends NodeBase {
         }
     }
 
-    public async getChildren(element: AzureRegistryNode): Promise<AzureRepositoryNode[]> {
-        const repoNodes: AzureRepositoryNode[] = [];
+    public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
+        const repoNodes: NodeBase[] = [];
+
+        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+        let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
+        repoNodes.push(taskNode);
 
         if (!this.azureAccount) {
             return [];
@@ -62,7 +67,6 @@ export class AzureRegistryNode extends NodeBase {
         return repoNodes;
     }
 }
-
 export class AzureRepositoryNode extends NodeBase {
     constructor(
         public readonly label: string,
@@ -94,7 +98,7 @@ export class AzureRepositoryNode extends NodeBase {
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
         const imageNodes: AzureImageTagNode[] = [];
         let node: AzureImageTagNode;
-        let repo = new Repository(element.registry, element.label);
+        let repo = await Repository.Create(element.registry, element.label);
         let images: AzureImage[] = await getImagesByRepository(repo);
         for (let img of images) {
             node = new AzureImageTagNode(
@@ -124,11 +128,15 @@ export class AzureImageTagNode extends NodeBase {
         public readonly tag: string,
         public readonly created: Date,
     ) {
-        super(`${repositoryName}:${tag}`);
+        super(AzureImageTagNode.getImageNameWithTag(repositoryName, tag));
     }
 
     public static readonly contextValue: string = 'azureImageTagNode';
     public readonly contextValue: string = AzureImageTagNode.contextValue;
+
+    public static getImageNameWithTag(repositoryName: string, tag: string): string {
+        return `${repositoryName}:${tag}`;
+    }
 
     public getTreeItem(): vscode.TreeItem {
         return {

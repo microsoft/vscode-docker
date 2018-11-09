@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -27,8 +28,8 @@ export class RegistryRootNode extends NodeBase {
     constructor(
         public readonly label: string,
         public readonly contextValue: 'dockerHubRootNode' | 'azureRegistryRootNode' | 'customRootNode',
-        public readonly eventEmitter?: vscode.EventEmitter<NodeBase>,
-        public readonly azureAccount?: AzureAccount
+        public readonly eventEmitter: vscode.EventEmitter<NodeBase> | undefined, // Needed only for Azure
+        public readonly azureAccount: AzureAccount | undefined // Needed only for Azure
     ) {
         super(label);
 
@@ -133,14 +134,14 @@ export class RegistryRootNode extends NodeBase {
         }
 
         if (loggedIntoAzure) {
-            const subscriptions: SubscriptionModels.Subscription[] = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+            const subscriptions: SubscriptionModels.Subscription[] = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
 
             const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
             let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult }[] = [];
             //Acquire each subscription's data simultaneously
             for (let sub of subscriptions) {
                 subPool.addTask(async () => {
-                    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(sub);
+                    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(sub);
                     try {
                         let regs: ContainerModels.Registry[] = await client.registries.list();
                         subsAndRegistries.push({
@@ -150,6 +151,7 @@ export class RegistryRootNode extends NodeBase {
                     } catch (error) {
                         vscode.window.showErrorMessage(parseError(error).message);
                     }
+
                 });
             }
             await subPool.runAll();

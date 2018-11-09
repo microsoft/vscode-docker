@@ -24,9 +24,9 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
     }
     const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${registry.name} and its associated images?`);
     if (shouldDelete) {
-        let subscription: SubscriptionModels.Subscription = acrTools.getSubscriptionFromRegistry(registry);
+        let subscription: SubscriptionModels.Subscription = await acrTools.getSubscriptionFromRegistry(registry);
         let resourceGroup: string = acrTools.getResourceGroupName(registry);
-        const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+        const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
         await client.registries.beginDeleteMethod(resourceGroup, nonNullProp(registry, 'name'));
         vscode.window.showInformationMessage(`Successfully deleted registry ${registry.name}`);
         dockerExplorerProvider.refreshRegistries();

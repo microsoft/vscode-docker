@@ -1,3 +1,14 @@
+## 0.x.x - Unreleased
+
+### Added
+* Adds preview support for debugging .NET Core web applications running in Linux Docker containers.
+
+## 0.3.1 - 25 September 2018
+
+### Fixed
+
+* Error while generating Dockerfile for 'other' [#504](https://github.com/Microsoft/vscode-docker/issues/504)
+
 ## 0.3.0 - 21 September 2018
 
 ### Added

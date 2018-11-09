@@ -3,15 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PackageInfo } from './configure';
+import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
-export let configureGo = {
+export let configureGo: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
-  genDockerComposeDebug
+  genDockerComposeDebug,
+  defaultPort: '3000'
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+  let exposeStatements = getExposeStatements(port);
+
   return `
 #build stage
 FROM golang:alpine AS builder
@@ -27,7 +30,7 @@ RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
 ENTRYPOINT ./app
 LABEL Name=${serviceNameAndRelativePath} Version=${version}
-EXPOSE ${port}
+${exposeStatements}
 `;
 }
 

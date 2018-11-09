@@ -9,7 +9,6 @@ import { appendExtensionUserAgent } from 'vscode-azureextensionui';
 const userAgentKey = 'User-Agent';
 
 export function addUserAgent(options: { headers?: OutgoingHttpHeaders }): void {
-    // tslint:disable-next-line:no-any
     if (!options.headers) {
         options.headers = {};
     }

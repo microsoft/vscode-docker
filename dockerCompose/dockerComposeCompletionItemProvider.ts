@@ -7,7 +7,7 @@
 
 import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
 import { KeyInfo } from '../dockerExtension';
-import hub = require('../dockerHubApi');
+import hub = require('../dockerHubSearch');
 import helper = require('../helpers/suggestSupportHelper');
 import composeVersions from './dockerComposeKeyInfo';
 

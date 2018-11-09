@@ -4,8 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { docker } from '../commands/utils/docker-endpoint';
-import { AzureAccount } from '../typings/azure-account.api';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
 
@@ -16,11 +14,6 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     private _imagesNode: RootNode | undefined;
     private _containersNode: RootNode | undefined;
     private _registriesNode: RootNode | undefined;
-    private _azureAccount: AzureAccount | undefined;
-
-    constructor(azureAccount: AzureAccount | undefined) {
-        this._azureAccount = azureAccount;
-    }
 
     public refresh(): void {
         this.refreshImages();
@@ -67,7 +60,7 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
         this._containersNode = node;
         rootNodes.push(node);
 
-        node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData, this._azureAccount);
+        node = new RootNode('Registries', 'registriesRootNode', this._onDidChangeTreeData);
         this._registriesNode = node;
         rootNodes.push(node);
 
