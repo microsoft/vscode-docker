@@ -9,7 +9,6 @@ import * as os from 'os';
 import vscode = require('vscode');
 import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { openShellContainer } from '../open-shell-container';
 import { docker } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {

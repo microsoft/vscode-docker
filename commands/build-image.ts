@@ -16,7 +16,7 @@ async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
 }
 
-interface Item extends vscode.QuickPickItem {
+export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
     relativeFolderPath: string;
 }
@@ -32,7 +32,7 @@ function createDockerfileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Ur
     };
 }
 
-async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
+export async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
     if (dockerFileUri) {
         return createDockerfileItem(rootFolder, dockerFileUri);
     }

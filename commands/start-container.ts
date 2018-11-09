@@ -4,14 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as cp from 'child_process';
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import os = require('os');
 import vscode = require('vscode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
@@ -93,13 +92,13 @@ export async function startAzureCLI(actionContext: IActionContext): Promise<cp.C
         const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
         let vol: string = '';
 
-        if (fs.existsSync(`${homeDir}/.azure`)) {
+        if (fse.existsSync(`${homeDir}/.azure`)) {
             vol += ` -v ${homeDir}/.azure:/root/.azure`;
         }
-        if (fs.existsSync(`${homeDir}/.ssh`)) {
+        if (fse.existsSync(`${homeDir}/.ssh`)) {
             vol += ` -v ${homeDir}/.ssh:/root/.ssh`;
         }
-        if (fs.existsSync(`${homeDir}/.kube`)) {
+        if (fse.existsSync(`${homeDir}/.kube`)) {
             vol += ` -v ${homeDir}/.kube:/root/.kube`;
         }
 
