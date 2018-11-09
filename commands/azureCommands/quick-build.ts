@@ -59,19 +59,16 @@ export async function quickBuild(actionContext: IActionContext, dockerFileUri?: 
     status.appendLine("Scheduled Run " + run.runId);
 
     await streamLogs(registry, run, status, client);
+    fse.unlink(tarFilePath);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
     status.appendLine("   Sending source code to temp file");
     let source: string = rootFolder.uri.fsPath;
-    let current: string = process.cwd();
-    process.chdir(source);
-    fse.readdir(source, (err, items) => {
-        items = items.filter(i => !(i in vcsIgnoreList));
-        // tslint:disable-next-line:no-unsafe-any
-        tar.c({}, items).pipe(fse.createWriteStream(tarFilePath));
-        process.chdir(current);
-    });
+    let items = await fse.readdir(source);
+    items = items.filter(i => !(i in vcsIgnoreList));
+    // tslint:disable-next-line:no-unsafe-any
+    tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
     status.appendLine("   Getting Build Source Upload Url ");
     let sourceUploadLocation: SourceUploadDefinition = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
@@ -85,6 +82,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
     status.appendLine("   Creating Block Blob ");
     blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (): void => { });
+
     return relative_path;
 }
 
