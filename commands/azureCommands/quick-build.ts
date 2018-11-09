@@ -59,7 +59,7 @@ export async function quickBuild(actionContext: IActionContext, dockerFileUri?: 
     status.appendLine("Scheduled Run " + run.runId);
 
     await streamLogs(registry, run, status, client);
-    fse.unlink(tarFilePath);
+    await fse.unlink(tarFilePath);
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
@@ -82,7 +82,6 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
     status.appendLine("   Creating Block Blob ");
     blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (): void => { });
-
     return relative_path;
 }
 
