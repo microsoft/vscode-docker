@@ -1,6 +1,8 @@
+import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as opn from 'opn';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -13,15 +15,21 @@ export class TaskRootNode extends NodeBase {
     public readonly onDidChangeTreeData: vscode.Event<NodeBase> = this._onDidChangeTreeData.event;
     constructor(
         public readonly label: string,
-        public subscription: SubscriptionModels.Subscription,
         public readonly azureAccount: AzureAccount,
-        public registry: ContainerModels.Registry,
-        public readonly iconPath: any = null,
+        public readonly subscription: SubscriptionModels.Subscription,
+        public readonly registry: ContainerModels.Registry,
+        //public readonly iconPath: any = null,
     ) {
         super(label);
     }
 
+    public readonly contextValue: string = 'taskRootNode';
     public name: string;
+    public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'tasks_light.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'tasks_dark.svg')
+    };
+
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
@@ -35,12 +43,13 @@ export class TaskRootNode extends NodeBase {
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
         const taskNodes: TaskNode[] = [];
         let tasks: ContainerModels.Task[] = [];
-        const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
+        const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
         tasks = await client.tasks.list(resourceGroup, element.registry.name);
         if (tasks.length === 0) {
-            vscode.window.showInformationMessage(`You do not have any Tasks in the registry, '${element.registry.name}'. You can create one with ACR Task. `, "Learn More").then(val => {
+            vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, "Learn How to Create Build Tasks").then(val => {
                 if (val === "Learn More") {
+                    // tslint:disable-next-line:no-unsafe-any
                     opn('https://aka.ms/acr/task');
                 }
             })
@@ -53,11 +62,7 @@ export class TaskRootNode extends NodeBase {
         return taskNodes;
     }
 }
-
 export class TaskNode extends NodeBase {
-    public static readonly contextValue: string = 'taskNode';
-    public label: string;
-
     constructor(
         public task: ContainerModels.Task,
         public registry: ContainerModels.Registry,
@@ -69,11 +74,14 @@ export class TaskNode extends NodeBase {
         super(task.name);
     }
 
+    public label: string;
+    public readonly contextValue: string = 'taskNode';
+
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
-            contextValue: TaskNode.contextValue,
+            contextValue: this.contextValue,
             iconPath: null
         }
     }

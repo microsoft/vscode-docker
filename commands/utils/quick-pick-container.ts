@@ -9,7 +9,6 @@ import * as os from 'os';
 import vscode = require('vscode');
 import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { openShellContainer } from '../open-shell-container';
 import { docker } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {
@@ -62,7 +61,7 @@ export async function quickPickContainer(actionContext: IActionContext, includeA
     try {
         containers = await docker.getContainerDescriptors(opts);
     } catch (err) {
-        let error: { code?: string } = err;
+        let error = <{ code?: string }>err;
         let msg = 'Unable to connect to Docker, is the Docker daemon running?';
         if (error.code !== 'ENOENT') {
             msg += os.EOL + os.EOL + parseError(error).message;

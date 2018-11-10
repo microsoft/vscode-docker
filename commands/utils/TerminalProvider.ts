@@ -32,7 +32,7 @@ export class DefaultTerminalProvider {
  * Creates terminals for testing that automatically save the standard and error output of the commands sent to it
  */
 export class TestTerminalProvider {
-  private _currentTerminal: TestTerminal;
+  private _currentTerminal: TestTerminal | undefined;
 
   public createTerminal(name: string): TestTerminal {
     let terminal = new DefaultTerminalProvider().createTerminal(name);
@@ -41,7 +41,7 @@ export class TestTerminalProvider {
     return testTerminal;
   }
 
-  public get currentTerminal(): TestTerminal {
+  public get currentTerminal(): TestTerminal | undefined {
     return this._currentTerminal;
   }
 }
@@ -53,7 +53,7 @@ class TestTerminal implements vscode.Terminal {
   private _errFilePath: string;
   private _semaphorePath: string;
   private _suffix: number;
-  private _disposed: boolean;
+  private _disposed: boolean = false;
 
   constructor(private _terminal: vscode.Terminal) {
     let root = vscode.workspace.rootPath || os.tmpdir();

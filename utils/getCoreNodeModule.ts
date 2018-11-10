@@ -8,14 +8,14 @@ import * as vscode from 'vscode';
 /**
  * Returns a node module installed with VSCode, or undefined if it fails.
  */
-export function getCoreNodeModule(moduleName: string): any {
+export function getCoreNodeModule(moduleName: string): {} | undefined {
     try {
-        // tslint:disable-next-line:non-literal-require
+        // tslint:disable-next-line:non-literal-require no-unsafe-any
         return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);
     } catch (err) { }
 
     try {
-        // tslint:disable-next-line:non-literal-require
+        // tslint:disable-next-line:non-literal-require no-unsafe-any
         return require(`${vscode.env.appRoot}/node_modules/${moduleName}`);
     } catch (err) { }
 

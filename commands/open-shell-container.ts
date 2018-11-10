@@ -13,10 +13,16 @@ import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
 
-const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-const engineTypeShellCommands = {
-    [DockerEngineType.Linux]: configOptions.get('attachShellCommand.linuxContainer', '/bin/sh'),
-    [DockerEngineType.Windows]: configOptions.get('attachShellCommand.windowsContainer', 'powershell')
+function getEngineTypeShellCommands(engineType: DockerEngineType): string {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    switch (engineType) {
+        case DockerEngineType.Linux:
+            return configOptions.get('attachShellCommand.linuxContainer', '/bin/sh');
+        case DockerEngineType.Windows:
+            return configOptions.get('attachShellCommand.windowsContainer', 'powershell');
+        default:
+            throw new Error(`Unexpected engine type ${engineType}`);
+    }
 }
 
 export async function openShellContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
@@ -37,22 +43,12 @@ export async function openShellContainer(actionContext: IActionContext, context:
     }
 
     if (containerToAttach) {
-        docker.getEngineType().then((engineType: DockerEngineType) => {
-            const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);
-            terminal.sendText(`docker exec -it ${containerToAttach.Id} ${engineTypeShellCommands[engineType]}`);
-            terminal.show();
-            if (reporter) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
-                      "dockerEngineType": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleCmdId,
-                    dockerEngineType: engineTypeShellCommands[engineType]
-                });
-            }
-        });
+        let engineType = await docker.getEngineType();
+        actionContext.properties.engineType = DockerEngineType[engineType];
+        const shellCommand = getEngineTypeShellCommands(engineType);
+        actionContext.properties.shellCommand = shellCommand;
+        const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);
+        terminal.sendText(`docker exec -it ${containerToAttach.Id} ${shellCommand}`);
+        terminal.show();
     }
 }

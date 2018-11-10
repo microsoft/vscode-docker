@@ -3,8 +3,10 @@ import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
-import { accessLog, downloadLog } from './logFileManager';
-import { LogData } from './tableDataManager'
+import { parseError } from "vscode-azureextensionui";
+import { ext } from "../../../extensionVariables";
+import { accessLog } from './logFileManager';
+import { Filter, LogData } from './tableDataManager'
 export class LogTableWebview {
     private logData: LogData;
     private panel: vscode.WebviewPanel;
@@ -14,38 +16,50 @@ export class LogTableWebview {
         this.panel = vscode.window.createWebviewPanel('log Viewer', webviewName, vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
 
         //Get path to resource on disk
-        let extensionPath = vscode.extensions.getExtension("PeterJausovec.vscode-docker").extensionPath;
+        const extensionPath = ext.context.extensionPath;
         const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const resizingScript = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'resizable.js')).with({ scheme: 'vscode-resource' });
         const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
         const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
-        this.panel.webview.html = this.getBaseHtml(scriptFile, resizingScript, styleFile, iconStyle);
+        this.panel.webview.html = this.getBaseHtml(scriptFile, styleFile, iconStyle);
         this.setupIncomingListeners();
         this.addLogsToWebView();
     }
     //Post Opening communication from webview
     /** Setup communication with the webview sorting out received mesages from its javascript file */
     private setupIncomingListeners(): void {
-        this.panel.webview.onDidReceiveMessage(async (message) => {
+        this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
             if (message.logRequest) {
                 const itemNumber: number = +message.logRequest.id;
-                this.logData.getLink(itemNumber).then((url) => {
-                    if (url !== 'requesting') {
-                        accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
-                    }
-                });
-
+                try {
+                    await this.logData.getLink(itemNumber).then(async (url) => {
+                        if (url !== 'requesting') {
+                            await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
+                        }
+                    });
+                } catch (err) {
+                    const error = parseError(err);
+                    vscode.window.showErrorMessage(`Error '${error.errorType}': ${error.message}`);
+                }
             } else if (message.copyRequest) {
+                // tslint:disable-next-line:no-unsafe-any
                 clipboardy.writeSync(message.copyRequest.text);
 
             } else if (message.loadMore) {
                 const alreadyLoaded = this.logData.logs.length;
-                await this.logData.loadLogs(true);
+                await this.logData.loadLogs({
+                    webViewEvent: true,
+                    loadNext: true
+                });
                 this.addLogsToWebView(alreadyLoaded);
 
             } else if (message.loadFiltered) {
-                await this.logData.loadLogs(false, true, message.loadFiltered.filterString);
+                await this.logData.loadLogs({
+                    webViewEvent: true,
+                    loadNext: false,
+                    removeOld: true,
+                    filter: message.loadFiltered.filterString
+                });
                 this.addLogsToWebView();
             }
         });
@@ -90,7 +104,7 @@ export class LogTableWebview {
 
     //HTML Content Loaders
     /** Create the table in which to push the logs */
-    private getBaseHtml(scriptFile: vscode.Uri, resizingScript: vscode.Uri, stylesheet: vscode.Uri, iconStyles: vscode.Uri): string {
+    private getBaseHtml(scriptFile: vscode.Uri, stylesheet: vscode.Uri, iconStyles: vscode.Uri): string {
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -112,10 +126,6 @@ export class LogTableWebview {
                     <div class = "middle">
                         Filter by Task:<br>
                         <input type="text" name="task">
-                    </div>
-                    <div>
-                        Filter by Image:<br>
-                        <input type="text" name="date">
                     </div>
                 </form>
                 <table id='core' class='resizable'>
@@ -145,7 +155,6 @@ export class LogTableWebview {
             <div class = 'loadMoreBtn'>
                 <button id= "loadBtn" class="viewLog">Load More Logs</button>
             </div>
-            <script src= "${resizingScript}"></script>
             <script src= "${scriptFile}"></script>
         </body>`;
     }
@@ -259,4 +268,11 @@ export class LogTableWebview {
         if (secs < 63072000) { return "1 year ago"; }
         return Math.floor(secs / 31536000) + " years ago";
     }
+}
+
+interface IMessage {
+    logRequest?: { id: number; download: boolean };
+    copyRequest?: { text: string };
+    loadMore?: string;
+    loadFiltered?: { filterString: Filter };
 }

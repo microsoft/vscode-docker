@@ -1,8 +1,11 @@
 import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
+import vscode = require('vscode');
+import { parseError } from "vscode-azureextensionui";
 import { getImageDigest } from "../../../utils/Azure/acrTools";
 import { AzureImage } from "../../../utils/Azure/models/image";
 import { Repository } from "../../../utils/Azure/models/repository";
+
 /** Class to manage data and data acquisition for logs */
 export class LogData {
     public registry: Registry;
@@ -50,22 +53,40 @@ export class LogData {
      * the next page of logs will be saved and all preexisting data will be deleted.
      * @param filter Specifies a filter for log items, if run Id is specified this will take precedence
      */
-    public async loadLogs(loadNext: boolean, removeOld?: boolean, filter?: Filter): Promise<void> {
+    public async loadLogs(options: { webViewEvent: boolean, loadNext: boolean, removeOld?: boolean, filter?: Filter }): Promise<void> {
         let runListResult: RunListResult;
-        let options: any = {};
-        if (filter && Object.keys(filter).length) {
-            if (!filter.runId) {
-                options.filter = await this.parseFilter(filter);
-                if (filter.image) { options.top = 1; }
-                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, options);
+
+        if (options.filter && Object.keys(options.filter).length) {
+            if (!options.filter.runId) {
+                let runOptions: {
+                    filter?: string,
+                    top?: number,
+                    customHeaders?: {
+                        [headerName: string]: string;
+                    };
+                } = {};
+                runOptions.filter = await this.parseFilter(options.filter);
+                if (options.filter.image) { runOptions.top = 1; }
+                runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name, runOptions);
             } else {
                 runListResult = [];
-                runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, filter.runId));
+                try {
+                    runListResult.push(await this.client.runs.get(this.resourceGroup, this.registry.name, options.filter.runId));
+                } catch (err) {
+                    const error = parseError(err);
+                    if (!options.webViewEvent) {
+                        throw err;
+                    } else if (error.errorType !== "EntityNotFound") {
+                        vscode.window.showErrorMessage(`Error '${error.errorType}': ${error.message}`);
+                    }
+                }
             }
         } else {
-            if (loadNext) {
+            if (options.loadNext) {
                 if (this.nextLink) {
                     runListResult = await this.client.runs.listNext(this.nextLink);
+                } else if (options.webViewEvent) {
+                    vscode.window.showErrorMessage("No more logs to show.");
                 } else {
                     throw new Error('No more logs to show');
                 }
@@ -73,28 +94,27 @@ export class LogData {
                 runListResult = await this.client.runs.list(this.resourceGroup, this.registry.name);
             }
         }
-        if (removeOld) { this.clearLogItems() }
+        if (options.removeOld) {
+            //Clear Log Items
+            this.logs = [];
+            this.links = [];
+            this.nextLink = '';
+        }
         this.nextLink = runListResult.nextLink;
-        this.addLogs(runListResult);
-    }
+        this.logs = this.logs.concat(runListResult);
 
-    public addLogs(logs: Run[]): void {
-        this.logs = this.logs.concat(logs);
-
-        const itemCount = logs.length;
+        const itemCount = runListResult.length;
         for (let i = 0; i < itemCount; i++) {
             this.links.push({ 'requesting': false });
         }
     }
 
-    public clearLogItems(): void {
-        this.logs = [];
-        this.links = [];
-        this.nextLink = '';
-    }
-
     public hasNextPage(): boolean {
         return this.nextLink !== undefined;
+    }
+
+    public isEmpty(): boolean {
+        return this.logs.length === 0;
     }
 
     private async parseFilter(filter: Filter): Promise<string> {
@@ -102,15 +122,15 @@ export class LogData {
         if (filter.task) { //Task id
             parsedFilter = `TaskName eq '${filter.task}'`;
         } else if (filter.image) { //Image
-            let items: string[] = filter.image.split(':');
+            let items: string[] = filter.image.split(':')
             if (items.length !== 2) {
-                throw new Error('Wrong format: It should be <image>:<tag>')
+                throw new Error('Wrong format: It should be <image>:<tag>');
             }
-            const image = new AzureImage(new Repository(this.registry, items[0]), items[1]);
-            const digest: string = await getImageDigest(image);
+            const image = new AzureImage(await Repository.Create(this.registry, items[0]), items[1]);
+            const imageDigest: string = await getImageDigest(image);
 
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }
-            parsedFilter += `contains(OutputImageManifests, '${image.repository.name}@${digest}')`;
+            parsedFilter += `contains(OutputImageManifests, '${image.repository.name}@${imageDigest}')`;
         }
         return parsedFilter;
     }

@@ -1,0 +1,18 @@
+steps:
+- script: |
+    sudo cp .azure-pipelines/linux/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+  displayName: 'Start X Virtual Frame Buffer'
+
+- script: |
+    export DISPLAY=:10
+    gulp test
+  displayName: 'Test'
+  env:
+    SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
+    SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
+    SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
+
+- template: ../common/publish-test-results.yml

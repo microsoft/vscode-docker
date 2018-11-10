@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { formatTag, getCatalog, getTagAttributes, registryRequest } from './commonRegistryUtils';
+import { formatTag, getCatalog, getTagsAttributes, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
@@ -40,8 +40,8 @@ export class CustomRegistryNode extends NodeBase {
 
     // Returns undefined if it's valid, otherwise returns an error message
     public static async verifyIsValidRegistryUrl(registry: CustomRegistry): Promise<void> {
-        // If the call succeeded, it's a V2 registry
-        await registryRequest<{}>(registry.url, 'v2', registry.credentials);
+        // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
+        await registryRequest<{}>(registry.url, 'v2/', registry.credentials);
     }
 
     public async getChildren(element: CustomRegistryNode): Promise<CustomRepositoryNode[]> {
@@ -88,7 +88,7 @@ export class CustomRepositoryNode extends NodeBase {
         let node: CustomImageTagNode;
 
         try {
-            let tagInfos = await getTagAttributes(this.registry.url, this.repositoryName, this.registry.credentials);
+            let tagInfos = await getTagsAttributes(this.registry.url, this.repositoryName, this.registry.credentials);
             for (let tagInfo of tagInfos) {
                 node = new CustomImageTagNode(this.registry, this.repositoryName, tagInfo.tag, tagInfo.created);
                 imageNodes.push(node);
@@ -135,6 +135,8 @@ export class CustomLoadingNode extends NodeBase {
     constructor() {
         super('Loading...');
     }
+
+    public readonly contextValue: string = 'customLoadingNode';
 
     public getTreeItem(): vscode.TreeItem {
         return {

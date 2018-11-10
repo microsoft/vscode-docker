@@ -340,7 +340,7 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
 // Helper function that merges the specified version-specific keys with the shared
 // keys, in order to create a complete schema for a specic version.
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
-    return Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
+    return <KeyInfo>Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
 
 export default <ComposeVersionKeys>{

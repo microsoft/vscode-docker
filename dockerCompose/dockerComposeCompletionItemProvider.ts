@@ -6,7 +6,8 @@
 'use strict';
 
 import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
-import hub = require('../dockerHubApi');
+import { KeyInfo } from '../dockerExtension';
+import hub = require('../dockerHubSearch');
 import helper = require('../helpers/suggestSupportHelper');
 import composeVersions from './dockerComposeKeyInfo';
 
@@ -65,7 +66,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     private suggestKeys(word: string, version: string): CompletionItem[] {
         // Attempt to grab the keys for the requested schema version,
         // otherwise, fall back to showing a composition of all possible keys.
-        const keys = composeVersions[`v${version}`] || composeVersions.All;
+        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.All;
 
         return Object.keys(keys).map(ruleName => {
             let completionItem = new CompletionItem(ruleName);

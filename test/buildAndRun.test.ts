@@ -12,7 +12,7 @@ import { Uri } from 'vscode';
 import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
 import * as path from 'path';
-import { Platform } from "../configureWorkspace/config-utils";
+import { Platform } from '../utils/platform';
 import { ext } from '../extensionVariables';
 import { Suite } from 'mocha';
 import { configure } from '../configureWorkspace/configure';
@@ -24,7 +24,7 @@ import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 let testRootFolder: string = getTestRootFolder();
 
 /**
- * Downloads and then extracts only a specific subfolder and its folders.
+ * Downloads and then extracts only a specific folder and its subfolders.
  */
 async function unzipFileFromUrl(uri: Uri, sourceFolderInZip: string, outputFolder: string): Promise<void> {
     let zipContents = await httpsRequestBinary(uri.toString());
@@ -97,7 +97,7 @@ suite("Build Image", function (this: Suite): void {
         await commands.executeCommand('vscode-docker.image.build', dockerFile);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for Build Image');
 
-        let { outputText, errorText } = await testTerminalProvider.currentTerminal.exit();
+        let { outputText, errorText } = await testTerminalProvider.currentTerminal!.exit();
 
         assert.equal(errorText, '', 'Expected no errors from Build Image');
         assertEx.assertContains(outputText, 'Successfully built');
