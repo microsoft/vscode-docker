@@ -7,22 +7,24 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
+import { skus } from '../../constants';
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { nonNullProp } from '../../utils/nonNull';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../utils/quick-pick-azure';
 
 /* Creates a new Azure container registry based on user input/selection of features */
 export async function createRegistry(): Promise<Registry> {
     const subscription: SubscriptionModels.Subscription = await quickPickSubscription();
     const resourceGroup: ResourceGroup = await quickPickResourceGroup(true, subscription);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registryName: string = await acquireRegistryName(client);
     const sku: string = await quickPickSKU();
     const location = await quickPickLocation(subscription);
 
-    const registry = await client.registries.beginCreate(resourceGroup.name, registryName, {
+    const registry = await client.registries.beginCreate(nonNullProp(resourceGroup, 'name'), registryName, {
         'sku': { 'name': sku },
         'location': location
     });
@@ -43,7 +45,7 @@ async function acquireRegistryName(client: ContainerRegistryManagementClient): P
     return registryName;
 }
 
-async function checkForValidName(registryName: string, client: ContainerRegistryManagementClient): Promise<string> {
+async function checkForValidName(registryName: string, client: ContainerRegistryManagementClient): Promise<string | undefined> {
     let check = isValidAzureName(registryName);
     if (!check.isValid) { return check.message; }
     let registryStatus: RegistryNameStatus = await client.registries.checkNameAvailability({ 'name': registryName });

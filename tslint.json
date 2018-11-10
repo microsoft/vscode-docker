@@ -37,7 +37,7 @@
         "match-default-export-name": true,
         "mocha-avoid-only": true,
         "mocha-no-side-effect-code": true,
-        // TODO: "no-any": true,
+        "no-any": true,
         "no-arg": true,
         "no-bitwise": true,
         "no-conditional-assignment": true,
@@ -53,7 +53,7 @@
         "no-constant-condition": true,
         "no-control-regex": true,
         "no-debugger": true,
-        "no-duplicate-case": true,
+        "no-duplicate-switch-case": true,
         "no-duplicate-super": true,
         "no-duplicate-variable": true,
         "no-empty": false, // changed
@@ -70,14 +70,14 @@
         "no-reference-import": true,
         "no-regex-spaces": true,
         "no-sparse-arrays": true,
-        "no-stateless-class": true,
+        "no-unnecessary-class": true,
         "no-string-literal": true,
         "no-string-throw": true,
         "no-unnecessary-bind": true,
         "no-unnecessary-callback-wrapper": true,
         "no-unnecessary-initializer": true,
         "no-unnecessary-override": true,
-        // TODO: "no-unsafe-any": true,
+        "no-unsafe-any": true,
         "no-unsafe-finally": true,
         "no-unused-expression": true,
         "no-use-before-declare": false, // changed (recommended turned off: https://palantir.github.io/tslint/rules/no-use-before-declare/)
@@ -101,7 +101,7 @@
         ],
         "use-isnan": true,
         "use-named-parameter": true,
-        "valid-typeof": true,
+        "typeof-compare": true,
         "adjacent-overload-signatures": true,
         "array-type": [
             true,
@@ -169,7 +169,7 @@
         "no-useless-files": true,
         "no-var-keyword": true,
         "no-var-requires": true,
-        "no-var-self": true,
+        "no-this-assignment": true,
         "no-void-expression": [
             false, // changed
             "ignore-arrow-function-shorthand" // changed
@@ -303,8 +303,7 @@
         "no-empty-interfaces": false,
         "no-missing-visibility-modifiers": false,
         "no-multiple-var-decl": false,
-        "no-switch-case-fall-through": false,
-        "typeof-compare": false
+        "no-switch-case-fall-through": false
     },
     "rulesDirectory": "node_modules/tslint-microsoft-contrib/",
     "linterOptions": {

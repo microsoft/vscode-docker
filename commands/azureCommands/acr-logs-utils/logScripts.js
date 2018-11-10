@@ -6,7 +6,7 @@ const status = {
     'Failed': 1
 }
 
-var currentN = 4;
+var currentItemsCount = 4;
 var currentDir = "asc"
 var triangles = {
     'down': '&nbsp;<i class="ms-Icon ms-Icon--ChevronDown"></i>',
@@ -39,7 +39,7 @@ document.onkeydown = function (event) {
  * it allows a low stuttering experience that allowed rapid testing.
  * I will improve it soon.*/
 function sortTable(n, dir = "asc", holdDir = false) {
-    currentN = n;
+    currentItemsCount = n;
     let table, rows, switching, i, x, y, shouldSwitch, switchcount = 0;
     let cmpFunc = acquireCompareFunction(n);
     table = document.getElementById("core");
@@ -147,11 +147,11 @@ window.addEventListener('message', event => {
         setDigestListener(digestClickables);
 
     } else if (message.type === 'endContinued') {
-        sortTable(currentN, currentDir, true);
+        sortTable(currentItemsCount, currentDir, true);
         loading();
     } else if (message.type === 'end') {
-        window.addEventListener("resize", manageWidth);
-        manageWidth();
+        window.addEventListener("resize", setAccordionTableWidth);
+        setAccordionTableWidth();
         setTableSorter();
         loading();
     }
@@ -231,17 +231,6 @@ function setDigestListener(digestClickables) {
     }
 }
 
-function manageWidth() {
-    // let headerCells = document.querySelectorAll("#headerTable th");
-    // let topRow = document.querySelector("#core tr");
-    // let topRowCells = topRow.querySelectorAll("td");
-    // for (let i = 0; i < topRowCells.length; i++) {
-    //     let width = parseInt(getComputedStyle(topRowCells[i]).width);
-    //     headerCells[i].style.width = width + "px";
-    // }
-    setAccordionTableWidth();
-}
-
 let openAccordions = [];
 
 function setAccordionTableWidth() {
@@ -294,8 +283,6 @@ function getFilterString(inputFields) {
         filter.runId = inputFields[0].value;
     } else if (inputFields[1].value.length > 0) { //Task id
         filter.task = inputFields[1].value;
-    } else if (inputFields[2].value.length > 0) { //Image
-        filter.image = inputFields[2].value;
     }
     return filter;
 }

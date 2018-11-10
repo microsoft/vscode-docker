@@ -1,6 +1,6 @@
 # Docker Support for Visual Studio Code
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://travis-ci.org/Microsoft/vscode-docker.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-docker)
+[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/vscode-docker)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=8)
 
 The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for example:
 
@@ -10,12 +10,13 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing Images, running Containers, and Docker Hub registries
 * Deploy images from Docker Hub and Azure Container Registries directly to Azure App Service
+* Debug .NET Core applications running in Linux Docker containers
 * [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
 
 
 ## Generating Docker Files
 
-Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
+Press `F1` and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
 
 ![dockerfile](images/generateFiles.gif)
 
@@ -85,6 +86,150 @@ After the container is started, you will be prompted to login to your Azure acco
 ## Private registries (Preview)
 
 This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
+
+## Debugging .NET Core (Preview)
+
+> Note that Windows containers are **not** currently supported, only Linux containers.
+
+### Prerequisites
+
+
+1. (All users) Install the [.NET Core SDK](https://www.microsoft.com/net/download) which includes support for attaching to the .NET Core debugger.
+
+1. (All users) Install the [C# VS Code extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp) which includes support for attaching to the .NET Core debugger in VS Code.
+
+1. (Mac users) add `/usr/local/share/dotnet/sdk/NuGetFallbackFolder` as a shared folder in your Docker preferences.
+
+![Docker Shared Folders](images/dockerSharedFolders.png)
+
+### Starting the Debugger
+
+To debug a .NET Core application running in a Linux Docker container, add a Docker .NET Core launch configuration:
+
+1. Switch to the debugging tab.
+1. Select `Add configuration...`
+1. Select `Docker: Launch .NET Core (Preview)`
+1. Set a breakpoint.
+1. Start debugging.
+
+Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  If the Docker container exposes port 80, after the debugger is attached the browser will be launched and navigate to the application's initial page.
+
+> NOTE: you may see errors in the debug console when debugging ends (e.g. "`Error from pipe program 'docker': ...`"). This appears due to debugger issue [#2439](https://github.com/OmniSharp/omnisharp-vscode/issues/2439) and should not impact debugging.
+
+Most properties of the configuration are optional and will be inferred from the project. If not, or if there are additional customizations to be made to the Docker image build or container run process, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Docker: Launch .NET Core (Preview)",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerBuild": {
+                // Image customizations
+            },
+            "dockerRun": {
+                // Container customizations
+            }
+        }
+    ]
+}
+```
+
+### Application Customizations
+
+When possible, the location and output of the application will be inferred from the workspace folder opened in VS Code. When they cannot be inferred, these properties can be used to make them explicit:
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `appFolder` | The root folder of the application | The workspace folder |
+| `appProject` | The path to the project file | The first `.csproj` found in the application folder |
+| `appOutput` | The application folder relative path to the output assembly | The `TargetPath` MS Build property |
+
+> You can specify either `appFolder` or `appProject` but should not specify *both*.
+
+### Docker Build Customizations
+
+Customize the Docker image build process by adding properties under the `dockerBuild` configuration property.
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `args` | Build arguments applied to the image. | None |
+| `context` | The Docker context used during the build process. | The workspace folder, if the same as the application folder; otherwise, the application's parent (i.e. solution) folder |
+| `dockerfile` | The path to the Dockerfile used to build the image. | The file `Dockerfile` in the application folder |
+| `labels` | The set of labels added to the image. | `com.microsoft.created-by` = `visual-studio-code` |
+| `tag` | The tag added to the image. | `<Application Name>:dev` |
+| `target` | The target (stage) of the Dockerfile from which to build the image. | `base`
+
+Example build customizations:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerBuild": {
+                "args": {
+                    "arg1": "value1",
+                    "arg2": "value2"
+                },
+                "context": "${workspaceFolder}/src",
+                "dockerfile": "${workspaceFolder}/src/Dockerfile",
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                },
+                "tag": "mytag",
+                "target": "publish"
+            }
+        }
+    ]
+}
+```
+
+### Docker Run Customization
+
+Customize the Docker container run process by adding properties under the `dockerRun` configuration property.
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `containerName` | The name of the container. | `<Application Name>-dev` |
+| `env` | Environment variables applied to the container. | None |
+| `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
+| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+
+Example run customization:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerRun": {
+                "containerName": "my-container",
+                "env": {
+                    "var1": "value1",
+                    "var2": "value2"
+                },
+                "envFiles": [
+                    "${workspaceFolder}/staging.env"
+                ],
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                }
+            }
+        }
+    ]
+}
+```
 
 ## Configuration Settings
 

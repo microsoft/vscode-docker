@@ -7,7 +7,7 @@
 
 import { CancellationToken, Hover, HoverProvider, MarkedString, Position, Range, TextDocument } from 'vscode';
 import { KeyInfo } from "../dockerExtension";
-import hub = require('../dockerHubApi');
+import hub = require('../dockerHubSearch');
 import suggestHelper = require('../helpers/suggestSupportHelper');
 import parser = require('../parser');
 

@@ -5,12 +5,12 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
-import { ContainerNode } from './containerNode';
+import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ImageNode } from './imageNode';
-import { NodeBase } from './nodeBase';
+import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 
 const imageFilters = {
@@ -26,19 +26,17 @@ const containerFilters = {
 };
 
 export class RootNode extends NodeBase {
-    private _sortedImageCache: Docker.ImageDesc[];
-    private _imageDebounceTimer: NodeJS.Timer;
-    private _imagesNode: RootNode;
-    private _containerCache: Docker.ContainerDesc[];
-    private _containerDebounceTimer: NodeJS.Timer;
-    private _containersNode: RootNode;
-    private _azureAccount: AzureAccount;
+    private _sortedImageCache: Docker.ImageDesc[] | undefined;
+    private _imageDebounceTimer: NodeJS.Timer | undefined;
+    private _imagesNode: RootNode | undefined;
+    private _containerCache: Docker.ContainerDesc[] | undefined;
+    private _containerDebounceTimer: NodeJS.Timer | undefined;
+    private _containersNode: RootNode | undefined;
 
     constructor(
         public readonly label: string,
         public readonly contextValue: 'imagesRootNode' | 'containersRootNode' | 'registriesRootNode',
-        public eventEmitter: vscode.EventEmitter<NodeBase>,
-        public azureAccount?: AzureAccount
+        public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
         if (this.contextValue === 'imagesRootNode') {
@@ -46,7 +44,6 @@ export class RootNode extends NodeBase {
         } else if (this.contextValue === 'containersRootNode') {
             this._containersNode = this;
         }
-        this._azureAccount = azureAccount;
     }
 
     public autoRefreshImages(): void {
@@ -58,13 +55,13 @@ export class RootNode extends NodeBase {
         //     clearInterval(this._imageDebounceTimer);
         //     return;
         // }
-        clearInterval(this._imageDebounceTimer);
+
+        if (this._imageDebounceTimer) {
+            clearInterval(this._imageDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
-                let needToRefresh: boolean = false;
-                let found: boolean = false;
-
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
                 images.sort((img1, img2) => {
                     if (img1.Id > img2.Id) {
@@ -114,7 +111,7 @@ export class RootNode extends NodeBase {
                 return this.getRegistries();
             }
             default: {
-                break;
+                throw new Error(`Unexpected contextValue ${element.contextValue}`);
             }
         }
     }
@@ -131,12 +128,12 @@ export class RootNode extends NodeBase {
 
             for (let image of images) {
                 if (!image.RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, this.eventEmitter);
+                    let node = new ImageNode(`<none>:<none>`, image, this.eventEmitter);
                     node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
                     for (let repoTag of image.RepoTags) {
-                        let node = new ImageNode(`${repoTag}`, this.eventEmitter);
+                        let node = new ImageNode(`${repoTag}`, image, this.eventEmitter);
                         node.imageDesc = image;
                         imageNodes.push(node);
                     }
@@ -161,7 +158,10 @@ export class RootNode extends NodeBase {
         //     clearInterval(this._containerDebounceTimer);
         //     return;
         // }
-        clearInterval(this._containerDebounceTimer);
+
+        if (this._containerDebounceTimer) {
+            clearInterval(this._containerDebounceTimer);
+        }
 
         if (refreshInterval > 0) {
             this._containerDebounceTimer = setInterval(async () => {
@@ -211,8 +211,8 @@ export class RootNode extends NodeBase {
     private async getContainers(): Promise<ContainerNode[]> {
         const containerNodes: ContainerNode[] = [];
         let containers: Docker.ContainerDesc[];
-        let contextValue: string;
-        let iconPath: any = {};
+        let contextValue: ContainerNodeContextValue;
+        let iconPath: IconPath;
 
         try {
             containers = await docker.getContainerDescriptors(containerFilters);
@@ -235,8 +235,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, contextValue, iconPath);
-                containerNode.containerDesc = container;
+                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 
@@ -253,13 +252,14 @@ export class RootNode extends NodeBase {
     private async getRegistries(): Promise<RegistryRootNode[]> {
         const registryRootNodes: RegistryRootNode[] = [];
 
-        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", null));
+        registryRootNodes.push(new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined));
 
-        if (this._azureAccount) {
-            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, this._azureAccount));
+        let azureAccount: AzureAccount = await AzureUtilityManager.getInstance().tryGetAzureAccount();
+        if (azureAccount) {
+            registryRootNodes.push(new RegistryRootNode('Azure', "azureRegistryRootNode", this.eventEmitter, azureAccount));
         }
 
-        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', null));
+        registryRootNodes.push(new RegistryRootNode('Private Registries', 'customRootNode', undefined, undefined));
 
         return registryRootNodes;
     }

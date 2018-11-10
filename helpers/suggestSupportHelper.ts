@@ -7,7 +7,7 @@
 
 import vscode = require('vscode');
 import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
-import hub = require('../dockerHubApi');
+import hub = require('../dockerHubSearch');
 import parser = require('../parser');
 
 export class SuggestSupportHelper {
@@ -87,7 +87,7 @@ export class SuggestSupportHelper {
         }
         let keyName = _parser.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
-            let imageName;
+            let imageName: string;
 
             if (keyName === 'FROM') {
                 imageName = line.match(FROM_DIRECTIVE_PATTERN)[1];

@@ -10,6 +10,7 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { delay } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
+import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
@@ -35,8 +36,8 @@ export async function tagImage(actionContext: IActionContext, context: ImageNode
 
         const image: Docker.Image = docker.getImage(imageToTag.Id);
 
-        // tslint:disable-next-line:no-function-expression // Grandfathered in
-        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, data: any): void {
+        // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, _data: any): void {
             if (err) {
                 // TODO: use parseError, proper error handling
                 vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
@@ -151,7 +152,7 @@ export function addImageTaggingTelemetry(actionContext: IActionContext, fullImag
         properties.registryType = knownRegistry.type;
 
         for (let propertyName of Object.getOwnPropertyNames(properties)) {
-            actionContext.properties[propertyName + propertyPostfix] = properties[propertyName];
+            actionContext.properties[propertyName + propertyPostfix] = <string>properties[propertyName];
         }
     } catch (error) {
         console.error(error);
@@ -160,15 +161,4 @@ export function addImageTaggingTelemetry(actionContext: IActionContext, fullImag
 
 function numberMatches(matches: RegExpMatchArray | null): number {
     return matches ? matches.length : 0;
-}
-
-function extractRegExGroups(input: string, regex: RegExp, defaults: string[]): string[] {
-    let matches = input.match(regex);
-    if (matches) {
-        // Ignore first item, which is the text of the entire match
-        let [, ...groups] = matches;
-        return groups;
-    }
-
-    return defaults;
 }

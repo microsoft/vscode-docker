@@ -9,3 +9,4 @@ coverage/**
 .vscode-test
 testOutput
 .vs
+test-results.xml

@@ -17,6 +17,7 @@ import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { createRegistry } from '../azureCommands/create-registry';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
@@ -37,7 +38,7 @@ export async function quickPickACRRepository(registry: Registry, prompt?: string
 export async function quickPickTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.Task> {
     const placeHolder = prompt ? prompt : 'Choose a Task';
 
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let tasks: ContainerModels.Task[] = await client.tasks.list(resourceGroup.name, registry.name);
     const quickpPickBTList = tasks.map(task => <IAzureQuickPickItem<ContainerModels.Task>>{ label: task.name, data: task });
     let desiredTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
@@ -58,7 +59,7 @@ export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt
     });
     let registry: Registry;
     if (desiredReg === createNewItem) {
-        registry = <Registry>await vscode.commands.executeCommand("vscode-docker.create-ACR-Registry");
+        registry = await createRegistry();
     } else {
         registry = desiredReg.data;
     }
@@ -75,10 +76,11 @@ export async function quickPickSKU(): Promise<string> {
 }
 
 export async function quickPickSubscription(): Promise<Subscription> {
-    const subscriptions = AzureUtilityManager.getInstance().getFilteredSubscriptionList();
+    const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
         vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", "Open Portal").then(val => {
             if (val === "Open Portal") {
+                // tslint:disable-next-line:no-unsafe-any
                 opn('https://portal.azure.com/');
             }
         });
@@ -154,7 +156,7 @@ export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean>
 
 /*Creates a new resource group within the current subscription */
 async function createNewResourceGroup(loc: string, subscription?: Subscription): Promise<ResourceGroup> {
-    const resourceGroupClient = AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
+    const resourceGroupClient = await AzureUtilityManager.getInstance().getResourceManagementClient(subscription);
 
     let opt: vscode.InputBoxOptions = {
         validateInput: async (value: string) => { return await checkForValidResourcegroupName(value, resourceGroupClient) },

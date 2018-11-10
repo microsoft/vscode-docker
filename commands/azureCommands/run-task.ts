@@ -1,22 +1,24 @@
-import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
+import { FileTaskRunRequest, Run, TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from "azure-arm-containerregistry/lib/models";
-import { FileTaskRunRequest } from "azure-arm-containerregistry/lib/models/fileTaskRunRequest";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import * as fse from 'fs-extra';
 import vscode = require('vscode');
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { parseError } from "vscode-azureextensionui";
 import { TaskNode } from "../../explorer/models/taskNode";
-import { ext } from '../../extensionVariables';
+import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
-import { FileType, resolveFileItem } from '../build-image';
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
+import { quickPickYamlFileItem } from "../utils/quick-pick-image";
+import { quickPickWorkspaceFolder } from "../utils/quickPickWorkspaceFolder";
 import { getTempSourceArchivePath, uploadSourceCode } from '../utils/SourceArchiveUtility';
 
 const status = vscode.window.createOutputChannel('Run ACR Task status');
 
-export async function runTask(context?: TaskNode): Promise<any> {
+export async function runTask(context?: TaskNode): Promise<void> {
     let taskName: string;
     let subscription: Subscription;
     let resourceGroup: ResourceGroup;
@@ -34,7 +36,7 @@ export async function runTask(context?: TaskNode): Promise<any> {
         taskName = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }
 
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let runRequest: TaskRunRequest = {
         type: 'TaskRunRequest',
         taskName: taskName
@@ -42,10 +44,9 @@ export async function runTask(context?: TaskNode): Promise<any> {
 
     try {
         let taskRun = await client.registries.scheduleRun(resourceGroup.name, registry.name, runRequest);
-        vscode.window.showInformationMessage(`Successfully ran the Task: ${taskName} with ID: ${taskRun.runId}`);
+        vscode.window.showInformationMessage(`Successfully scheduled the Task '${taskName}' with ID '${taskRun.runId}'.`);
     } catch (err) {
-        ext.outputChannel.append(err);
-        vscode.window.showErrorMessage(`Failed to ran the Task: ${taskName}`);
+        throw new Error(`Failed to schedule the Task '${taskName}'\nError: '${parseError(err).message}'`);
     }
 }
 
@@ -53,42 +54,34 @@ export async function runTask(context?: TaskNode): Promise<any> {
 // Selected source code must contain a path to the desired dockerfile.
 export async function runTaskFile(yamlFileUri?: vscode.Uri): Promise<void> {
     //Acquire information from user
+    let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder("To run a task from a Yaml file you must first open a folder or workspace in VS Code.");
+    const yamlItem = await quickPickYamlFileItem(yamlFileUri, rootFolder);
     const subscription = await quickPickSubscription();
-
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     const registry: Registry = await quickPickACRRegistry(true);
-
-    const resourceGroupName = getResourceGroupName(registry);
-
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
+
+    const resourceGroupName = getResourceGroupName(registry);
+    const tarFilePath = getTempSourceArchivePath(status);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
 
     //Begin readying build
     status.show();
 
-    let folder: vscode.WorkspaceFolder;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-        folder = vscode.workspace.workspaceFolders[0];
-    } else {
-        folder = await (<any>vscode).window.showWorkspaceFolderPick();
-    }
-    const yamlItem = await resolveFileItem(folder, yamlFileUri, FileType.Yaml);
-    const sourceLocation: string = folder.uri.path;
-    const tarFilePath = getTempSourceArchivePath(status);
-
-    const uploadedSourceLocation = await uploadSourceCode(status, client, registry.name, resourceGroupName, sourceLocation, tarFilePath, folder);
+    const uploadedSourceLocation: string = await uploadSourceCode(status, client, registry.name, resourceGroupName, rootFolder, tarFilePath);
     status.appendLine("Uploaded Source Code to " + tarFilePath);
 
     const runRequest: FileTaskRunRequest = {
         type: 'FileTaskRunRequest',
         taskFilePath: yamlItem.relativeFilePath,
-        //valuesFilePath: yamlItem.relativeFolderPath,
         sourceLocation: uploadedSourceLocation,
         platform: { os: osType }
-    };
+    }
+    status.appendLine("Set up Run Request");
 
-    const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
+    const run: Run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
     status.appendLine("Schedule Run " + run.runId);
 
-    streamLogs(registry, run, status, client);
+    await streamLogs(registry, run, status, client);
+    await fse.unlink(tarFilePath);
 }

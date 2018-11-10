@@ -1,7 +1,9 @@
-import { Registry, Run } from "azure-arm-containerregistry/lib/models";
+"use strict";
+
+import { Registry } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
-import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
+import { AzureImageTagNode, AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
@@ -16,42 +18,53 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     let subscription: Subscription;
     if (!context) {
         registry = await quickPickACRRegistry();
-        if (!registry) { return; }
-        subscription = getSubscriptionFromRegistry(registry);
+        subscription = await getSubscriptionFromRegistry(registry);
     } else {
         registry = context.registry;
         subscription = context.subscription;
     }
     let resourceGroup: string = getResourceGroupName(registry);
-    const client = AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let logData: LogData = new LogData(client, registry, resourceGroup);
 
-    // Fuiltering provided
+    // Filtering provided
     if (context && context instanceof AzureImageTagNode) {
         //ACR Image Logs
-        let imageRun = await logData.loadLogs(false, false, { image: context.label });
-        if (!hasValidLogContent(context, logData)) { return; }
-        logData.getLink(0).then((url) => {
-            accessLog(url, logData.logs[0].runId, false);
+        await logData.loadLogs({
+            webViewEvent: false,
+            loadNext: false,
+            removeOld: false,
+            filter: { image: context.label }
         });
+        if (!hasValidLogContent(context, logData)) { return; }
+        const url = await logData.getLink(0);
+        await accessLog(url, logData.logs[0].runId, false);
     } else {
         if (context && context instanceof TaskNode) {
             //ACR Task Logs
-            await logData.loadLogs(false, false, { task: context.label });
+            await logData.loadLogs({
+                webViewEvent: false,
+                loadNext: false,
+                removeOld: false,
+                filter: { task: context.label }
+            });
         } else {
             //ACR Registry Logs
-            await logData.loadLogs(false);
+            await logData.loadLogs({
+                webViewEvent: false,
+                loadNext: false
+            });
         }
         if (!hasValidLogContent(context, logData)) { return; }
-        let webViewTitle: string = registry.name;
+        let webViewTitle = registry.name;
         if (context instanceof TaskNode) {
             webViewTitle += '/' + context.label;
         }
-        let webview = new LogTableWebview(webViewTitle, logData);
+        const webview = new LogTableWebview(webViewTitle, logData);
     }
 }
 
-function hasValidLogContent(context: any, logData: LogData): boolean {
+function hasValidLogContent(context: AzureRegistryNode | AzureImageTagNode | TaskNode, logData: LogData): boolean {
     if (logData.logs.length === 0) {
         let itemType: string;
         if (context && context instanceof TaskNode) {

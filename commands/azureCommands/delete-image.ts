@@ -11,6 +11,7 @@ import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
+import { getLoginServer } from "../../utils/nonNull";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /** Function to untag an Azure hosted image
@@ -45,7 +46,7 @@ async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<
     } else {
         registry = context.registry;
         let wholeName: string[] = context.label.split(':');
-        repo = new Repository(registry, wholeName[0]);
+        repo = await Repository.Create(registry, wholeName[0]);
         image = new AzureImage(repo, wholeName[1]);
     }
 
@@ -58,14 +59,14 @@ async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<
     } else {
         digest = await acrTools.getImageDigest(image);
         let images = await acrTools.getImagesByDigest(repo, digest);
-        message = `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.toString()}?`;
+        message = `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.join(', ')}?`;
         path = `/v2/${repo.name}/manifests/${digest}`;
     }
 
     const shouldDelete = await ext.ui.showWarningMessage(message, { modal: true }, DialogResponses.deleteResponse, DialogResponses.cancel);
     if (shouldDelete === DialogResponses.deleteResponse) {
         const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repo.name}:*`);
-        await acrTools.sendRequestToRegistry('delete', registry.loginServer, path, acrAccessToken);
+        await acrTools.sendRequestToRegistry('delete', getLoginServer(registry), path, acrAccessToken);
         if (untag) {
             vscode.window.showInformationMessage(`Successfully untagged: \'${image.toString()}\'`);
         } else {

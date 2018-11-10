@@ -1,7 +1,7 @@
 import { BlobService, createBlobServiceWithSas } from 'azure-storage';
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
-import { getBlobInfo } from '../../../utils/Azure/acrTools';
+import { getBlobInfo, getBlobToText, IBlobInfo } from '../../../utils/Azure/acrTools';
 
 export class LogContentProvider implements vscode.TextDocumentContentProvider {
     public static scheme: string = 'purejs';
@@ -10,7 +10,8 @@ export class LogContentProvider implements vscode.TextDocumentContentProvider {
     constructor() { }
 
     public provideTextDocumentContent(uri: vscode.Uri): string {
-        return decodeBase64(JSON.parse(uri.query).log);
+        let parse: { log: string } = <{ log: string }>JSON.parse(uri.query);
+        return decodeBase64(parse.log);
     }
 
     get onDidChange(): vscode.Event<vscode.Uri> {
@@ -32,20 +33,15 @@ export function encodeBase64(str: string): string {
 }
 
 /** Loads log text from remote url using azure blobservices */
-export function accessLog(url: string, title: string, download: boolean): void {
-    let blobInfo = getBlobInfo(url);
+export async function accessLog(url: string, title: string, download: boolean): Promise<void> {
+    let blobInfo: IBlobInfo = getBlobInfo(url);
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
-    blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, async (error, text, result, response) => {
-        if (response) {
-            if (download) {
-                downloadLog(text, title);
-            } else {
-                openLogInNewWindow(text, title);
-            }
-        } else if (error) {
-            throw error;
-        }
-    });
+    let text1 = await getBlobToText(blobInfo, blob, 0);
+    if (download) {
+        await downloadLog(text1, title);
+    } else {
+        openLogInNewWindow(text1, title);
+    }
 }
 
 function openLogInNewWindow(content: string, title: string): void {
@@ -62,7 +58,7 @@ export async function downloadLog(content: string, title: string): Promise<void>
         filters: { 'Log': ['.log', '.txt'] },
         defaultUri: vscode.Uri.file(`${title}.log`)
     });
-    fs.writeFile(uri.fsPath, content,
+    fse.writeFile(uri.fsPath, content,
         (err) => {
             if (err) { throw err; }
         });
