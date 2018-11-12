@@ -97,7 +97,7 @@ export async function getImagesByDigest(repo: Repository, digest: string): Promi
  * @param path : the URL path
  * @param accessToken : Bearer access token.
  */
-export async function sendRequestToRegistry(http_method: string, login_server: string, path: string, accessToken: string): Promise<void> {
+export async function sendRequestToRegistry(http_method: 'delete', login_server: string, path: string, accessToken: string): Promise<void> {
     let url: string = `https://${login_server}${path}`;
     let opt = {
         headers: { 'Authorization': `Bearer ${accessToken}` },
