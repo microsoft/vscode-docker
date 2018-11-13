@@ -143,22 +143,22 @@
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /\\.ya?ml$/i",
+          "when": "resourceFilename =~ /^(?:(?!^docker-compose\\.ya?ml$).)*\\.ya?ml$/i",
           "command": "vscode-docker.acr.runTaskFile",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
+          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
           "command": "vscode-docker.compose.down",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
+          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /[dD]ocker-[cC]ompose/",
+          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
