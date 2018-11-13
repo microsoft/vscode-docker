@@ -8,7 +8,6 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 const teleCmdId: string = 'vscode-docker.container.open-shell';
@@ -17,7 +16,7 @@ function getEngineTypeShellCommands(engineType: DockerEngineType): string {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     switch (engineType) {
         case DockerEngineType.Linux:
-            return configOptions.get('attachShellCommand.linuxContainer', '/bin/sh');
+            return configOptions.get('attachShellCommand.linuxContainer', '/bin/sh -c "[ -e /bin/bash ] && /bin/bash || /bin/sh"');
         case DockerEngineType.Windows:
             return configOptions.get('attachShellCommand.windowsContainer', 'powershell');
         default:
