@@ -11,6 +11,7 @@ import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
+import * as winCa from 'win-ca';
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from './commands/azureCommands/create-registry';
