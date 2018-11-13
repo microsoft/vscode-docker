@@ -187,7 +187,7 @@
         },
         {
           "command": "vscode-docker.acr.pullImage",
-          "when": "view == dockerExplorer && viewItem == azureImageNode"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|azureRepositoryNode)$/"
         },
         {
           "command": "vscode-docker.acr.runTask",
@@ -207,7 +207,7 @@
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
