@@ -9,20 +9,14 @@ import * as vscode from 'vscode';
 export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvider {
 
     public provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
-
-        const config: vscode.DebugConfiguration = {
-            name: 'Docker: Attach to Node',
-            type: 'node',
-            request: 'attach',
-            port: 9229,
-            address: 'localhost',
-            localRoot: '\${workspaceFolder}',
-            remoteRoot: '/usr/src/app',
-            protocol: 'inspector'
-        };
-
-        return [config];
-
+        return vscode.window.showInputBox({ value: '/usr/src/app', prompt: 'Please enter your Docker remote root'}).then(remoteRoot => {
+            return [{
+                name: 'Docker: Attach to Node',
+                type: 'node',
+                request: 'attach',
+                remoteRoot
+            }];
+        });
     }
 
 }
