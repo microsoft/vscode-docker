@@ -16,9 +16,9 @@ function getEngineTypeShellCommands(engineType: DockerEngineType): string {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     switch (engineType) {
         case DockerEngineType.Linux:
-            return configOptions.get('attachShellCommand.linuxContainer', '/bin/sh -c "[ -e /bin/bash ] && /bin/bash || /bin/sh"');
+            return configOptions.get('attachShellCommand.linuxContainer');
         case DockerEngineType.Windows:
-            return configOptions.get('attachShellCommand.windowsContainer', 'powershell');
+            return configOptions.get('attachShellCommand.windowsContainer');
         default:
             throw new Error(`Unexpected engine type ${engineType}`);
     }
