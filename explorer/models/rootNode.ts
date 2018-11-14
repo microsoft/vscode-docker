@@ -152,6 +152,10 @@ export class RootNode extends NodeBase {
         return imageNodes;
     }
 
+    private isContainerUnhealthy(container: Docker.ContainerDesc): boolean {
+        return container.Status.includes('(unhealthy)');
+    }
+
     public autoRefreshContainers(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
@@ -187,7 +191,8 @@ export class RootNode extends NodeBase {
                             // can't do a full object compare because "Status" keeps changing for running containers
                             if (ctr.Id === cont.Id &&
                                 ctr.Image === cont.Image &&
-                                ctr.State === cont.State) {
+                                ctr.State === cont.State &&
+                                this.isContainerUnhealthy(ctr) === this.isContainerUnhealthy(cont)) {
                                 found = true;
                                 break;
                             }
@@ -229,6 +234,12 @@ export class RootNode extends NodeBase {
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
                         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
+                    };
+                } else if (this.isContainerUnhealthy(container)) {
+                    contextValue = "runningLocalContainerNode";
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
+                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'unhealthyContainer.svg')
                     };
                 } else {
                     contextValue = "runningLocalContainerNode";
