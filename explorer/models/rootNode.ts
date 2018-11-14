@@ -105,19 +105,21 @@ export class RootNode extends NodeBase {
 
     }
 
-    public async getChildren(element: NodeBase): Promise<NodeBase[]> {
-
-        if (element.contextValue === 'imagesRootNode') {
-            return this.getImages();
+    public async getChildren(element: RootNode): Promise<NodeBase[]> {
+        switch (element.contextValue) {
+            case 'imagesRootNode': {
+                return this.getImages();
+            }
+            case 'containersRootNode': {
+                return this.getContainers();
+            }
+            case 'registriesRootNode': {
+                return this.getRegistries();
+            }
+            default: {
+                throw new Error(`Unexpected contextValue ${element.contextValue}`);
+            }
         }
-        if (element.contextValue === 'containersRootNode') {
-            return this.getContainers();
-        }
-        if (element.contextValue === 'registriesRootNode') {
-            return this.getRegistries()
-        }
-
-        throw new Error(`Unexpected contextValue ${element.contextValue}`);
     }
 
     private async getImages(): Promise<(ImageNode | ErrorNode)[]> {
@@ -130,17 +132,15 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < images.length; i++) {
-                // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                if (!images[i].RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, images[i], this.eventEmitter);
+            for (let image of images) {
+                if (!image.RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, image, this.eventEmitter);
+                    node.imageDesc = image;
                     imageNodes.push(node);
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let j = 0; j < images[i].RepoTags.length; j++) {
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        let node = new ImageNode(`${images[i].RepoTags[j]}`, images[i], this.eventEmitter);
+                    for (let repoTag of image.RepoTags) {
+                        let node = new ImageNode(`${repoTag}`, image, this.eventEmitter);
+                        node.imageDesc = image;
                         imageNodes.push(node);
                     }
                 }
@@ -154,6 +154,10 @@ export class RootNode extends NodeBase {
         this.autoRefreshImages();
 
         return imageNodes;
+    }
+
+    private isContainerUnhealthy(container: Docker.ContainerDesc): boolean {
+        return container.Status.includes('(unhealthy)');
     }
 
     public autoRefreshContainers(): void {
@@ -185,15 +189,14 @@ export class RootNode extends NodeBase {
                 if (this._containerCache.length !== containers.length) {
                     needToRefresh = true;
                 } else {
-                    // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                    for (let i = 0; i < this._containerCache.length; i++) {
-                        let ctr: Docker.ContainerDesc = this._containerCache[i];
-                        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-                        for (let j = 0; j < containers.length; j++) {
+                    for (let cachedContainer of this._containerCache) {
+                        let ctr: Docker.ContainerDesc = cachedContainer;
+                        for (let cont of containers) {
                             // can't do a full object compare because "Status" keeps changing for running containers
-                            if (ctr.Id === containers[j].Id &&
-                                ctr.Image === containers[j].Image &&
-                                ctr.State === containers[j].State) {
+                            if (ctr.Id === cont.Id &&
+                                ctr.Image === cont.Image &&
+                                ctr.State === cont.State &&
+                                this.isContainerUnhealthy(ctr) === this.isContainerUnhealthy(cont)) {
                                 found = true;
                                 break;
                             }
@@ -229,13 +232,18 @@ export class RootNode extends NodeBase {
                 return [];
             }
 
-            // tslint:disable-next-line:prefer-for-of // Grandfathered in
-            for (let i = 0; i < containers.length; i++) {
-                if (['exited', 'dead'].includes(containers[i].State)) {
+            for (let container of containers) {
+                if (['exited', 'dead'].includes(container.State)) {
                     contextValue = "stoppedLocalContainerNode";
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
                         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
+                    };
+                } else if (this.isContainerUnhealthy(container)) {
+                    contextValue = "runningLocalContainerNode";
+                    iconPath = {
+                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
+                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'unhealthyContainer.svg')
                     };
                 } else {
                     contextValue = "runningLocalContainerNode";
@@ -245,7 +253,7 @@ export class RootNode extends NodeBase {
                     };
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${containers[i].Image} (${containers[i].Names[0].substring(1)}) (${containers[i].Status})`, containers[i], contextValue, iconPath);
+                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
                 containerNodes.push(containerNode);
             }
 

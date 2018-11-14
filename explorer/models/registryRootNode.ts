@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -150,6 +151,7 @@ export class RegistryRootNode extends NodeBase {
                     } catch (error) {
                         vscode.window.showErrorMessage(parseError(error).message);
                     }
+
                 });
             }
             await subPool.runAll();

@@ -40,5 +40,5 @@ export class ImageNode extends NodeBase {
         }
     }
 
-    // no children
+    // No children
 }

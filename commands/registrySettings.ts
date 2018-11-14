@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { DialogResponses } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';

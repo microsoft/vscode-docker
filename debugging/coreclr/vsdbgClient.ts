@@ -4,8 +4,8 @@
 
 import * as path from 'path';
 import * as process from 'process';
-import * as request from 'request-promise-native';
 import { Memento } from 'vscode';
+import { ext } from '../../extensionVariables';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { OutputManager } from './outputManager';
@@ -101,7 +101,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
             await this.fileSystemProvider.makeDir(this.vsdbgPath);
         }
 
-        const script = await request(this.options.url);
+        const script = await ext.request(this.options.url);
 
         await this.fileSystemProvider.writeFile(vsdbgAcquisitionScriptPath, script);
 

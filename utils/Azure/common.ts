@@ -1,8 +1,3 @@
-import * as opn from 'opn';
-import * as vscode from "vscode";
-import { IActionContext, registerCommand } from "vscode-azureextensionui";
-import { UserCancelledError } from '../../explorer/deploy/wizard';
-import { AzureUtilityManager } from "../azureUtilityManager";
 
 let alphaNum = new RegExp('^[a-zA-Z0-9]*$');
 

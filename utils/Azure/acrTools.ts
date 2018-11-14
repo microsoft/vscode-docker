@@ -4,12 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationContext } from 'adal-node';
-import * as assert from 'assert';
-import { Registry } from "azure-arm-containerregistry/lib/models";
+import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
+import { Registry, Run, RunGetLogResult } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
+import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
+import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
+import * as vscode from "vscode";
+import { parseError } from 'vscode-azureextensionui';
 import { NULL_GUID } from "../../constants";
 import { getCatalog, getTags, TagInfo } from "../../explorer/models/commonRegistryUtils";
 import { ext } from '../../extensionVariables';
@@ -42,6 +46,13 @@ export async function getSubscriptionFromRegistry(registry: Registry): Promise<S
 export function getResourceGroupName(registry: Registry): string {
     let id = getId(registry);
     return id.slice(id.search('resourceGroups/') + 'resourceGroups/'.length, id.search('/providers/'));
+}
+
+//Gets resource group object from registry and subscription
+export async function getResourceGroup(registry: Registry, subscription: Subscription): Promise<ResourceGroup | undefined> {
+    let resourceGroups: ResourceGroup[] = await AzureUtilityManager.getInstance().getResourceGroups(subscription);
+    const resourceGroupName = getResourceGroupName(registry);
+    return resourceGroups.find((res) => { return res.name === resourceGroupName });
 }
 
 //Registry item management
@@ -174,4 +185,93 @@ export async function acquireACRAccessToken(registryUrl: string, scope: string, 
         json: true
     });
     return acrAccessTokenResponse.access_token;
+}
+
+export interface IBlobInfo {
+    accountName: string;
+    endpointSuffix: string;
+    containerName: string;
+    blobName: string;
+    sasToken: string;
+    host: string;
+}
+
+/** Parses information into a readable format from a blob url */
+export function getBlobInfo(blobUrl: string): IBlobInfo {
+    let items: string[] = blobUrl.slice(blobUrl.search('https://') + 'https://'.length).split('/');
+    const accountName = blobUrl.slice(blobUrl.search('https://') + 'https://'.length, blobUrl.search('.blob'));
+    const endpointSuffix = items[0].slice(items[0].search('.blob.') + '.blob.'.length);
+    const containerName = items[1];
+    const blobName = items[2] + '/' + items[3] + '/' + items[4].slice(0, items[4].search('[?]'));
+    const sasToken = items[4].slice(items[4].search('[?]') + 1);
+    const host = accountName + '.blob.' + endpointSuffix;
+    return {
+        accountName: accountName,
+        endpointSuffix: endpointSuffix,
+        containerName: containerName,
+        blobName: blobName,
+        sasToken: sasToken,
+        host: host
+    };
+}
+
+/** Stream logs from a blob into output channel.
+ * Note, since output streams don't actually deal with streams directly, text is not actually
+ * streamed in which prevents updating of already appended lines. Usure if this can be fixed. Nonetheless
+ * logs do load in chunks every 1 second.
+ */
+export async function streamLogs(registry: Registry, run: Run, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
+    //Prefer passed in client to avoid initialization but if not added obtains own
+    const subscription = await getSubscriptionFromRegistry(registry);
+    let client = providedClient ? providedClient : await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    let temp: RunGetLogResult = await client.runs.getLogSasUrl(getResourceGroupName(registry), registry.name, run.runId);
+    const link = temp.logLink;
+    let blobInfo: IBlobInfo = getBlobInfo(link);
+    let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
+    let available = 0;
+    let start = 0;
+
+    let obtainLogs = setInterval(async () => {
+        let props: BlobService.BlobResult;
+        let metadata: { [key: string]: string; };
+        try {
+            props = await getBlobProperties(blobInfo, blob);
+            metadata = props.metadata;
+        } catch (err) {
+            const error = parseError(err);
+            //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
+            if (error.errorType === "NotFound") { return; } else { throw error; }
+        }
+        available = +props.contentLength;
+        let text: string;
+        //Makes sure that if item fails it does so due to network/azure errors not lack of new content
+        if (available > start) {
+            text = await getBlobToText(blobInfo, blob, start);
+            let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
+            start += text.length;
+            outputChannel.append(utf8encoded);
+        }
+        if (metadata.Complete) {
+            clearInterval(obtainLogs);
+        }
+    }, 1000);
+}
+
+// Promisify getBlobToText for readability and error handling purposes
+export async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
+            (error, result) => {
+                if (error) { reject(error) } else { resolve(result); }
+            });
+    });
+}
+
+// Promisify getBlobProperties for readability and error handling purposes
+async function getBlobProperties(blobInfo: IBlobInfo, blob: BlobService): Promise<BlobService.BlobResult> {
+    return new Promise<BlobService.BlobResult>((resolve, reject) => {
+        blob.getBlobProperties(blobInfo.containerName, blobInfo.blobName, (error, result) => {
+            if (error) { reject(error) } else { resolve(result); }
+        });
+    });
 }

@@ -7,6 +7,7 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
+import { skus } from '../../constants';
 import { dockerExplorerProvider } from '../../dockerExtension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
