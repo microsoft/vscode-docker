@@ -20,9 +20,11 @@ import { throwDockerConnectionError, internal } from '../explorer/utils/dockerCo
 const registryContainerName = 'test-registry';
 
 suite("throwDockerConnectionError", async function (this: Suite): Promise<void> {
-    testUrl(internal.installDockerUrl);
-    testUrl(internal.linuxPostInstallUrl);
-    testUrl(internal.troubleshootingUrl);
+    suite("connection error URLs", async function (this: Suite): Promise<void> {
+        testUrl(internal.installDockerUrl);
+        testUrl(internal.linuxPostInstallUrl);
+        testUrl(internal.troubleshootingUrl);
+    });
 
     function testThrowDockerConnectionError(platform: NodeJS.Platform, expectedMessage: string): void {
         test(platform, () => {
@@ -43,8 +45,9 @@ suite("throwDockerConnectionError", async function (this: Suite): Promise<void> 
         });
     }
 
-    testThrowDockerConnectionError('win32', 'Unable to connect to Docker, is the Docker daemon running? Details: Whoops');
-    testThrowDockerConnectionError('darwin', 'Unable to connect to Docker, is the Docker daemon running? Details: Whoops');
-    testThrowDockerConnectionError('linux', 'Unable to connect to Docker, is the Docker daemon running? Please see https://github.com/Microsoft/vscode-docker#im-on-linux-and-get-the-error-unable-to-connect-to-docker-is-the-docker-daemon-running for a possible cause and solution. Details: Whoops');
-    testThrowDockerConnectionError('freebsd', 'Unable to connect to Docker, is the Docker daemon running? Please see https://github.com/Microsoft/vscode-docker#im-on-linux-and-get-the-error-unable-to-connect-to-docker-is-the-docker-daemon-running for a possible cause and solution. Details: Whoops');
+
+    testThrowDockerConnectionError('win32', 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running. Details: Whoops');
+    testThrowDockerConnectionError('darwin', 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running. Details: Whoops');
+    testThrowDockerConnectionError('linux', 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running. Also make sure you\'ve followed the Linux post-install instructions "Manage Docker as a non-root user". Details: Whoops');
+    testThrowDockerConnectionError('freebsd', 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running. Also make sure you\'ve followed the Linux post-install instructions "Manage Docker as a non-root user". Details: Whoops');
 });
