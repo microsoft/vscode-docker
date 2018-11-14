@@ -5,16 +5,16 @@
 
 import * as semver from 'semver';
 import vscode = require('vscode');
-import { getDockerConnectionError } from '../explorer/utils/getDockerConnectionError';
+import { IActionContext } from 'vscode-azureextensionui';
+import { throwDockerConnectionError } from '../explorer/utils/dockerConnectionError';
 import { ext } from '../extensionVariables';
 import { docker } from './utils/docker-endpoint';
 
-export async function systemPrune(): Promise<void> {
+export async function systemPrune(actionContext: IActionContext): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = ext.terminalProvider.createTerminal("docker system prune");
 
     try {
-
         if (configOptions.get('promptOnSystemPrune', true)) {
             let res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
                 { title: 'Yes' },
@@ -39,6 +39,6 @@ export async function systemPrune(): Promise<void> {
         terminal.show();
 
     } catch (error) {
-        throw getDockerConnectionError(error);
+        throwDockerConnectionError(actionContext, error);
     }
 }

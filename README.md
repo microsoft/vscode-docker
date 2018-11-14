@@ -13,6 +13,8 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Debug .NET Core applications running in Linux Docker containers
 * [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
 
+## Prerequisites
+
 ## Linux Prerequisites
 Since VS Code runs as a non-root user, you will need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://docs.docker.com/install/linux/linux-postinstall/) for the extension to be able to access docker.
 

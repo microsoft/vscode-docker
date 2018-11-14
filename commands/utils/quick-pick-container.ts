@@ -7,7 +7,7 @@ import * as Docker from 'dockerode';
 import { ContainerDesc } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
-import { getDockerConnectionError } from '../../explorer/utils/getDockerConnectionError';
+import { throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
 import { ext } from '../../extensionVariables';
 import { docker } from './docker-endpoint';
 
@@ -61,9 +61,7 @@ export async function quickPickContainer(actionContext: IActionContext, includeA
     try {
         containers = await docker.getContainerDescriptors(opts);
     } catch (err) {
-        let error = <{ code?: string }>err;
-        throw getDockerConnectionError(error);
-
+        throwDockerConnectionError(actionContext, err);
     }
 
     if (containers.length === 0) {
