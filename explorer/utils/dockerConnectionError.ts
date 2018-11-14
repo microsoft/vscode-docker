@@ -7,8 +7,6 @@ import * as opn from 'opn';
 import { MessageItem } from "vscode";
 import * as vscode from 'vscode';
 import { IActionContext, parseError } from "vscode-azureextensionui";
-import { VersionedTextDocumentIdentifier } from "vscode-languageclient";
-import { ext } from "../../extensionVariables";
 import { isLinux } from "../../helpers/osVersion";
 import { wrapError } from "./wrapError";
 
