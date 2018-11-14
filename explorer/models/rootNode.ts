@@ -152,6 +152,10 @@ export class RootNode extends NodeBase {
         return imageNodes;
     }
 
+    private isContainerUnhealthy(container: Docker.ContainerDesc): boolean {
+        return container.Status.includes('(unhealthy)');
+    }
+
     public autoRefreshContainers(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval = configOptions.get('explorerRefreshInterval', 1000);
@@ -188,7 +192,7 @@ export class RootNode extends NodeBase {
                             if (ctr.Id === cont.Id &&
                                 ctr.Image === cont.Image &&
                                 ctr.State === cont.State &&
-                                ctr.Status.includes('(unhealthy)') === cont.Status.includes('(unhealthy)')) {
+                                this.isContainerUnhealthy(ctr) === this.isContainerUnhealthy(cont)) {
                                 found = true;
                                 break;
                             }
@@ -231,7 +235,7 @@ export class RootNode extends NodeBase {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
                         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
                     };
-                } else if (container.Status.includes('(unhealthy)')) {
+                } else if (this.isContainerUnhealthy(container)) {
                     contextValue = "runningLocalContainerNode";
                     iconPath = {
                         light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
