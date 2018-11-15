@@ -200,6 +200,8 @@ function setRequestDefaults(): void {
 function getTrustedCertificateAuthorities(): string | Buffer | (string | Buffer)[] {
   // tslint:disable-next-line:no-function-expression
   return callWithTelemetryAndErrorHandlingSync('docker.getCertificates', function (this: IActionContext): string | Buffer | (string | Buffer)[] {
+    this.suppressTelemetry = true;
+
     // {win,mac}-ca automatically read trusted certificate authorities from the system and place them into the global
     //   Node agent. We don't want them in the global agent because that will affect all other extensions
     //   loaded in the same process, which will make them behave inconstently depending on whether we're loaded.
