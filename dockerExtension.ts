@@ -6,10 +6,13 @@
 let loadStartTime = Date.now();
 
 import * as assert from 'assert';
+import * as fse from 'fs-extra';
+import * as https from 'https';
 import * as path from 'path';
+import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, callWithTelemetryAndErrorHandlingSync, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
@@ -61,9 +64,12 @@ import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from './extensionVariables';
+import { globAsync } from './helpers/async';
+import { isLinux, isMac, isWindows } from './helpers/osVersion';
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
+import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
@@ -109,12 +115,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
   let activateStartTime = Date.now();
 
   initializeExtensionVariables(ctx);
-
-  // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
-  let defaultRequestOptions = {};
-  addUserAgent(defaultRequestOptions);
-  ext.request = request.defaults(defaultRequestOptions);
-
+  await setRequestDefaults();
   await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
     this.properties.isActivationEvent = 'true';
     this.measurements.mainFileLoad = (loadEndTime - loadStartTime) / 1000;
@@ -187,6 +188,16 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
       () => AzureUtilityManager.getInstance().tryGetAzureAccount(),
       1);
   });
+}
+
+async function setRequestDefaults(): Promise<void> {
+  // Set up the user agent for all direct 'request' calls in the extension (as long as they use ext.request)
+  // ...  Trusted root certificate authorities
+  let caList = await getTrustedCertificates();
+  let defaultRequestOptions: CoreOptions = { agentOptions: { ca: caList } };
+  // ... User agent
+  addUserAgent(defaultRequestOptions);
+  ext.request = request.defaults(defaultRequestOptions);
 }
 
 async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode): Promise<void> {
@@ -324,6 +335,8 @@ namespace Configuration {
         // Update endpoint and refresh explorer if needed
         if (e.affectsConfiguration('docker')) {
           docker.refreshEndpoint();
+          // tslint:disable-next-line: no-floating-promises
+          setRequestDefaults();
           vscode.commands.executeCommand('vscode-docker.explorer.refresh');
         }
       }
