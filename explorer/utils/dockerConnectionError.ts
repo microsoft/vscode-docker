@@ -37,6 +37,7 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
     actionContext.suppressErrorDisplay = true;
     vscode.window.showErrorMessage(parseError(wrappedError).message, ...items).then(response => {
         if (response) {
+            // tslint:disable-next-line:no-unsafe-any
             opn(response.url);
         }
     });
@@ -45,6 +46,6 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
 }
 
 // tslint:disable-next-line:no-any no-unsafe-any
-export function throwDockerConnectionError(actionContext: IActionContext, error: any): Promise<never> {
+export function throwDockerConnectionError(actionContext: IActionContext, error: any): never {
     throw showDockerConnectionError(actionContext, error);
 }
