@@ -6,8 +6,6 @@
 import * as assert from 'assert';
 import { parseError } from 'vscode-azureextensionui';
 import * as fse from 'fs-extra';
-import * as path from 'path';
-import { getTestRootFolder } from './global.test';
 
 // Provides additional assertion-style functions for use in tests.
 

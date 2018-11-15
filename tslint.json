@@ -101,7 +101,6 @@
         ],
         "use-isnan": true,
         "use-named-parameter": true,
-        "typeof-compare": true,
         "adjacent-overload-signatures": true,
         "array-type": [
             true,

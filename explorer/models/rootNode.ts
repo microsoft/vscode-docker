@@ -5,10 +5,13 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { docker } from '../../commands/utils/docker-endpoint';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { showDockerConnectionError } from '../utils/dockerConnectionError';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
+import { ErrorNode } from './errorNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
@@ -119,37 +122,42 @@ export class RootNode extends NodeBase {
         }
     }
 
-    private async getImages(): Promise<ImageNode[]> {
-        const imageNodes: ImageNode[] = [];
-        let images: Docker.ImageDesc[];
+    private async getImages(): Promise<(ImageNode | ErrorNode)[]> {
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
 
-        try {
-            images = await docker.getImageDescriptors(imageFilters);
-            if (!images || images.length === 0) {
-                return [];
-            }
+        return await callWithTelemetryAndErrorHandling('getChildren.images', async function (this: IActionContext): Promise<(ImageNode | ErrorNode)[]> {
+            const imageNodes: ImageNode[] = [];
+            let images: Docker.ImageDesc[];
 
-            for (let image of images) {
-                if (!image.RepoTags) {
-                    let node = new ImageNode(`<none>:<none>`, image, this.eventEmitter);
-                    node.imageDesc = image;
-                    imageNodes.push(node);
-                } else {
-                    for (let repoTag of image.RepoTags) {
-                        let node = new ImageNode(`${repoTag}`, image, this.eventEmitter);
+            try {
+                images = await docker.getImageDescriptors(imageFilters);
+                if (!images || images.length === 0) {
+                    return [];
+                }
+
+                for (let image of images) {
+                    if (!image.RepoTags) {
+                        let node = new ImageNode(`<none>:<none>`, image, me.eventEmitter);
                         node.imageDesc = image;
                         imageNodes.push(node);
+                    } else {
+                        for (let repoTag of image.RepoTags) {
+                            let node = new ImageNode(`${repoTag}`, image, me.eventEmitter);
+                            node.imageDesc = image;
+                            imageNodes.push(node);
+                        }
                     }
                 }
+            } catch (error) {
+                let newError = showDockerConnectionError(this, error);
+                return [new ErrorNode(newError, ErrorNode.getImagesErrorContextValue)]
             }
-        } catch (error) {
-            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-            return [];
-        }
 
-        this.autoRefreshImages();
+            me.autoRefreshImages();
 
-        return imageNodes;
+            return imageNodes;
+        });
     }
 
     private isContainerUnhealthy(container: Docker.ContainerDesc): boolean {
@@ -216,51 +224,55 @@ export class RootNode extends NodeBase {
 
     }
 
-    private async getContainers(): Promise<ContainerNode[]> {
-        const containerNodes: ContainerNode[] = [];
-        let containers: Docker.ContainerDesc[];
-        let contextValue: ContainerNodeContextValue;
-        let iconPath: IconPath;
+    private async getContainers(): Promise<(ContainerNode | ErrorNode)[]> {
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
 
-        try {
-            containers = await docker.getContainerDescriptors(containerFilters);
-            if (!containers || containers.length === 0) {
-                return [];
-            }
+        return await callWithTelemetryAndErrorHandling('getChildren.containers', async function (this: IActionContext): Promise<(ContainerNode | ErrorNode)[]> {
+            const containerNodes: ContainerNode[] = [];
+            let containers: Docker.ContainerDesc[];
+            let contextValue: ContainerNodeContextValue;
+            let iconPath: IconPath;
 
-            for (let container of containers) {
-                if (['exited', 'dead'].includes(container.State)) {
-                    contextValue = "stoppedLocalContainerNode";
-                    iconPath = {
-                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
-                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
-                    };
-                } else if (this.isContainerUnhealthy(container)) {
-                    contextValue = "runningLocalContainerNode";
-                    iconPath = {
-                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
-                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'unhealthyContainer.svg')
-                    };
-                } else {
-                    contextValue = "runningLocalContainerNode";
-                    iconPath = {
-                        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
-                        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
-                    };
+            try {
+                containers = await docker.getContainerDescriptors(containerFilters);
+                if (!containers || containers.length === 0) {
+                    return [];
                 }
 
-                let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
-                containerNodes.push(containerNode);
+                for (let container of containers) {
+                    if (['exited', 'dead'].includes(container.State)) {
+                        contextValue = "stoppedLocalContainerNode";
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'stoppedContainer.svg'),
+                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'stoppedContainer.svg')
+                        };
+                    } else if (me.isContainerUnhealthy(container)) {
+                        contextValue = "runningLocalContainerNode";
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'unhealthyContainer.svg'),
+                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'unhealthyContainer.svg')
+                        };
+                    } else {
+                        contextValue = "runningLocalContainerNode";
+                        iconPath = {
+                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'runningContainer.svg'),
+                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'runningContainer.svg')
+                        };
+                    }
+
+                    let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
+                    containerNodes.push(containerNode);
+                }
+            } catch (error) {
+                let newError = showDockerConnectionError(this, error);
+                return [new ErrorNode(newError, ErrorNode.getContainersErrorContextValue)]
             }
 
-        } catch (error) {
-            vscode.window.showErrorMessage('Unable to connect to Docker, is the Docker daemon running?');
-            return [];
-        }
+            me.autoRefreshContainers();
 
-        this.autoRefreshContainers();
-
-        return containerNodes;
+            return containerNodes;
+        });
     }
 
     private async getRegistries(): Promise<RegistryRootNode[]> {

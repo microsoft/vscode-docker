@@ -30,7 +30,7 @@ export namespace ext {
     export let request: requestPromise;
 
     /**
-     * An test-injectable structure defining the current operating system and version
+     * A test-injectable structure defining the current operating system and version
      */
     export let os = {
         platform: osNode.platform(),
