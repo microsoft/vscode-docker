@@ -266,7 +266,6 @@ export class RootNode extends NodeBase {
                 }
             } catch (error) {
                 let newError = showDockerConnectionError(this, error);
-                vscode.window.showErrorMessage(parseError(newError).message);
                 return [new ErrorNode(newError, ErrorNode.getContainersErrorContextValue)]
             }
 
