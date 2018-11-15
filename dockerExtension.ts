@@ -6,10 +6,12 @@
 let loadStartTime = Date.now();
 
 import * as assert from 'assert';
+import * as https from 'https';
 import * as path from 'path';
+import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, callWithTelemetryAndErrorHandlingSync, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
@@ -61,6 +63,7 @@ import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from './extensionVariables';
+import { isMac, isWindows } from './helpers/osVersion';
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
@@ -109,12 +112,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
   let activateStartTime = Date.now();
 
   initializeExtensionVariables(ctx);
-
-  // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
-  let defaultRequestOptions = {};
-  addUserAgent(defaultRequestOptions);
-  ext.request = request.defaults(defaultRequestOptions);
-
+  setRequestDefaults();
   await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
     this.properties.isActivationEvent = 'true';
     this.measurements.mainFileLoad = (loadEndTime - loadStartTime) / 1000;
@@ -186,6 +184,40 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
       // tslint:disable-next-line:promise-function-async
       () => AzureUtilityManager.getInstance().tryGetAzureAccount(),
       1);
+  });
+}
+
+function setRequestDefaults(): void {
+  // Set up the user agent for all direct 'request' calls in the extension (as long as they use ext.request)
+  // ...  Trusted root certificate authorities
+  let caList = getTrustedCertificateAuthorities();
+  let defaultRequestOptions: CoreOptions = { agentOptions: { ca: caList } };
+  // ... User agent
+  addUserAgent(defaultRequestOptions);
+  ext.request = request.defaults(defaultRequestOptions);
+}
+
+function getTrustedCertificateAuthorities(): string | Buffer | (string | Buffer)[] {
+  // tslint:disable-next-line:no-function-expression
+  return callWithTelemetryAndErrorHandlingSync('docker.getCertificates', function (this: IActionContext): string | Buffer | (string | Buffer)[] {
+    // {win,mac}-ca automatically read trusted certificate authorities from the system and place them into the global
+    //   Node agent. We don't want them in the global agent because that will affect all other extensions
+    //   loaded in the same process, which will make them behave inconstently depending on whether we're loaded.
+    let previousCertificateAuthorities = https.globalAgent.options.ca;
+    let importedCertificateAuthorities: string | Buffer | (string | Buffer)[] = [];
+
+    try {
+      if (isWindows()) {
+        require('win-ca');
+      } else if (isMac()) {
+        require('mac-ca');
+      }
+    } finally {
+      importedCertificateAuthorities = https.globalAgent.options.ca;
+      https.globalAgent.options.ca = previousCertificateAuthorities;
+    }
+
+    return importedCertificateAuthorities;
   });
 }
 
