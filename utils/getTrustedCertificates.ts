@@ -31,8 +31,8 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         }
         let folderCerts = await getCertificatesFromPaths(certificatePaths);
 
-        this.properties.fromSystem = String(systemCerts.length);
-        this.properties.fromPaths = String(folderCerts.length);
+        this.properties.fromSystemCount = String(systemCerts.length);
+        this.properties.fromPathsCount = String(folderCerts.length);
 
         let certificates = systemCerts;
         certificates.push(...folderCerts);
