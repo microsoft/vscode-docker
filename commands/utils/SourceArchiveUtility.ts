@@ -18,7 +18,6 @@ import { quickPickWorkspaceFolder } from './quickPickWorkspaceFolder';
 
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
-const status1 = vscode.window.createOutputChannel('Scheduled ACR Run');
 
 export type runRequestType =
     | 'DockerBuildRequest'
@@ -32,7 +31,7 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
         rootFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
         fileItem = await quickPickDockerFileItem(actionContext, fileUri, rootFolder);
     } else if (requestType === 'FileTaskRunRequest') {
-        rootFolder = await quickPickWorkspaceFolder("To run a task from a Yaml file you must first open a folder or workspace in VS Code.");
+        rootFolder = await quickPickWorkspaceFolder("To run a task from a .yaml file you must first open a folder or workspace in VS Code.");
         fileItem = await quickPickYamlFileItem(fileUri, rootFolder);
     } else {
         throw new Error("Run Request Type Currently not supported.");
@@ -43,14 +42,14 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
 
     const resourceGroupName: string = getResourceGroupName(registry);
-    const tarFilePath: string = getTempSourceArchivePath(status1);
+    const tarFilePath: string = getTempSourceArchivePath();
     const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
 
     //Prepare to run.
-    status1.show();
+    ext.outputChannel.show();
 
-    const uploadedSourceLocation: string = await uploadSourceCode(status1, client, registry.name, resourceGroupName, rootFolder, tarFilePath);
-    status1.appendLine("Uploaded Source Code to " + tarFilePath);
+    const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, rootFolder, tarFilePath);
+    ext.outputChannel.appendLine("Uploaded Source Code to " + tarFilePath);
 
     let runRequest: DockerBuildRequest | FileTaskRunRequest;
     if (requestType === 'DockerBuildRequest') {
@@ -73,42 +72,42 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
     }
 
     //Schedule the run and Clean up.
-    status1.appendLine("Set up Run Request");
+    ext.outputChannel.appendLine("Set up Run Request");
 
     const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
-    status1.appendLine("Scheduled Run " + run.runId);
+    ext.outputChannel.appendLine("Scheduled Run " + run.runId);
 
-    await streamLogs(registry, run, status1, client);
+    await streamLogs(registry, run, client);
     await fse.unlink(tarFilePath);
 }
 
-async function uploadSourceCode(status: vscode.OutputChannel, client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
-    status.appendLine("   Sending source code to temp file");
+async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
+    ext.outputChannel.appendLine("   Sending source code to temp file");
     let source: string = rootFolder.uri.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any
     tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
-    status.appendLine("   Getting Build Source Upload Url ");
+    ext.outputChannel.appendLine("   Getting Build Source Upload Url ");
     let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
     let upload_url: string = sourceUploadLocation.uploadUrl;
     let relative_path: string = sourceUploadLocation.relativePath;
 
-    status.appendLine("   Getting blob info from Upload Url ");
+    ext.outputChannel.appendLine("   Getting blob info from Upload Url ");
     // Right now, accountName and endpointSuffix are unused, but will be used for streaming logs later.
     let blobInfo = getBlobInfo(upload_url);
-    status.appendLine("   Creating Blob Service ");
+    ext.outputChannel.appendLine("   Creating Blob Service ");
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
-    status.appendLine("   Creating Block Blob ");
+    ext.outputChannel.appendLine("   Creating Block Blob ");
     blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (): void => { });
     return relative_path;
 }
 
-function getTempSourceArchivePath(status: vscode.OutputChannel): string {
+function getTempSourceArchivePath(): string {
     /* tslint:disable-next-line:insecure-random */
     let id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
-    status.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
+    ext.outputChannel.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
     let tarFilePath: string = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
     return tarFilePath;
 }

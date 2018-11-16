@@ -6,5 +6,5 @@ import { scheduleRunRequest } from '../utils/SourceArchiveUtility';
 // The user is then asked to name & tag the image. A build is queued for the image in the selected registry.
 // Selected source code must contain a path to the desired dockerfile.
 export async function quickBuild(actionContext: IActionContext, dockerFileUri?: vscode.Uri | undefined): Promise<void> {
-    scheduleRunRequest(dockerFileUri, "DockerBuildRequest", actionContext);
+    await scheduleRunRequest(dockerFileUri, "DockerBuildRequest", actionContext);
 }

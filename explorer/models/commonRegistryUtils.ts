@@ -9,7 +9,7 @@ import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { AsyncPool } from '../../utils/asyncpool';
-import { Manifest } from '../utils/dockerHubUtils';
+import { Manifest, ManifestHistoryV1Compatibility } from '../utils/dockerHubUtils';
 
 interface RegistryNonsensitiveInfo {
     url: string,
@@ -63,7 +63,7 @@ export async function getCatalog(registryUrl: string, credentials: RegistryCrede
     return response.repositories;
 }
 
-export async function getTagsAttributes(registryUrl: string, repositoryName: string, credentials?: RegistryCredentials): Promise<TagInfo[]> {
+export async function getTags(registryUrl: string, repositoryName: string, credentials: RegistryCredentials): Promise<TagInfo[]> {
     let result = await registryRequest<{ tags: string[] }>(registryUrl, `v2/${repositoryName}/tags/list?page_size=${PAGE_SIZE}&page=1`, credentials);
     let tags = result.tags;
     let tagInfos: TagInfo[] = [];
@@ -73,8 +73,9 @@ export async function getTagsAttributes(registryUrl: string, repositoryName: str
     for (let tag of tags) {
         pool.addTask(async (): Promise<void> => {
             try {
-                let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `/acr/v1/${repositoryName}/_tags/${tag}`, credentials);
-                let created = new Date(manifest.tag.lastUpdateTime);
+                let manifest: Manifest = await registryRequest<Manifest>(registryUrl, `v2/${repositoryName}/manifests/${tag}`, credentials);
+                let history = <ManifestHistoryV1Compatibility>JSON.parse(manifest.history[0].v1Compatibility);
+                let created = new Date(history.created);
                 let info = <TagInfo>{
                     tag: tag,
                     created
@@ -90,12 +91,6 @@ export async function getTagsAttributes(registryUrl: string, repositoryName: str
 
     tagInfos.sort(compareTagsReverse);
     return tagInfos;
-}
-
-export async function getAssociatedTags(registryUrl: string, repositoryName: string, digest: string, credentials?: RegistryCredentials): Promise<string[]> {
-    let result = await registryRequest<{ manifest: Manifest }>(registryUrl, `/acr/v1/${repositoryName}/_manifests/${digest}`, credentials);
-    let tags: string[] = result.manifest.tags;
-    return tags;
 }
 
 function compareTagsReverse(a: TagInfo, b: TagInfo): number {

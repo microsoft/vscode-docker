@@ -8,12 +8,12 @@ import { Repository } from './repository';
 
 /** Class Azure Image: Used locally, Organizes data for managing images */
 export class AzureImage {
-    public created?: Date;
     public registry: Registry;
     public repository: Repository;
     public tag: string;
     public subscription: SubscriptionModels.Subscription;
     public resourceGroupName: string;
+    public created?: Date;
     public password?: string;
     public username?: string;
 
@@ -23,12 +23,12 @@ export class AzureImage {
         this.tag = tag;
         this.subscription = repository.subscription;
         this.resourceGroupName = repository.resourceGroupName;
-        if (created) { this.created = created; }
-        if (repository.password) { this.password = repository.password; }
-        if (repository.username) { this.username = repository.username; }
+        this.created = created;
+        this.password = repository.password;
+        this.username = repository.username;
     }
 
-    public toString = (): string => {
+    public toString(): string {
         return `${this.repository.name}:${this.tag}`;
     }
 }

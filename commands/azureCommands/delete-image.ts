@@ -11,37 +11,21 @@ import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
-import { getLoginServer } from "../../utils/nonNull";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /** Function to untag an Azure hosted image
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function untagAzureImage(context?: AzureImageTagNode): Promise<void> {
-    await removeImage(context, true);
-}
-
-/** Function to delete an Azure hosted image
- * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
- */
-export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
-    await removeImage(context, false);
-}
-
-/** Function to delete an Azure hosted image
- * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
- * @param untag : if true deletes the image tag, otherwise removes digest and all other tags associeted to the image selected.
- */
-async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<void> {
-    let action: string = (untag) ? "untag" : "delete";
+    //await removeImage(context, true);
     let registry: Registry;
     let repo: Repository;
     let image: AzureImage;
 
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
-        repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to ${action}`);
-        image = await quickPicks.quickPickACRImage(repo, `Select the image you want to ${action}`);
+        repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to untag`);
+        image = await quickPicks.quickPickACRImage(repo, `Select the image you want to untag`);
 
     } else {
         registry = context.registry;
@@ -50,28 +34,58 @@ async function removeImage(context: AzureImageTagNode, untag: boolean): Promise<
         image = new AzureImage(repo, wholeName[1]);
     }
 
-    let message: string;
-    let path: string;
-    let digest: string;
-    if (untag) {
-        message = `Are you sure you want to untag: \'${image.toString()}\'? This does not delete the manifest referenced by the tag.`;
-        path = `/v2/_acr/${repo.name}/tags/${image.tag}`;
+    const shouldDelete = await ext.ui.showWarningMessage(
+        `Are you sure you want to untag: \'${image.toString()}\'? This does not delete the manifest referenced by the tag.`,
+        { modal: true },
+        DialogResponses.deleteResponse,
+        DialogResponses.cancel);
+
+    if (shouldDelete === DialogResponses.deleteResponse) {
+        await acrTools.untagImage(image);
+        vscode.window.showInformationMessage(`Successfully untagged: \'${image.toString()}\'`);
+
+        if (context) {
+            dockerExplorerProvider.refreshNode(context.parent);
+        } else {
+            dockerExplorerProvider.refreshRegistries();
+        }
+    }
+}
+
+/** Function to delete an Azure hosted image
+ * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
+ */
+export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
+    //await removeImage(context, false);
+    let registry: Registry;
+    let repo: Repository;
+    let image: AzureImage;
+
+    if (!context) {
+        registry = await quickPicks.quickPickACRRegistry();
+        repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to delete`);
+        image = await quickPicks.quickPickACRImage(repo, `Select the image you want to delete`);
+
     } else {
-        digest = await acrTools.getImageDigest(image);
-        let images = await acrTools.getImagesByDigest(repo, digest);
-        message = `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.join(', ')}?`;
-        path = `/v2/${repo.name}/manifests/${digest}`;
+        registry = context.registry;
+        let wholeName: string[] = context.label.split(':');
+        repo = await Repository.Create(registry, wholeName[0]);
+        image = new AzureImage(repo, wholeName[1]);
     }
 
-    const shouldDelete = await ext.ui.showWarningMessage(message, { modal: true }, DialogResponses.deleteResponse, DialogResponses.cancel);
+    const digest = await acrTools.getImageDigest(image);
+    const images = await acrTools.getImagesByDigest(repo, digest);
+
+    const shouldDelete = await ext.ui.showWarningMessage(
+        `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.join(', ')}?`,
+        { modal: true },
+        DialogResponses.deleteResponse,
+        DialogResponses.cancel);
+
     if (shouldDelete === DialogResponses.deleteResponse) {
-        const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repo.name}:*`);
-        await acrTools.sendRequestToRegistry('delete', getLoginServer(registry), path, acrAccessToken);
-        if (untag) {
-            vscode.window.showInformationMessage(`Successfully untagged: \'${image.toString()}\'`);
-        } else {
-            vscode.window.showInformationMessage(`Successfully deleted manifest: ${digest}`);
-        }
+        await acrTools.deleteImage(repo, digest);
+        vscode.window.showInformationMessage(`Successfully deleted manifest: ${digest}`);
+
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
         } else {

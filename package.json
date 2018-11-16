@@ -148,22 +148,22 @@
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
+          "when": "resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.down",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
+          "when": "resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /^docker-compose\\.ya?ml$/i",
+          "when": "resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
         {
-          "when": "resourceFilename =~ /(^|\\.)dockerfile$/i",
+          "when": "resourceFilename =~ /dockerfile/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         }
@@ -886,7 +886,6 @@
     "fs-extra": "^6.0.1",
     "glob": "7.1.2",
     "gradle-to-js": "^1.0.1",
-    "handlebars": "^4.0.11",
     "moment": "^2.19.3",
     "opn": "^5.2.0",
     "pom-parser": "^1.1.1",

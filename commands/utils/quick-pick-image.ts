@@ -134,7 +134,7 @@ export async function quickPickDockerFileItem(actionContext: IActionContext, doc
 export async function quickPickYamlFileItem(fileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
     let fileItem: Item;
 
-    let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, fileUri, YAML_GLOB_PATTERN, 'Choose a Yaml file to run.');
+    let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, fileUri, YAML_GLOB_PATTERN, 'Choose a .yaml file to run.');
     if (resolvedItem) {
         fileItem = resolvedItem;
     }

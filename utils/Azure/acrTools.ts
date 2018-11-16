@@ -12,10 +12,11 @@ import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
-import * as vscode from "vscode";
+import { isNull } from 'util';
+import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { NULL_GUID } from "../../constants";
-import { getAssociatedTags, getCatalog, getTagsAttributes, TagInfo } from "../../explorer/models/commonRegistryUtils";
+import { Manifest } from '../../explorer/utils/dockerHubUtils';
 import { ext } from '../../extensionVariables';
 import { AzureSession } from "../../typings/azure-account.api";
 import { AzureUtilityManager } from '../azureUtilityManager';
@@ -57,12 +58,35 @@ export async function getResourceGroup(registry: Registry, subscription: Subscri
 
 //Registry item management
 /** List images under a specific Repository */
-export async function getImagesByRepository(element: Repository): Promise<AzureImage[]> {
+export async function getImagesByRepository(repo: Repository): Promise<AzureImage[]> {
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
+    let response = await sendRequest<{ tags: { name: string, lastUpdateTime: string }[] }>(
+        'get',
+        getLoginServer(repo.registry),
+        `acr/v1/${repo.name}/_tags?orderby=timedesc`,
+        acrAccessToken);
+
+    let tags = response.tags;
+    let images: AzureImage[] = [];
+    if (!isNull(tags)) {
+        //Acquires each image's manifest (in parallel) to acquire build time
+        for (let tag of tags) {
+            let img = new AzureImage(repo, tag.name, new Date(tag.lastUpdateTime));
+            images.push(img);
+        }
+    }
+
+    return images;
+}
+
+/** List images under a specific digest */
+export async function getImagesByDigest(repo: Repository, digest: string): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
-    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(element.registry, 'repository:' + element.name + ':pull');
-    const tags: TagInfo[] = await getTagsAttributes('https://' + element.registry.loginServer, element.name, { bearer: acrAccessToken });
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
+    let response = await sendRequest<{ manifest: ACRManifest }>('get', getLoginServer(repo.registry), `acr/v1/${repo.name}/_manifests/${digest}`, acrAccessToken);
+    const tags: string[] = response.manifest.tags;
     for (let tag of tags) {
-        allImages.push(new AzureImage(element, tag.tag, tag.created));
+        allImages.push(new AzureImage(repo, tag));
     }
     return allImages;
 }
@@ -70,44 +94,62 @@ export async function getImagesByRepository(element: Repository): Promise<AzureI
 /** List repositories on a given Registry. */
 export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
-    const repositories: string[] = await getCatalog('https://' + registry.loginServer, { bearer: acrAccessToken });
+    let response = await sendRequest<{ repositories: string[] }>('get', getLoginServer(registry), 'acr/v1/_catalog', acrAccessToken);
 
     let allRepos: Repository[] = [];
-    for (let tempRepo of repositories) {
-        allRepos.push(await Repository.Create(registry, tempRepo));
+    if (!isNull(response.repositories)) {
+        for (let tempRepo of response.repositories) {
+            allRepos.push(await Repository.Create(registry, tempRepo));
+        }
     }
+
     //Note these are ordered by default in alphabetical order
     return allRepos;
 }
 
-/** List images under a specific digest */
-export async function getImagesByDigest(repo: Repository, digest: string): Promise<AzureImage[]> {
-    let allImages: AzureImage[] = [];
-    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
-    const tags: string[] = await getAssociatedTags('https://' + repo.registry.loginServer, repo.name, digest, { bearer: acrAccessToken });
-    for (let tag of tags) {
-        allImages.push(new AzureImage(repo, tag));
-    }
-    return allImages;
+export async function deleteRepository(repo: Repository): Promise<void> {
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, `repository:${repo.name}:*`);
+    await sendRequest('delete', getLoginServer(repo.registry), `v2/_acr/${repo.name}/repository`, acrAccessToken);
+}
+
+export async function deleteImage(repo: Repository, imageDigest: string): Promise<void> {
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, `repository:${repo.name}:*`);
+    await sendRequest('delete', getLoginServer(repo.registry), `v2/${repo.name}/manifests/${imageDigest}`, acrAccessToken);
+}
+
+export async function untagImage(img: AzureImage): Promise<void> {
+    const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(img.registry, `repository:${img.repository.name}:*`);
+    await sendRequest('delete', getLoginServer(img.registry), `v2/_acr/${img.repository.name}/tags/${img.tag}`, acrAccessToken);
 }
 
 /** Sends a custom html request to a registry
- * @param http_method : the http method, this function currently only uses delete
+ * @param http_method : the http method
  * @param login_server: the login server of the registry
  * @param path : the URL path
  * @param accessToken : Bearer access token.
  */
-export async function sendRequestToRegistry(http_method: 'delete', login_server: string, path: string, accessToken: string): Promise<void> {
-    let url: string = `https://${login_server}${path}`;
-    let opt = {
-        headers: { 'Authorization': `Bearer ${accessToken}` },
-        http_method: http_method,
-        url: url
-    }
+export async function sendRequest<T>(http_method: string, login_server: string, path: string, accessToken: string): Promise<T> {
+    let url: string = `https://${login_server}/${path}`;
+    let httpSettings = vscode.workspace.getConfiguration('http');
+    let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
 
     if (http_method === 'delete') {
-        await ext.request.delete(opt);
-        return;
+        return <T>await ext.request.delete(
+            {
+                headers: { 'Authorization': `Bearer ${accessToken}` },
+                url: url
+            }
+        );
+    } else if (http_method === 'get') {
+        return <T>await ext.request.get(
+            url,
+            {
+                headers: { 'Authorization': `Bearer ${accessToken}` },
+                json: true,
+                resolveWithFullResponse: false,
+                strictSSL: strictSSL,
+            }
+        );
     }
 
     throw new Error('sendRequestToRegistry: Unexpected http method');
@@ -251,7 +293,7 @@ export function getBlobInfo(blobUrl: string): IBlobInfo {
  * streamed in which prevents updating of already appended lines. Usure if this can be fixed. Nonetheless
  * logs do load in chunks every 1 second.
  */
-export async function streamLogs(registry: Registry, run: Run, outputChannel: vscode.OutputChannel, providedClient?: ContainerRegistryManagementClient): Promise<void> {
+export async function streamLogs(registry: Registry, run: Run, providedClient?: ContainerRegistryManagementClient): Promise<void> {
     //Prefer passed in client to avoid initialization but if not added obtains own
     const subscription = await getSubscriptionFromRegistry(registry);
     let client = providedClient ? providedClient : await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
@@ -280,7 +322,7 @@ export async function streamLogs(registry: Registry, run: Run, outputChannel: vs
             text = await getBlobToText(blobInfo, blob, start);
             let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
             start += text.length;
-            outputChannel.append(utf8encoded);
+            ext.outputChannel.append(utf8encoded);
         }
         if (metadata.Complete) {
             clearInterval(obtainLogs);
@@ -305,4 +347,8 @@ async function getBlobProperties(blobInfo: IBlobInfo, blob: BlobService): Promis
             if (error) { reject(error) } else { resolve(result); }
         });
     });
+}
+
+interface ACRManifest extends Manifest {
+    tags: string[];
 }

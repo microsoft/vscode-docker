@@ -13,7 +13,7 @@ import { scheduleRunRequest } from '../utils/SourceArchiveUtility';
 // Runs the selected yaml file. Equivalent to az acr run -f <yaml file> <directory>
 // Selected source code must contain a path to the desired dockerfile.
 export async function runTaskFile(yamlFileUri?: vscode.Uri): Promise<void> {
-    scheduleRunRequest(yamlFileUri, "FileTaskRunRequest");
+    await scheduleRunRequest(yamlFileUri, "FileTaskRunRequest");
 }
 
 export async function runTask(context?: TaskNode): Promise<void> {
