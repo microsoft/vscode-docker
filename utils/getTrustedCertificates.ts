@@ -24,6 +24,7 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         let certificatePaths = vscode.workspace.getConfiguration('docker').get<string[] | undefined>('certificates');
         if (certificatePaths === undefined) {
             if (isLinux()) {
+                // These are some of the most common paths on Linux, but there is no official standard
                 certificatePaths = ['/etc/ssl/certs/ca-certificates', '/etc/openssl/certs', '/etc/pki/tls/certs', '/usr/local/share/certs'];
             } else {
                 certificatePaths = [];
