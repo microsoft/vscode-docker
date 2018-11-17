@@ -2,8 +2,10 @@ import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
 import vscode = require('vscode');
 import { parseError } from "vscode-azureextensionui";
-import { ext } from "../../../extensionVariables";
-import { acquireACRAccessTokenFromRegistry } from "../../../utils/Azure/acrTools";
+import { getImageDigest } from "../../../utils/Azure/acrTools";
+import { AzureImage } from "../../../utils/Azure/models/image";
+import { Repository } from "../../../utils/Azure/models/repository";
+
 /** Class to manage data and data acquisition for logs */
 export class LogData {
     public registry: Registry;
@@ -121,29 +123,14 @@ export class LogData {
             parsedFilter = `TaskName eq '${filter.task}'`;
         } else if (filter.image) { //Image
             let items: string[] = filter.image.split(':')
-            const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(this.registry, 'repository:' + items[0] + ':pull');
-            let digest = await new Promise<string>((resolve, reject) => ext.request.get('https://' + this.registry.loginServer + `/v2/${items[0]}/manifests/${items[1]}`, {
-                auth: {
-                    bearer: acrAccessToken
-                },
-                headers: {
-                    accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
-                }
-            }, (err, httpResponse, body) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    const imageDigest = httpResponse.headers['docker-content-digest'];
-                    if (imageDigest instanceof Array) {
-                        reject(new Error('docker-content-digest should be a string not an array.'))
-                    } else {
-                        resolve(imageDigest);
-                    }
-                }
-            }));
+            if (items.length !== 2) {
+                throw new Error('Wrong format: It should be <image>:<tag>');
+            }
+            const image = new AzureImage(await Repository.Create(this.registry, items[0]), items[1]);
+            const imageDigest: string = await getImageDigest(image);
 
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }
-            parsedFilter += `contains(OutputImageManifests, '${items[0]}@${digest}')`;
+            parsedFilter += `contains(OutputImageManifests, '${image.repository.name}@${imageDigest}')`;
         }
         return parsedFilter;
     }

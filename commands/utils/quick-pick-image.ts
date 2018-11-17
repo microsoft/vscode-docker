@@ -2,14 +2,16 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import * as Docker from 'dockerode';
 import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
+import { DOCKERFILE_GLOB_PATTERN, YAML_GLOB_PATTERN } from '../../dockerExtension';
 import { showDockerConnectionError, throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
 import { delay } from '../../explorer/utils/utils';
 import { ext } from '../../extensionVariables';
-import { Item, resolveDockerFileItem } from '../build-image';
+import { Item, resolveFileItem } from '../build-image';
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../tag-image';
 import { docker } from './docker-endpoint';
 
@@ -115,7 +117,7 @@ export async function quickPickDockerFileItem(actionContext: IActionContext, doc
     let dockerFileItem: Item;
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, DOCKERFILE_GLOB_PATTERN, 'Choose a Dockerfile to build.');
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {
@@ -128,4 +130,14 @@ export async function quickPickDockerFileItem(actionContext: IActionContext, doc
         }
     }
     return dockerFileItem;
+}
+
+export async function quickPickYamlFileItem(fileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
+    let fileItem: Item;
+
+    let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, fileUri, YAML_GLOB_PATTERN, 'Choose a .yaml file to run.');
+    if (resolvedItem) {
+        fileItem = resolvedItem;
+    }
+    return fileItem;
 }

@@ -65,9 +65,6 @@ export class RootNode extends NodeBase {
 
         if (refreshInterval > 0) {
             this._imageDebounceTimer = setInterval(async () => {
-                let needToRefresh: boolean = false;
-                let found: boolean = false;
-
                 const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
                 images.sort((img1, img2) => {
                     if (img1.Id > img2.Id) {

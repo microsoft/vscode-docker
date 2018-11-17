@@ -9,7 +9,7 @@ import { Location, Subscription } from 'azure-arm-resource/lib/subscription/mode
 import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { imageTagRegExp, skus } from '../../constants'
+import { skus } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -46,7 +46,7 @@ export async function quickPickTask(registry: Registry, subscription: Subscripti
 }
 
 export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
-    const placeHolder = prompt ? prompt : 'Select registry to use';
+    const placeHolder = prompt ? prompt : 'Select registry';
     let registries = await AzureUtilityManager.getInstance().getRegistries();
     let quickPickRegList = registries.map(reg => <IAzureQuickPickItem<Registry | undefined>>{ label: reg.name, data: reg });
 

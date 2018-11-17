@@ -18,12 +18,12 @@ import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelect
 import { viewACRLogs } from "./commands/azureCommands/acr-logs";
 import { LogContentProvider } from "./commands/azureCommands/acr-logs-utils/logFileManager";
 import { createRegistry } from './commands/azureCommands/create-registry';
-import { deleteAzureImage } from './commands/azureCommands/delete-image';
+import { deleteAzureImage, untagAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
 import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
 import { quickBuild } from "./commands/azureCommands/quick-build";
-import { runTask } from "./commands/azureCommands/run-task";
+import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
 import { TaskContentProvider } from "./commands/azureCommands/task-utils/showTaskManager";
 import { buildImage } from './commands/build-image';
@@ -75,8 +75,9 @@ import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
-export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD]ocker-[cC]ompose*.{yaml,yml}';
-export const DOCKERFILE_GLOB_PATTERN = '**/{*.dockerfile,[dD]ocker[fF]ile}';
+export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}';
+export const YAML_GLOB_PATTERN = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
 
@@ -282,7 +283,9 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.acr.pullImage', pullFromAzure);
   registerCommand('vscode-docker.acr.quickBuild', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await quickBuild(this, item); });
   registerCommand('vscode-docker.acr.runTask', runTask);
+  registerCommand("vscode-docker.acr.runTaskFile", runTaskFile);
   registerCommand('vscode-docker.acr.showTask', showTaskProperties);
+  registerCommand('vscode-docker.acr.untagImage', untagAzureImage);
   registerCommand('vscode-docker.acr.viewLogs', viewACRLogs);
 
   registerCommand('vscode-docker.api.configure', async function (this: IActionContext, options: ConfigureApiOptions): Promise<void> { await configureApi(this, options); });
