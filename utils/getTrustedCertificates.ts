@@ -23,7 +23,7 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         this.properties.useCertStore = String(useCertificateStore);
         let systemCerts: (string | Buffer)[] = useCertificateStore ? getCertificatesFromSystem() : [];
 
-        let certificatePaths = vscode.workspace.getConfiguration('docker').get<string[] | undefined>('certificatePaths') || [];
+        let certificatePaths: string[] = vscode.workspace.getConfiguration('docker').get<string[] | undefined>('certificatePaths') || [];
         this.properties.certPathsCount = String(certificatePaths.length);
         let filesCerts = certificatePaths ? await getCertificatesFromPaths(certificatePaths) : [];
 
