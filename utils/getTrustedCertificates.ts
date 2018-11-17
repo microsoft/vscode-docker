@@ -37,8 +37,8 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
     });
 }
 
-async function getCertificatesFromPaths(paths: string[]): Promise<string[]> {
-    let certs: string[] = [];
+async function getCertificatesFromPaths(paths: string[]): Promise<Buffer[]> {
+    let certs: Buffer[] = [];
 
     for (let certPath of paths) {
         if (!path.isAbsolute(certPath)) {
@@ -57,13 +57,18 @@ async function getCertificatesFromPaths(paths: string[]): Promise<string[]> {
                 // Ignore (could be permission issues, for instance)
             }
 
+            let certFiles: string[] = [];
             if (isFolder) {
                 let files = await globAsync('**', { absolute: true, nodir: true, cwd: certPath });
-                certs.push(...files);
+                certFiles.push(...files);
             } else if (isFile) {
-                certs.push(certPath);
+                certFiles.push(certPath);
             } else {
                 console.log(`Could not find certificate path "${certPath}.`);
+            }
+
+            for (let cf of certFiles) {
+                certs.push(fse.readFileSync(cf));
             }
         }
     }
