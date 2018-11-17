@@ -455,6 +455,19 @@
           "default": "",
           "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
         },
+        "docker.certificatePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to files or folders containing certificates to import. For Linux, the correct path to pick up system-wide certificates will depend on the distribution. The list [\"/etc/ssl/certs/ca-certificates\", \"/etc/openssl/certs\", \"/etc/pki/tls/certs\", \"/usr/local/share/certs\"] may suffice for many.",
+          "default": []
+        },
+        "docker.useCertificateStore": {
+          "type": "boolean",
+          "description": "On Mac and Windows, indicates whether to automatically import certificates from the system certificate store. Ignored on Linux.",
+          "default": false
+        },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",
           "type": "string",
@@ -851,14 +864,15 @@
     "azure-arm-containerregistry": "^3.0.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
-    "deep-equal": "^1.0.1",
-    "dockerfile-language-server-nodejs": "^0.0.19",
     "azure-storage": "^2.8.1",
     "clipboardy": "^1.2.3",
+    "deep-equal": "^1.0.1",
+    "dockerfile-language-server-nodejs": "^0.0.19",
     "dockerode": "^2.5.1",
     "fs-extra": "^6.0.1",
     "glob": "7.1.2",
     "gradle-to-js": "^1.0.1",
+    "mac-ca": "^1.0.4",
     "moment": "^2.19.3",
     "opn": "^5.2.0",
     "pom-parser": "^1.1.1",
@@ -866,6 +880,7 @@
     "semver": "^5.5.1",
     "tar": "^4.4.6",
     "vscode-azureextensionui": "^0.19.0",
-    "vscode-languageclient": "^4.4.0"
+    "vscode-languageclient": "^4.4.0",
+    "win-ca": "^2.2.0"
   }
 }
