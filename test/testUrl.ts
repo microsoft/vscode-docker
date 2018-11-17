@@ -7,13 +7,13 @@ import { ITestCallbackContext } from "mocha";
 import { ext } from "../extensionVariables";
 import { wrapError } from "../explorer/utils/wrapError";
 import { Uri } from "vscode";
-import { isLinux } from "../helpers/osVersion";
+import { isLinux, isWindows } from "../helpers/osVersion";
 
 export async function testUrl(url: string): Promise<void> {
     test(`Testing ${url} exists`, async function (this: ITestCallbackContext) {
         this.timeout(10000);
 
-        if (!isLinux()) {
+        if (!isWindows()) {
             this.skip();
         } else {
             let contents: string | undefined;
