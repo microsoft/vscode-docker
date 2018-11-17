@@ -11,6 +11,7 @@ import * as https from 'https';
 import * as path from 'path';
 import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
+import { RequestPromise } from 'request-promise-native';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, callWithTelemetryAndErrorHandlingSync, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
@@ -63,6 +64,7 @@ import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { wrapError } from './explorer/utils/wrapError';
 import { ext } from './extensionVariables';
 import { globAsync } from './helpers/async';
 import { isLinux, isMac, isWindows } from './helpers/osVersion';
@@ -197,7 +199,30 @@ async function setRequestDefaults(): Promise<void> {
   let defaultRequestOptions: CoreOptions = { agentOptions: { ca: caList } };
   // ... User agent
   addUserAgent(defaultRequestOptions);
-  ext.request = request.defaults(defaultRequestOptions);
+  let requestWithDefaults = request.defaults(defaultRequestOptions);
+
+  // Wrap 'get' to provide better error message for self-signed certificates
+  let originalGet = <(...args: unknown[]) => RequestPromise>requestWithDefaults.get;
+  // tslint:disable-next-line:no-any
+  async function wrappedGet(this: unknown, ...args: unknown[]): Promise<any> {
+    try {
+      // tslint:disable-next-line: no-unsafe-any
+      return await originalGet.call(this, ...args);
+    } catch (err) {
+      let error = <{ cause?: { code?: string } }>err;
+
+      if (error && error.cause && error.cause.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+        err = wrapError(err, `There was a problem verifying a certificate. This could be caused by a self-signed or corporate certificate. You may need to set the 'docker.useCertificateStore' or 'docker.certificatePaths' setting.`)
+      }
+
+      throw err;
+    }
+  }
+
+  // tslint:disable-next-line:no-any
+  requestWithDefaults.get = <any>wrappedGet;
+
+  ext.request = requestWithDefaults;
 }
 
 async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode): Promise<void> {

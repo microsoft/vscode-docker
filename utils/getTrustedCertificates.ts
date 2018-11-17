@@ -19,24 +19,19 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
     return callWithTelemetryAndErrorHandling('docker.certificates', async function (this: IActionContext): Promise<(string | Buffer)[]> {
         this.suppressTelemetry = true;
 
-        let systemCerts = getCertificatesFromSystem();
+        let useCertificateStore: boolean = !!vscode.workspace.getConfiguration('docker').get<boolean>('useCertificateStore');
+        this.properties.useCertStore = String(useCertificateStore);
+        let systemCerts: (string | Buffer)[] = useCertificateStore ? getCertificatesFromSystem() : [];
 
-        let certificatePaths = vscode.workspace.getConfiguration('docker').get<string[] | undefined>('certificates');
-        if (certificatePaths === undefined) {
-            if (isLinux()) {
-                // These are some of the most common paths on Linux, but there is no official standard
-                certificatePaths = ['/etc/ssl/certs/ca-certificates', '/etc/openssl/certs', '/etc/pki/tls/certs', '/usr/local/share/certs'];
-            } else {
-                certificatePaths = [];
-            }
-        }
-        let folderCerts = await getCertificatesFromPaths(certificatePaths);
+        let certificatePaths = vscode.workspace.getConfiguration('docker').get<string[] | undefined>('certificatePaths') || [];
+        this.properties.certPathsCount = String(certificatePaths.length);
+        let filesCerts = certificatePaths ? await getCertificatesFromPaths(certificatePaths) : [];
 
-        this.properties.fromSystemCount = String(systemCerts.length);
-        this.properties.fromPathsCount = String(folderCerts.length);
+        this.properties.systemCertsCount = String(systemCerts.length);
+        this.properties.fileCertsCount = String(filesCerts.length);
 
         let certificates = systemCerts;
-        certificates.push(...folderCerts);
+        certificates.push(...filesCerts);
 
         return certificates;
     });
@@ -44,6 +39,7 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
 
 async function getCertificatesFromPaths(paths: string[]): Promise<string[]> {
     let certs: string[] = [];
+
     for (let certPath of paths) {
         if (!path.isAbsolute(certPath)) {
             // tslint:disable-next-line: no-floating-promises
