@@ -2,11 +2,13 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import * as Docker from 'dockerode';
 import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
 import { DOCKERFILE_GLOB_PATTERN, YAML_GLOB_PATTERN } from '../../dockerExtension';
+import { showDockerConnectionError, throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
 import { delay } from '../../explorer/utils/utils';
 import { ext } from '../../extensionVariables';
 import { Item, resolveFileItem } from '../build-image';
@@ -70,8 +72,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        (<{ message?: string }>error).message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
-        throw error;
+        throwDockerConnectionError(actionContext, error);
     }
     if (!images || images.length === 0) {
         throw new Error('There are no docker images. Try Docker Build first.');

@@ -18,7 +18,9 @@ export abstract class NodeBase {
     public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
-            collapsibleState: vscode.TreeItemCollapsibleState.None
+            collapsibleState: vscode.TreeItemCollapsibleState.None,
+            contextValue: this.contextValue,
+            iconPath: this.iconPath
         };
     }
 
