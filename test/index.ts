@@ -18,7 +18,7 @@
 // tslint:disable-next-line:no-require-imports no-var-requires
 let testRunner = require('vscode/lib/testrunner');
 
-let options: { [key: string]: string | boolean | number } = {
+let options: { [key: string]: string | boolean | number | object } = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
     useColors: true // colored output from test results
 };
@@ -43,12 +43,23 @@ for (let envVar of Object.keys(environmentVariables)) {
     if (match) {
         let [, option] = match;
         let value: string | number = environmentVariables[envVar];
-        if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
-            value = parseInt(value, undefined);
+
+        try {
+            value = JSON.parse(value);
+        } catch
+        {
+            if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
+                value = parseInt(value, undefined);
+            }
         }
         options[option] = value;
     }
 }
+
+options.reporterOptions = {
+    "reporterEnabled": "mocha-junit-reporter, spec"
+};
+
 console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
 
 // tslint:disable-next-line: no-unsafe-any
