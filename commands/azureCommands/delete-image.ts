@@ -17,7 +17,6 @@ import * as quickPicks from '../utils/quick-pick-azure';
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function untagAzureImage(context?: AzureImageTagNode): Promise<void> {
-    //await removeImage(context, true);
     let registry: Registry;
     let repo: Repository;
     let image: AzureImage;
@@ -35,14 +34,14 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
     }
 
     const shouldDelete = await ext.ui.showWarningMessage(
-        `Are you sure you want to untag: \'${image.toString()}\'? This does not delete the manifest referenced by the tag.`,
+        `Are you sure you want to untag '${image.toString()}'? This does not delete the manifest referenced by the tag.`,
         { modal: true },
         DialogResponses.deleteResponse,
         DialogResponses.cancel);
 
     if (shouldDelete === DialogResponses.deleteResponse) {
         await acrTools.untagImage(image);
-        vscode.window.showInformationMessage(`Successfully untagged: \'${image.toString()}\'`);
+        vscode.window.showInformationMessage(`Successfully untagged '${image.toString()}'`);
 
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
@@ -56,7 +55,6 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
  * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
 export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
-    //await removeImage(context, false);
     let registry: Registry;
     let repo: Repository;
     let image: AzureImage;
@@ -75,16 +73,17 @@ export async function deleteAzureImage(context?: AzureImageTagNode): Promise<voi
 
     const digest = await acrTools.getImageDigest(image);
     const images = await acrTools.getImagesByDigest(repo, digest);
+    const imageList = images.join(', ');
 
     const shouldDelete = await ext.ui.showWarningMessage(
-        `Are you sure you want to delete the manifest: '${digest}' and the associated image(s) ${images.join(', ')}?`,
+        `Are you sure you want to delete the manifest '${digest}' and the associated image(s): ${imageList}?`,
         { modal: true },
         DialogResponses.deleteResponse,
         DialogResponses.cancel);
 
     if (shouldDelete === DialogResponses.deleteResponse) {
         await acrTools.deleteImage(repo, digest);
-        vscode.window.showInformationMessage(`Successfully deleted manifest: ${digest}`);
+        vscode.window.showInformationMessage(`Successfully deleted manifest '${digest}' and the associated image(s): ${imageList}.`);
 
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);

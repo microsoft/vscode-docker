@@ -49,7 +49,7 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
     ext.outputChannel.show();
 
     const uploadedSourceLocation: string = await uploadSourceCode(client, registry.name, resourceGroupName, rootFolder, tarFilePath);
-    ext.outputChannel.appendLine("Uploaded Source Code to " + tarFilePath);
+    ext.outputChannel.appendLine("Uploaded source code to " + tarFilePath);
 
     let runRequest: DockerBuildRequest | FileTaskRunRequest;
     if (requestType === 'DockerBuildRequest') {
@@ -72,10 +72,10 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
     }
 
     //Schedule the run and Clean up.
-    ext.outputChannel.appendLine("Set up Run Request");
+    ext.outputChannel.appendLine("Set up run request");
 
     const run = await client.registries.scheduleRun(resourceGroupName, registry.name, runRequest);
-    ext.outputChannel.appendLine("Scheduled Run " + run.runId);
+    ext.outputChannel.appendLine("Scheduled run " + run.runId);
 
     await streamLogs(registry, run, client);
     await fse.unlink(tarFilePath);
@@ -89,25 +89,26 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     // tslint:disable-next-line:no-unsafe-any
     tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
-    ext.outputChannel.appendLine("   Getting Build Source Upload Url ");
+    ext.outputChannel.appendLine("   Getting build source upload URL ");
     let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
     let upload_url: string = sourceUploadLocation.uploadUrl;
     let relative_path: string = sourceUploadLocation.relativePath;
 
-    ext.outputChannel.appendLine("   Getting blob info from Upload Url ");
+    ext.outputChannel.appendLine("   Getting blob info from upload URL ");
     // Right now, accountName and endpointSuffix are unused, but will be used for streaming logs later.
     let blobInfo = getBlobInfo(upload_url);
-    ext.outputChannel.appendLine("   Creating Blob Service ");
+    ext.outputChannel.appendLine("   Creating blob service ");
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
-    ext.outputChannel.appendLine("   Creating Block Blob ");
+    ext.outputChannel.appendLine("   Creating block blob ");
     blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (): void => { });
     return relative_path;
 }
 
 function getTempSourceArchivePath(): string {
     /* tslint:disable-next-line:insecure-random */
-    let id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
-    ext.outputChannel.appendLine("Setting up temp file with 'sourceArchive" + id + ".tar.gz' ");
-    let tarFilePath: string = url.resolve(os.tmpdir(), `sourceArchive${id}.tar.gz`);
+    const id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
+    const archive = `sourceArchive${id}.tar.gz`;
+    ext.outputChannel.appendLine(`Setting up temp file with '${archive}'`);
+    const tarFilePath: string = url.resolve(os.tmpdir(), archive);
     return tarFilePath;
 }

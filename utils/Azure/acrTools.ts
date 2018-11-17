@@ -13,7 +13,6 @@ import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
 import { isNull } from 'util';
-import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { NULL_GUID } from "../../constants";
 import { Manifest } from '../../explorer/utils/dockerHubUtils';
@@ -130,8 +129,6 @@ export async function untagImage(img: AzureImage): Promise<void> {
  */
 export async function sendRequest<T>(http_method: string, login_server: string, path: string, accessToken: string): Promise<T> {
     let url: string = `https://${login_server}/${path}`;
-    let httpSettings = vscode.workspace.getConfiguration('http');
-    let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
 
     if (http_method === 'delete') {
         return <T>await ext.request.delete(
@@ -147,7 +144,6 @@ export async function sendRequest<T>(http_method: string, login_server: string, 
                 headers: { 'Authorization': `Bearer ${accessToken}` },
                 json: true,
                 resolveWithFullResponse: false,
-                strictSSL: strictSSL,
             }
         );
     }
