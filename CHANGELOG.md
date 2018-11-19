@@ -16,7 +16,7 @@
 ### Fixed
 * Don't output EXPOSE if empty port specified [#490](https://github.com/Microsoft/vscode-docker/issues/490)
 * When attaching shell, use bash if available [#505 Attached shell doesn' t support some keys](https://github.com/Microsoft/vscode-docker/issues/480)
-* Fix truncation of long image and container registry paths in the Explorer [#527](https://github.com/Microsoft/vscode-docker/issues/480)
+* Fix truncation of long image and container registry paths in the Explorer [#527](https://github.com/Microsoft/vscode-docker/issues/527)
 * Performance: Delay loading of Azure Account extension until after activation (part of [#535](https://github.com/Microsoft/vscode-docker/issues/535)). Note: much bigger performance improvements coming in next version!
 * Specify .dockerignore language to receive syntax highlighting and toggling of comments (thanks @remcohaszing) [#564](https://github.com/Microsoft/vscode-docker/issues/564)
 
