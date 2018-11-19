@@ -47,8 +47,9 @@ export class TaskRootNode extends NodeBase {
         const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
         tasks = await client.tasks.list(resourceGroup, element.registry.name);
         if (tasks.length === 0) {
-            vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, "Learn How to Create Build Tasks").then(val => {
-                if (val === "Learn More") {
+            const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
+            vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow).then(val => {
+                if (val === learnHow) {
                     // tslint:disable-next-line:no-unsafe-any
                     opn('https://aka.ms/acr/task');
                 }
