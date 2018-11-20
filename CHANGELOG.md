@@ -7,7 +7,7 @@
 * Adds preview support for debugging .NET Core web applications running in Linux Docker containers.
 * Azure Container Registry improvements:
   - Automatic login for pulls (even if Admin user not enabled)
-  - Navigate and build tasks
+  - Explore and build tasks
   - Display and filter logs
   - Create build from Dockerfile
   - Run ACR task file (.yml)
@@ -15,7 +15,7 @@
 
 ### Fixed
 * Don't output EXPOSE if empty port specified [#490](https://github.com/Microsoft/vscode-docker/issues/490)
-* When attaching shell, use bash if available [#505 Attached shell doesn' t support some keys](https://github.com/Microsoft/vscode-docker/issues/480)
+* When attaching shell, use bash if available [#505](https://github.com/Microsoft/vscode-docker/issues/505)
 * Fix truncation of long image and container registry paths in the Explorer [#527](https://github.com/Microsoft/vscode-docker/issues/527)
 * Performance: Delay loading of Azure Account extension until after activation (part of [#535](https://github.com/Microsoft/vscode-docker/issues/535)). Note: much bigger performance improvements coming in next version!
 * Specify .dockerignore language to receive syntax highlighting and toggling of comments (thanks @remcohaszing) [#564](https://github.com/Microsoft/vscode-docker/issues/564)
