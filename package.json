@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.3.2-alpha",
+  "version": "0.4.0",
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -472,12 +472,15 @@
           "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
         },
         "docker.certificatePaths": {
-          "type": "array",
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
           "description": "Paths to files or folders containing certificates to import. For Linux, the correct path to pick up system-wide certificates will depend on the distribution. The list [\"/etc/ssl/certs/ca-certificates\", \"/etc/openssl/certs\", \"/etc/pki/tls/certs\", \"/usr/local/share/certs\"] may suffice for many.",
-          "default": []
+          "default": null
         },
         "docker.useCertificateStore": {
           "type": "boolean",
