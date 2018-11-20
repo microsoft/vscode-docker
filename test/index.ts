@@ -42,8 +42,10 @@ let options: { [key: string]: string | boolean | number | object } = {
 // Defaults
 options.reporter = 'mocha-multi-reporters';
 options.reporterOptions = {
-    reporterEnabled: "mocha-junit-reporter, spec",
-    mochaFile: path.join(__dirname, 'test-results2.xml')
+    reporterEnabled: "spec, mocha-junit-reporter",
+    mochaJunitReporterReporterOptions: {
+        mochaFile: path.join(__dirname, '..', '..', 'test-results.xml')
+    }
 };
 
 let environmentVariables = <{ [key: string]: string }>process.env;
