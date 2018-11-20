@@ -37,28 +37,25 @@ let options: { [key: string]: string | boolean | number | object } = {
 //
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for all available options
 
+// Defaults
+options.reporter = 'mocha-multi-reporters';
+options.reporterOptions = {
+    "reporterEnabled": "mocha-junit-reporter, spec"
+};
+
 let environmentVariables = <{ [key: string]: string }>process.env;
 for (let envVar of Object.keys(environmentVariables)) {
     let match = envVar.match(/^mocha_(.+)/i);
     if (match) {
         let [, option] = match;
         let value: string | number = environmentVariables[envVar];
-
-        try {
-            value = JSON.parse(value);
-        } catch
-        {
-            if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
-                value = parseInt(value, undefined);
-            }
+        if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
+            value = parseInt(value, undefined);
         }
+
         options[option] = value;
     }
 }
-
-options.reporterOptions = {
-    "reporterEnabled": "mocha-junit-reporter, spec"
-};
 
 console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
 
