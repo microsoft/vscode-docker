@@ -213,7 +213,7 @@ async function setRequestDefaults(): Promise<void> {
       let error = <{ cause?: { code?: string } }>err;
 
       if (error && error.cause && error.cause.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
-        err = wrapError(err, `There was a problem verifying a certificate. This could be caused by a self-signed or corporate certificate. You may need to set the 'docker.useCertificateStore' or 'docker.certificatePaths' setting.`)
+        err = wrapError(err, `There was a problem verifying a certificate. This could be caused by a self-signed or corporate certificate. You may need to set the 'docker.importCertificates' setting to true.`)
       }
 
       throw err;

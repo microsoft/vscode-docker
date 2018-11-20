@@ -94,11 +94,23 @@ This build includes preview support for connecting to private registries (such a
 
 ## Self-signed and corporate certificates
 
-If you are using a self-signed or corporate CA certificate (e.g. for a private Docker registry) and have the certificate authority's certificate registered in the Windows or Mac certificate store, you will need to set the `docker.useCertificateStore` setting to true in order for that certificate to be trusted by the extension. If you're on Linux, you will need to specify your certificate folder(s) and/or file(s) using the `docker.certificatePaths` setting. The exact folder to use will depend on the Linux distribution, but we suggest trying `["/etc/ssl/certs/ca-certificates", "/etc/openssl/certs", "/etc/pki/tls/certs", "/usr/local/share/certs"]` first.
-
-Note that currently if you specify either of these settings, Node.js's internal certificate list will be ignored.
-
-We will likely set default values for these in the future.
+If you are using a self-signed or corporate CA certificate (e.g. for a private Docker registry) and have the certificate authority's certificate registered in the Windows or Mac certificate store, you will want to use the following setting:
+```json
+"docker.importCertificates": true
+```
+This causes the extension automatically pick up system-wide certificates. Leaving it at the default `false` means the default Node.js list of trusted certificates will be used. You can fine-tune the values this way:
+```json
+    "docker.importCertificates":{
+        "useCertificateStore": true,
+        "certificatePaths": [
+            "/etc/ssl/certs/ca-certificates",
+            "/etc/openssl/certs",
+            "/etc/pki/tls/certs",
+            "/usr/local/share/certs"
+        ]
+    }
+```
+The exact folder to use for certificatePaths on Linux will depend on the distribution.
 
 ## Debugging .NET Core (Preview)
 

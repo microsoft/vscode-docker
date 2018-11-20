@@ -14,29 +14,49 @@ import { isLinux, isMac, isWindows } from '../helpers/osVersion';
 
 let _systemCertificates: (string | Buffer)[] | undefined;
 
+type ImportCertificatesSetting = boolean | {
+    useCertificateStore: boolean,
+    certificatePaths: string[]
+};
+
+const defaultCertificatePaths: string[] = [
+    "/etc/ssl/certs/ca-certificates",
+    "/etc/openssl/certs",
+    "/etc/pki/tls/certs",
+    "/usr/local/share/certs"
+];
+
 export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
     // tslint:disable-next-line:no-function-expression
     return callWithTelemetryAndErrorHandling('docker.certificates', async function (this: IActionContext): Promise<(string | Buffer)[] | undefined> {
         this.suppressTelemetry = true;
 
-        let useCertificateStore: boolean = !!vscode.workspace.getConfiguration('docker').get<boolean>('useCertificateStore');
-        this.properties.useCertStore = String(useCertificateStore);
-        let systemCerts: (string | Buffer)[] | undefined = useCertificateStore ? getCertificatesFromSystem() : undefined;
-
-        let certificatePaths: string[] = vscode.workspace.getConfiguration('docker').get<string[] | null>('certificatePaths');
-        let filesCerts: Buffer[] | undefined;
-        if (Array.isArray(certificatePaths)) {
-            this.properties.certPathsCount = String(certificatePaths.length);
-            filesCerts = await getCertificatesFromPaths(certificatePaths);
-        }
-
-        if (systemCerts === undefined && filesCerts === undefined) {
-            // If neither setting is set, be sure to return undefined to get Node.js's default list of trusted certificates
+        let importSetting = vscode.workspace.getConfiguration('docker').get<ImportCertificatesSetting>('importCertificates');
+        if (importSetting === false) {
+            // Use default Node.js behavior
+            this.properties.importCertificates = 'false';
             return undefined;
         }
 
-        systemCerts = systemCerts || [];
-        filesCerts = filesCerts || [];
+        let useCertificateStore: boolean;
+        let certificatePaths: string[];
+
+        if (importSetting === true) {
+            this.properties.importCertificates = 'true';
+            useCertificateStore = true;
+            certificatePaths = defaultCertificatePaths;
+        } else {
+            this.properties.importCertificates = 'custom';
+            useCertificateStore = !!importSetting.useCertificateStore;
+            certificatePaths = importSetting.certificatePaths || [];
+        }
+
+        this.properties.useCertStore = String(useCertificateStore);
+        let systemCerts: (string | Buffer)[] = useCertificateStore ? getCertificatesFromSystem() : [];
+
+        let filesCerts: Buffer[];
+        this.properties.certPathsCount = String(certificatePaths.length);
+        filesCerts = await getCertificatesFromPaths(certificatePaths);
 
         this.properties.systemCertsCount = String(systemCerts.length);
         this.properties.fileCertsCount = String(filesCerts.length);

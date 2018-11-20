@@ -471,21 +471,37 @@
           "default": "",
           "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
         },
-        "docker.certificatePaths": {
-          "type": [
-            "array",
-            "null"
+        "docker.importCertificates": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "useCertificateStore": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "On Mac and Windows, indicates whether to automatically import certificates from the system certificate store. Ignored on Linux."
+                },
+                "certificatePaths": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [
+                    "/etc/ssl/certs/ca-certificates",
+                    "/etc/openssl/certs",
+                    "/etc/pki/tls/certs",
+                    "/usr/local/share/certs"
+                  ],
+                  "description": "Paths to files or folders containing certificates to import. For Linux, the correct path to pick up system-wide certificates will depend on the distribution."
+                }
+              }
+            }
           ],
-          "items": {
-            "type": "string"
-          },
-          "description": "Paths to files or folders containing certificates to import. For Linux, the correct path to pick up system-wide certificates will depend on the distribution. The list [\"/etc/ssl/certs/ca-certificates\", \"/etc/openssl/certs\", \"/etc/pki/tls/certs\", \"/usr/local/share/certs\"] may suffice for many.",
-          "default": null
-        },
-        "docker.useCertificateStore": {
-          "type": "boolean",
-          "description": "On Mac and Windows, indicates whether to automatically import certificates from the system certificate store. Ignored on Linux.",
-          "default": false
+          "default": false,
+          "description": "asdf"
         },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",
