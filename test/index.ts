@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
+
 //
 // PLEASE DO NOT MODIFY / DELETE UNLESS YOU KNOW WHAT YOU ARE DOING
 //
@@ -40,7 +42,8 @@ let options: { [key: string]: string | boolean | number | object } = {
 // Defaults
 options.reporter = 'mocha-multi-reporters';
 options.reporterOptions = {
-    "reporterEnabled": "mocha-junit-reporter, spec"
+    reporterEnabled: "mocha-junit-reporter, spec",
+    mochaFile: path.join(__dirname, 'test-results2.xml')
 };
 
 let environmentVariables = <{ [key: string]: string }>process.env;
