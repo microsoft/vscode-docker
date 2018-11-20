@@ -501,7 +501,7 @@
             }
           ],
           "default": false,
-          "description": "asdf"
+          "description": "True causes the extension to attempt to find system-wide certificates, false indicates that the default Node.js trusted certificates list will be used. Use an object to get more fine-grained control."
         },
         "docker.languageserver.diagnostics.deprecatedMaintainer": {
           "scope": "resource",
