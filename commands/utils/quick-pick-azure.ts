@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { Registry } from 'azure-arm-containerregistry/lib/models';
+import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
@@ -16,6 +17,7 @@ import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { createRegistry } from '../azureCommands/create-registry';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
@@ -33,8 +35,18 @@ export async function quickPickACRRepository(registry: Registry, prompt?: string
     return desiredRepo.data;
 }
 
+export async function quickPickTask(registry: Registry, subscription: Subscription, resourceGroup: ResourceGroup, prompt?: string): Promise<ContainerModels.Task> {
+    const placeHolder = prompt ? prompt : 'Choose a Task';
+
+    const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
+    let tasks: ContainerModels.Task[] = await client.tasks.list(resourceGroup.name, registry.name);
+    const quickpPickBTList = tasks.map(task => <IAzureQuickPickItem<ContainerModels.Task>>{ label: task.name, data: task });
+    let desiredTask = await ext.ui.showQuickPick(quickpPickBTList, { 'canPickMany': false, 'placeHolder': placeHolder });
+    return desiredTask.data;
+}
+
 export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
-    const placeHolder = prompt ? prompt : 'Select registry to use';
+    const placeHolder = prompt ? prompt : 'Select registry';
     let registries = await AzureUtilityManager.getInstance().getRegistries();
     let quickPickRegList = registries.map(reg => <IAzureQuickPickItem<Registry | undefined>>{ label: reg.name, data: reg });
 
@@ -47,7 +59,7 @@ export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt
     });
     let registry: Registry;
     if (desiredReg === createNewItem) {
-        registry = <Registry>await vscode.commands.executeCommand("vscode-docker.create-ACR-Registry");
+        registry = await createRegistry();
     } else {
         registry = desiredReg.data;
     }
@@ -66,8 +78,9 @@ export async function quickPickSKU(): Promise<string> {
 export async function quickPickSubscription(): Promise<Subscription> {
     const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
-        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", "Open Portal").then(val => {
-            if (val === "Open Portal") {
+        let openPortal = 'Open Portal';
+        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", openPortal).then(val => {
+            if (val === openPortal) {
                 // tslint:disable-next-line:no-unsafe-any
                 opn('https://portal.azure.com/');
             }
@@ -153,7 +166,6 @@ async function createNewResourceGroup(loc: string, subscription?: Subscription):
     };
 
     let resourceGroupName: string = await ext.ui.showInputBox(opt);
-
     let newResourceGroup: ResourceGroup = {
         name: resourceGroupName,
         location: loc,

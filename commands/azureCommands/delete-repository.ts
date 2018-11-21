@@ -8,7 +8,6 @@ import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
-import { getLoginServer } from "../../utils/nonNull";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 /**
@@ -17,22 +16,19 @@ import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from 
  */
 export async function deleteRepository(context?: AzureRepositoryNode): Promise<void> {
     let registry: Registry;
-    let repoName: string;
+    let repo: Repository;
 
     if (context) {
-        repoName = context.label;
         registry = context.registry;
+        repo = await Repository.Create(registry, context.label);
     } else {
         registry = await quickPickACRRegistry();
-        const repository: Repository = await quickPickACRRepository(registry, 'Select the repository you want to delete');
-        repoName = repository.name;
+        repo = await quickPickACRRepository(registry, 'Select the repository you want to delete');
     }
-    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${repoName} and its associated images?`);
+    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${repo.name} and its associated images?`);
     if (shouldDelete) {
-        const { acrAccessToken } = await acrTools.acquireACRAccessTokenFromRegistry(registry, `repository:${repoName}:*`);
-        const path = `/v2/_acr/${repoName}/repository`;
-        await acrTools.sendRequestToRegistry('delete', getLoginServer(registry), path, acrAccessToken);
-        vscode.window.showInformationMessage(`Successfully deleted repository ${repoName}`);
+        await acrTools.deleteRepository(repo);
+        vscode.window.showInformationMessage(`Successfully deleted repository ${repo.name}`);
         if (context) {
             dockerExplorerProvider.refreshNode(context.parent);
         } else {

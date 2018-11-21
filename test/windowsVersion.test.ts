@@ -5,7 +5,7 @@
 
 import { ext } from "../extensionVariables";
 import * as assert from 'assert';
-import { isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../helpers/windowsVersion";
+import { isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../helpers/osVersion";
 
 suite("windowsVersion", () => {
     let previousOs: typeof ext.os;

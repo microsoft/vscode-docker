@@ -9,7 +9,7 @@ import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { ext } from '../../extensionVariables';
 import { AsyncPool } from '../../utils/asyncpool';
-import { Manifest, ManifestHistory, ManifestHistoryV1Compatibility, Repository } from '../utils/dockerHubUtils';
+import { Manifest, ManifestHistoryV1Compatibility } from '../utils/dockerHubUtils';
 
 interface RegistryNonsensitiveInfo {
     url: string,

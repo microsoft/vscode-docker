@@ -31,3 +31,11 @@ export function isWindows10RS3OrNewer(): boolean {
 
     return semver.gte(ext.os.release, windows10RS3MinVersion);
 }
+
+export function isLinux(): boolean {
+    return !isMac() && !isWindows();
+}
+
+export function isMac(): boolean {
+    return ext.os.platform === 'darwin';
+}

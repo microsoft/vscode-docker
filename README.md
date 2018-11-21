@@ -1,6 +1,6 @@
 # Docker Support for Visual Studio Code
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://travis-ci.org/Microsoft/vscode-docker.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-docker)
+[![Version](https://vsmarketplacebadge.apphb.com/version/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/PeterJausovec.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=PeterJausovec.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/vscode-docker)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=8)
 
 The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for example:
 
@@ -13,10 +13,15 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * Debug .NET Core applications running in Linux Docker containers
 * [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
 
+## Prerequisites
+To use much of the Docker extension functionality, you will need to [install Docker](https://aka.ms/AA37qtj) on your machine and set up on the system path.
+
+### Linux
+Since VS Code runs as a non-root user, you will also need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://aka.ms/AA37yk6) for the extension to be able to access docker.
 
 ## Generating Docker Files
 
-Press `F1` and search for `Docker: Add Docker files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
+Press `F1` and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
 
 ![dockerfile](images/generateFiles.gif)
 
@@ -87,7 +92,27 @@ After the container is started, you will be prompted to login to your Azure acco
 
 This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
 
-## Debugging .NET Core ASP.NET (Preview)
+## Self-signed and corporate certificates
+
+If you are using a self-signed or corporate CA certificate (e.g. for a private Docker registry) and have the certificate authority's certificate registered in the Windows or Mac certificate store, you will want to use the following setting:
+```json
+"docker.importCertificates": true
+```
+This causes the extension automatically pick up system-wide certificates. Leaving it at the default `false` means the default Node.js list of trusted certificates will be used. You can fine-tune the values this way:
+```json
+    "docker.importCertificates":{
+        "useCertificateStore": true,
+        "certificatePaths": [
+            "/etc/ssl/certs/ca-certificates",
+            "/etc/openssl/certs",
+            "/etc/pki/tls/certs",
+            "/usr/local/share/certs"
+        ]
+    }
+```
+The exact folder to use for certificatePaths on Linux will depend on the distribution.
+
+## Debugging .NET Core (Preview)
 
 > Note that Windows containers are **not** currently supported, only Linux containers.
 
@@ -104,15 +129,17 @@ This build includes preview support for connecting to private registries (such a
 
 ### Starting the Debugger
 
-To debug a .NET Core ASP.NET application running in a Linux Docker container, add a Docker .NET Core launch configuration:
+To debug a .NET Core application running in a Linux Docker container, add a Docker .NET Core launch configuration:
 
 1. Switch to the debugging tab.
 1. Select `Add configuration...`
-1. Select `Docker: Launch .NET Core ASP.NET (Preview)`
+1. Select `Docker: Launch .NET Core (Preview)`
 1. Set a breakpoint.
 1. Start debugging.
 
-Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  After the debugger is attached, the browser will be launched and navigate to the application's initial page.
+Upon debugging, a Docker image will be built and a container will be run based on that image.  The container will have volumes mapped to the locally-built application and the .NET Core debugger.  If the Docker container exposes port 80, after the debugger is attached the browser will be launched and navigate to the application's initial page.
+
+> NOTE: you may see errors in the debug console when debugging ends (e.g. "`Error from pipe program 'docker': ...`"). This appears due to debugger issue [#2439](https://github.com/OmniSharp/omnisharp-vscode/issues/2439) and should not impact debugging.
 
 Most properties of the configuration are optional and will be inferred from the project. If not, or if there are additional customizations to be made to the Docker image build or container run process, those can be added under the `dockerBuild` and `dockerRun` properties of the configuration, respectively.
 
@@ -120,7 +147,7 @@ Most properties of the configuration are optional and will be inferred from the 
 {
     "configurations": [
         {
-            "name": "Docker: Launch .NET Core ASP.NET (Preview)",
+            "name": "Docker: Launch .NET Core (Preview)",
             "type": "docker-coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -153,11 +180,41 @@ Customize the Docker image build process by adding properties under the `dockerB
 
 | Property | Description | Default |
 | --- | --- | --- |
+| `args` | Build arguments applied to the image. | None |
 | `context` | The Docker context used during the build process. | The workspace folder, if the same as the application folder; otherwise, the application's parent (i.e. solution) folder |
 | `dockerfile` | The path to the Dockerfile used to build the image. | The file `Dockerfile` in the application folder |
+| `labels` | The set of labels added to the image. | `com.microsoft.created-by` = `visual-studio-code` |
 | `tag` | The tag added to the image. | `<Application Name>:dev` |
 | `target` | The target (stage) of the Dockerfile from which to build the image. | `base`
 
+Example build customizations:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerBuild": {
+                "args": {
+                    "arg1": "value1",
+                    "arg2": "value2"
+                },
+                "context": "${workspaceFolder}/src",
+                "dockerfile": "${workspaceFolder}/src/Dockerfile",
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                },
+                "tag": "mytag",
+                "target": "publish"
+            }
+        }
+    ]
+}
+```
 
 ### Docker Run Customization
 
@@ -166,6 +223,38 @@ Customize the Docker container run process by adding properties under the `docke
 | Property | Description | Default |
 | --- | --- | --- |
 | `containerName` | The name of the container. | `<Application Name>-dev` |
+| `env` | Environment variables applied to the container. | None |
+| `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
+| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+
+Example run customization:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Launch .NET Core in Docker",
+            "type": "docker-coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "dockerRun": {
+                "containerName": "my-container",
+                "env": {
+                    "var1": "value1",
+                    "var2": "value2"
+                },
+                "envFiles": [
+                    "${workspaceFolder}/staging.env"
+                ],
+                "labels": {
+                    "label1": "value1",
+                    "label2": "value2"
+                }
+            }
+        }
+    ]
+}
+```
 
 ## Configuration Settings
 
@@ -242,7 +331,7 @@ and respond with the username and password specified by Azure.
 
 ### I'm on Linux and get the error "Unable to connect to Docker, is the Docker daemon running?"
 
-Since VS Code runs as a non-root user, you will need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://docs.docker.com/install/linux/linux-postinstall/) for the extension to be able to access docker.
+Please see [Linux Prerequisites](#linux-prerequisites).
 
 ## Telemetry
 

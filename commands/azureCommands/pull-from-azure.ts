@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
-import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import * as path from "path";
 import vscode = require('vscode');
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
@@ -97,7 +97,7 @@ async function isLoggedIntoDocker(registryName: string): Promise<{ configPath: s
 
     await callWithTelemetryAndErrorHandling('findDockerConfig', async function (this: IActionContext): Promise<void> {
         this.suppressTelemetry = true;
-        buffer = fs.readFileSync(configPath);
+        buffer = fse.readFileSync(configPath);
     });
 
     let index = buffer.indexOf(registryName);

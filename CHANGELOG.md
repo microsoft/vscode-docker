@@ -1,7 +1,26 @@
-## 0.x.x - Unreleased
+## 0.5.0 - UNRELEASED
+
+## 0.4.0 - 20 November 2018
 
 ### Added
+* Added support for self-signed certificates and reading from Windows/Mac certificate stores (currently opt-in) [#613](https://github.com/Microsoft/vscode-docker/issues/613), [#602](https://github.com/Microsoft/vscode-docker/issues/602), [#483](https://github.com/Microsoft/vscode-docker/issues/483)
+* Use a different icon for unhealthy containers (thanks @grhm) [#615](https://github.com/Microsoft/vscode-docker/issues/615)
+* 8.9-alpine -> 10.13-alpine [#624](https://github.com/Microsoft/vscode-docker/pull/624)
 * Adds preview support for debugging .NET Core web applications running in Linux Docker containers.
+* Azure Container Registry improvements:
+  - Automatic login for pulls (even if Admin user not enabled)
+  - Explore and build tasks
+  - Display and filter logs
+  - Create build from Dockerfile
+  - Run ACR task file (.yml)
+  - Delete or untag images
+
+### Fixed
+* Don't output EXPOSE if empty port specified [#490](https://github.com/Microsoft/vscode-docker/issues/490)
+* When attaching shell, use bash if available [#505](https://github.com/Microsoft/vscode-docker/issues/505)
+* Fix truncation of long image and container registry paths in the Explorer [#527](https://github.com/Microsoft/vscode-docker/issues/527)
+* Performance: Delay loading of Azure Account extension until after activation (part of [#535](https://github.com/Microsoft/vscode-docker/issues/535)). Note: much bigger performance improvements coming in next version!
+* Specify .dockerignore language to receive syntax highlighting and toggling of comments (thanks @remcohaszing) [#564](https://github.com/Microsoft/vscode-docker/issues/564)
 
 ## 0.3.1 - 25 September 2018
 

@@ -101,7 +101,6 @@
         ],
         "use-isnan": true,
         "use-named-parameter": true,
-        "typeof-compare": true,
         "adjacent-overload-signatures": true,
         "array-type": [
             true,
@@ -303,8 +302,7 @@
         "no-empty-interfaces": false,
         "no-missing-visibility-modifiers": false,
         "no-multiple-var-decl": false,
-        "no-switch-case-fall-through": false,
-        "typeof-compare": false
+        "no-switch-case-fall-through": false
     },
     "rulesDirectory": "node_modules/tslint-microsoft-contrib/",
     "linterOptions": {

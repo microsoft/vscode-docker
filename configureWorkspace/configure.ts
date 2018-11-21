@@ -4,10 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
-import { EOL } from 'os';
 import * as path from "path";
 import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
@@ -149,7 +147,7 @@ async function readPackageJson(folderPath: string): Promise<{ packagePath?: stri
 
     if (uris && uris.length > 0) {
         packagePath = uris[0].fsPath;
-        const json = <JsonPackageContents>JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        const json = <JsonPackageContents>JSON.parse(fse.readFileSync(packagePath, 'utf8'));
 
         if (json.scripts && typeof json.scripts.start === "string") {
             packageInfo.npmStart = true;
@@ -428,7 +426,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
             // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
             let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
             if (fileContents) {
-                fs.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
+                fse.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
                 filesWritten.push(filePath);
             }
         }

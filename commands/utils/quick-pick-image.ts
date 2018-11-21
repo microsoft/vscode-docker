@@ -4,9 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as Docker from 'dockerode';
+import * as path from "path";
 import vscode = require('vscode');
-import { IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
+import { DialogResponses, IActionContext, parseError, TelemetryProperties } from 'vscode-azureextensionui';
+import { DOCKERFILE_GLOB_PATTERN, YAML_GLOB_PATTERN } from '../../dockerExtension';
+import { showDockerConnectionError, throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
+import { delay } from '../../explorer/utils/utils';
 import { ext } from '../../extensionVariables';
+import { Item, resolveFileItem } from '../build-image';
+import { addImageTaggingTelemetry, getTagFromUserInput } from '../tag-image';
 import { docker } from './docker-endpoint';
 
 export interface ImageItem extends vscode.QuickPickItem {
@@ -66,8 +72,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        (<{ message?: string }>error).message = 'Unable to connect to Docker, is the Docker daemon running?\nOutput from Docker: ' + parseError(error).message;
-        throw error;
+        throwDockerConnectionError(actionContext, error);
     }
     if (!images || images.length === 0) {
         throw new Error('There are no docker images. Try Docker Build first.');
@@ -77,4 +82,62 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
         properties.allContainers = includeAll ? String(response.allImages) : undefined;
         return response;
     }
+}
+
+export async function quickPickImageName(actionContext: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
+    let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
+    let dockerFileKey = `ACR_buildTag_${absFilePath}`;
+    let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
+    let suggestedImageName: string;
+
+    if (!prevImageName) {
+        // Get imageName based on name of subfolder containing the Dockerfile, or else workspacefolder
+        suggestedImageName = path.basename(dockerFileItem.relativeFolderPath).toLowerCase();
+        if (suggestedImageName === '.') {
+            suggestedImageName = path.basename(rootFolder.uri.fsPath).toLowerCase().replace(/\s/g, '');
+        }
+
+        suggestedImageName += ":{{.Run.ID}}"
+    } else {
+        suggestedImageName = prevImageName;
+    }
+
+    // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
+    await delay(500);
+
+    addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
+    const imageName: string = await getTagFromUserInput(suggestedImageName, false);
+    addImageTaggingTelemetry(actionContext, imageName, '.after');
+
+    await ext.context.globalState.update(dockerFileKey, imageName);
+    return imageName;
+}
+
+export async function quickPickDockerFileItem(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
+    let dockerFileItem: Item;
+
+    while (!dockerFileItem) {
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, DOCKERFILE_GLOB_PATTERN, 'Choose a Dockerfile to build.');
+        if (resolvedItem) {
+            dockerFileItem = resolvedItem;
+        } else {
+            let msg = "Couldn't find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?";
+            actionContext.properties.cancelStep = msg;
+            await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
+            actionContext.properties.cancelStep = undefined;
+            await vscode.commands.executeCommand('vscode-docker.configure');
+            // Try again
+        }
+    }
+    return dockerFileItem;
+}
+
+export async function quickPickYamlFileItem(fileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
+    let fileItem: Item;
+
+    let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, fileUri, YAML_GLOB_PATTERN, 'Choose a .yaml file to run.');
+    if (resolvedItem) {
+        fileItem = resolvedItem;
+    }
+    return fileItem;
 }

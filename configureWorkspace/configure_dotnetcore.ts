@@ -8,7 +8,7 @@ import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/windowsVersion';
+import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/osVersion';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 

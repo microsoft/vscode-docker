@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
@@ -20,7 +19,7 @@ import { getSubscriptionId, getTenantId } from './nonNull';
 
 /* Singleton for facilitating communication with Azure account services by providing extended shared
   functionality and extension wide access to azureAccount. Tool for internal use.
-  Authors: Esteban Rey L, Jackson Stokes
+  Authors: Esteban Rey L, Jackson Stokes, Julia Lieberman
 */
 
 export class AzureUtilityManager {
@@ -42,6 +41,8 @@ export class AzureUtilityManager {
                 if (azureAccountExtension) {
                     azureAccount = <AzureAccount>await azureAccountExtension.activate();
                 }
+
+                vscode.commands.executeCommand('setContext', 'isAzureAccountInstalled', !!azureAccount);
             } catch (error) {
                 throw new Error('Failed to activate the Azure Account Extension: ' + parseError(error).message);
             }
@@ -167,6 +168,7 @@ export class AzureUtilityManager {
         const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
         let resourceGroups: ResourceGroup[] = [];
         //Acquire each subscription's data simultaneously
+
         for (let sub of subs) {
             subPool.addTask(async () => {
                 const resourceClient = await this.getResourceManagementClient(sub);
@@ -185,7 +187,6 @@ export class AzureUtilityManager {
         if (session) {
             return session.credentials;
         }
-
         throw new Error(`Failed to get credentials, tenant ${tenantId} not found.`);
     }
 

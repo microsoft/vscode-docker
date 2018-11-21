@@ -6,22 +6,22 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext, UserCancelledError } from "vscode-azureextensionui";
-import { DOCKERFILE_GLOB_PATTERN } from '../dockerExtension';
+import { DOCKERFILE_GLOB_PATTERN, YAML_GLOB_PATTERN } from '../dockerExtension';
 import { delay } from "../explorer/utils/utils";
 import { ext } from "../extensionVariables";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 import { quickPickWorkspaceFolder } from "./utils/quickPickWorkspaceFolder";
 
-async function getDockerFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, DOCKERFILE_GLOB_PATTERN), undefined, 1000, undefined);
+async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string): Promise<vscode.Uri[]> {
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), undefined, 1000, undefined);
 }
 
-interface Item extends vscode.QuickPickItem {
+export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
     relativeFolderPath: string;
 }
 
-function createDockerfileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
+function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
     let relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.uri.fsPath.length));
 
     return <Item>{
@@ -32,21 +32,21 @@ function createDockerfileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Ur
     };
 }
 
-async function resolveDockerFileItem(rootFolder: vscode.WorkspaceFolder, dockerFileUri: vscode.Uri | undefined): Promise<Item | undefined> {
-    if (dockerFileUri) {
-        return createDockerfileItem(rootFolder, dockerFileUri);
+export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPattern: string, message: string): Promise<Item | undefined> {
+    if (fileUri) {
+        return createFileItem(rootFolder, fileUri);
     }
 
-    const uris: vscode.Uri[] = await getDockerFileUris(rootFolder);
+    let uris: vscode.Uri[] = await getFileUris(rootFolder, globPattern);
 
     if (!uris || uris.length === 0) {
         return undefined;
     } else {
-        let items: Item[] = uris.map(uri => createDockerfileItem(rootFolder, uri));
+        let items: Item[] = uris.map(uri => createFileItem(rootFolder, uri));
         if (items.length === 1) {
             return items[0];
         } else {
-            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: 'Choose Dockerfile to build' });
+            const res: vscode.QuickPickItem = await ext.ui.showQuickPick(items, { placeHolder: message });
             return <Item>res;
         }
     }
@@ -60,7 +60,7 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To build Docker files you must first open a folder or workspace in VS Code.');
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveDockerFileItem(rootFolder, dockerFileUri);
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, DOCKERFILE_GLOB_PATTERN, 'Choose a Dockerfile to build the image.');
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {
