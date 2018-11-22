@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Contains the extension entrypointu plus exports for tests
+ * Contains the extension entrypoint plus exports for tests
  */
 
 import * as vscode from 'vscode';
