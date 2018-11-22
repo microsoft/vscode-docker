@@ -4,16 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Contains the extension entrypoint
+ * Contains the extension entrypointu plus exports for tests
  */
-
-const loadStartTime = Date.now();
 
 import * as vscode from 'vscode';
 import * as dockerExtension from './dockerExtension';
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    await dockerExtension.activate(ctx, loadStartTime, loadEndTime);
+    await dockerExtension.activate(ctx);
 }
 
 // Exports for use by the tests (they are not packaged with the webpack bundle and therefore
@@ -43,5 +41,3 @@ export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './
 export { globAsync } from './helpers/async';
 export { httpsRequestBinary } from './utils/httpRequest';
 export { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
-
-const loadEndTime: number = Date.now();

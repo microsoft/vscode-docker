@@ -1,0 +1,19 @@
+/* preamble.txt */
+
+// The first generated in extension.js is this:
+//
+//   module.exports =
+//
+// And then the contents of this file follow that.
+
+// ... So first provide a temporary value to close off the assignment to module.exports:
+null;
+
+// ... Now our intended preamble code
+// This will not be transpiled, but it will go through the minimizer
+
+const loadStartTime = Date.now();
+let loadEndTime = undefined;
+
+// ... Then do the module.exports assignment for real
+module.exports =

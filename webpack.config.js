@@ -17,6 +17,7 @@ const fse = require('fs-extra');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const StringReplacePlugin = require("string-replace-webpack-plugin");
+const PreamblePlugin = require('webpack-preamble-plugin');
 
 const packageLock = fse.readJSONSync('./package-lock.json');
 
@@ -138,7 +139,13 @@ const config = {
             }),
 
         // an instance of the StringReplacePlugin plugin must be present for it to work (see modules)
-        new StringReplacePlugin()
+        new StringReplacePlugin(),
+
+        new PreamblePlugin({
+            files: [
+                './build/preamble.txt'
+            ]
+        })
     ],
     resolve: {
         // Support reading TypeScript and JavaScript files, see https://github.com/TypeStrong/ts-loader

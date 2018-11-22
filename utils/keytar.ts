@@ -38,7 +38,7 @@ export interface IKeytar {
      */
     deletePassword(service: string, account: string): Promise<boolean>;
 }
-debugger;
+
 /**
  * Returns the keytar module installed with vscode
  */

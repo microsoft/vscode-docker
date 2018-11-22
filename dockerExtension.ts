@@ -69,6 +69,9 @@ import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { wrapError } from './utils/wrapError';
 
+declare let loadStartTime: number;
+declare let loadEndTime: number;
+
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}';
@@ -109,15 +112,14 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   registerUIExtensionVariables(ext);
 }
 
-export async function activate(ctx: vscode.ExtensionContext, loadStartTime: number, loadEndTime: number): Promise<void> {
-  let activateStartTime = Date.now();
+export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+  loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);
   await setRequestDefaults();
   await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
     this.properties.isActivationEvent = 'true';
     this.measurements.mainFileLoad = (loadEndTime - loadStartTime) / 1000;
-    this.measurements.mainFileLoadedToActivate = (activateStartTime - loadEndTime) / 1000;
 
     ctx.subscriptions.push(
       vscode.languages.registerCompletionItemProvider(
