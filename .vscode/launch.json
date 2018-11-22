@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"configurations": [
 		{
-			"name": "Launch Extension (Webpack)",
+			"name": "Launch Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -21,7 +21,7 @@
 			"preLaunchTask": "npm: webpack"
 		},
 		{
-			"name": "Launch Tests (Webpack)",
+			"name": "Launch Tests",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -32,9 +32,6 @@
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
 			"preLaunchTask": "npm: pretest",
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)

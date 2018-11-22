@@ -6,8 +6,6 @@
 import * as keytarType from 'keytar';
 import { getCoreNodeModule } from './getCoreNodeModule';
 
-declare function getCoreNodeModule(moduleName: string): unknown | undefined;
-
 export interface IKeytar {
     /**
      * Get the stored password for the service and account.
@@ -40,7 +38,7 @@ export interface IKeytar {
      */
     deletePassword(service: string, account: string): Promise<boolean>;
 }
-
+debugger;
 /**
  * Returns the keytar module installed with vscode
  */

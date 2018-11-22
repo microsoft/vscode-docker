@@ -23,9 +23,14 @@ const packageLock = fse.readJSONSync('./package-lock.json');
 const externalModules = [
     // Modules that we can't webpack for some reason.
     // Keep this list small, because all the subdependencies will also have to not be webpacked.
+
+    // has binary
     'clipboardy',
-    'win-ca' // has binary
+
+    // has binary
+    'win-ca'
 ];
+
 // External modules and all their dependencies and subdependencies (these will not be webpacked)
 const externalModulesClosure = getDependencies(externalModules);
 console.log('externalModulesClosure:', externalModulesClosure);
@@ -41,14 +46,15 @@ const config = {
         __filename: false
     },
     entry: {
+        // Note: Each entry is a completely separate Node.js application that cannot interact with any
+        // of the others, and that individually includes all dependencies necessary (i.e. common
+        // dependencies will have a copy in each entry file, no sharing).
+
         // The entrypoint of this extension, see https://webpack.js.org/configuration/entry-context/
-        extension: './extension.ts', // asdf
+        extension: './extension.ts',
 
         // Entrypoint for the language server
-        './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
-
-        // // Entrypoint for tests
-        // tests: './test/index.ts'
+        './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js'
     },
     output: {
         // The bundles are stored in the 'dist' folder (check package.json), see https://webpack.js.org/configuration/output/
@@ -83,20 +89,20 @@ const config = {
                 verbose: true,
             }),
 
+        // Copy files to dist folder where the runtime can find them
         new CopyWebpackPlugin([
+            // getCoreNodeModule.js
             { from: './utils/getCoreNodeModule.js', to: 'node_modules' },
-        ]),
 
-        // Automatically copy all external node modules
-        getExternalsCopyEntry(),
-
-        new CopyWebpackPlugin([
             // Images
             { from: './images', to: 'images' },
 
             // Test files
             { from: './out/test', to: 'test' }
         ]),
+
+        // External node modules
+        getExternalsCopyEntry(),
 
         // vscode-languageserver/lib/files.js has one function which uses a dynamic require, but is not currently used by any dependencies
         // Replace with a version that has only what is actually used.
@@ -131,11 +137,12 @@ const config = {
                 }
             }),
 
-        // an instance of the plugin must be present
+        // an instance of the StringReplacePlugin plugin must be present for it to work (see modules)
         new StringReplacePlugin()
     ],
     resolve: {
         // Support reading TypeScript and JavaScript files, see https://github.com/TypeStrong/ts-loader
+        // These will be automatically transpiled while being placed into dist/extension.js
         extensions: ['.ts', '.js']
     },
     module: {
@@ -156,17 +163,6 @@ const config = {
                 test: /dockerfile-language-service|vscode-languageserver-types/,
                 use: { loader: 'umd-compat-loader' }
             },
-
-            // Note: If you use`vscode-nls` to localize your extension than you likely also use`vscode-nls-dev` to create language bundles at build time.
-            // To support webpack, a loader has been added to vscode-nls-dev .Add the section below to the`modules/rules` configuration.
-            // {
-            //     // vscode-nls-dev loader:
-            //     // * rewrite nls-calls
-            //     loader: 'vscode-nls-dev/lib/webpack-loader',
-            //     options: {
-            //         base: path.join(__dirname, 'src')
-            //     }
-            // }
 
             {
                 // Fix error in win-ca: Module parse failed: 'return' outside of function (5:2)
@@ -206,56 +202,20 @@ const config = {
                     ]
                 })
             }
+
+            // Note: If you use`vscode-nls` to localize your extension than you likely also use`vscode-nls-dev` to create language bundles at build time.
+            // To support webpack, a loader has been added to vscode-nls-dev .Add the section below to the`modules/rules` configuration.
+            // {
+            //     // vscode-nls-dev loader:
+            //     // * rewrite nls-calls
+            //     loader: 'vscode-nls-dev/lib/webpack-loader',
+            //     options: {
+            //         base: path.join(__dirname, 'src')
+            //     }
+            // }
         ]
     }
-    // optimization: {
-    //     splitChunks: {
-    //         minChunks: 1,
-    //         minSize: 1,
-    //         chunks: "all",
-    //         cacheGroups: {
-    //             commons: {
-    //                 test: /[\\/]node_modules[\\/]/,
-    //                 name: 'nodeModules-chunk',
-    //                 chunks: 'initial'
-    //             },
-    //             'entry': {
-    //                 test: /entry/,
-    //                 priority: 100,
-    //                 name: 'entry'
-    //             },
-    //             'tests': {
-    //                 test: /test/,
-    //                 priority: 0,
-    //                 name: 'tests',
-    //                 chunks: "all"
-    //             }
-
-    //         }
-    //     }
 }
-
-// optimization: {
-//     runtimeChunk: "single",
-//     splitChunks: {
-//         //chunks: "async",
-//         minChunks: 1,
-//         minSize: 1,
-//         cacheGroups: {
-//             commons: {
-//                 test: /[\\/]node_modules[\\/]/,
-//                 name: 'nodeModules-chunk',
-//                 chunks: 'initial'
-//             },
-//             extensionVars: {
-//                 test: /extensionVar/,
-//                 name: 'extensionVars',
-//                 chunks: 'all'
-//             }
-//         }
-//     },
-// }
-
 
 function getExternalsEntries() {
     let externals = {};
@@ -274,7 +234,6 @@ function getExternalsCopyEntry() {
     //     { from: './node_modules/clipboardy', to: 'node_modules/clipboardy' }
     //     ...
     // ])
-
     let patterns = [];
     for (let moduleName of externalModulesClosure) {
         patterns.push({
