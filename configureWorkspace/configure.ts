@@ -68,7 +68,7 @@ export function getExposeStatements(port: string): string {
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
 generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
-generatorsByPlatform.set('Cpp', configureCpp);
+generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
 generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);

@@ -18,7 +18,7 @@ export type Platform =
     'Node.js' |
     'Python' |
     'Ruby' |
-    'Cpp' |
+    'C++' |
     'Other';
 
 /**
@@ -61,7 +61,7 @@ export async function quickPickPlatform(): Promise<Platform> {
         'Node.js',
         'Python',
         'Ruby',
-        'Cpp',
+        'C++',
         'Other'
     ];
 

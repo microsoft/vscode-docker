@@ -1133,27 +1133,24 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
     });
 
-    // Cpp
+    // C++
 
-    suite("Cpp", () => {
-        testInEmptyFolder("Cpp, empty folder", async () => {
+    suite("C++", () => {
+        testInEmptyFolder("C++", async () => {
             await testConfigureDocker(
-                'Cpp',
+                'C++',
                 {
-                    configurePlatform: 'Cpp',
+                    configurePlatform: 'C++',
                     configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
-                },
-                [undefined /*port*/],
-                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']);
+                });
 
             assertFileContains('Dockerfile', 'FROM gcc:latest');
             assertFileContains('Dockerfile', 'COPY . /usr/src/myapp');
             assertFileContains('Dockerfile', 'WORKDIR /usr/src/myapp');
             assertFileContains('Dockerfile', 'RUN g++ -o myapp main.cpp');
             assertFileContains('Dockerfile', 'CMD ["./myapp"]');
-            assertFileContains('Dockerfile', 'LABEL Name=${serviceNameAndRelativePath} Version=${version}');
         });
     });
 

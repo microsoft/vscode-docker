@@ -12,5 +12,5 @@ export type Platform =
     'Node.js' |
     'Python' |
     'Ruby' |
-    'Cpp' |
+    'C++' |
     'Other';
