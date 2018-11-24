@@ -4,15 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Contains the extension entrypoint plus exports for tests
+ * This will become the main file for the extension. Anything to be exposed to the outside must
+ * be exported from here.
  */
 
-import * as vscode from 'vscode';
-import * as dockerExtension from './dockerExtension';
-
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
-    await dockerExtension.activate(ctx);
-}
+export { activate } from './dockerExtension';
 
 // Exports for use by the tests (they are not packaged with the webpack bundle and therefore
 //   only have access to things exported from this file, which conveniently is named extension.ts
