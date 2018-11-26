@@ -12,6 +12,7 @@
 'use strict';
 
 const path = require('path');
+const process = require('process');
 const webpack = require('webpack');
 const fse = require('fs-extra');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -19,6 +20,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const StringReplacePlugin = require("string-replace-webpack-plugin");
 
 const packageLock = fse.readJSONSync('./package-lock.json');
+
+let DEBUG_WEBPACK = !!process.env.DEBUG_WEBPACK;
 
 const externalModules = [
     // Modules that we can't webpack for some reason.
@@ -33,7 +36,9 @@ const externalModules = [
 
 // External modules and all their dependencies and subdependencies (these will not be webpacked)
 const externalModulesClosure = getDependencies(externalModules);
-console.log('externalModulesClosure:', externalModulesClosure);
+if (DEBUG_WEBPACK) {
+    console.log('externalModulesClosure:', externalModulesClosure);
+}
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -270,5 +275,7 @@ function getDependencies(modules) {
     return Array.from(set);
 }
 
-//console.log('Config:', config);
+if (DEBUG_WEBPACK) {
+    console.log('Config:', config);
+}
 module.exports = config;
