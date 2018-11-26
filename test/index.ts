@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
+
 //
 // PLEASE DO NOT MODIFY / DELETE UNLESS YOU KNOW WHAT YOU ARE DOING
 //
@@ -18,7 +20,7 @@
 // tslint:disable-next-line:no-require-imports no-var-requires
 let testRunner = require('vscode/lib/testrunner');
 
-let options: { [key: string]: string | boolean | number } = {
+let options: { [key: string]: string | boolean | number | object } = {
     ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
     useColors: true // colored output from test results
 };
@@ -37,6 +39,15 @@ let options: { [key: string]: string | boolean | number } = {
 //
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for all available options
 
+// Defaults
+options.reporter = 'mocha-multi-reporters';
+options.reporterOptions = {
+    reporterEnabled: "spec, mocha-junit-reporter",
+    mochaJunitReporterReporterOptions: {
+        mochaFile: path.join(__dirname, '..', '..', 'test-results.xml')
+    }
+};
+
 let environmentVariables = <{ [key: string]: string }>process.env;
 for (let envVar of Object.keys(environmentVariables)) {
     let match = envVar.match(/^mocha_(.+)/i);
@@ -46,9 +57,11 @@ for (let envVar of Object.keys(environmentVariables)) {
         if (typeof value === 'string' && !isNaN(parseInt(value, undefined))) {
             value = parseInt(value, undefined);
         }
+
         options[option] = value;
     }
 }
+
 console.warn(`Mocha options: ${JSON.stringify(options, null, 2)}`);
 
 // tslint:disable-next-line: no-unsafe-any
