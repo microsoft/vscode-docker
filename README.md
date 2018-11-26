@@ -92,6 +92,26 @@ After the container is started, you will be prompted to login to your Azure acco
 
 This build includes preview support for connecting to private registries (such as those described in Docker Hub [documentation](https://docs.docker.com/registry/deploying/)).  At the moment, OAuth is not supported, only basic authentication.  We hope to extend this support in the future.
 
+## Self-signed and corporate certificates
+
+If you are using a self-signed or corporate CA certificate (e.g. for a private Docker registry) and have the certificate authority's certificate registered in the Windows or Mac certificate store, you will want to use the following setting:
+```json
+"docker.importCertificates": true
+```
+This causes the extension automatically pick up system-wide certificates. Leaving it at the default `false` means the default Node.js list of trusted certificates will be used. You can fine-tune the values this way:
+```json
+    "docker.importCertificates":{
+        "useCertificateStore": true,
+        "certificatePaths": [
+            "/etc/ssl/certs/ca-certificates",
+            "/etc/openssl/certs",
+            "/etc/pki/tls/certs",
+            "/usr/local/share/certs"
+        ]
+    }
+```
+The exact folder to use for certificatePaths on Linux will depend on the distribution.
+
 ## Debugging .NET Core (Preview)
 
 > Note that Windows containers are **not** currently supported, only Linux containers.
