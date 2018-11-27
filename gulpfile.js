@@ -7,6 +7,7 @@ const gulp = require('gulp');
 const decompress = require('gulp-decompress');
 const download = require('gulp-download');
 const path = require('path');
+const fse = require('fs-extra');
 const os = require('os');
 const cp = require('child_process');
 const glob = require('glob');
@@ -15,12 +16,12 @@ const env = process.env;
 
 gulp.task('webpack-dev', (cb) => {
     preWebpack();
-    spawn('./node_modules/.bin/webpack', ['--mode', 'development'], { stdio: 'inherit', env }, cb);
+    spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'development'], { stdio: 'inherit', env }, cb);
 });
 
 gulp.task('webpack-prod', (cb) => {
     preWebpack();
-    spawn('./node_modules/.bin/webpack', ['--mode', 'production'], { stdio: 'inherit', env }, cb);
+    spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'production'], { stdio: 'inherit', env }, cb);
 });
 
 gulp.task('test', ['install-azure-account'], (cb) => {
@@ -57,11 +58,23 @@ gulp.task('install-azure-account', () => {
 });
 
 function spawn(command, args, options, cb) {
-    const cmd = cp.spawn(command, args, options);
-    cmd.on('close', (code) => {
-        if (cb) {
-            cb(code);
+    if (process.platform === 'win32') {
+        if (fse.pathExistsSync(command + '.exe')) {
+            command = command + '.exe';
+        } else if (fse.pathExistsSync(command + '.cmd')) {
+            command = command + '.cmd';
         }
+
+    }
+
+    const cmd = cp.spawn(command, args, options);
+
+    cmd.on('close', (code) => {
+        cb(code);
+    });
+    cmd.on('error', (err) => {
+        console.error(`Error spawning '${command}': ${err}`)
+        cb(err);
     });
 }
 
