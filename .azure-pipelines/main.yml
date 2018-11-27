@@ -5,8 +5,7 @@ jobs:
   steps:
   - template: common/build.yml
   - template: common/lint.yml
-  # https://github.com/Microsoft/vscode-docker/issues/606
-  # - template: common/test.yml
+  - template: common/test.yml
 
 - job: Linux
   pool:
