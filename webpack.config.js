@@ -102,9 +102,6 @@ const config = {
             // getCoreNodeModule.js
             { from: './utils/getCoreNodeModule.js', to: 'node_modules' },
 
-            // Images
-            { from: './images', to: 'images' },
-
             // Test files
             { from: './out/test', to: 'test' }
         ]),

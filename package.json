@@ -5,7 +5,7 @@
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
   "license": "SEE LICENSE IN LICENSE.md",
-  "icon": "dist/images/docker_icon.png",
+  "icon": "images/docker_icon.png",
   "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
   "galleryBanner": {
     "color": "#1289B9",
@@ -798,8 +798,8 @@
         "title": "Refresh Explorer",
         "category": "Docker",
         "icon": {
-          "light": "dist/images/light/refresh.svg",
-          "dark": "dist/images/dark/refresh.svg"
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
         }
       },
       {
@@ -842,8 +842,8 @@
         "title": "System Prune",
         "category": "Docker",
         "icon": {
-          "light": "dist/images/light/prune.svg",
-          "dark": "dist/images/dark/prune.svg"
+          "light": "images/light/prune.svg",
+          "dark": "images/dark/prune.svg"
         }
       }
     ],
@@ -859,7 +859,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "icon": "dist/images/docker.svg",
+          "icon": "images/docker.svg",
           "id": "dockerView",
           "title": "Docker"
         }

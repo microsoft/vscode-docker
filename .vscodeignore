@@ -3,7 +3,6 @@
 .github/**
 .vscode/**
 build/**
-images/**
 utils/**
 node_modules/**
 out/**
