@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
-import { ext } from '../extensionVariables';
+import { ext } from '../extension';
 import { Suite, Test, Context } from 'mocha';
-import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
+import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
 
 const registryContainerName = 'test-registry';

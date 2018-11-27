@@ -7,6 +7,7 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
@@ -28,8 +29,8 @@ export class AzureRegistryNode extends NodeBase {
 
     public readonly contextValue: string = 'azureRegistryNode';
     public readonly iconPath: IconPath = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
     };
 
     public getTreeItem(): vscode.TreeItem {
@@ -82,8 +83,8 @@ export class AzureRepositoryNode extends NodeBase {
     public static readonly contextValue: string = 'azureRepositoryNode';
     public readonly contextValue: string = AzureRepositoryNode.contextValue;
     public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
     };
 
     public getTreeItem(): vscode.TreeItem {
