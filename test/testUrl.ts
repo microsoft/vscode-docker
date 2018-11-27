@@ -13,6 +13,7 @@ export async function testUrl(url: string): Promise<void> {
 
         // TODO: Why is this test having troubles now?
         this.skip();
+        return;
 
         let contents: string | undefined;
 

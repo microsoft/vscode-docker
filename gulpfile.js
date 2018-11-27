@@ -27,7 +27,6 @@ gulp.task('test', ['install-azure-account'], (cb) => {
     env.DEBUGTELEMETRY = 1;
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    env.MOCHA_FILE = path.join(__dirname, 'test-results.xml');
     const cmd = cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
     cmd.on('close', (code) => {
         cb(code);
