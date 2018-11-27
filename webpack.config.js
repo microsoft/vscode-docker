@@ -6,7 +6,6 @@
 //@ts-check
 
 // Full webpack documentation: [https://webpack.js.org/configuration/]().
-// In short, the config-files defines the entrypoint of the extension, to use TypeScript, to produce a commonjs-module, and what modules not to bundle.
 // Using webpack helps reduce the install- and startup-time of large extensions because instead of hundreds of files, a single file is produced.
 
 'use strict';

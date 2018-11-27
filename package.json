@@ -880,8 +880,8 @@
     "pretest": "npm run build && npm run webpack",
     "test": "gulp test",
     "all": "npm i && npm run lint && npm test",
-    "webpack": "webpack --mode development",
-    "webpack-prod": "webpack --mode production",
+    "webpack": "gulp webpack-dev",
+    "webpack-prod": "gulp webpack-prod",
     "webpack-profile": "webpack --profile --json --mode production > webpack-stats.json && echo Use http://webpack.github.io/analyse to analyze the stats"
   },
   "extensionDependencies": [

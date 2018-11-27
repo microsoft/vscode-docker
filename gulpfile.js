@@ -11,12 +11,22 @@ const os = require('os');
 const cp = require('child_process');
 const glob = require('glob');
 
+const env = process.env;
+
+gulp.task('webpack-dev', (cb) => {
+    preWebpack();
+    spawn('./node_modules/.bin/webpack', ['--mode', 'development'], { stdio: 'inherit', env }, cb);
+});
+
+gulp.task('webpack-prod', (cb) => {
+    preWebpack();
+    spawn('./node_modules/.bin/webpack', ['--mode', 'production'], { stdio: 'inherit', env }, cb);
+});
+
 gulp.task('test', ['install-azure-account'], (cb) => {
-    const env = process.env;
     env.DEBUGTELEMETRY = 1;
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    //env.MOCHA_reporter = 'mocha-junit-reporter';
     env.MOCHA_FILE = path.join(__dirname, 'test-results.xml');
     const cmd = cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
     cmd.on('close', (code) => {
@@ -47,3 +57,16 @@ gulp.task('install-azure-account', () => {
     }
 });
 
+function spawn(command, args, options, cb) {
+    const cmd = cp.spawn(command, args, options);
+    cmd.on('close', (code) => {
+        if (cb) {
+            cb(code);
+        }
+    });
+}
+
+function preWebpack() {
+    // without this, webpack can run out of memory in some environments
+    env.NODE_OPTIONS = '--max-old-space-size=8192';
+}
