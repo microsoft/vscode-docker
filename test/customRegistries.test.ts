@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+debugger;
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
 import { ext } from '../extension';
@@ -10,13 +11,14 @@ import { Suite, Test, Context } from 'mocha';
 import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
 import { shouldSkipDockerTest } from './dockerInfo';
+import { debug } from 'util';
 
 const registryContainerName = 'test-registry';
 
 suite("Custom registries", async function (this: Suite): Promise<void> {
     this.timeout(Math.max(60 * 1000 * 3, this.timeout()));
 
-    if (shouldSkipDockerTest({ linuxContainers: true })) {
+    if (await shouldSkipDockerTest({ linuxContainers: true })) {
         return;
     }
 

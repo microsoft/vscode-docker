@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { docker } from '../commands/utils/docker-endpoint';
+import { docker } from '../extension';
 import { EngineInfo } from "dockerode";
 
 let info: EngineInfo | undefined;
@@ -34,6 +34,8 @@ export async function shouldSkipDockerTest(requires?: { linuxContainers?: boolea
 
     if (requires && requires.linuxContainers && !await isLinuxContainers()) {
         console.warn("Skipping because not running Linux containers on this system");
-        return;
+        return true;
     }
+
+    return false;
 }
