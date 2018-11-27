@@ -10,4 +10,4 @@ steps:
     SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
     SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
 
-- template: publish-test-results.yml
+- template: ../common/publish-test-results.yml
