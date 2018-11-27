@@ -8,7 +8,7 @@ import * as path from "path";
 import * as fse from "fs-extra";
 import mocha = require("mocha");
 import * as assert from 'assert';
-import { ext } from "../extensionVariables";
+import { ext } from "../extension";
 import { TestKeytar } from "../test/testKeytar";
 
 export namespace constants {

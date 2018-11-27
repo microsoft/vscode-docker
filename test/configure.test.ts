@@ -8,13 +8,10 @@ import * as assertEx from './assertEx';
 import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { ext } from '../extensionVariables';
-import { PlatformOS, Platform } from '../utils/platform';
 import { Suite } from 'mocha';
-import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '../configureWorkspace/configure';
+import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
-import { globAsync } from '../helpers/async';
-import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';
+import { getTestRootFolder, testInEmptyFolder } from './global.test';
 
 // Can be useful for testing
 const outputAllGeneratedFileContents = false;

@@ -5,9 +5,9 @@
 
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
-import { ext } from '../extensionVariables';
+import { ext } from '../extension';
 import { Suite, Test, Context } from 'mocha';
-import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
+import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
 import { shouldSkipDockerTest } from './dockerInfo';
 

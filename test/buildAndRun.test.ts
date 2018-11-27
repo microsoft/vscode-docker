@@ -12,14 +12,11 @@ import { Uri } from 'vscode';
 import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
 import * as path from 'path';
-import { Platform } from '../utils/platform';
-import { ext } from '../extensionVariables';
-import { Suite, Test, Context } from 'mocha';
-import { configure } from '../configureWorkspace/configure';
+import { Platform, configure, httpsRequestBinary, ext } from '../extension';
+import { Suite, Context } from 'mocha';
 import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';
-import { httpsRequestBinary } from '../utils/httpRequest';
-import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
+import { TestTerminalProvider } from './TestTerminalProvider';
 import { shouldSkipDockerTest } from './dockerInfo';
 
 let testRootFolder: string = getTestRootFolder();

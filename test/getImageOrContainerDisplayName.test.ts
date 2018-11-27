@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { getImageOrContainerDisplayName } from '../explorer/models/getImageOrContainerDisplayName';
+import { getImageOrContainerDisplayName } from '../extension';
 
 suite('getImageOrContainerDisplayName', () => {
     function genTest(fullName: string, trim: boolean, max: number, expected: string): void {

@@ -3,13 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ext } from "../extensionVariables";
 import * as assert from 'assert';
-import { isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../helpers/osVersion";
+import { ext, isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../extension";
 
 suite("windowsVersion", () => {
-    let previousOs: typeof ext.os;
-
     function testIsWindows10RS4OrNewer(release: string, expectedResult: boolean): void {
         test(`isWindows10RS4OrNewer: ${release}`, () => {
             let previousOs = ext.os;

@@ -4,13 +4,13 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { FileSystemProvider } from '../../../debugging/coreclr/fsProvider';
-import { OSProvider } from '../../../debugging/coreclr/osProvider';
-import { ProcessProvider } from '../../../debugging/coreclr/processProvider';
-import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, ShowErrorMessageFunction, DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../debugging/coreclr/prereqManager';
-import { PlatformOS } from '../../../utils/platform';
-import { DockerClient } from '../../../debugging/coreclr/dockerClient';
-import { DotNetClient } from '../../../debugging/coreclr/dotNetClient';
+import { FileSystemProvider } from '../../../extension';
+import { OSProvider } from '../../../extension';
+import { ProcessProvider } from '../../../extension';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../extension';
+import { PlatformOS } from '../../../extension';
+import { DockerClient } from '../../../extension';
+import { DotNetClient } from '../../../extension';
 
 suite('debugging/coreclr/prereqManager', () => {
     suite('DockerDaemonIsLinuxPrerequisite', () => {
@@ -112,7 +112,7 @@ suite('debugging/coreclr/prereqManager', () => {
 
                             const groups = inGroup ? 'groupA docker groupB' : 'groupA groupB';
 
-                            return Promise.resolve({ stdout: groups, stderr: ''});
+                            return Promise.resolve({ stdout: groups, stderr: '' });
                         }
                     };
                 }
@@ -205,7 +205,7 @@ suite('debugging/coreclr/prereqManager', () => {
 
             const result = await prereq.checkPrerequisite();
 
-            assert.equal(true, result, 'The prerequisite should return `true` on non-Mac.');
+            assert.equal(true, result, 'The prerequisite should return `true` on non-Mac.');
         });
     });
 });

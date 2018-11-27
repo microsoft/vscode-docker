@@ -43,6 +43,7 @@ export interface IKeytar {
  * Returns the keytar module installed with vscode
  */
 function getKeytarModule(): typeof keytarType {
+    // tslint:disable-next-line: no-unsafe-any
     const keytar = <typeof keytarType | undefined>getCoreNodeModule('keytar');
     if (!keytar) {
         throw new Error("Internal error: Could not find keytar module for reading and writing passwords");
