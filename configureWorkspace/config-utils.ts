@@ -9,7 +9,6 @@ import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
 
-export type OS = 'Windows' | 'Linux';
 export type Platform =
     'Go' |
     'Java' |
