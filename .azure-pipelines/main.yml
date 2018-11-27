@@ -20,7 +20,6 @@ jobs:
   pool:
     vmImage: macOS 10.13
   steps:
-    env:
   - template: common/build.yml
   - template: common/lint.yml
   - template: macOs/test.yml
