@@ -15,7 +15,6 @@ import { configure, ConfigureTelemetryProperties, ConfigureApiOptions } from '..
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { globAsync } from '../helpers/async';
 import { getTestRootFolder, constants, testInEmptyFolder } from './global.test';
-import { win32 } from 'path';
 
 // Can be useful for testing
 const outputAllGeneratedFileContents = false;

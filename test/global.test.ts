@@ -51,12 +51,12 @@ export function getTestRootFolder(): string {
  * Run a test with an empty root testing folder (i.e. delete everything out of it before running the test).
  * This is important since we can't open new folders in vscode while tests are running
  */
-export function testInEmptyFolder(name: string, func?: () => Promise<void>): void {
-    test(name, !func ? undefined : async () => {
+export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
+    test(name, !func ? undefined : async function (this: mocha.Context) {
         // Delete everything in the root testing folder
         assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
         await fse.emptyDir(testRootFolder);
-        await func();
+        await func.apply(this);
     });
 }
 
