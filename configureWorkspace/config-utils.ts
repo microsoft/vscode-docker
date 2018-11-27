@@ -9,17 +9,6 @@ import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
 
-export type Platform =
-    'Go' |
-    'Java' |
-    '.NET Core Console' |
-    'ASP.NET Core' |
-    'Node.js' |
-    'Python' |
-    'Ruby' |
-    'C++' |
-    'Other';
-
 /**
  * Prompts for a port number
  * @throws `UserCancelledError` if the user cancels.
