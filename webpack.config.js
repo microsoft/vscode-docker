@@ -76,9 +76,7 @@ const config = {
             // the vscode-module is created on-the-fly and must be excluded.
             vscode: 'commonjs vscode',
 
-            // Out util/getCoreNodeModule.js file uses a dynamic require, so we'll just use it directly as a .js file.
-            // Note that the source is in .js and not .ts because we don't want webpack to depend on npm run build
-            // (except currently it's required for tests)
+            // util/getCoreNodeModule.js uses a dynamic require which can't be webpacked
             './getCoreNodeModule': 'commonjs getCoreNodeModule',
 
             // Pull the rest automatically from externalModulesClosure
@@ -96,21 +94,20 @@ const config = {
 
         // Copy files to dist folder where the runtime can find them
         new CopyWebpackPlugin([
-            // Extension entrypoint
+            // Extension entrypoint -> dist/entrypoint.js
             { from: './entrypoint.js' },
 
-            // getCoreNodeModule.js
+            // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
             { from: './utils/getCoreNodeModule.js', to: 'node_modules' },
 
-            // Test files
+            // Test files -> dist/test (skipped during packaging)
             { from: './out/test', to: 'test' }
         ]),
 
-        // External node modules
+        // External node modules (can't be webpacked) -> dist/node_modules (where they can be found by extension.js)
         getExternalsCopyEntry(),
 
-        // vscode-languageserver/lib/files.js has one function which uses a dynamic require, but is not currently used by any dependencies
-        // Replace with a version that has only what is actually used.
+        // Replace vscode-languageserver/lib/files.js with a modified version that doesn't have webpack issues
         new webpack.NormalModuleReplacementPlugin(
             /[/\\]vscode-languageserver[/\\]lib[/\\]files\.js/,
             require.resolve('./build/vscode-languageserver-files-stub.js')
@@ -127,22 +124,28 @@ const config = {
             (context) => {
                 // ... and the call was from within node_modules/ms-rest/lib...
                 if (/node_modules[/\\]ms-rest[/\\]lib/.test(context.context)) {
-                    // CONSIDER: Figure out how to make this work properly. The consequences of ignoring this error are that
-                    // the Azure SDKs (e.g. azure-arm-resource) don't get their info stamped into the user agent info for their calls.
+                    /* CONSIDER: Figure out how to make this work properly.
 
-                    // // ... tell webpack that the call may be loading any of the package.json files from the 'node_modules/azure-arm*' folders
-                    // // so it will include those in the package to be available for lookup at runtime
-                    // context.request = path.resolve(__dirname, 'node_modules');
-                    // context.regExp = /azure-arm.*package\.json/;
+                        // ... tell webpack that the call may be loading any of the package.json files from the 'node_modules/azure-arm*' folders
+                        // so it will include those in the package to be available for lookup at runtime
+                        context.request = path.resolve(__dirname, 'node_modules');
+                        context.regExp = /azure-arm.*package\.json/;
+                    */
 
-                    // Tell webpack we've solved the critical dependency issue
+                    // In the meantime, just ignore the error by telling webpack we've solved the critical dependency issue.
+                    // The consequences of ignoring this error are that
+                    //   the Azure SDKs (e.g. azure-arm-resource) don't get their info stamped into the user agent info for their calls.
                     for (const d of context.dependencies) {
                         if (d.critical) { d.critical = false; }
                     }
                 }
             }),
 
-        // an instance of the StringReplacePlugin plugin must be present for it to work (see modules)
+        // An instance of the StringReplacePlugin plugin must be present for it to work (its use is configured in modules).
+        //
+        // StringReplacePlugin allows you to specific parts of a file by regexp replacement to get around webpack issues such as dynamic imports.
+        // This is different from ContextReplacementPlugin, which is simply meant to help webpack find files referred to by a dynamic import (i.e. it
+        //   assumes  they can be found by simply knowing the correct the path).
         new StringReplacePlugin()
     ],
     resolve: {

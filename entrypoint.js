@@ -5,8 +5,9 @@
 
 "use strict";
 
-// This is the extension entrypoint. It's in a separate file so we can properly measure
-// extension.js load time.
+// This is the extension entrypoint, which imports extension.js, the actual extension code.
+//
+// This is in a separate file so we can properly measure extension.js load time.
 
 let perfStats = {
     loadStartTime: Date.now(),

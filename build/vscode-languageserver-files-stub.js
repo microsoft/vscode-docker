@@ -1,4 +1,10 @@
-// This is a stub to provide only the part of node_modules/vscode-languageserver/lib/files.js that is used by dockerfile-language-server-node
+// This stub is a subset of the code from files.ts in vscode-languageserver
+// (https://github.com/Microsoft/vscode-languageserver-node/blob/master/server/src/files.ts), which is used
+// by https://www.npmjs.com/package/dockerfile-language-server-nodejs. It contains some dynamic imports that
+// can't be webpack'ed. Since dockerfile-language-server-node only uses the uriToFilePath utility from this
+// file and that function doesn't have issues, the easiest solution is to copy just that function here.
+//
+// The original files.js file gets replaced by this file during webpack
 
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
@@ -37,7 +43,9 @@ function uriToFilePath(uri) {
 }
 exports.uriToFilePath = uriToFilePath;
 
+// END OF ORIGINAL CODE
 
+// Throw NYI if any of the other functions are ever called (they shouldn't be currently)
 function resolveModule(workspaceRoot, moduleName) {
     throw new Error('Not implemented');
 }

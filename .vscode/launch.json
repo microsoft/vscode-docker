@@ -18,7 +18,7 @@
 			"outFiles": [
 				"${workspaceFolder}/../dist/**/*.js"
 			],
-			"preLaunchTask": "npm: webpack"
+			"preLaunchTask": "npm: pretest"
 		},
 		{
 			"name": "Launch Tests",

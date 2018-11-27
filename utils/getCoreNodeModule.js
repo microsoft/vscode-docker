@@ -5,6 +5,11 @@
 
 "use strict";
 
+// Our util/getCoreNodeModule.js file uses a dynamic require that depends on the environment and so has to be excluded
+// from webpack'ing, and we'll just copy it to the distribution folder.
+//
+// Since webpack shouldn't have to depend on npm build to transpile .ts -> .js, we keep this file in .js.
+
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 
