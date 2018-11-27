@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
 import { ext } from '../extensionVariables';
 import { Suite, Test, Context } from 'mocha';
 import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
-import { isLinuxContainers, shouldSkipDockerTest } from './dockerInfo';
-import * as process from 'process';
+import { shouldSkipDockerTest } from './dockerInfo';
 
 const registryContainerName = 'test-registry';
 
