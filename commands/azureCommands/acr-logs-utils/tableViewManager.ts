@@ -18,8 +18,8 @@ export class LogTableWebview {
         //Get path to resource on disk
         const extensionPath = ext.context.extensionPath;
         const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const styleFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
-        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
+        const styleFile = vscode.Uri.file(path.join(extensionPath, 'style', 'acr-logs', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
+        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'style', 'acr-logs', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
         this.panel.webview.html = this.getBaseHtml(scriptFile, styleFile, iconStyle);
         this.setupIncomingListeners();
