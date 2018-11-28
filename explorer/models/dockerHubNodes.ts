@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants';
+import { imagesPath, MAX_CONCURRENT_REQUESTS } from '../../constants';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { formatTag } from './commonRegistryUtils';
@@ -30,8 +30,8 @@ export class DockerHubOrgNode extends NodeBase {
     public readonly label: string = this.namespace;
 
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
     };
 
     public getTreeItem(): vscode.TreeItem {
@@ -79,8 +79,8 @@ export class DockerHubRepositoryNode extends NodeBase {
     public readonly contextValue: string = DockerHubRepositoryNode.contextValue;
 
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
     };
     public repository: dockerHub.RepositoryInfo;
     public userName: string;

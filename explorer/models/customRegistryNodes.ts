@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
+import { imagesPath } from '../../constants';
 import { formatTag, getCatalog, getTags, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
 import { NodeBase } from './nodeBase';
@@ -18,8 +19,8 @@ export class CustomRegistryNode extends NodeBase {
     public contextValue: string = CustomRegistryNode.contextValue;
 
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
     };
 
     constructor(
@@ -63,8 +64,8 @@ export class CustomRepositoryNode extends NodeBase {
     public static readonly contextValue: string = 'customRepository';
     public contextValue: string = CustomRepositoryNode.contextValue;
     public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Repository_16x.svg'),
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Repository_16x.svg')
+        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
+        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
     };
 
     constructor(

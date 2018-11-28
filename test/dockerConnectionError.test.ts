@@ -8,16 +8,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as assertEx from './assertEx';
-import { commands, OutputChannel, window } from 'vscode';
-import { ext } from '../extensionVariables';
+import { ext, throwDockerConnectionError, internal } from '../extension';
 import { Suite, Test, Context } from 'mocha';
-import { TestTerminalProvider } from '../commands/utils/TerminalProvider';
-import { TestUserInput, parseError, IActionContext } from 'vscode-azureextensionui';
+import { parseError, IActionContext } from 'vscode-azureextensionui';
 import { testUrl } from './testUrl';
-import { throwDockerConnectionError, internal } from '../explorer/utils/dockerConnectionError';
-
-const registryContainerName = 'test-registry';
 
 suite("throwDockerConnectionError", async function (this: Suite): Promise<void> {
     suite("connection error URLs", async function (this: Suite): Promise<void> {

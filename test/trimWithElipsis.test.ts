@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { trimWithElipsis } from "../explorer/utils/utils";
+import { trimWithElipsis } from "../extension";
 import * as assert from 'assert';
 
 suite('trimWithElipsis', () => {
