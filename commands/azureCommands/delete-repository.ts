@@ -25,7 +25,7 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         registry = await quickPickACRRegistry();
         repo = await quickPickACRRepository(registry, 'Select the repository you want to delete');
     }
-    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${repo.name} and its associated images?`);
+    const shouldDelete = await confirmUserIntent(`Are you sure you want to delete ${repo.name} and its associated images?`, true);
     if (shouldDelete) {
         await acrTools.deleteRepository(repo);
         vscode.window.showInformationMessage(`Successfully deleted repository ${repo.name}`);

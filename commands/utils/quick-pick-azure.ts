@@ -2,8 +2,8 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { Registry } from 'azure-arm-containerregistry/lib/models';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
+import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as opn from 'opn';
@@ -45,9 +45,9 @@ export async function quickPickTask(registry: Registry, subscription: Subscripti
     return desiredTask.data;
 }
 
-export async function quickPickACRRegistry(canCreateNew: boolean = false, prompt?: string): Promise<Registry> {
+export async function quickPickACRRegistry(canCreateNew: boolean = false, subscription?: Subscription, prompt?: string): Promise<Registry> {
     const placeHolder = prompt ? prompt : 'Select registry';
-    let registries = await AzureUtilityManager.getInstance().getRegistries();
+    let registries = await AzureUtilityManager.getInstance().getRegistries(subscription);
     let quickPickRegList = registries.map(reg => <IAzureQuickPickItem<Registry | undefined>>{ label: reg.name, data: reg });
 
     let createNewItem: IAzureQuickPickItem<Registry | undefined> = { label: '+ Create new registry', data: undefined };
@@ -139,7 +139,7 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
 /** Requests confirmation for an action and returns true only in the case that the user types in yes
  * @param yesOrNoPrompt Should be a yes or no question
  */
-export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
+export async function confirmUserIntent(yesOrNoPrompt: string, cancelWhenNo: boolean): Promise<boolean> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         placeHolder: 'Enter "Yes"',
@@ -149,7 +149,9 @@ export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean>
     let answer = await ext.ui.showInputBox(opt);
     answer = answer.toLowerCase();
     if (answer === 'yes') {
-        return answer === 'yes';
+        return true;
+    } else if (!cancelWhenNo && answer === 'no') {
+        return false;
     } else {
         throw new UserCancelledError();
     }
