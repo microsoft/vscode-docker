@@ -72,7 +72,7 @@
     "onLanguage:yaml",
     "onView:dockerExplorer"
   ],
-  "main": "dist/entrypoint",
+  "main": "entrypoint",
   "contributes": {
     "menus": {
       "commandPalette": [
