@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import * as semver from 'semver';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
@@ -11,6 +12,8 @@ import { ext } from '../extensionVariables';
 import { docker } from './utils/docker-endpoint';
 
 export async function systemPrune(actionContext: IActionContext): Promise<void> {
+    assert(!!actionContext, "Missing actionContext");
+
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const terminal = ext.terminalProvider.createTerminal("docker system prune");
 

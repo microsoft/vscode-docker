@@ -6,23 +6,17 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { ext } from '../extensionVariables';
+
 export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvider {
 
-    public provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
-
-        const config: vscode.DebugConfiguration = {
+    public async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+        const remoteRoot = await ext.ui.showInputBox({ value: '/usr/src/app', prompt: 'Please enter your Docker remote root' });
+        return [{
             name: 'Docker: Attach to Node',
             type: 'node',
             request: 'attach',
-            port: 9229,
-            address: 'localhost',
-            localRoot: '\${workspaceFolder}',
-            remoteRoot: '/usr/src/app',
-            protocol: 'inspector'
-        };
-
-        return [config];
-
+            remoteRoot
+        }];
     }
-
 }

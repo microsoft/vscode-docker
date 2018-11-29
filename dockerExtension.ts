@@ -313,7 +313,7 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.image.tag', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await tagImage(this, node); });
 
   registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
-  registerCommand('vscode-docker.system.prune', systemPrune);
+  registerCommand('vscode-docker.system.prune', async function (this: IActionContext): Promise<void> { await systemPrune(this); });
 }
 
 export async function deactivate(): Promise<void> {

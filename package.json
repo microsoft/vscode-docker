@@ -72,7 +72,7 @@
     "onLanguage:yaml",
     "onView:dockerExplorer"
   ],
-  "main": "dist/entrypoint",
+  "main": "entrypoint",
   "contributes": {
     "menus": {
       "commandPalette": [
@@ -303,11 +303,7 @@
               "type": "node",
               "request": "attach",
               "name": "Docker: Attach to Node",
-              "port": 9229,
-              "address": "localhost",
-              "localRoot": "^\"\\${workspaceFolder}\"",
-              "remoteRoot": "/usr/src/app",
-              "protocol": "inspector"
+              "remoteRoot": "/usr/src/app"
             }
           }
         ]
