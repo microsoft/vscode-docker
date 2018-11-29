@@ -34,7 +34,7 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): 
 
     if (includeAll && containers.length > 0) {
         items.unshift(<ContainerItem>{
-            label: 'All Containers',
+            label: 'All containers',
             allContainers: true
         });
     }

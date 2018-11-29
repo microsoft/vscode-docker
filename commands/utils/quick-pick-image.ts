@@ -49,7 +49,7 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
 
     if (includeAll && images.length > 0) {
         items.unshift(<ImageItem>{
-            label: 'All Images',
+            label: 'All images',
             allImages: true
         });
     }
