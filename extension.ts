@@ -10,7 +10,7 @@
  */
 
 // Export activate for vscode to call (via entrypoint.js)
-export { activate } from './dockerExtension';
+export { activateInternal, deactivateInternal } from './dockerExtension';
 
 // Exports for use by the tests, which are not packaged with the webpack bundle and therefore
 //   only have access to code exported from this file. The tests should import '../extension.ts' (this file),

@@ -57,7 +57,7 @@ const config = {
         // The entrypoint of this extension, see https://webpack.js.org/configuration/entry-context/
         extension: './extension.ts',
 
-        // Entrypoint for the language server
+        // Separate module for the language server (doesn't share any code with extension.js)
         './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js'
     },
     output: {
