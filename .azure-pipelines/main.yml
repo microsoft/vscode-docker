@@ -4,6 +4,7 @@ jobs:
     vmImage: VS2017-Win2016
   steps:
   - template: common/build.yml
+  - template: common/webpack-prod.yml # This is required since we're not running publish
   - template: common/lint.yml
   - template: common/test.yml
 
@@ -21,5 +22,6 @@ jobs:
     vmImage: macOS 10.13
   steps:
   - template: common/build.yml
+  # - template: common/webpack-prod.yml # This is required since we're not running publish
   - template: common/lint.yml
-  - template: macOs/test.yml
+  # - template: macOs/test.yml
