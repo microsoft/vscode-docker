@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-debugger;
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
 import { ext } from '../extension';
