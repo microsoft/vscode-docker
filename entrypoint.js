@@ -19,9 +19,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const extension = require("./dist/extension");
 
 async function activate(ctx) {
-    await extension.activate(ctx, perfStats);
+    return await extension.activateInternal(ctx, perfStats);
+}
+
+async function deactivate(ctx) {
+    return await extension.deactivateInternal();
 }
 
 exports.activate = activate;
+exports.deactivate = deactivate;
 
 perfStats.loadEndTime = Date.now();
