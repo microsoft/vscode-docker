@@ -13,10 +13,11 @@ import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
 import * as path from 'path';
 import { Platform, configure, httpsRequestBinary, ext } from '../extension';
-import { Suite } from 'mocha';
+import { Suite, Context } from 'mocha';
 import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';
 import { TestTerminalProvider } from './TestTerminalProvider';
+import { shouldSkipDockerTest } from './dockerInfo';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -103,7 +104,12 @@ suite("Build Image", function (this: Suite): void {
 
     // Go
 
-    testInEmptyFolder("Go", async () => {
+    testInEmptyFolder("Go", async function (this: Context) {
+        if (await shouldSkipDockerTest({ linuxContainers: true })) {
+            this.skip();
+            return;
+        }
+
         let uri = 'https://codeload.github.com/cloudfoundry-community/simple-go-web-app/zip/master'; // https://github.com/cloudfoundry-community/simple-go-web-app/archive/master.zip
         await unzipFileFromUrl(Uri.parse(uri), 'simple-go-web-app-master', testRootFolder);
         await testConfigureAndBuildImage(

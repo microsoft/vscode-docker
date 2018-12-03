@@ -39,3 +39,4 @@ export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './
 export { globAsync } from './helpers/async';
 export { httpsRequestBinary } from './utils/httpRequest';
 export { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
+export { docker } from './commands/utils/docker-endpoint';

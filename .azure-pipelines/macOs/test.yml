@@ -1,0 +1,13 @@
+steps:
+- task: Gulp@0
+  displayName: 'Test'
+  inputs:
+    targets: 'test'
+  env:
+    # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)
+    DOCKER_UNAVAILBLE: 1
+    SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
+    SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
+    SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
+
+- template: ../common/publish-test-results.yml

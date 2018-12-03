@@ -4,9 +4,9 @@ jobs:
     vmImage: VS2017-Win2016
   steps:
   - template: common/build.yml
+  - template: common/webpack-prod.yml # This is required since we're not running publish
   - template: common/lint.yml
-  # https://github.com/Microsoft/vscode-docker/issues/606
-  # - template: common/test.yml
+  - template: common/test.yml
 
 - job: Linux
   pool:
@@ -22,6 +22,6 @@ jobs:
     vmImage: macOS 10.13
   steps:
   - template: common/build.yml
+  # - template: common/webpack-prod.yml # This is required since we're not running publish
   - template: common/lint.yml
-  # https://github.com/Microsoft/vscode-docker/issues/606
-  # - template: common/test.yml
+  # - template: macOs/test.yml
