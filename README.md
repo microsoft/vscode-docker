@@ -14,9 +14,11 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 * [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
 
 ## Prerequisites
+
 To use much of the Docker extension functionality, you will need to [install Docker](https://aka.ms/AA37qtj) on your machine and set up on the system path.
 
 ### Linux
+
 Since VS Code runs as a non-root user, you will also need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://aka.ms/AA37yk6) for the extension to be able to access docker.
 
 ## Generating Docker Files
@@ -58,6 +60,7 @@ The `showExplorer` configuration setting controls the visibility of the Docker V
 ```
 
 ## Docker Hub Login
+
 The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
 
 ![Docker Hub Login](images/dockerHubLogin.gif)
@@ -117,7 +120,6 @@ The exact folder to use for certificatePaths on Linux will depend on the distrib
 > Note that Windows containers are **not** currently supported, only Linux containers.
 
 ### Prerequisites
-
 
 1. (All users) Install the [.NET Core SDK](https://www.microsoft.com/net/download) which includes support for attaching to the .NET Core debugger.
 
@@ -331,7 +333,7 @@ and respond with the username and password specified by Azure.
 
 ### I'm on Linux and get the error "Unable to connect to Docker, is the Docker daemon running?"
 
-Please see [Linux Prerequisites](#linux-prerequisites).
+Please see [Prerequisites](#prerequisites) and the specific section on [Linux](#linux).
 
 ## Telemetry
 
