@@ -16,12 +16,12 @@ const env = process.env;
 
 gulp.task('webpack-dev', async () => {
     preWebpack();
-    return await spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'development'], { stdio: 'inherit', env });
+    return spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'development'], { stdio: 'inherit', env });
 });
 
 gulp.task('webpack-prod', async () => {
     preWebpack();
-    return await spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'production'], { stdio: 'inherit', env });
+    return spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'production'], { stdio: 'inherit', env });
 });
 
 /**
