@@ -335,12 +335,16 @@ export async function streamLogs(registry: Registry, run: Run, providedClient?: 
 
 // Promisify getBlobToText for readability and error handling purposes
 export async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
-                           (error, result) => {
-                if (error) { reject(error) } else { resolve(result); }
-            });
-    });
+    return new Promise<string>(
+        (resolve, reject) => {
+            blob.getBlobToText(
+                blobInfo.containerName,
+                blobInfo.blobName,
+                { rangeStart: rangeStart },
+                (error, result) => {
+                    if (error) { reject(error) } else { resolve(result); }
+                });
+        });
 }
 
 // Promisify getBlobProperties for readability and error handling purposes
