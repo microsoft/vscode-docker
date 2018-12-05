@@ -14,31 +14,21 @@ const glob = require('glob');
 
 const env = process.env;
 
-gulp.task('webpack-dev', (cb) => {
+gulp.task('webpack-dev', async () => {
     preWebpack();
-    spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'development'], { stdio: 'inherit', env }, cb);
+    return await spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'development'], { stdio: 'inherit', env });
 });
 
-gulp.task('webpack-prod', (cb) => {
+gulp.task('webpack-prod', async () => {
     preWebpack();
-    spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'production'], { stdio: 'inherit', env }, cb);
-});
-
-gulp.task('test', ['install-azure-account'], (cb) => {
-    env.DEBUGTELEMETRY = 1;
-    env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
-    env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    const cmd = cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
-    cmd.on('close', (code) => {
-        cb(code);
-    });
+    return await spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', 'production'], { stdio: 'inherit', env });
 });
 
 /**
  * Installs the azure account extension before running tests (otherwise our extension would fail to activate)
  * NOTE: The version isn't super important since we don't actually use the account extension in tests
  */
-gulp.task('install-azure-account', () => {
+gulp.task('install-azure-account', async () => {
     const version = '0.4.3';
     const extensionPath = path.join(os.homedir(), `.vscode/extensions/ms-vscode.azure-account-${version}`);
     const existingExtensions = glob.sync(extensionPath.replace(version, '*'));
@@ -57,7 +47,14 @@ gulp.task('install-azure-account', () => {
     }
 });
 
-function spawn(command, args, options, cb) {
+gulp.task('test', gulp.series('install-azure-account', async () => {
+    env.DEBUGTELEMETRY = 1;
+    env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
+    env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
+    return spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+}));
+
+function spawn(command, args, options) {
     if (process.platform === 'win32') {
         if (fse.pathExistsSync(command + '.exe')) {
             command = command + '.exe';
@@ -67,15 +64,7 @@ function spawn(command, args, options, cb) {
 
     }
 
-    const cmd = cp.spawn(command, args, options);
-
-    cmd.on('close', (code) => {
-        cb(code);
-    });
-    cmd.on('error', (err) => {
-        console.error(`Error spawning '${command}': ${err}`)
-        cb(err);
-    });
+    return cp.spawn(command, args, options);
 }
 
 function preWebpack() {
