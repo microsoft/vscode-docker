@@ -899,7 +899,6 @@
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.4",
     "gulp": "^4.0.0",
-    "gulp-api": "^1.0.0",
     "gulp-decompress": "^2.0.2",
     "gulp-download": "^0.0.1",
     "mocha": "^5.2.0",
