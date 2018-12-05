@@ -19,7 +19,8 @@ export async function systemPrune(actionContext: IActionContext): Promise<void> 
 
     try {
         if (configOptions.get('promptOnSystemPrune', true)) {
-            let res = await vscode.window.showWarningMessage<vscode.MessageItem>('Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
+            let res = await vscode.window.showWarningMessage<vscode.MessageItem>(
+                'Remove all unused containers, volumes, networks and images (both dangling and unreferenced)?',
                 { title: 'Yes' },
                 { title: 'Cancel', isCloseAffordance: true }
             );
