@@ -8,7 +8,7 @@ steps:
 
 - script: |
     export DISPLAY=:10
-    gulp test
+    npm test
   displayName: 'Test'
   env:
     SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
