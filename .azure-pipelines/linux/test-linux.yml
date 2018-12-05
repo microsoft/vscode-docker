@@ -7,10 +7,10 @@ steps:
   displayName: 'Start X Virtual Frame Buffer'
 
 - script: |
-    export DISPLAY=:10
-    gulp test
+    npm test
   displayName: 'Test'
   env:
+    DISPLAY: :10
     SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
     SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
     SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
