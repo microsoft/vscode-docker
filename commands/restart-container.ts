@@ -3,17 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { dockerExplorerProvider } from '../dockerExtension';
-import { ContainerNode } from '../explorer/models/containerNode';
-import { reporter } from '../telemetry/telemetry';
-import { docker } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
+import { dockerExplorerProvider } from '../dockerExtension';
+import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
-
-const teleCmdId: string = 'vscode-docker.container.restart';
+import { docker } from './utils/docker-endpoint';
+import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 export async function restartContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
@@ -59,16 +55,5 @@ export async function restartContainer(actionContext: IActionContext, context: R
                 });
             });
         }));
-
-        if (reporter) {
-            /* __GDPR__
-                "command" : {
-                    "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                }
-            */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
     }
 }

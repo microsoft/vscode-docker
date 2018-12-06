@@ -11,11 +11,8 @@ import { RootNode } from '../explorer/models/rootNode';
 import { delay } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
-
-const teleCmdId: string = 'vscode-docker.image.tag';
 
 export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndLabel | undefined): Promise<string> {
     // If a RootNode or no node is passed in, we ask the user to pick an image
@@ -44,16 +41,6 @@ export async function tagImage(actionContext: IActionContext, context: ImageNode
             }
         });
 
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
         return newTaggedName;
     }
 }
