@@ -236,14 +236,14 @@ export class DefaultDockerManager implements DockerManager {
         const browserUrl = await this.getContainerWebEndpoint(containerId);
 
         const additionalProbingPaths = options.run.os === 'Windows'
-        ? [
-            'C:\\.nuget\\packages',
-            'C:\\.nuget\\fallbackpackages'
-        ]
-        : [
-            '/root/.nuget/packages',
-            '/root/.nuget/fallbackpackages'
-        ];
+            ? [
+                'C:\\.nuget\\packages',
+                'C:\\.nuget\\fallbackpackages'
+            ]
+            : [
+                '/root/.nuget/packages',
+                '/root/.nuget/fallbackpackages'
+            ];
         const additionalProbingPathsArgs = additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
 
         const containerAppOutput = options.run.os === 'Windows'
@@ -347,7 +347,7 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const nugetFallbackVolume: DockerContainerVolume = {
-            localPath: this.osProvider.os === 'Windows' ? path.join(<string>programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
+            localPath: this.osProvider.os === 'Windows' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
             containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };
