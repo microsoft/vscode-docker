@@ -19,6 +19,6 @@ export function trimWithElipsis(str: string, max: number = 10): string {
 
 export async function delay(ms: number): Promise<void> {
     return new Promise<void>(resolve => {
-        setTimeout(resolve, ms);
+        setTimeout(() => { resolve(); }, ms);
     });
 }
