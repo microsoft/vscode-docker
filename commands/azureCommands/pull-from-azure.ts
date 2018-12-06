@@ -18,11 +18,11 @@ import { Repository } from "../../utils/Azure/models/repository";
 import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 export async function pullRepoFromAzure(context?: AzureRepositoryNode): Promise<void> {
-    pullFromAzure(context, true);
+    await pullFromAzure(context, true);
 }
 
 export async function pullImageFromAzure(context?: AzureImageTagNode): Promise<void> {
-    pullFromAzure(context, false);
+    await pullFromAzure(context, false);
 }
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */

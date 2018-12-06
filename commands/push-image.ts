@@ -9,11 +9,8 @@ import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
-import { reporter } from '../telemetry/telemetry';
 import { askToSaveRegistryPath } from './registrySettings';
 import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
-const teleCmdId: string = 'vscode-docker.image.push';
-const teleAzureId: string = 'vscode-docker.image.push.azureContainerRegistry';
 
 export async function pushImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
     let properties: {
@@ -53,27 +50,5 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
         const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-
-            if (imageName.toLowerCase().includes('azurecr.io')) {
-                /* __GDPR__
-                   "command" : {
-                      "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-                   }
-                 */
-                reporter.sendTelemetryEvent('command', {
-                    command: teleAzureId
-                });
-
-            }
-        }
     }
 }

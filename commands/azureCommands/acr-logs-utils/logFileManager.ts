@@ -58,7 +58,9 @@ export async function downloadLog(content: string, title: string): Promise<void>
         filters: { 'Log': ['.log', '.txt'] },
         defaultUri: vscode.Uri.file(`${title}.log`)
     });
-    fse.writeFile(uri.fsPath, content,
+    fse.writeFile(
+        uri.fsPath,
+        content,
         (err) => {
             if (err) { throw err; }
         });

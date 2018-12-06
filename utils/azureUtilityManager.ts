@@ -118,7 +118,8 @@ export class AzureUtilityManager {
         return new ResourceManagementClient(await this.getCredentialByTenantId(getTenantId(subscription)), getSubscriptionId(subscription));
     }
 
-    public async getRegistries(subscription?: Subscription, resourceGroup?: string,
+    public async getRegistries(
+        subscription?: Subscription, resourceGroup?: string,
         compareFn: (a: ContainerModels.Registry, b: ContainerModels.Registry) => number = this.sortRegistriesAlphabetically
     ): Promise<ContainerModels.Registry[]> {
 

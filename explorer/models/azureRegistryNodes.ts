@@ -55,7 +55,8 @@ export class AzureRegistryNode extends NodeBase {
 
         const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
         for (let repository of repositories) {
-            let node = new AzureRepositoryNode(repository.name,
+            let node = new AzureRepositoryNode(
+                repository.name,
                 element,
                 this.azureAccount,
                 element.subscription,

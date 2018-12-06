@@ -11,15 +11,12 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
-import { reporter } from '../../telemetry/telemetry';
 import { AzureImageTagNode } from '../models/azureRegistryNodes';
 import { CustomImageTagNode } from '../models/customRegistryNodes';
 import { DockerHubImageTagNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 import * as util from './util';
 import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
-
-const teleCmdId: string = 'vscode-docker.deploy.azureAppService';
 
 export class WebAppCreator extends WizardBase {
     constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
@@ -540,18 +537,6 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         this.wizard.writeline(`Web App "${this._website.name}" ready: https://${this._website.defaultHostName}`);
         this.wizard.writeline('');
-
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
-
     }
 
     get website(): WebSiteModels.Site {

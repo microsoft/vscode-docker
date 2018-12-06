@@ -187,15 +187,17 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
         foundPath = pomPath;
         let json = await new Promise<PomXmlContents>((resolve, reject) => {
             // tslint:disable-next-line:no-unsafe-any
-            pomParser.parse({
-                filePath: pomPath
-            }, (error, response: { pomObject: PomXmlContents }) => {
-                if (error) {
-                    reject(`Failed to parse pom.xml: ${error}`);
-                    return;
-                }
-                resolve(response.pomObject);
-            });
+            pomParser.parse(
+                {
+                    filePath: pomPath
+                },
+                (error, response: { pomObject: PomXmlContents }) => {
+                    if (error) {
+                        reject(`Failed to parse pom.xml: ${error}`);
+                        return;
+                    }
+                    resolve(response.pomObject);
+                });
         });
         json = json || {};
 

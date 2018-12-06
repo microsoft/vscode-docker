@@ -63,7 +63,6 @@ import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from './extensionVariables';
-import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
@@ -96,8 +95,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   if (!ext.terminalProvider) {
     ext.terminalProvider = new DefaultTerminalProvider();
   }
-  initializeTelemetryReporter(createTelemetryReporter(ctx));
-  ext.reporter = reporter;
+  ext.reporter = createTelemetryReporter(ctx);
   if (!ext.keytar) {
     ext.keytar = Keytar.tryCreate();
   }
