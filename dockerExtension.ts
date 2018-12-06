@@ -109,7 +109,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   registerUIExtensionVariables(ext);
 }
 
-export async function activate(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
+export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
   perfStats.loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);
@@ -316,7 +316,7 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.system.prune', async function (this: IActionContext): Promise<void> { await systemPrune(this); });
 }
 
-export async function deactivate(): Promise<void> {
+export async function deactivateInternal(): Promise<void> {
   if (!client) {
     return undefined;
   }

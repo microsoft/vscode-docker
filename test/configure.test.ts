@@ -376,25 +376,35 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;
 
-    async function testDotNetCoreConsole(os: PlatformOS, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
-        await writeFile(projectFolder, projectFileName, projectFileContents);
-        await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
+    async function testDotNetCoreConsole(os: PlatformOS, hostOs: PlatformOS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
+        let previousOs = ext.os;
+        ext.os = {
+            platform: hostOs === 'Windows' ? 'win32' : 'linux',
+            release: hostOsRelease
+        };
+        try {
 
-        await testConfigureDocker(
-            '.NET Core Console',
-            {
-                configurePlatform: '.NET Core Console',
-                configureOs: os,
-                packageFileType: '.csproj',
-                packageFileSubfolderDepth: '1'
-            },
-            [os /* it doesn't ask for a port, so we don't specify one here */],
-            ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
-        );
+            await writeFile(projectFolder, projectFileName, projectFileContents);
+            await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
 
-        let dockerFileContents = await readFile('Dockerfile');
-        if (expectedDockerFileContents) {
-            assert.equal(dockerFileContents, expectedDockerFileContents);
+            await testConfigureDocker(
+                '.NET Core Console',
+                {
+                    configurePlatform: '.NET Core Console',
+                    configureOs: os,
+                    packageFileType: '.csproj',
+                    packageFileSubfolderDepth: '1'
+                },
+                [os /* it doesn't ask for a port, so we don't specify one here */],
+                ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
+            );
+
+            let dockerFileContents = await readFile('Dockerfile');
+            if (expectedDockerFileContents) {
+                assert.equal(dockerFileContents, expectedDockerFileContents);
+            }
+        } finally {
+            ext.os = previousOs;
         }
     }
 
@@ -405,7 +415,6 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             release: hostOsRelease
         };
         try {
-
             await writeFile(projectFolder, projectFileName, projectFileContents);
             await writeFile(projectFolder, 'Program.cs', dotNetCoreConsole_10_ProjectFileContents);
 
@@ -597,6 +606,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'ConsoleApp1Folder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_21_ProjectFileContents,
@@ -630,6 +641,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
+                'Linux',
+                '',
                 'ConsoleApp1Folder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_21_ProjectFileContents,
@@ -662,6 +675,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_20_ProjectFileContents,
@@ -695,6 +710,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
+                'Linux',
+                '',
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_20_ProjectFileContents,
@@ -727,6 +744,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_11_ProjectFileContents);
@@ -739,6 +758,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
+                'Linux',
+                '',
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_11_ProjectFileContents);
@@ -753,6 +774,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
+                'Windows',
+                windows10RS4,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_22_ProjectFileContents);
@@ -765,6 +788,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
+                'Linux',
+                '',
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_22_ProjectFileContents);
@@ -1126,6 +1151,27 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'COPY Gemfile Gemfile.lock ./');
             assertFileContains('Dockerfile', 'RUN bundle install');
             assertFileContains('Dockerfile', 'CMD ["ruby", "testoutput.rb"]');
+        });
+    });
+
+    // C++
+
+    suite("C++", () => {
+        testInEmptyFolder("C++", async () => {
+            await testConfigureDocker(
+                'C++',
+                {
+                    configurePlatform: 'C++',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                });
+
+            assertFileContains('Dockerfile', 'FROM gcc:latest');
+            assertFileContains('Dockerfile', 'COPY . /usr/src/myapp');
+            assertFileContains('Dockerfile', 'WORKDIR /usr/src/myapp');
+            assertFileContains('Dockerfile', 'RUN g++ -o myapp main.cpp');
+            assertFileContains('Dockerfile', 'CMD ["./myapp"]');
         });
     });
 

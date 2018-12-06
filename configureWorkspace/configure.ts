@@ -16,6 +16,7 @@ import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { Platform, PlatformOS } from '../utils/platform';
 import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
+import { configureCpp } from './configure_cpp';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
 import { configureGo } from './configure_go';
 import { configureJava } from './configure_java';
@@ -67,6 +68,7 @@ export function getExposeStatements(port: string): string {
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
 generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
+generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
 generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);

@@ -49,6 +49,7 @@ export async function quickPickPlatform(): Promise<Platform> {
         'Node.js',
         'Python',
         'Ruby',
+        'C++',
         'Other'
     ];
 

@@ -9,11 +9,17 @@ import { ext } from '../extension';
 import { Suite, Test, Context } from 'mocha';
 import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
+import { shouldSkipDockerTest } from './dockerInfo';
+import { debug } from 'util';
 
 const registryContainerName = 'test-registry';
 
 suite("Custom registries", async function (this: Suite): Promise<void> {
     this.timeout(Math.max(60 * 1000 * 3, this.timeout()));
+
+    if (await shouldSkipDockerTest({ linuxContainers: true })) {
+        return;
+    }
 
     const outputChannel: OutputChannel = window.createOutputChannel('Docker extension tests');
     ext.outputChannel = outputChannel;

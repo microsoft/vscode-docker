@@ -4,15 +4,16 @@ jobs:
     vmImage: VS2017-Win2016
   steps:
   - template: common/build.yml
+  - template: common/webpack-prod.yml
   - template: common/lint.yml
-  # https://github.com/Microsoft/vscode-docker/issues/606
-  # - template: common/test.yml
+  - template: common/test.yml
 
 - job: Linux
   pool:
     vmImage: ubuntu-16.04
   steps:
   - template: common/build.yml
+  - template: common/webpack-prod.yml # This will also run during vsce package, but vscep pack doesn't show STDOUT so we won't see full errors there
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
   - template: common/lint.yml
   - template: linux/test-linux.yml
@@ -22,6 +23,6 @@ jobs:
     vmImage: macOS 10.13
   steps:
   - template: common/build.yml
+  # - template: common/webpack-prod.yml
   - template: common/lint.yml
-  # https://github.com/Microsoft/vscode-docker/issues/606
-  # - template: common/test.yml
+  # - template: macOs/test.yml
