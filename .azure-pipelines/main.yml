@@ -16,13 +16,15 @@ jobs:
   - template: common/webpack-prod.yml # This will also run during vsce package, but vscep pack doesn't show STDOUT so we won't see full errors there
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
   - template: common/lint.yml
-  - template: linux/test-linux.yml
+  - template: common/test.yml
 
 - job: macOS
   pool:
     vmImage: macOS 10.13
   steps:
   - template: common/build.yml
-  # - template: common/webpack-prod.yml
+  - template: common/webpack-prod.yml
   - template: common/lint.yml
-  # - template: macOs/test.yml
+  - template: common/test.yml
+    parameters:
+      dockerUnavailable: 1 # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)
