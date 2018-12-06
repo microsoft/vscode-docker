@@ -6,7 +6,7 @@
 'use strict';
 
 import { CancellationToken, CompletionItem, CompletionItemProvider, Position, TextDocument } from 'vscode';
-import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
+import { FROM_DIRECTIVE_PATTERN } from '../constants';
 import helper = require('../helpers/suggestSupportHelper');
 
 // IntelliSense

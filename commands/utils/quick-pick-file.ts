@@ -6,7 +6,7 @@
 import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { DOCKERFILE_GLOB_PATTERN, YAML_GLOB_PATTERN } from '../../dockerExtension';
+import { DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, YAML_GLOB_PATTERN } from "../../constants";
 import { ext } from '../../extensionVariables';
 
 export interface Item extends vscode.QuickPickItem {
@@ -15,7 +15,7 @@ export interface Item extends vscode.QuickPickItem {
 }
 
 async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), undefined, 1000, undefined);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), undefined, FILE_SEARCH_MAX_RESULT, undefined);
 }
 
 function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {

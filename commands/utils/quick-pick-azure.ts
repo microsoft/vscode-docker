@@ -144,7 +144,7 @@ export async function confirmUserIntent(yesOrNoPrompt: string, cancelWhenNo: boo
         ignoreFocusOut: true,
         placeHolder: 'Enter "Yes"',
         value: 'No',
-        prompt: yesOrNoPrompt + ' Enter yes to continue'
+        prompt: yesOrNoPrompt
     };
     let answer = await ext.ui.showInputBox(opt);
     answer = answer.toLowerCase();

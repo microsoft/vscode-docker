@@ -5,8 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { UserCancelledError } from 'vscode-azureextensionui';
-import { COMPOSE_FILE_GLOB_PATTERN } from '../dockerExtension';
+import { COMPOSE_FILE_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { reporter } from '../telemetry/telemetry';
 import { quickPickWorkspaceFolder } from './utils/quickPickWorkspaceFolder';

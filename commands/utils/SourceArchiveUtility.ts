@@ -5,8 +5,8 @@ import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import * as path from 'path';
 import * as tar from 'tar';
-import * as url from 'url';
 import vscode = require('vscode');
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
@@ -107,6 +107,6 @@ function getTempSourceArchivePath(): string {
     const id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
     const archive = `sourceArchive${id}.tar.gz`;
     ext.outputChannel.appendLine(`Setting up temp file with '${archive}'`);
-    const tarFilePath: string = url.resolve(os.tmpdir(), archive);
+    const tarFilePath: string = path.join(os.tmpdir(), archive);
     return tarFilePath;
 }
