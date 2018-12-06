@@ -50,13 +50,5 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
         const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);
         terminal.show();
-        if (reporter) {
-            if (imageName.toLowerCase().includes('azurecr.io')) {
-                reporter.sendTelemetryEvent('command', {
-                    command: 'vscode-docker.image.push.azureContainerRegistry'
-                });
-
-            }
-        }
     }
 }
