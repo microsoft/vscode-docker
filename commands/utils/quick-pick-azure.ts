@@ -139,7 +139,7 @@ export async function quickPickResourceGroup(canCreateNew?: boolean, subscriptio
 /** Requests confirmation for an action and returns true only in the case that the user types in yes
  * @param yesOrNoPrompt Should be a yes or no question
  */
-export async function confirmUserIntent(yesOrNoPrompt: string, cancelWhenNo: boolean): Promise<boolean> {
+export async function confirmUserIntent(yesOrNoPrompt: string): Promise<boolean> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         placeHolder: 'Enter "Yes"',
@@ -150,8 +150,6 @@ export async function confirmUserIntent(yesOrNoPrompt: string, cancelWhenNo: boo
     answer = answer.toLowerCase();
     if (answer === 'yes') {
         return true;
-    } else if (!cancelWhenNo && answer === 'no') {
-        return false;
     } else {
         throw new UserCancelledError();
     }

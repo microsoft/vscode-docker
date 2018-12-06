@@ -15,10 +15,18 @@ import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
-import { confirmUserIntent, quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
+import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
+
+export async function pullRepoFromAzure(context?: AzureRepositoryNode): Promise<void> {
+    pullFromAzure(context, true);
+}
+
+export async function pullImageFromAzure(context?: AzureImageTagNode): Promise<void> {
+    pullFromAzure(context, false);
+}
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
-export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositoryNode): Promise<void> {
+async function pullFromAzure(context: AzureImageTagNode | AzureRepositoryNode, pullAll: boolean): Promise<void> {
     let registry: Registry;
     let imageRequest: string;
 
@@ -36,7 +44,6 @@ export async function pullFromAzure(context?: AzureImageTagNode | AzureRepositor
     } else { // Command Palette
         registry = await quickPickACRRegistry();
         const repository: Repository = await quickPickACRRepository(registry, 'Select the repository of the image you want to pull.');
-        const pullAll = await confirmUserIntent(`Do want to pull all tags from '${repository.name}'.`, false);
         if (pullAll) {
             imageRequest = `${repository.name} -a`;
         } else {
@@ -63,10 +70,13 @@ async function pullImage(loginServer: string, imageRequest: string, username: st
             if (err && err.message.match(/error storing credentials.*The stub received bad data/)) {
                 // Temporary work-around for this error- same as Azure CLI
                 // See https://github.com/Azure/azure-cli/issues/4843
+                ext.outputChannel.show();
                 reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \n${dockerConfigPath} and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
             } else if (err) {
+                ext.outputChannel.show();
                 reject(err);
             } else if (stderr) {
+                ext.outputChannel.show();
                 reject(stderr);
             }
 

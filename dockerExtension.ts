@@ -18,7 +18,7 @@ import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage, untagAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
-import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
+import { pullImageFromAzure, pullRepoFromAzure } from './commands/azureCommands/pull-from-azure';
 import { quickBuild } from "./commands/azureCommands/quick-build";
 import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
@@ -270,7 +270,8 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
   registerCommand('vscode-docker.acr.deleteRepository', deleteRepository);
-  registerCommand('vscode-docker.acr.pullImage', pullFromAzure);
+  registerCommand('vscode-docker.acr.pullImage', pullImageFromAzure);
+  registerCommand('vscode-docker.acr.pullRepo', pullRepoFromAzure);
   registerCommand('vscode-docker.acr.quickBuild', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await quickBuild(this, item); });
   registerCommand('vscode-docker.acr.runTask', runTask);
   registerCommand("vscode-docker.acr.runTaskFile", runTaskFile);
