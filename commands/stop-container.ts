@@ -5,15 +5,12 @@
 
 import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
-import { reporter } from '../telemetry/telemetry';
 import { docker } from './utils/docker-endpoint';
 import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { RootNode } from '../explorer/models/rootNode';
-
-const teleCmdId: string = 'vscode-docker.container.stop';
 
 export async function stopContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
     let containersToStop: Docker.ContainerDesc[];
@@ -58,16 +55,5 @@ export async function stopContainer(actionContext: IActionContext, context: Root
                 });
             });
         }));
-
-        if (reporter) {
-            /* __GDPR__
-               "command" : {
-                  "command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-               }
-             */
-            reporter.sendTelemetryEvent('command', {
-                command: teleCmdId
-            });
-        }
     }
 }
