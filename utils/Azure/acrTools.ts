@@ -157,25 +157,29 @@ export async function sendRequest<T>(http_method: string, login_server: string, 
 export async function getImageDigest(image: AzureImage): Promise<string> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(image.registry, `repository:${image.repository.name}:pull`);
 
-    return new Promise<string>((resolve, reject) => ext.request.get('https://' + image.registry.loginServer + `/v2/${image.repository.name}/manifests/${image.tag}`, {
-        auth: {
-            bearer: acrAccessToken
-        },
-        headers: {
-            accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
-        }
-    }, (_err, _httpResponse, _body) => {
-        if (_err) {
-            reject(_err);
-        } else {
-            const imageDigest = _httpResponse.headers['docker-content-digest'];
-            if (imageDigest instanceof Array) {
-                reject(new Error('docker-content-digest should be a string not an array.'))
-            } else {
-                resolve(imageDigest);
-            }
-        }
-    }));
+    return new Promise<string>(
+        (resolve, reject) => ext.request.get(
+            'https://' + image.registry.loginServer + `/v2/${image.repository.name}/manifests/${image.tag}`,
+            {
+                auth: {
+                    bearer: acrAccessToken
+                },
+                headers: {
+                    accept: 'application/vnd.docker.distribution.manifest.v2+json; 0.5, application/vnd.docker.distribution.manifest.list.v2+json; 0.6'
+                }
+            },
+            (_err, _httpResponse, _body) => {
+                if (_err) {
+                    reject(_err);
+                } else {
+                    const imageDigest = _httpResponse.headers['docker-content-digest'];
+                    if (imageDigest instanceof Array) {
+                        reject(new Error('docker-content-digest should be a string not an array.'))
+                    } else {
+                        resolve(imageDigest);
+                    }
+                }
+            }));
 }
 
 //Credential management
@@ -300,40 +304,47 @@ export async function streamLogs(registry: Registry, run: Run, providedClient?: 
     let available = 0;
     let start = 0;
 
-    let obtainLogs = setInterval(async () => {
-        let props: BlobService.BlobResult;
-        let metadata: { [key: string]: string; };
-        try {
-            props = await getBlobProperties(blobInfo, blob);
-            metadata = props.metadata;
-        } catch (err) {
-            const error = parseError(err);
-            //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
-            if (error.errorType === "NotFound") { return; } else { throw error; }
-        }
-        available = +props.contentLength;
-        let text: string;
-        //Makes sure that if item fails it does so due to network/azure errors not lack of new content
-        if (available > start) {
-            text = await getBlobToText(blobInfo, blob, start);
-            let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
-            start += text.length;
-            ext.outputChannel.append(utf8encoded);
-        }
-        if (metadata.Complete) {
-            clearInterval(obtainLogs);
-        }
-    }, 1000);
+    let obtainLogs = setInterval(
+        async () => {
+            let props: BlobService.BlobResult;
+            let metadata: { [key: string]: string; };
+            try {
+                props = await getBlobProperties(blobInfo, blob);
+                metadata = props.metadata;
+            } catch (err) {
+                const error = parseError(err);
+                //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
+                if (error.errorType === "NotFound") { return; } else { throw error; }
+            }
+            available = +props.contentLength;
+            let text: string;
+            //Makes sure that if item fails it does so due to network/azure errors not lack of new content
+            if (available > start) {
+                text = await getBlobToText(blobInfo, blob, start);
+                let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
+                start += text.length;
+                ext.outputChannel.append(utf8encoded);
+            }
+            if (metadata.Complete) {
+                clearInterval(obtainLogs);
+            }
+        },
+        1000
+    );
 }
 
 // Promisify getBlobToText for readability and error handling purposes
 export async function getBlobToText(blobInfo: IBlobInfo, blob: BlobService, rangeStart: number): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        blob.getBlobToText(blobInfo.containerName, blobInfo.blobName, { rangeStart: rangeStart },
-            (error, result) => {
-                if (error) { reject(error) } else { resolve(result); }
-            });
-    });
+    return new Promise<string>(
+        (resolve, reject) => {
+            blob.getBlobToText(
+                blobInfo.containerName,
+                blobInfo.blobName,
+                { rangeStart: rangeStart },
+                (error, result) => {
+                    if (error) { reject(error) } else { resolve(result); }
+                });
+        });
 }
 
 // Promisify getBlobProperties for readability and error handling purposes

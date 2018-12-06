@@ -65,31 +65,34 @@ export class RootNode extends NodeBase {
         }
 
         if (refreshInterval > 0) {
-            this._imageDebounceTimer = setInterval(async () => {
-                const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
-                images.sort((img1, img2) => {
-                    if (img1.Id > img2.Id) {
-                        return -1;
-                    } else if (img1.Id < img2.Id) {
-                        return 1;
-                    } else {
-                        return 0;
+            this._imageDebounceTimer = setInterval(
+                async () => {
+                    const images: Docker.ImageDesc[] = await docker.getImageDescriptors(imageFilters);
+                    images.sort((img1, img2) => {
+                        if (img1.Id > img2.Id) {
+                            return -1;
+                        } else if (img1.Id < img2.Id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
+
+                    if (!this._sortedImageCache) {
+                        this._sortedImageCache = images;
+                        return;
                     }
-                });
 
-                if (!this._sortedImageCache) {
-                    this._sortedImageCache = images;
-                    return;
-                }
+                    let imagesAsJson = JSON.stringify(images);
+                    let cacheAsJson = JSON.stringify(this._sortedImageCache);
+                    if (imagesAsJson !== cacheAsJson) {
+                        this.eventEmitter.fire(this._imagesNode);
+                        this._sortedImageCache = images;
+                    }
 
-                let imagesAsJson = JSON.stringify(images);
-                let cacheAsJson = JSON.stringify(this._sortedImageCache);
-                if (imagesAsJson !== cacheAsJson) {
-                    this.eventEmitter.fire(this._imagesNode);
-                    this._sortedImageCache = images;
-                }
-
-            }, refreshInterval);
+                },
+                refreshInterval
+            );
         }
 
     }
@@ -177,47 +180,47 @@ export class RootNode extends NodeBase {
         }
 
         if (refreshInterval > 0) {
-            this._containerDebounceTimer = setInterval(async () => {
+            this._containerDebounceTimer = setInterval(
+                async () => {
+                    let needToRefresh: boolean = false;
+                    let found: boolean = false;
 
-                let needToRefresh: boolean = false;
-                let found: boolean = false;
+                    const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(containerFilters);
 
-                const containers: Docker.ContainerDesc[] = await docker.getContainerDescriptors(containerFilters);
+                    if (!this._containerCache) {
+                        this._containerCache = containers;
+                    }
 
-                if (!this._containerCache) {
-                    this._containerCache = containers;
-                }
+                    if (this._containerCache.length !== containers.length) {
+                        needToRefresh = true;
+                    } else {
+                        for (let cachedContainer of this._containerCache) {
+                            let ctr: Docker.ContainerDesc = cachedContainer;
+                            for (let cont of containers) {
+                                // can't do a full object compare because "Status" keeps changing for running containers
+                                if (ctr.Id === cont.Id &&
+                                    ctr.Image === cont.Image &&
+                                    ctr.State === cont.State &&
+                                    this.isContainerUnhealthy(ctr) === this.isContainerUnhealthy(cont)) {
+                                    found = true;
+                                    break;
+                                }
+                            }
 
-                if (this._containerCache.length !== containers.length) {
-                    needToRefresh = true;
-                } else {
-                    for (let cachedContainer of this._containerCache) {
-                        let ctr: Docker.ContainerDesc = cachedContainer;
-                        for (let cont of containers) {
-                            // can't do a full object compare because "Status" keeps changing for running containers
-                            if (ctr.Id === cont.Id &&
-                                ctr.Image === cont.Image &&
-                                ctr.State === cont.State &&
-                                this.isContainerUnhealthy(ctr) === this.isContainerUnhealthy(cont)) {
-                                found = true;
-                                break;
+                            if (!found) {
+                                needToRefresh = true;
+                                break
                             }
                         }
-
-                        if (!found) {
-                            needToRefresh = true;
-                            break
-                        }
                     }
-                }
 
-                if (needToRefresh) {
-                    this.eventEmitter.fire(this._containersNode);
-                    this._containerCache = containers;
-                }
+                    if (needToRefresh) {
+                        this.eventEmitter.fire(this._containersNode);
+                        this._containerCache = containers;
+                    }
 
-            }, refreshInterval);
-
+                },
+                refreshInterval);
         }
 
     }

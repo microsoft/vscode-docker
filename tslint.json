@@ -215,7 +215,7 @@
         "react-a11y-tabindex-no-positive": true,
         "react-a11y-titles": true,
         "align": [
-            false, // TODO: true,
+            true,
             "parameters",
             "arguments",
             "statements"

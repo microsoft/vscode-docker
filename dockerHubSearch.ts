@@ -82,12 +82,14 @@ export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promi
 // tslint:disable-next-line:promise-function-async // Grandfathered in
 function invokeHubSearch(imageName: string, count: number, cache: boolean): Promise<IHubSearchResponse> {
     // https://registry.hub.docker.com/v1/search?q=redis&n=1
-    return fetchHttpsJson<IHubSearchResponse>({
-        hostname: 'registry.hub.docker.com',
-        port: 443,
-        path: '/v1/search?q=' + encodeURIComponent(imageName) + '&n=' + count,
-        method: 'GET',
-    }, cache);
+    return fetchHttpsJson<IHubSearchResponse>(
+        {
+            hostname: 'registry.hub.docker.com',
+            port: 443,
+            path: '/v1/search?q=' + encodeURIComponent(imageName) + '&n=' + count,
+            method: 'GET',
+        },
+        cache);
 }
 export interface IHubSearchResponse {
     num_pages: number;

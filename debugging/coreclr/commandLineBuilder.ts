@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
- export type CommandLineArgFactory = () => (string | undefined);
+export type CommandLineArgFactory = () => (string | undefined);
 
 export class CommandLineBuilder {
     private readonly args: CommandLineArgFactory[] = [];
