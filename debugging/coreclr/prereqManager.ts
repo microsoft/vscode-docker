@@ -6,14 +6,14 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { BrowserClient } from './browserClient';
 import { DockerClient } from './dockerClient';
-import { MacNuGetPackageFallbackFolderPath } from './dockerManager';
+import { MacNuGetPackageFallbackFolderPath, LaunchOptions } from './dockerManager';
 import { DotNetClient } from './dotNetClient';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { ProcessProvider } from './processProvider';
 
 export interface Prerequisite {
-    checkPrerequisite(): Promise<boolean>;
+    checkPrerequisite(options: LaunchOptions): Promise<boolean>;
 }
 
 export type ShowErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem | undefined>;
@@ -159,6 +159,36 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
     }
 }
 
+export class DockerfileExistsPrerequisite implements Prerequisite {
+    constructor(
+        private readonly fsProvider: FileSystemProvider,
+        private readonly showErrorMessage: ShowErrorMessageFunction,
+        private readonly executeCommand: (command: string) => void) {
+    }
+
+    public async checkPrerequisite(options: LaunchOptions): Promise<boolean> {
+        if (await this.fsProvider.fileExists(options.build.dockerfile)) {
+            return true;
+        }
+
+        const addDockerFiles: vscode.MessageItem = {
+            title: 'Add Docker files'
+        };
+
+        this
+            .showErrorMessage(
+                'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?',
+                addDockerFiles)
+            .then(result => {
+                if (result === addDockerFiles) {
+                    this.executeCommand('vscode-docker.configure');
+                }
+            });
+
+        return false;
+    }
+}
+
 export class AggregatePrerequisite implements Prerequisite {
     private readonly prerequisites: Prerequisite[];
 
@@ -166,8 +196,8 @@ export class AggregatePrerequisite implements Prerequisite {
         this.prerequisites = prerequisites;
     }
 
-    public async checkPrerequisite(): Promise<boolean> {
-        const results = await Promise.all(this.prerequisites.map(async prerequisite => await prerequisite.checkPrerequisite()));
+    public async checkPrerequisite(options: LaunchOptions): Promise<boolean> {
+        const results = await Promise.all(this.prerequisites.map(async prerequisite => await prerequisite.checkPrerequisite(options)));
 
         return results.every(result => result);
     }
