@@ -7,10 +7,11 @@ import * as vscode from 'vscode';
 import { FileSystemProvider } from '../../../extension';
 import { OSProvider } from '../../../extension';
 import { ProcessProvider } from '../../../extension';
-import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../extension';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../extension';
 import { PlatformOS } from '../../../extension';
 import { DockerClient } from '../../../extension';
 import { DotNetClient } from '../../../extension';
+import { LaunchOptions } from '../../../extension';
 
 suite('debugging/coreclr/prereqManager', () => {
     suite('DockerDaemonIsLinuxPrerequisite', () => {
@@ -205,7 +206,70 @@ suite('debugging/coreclr/prereqManager', () => {
 
             const result = await prereq.checkPrerequisite();
 
-            assert.equal(true, result, 'The prerequisite should return `true` on non-Mac.');
+            assert.equal(result, true, 'The prerequisite should return `true` on non-Mac.');
         });
+    });
+
+    suite('DockerfileExistsPrerequisite', () => {
+        const generateTest = (name: string, dockerfileExists: boolean, userElectsToScaffold?: boolean) => {
+            test(name, async () => {
+                const dockerfile = '/users/user/repos/repo/Dockerfile';
+
+                let wasFileExistsCalled = false;
+
+                const fsProvider = <FileSystemProvider> {
+                    fileExists: (path: string) => {
+                        wasFileExistsCalled = true;
+
+                        assert.equal(path, dockerfile, 'The path should be that of the Dockerfile.');
+
+                        return Promise.resolve(dockerfileExists)
+                    }
+                };
+
+                let wasShowErrorMessageCalled = false;
+
+                const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {
+                    wasShowErrorMessageCalled = true;
+
+                    if (!dockerfileExists) {
+                        assert.equal(items.length > 0 && items[0] !== undefined, true, 'An option to scaffold should be returned.');
+                    }
+
+                    if (userElectsToScaffold) {
+                        return Promise.resolve<vscode.MessageItem | undefined>(items[0]);
+                    } else {
+                        return Promise.resolve<vscode.MessageItem | undefined>(undefined);
+                    }
+                };
+
+                let wasCommandExecuted = false;
+
+                const executeCommand = (command: string) => {
+                    wasCommandExecuted = true;
+
+                    assert.equal(command, 'vscode-docker.configure', 'The scaffolding command should be executed.');
+                };
+
+                const prereq = new DockerfileExistsPrerequisite(fsProvider, showErrorMessage, executeCommand);
+
+                const options = <LaunchOptions> {
+                    build: {
+                        dockerfile
+                    }
+                };
+
+                const result = await prereq.checkPrerequisite(options);
+
+                assert.equal(result, dockerfileExists, 'The prerequisite should return `true` when the Dockerfile exists.');
+                assert.equal(wasFileExistsCalled, true, 'The Dockerfile should have been tested for existence.');
+                assert.equal(wasShowErrorMessageCalled, !dockerfileExists, 'The user should be shown an error when the Dockerfile does not exist.');
+                assert.equal(wasCommandExecuted, !dockerfileExists && userElectsToScaffold === true, 'The scaffold command should be executed only if the Dockerfile does not exist and the user elects to scaffold.');
+            });
+        };
+
+        generateTest('Dockerfile exists', true);
+        generateTest('Dockerfile does not exist', false);
+        generateTest('Dockerfile does not exist and user elects to scaffold', false, true);
     });
 });

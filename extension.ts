@@ -27,10 +27,11 @@ export { isWindows10RS3OrNewer, isWindows10RS4OrNewer } from "./helpers/osVersio
 export { LineSplitter } from './debugging/coreclr/lineSplitter';
 export { CommandLineBuilder } from './debugging/coreclr/commandLineBuilder';
 export { DockerClient } from './debugging/coreclr/dockerClient';
+export { LaunchOptions } from './debugging/coreclr/dockerManager';
 export { DotNetClient } from './debugging/coreclr/dotNetClient';
 export { FileSystemProvider } from './debugging/coreclr/fsProvider';
 export { OSProvider } from './debugging/coreclr/osProvider';
-export { DockerDaemonIsLinuxPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './debugging/coreclr/prereqManager';
+export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './debugging/coreclr/prereqManager';
 export { ProcessProvider } from './debugging/coreclr/processProvider';
 export { PlatformOS, Platform } from './utils/platform';
 export { DockerBuildImageOptions } from "./debugging/coreclr/dockerClient";
