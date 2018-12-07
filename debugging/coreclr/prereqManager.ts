@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { BrowserClient } from './browserClient';
 import { DockerClient } from './dockerClient';
-import { MacNuGetPackageFallbackFolderPath, LaunchOptions } from './dockerManager';
+import { LaunchOptions, MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { DotNetClient } from './dotNetClient';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
