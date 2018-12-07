@@ -895,6 +895,7 @@
     "@types/node": "^8.10.34",
     "@types/request-promise-native": "^1.0.15",
     "@types/semver": "^5.5.0",
+    "@types/xml2js": "^0.4.3",
     "adm-zip": "^0.4.11",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.4",
@@ -908,7 +909,7 @@
     "ts-loader": "^5.3.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "tslint-microsoft-contrib": "^5.2.1",
+    "tslint-microsoft-contrib": "^6.0.0",
     "typescript": "^3.1.1",
     "umd-compat-loader": "^2.1.1",
     "vsce": "^1.51.1",
@@ -917,6 +918,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "adal-node": "^0.1.28",
     "azure-arm-containerregistry": "^3.0.0",
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
@@ -930,13 +932,16 @@
     "gradle-to-js": "^1.0.1",
     "mac-ca": "^1.0.4",
     "moment": "^2.19.3",
+    "ms-rest": "^2.3.8",
+    "ms-rest-azure": "^2.5.9",
     "opn": "^5.2.0",
-    "pom-parser": "^1.1.1",
+    "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "semver": "^5.5.1",
     "tar": "^4.4.6",
     "vscode-azureextensionui": "^0.19.0",
     "vscode-languageclient": "^5.1.1",
-    "win-ca": "^2.2.0"
+    "win-ca": "^2.2.0",
+    "xml2js": "^0.4.19"
   }
 }

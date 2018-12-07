@@ -124,7 +124,7 @@ export async function dockerHubLogin(): Promise<{ username: string, password: st
         if (password) {
             _token = await login(username, password);
             if (_token) {
-                return { username: username, password: password, token: <string>_token.token };
+                return { username: username, password: password, token: _token.token };
             }
         }
     }
@@ -242,7 +242,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
         vscode.window.showErrorMessage('Docker: Unable to retrieve Repository Tags');
     }
 
-    return <Tag[]>tagsPage.results;
+    return tagsPage.results;
 }
 
 export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {

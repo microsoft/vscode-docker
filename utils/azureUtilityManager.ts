@@ -39,7 +39,7 @@ export class AzureUtilityManager {
                 let azureAccountExtension = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
                 this.properties.found = azureAccountExtension ? 'true' : 'false';
                 if (azureAccountExtension) {
-                    azureAccount = <AzureAccount>await azureAccountExtension.activate();
+                    azureAccount = await azureAccountExtension.activate();
                 }
 
                 vscode.commands.executeCommand('setContext', 'isAzureAccountInstalled', !!azureAccount);

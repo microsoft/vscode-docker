@@ -7,9 +7,9 @@ import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
 import * as path from "path";
-import * as pomParser from "pom-parser";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import * as xml2js from 'xml2js';
 import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFolder';
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
@@ -185,19 +185,22 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
 
     if (await fse.pathExists(pomPath)) {
         foundPath = pomPath;
+        const pomString = await fse.readFile(pomPath);
         let json = await new Promise<PomXmlContents>((resolve, reject) => {
+            const options = {
+                trim: true,
+                normalizeTags: true,
+                normalize: true,
+                mergeAttrs: true
+            };
             // tslint:disable-next-line:no-unsafe-any
-            pomParser.parse(
-                {
-                    filePath: pomPath
-                },
-                (error, response: { pomObject: PomXmlContents }) => {
-                    if (error) {
-                        reject(`Failed to parse pom.xml: ${error}`);
-                        return;
-                    }
-                    resolve(response.pomObject);
-                });
+            xml2js.parseString(pomString, options, (error, result: PomXmlContents): void => {
+                if (error) {
+                    reject(`Failed to parse pom.xml: ${error}`);
+                    return;
+                }
+                resolve(result);
+            });
         });
         json = json || {};
 

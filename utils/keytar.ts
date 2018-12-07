@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// tslint:disable-next-line:no-implicit-dependencies
 import * as keytarType from 'keytar';
 import { getCoreNodeModule } from './getCoreNodeModule';
 

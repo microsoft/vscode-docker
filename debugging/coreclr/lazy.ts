@@ -19,7 +19,7 @@ export class Lazy<T> {
             this._isValueCreated = true;
         }
 
-        return <T>this._value;
+        return this._value;
     }
 }
 
