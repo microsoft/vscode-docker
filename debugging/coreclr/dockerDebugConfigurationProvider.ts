@@ -92,12 +92,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             throw new Error('No workspace folder is associated with debugging.');
         }
 
-        const prerequisiteSatisfied = await this.prerequisite.checkPrerequisite();
-
-        if (!prerequisiteSatisfied) {
-            return undefined;
-        }
-
         const appFolder = this.inferAppFolder(folder, debugConfiguration);
 
         const resolvedAppFolder = DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder);
@@ -117,12 +111,20 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const buildOptions = DockerDebugConfigurationProvider.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
         const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os);
 
-        const result = await this.dockerManager.prepareForLaunch({
+        const launchOptions = {
             appFolder: resolvedAppFolder,
             appOutput,
             build: buildOptions,
             run: runOptions
-        });
+        };
+
+        const prerequisiteSatisfied = await this.prerequisite.checkPrerequisite(launchOptions);
+
+        if (!prerequisiteSatisfied) {
+            return undefined;
+        }
+
+        const result = await this.dockerManager.prepareForLaunch(launchOptions);
 
         const configuration = this.createConfiguration(debugConfiguration, appFolder, result);
 
