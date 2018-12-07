@@ -33,6 +33,7 @@
     "onCommand:vscode-docker.acr.deleteRegistry",
     "onCommand:vscode-docker.acr.deleteRepository",
     "onCommand:vscode-docker.acr.pullImage",
+    "onCommand:vscode-docker.acr.pullRepo",
     "onCommand:vscode-docker.acr.quickBuild",
     "onCommand:vscode-docker.acr.runTask",
     "onCommand:vscode-docker.acr.runTaskFile",
@@ -199,7 +200,11 @@
         },
         {
           "command": "vscode-docker.acr.pullImage",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|azureRepositoryNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ azureImageTagNode"
+        },
+        {
+          "command": "vscode-docker.acr.pullRepo",
+          "when": "view == dockerExplorer && viewItem =~ azureRepositoryNode"
         },
         {
           "command": "vscode-docker.acr.runTask",
@@ -648,7 +653,13 @@
       },
       {
         "command": "vscode-docker.acr.pullImage",
-        "title": "Pull Image from Azure",
+        "title": "Pull tag from Azure",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.acr.pullRepo",
+        "title": "Pull Repository from Azure",
+        "description": "Pull all Image tags from an Azure Repository",
         "category": "Docker"
       },
       {
@@ -680,7 +691,7 @@
       },
       {
         "command": "vscode-docker.acr.viewLogs",
-        "title": "View Azure Logs",
+        "title": "View Task Logs",
         "category": "Docker"
       },
       {

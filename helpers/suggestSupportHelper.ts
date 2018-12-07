@@ -6,7 +6,7 @@
 'use strict';
 
 import vscode = require('vscode');
-import { FROM_DIRECTIVE_PATTERN } from "../dockerExtension";
+import { FROM_DIRECTIVE_PATTERN } from '../constants';
 import hub = require('../dockerHubSearch');
 import parser = require('../parser');
 

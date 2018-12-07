@@ -1,5 +1,5 @@
-import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { Registry } from "azure-arm-containerregistry/lib/models";
+import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import vscode = require('vscode');
@@ -29,7 +29,7 @@ export async function runTask(context?: TaskNode): Promise<void> {
         taskName = context.task.name;
     } else { // Command Palette
         subscription = await quickPickSubscription();
-        registry = await quickPickACRRegistry();
+        registry = await quickPickACRRegistry(false, subscription);
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
         taskName = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }

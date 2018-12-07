@@ -18,7 +18,7 @@ import { createRegistry } from './commands/azureCommands/create-registry';
 import { deleteAzureImage, untagAzureImage } from './commands/azureCommands/delete-image';
 import { deleteAzureRegistry } from './commands/azureCommands/delete-registry';
 import { deleteRepository } from './commands/azureCommands/delete-repository';
-import { pullFromAzure } from './commands/azureCommands/pull-from-azure';
+import { pullImageFromAzure, pullRepoFromAzure } from './commands/azureCommands/pull-from-azure';
 import { quickBuild } from "./commands/azureCommands/quick-build";
 import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
@@ -41,6 +41,7 @@ import { docker } from './commands/utils/docker-endpoint';
 import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure, configureApi, ConfigureApiOptions } from './configureWorkspace/configure';
+import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugger';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
@@ -67,11 +68,6 @@ import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { wrapError } from './utils/wrapError';
-
-export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-\/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
-export const COMPOSE_FILE_GLOB_PATTERN = '**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
-export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}';
-export const YAML_GLOB_PATTERN = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
 
@@ -272,7 +268,8 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
   registerCommand('vscode-docker.acr.deleteRepository', deleteRepository);
-  registerCommand('vscode-docker.acr.pullImage', pullFromAzure);
+  registerCommand('vscode-docker.acr.pullImage', pullImageFromAzure);
+  registerCommand('vscode-docker.acr.pullRepo', pullRepoFromAzure);
   registerCommand('vscode-docker.acr.quickBuild', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await quickBuild(this, item); });
   registerCommand('vscode-docker.acr.runTask', runTask);
   registerCommand("vscode-docker.acr.runTaskFile", runTaskFile);

@@ -20,7 +20,7 @@ export async function showTaskProperties(context?: TaskNode): Promise<void> {
         task = context.task.name;
     } else { // Command palette
         subscription = await quickPickSubscription();
-        registry = await quickPickACRRegistry();
+        registry = await quickPickACRRegistry(false, subscription);
         resourceGroup = await acrTools.getResourceGroup(registry, subscription);
         task = (await quickPickTask(registry, subscription, resourceGroup)).name;
     }

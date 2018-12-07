@@ -1,43 +1,42 @@
+
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry/lib/containerRegistryManagementClient';
 import { DockerBuildRequest, FileTaskRunRequest, Registry } from 'azure-arm-containerregistry/lib/models';
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import * as path from 'path';
 import * as tar from 'tar';
-import * as url from 'url';
 import vscode = require('vscode');
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { getBlobInfo, getResourceGroupName, streamLogs } from "../../utils/Azure/acrTools";
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
-import { Item } from '../build-image';
 import { quickPickACRRegistry, quickPickSubscription } from './quick-pick-azure';
-import { quickPickDockerFileItem, quickPickImageName, quickPickYamlFileItem } from './quick-pick-image';
+import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from './quick-pick-file';
+import { quickPickImageName } from './quick-pick-image';
 import { quickPickWorkspaceFolder } from './quickPickWorkspaceFolder';
 
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
 
-export type runRequestType =
-    | 'DockerBuildRequest'
-    | 'FileTaskRunRequest';
-
-export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRequestType, actionContext?: IActionContext): Promise<void> {
+export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', actionContext?: IActionContext): Promise<void> {
     //Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
+    let imageName: string;
     if (requestType === 'DockerBuildRequest') {
         rootFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
         fileItem = await quickPickDockerFileItem(actionContext, fileUri, rootFolder);
+        imageName = await quickPickImageName(actionContext, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
         rootFolder = await quickPickWorkspaceFolder("To run a task from a .yaml file you must first open a folder or workspace in VS Code.");
-        fileItem = await quickPickYamlFileItem(fileUri, rootFolder);
+        fileItem = await quickPickYamlFileItem(fileUri, rootFolder, "To run a task from a .yaml file you must have yaml file in your VS Code workspace.");
     } else {
         throw new Error("Run Request Type Currently not supported.");
     }
     const subscription: Subscription = await quickPickSubscription();
-    const registry: Registry = await quickPickACRRegistry(true);
+    const registry: Registry = await quickPickACRRegistry(true, subscription);
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'canPickMany': false, 'placeHolder': 'Select image base OS' })).data;
 
@@ -53,7 +52,6 @@ export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: runRe
 
     let runRequest: DockerBuildRequest | FileTaskRunRequest;
     if (requestType === 'DockerBuildRequest') {
-        const imageName: string = await quickPickImageName(actionContext, rootFolder, fileItem);
         runRequest = {
             type: requestType,
             imageNames: [imageName],
@@ -109,6 +107,6 @@ function getTempSourceArchivePath(): string {
     const id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
     const archive = `sourceArchive${id}.tar.gz`;
     ext.outputChannel.appendLine(`Setting up temp file with '${archive}'`);
-    const tarFilePath: string = url.resolve(os.tmpdir(), archive);
+    const tarFilePath: string = path.join(os.tmpdir(), archive);
     return tarFilePath;
 }
