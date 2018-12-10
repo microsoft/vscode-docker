@@ -41,6 +41,8 @@ export type DockerRunContainerOptions = {
     envFiles?: string[];
     labels?: { [key: string]: string };
     volumes?: DockerContainerVolume[];
+    ports?: string[];
+    externalHosts?: string[];
 };
 
 export type DockerVersionOptions = {
@@ -193,6 +195,8 @@ export class CliDockerClient implements DockerClient {
             .withArrayArgs('--env-file', options.envFiles)
             .withKeyValueArgs('--label', options.labels)
             .withArrayArgs('-v', options.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
+            .withArrayArgs('-p', options.ports)
+            .withArrayArgs('--add-host', options.externalHosts)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
             .withArg(options.command)

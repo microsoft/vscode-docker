@@ -217,7 +217,7 @@ export class DefaultDockerManager implements DockerManager {
                         env: options.env,
                         envFiles: options.envFiles,
                         labels: options.labels,
-                        volumes
+                        volumes: [...volumes, ...options.volumes]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,

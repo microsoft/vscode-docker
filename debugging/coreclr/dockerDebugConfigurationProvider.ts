@@ -12,6 +12,7 @@ import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
+import { DockerContainerVolume } from './dockerClient';
 
 interface DockerDebugBuildOptions {
     args?: { [key: string]: string };
@@ -28,6 +29,9 @@ interface DockerDebugRunOptions {
     envFiles?: string[];
     labels?: { [key: string]: string };
     os?: PlatformOS;
+    ports?: string[];
+    volumes?: DockerContainerVolume[];
+    externalHosts?: string[];
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -179,12 +183,19 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
             || DockerDebugConfigurationProvider.defaultLabels;
 
+        const ports = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports) || [];
+        const volumes = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes) || undefined;
+        const externalHosts = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.externalHosts) || [];
+
         return {
             containerName,
             env,
             envFiles,
             labels,
             os,
+            ports,
+            volumes,
+            externalHosts
         };
     }
 
