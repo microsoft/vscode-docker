@@ -7,12 +7,12 @@ import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, Prov
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
+import { DockerContainerVolume } from './dockerClient';
 import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { OSProvider } from './osProvider';
 import { Prerequisite } from './prereqManager';
-import { DockerContainerVolume } from './dockerClient';
 
 interface DockerDebugBuildOptions {
     args?: { [key: string]: string };
@@ -183,19 +183,19 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
             || DockerDebugConfigurationProvider.defaultLabels;
 
-        const ports = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports) || [];
-        const volumes = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes) || undefined;
-        const externalHosts = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.externalHosts) || [];
+        const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
+        const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes;
+        const externalHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.externalHosts;
 
         return {
             containerName,
             env,
             envFiles,
+            externalHosts,
             labels,
             os,
             ports,
-            volumes,
-            externalHosts
+            volumes
         };
     }
 
