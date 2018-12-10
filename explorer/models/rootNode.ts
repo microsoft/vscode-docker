@@ -246,7 +246,7 @@ export class RootNode extends NodeBase {
                         contextValue = "stoppedLocalContainerNode";
                         iconPath = {
                             light: path.join(imagesPath, 'light', 'stoppedContainer.svg'),
-                            dark: path.join(imagesPath, 'images', 'dark', 'stoppedContainer.svg')
+                            dark: path.join(imagesPath, 'dark', 'stoppedContainer.svg')
                         };
                     } else if (me.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
