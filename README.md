@@ -251,7 +251,22 @@ Example run customization:
                 "labels": {
                     "label1": "value1",
                     "label2": "value2"
-                }
+                },
+                "ports": [
+                    "80:80",
+                    "443:443"
+                ],
+                "externalHosts": [
+                    "some-hostname:some-ip",
+                    "some-other-hostname:some-other-ip"
+                ],
+                "volumes": [
+                    {
+                        "localPath": "path-on-host-machine",
+                        "containerPath": "path-inside-container",
+                        "permissions": "ro|rw"
+                    }
+                ]
             }
         }
     ]
