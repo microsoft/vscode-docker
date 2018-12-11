@@ -228,6 +228,23 @@ Customize the Docker container run process by adding properties under the `docke
 | `env` | Environment variables applied to the container. | None |
 | `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
 | `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+| `ports` | Ports that are going to be mapped on the host. | All ports exposed in the Dockerfile will get binded to a random port on the host machine |
+| `extraHosts` | Hosts to be added on the container `hosts` file for dns resolution. | None |
+| `volumes` | Volumes that are going to be mapped to the container. | None |
+
+# ports
+| Property | Description | Required |
+| --- | --- | --- |
+| `hostPort` | Port number to be binded on the host. | No |
+| `containerPort` | Port number of the container to be binded. | Yes |
+| `protocol` | Specific protocol for the binding (`tcp | udp`). If no protocol is specified it will bind both. | No |
+
+# volumes
+| Property | Description | Default |
+| --- | --- | --- |
+| `localPath` | Path on local machine that would be mapped. If the folder does not exist it will be created.  | None |
+| `containerPath` | Path where the volume will be mapped on the container. If the folder does not exist it will be created. | None |
+| `permissions` | Permissions for the container for the volume mapped (`rw | ro`). | `rw` |
 
 Example run customization:
 
@@ -253,12 +270,36 @@ Example run customization:
                     "label2": "value2"
                 },
                 "ports": [
-                    "80:80",
-                    "443:443"
+                    {
+                        "hostPort": 80,
+                        "containerPort": 80
+                    },
+                    {
+                        "containerPort": 443
+                    },
+                    {
+                        "containerPort": 6029,
+                        "protocol": "udp"
+                    },
+                    {
+                        "containerPort": 6029,
+                        "protocol": "tcp"
+                    },
+                    {
+                        "hostPort": 4562,
+                        "containerPort": 5837,
+                        "protocol": "tcp"
+                    }
                 ],
-                "externalHosts": [
-                    "some-hostname:some-ip",
-                    "some-other-hostname:some-other-ip"
+                "extraHosts": [
+                    {
+                        "hostname": "some-hostname",
+                        "ip": "some-ip"
+                    },
+                    {
+                        "hostname": "some-other-hostname",
+                        "ip": "some-other-ip"
+                    }
                 ],
                 "volumes": [
                     {

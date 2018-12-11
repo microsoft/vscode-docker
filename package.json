@@ -407,6 +407,50 @@
                     "additionalProperties": {
                       "type": "string"
                     }
+                  },
+                  "ports": {
+                    "type": "array",
+                    "description": "Ports that are going to be mapped on the host.",
+                    "hostPort": {
+                      "type": "string",
+                      "description": "Port number to be binded on the host."
+                    },
+                    "containerPort": {
+                      "type": "string",
+                      "description": "Port number of the container to be binded."
+                    },
+                    "protocol": {
+                      "type": "string",
+                      "description": "Specific protocol for the binding (`tcp | udp`)."
+                    }
+                  },
+                  "extraHosts": {
+                    "type": "array",
+                    "description": "Hosts to be added on the container `hosts` file for dns resolution.",
+                    "hostname": {
+                      "type": "string",
+                      "description": "Hostname for dns resolution."
+                    },
+                    "ip": {
+                      "type": "string",
+                      "description": "IP associated to the hostname."
+                    }
+                  },
+                  "volumes": {
+                    "type": "array",
+                    "description": "Volumes that are going to be mapped to the container.",
+                    "localPath": {
+                      "type": "string",
+                      "description": "Path on local machine that would be mapped. If the folder does not exist it will be created."
+                    },
+                    "containerPath": {
+                      "type": "string",
+                      "description": "Path where the volume will be mapped on the container. If the folder does not exist it will be created."
+                    },
+                    "permissions": {
+                      "type": "string",
+                      "description": "Permissions for the container for the volume mapped (`rw | ro`)."
+                    }
                   }
                 }
               }
