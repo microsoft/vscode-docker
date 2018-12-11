@@ -27,6 +27,17 @@ export type DockerContainerRemoveOptions = {
     force?: boolean;
 };
 
+export type DockerContainerPort = {
+    hostPort?: string;
+    containerPort: string;
+    protocol?: 'tcp' | 'udp';
+}
+
+export type DockerContainerExtraHost = {
+    hostname: string;
+    ip: string;
+}
+
 export type DockerContainerVolume = {
     localPath: string;
     containerPath: string;
@@ -41,8 +52,8 @@ export type DockerRunContainerOptions = {
     envFiles?: string[];
     labels?: { [key: string]: string };
     volumes?: DockerContainerVolume[];
-    ports?: string[];
-    externalHosts?: string[];
+    ports?: DockerContainerPort[];
+    extraHosts?: DockerContainerExtraHost[];
 };
 
 export type DockerVersionOptions = {
@@ -189,14 +200,14 @@ export class CliDockerClient implements DockerClient {
         options = options || {};
 
         const command = CommandLineBuilder
-            .create('docker', 'run', '-dt', '-P')
+            .create('docker', 'run', '-dt', options.ports ? '-P' : '')
             .withNamedArg('--name', options.containerName)
             .withKeyValueArgs('-e', options.env)
             .withArrayArgs('--env-file', options.envFiles)
             .withKeyValueArgs('--label', options.labels)
             .withArrayArgs('-v', options.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
-            .withArrayArgs('-p', options.ports)
-            .withArrayArgs('--add-host', options.externalHosts)
+            .withArrayArgs('-p', options.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
+            .withArrayArgs('--add-host', options.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
             .withArg(options.command)
