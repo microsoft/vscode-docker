@@ -29,37 +29,38 @@ export class LogTableWebview {
     /** Setup communication with the webview sorting out received mesages from its javascript file */
     private setupIncomingListeners(): void {
         this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
-            if (message.logRequest) {
-                const itemNumber: number = +message.logRequest.id;
-                await callWithTelemetryAndErrorHandling(
-                    'accessLogFromTable',
-                    async () => await this.logData.getLink(itemNumber).then(async (url) => {
-                        if (url !== 'requesting') {
-                            await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
-                        }
-                    })
-                );
-            } else if (message.copyRequest) {
-                // tslint:disable-next-line:no-unsafe-any
-                clipboardy.writeSync(message.copyRequest.text);
-                vscode.window.showInformationMessage("The digest was successfully copied to the clipboard.");
-            } else if (message.loadMore) {
-                const alreadyLoaded = this.logData.logs.length;
-                await this.logData.loadLogs({
-                    webViewEvent: true,
-                    loadNext: true
-                });
-                this.addLogsToWebView(alreadyLoaded);
+            await callWithTelemetryAndErrorHandling(
+                'ACR-logsTableListeners',
+                async () => {
+                    if (message.logRequest) {
+                        const itemNumber: number = +message.logRequest.id;
+                        await this.logData.getLink(itemNumber).then(async (url) => {
+                            if (url !== 'requesting') {
+                                await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
+                            }
+                        });
+                    } else if (message.copyRequest) {
+                        // tslint:disable-next-line:no-unsafe-any
+                        clipboardy.writeSync(message.copyRequest.text);
+                        vscode.window.showInformationMessage("The digest was successfully copied to the clipboard.");
+                    } else if (message.loadMore) {
+                        const alreadyLoaded = this.logData.logs.length;
+                        await this.logData.loadLogs({
+                            webViewEvent: true,
+                            loadNext: true
+                        });
+                        this.addLogsToWebView(alreadyLoaded);
 
-            } else if (message.loadFiltered) {
-                await this.logData.loadLogs({
-                    webViewEvent: true,
-                    loadNext: false,
-                    removeOld: true,
-                    filter: message.loadFiltered.filterString
+                    } else if (message.loadFiltered) {
+                        await this.logData.loadLogs({
+                            webViewEvent: true,
+                            loadNext: false,
+                            removeOld: true,
+                            filter: message.loadFiltered.filterString
+                        });
+                        this.addLogsToWebView();
+                    }
                 });
-                this.addLogsToWebView();
-            }
         });
     }
 
