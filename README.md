@@ -228,23 +228,23 @@ Customize the Docker container run process by adding properties under the `docke
 | `env` | Environment variables applied to the container. | None |
 | `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
 | `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
-| `ports` | Ports that are going to be mapped on the host. | All ports exposed in the Dockerfile will get binded to a random port on the host machine |
-| `extraHosts` | Hosts to be added on the container `hosts` file for dns resolution. | None |
+| `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
+| `extraHosts` | Hosts to be added to the container's `hosts` file for DNS resolution. | None |
 | `volumes` | Volumes that are going to be mapped to the container. | None |
 
 # ports
-| Property | Description | Required |
-| --- | --- | --- |
-| `hostPort` | Port number to be binded on the host. | No |
-| `containerPort` | Port number of the container to be binded. | Yes |
-| `protocol` | Specific protocol for the binding (`tcp | udp`). If no protocol is specified it will bind both. | No |
+| Property | Description | Required | Default |
+| --- | --- | --- | --- |
+| `hostPort` | Port number to be bound on the host. | No | None |
+| `containerPort` | Port number of the container to be bound. | Yes | None |
+| `protocol` | Specific protocol for the binding (`tcp | udp`). If no protocol is specified it will bind both. | No | None |
 
 # volumes
-| Property | Description | Default |
-| --- | --- | --- |
-| `localPath` | Path on local machine that would be mapped. If the folder does not exist it will be created.  | None |
-| `containerPath` | Path where the volume will be mapped on the container. If the folder does not exist it will be created. | None |
-| `permissions` | Permissions for the container for the volume mapped (`rw | ro`). | `rw` |
+| Property | Description | Required | Default |
+| --- | --- | --- | --- |
+| `localPath` | Path on local machine that will be mapped. The folder will be created if it does not exist. | Yes | None |
+| `containerPath` | Path where the volume will be mapped within the container. The folder will be created if it does not exist. | Yes | None |
+| `permissions` | Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only. | Yes | `rw` |
 
 Example run customization:
 

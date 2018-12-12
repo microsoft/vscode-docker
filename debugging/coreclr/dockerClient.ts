@@ -200,7 +200,8 @@ export class CliDockerClient implements DockerClient {
         options = options || {};
 
         const command = CommandLineBuilder
-            .create('docker', 'run', '-dt', options.ports ? '-P' : '')
+            .create('docker', 'run', '-dt')
+            .withFlagArg('-P', options.ports === undefined || options.ports.length < 1)
             .withNamedArg('--name', options.containerName)
             .withKeyValueArgs('-e', options.env)
             .withArrayArgs('--env-file', options.envFiles)
