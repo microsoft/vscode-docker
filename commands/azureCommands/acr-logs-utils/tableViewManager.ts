@@ -3,7 +3,7 @@ import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
-import { parseError } from "vscode-azureextensionui";
+import { callWithTelemetryAndErrorHandling } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { accessLog } from './logFileManager';
 import { Filter, LogData } from './tableDataManager'
@@ -31,20 +31,18 @@ export class LogTableWebview {
         this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
             if (message.logRequest) {
                 const itemNumber: number = +message.logRequest.id;
-                try {
-                    await this.logData.getLink(itemNumber).then(async (url) => {
+                await callWithTelemetryAndErrorHandling(
+                    'accessLogFromTable',
+                    async () => await this.logData.getLink(itemNumber).then(async (url) => {
                         if (url !== 'requesting') {
                             await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
                         }
-                    });
-                } catch (err) {
-                    const error = parseError(err);
-                    vscode.window.showErrorMessage(`Error '${error.errorType}': ${error.message}`);
-                }
+                    })
+                );
             } else if (message.copyRequest) {
                 // tslint:disable-next-line:no-unsafe-any
                 clipboardy.writeSync(message.copyRequest.text);
-
+                vscode.window.showInformationMessage("The digest was successfully copied to the clipboard.");
             } else if (message.loadMore) {
                 const alreadyLoaded = this.logData.logs.length;
                 await this.logData.loadLogs({
