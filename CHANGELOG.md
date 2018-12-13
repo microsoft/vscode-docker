@@ -1,4 +1,23 @@
-## 0.5.0 - UNRELEASED
+[#](https://github.com/Microsoft/vscode-docker/issues/)
+## 0.5.0 - 14 December 2018
+
+### Added
+
+* Significantly improved startup and setup performance by packaging with webpack
+* Support for adding C++ Dockerfile (thanks @robotdad) [#644](https://github.com/Microsoft/vscode-docker/issues/644)
+
+### Fixed
+
+* Fix null ref showing connection error during prune [#653](https://github.com/Microsoft/vscode-docker/issues/653)
+* Sporadic failure pushing images to ACR [#666](https://github.com/Microsoft/vscode-docker/issues/666)
+* Unhandled error if you cancel saving Azure log [#639](https://github.com/Microsoft/vscode-docker/issues/639)
+* Save Azure log dialog shows "log..log" as the filename extension [#640](https://github.com/Microsoft/vscode-docker/issues/640)
+* ACR pull image issue [#648](https://github.com/Microsoft/vscode-docker/issues/648)
+* ACR Build for Dockerfile fails through extension [#650](https://github.com/Microsoft/vscode-docker/issues/650)
+* "Run ACR Task File" from command palette with no .yml file in workspace throws error [#635](https://github.com/Microsoft/vscode-docker/issues/635)
+* Add prerequisite check for missing Dockerfile [#687](https://github.com/Microsoft/vscode-docker/issues/687)
+* Make the launch.json generation leaner (merci vielmal @isidorn) [#618](https://github.com/Microsoft/vscode-docker/issues/618)
+
 
 ## 0.4.0 - 20 November 2018
 
