@@ -79,7 +79,7 @@ export async function quickPickSubscription(): Promise<Subscription> {
     const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
         let openPortal = 'Open Portal';
-        vscode.window.showErrorMessage("You do not have any subscriptions. You can create one in your Azure portal", openPortal).then(val => {
+        vscode.window.showErrorMessage("You are not signed in to Azure, or you do not have any subscriptions. To sign in, select 'Azure: Sign In' from the command palette. Subscriptions can be created in the Azure portal", openPortal).then(val => {
             if (val === openPortal) {
                 // tslint:disable-next-line:no-unsafe-any
                 opn('https://portal.azure.com/');
