@@ -3,7 +3,7 @@
 
 ### Added
 
-* Significantly improved startup and setup performance by packaging with webpack
+* Significantly improved startup and installation performance by packaging with webpack
 * Support for adding C++ Dockerfile (thanks @robotdad) [#644](https://github.com/Microsoft/vscode-docker/issues/644)
 
 ### Fixed
@@ -17,7 +17,6 @@
 * "Run ACR Task File" from command palette with no .yml file in workspace throws error [#635](https://github.com/Microsoft/vscode-docker/issues/635)
 * Add prerequisite check for missing Dockerfile [#687](https://github.com/Microsoft/vscode-docker/issues/687)
 * Make the launch.json generation leaner (merci vielmal @isidorn) [#618](https://github.com/Microsoft/vscode-docker/issues/618)
-
 
 ## 0.4.0 - 20 November 2018
 
