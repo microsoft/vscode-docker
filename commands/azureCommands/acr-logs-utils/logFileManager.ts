@@ -1,6 +1,8 @@
 import { BlobService, createBlobServiceWithSas } from 'azure-storage';
 import * as fse from 'fs-extra';
+import { isNullOrUndefined } from 'util';
 import * as vscode from 'vscode';
+import { UserCancelledError } from 'vscode-azureextensionui';
 import { getBlobInfo, getBlobToText, IBlobInfo } from '../../../utils/Azure/acrTools';
 
 export class LogContentProvider implements vscode.TextDocumentContentProvider {
@@ -55,9 +57,14 @@ function openLogInNewWindow(content: string, title: string): void {
 
 export async function downloadLog(content: string, title: string): Promise<void> {
     let uri = await vscode.window.showSaveDialog({
-        filters: { 'Log': ['.log', '.txt'] },
+        filters: { 'Log': ['log', 'txt'] },
         defaultUri: vscode.Uri.file(`${title}.log`)
     });
+
+    if (isNullOrUndefined(uri)) {
+        throw new UserCancelledError("Operation cancelled.");
+    }
+
     fse.writeFile(
         uri.fsPath,
         content,

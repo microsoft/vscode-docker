@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
 import * as fse from 'fs-extra';
+import os = require('os');
 import * as path from "path";
 import vscode = require('vscode');
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
@@ -59,8 +60,6 @@ async function pullFromAzure(context: AzureImageTagNode | AzureRepositoryNode, p
 
 async function pullImage(loginServer: string, imageRequest: string, username: string, password: string): Promise<void> {
     // We can't know if the key is still active. So we login into Docker and send appropriate commands to terminal
-    let dockerConfigPath: string = path.join(process.env.HOMEPATH, '.docker', 'config.json');
-
     await new Promise((resolve, reject) => {
         const dockerLoginCmd = `docker login ${loginServer} --username ${username} --password-stdin`;
         let childProcess = exec(dockerLoginCmd, (err, stdout, stderr) => {
@@ -71,7 +70,7 @@ async function pullImage(loginServer: string, imageRequest: string, username: st
                 // Temporary work-around for this error- same as Azure CLI
                 // See https://github.com/Azure/azure-cli/issues/4843
                 ext.outputChannel.show();
-                reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \n${dockerConfigPath} and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
+                reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \nOpen your Docker config file and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
             } else if (err) {
                 ext.outputChannel.show();
                 reject(err);
@@ -94,7 +93,7 @@ async function pullImage(loginServer: string, imageRequest: string, username: st
 }
 
 async function isLoggedIntoDocker(loginServer: string): Promise<{ configPath: string, loggedIn: boolean }> {
-    let home = process.env.HOMEPATH;
+    const home = os.homedir();
     let configPath: string = path.join(home, '.docker', 'config.json');
     let buffer: Buffer;
 

@@ -98,7 +98,15 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     ext.outputChannel.appendLine("   Creating blob service ");
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
     ext.outputChannel.appendLine("   Creating block blob ");
-    blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (): void => { });
+    await new Promise((resolve, reject) => {
+        blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (error, result, response): void => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve({ result, response });
+            }
+        });
+    });
     return relative_path;
 }
 
