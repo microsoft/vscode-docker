@@ -29,29 +29,41 @@ export class LogTableWebview {
     /** Setup communication with the webview sorting out received mesages from its javascript file */
     private setupIncomingListeners(): void {
         this.panel.webview.onDidReceiveMessage(async (message: IMessage) => {
-            await callWithTelemetryAndErrorHandling(
-                'ACR-logsTableListeners',
-                async () => {
-                    if (message.logRequest) {
+            if (message.logRequest) {
+                await callWithTelemetryAndErrorHandling(
+                    'ACRLogs-accessLogs',
+                    async () => {
+
                         const itemNumber: number = +message.logRequest.id;
                         await this.logData.getLink(itemNumber).then(async (url) => {
                             if (url !== 'requesting') {
                                 await accessLog(url, this.logData.logs[itemNumber].runId, message.logRequest.download);
                             }
                         });
-                    } else if (message.copyRequest) {
+                    });
+            } else if (message.copyRequest) {
+                await callWithTelemetryAndErrorHandling(
+                    'ACRLogs-copyDigest',
+                    async () => {
                         // tslint:disable-next-line:no-unsafe-any
                         clipboardy.writeSync(message.copyRequest.text);
                         vscode.window.showInformationMessage("The digest was successfully copied to the clipboard.");
-                    } else if (message.loadMore) {
+                    });
+            } else if (message.loadMore) {
+                await callWithTelemetryAndErrorHandling(
+                    'ACRLogs-loadMore',
+                    async () => {
                         const alreadyLoaded = this.logData.logs.length;
                         await this.logData.loadLogs({
                             webViewEvent: true,
                             loadNext: true
                         });
                         this.addLogsToWebView(alreadyLoaded);
-
-                    } else if (message.loadFiltered) {
+                    });
+            } else if (message.loadFiltered) {
+                await callWithTelemetryAndErrorHandling(
+                    'ACRLogs-filterTable',
+                    async () => {
                         await this.logData.loadLogs({
                             webViewEvent: true,
                             loadNext: false,
@@ -59,8 +71,8 @@ export class LogTableWebview {
                             filter: message.loadFiltered.filterString
                         });
                         this.addLogsToWebView();
-                    }
-                });
+                    });
+            }
         });
     }
 
