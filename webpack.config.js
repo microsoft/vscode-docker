@@ -5,8 +5,8 @@
 
 //@ts-check
 
+// Using webpack helps reduce the install and startup time of large extensions by reducing the large number of files into a much smaller set
 // Full webpack documentation: [https://webpack.js.org/configuration/]().
-// Using webpack helps reduce the install- and startup-time of large extensions because instead of hundreds of files, a single file is produced.
 
 'use strict';
 
