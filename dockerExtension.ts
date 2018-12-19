@@ -370,8 +370,8 @@ namespace Configuration {
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
   // Don't wait
-  // tslint:disable-next-line:no-function-expression
   callWithTelemetryAndErrorHandling('docker.languageclient.activate', async function (this: IActionContext): Promise<void> {
+    this.properties.isActivationEvent = 'true';
     let serverModule = ctx.asAbsolutePath(
       path.join(
         "dist",
