@@ -1,5 +1,4 @@
-[#](https://github.com/Microsoft/vscode-docker/issues/)
-## 0.5.0 - 14 December 2018
+## 0.5.0 - 7 January 2019
 
 ### Added
 
