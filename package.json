@@ -88,6 +88,10 @@
         {
           "command": "vscode-docker.createWebApp",
           "when": "false"
+        },
+        {
+          "command": "vscode-docker.setRegistryAsDefault",
+          "when": "never"
         }
       ],
       "editor/context": [
