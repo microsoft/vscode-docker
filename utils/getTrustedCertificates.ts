@@ -32,8 +32,10 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         this.suppressTelemetry = true;
 
         let importSetting = vscode.workspace.getConfiguration('docker').get<ImportCertificatesSetting>('importCertificates');
-        if (importSetting === false) {
-            // Use default Node.js behavior
+
+        // If value is false or null/undefined or anything not an object or boolean...
+        if (!importSetting || (typeof importSetting !== "object" && typeof importSetting !== "boolean")) {
+            // ... then use default Node.js behavior
             this.properties.importCertificates = 'false';
             return undefined;
         }
