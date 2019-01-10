@@ -280,6 +280,8 @@ export class DefaultDockerManager implements DockerManager {
                             try {
                                 await this.dockerClient.removeContainer(containerId, { force: true });
 
+                                this.dockerOutputManager.appendLine(`Container ${this.dockerClient.trimId(containerId)} removed.`);
+
                                 return undefined;
                             } catch {
                                 return containerId;
