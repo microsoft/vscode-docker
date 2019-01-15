@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { docker } from '../../commands/utils/docker-endpoint';
+import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
 import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
@@ -23,7 +23,7 @@ const imageFilters = {
     }
 };
 
-const containerFilters = {
+const containerFilters: GetContainerDescOptions = {
     "filters": {
         "status": ["created", "restarting", "running", "paused", "exited", "dead"]
     }
