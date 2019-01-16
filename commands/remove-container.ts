@@ -9,7 +9,7 @@ import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer, quickPickContainerOrAll as quickPickContainerOrAll } from './utils/quick-pick-container';
+import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
