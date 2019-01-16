@@ -17,6 +17,7 @@ const fse = require('fs-extra');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const StringReplacePlugin = require("string-replace-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 
 const packageLock = fse.readJSONSync('./package-lock.json');
 
@@ -82,6 +83,18 @@ const config = {
             ...getExternalsEntries()
         }
     ],
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    // https://github.com/webpack-contrib/terser-webpack-plugin/
+
+                    // Without this, parseError() will not recognize user cancelled errors.  Also makes debugging easier in production.
+                    keep_classnames: true
+                }
+            }),
+        ],
+    },
     plugins: [
         // Clean the dist folder before webpacking
         new CleanWebpackPlugin(
