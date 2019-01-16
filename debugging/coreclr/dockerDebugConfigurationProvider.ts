@@ -92,12 +92,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             throw new Error('No workspace folder is associated with debugging.');
         }
 
-        const appFolder = this.inferAppFolder(folder, debugConfiguration);
-
-        const resolvedAppFolder = DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder);
+        const { appFolder, resolvedAppFolder } = await this.inferAppFolder(folder, debugConfiguration);
 
         const appProject = await this.inferAppProject(debugConfiguration, resolvedAppFolder);
-
         const resolvedAppProject = DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder);
 
         const appName = path.basename(resolvedAppProject, '.csproj');
@@ -188,18 +185,32 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
-    private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {
+    private async inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): Promise<{ appFolder: string, resolvedAppFolder: string }> {
+        let appFolder;
+
         if (configuration) {
             if (configuration.appFolder) {
-                return configuration.appFolder;
+                appFolder = configuration.appFolder;
             }
-
-            if (configuration.appProject) {
-                return path.dirname(configuration.appProject);
+            else if (configuration.appProject) {
+                appFolder = path.dirname(configuration.appProject);
             }
         }
 
-        return folder.uri.fsPath;
+        if (appFolder === undefined) {
+            appFolder = folder.uri.fsPath;
+        }
+
+        var folders = {
+            appFolder,
+            resolvedAppFolder: DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder)
+        };
+
+        if (!await this.fsProvider.dirExists(folders.resolvedAppFolder)) {
+            throw new Error(`The application folder '${folders.resolvedAppFolder}' does not exist. Ensure that the 'appProject' or 'appFolder' properties are set correctly in the debug configuration.`);
+        }
+
+        return folders;
     }
 
     private async inferAppOutput(configuration: DockerDebugConfiguration, targetOS: PlatformOS, resolvedAppProject: string): Promise<string> {
