@@ -104,7 +104,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
 
-        const buildOptions = DockerDebugConfigurationProvider.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
+        const buildOptions = await this.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
         const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os);
 
         const launchOptions = {
@@ -129,9 +129,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return configuration;
     }
 
-    private static inferBuildOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appFolder: string, resolvedAppFolder: string, appName: string): LaunchBuildOptions {
-        const context = DockerDebugConfigurationProvider.inferContext(folder, resolvedAppFolder, debugConfiguration);
-        const resolvedContext = DockerDebugConfigurationProvider.resolveFolderPath(context, folder);
+    private async inferBuildOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appFolder: string, resolvedAppFolder: string, appName: string): Promise<LaunchBuildOptions> {
+        const resolvedContext = await this.inferContext(folder, resolvedAppFolder, debugConfiguration);
 
         let dockerfile = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.dockerfile
             ? DockerDebugConfigurationProvider.resolveFolderPath(debugConfiguration.dockerBuild.dockerfile, folder)
@@ -256,12 +255,20 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return projects;
     }
 
-    private static inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
-        return configuration && configuration.dockerBuild && configuration.dockerBuild.context
+    private async inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): Promise<string> {
+        const context = configuration && configuration.dockerBuild && configuration.dockerBuild.context
             ? configuration.dockerBuild.context
             : path.normalize(resolvedAppFolder) === path.normalize(folder.uri.fsPath)
                 ? resolvedAppFolder                 // The context defaults to the application folder if it's the same as the workspace folder (i.e. there's no solution folder).
                 : path.dirname(resolvedAppFolder);  // The context defaults to the application's parent (i.e. solution) folder.
+
+        const resolvedContext = DockerDebugConfigurationProvider.resolveFolderPath(context, folder);
+
+        if (!await this.fsProvider.dirExists(resolvedContext)) {
+            throw new Error(`The context folder '${resolvedContext}' does not exist. Ensure that the 'context' property is set correctly in the Docker debug configuration.`);
+        }
+
+        return resolvedContext;
     }
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {
