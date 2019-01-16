@@ -180,13 +180,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): Promise<{ appFolder: string, resolvedAppFolder: string }> {
-        let appFolder;
+        let appFolder: string;
 
         if (configuration) {
             if (configuration.appFolder) {
                 appFolder = configuration.appFolder;
-            }
-            else if (configuration.appProject) {
+            } else if (configuration.appProject) {
                 appFolder = path.dirname(configuration.appProject);
             }
         }
@@ -195,7 +194,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             appFolder = folder.uri.fsPath;
         }
 
-        var folders = {
+        const folders = {
             appFolder,
             resolvedAppFolder: DockerDebugConfigurationProvider.resolveFolderPath(appFolder, folder)
         };
@@ -219,7 +218,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferAppProject(folder: WorkspaceFolder, configuration: DockerDebugConfiguration, resolvedAppFolder: string): Promise<{ appProject: string, resolvedAppProject: string }> {
-        let appProject;
+        let appProject: string;
 
         if (configuration && configuration.appProject) {
             appProject = configuration.appProject;
@@ -239,7 +238,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             throw new Error('Unable to infer the application project file. Set either the \'appFolder\' or \'appProject\' property in the Docker debug configuration.');
         }
 
-        var projects = {
+        const projects = {
             appProject,
             resolvedAppProject: DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder)
         };
