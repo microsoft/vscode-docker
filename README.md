@@ -228,6 +228,23 @@ Customize the Docker container run process by adding properties under the `docke
 | `env` | Environment variables applied to the container. | None |
 | `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
 | `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+| `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
+| `extraHosts` | Hosts to be added to the container's `hosts` file for DNS resolution. | None |
+| `volumes` | Volumes that are going to be mapped to the container. | None |
+
+# ports
+| Property | Description | Required | Default |
+| --- | --- | --- | --- |
+| `hostPort` | Port number to be bound on the host. | No | None |
+| `containerPort` | Port number of the container to be bound. | Yes | None |
+| `protocol` | Specific protocol for the binding (`tcp | udp`). If no protocol is specified it will bind both. | No | None |
+
+# volumes
+| Property | Description | Required | Default |
+| --- | --- | --- | --- |
+| `localPath` | Path on local machine that will be mapped. The folder will be created if it does not exist. | Yes | None |
+| `containerPath` | Path where the volume will be mapped within the container. The folder will be created if it does not exist. | Yes | None |
+| `permissions` | Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only. | Yes | `rw` |
 
 Example run customization:
 
@@ -251,7 +268,46 @@ Example run customization:
                 "labels": {
                     "label1": "value1",
                     "label2": "value2"
-                }
+                },
+                "ports": [
+                    {
+                        "hostPort": 80,
+                        "containerPort": 80
+                    },
+                    {
+                        "containerPort": 443
+                    },
+                    {
+                        "containerPort": 6029,
+                        "protocol": "udp"
+                    },
+                    {
+                        "containerPort": 6029,
+                        "protocol": "tcp"
+                    },
+                    {
+                        "hostPort": 4562,
+                        "containerPort": 5837,
+                        "protocol": "tcp"
+                    }
+                ],
+                "extraHosts": [
+                    {
+                        "hostname": "some-hostname",
+                        "ip": "some-ip"
+                    },
+                    {
+                        "hostname": "some-other-hostname",
+                        "ip": "some-other-ip"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "localPath": "path-on-host-machine",
+                        "containerPath": "path-inside-container",
+                        "permissions": "ro|rw"
+                    }
+                ]
             }
         }
     ]

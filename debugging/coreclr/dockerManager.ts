@@ -216,8 +216,10 @@ export class DefaultDockerManager implements DockerManager {
                         entrypoint,
                         env: options.env,
                         envFiles: options.envFiles,
+                        extraHosts: options.extraHosts,
                         labels: options.labels,
-                        volumes
+                        ports: options.ports,
+                        volumes: [...volumes, ...options.volumes]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
