@@ -3,10 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// Grandfathered in
-// tslint:disable:typedef
-// tslint:disable:no-unsafe-any
-
+// tslint:disable:no-implicit-dependencies
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
 import * as glob from 'glob';
@@ -18,7 +15,7 @@ import * as path from 'path';
 
 const env = process.env;
 
-function webpack(mode) {
+function webpack(mode: string): cp.ChildProcess {
     // without this, webpack can run out of memory in some environments
     env.NODE_OPTIONS = '--max-old-space-size=8192';
     return spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', mode], { stdio: 'inherit', env });
@@ -28,7 +25,7 @@ function webpack(mode) {
  * Installs the azure account extension before running tests (otherwise our extension would fail to activate)
  * NOTE: The version isn't super important since we don't actually use the account extension in tests
  */
-function installAzureAccount() {
+function installAzureAccount(): Promise<void> {
     const version = '0.4.3';
     const extensionPath = path.join(os.homedir(), `.vscode/extensions/ms-vscode.azure-account-${version}`);
     const existingExtensions = glob.sync(extensionPath.replace(version, '*'));
@@ -49,14 +46,14 @@ function installAzureAccount() {
     }
 }
 
-function test() {
+function test(): cp.ChildProcess {
     env.DEBUGTELEMETRY = '1';
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
     return spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
 }
 
-function spawn(command, args, options) {
+function spawn(command: string, args: string[], options: {}): cp.ChildProcess {
     if (process.platform === 'win32') {
         if (fse.pathExistsSync(command + '.exe')) {
             command = command + '.exe';
