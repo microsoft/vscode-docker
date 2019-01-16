@@ -94,8 +94,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const { appFolder, resolvedAppFolder } = await this.inferAppFolder(folder, debugConfiguration);
 
-        const appProject = await this.inferAppProject(debugConfiguration, resolvedAppFolder);
-        const resolvedAppProject = DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder);
+        const { appProject, resolvedAppProject } = await this.inferAppProject(folder, debugConfiguration, resolvedAppFolder);
 
         const appName = path.basename(resolvedAppProject, '.csproj');
 
@@ -207,7 +206,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
 
         if (!await this.fsProvider.dirExists(folders.resolvedAppFolder)) {
-            throw new Error(`The application folder '${folders.resolvedAppFolder}' does not exist. Ensure that the 'appProject' or 'appFolder' properties are set correctly in the debug configuration.`);
+            throw new Error(`The application folder '${folders.resolvedAppFolder}' does not exist. Ensure that the 'appFolder' or 'appProject' property is set correctly in the Docker debug configuration.`);
         }
 
         return folders;
@@ -224,22 +223,37 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return relativeTargetPath;
     }
 
-    private async inferAppProject(configuration: DockerDebugConfiguration, resolvedAppFolder: string): Promise<string> {
-        if (configuration) {
-            if (configuration.appProject) {
-                return configuration.appProject;
+    private async inferAppProject(folder: WorkspaceFolder, configuration: DockerDebugConfiguration, resolvedAppFolder: string): Promise<{ appProject: string, resolvedAppProject: string }> {
+        let appProject;
+
+        if (configuration && configuration.appProject) {
+            appProject = configuration.appProject;
+        }
+
+        if (appProject === undefined) {
+            const files = await this.fsProvider.readDir(resolvedAppFolder);
+
+            const projectFile = files.find(file => path.extname(file) === '.csproj');
+
+            if (projectFile) {
+                appProject = path.join(resolvedAppFolder, projectFile);
             }
         }
 
-        const files = await this.fsProvider.readDir(resolvedAppFolder);
-
-        const projectFile = files.find(file => path.extname(file) === '.csproj');
-
-        if (projectFile) {
-            return path.join(resolvedAppFolder, projectFile);
+        if (appProject === undefined) {
+            throw new Error('Unable to infer the application project file. Set either the \'appFolder\' or \'appProject\' property in the Docker debug configuration.');
         }
 
-        throw new Error('Unable to infer the application project file. Set either the `appFolder` or `appProject` property in the Docker debug configuration.');
+        var projects = {
+            appProject,
+            resolvedAppProject: DockerDebugConfigurationProvider.resolveFolderPath(appProject, folder)
+        };
+
+        if (!await this.fsProvider.fileExists(projects.resolvedAppProject)) {
+            throw new Error(`The application project file '${projects.resolvedAppProject}' does not exist. Ensure that the 'appFolder' or 'appProject' property is set correctly in the Docker debug configuration.`);
+        }
+
+        return projects;
     }
 
     private static inferContext(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): string {
