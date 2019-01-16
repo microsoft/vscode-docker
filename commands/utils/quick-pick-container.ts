@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import * as Docker from 'dockerode';
 import { ContainerDesc } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
 import { ext } from '../../extensionVariables';
-import { docker } from './docker-endpoint';
+import { docker, ListContainerDescOptions } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {
     label: string;
@@ -42,21 +43,22 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): 
     return items;
 }
 
-export async function quickPickContainer(actionContext: IActionContext, includeAll: boolean = false, opts?: {}): Promise<ContainerItem> {
+export async function quickPickContainer(actionContext: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc> {
+    let results = await quickPickContainersCore(actionContext, false, opts);
+    assert(results.length === 1);
+    return results[0];
+}
+
+export async function quickPickContainerOrAll(actionContext: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
+    return await quickPickContainersCore(actionContext, true, opts);
+}
+
+async function quickPickContainersCore(actionContext: IActionContext, allowSelectingAll: boolean, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
     let properties: {
         allContainers?: string;
     } & TelemetryProperties = actionContext.properties;
 
     let containers: ContainerDesc[];
-
-    // "status": ["created", "restarting", "running", "paused", "exited", "dead"]
-    if (!opts) {
-        opts = {
-            "filters": {
-                "status": ["running"]
-            }
-        };
-    }
 
     try {
         containers = await docker.getContainerDescriptors(opts);
@@ -67,9 +69,12 @@ export async function quickPickContainer(actionContext: IActionContext, includeA
     if (containers.length === 0) {
         throw new Error('There are no Docker containers that apply to this command.');
     } else {
-        const items: ContainerItem[] = computeItems(containers, includeAll);
+        const items: ContainerItem[] = computeItems(containers, allowSelectingAll);
         let response = await ext.ui.showQuickPick<ContainerItem>(items, { placeHolder: 'Choose container...' });
-        properties.allContainers = includeAll ? String(response.allContainers) : undefined;
-        return response;
+        let allSelected: boolean = response.allContainers;
+        properties.allContainers = String(allSelected);
+
+        let selectedItems: ContainerDesc[] = response.allContainers ? containers : [response.containerDesc];
+        return selectedItems;
     }
 }
