@@ -132,11 +132,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     private async inferBuildOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appFolder: string, resolvedAppFolder: string, appName: string): Promise<LaunchBuildOptions> {
         const resolvedContext = await this.inferContext(folder, resolvedAppFolder, debugConfiguration);
 
-        let dockerfile = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.dockerfile
-            ? DockerDebugConfigurationProvider.resolveFolderPath(debugConfiguration.dockerBuild.dockerfile, folder)
-            : path.join(appFolder, 'Dockerfile'); // CONSIDER: Omit dockerfile argument if not specified or possibly infer from context.
-
-        dockerfile = DockerDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
+        const dockerfile = await this.inferDockerfile(folder, resolvedAppFolder, debugConfiguration);
 
         const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
 
@@ -269,6 +265,20 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
 
         return resolvedContext;
+    }
+
+    private async inferDockerfile(folder: WorkspaceFolder, resolvedAppFolder: string, configuration: DockerDebugConfiguration): Promise<string> {
+        let dockerfile = configuration && configuration.dockerBuild && configuration.dockerBuild.dockerfile
+            ? configuration.dockerBuild.dockerfile
+            : path.join(resolvedAppFolder, 'Dockerfile'); // CONSIDER: Omit dockerfile argument if not specified or possibly infer from context.
+
+        dockerfile = DockerDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
+
+        if (!await this.fsProvider.fileExists(dockerfile)) {
+            throw new Error(`The Dockerfile '${dockerfile}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);
+        }
+
+        return dockerfile;
     }
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {
