@@ -83,19 +83,18 @@ const config = {
             ...getExternalsEntries()
         }
     ],
-
     optimization: {
         minimizer: [
             new TerserPlugin({
-                //exclude: /errors/,
                 terserOptions: {
                     // https://github.com/webpack-contrib/terser-webpack-plugin/
+
+                    // Without this, parseError() will not recognize user cancelled errors.  Also makes debugging easier in production.
                     keep_classnames: true
                 }
             }),
         ],
     },
-
     plugins: [
         // Clean the dist folder before webpacking
         new CleanWebpackPlugin(
