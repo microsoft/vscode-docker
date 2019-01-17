@@ -408,6 +408,10 @@
                       "type": "string"
                     }
                   },
+                  "network": {
+                    "type": "string",
+                    "description": "The network to which the container will be connected."
+                  },
                   "ports": {
                     "type": "array",
                     "description": "Ports that are going to be mapped on the host.",

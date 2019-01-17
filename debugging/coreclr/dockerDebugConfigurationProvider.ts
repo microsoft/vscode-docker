@@ -27,11 +27,12 @@ interface DockerDebugRunOptions {
     containerName?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
+    extraHosts?: DockerContainerExtraHost[];
     labels?: { [key: string]: string };
+    network?: string;
     os?: PlatformOS;
     ports?: DockerContainerPort[];
     volumes?: DockerContainerVolume[];
-    extraHosts?: DockerContainerExtraHost[];
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -183,6 +184,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
             || DockerDebugConfigurationProvider.defaultLabels;
 
+        const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
         const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
         const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes;
         const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
@@ -193,6 +195,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             envFiles,
             extraHosts,
             labels,
+            network,
             os,
             ports,
             volumes
