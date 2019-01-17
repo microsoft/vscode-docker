@@ -219,7 +219,7 @@ export class DefaultDockerManager implements DockerManager {
                         extraHosts: options.extraHosts,
                         labels: options.labels,
                         ports: options.ports,
-                        volumes: [...volumes, ...options.volumes]
+                        volumes: [...(volumes || []), ...(options.volumes || [])]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
