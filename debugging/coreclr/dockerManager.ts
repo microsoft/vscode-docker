@@ -218,6 +218,7 @@ export class DefaultDockerManager implements DockerManager {
                         envFiles: options.envFiles,
                         extraHosts: options.extraHosts,
                         labels: options.labels,
+                        network: options.network,
                         ports: options.ports,
                         volumes: [...(volumes || []), ...(options.volumes || [])]
                     });
