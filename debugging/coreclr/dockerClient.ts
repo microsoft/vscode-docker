@@ -50,10 +50,11 @@ export type DockerRunContainerOptions = {
     entrypoint?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
-    labels?: { [key: string]: string };
-    volumes?: DockerContainerVolume[];
-    ports?: DockerContainerPort[];
     extraHosts?: DockerContainerExtraHost[];
+    labels?: { [key: string]: string };
+    network?: string;
+    ports?: DockerContainerPort[];
+    volumes?: DockerContainerVolume[];
 };
 
 export type DockerVersionOptions = {
@@ -203,6 +204,7 @@ export class CliDockerClient implements DockerClient {
             .create('docker', 'run', '-dt')
             .withFlagArg('-P', options.ports === undefined || options.ports.length < 1)
             .withNamedArg('--name', options.containerName)
+            .withNamedArg('--network', options.network)
             .withKeyValueArgs('-e', options.env)
             .withArrayArgs('--env-file', options.envFiles)
             .withKeyValueArgs('--label', options.labels)

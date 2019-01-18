@@ -227,9 +227,10 @@ Customize the Docker container run process by adding properties under the `docke
 | `containerName` | The name of the container. | `<Application Name>-dev` |
 | `env` | Environment variables applied to the container. | None |
 | `envFiles` | Files of environment variables read in and applied to the container. Environment variables are specified one per line, in `<name>=<value>` format. | None |
-| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
-| `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
 | `extraHosts` | Hosts to be added to the container's `hosts` file for DNS resolution. | None |
+| `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
+| `network` | The network to which the container will be connected. Use values as described in the [Docker run documentation](https://docs.docker.com/engine/reference/run/#network-settings). | `bridge` |
+| `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
 | `volumes` | Volumes that are going to be mapped to the container. | None |
 
 # ports
@@ -269,6 +270,7 @@ Example run customization:
                     "label1": "value1",
                     "label2": "value2"
                 },
+                "network": "host",
                 "ports": [
                     {
                         "hostPort": 80,
