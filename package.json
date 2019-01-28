@@ -556,7 +556,7 @@
         "docker.host": {
           "type": "string",
           "default": "",
-          "description": "Host to connect to (same as setting the DOCKER_HOST environment variable)"
+          "description": "Full host address to connect to (with protocol). Equivalent to setting the DOCKER_HOST environment variable"
         },
         "docker.importCertificates": {
           "oneOf": [
