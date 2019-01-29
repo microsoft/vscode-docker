@@ -119,7 +119,7 @@ function getCertificatesFromSystem(): (string | Buffer)[] {
 
         try {
             if (isWindows()) {
-                require('win-ca');
+                require('win-ca/fallback');
             } else if (isMac()) {
                 require('mac-ca');
             } else if (isLinux()) {
