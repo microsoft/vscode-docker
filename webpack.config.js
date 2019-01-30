@@ -79,6 +79,8 @@ const config = {
             // util/getCoreNodeModule.js uses a dynamic require which can't be webpacked
             './getCoreNodeModule': 'commonjs getCoreNodeModule',
 
+            'win-ca/fallback': 'commonjs win-ca/fallback',
+
             // Pull the rest automatically from externalModulesClosure
             ...getExternalsEntries()
         }

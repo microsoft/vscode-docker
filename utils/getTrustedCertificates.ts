@@ -119,7 +119,9 @@ function getCertificatesFromSystem(): (string | Buffer)[] {
 
         try {
             if (isWindows()) {
-                require('win-ca');
+                // Use win-ca fallback logic since nAPI isn't currently compatible with Electron
+                // (https://github.com/ukoloff/win-ca/issues/12, https://www.npmjs.com/package/win-ca#availability)
+                require('win-ca/fallback');
             } else if (isMac()) {
                 require('mac-ca');
             } else if (isLinux()) {
