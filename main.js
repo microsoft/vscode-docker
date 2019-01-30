@@ -16,7 +16,7 @@ let perfStats = {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 
-const extension = require("./dist/extension");
+const extension = require("./dist/extension.bundle");
 
 async function activate(ctx) {
     return await extension.activateInternal(ctx, perfStats);
