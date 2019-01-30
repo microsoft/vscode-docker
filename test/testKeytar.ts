@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IKeytar } from "../extension";
+import { IKeytar } from "../extension.bundle";
 
 export class TestKeytar implements IKeytar {
     private _services: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();

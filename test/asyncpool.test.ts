@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 
-import { AsyncPool } from '../extension';
+import { AsyncPool } from '../extension.bundle';
 
 suite("AsyncPool Tests", () => {
 

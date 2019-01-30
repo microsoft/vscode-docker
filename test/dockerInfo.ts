@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { docker } from '../extension';
+import { docker } from '../extension.bundle';
 import { EngineInfo } from "dockerode";
 
 let info: EngineInfo | undefined;

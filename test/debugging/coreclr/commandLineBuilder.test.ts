@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { CommandLineBuilder } from '../../../extension';
+import { CommandLineBuilder } from '../../../extension.bundle';
 
 suite('debugging/coreclr/CommandLineBuilder', () => {
     function testBuilder(name: string, builderInitializer: (CommandLineBuilder) => CommandLineBuilder, expected: string, message: string) {

@@ -6,8 +6,7 @@
 'use strict';
 
 import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument, Uri } from 'vscode';
-import { KeyInfo } from '../dockerExtension';
-import hub = require('../dockerHubSearch');
+import { KeyInfo } from '../extension';
 import helper = require('../helpers/suggestSupportHelper');
 import composeVersions from './dockerComposeKeyInfo';
 

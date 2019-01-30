@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { LineSplitter } from '../../../extension';
+import { LineSplitter } from '../../../extension.bundle';
 
 suite('debugging/coreclr/LineSplitter', () => {
     const testCase = (name: string, input: string | string[], output: string[]) => {

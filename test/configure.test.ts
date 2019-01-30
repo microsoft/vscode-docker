@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Suite } from 'mocha';
-import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension';
+import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension.bundle';
 import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';
 
