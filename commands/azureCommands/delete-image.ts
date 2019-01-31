@@ -33,13 +33,14 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
         image = new AzureImage(repo, wholeName[1]);
     }
 
+    const untag: vscode.MessageItem = { title: "Untag" };
     const shouldDelete = await ext.ui.showWarningMessage(
         `Are you sure you want to untag '${image.toString()}'? This does not delete the manifest referenced by the tag.`,
         { modal: true },
-        DialogResponses.deleteResponse,
+        untag,
         DialogResponses.cancel);
 
-    if (shouldDelete === DialogResponses.deleteResponse) {
+    if (shouldDelete === untag) {
         await acrTools.untagImage(image);
         vscode.window.showInformationMessage(`Successfully untagged '${image.toString()}'`);
 

@@ -739,7 +739,7 @@
       },
       {
         "command": "vscode-docker.acr.pullImage",
-        "title": "Pull tag from Azure",
+        "title": "Pull Tag from Azure",
         "category": "Docker"
       },
       {
