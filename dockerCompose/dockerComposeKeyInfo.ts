@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ComposeVersionKeys, KeyInfo } from "../dockerExtension";
+import { ComposeVersionKeys, KeyInfo } from "../extension";
 
 // Define the keys that are shared between all compose file versions,
 // regardless of the major/minor version (e.g. v1-v2.1+).

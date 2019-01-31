@@ -2,10 +2,11 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
-import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
+import { dockerExplorerProvider } from '../../extension';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';

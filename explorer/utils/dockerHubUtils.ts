@@ -4,10 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-// tslint:disable-next-line:no-require-imports
 import * as opn from 'opn';
 import * as vscode from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';

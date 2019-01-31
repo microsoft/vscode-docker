@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
+import { dockerExplorerProvider } from '../extension';
 import { docker, ListContainerDescOptions } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer, quickPickContainerOrAll } from './utils/quick-pick-container';
+import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
