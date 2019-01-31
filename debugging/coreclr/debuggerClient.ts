@@ -26,7 +26,7 @@ export class DefaultDebuggerClient {
         if (os === 'Windows') {
             return await this.vsdbgClient.getVsDbgVersion(DefaultDebuggerClient.debuggerVersion, DefaultDebuggerClient.debuggerWindowsRuntime);
         } else {
-            const result = await this.dockerClient.exec(containerId, '/bin/sh -c \'. /etc/os-release && echo $ID\'', { interactive: true });
+            const result = await this.dockerClient.exec(containerId, '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'', { interactive: true });
 
             return await this.vsdbgClient.getVsDbgVersion(
                 DefaultDebuggerClient.debuggerVersion,
