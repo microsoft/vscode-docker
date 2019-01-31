@@ -7,6 +7,14 @@ import * as Docker from 'dockerode';
 import * as vscode from "vscode";
 import { nonNullValue } from '../../utils/nonNull';
 
+export type ContainerStatus = "created" | "restarting" | "running" | "paused" | "exited" | "dead";
+export type ListContainerDescOptions = {
+    filters?: {
+        status?: ContainerStatus[];
+    }
+};
+export const AllStatusFilter: ContainerStatus[] = ["created", "restarting", "running", "paused", "exited", "dead"];
+
 export enum DockerEngineType {
     Linux,
     Windows
@@ -52,7 +60,7 @@ class DockerClient {
         }
     }
 
-    public getContainerDescriptors(opts?: {}): Thenable<Docker.ContainerDesc[]> {
+    public getContainerDescriptors(opts?: ListContainerDescOptions): Thenable<Docker.ContainerDesc[]> {
         return new Promise((resolve, reject) => {
             if (!opts) {
                 opts = {}

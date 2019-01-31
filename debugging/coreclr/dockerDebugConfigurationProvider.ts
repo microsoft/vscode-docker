@@ -7,6 +7,7 @@ import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, Prov
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
+import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './dockerClient';
 import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
@@ -26,8 +27,12 @@ interface DockerDebugRunOptions {
     containerName?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
+    extraHosts?: DockerContainerExtraHost[];
     labels?: { [key: string]: string };
+    network?: string;
     os?: PlatformOS;
+    ports?: DockerContainerPort[];
+    volumes?: DockerContainerVolume[];
 }
 
 interface DebugConfigurationBrowserBaseOptions {
@@ -179,12 +184,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
             || DockerDebugConfigurationProvider.defaultLabels;
 
+        const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
+        const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
+        const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes;
+        const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
+
         return {
             containerName,
             env,
             envFiles,
+            extraHosts,
             labels,
+            network,
             os,
+            ports,
+            volumes
         };
     }
 

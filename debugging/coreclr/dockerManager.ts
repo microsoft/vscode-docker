@@ -216,8 +216,11 @@ export class DefaultDockerManager implements DockerManager {
                         entrypoint,
                         env: options.env,
                         envFiles: options.envFiles,
+                        extraHosts: options.extraHosts,
                         labels: options.labels,
-                        volumes
+                        network: options.network,
+                        ports: options.ports,
+                        volumes: [...(volumes || []), ...(options.volumes || [])]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
@@ -279,6 +282,8 @@ export class DefaultDockerManager implements DockerManager {
                         async containerId => {
                             try {
                                 await this.dockerClient.removeContainer(containerId, { force: true });
+
+                                this.dockerOutputManager.appendLine(`Container ${this.dockerClient.trimId(containerId)} removed.`);
 
                                 return undefined;
                             } catch {

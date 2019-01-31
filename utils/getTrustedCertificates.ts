@@ -32,8 +32,10 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         this.suppressTelemetry = true;
 
         let importSetting = vscode.workspace.getConfiguration('docker').get<ImportCertificatesSetting>('importCertificates');
-        if (importSetting === false) {
-            // Use default Node.js behavior
+
+        // If value is false or null/undefined or anything not an object or boolean...
+        if (!importSetting || (typeof importSetting !== "object" && typeof importSetting !== "boolean")) {
+            // ... then use default Node.js behavior
             this.properties.importCertificates = 'false';
             return undefined;
         }
@@ -117,7 +119,9 @@ function getCertificatesFromSystem(): (string | Buffer)[] {
 
         try {
             if (isWindows()) {
-                require('win-ca');
+                // Use win-ca fallback logic since nAPI isn't currently compatible with Electron
+                // (https://github.com/ukoloff/win-ca/issues/12, https://www.npmjs.com/package/win-ca#availability)
+                require('win-ca/fallback');
             } else if (isMac()) {
                 require('mac-ca');
             } else if (isLinux()) {

@@ -1,5 +1,10 @@
-[#](https://github.com/Microsoft/vscode-docker/issues/)
-## 0.5.0 - 14 December 2018
+## 0.5.1 - 8 January 2019
+
+### Fixed
+
+* Require vscode 1.26.0 because it's required by the language client version 5.0.0 [#729](https://github.com/Microsoft/vscode-docker/issues/729)
+
+## 0.5.0 - 7 January 2019
 
 ### Added
 
