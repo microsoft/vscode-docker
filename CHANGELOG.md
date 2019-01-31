@@ -1,3 +1,9 @@
+## 0.5.2 - 30 January 2019
+
+### Fixed
+
+* Extension fails to initialize in VS Code Insiders 1.31 [#733](https://github.com/Microsoft/vscode-docker/issues/733)
+
 ## 0.5.1 - 8 January 2019
 
 ### Fixed
