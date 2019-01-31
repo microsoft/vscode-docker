@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import { PlatformOS } from '../../utils/platform';
-import { VsDbgClient } from './vsdbgClient';
 import { DockerClient } from './dockerClient';
+import { VsDbgClient } from './vsdbgClient';
 
 export interface DebuggerClient {
     getDebugger(os: PlatformOS, containerId: string): Promise<string>;
@@ -40,7 +40,7 @@ export class DefaultDebuggerClient {
         }
     }
 
-    public getDebuggerFolder(): Promise<string> {
-        return this.vsdbgClient.getVsDbgFolder();
+    public async getDebuggerFolder(): Promise<string> {
+        return await this.vsdbgClient.getVsDbgFolder();
     }
 }

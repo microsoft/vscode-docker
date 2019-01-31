@@ -75,7 +75,7 @@ export interface DockerClient {
     removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void>;
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
     trimId(id: string): string;
-    exec(containerNameOrId: string, command: string, options?:DockerExecOptions): Promise<string>;
+    exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -248,7 +248,7 @@ export class CliDockerClient implements DockerClient {
         return id.substring(0, 12);
     }
 
-    public async exec(containerNameOrId: string, args: string, options?:DockerExecOptions): Promise<string> {
+    public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
         options = options || {};
 
         const command = CommandLineBuilder

@@ -58,8 +58,8 @@ export class RemoteVsDbgClient implements VsDbgClient {
             };
     }
 
-    public getVsDbgFolder(): Promise<string> {
-        return Promise.resolve(this.vsdbgPath);
+    public async getVsDbgFolder(): Promise<string> {
+        return this.vsdbgPath;
     }
 
     public async getVsDbgVersion(version: string, runtime: string): Promise<string> {
