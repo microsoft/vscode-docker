@@ -17,6 +17,10 @@ export class DefaultDebuggerClient {
     private static debuggerLinuxDefaultRuntime: string = 'linux-x64';
     private static debuggerWindowsRuntime: string = 'win7-x64';
 
+    // This script determines the "type" of Linux release (e.g. 'alpine', 'debian', etc.).
+    // NOTE: The result may contain line endings.
+    private static debuggerLinuxReleaseIdScript: string = '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'';
+
     constructor(
         private readonly dockerClient: DockerClient,
         private readonly vsdbgClient: VsDbgClient) {
@@ -26,7 +30,7 @@ export class DefaultDebuggerClient {
         if (os === 'Windows') {
             return await this.vsdbgClient.getVsDbgVersion(DefaultDebuggerClient.debuggerVersion, DefaultDebuggerClient.debuggerWindowsRuntime);
         } else {
-            const result = await this.dockerClient.exec(containerId, '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'', { interactive: true });
+            const result = await this.dockerClient.exec(containerId, DefaultDebuggerClient.debuggerLinuxReleaseIdScript, { interactive: true });
 
             return await this.vsdbgClient.getVsDbgVersion(
                 DefaultDebuggerClient.debuggerVersion,
