@@ -952,7 +952,7 @@
     "tar": "^4.4.6",
     "vscode-azureextensionui": "^0.19.0",
     "vscode-languageclient": "^5.1.1",
-    "win-ca": "^2.2.0",
+    "win-ca": "^2.4.0",
     "xml2js": "^0.4.19"
   }
 }
