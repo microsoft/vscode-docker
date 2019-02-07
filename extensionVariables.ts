@@ -13,6 +13,14 @@ import { IKeytar } from './utils/keytar';
 
 type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
 
+export enum ImageGrouping {
+    None,
+    Repository,
+    default = Repository,
+    RepositoryName,
+    ImageId
+}
+
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
  */
@@ -36,4 +44,6 @@ export namespace ext {
         platform: osNode.platform(),
         release: osNode.release()
     };
+
+    export let groupImagesBy: ImageGrouping = ImageGrouping.ImageId;
 }

@@ -52,7 +52,7 @@ import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME }
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from './explorer/deploy/util';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
-import { DockerExplorerProvider } from './explorer/dockerExplorer';
+import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { ContainerNode } from './explorer/models/containerNode';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
@@ -62,13 +62,14 @@ import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
-import { ext } from './extensionVariables';
+import { ext, ImageGrouping } from './extensionVariables';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { wrapError } from './utils/wrapError';
 
+const groupImagesByKey = 'groupImagesBy';
 export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string };
@@ -104,6 +105,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 }
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
+  // tslint:disable-next-line:no-debugger
   perfStats.loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);
@@ -168,6 +170,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
       )
     );
     registerDebugConfigurationProvider(ctx);
+
+    let imageGrouping: number | undefined = ext.context.globalState.get<ImageGrouping>(groupImagesByKey);
+    ext.groupImagesBy = typeof imageGrouping === "number" ? imageGrouping : ImageGrouping.default;
 
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
@@ -264,6 +269,11 @@ function registerDockerCommands(): void {
     dockerExplorerProvider
   );
 
+  registerCommand('vscode-docker.images.cycleGroupBy', cycleGroupImagesBy);
+  registerCommand('vscode-docker.images.groupBy.none', () => groupImagesBy(ImageGrouping.None));
+  registerCommand('vscode-docker.images.groupBy.repository', () => groupImagesBy(ImageGrouping.Repository));
+  registerCommand('vscode-docker.images.groupBy.imageId', () => groupImagesBy(ImageGrouping.ImageId));
+  registerCommand('vscode-docker.images.groupBy.repositoryName', () => groupImagesBy(ImageGrouping.RepositoryName));
   registerCommand('vscode-docker.acr.createRegistry', createRegistry);
   registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
@@ -424,4 +434,20 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     });
     client.start();
   });
+}
+
+function cycleGroupImagesBy(): void {
+  let groupBy = ext.groupImagesBy;
+  ++groupBy;
+  if (!(groupBy in ImageGrouping)) {
+    groupBy = ImageGrouping.None;
+  }
+
+  groupImagesBy(groupBy);
+}
+
+function groupImagesBy(groupBy: ImageGrouping): void {
+  ext.groupImagesBy = groupBy;
+  ext.context.globalState.update(groupImagesByKey, ext.groupImagesBy);
+  dockerExplorerProvider.refreshImages();
 }

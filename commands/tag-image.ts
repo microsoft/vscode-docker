@@ -14,7 +14,7 @@ import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
-export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndLabel | undefined): Promise<string> {
+export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndFullTag | undefined): Promise<string> {
     // If a RootNode or no node is passed in, we ask the user to pick an image
     let [imageToTag, currentName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
 
@@ -68,18 +68,18 @@ export async function getTagFromUserInput(imageName: string, addDefaultRegistry:
     return nameWithTag;
 }
 
-export interface IHasImageDescriptorAndLabel {
-    imageDesc: Docker.ImageDesc,
-    label: string
+export interface IHasImageDescriptorAndFullTag {
+    imageDesc: Docker.ImageDesc;
+    fullTag: string;
 }
 
-export async function getOrAskForImageAndTag(actionContext: IActionContext, context: IHasImageDescriptorAndLabel | undefined): Promise<[Docker.ImageDesc, string]> {
+export async function getOrAskForImageAndTag(actionContext: IActionContext, context: IHasImageDescriptorAndFullTag | undefined): Promise<[Docker.ImageDesc, string]> {
     let name: string;
     let description: Docker.ImageDesc;
 
     if (context && context.imageDesc) {
         description = context.imageDesc;
-        name = context.label;
+        name = context.fullTag;
     } else {
         const selectedItem: ImageItem = await quickPickImage(actionContext, false);
         if (selectedItem) {

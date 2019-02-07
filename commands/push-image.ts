@@ -10,7 +10,7 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { askToSaveRegistryPath } from './registrySettings';
-import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndLabel, tagImage } from './tag-image';
+import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tag-image';
 
 export async function pushImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
     let properties: {
@@ -39,7 +39,7 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
             //     ext.context.workspaceState.update(addPrefixImagePush, false);
             // }
             if (response === tagFirst) {
-                imageName = await tagImage(actionContext, <IHasImageDescriptorAndLabel>{ imageDesc: imageToPush, label: imageName }); //not passing this would ask the user a second time to pick an image
+                imageName = await tagImage(actionContext, <IHasImageDescriptorAndFullTag>{ imageDesc: imageToPush, fullTag: imageName }); //not passing this would ask the user a second time to pick an image
             }
         }
     }

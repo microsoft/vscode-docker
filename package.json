@@ -92,6 +92,26 @@
         {
           "command": "vscode-docker.setRegistryAsDefault",
           "when": "never"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.none",
+          "when": "never"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.imageId",
+          "when": "never"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.repository",
+          "when": "never"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.repositoryName",
+          "when": "never"
+        },
+        {
+          "command": "vscode-docker.images.cycleGroupBy",
+          "when": "never"
         }
       ],
       "editor/context": [
@@ -177,126 +197,179 @@
         {
           "command": "vscode-docker.explorer.refresh",
           "when": "view == dockerExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "vscode-docker.system.prune",
           "when": "view == dockerExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
+          "command": "vscode-docker.images.cycleGroupBy",
+          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "group": "inline"
+        },
+        {
           "command": "vscode-docker.acr.createRegistry",
-          "when": "view == dockerExplorer && viewItem == azureRegistryRootNode"
+          "when": "view == dockerExplorer && viewItem == azureRegistryRootNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteImage",
-          "when": "view == dockerExplorer && viewItem == azureImageTagNode"
+          "when": "view == dockerExplorer && viewItem == azureImageTagNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteRegistry",
-          "when": "view == dockerExplorer && viewItem == azureRegistryNode"
+          "when": "view == dockerExplorer && viewItem == azureRegistryNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteRepository",
-          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
+          "when": "view == dockerExplorer && viewItem == azureRepositoryNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.pullImage",
-          "when": "view == dockerExplorer && viewItem == azureImageTagNode"
+          "when": "view == dockerExplorer && viewItem == azureImageTagNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.pullRepo",
-          "when": "view == dockerExplorer && viewItem == azureRepositoryNode"
+          "when": "view == dockerExplorer && viewItem == azureRepositoryNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.runTask",
-          "when": "view == dockerExplorer && viewItem == taskNode"
+          "when": "view == dockerExplorer && viewItem == taskNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.showTask",
-          "when": "view == dockerExplorer && viewItem == taskNode"
+          "when": "view == dockerExplorer && viewItem == taskNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.untagImage",
-          "when": "view == dockerExplorer && viewItem == azureImageTagNode"
+          "when": "view == dockerExplorer && viewItem == azureImageTagNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.acr.viewLogs",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.browseDockerHub",
-          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
-          "when": "view == dockerExplorer && viewItem == customRootNode"
+          "when": "view == dockerExplorer && viewItem == customRootNode",
+          "group": "default"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "view == dockerExplorer && viewItem =~ /^(stoppedLocalContainerNode|runningLocalContainerNode|containersRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(stoppedLocalContainerNode|runningLocalContainerNode|containersRootNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.container.restart",
-          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
+          "group": "default"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
+          "group": "default"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.none",
+          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "group": "9_grouping@1"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.repository",
+          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "group": "9_grouping@2"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.repositoryName",
+          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "group": "9_grouping@3"
+        },
+        {
+          "command": "vscode-docker.images.groupBy.imageId",
+          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "group": "9_grouping@4"
         },
         {
           "command": "vscode-docker.container.start",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
-          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
-          "when": "view == dockerExplorer && viewItem == dockerHubRootNode"
+          "when": "view == dockerExplorer && viewItem == dockerHubRootNode",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "group": "5_default"
         },
         {
           "command": "vscode-docker.setRegistryAsDefault",
-          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/"
+          "when": "view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/",
+          "group": "5_default"
         }
       ]
     },
@@ -717,6 +790,51 @@
       }
     },
     "commands": [
+      {
+        "command": "vscode-docker.images.cycleGroupBy",
+        "title": "Cycle Group By",
+        "icon": {
+          "light": "images/SortingGrouping_16x.svg",
+          "dark": "images/SortingGrouping_16x.svg"
+        },
+        "category": "Azure Storage"
+      },
+      {
+        "command": "vscode-docker.images.groupBy.none",
+        "title": "No Grouping",
+        "icon": {
+          "light": "images/SortingGrouping_16x.svg",
+          "dark": "images/SortingGrouping_16x.svg"
+        },
+        "category": "Azure Storage"
+      },
+      {
+        "command": "vscode-docker.images.groupBy.imageId",
+        "title": "Group by Image ID",
+        "icon": {
+          "light": "images/SortingGrouping_16x.svg",
+          "dark": "images/SortingGrouping_16x.svg"
+        },
+        "category": "Azure Storage"
+      },
+      {
+        "command": "vscode-docker.images.groupBy.repository",
+        "title": "Group by Repository",
+        "icon": {
+          "light": "images/SortingGrouping_16x.svg",
+          "dark": "images/SortingGrouping_16x.svg"
+        },
+        "category": "Azure Storage"
+      },
+      {
+        "command": "vscode-docker.images.groupBy.repositoryName",
+        "title": "Group by Repository Name",
+        "icon": {
+          "light": "images/SortingGrouping_16x.svg",
+          "dark": "images/SortingGrouping_16x.svg"
+        },
+        "category": "Azure Storage"
+      },
       {
         "command": "vscode-docker.acr.createRegistry",
         "title": "Create Azure Registry",

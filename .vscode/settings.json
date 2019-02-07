@@ -11,5 +11,6 @@
 	"files.trimTrailingWhitespace": true,
 	"files.insertFinalNewline": true,
 	"editor.formatOnSave": true,
-	"tslint.autoFixOnSave": true
+	"tslint.autoFixOnSave": true,
+	"docker.defaultRegistryPath": "sweatherford"
 }
