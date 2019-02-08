@@ -1009,7 +1009,7 @@
     "umd-compat-loader": "^2.1.1",
     "vsce": "^1.51.1",
     "vscode": "^1.1.18",
-    "vscode-azureextensiondev": "0.1.4",
+    "vscode-azureextensiondev": "0.1.7",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.1.2"
   },
