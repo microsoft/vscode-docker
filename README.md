@@ -243,7 +243,7 @@ Customize the Docker container run process by adding properties under the `docke
 # volumes
 | Property | Description | Required | Default |
 | --- | --- | --- | --- |
-| `localPath` | Path on local machine that will be mapped. The folder will be created if it does not exist. | Yes | None |
+| `localPath` | Path on local machine that will be mapped. The folder will be created if it does not exist. Path may use the `${workspaceFolder}` variable when needed. | Yes | None |
 | `containerPath` | Path where the volume will be mapped within the container. The folder will be created if it does not exist. | Yes | None |
 | `permissions` | Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only. | Yes | `rw` |
 
