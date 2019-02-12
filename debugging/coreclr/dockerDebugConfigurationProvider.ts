@@ -186,8 +186,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
         const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
-        const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes;
         const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
+
+        const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes
+            ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: DockerDebugConfigurationProvider.resolveFolderPath(volume.localPath, folder) }))
+            : [];
 
         return {
             containerName,
