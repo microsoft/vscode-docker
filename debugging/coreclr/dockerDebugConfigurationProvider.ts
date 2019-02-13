@@ -186,7 +186,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
         const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
-        const volumes = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes;
+        const volumes = DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration);
         const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
 
         return {
@@ -200,6 +200,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             ports,
             volumes
         };
+    }
+
+    private static inferVolumes(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): DockerContainerVolume[] {
+        return debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes
+            ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: DockerDebugConfigurationProvider.resolveFolderPath(volume.localPath, folder) }))
+            : [];
     }
 
     private inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): string {
