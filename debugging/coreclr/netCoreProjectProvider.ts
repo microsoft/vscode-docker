@@ -56,7 +56,10 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
         }
         finally {
             await this.fsProvider.unlinkFile(getTargetPathProjectFile);
-            await this.fsProvider.unlinkFile(targetOutputFilename);
+
+            if (await this.fsProvider.fileExists(targetOutputFilename)) {
+                await this.fsProvider.unlinkFile(targetOutputFilename);
+            }
         }
     }
 }
