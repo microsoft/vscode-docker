@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ITestCallbackContext } from "mocha";
-import { ext, wrapError } from "../extension";
+import { ext, wrapError } from "../extension.bundle";
 import { Uri } from "vscode";
 
 export async function testUrl(url: string): Promise<void> {

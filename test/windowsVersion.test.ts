@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../extension";
+import { ext, isWindows10RS4OrNewer, isWindows10RS3OrNewer } from "../extension.bundle";
 
 suite("windowsVersion", () => {
     function testIsWindows10RS4OrNewer(release: string, expectedResult: boolean): void {

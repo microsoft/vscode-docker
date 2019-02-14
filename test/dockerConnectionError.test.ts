@@ -8,7 +8,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, throwDockerConnectionError, internal } from '../extension';
+import { ext, throwDockerConnectionError, internal } from '../extension.bundle';
 import { Suite, Test, Context } from 'mocha';
 import { parseError, IActionContext } from 'vscode-azureextensionui';
 import { testUrl } from './testUrl';

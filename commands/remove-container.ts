@@ -5,9 +5,9 @@
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
-import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
+import { dockerExplorerProvider } from '../extension';
 import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 

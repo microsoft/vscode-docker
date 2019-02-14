@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerDesc } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
-import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
+import { dockerExplorerProvider } from '../extension';
 import { docker, ListContainerDescOptions } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer, quickPickContainerOrAll } from './utils/quick-pick-container';
+import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 export async function restartContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
