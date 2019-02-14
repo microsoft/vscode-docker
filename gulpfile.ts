@@ -6,45 +6,11 @@
 // tslint:disable:no-implicit-dependencies
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
-import * as glob from 'glob';
 import * as gulp from 'gulp';
-import * as decompress from 'gulp-decompress';
-import * as download from 'gulp-download';
-import * as os from 'os';
 import * as path from 'path';
+import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
 
 const env = process.env;
-
-function webpack(mode: string): cp.ChildProcess {
-    // without this, webpack can run out of memory in some environments
-    env.NODE_OPTIONS = '--max-old-space-size=8192';
-    return spawn(path.join(__dirname, './node_modules/.bin/webpack'), ['--mode', mode], { stdio: 'inherit', env });
-}
-
-/**
- * Installs the azure account extension before running tests (otherwise our extension would fail to activate)
- * NOTE: The version isn't super important since we don't actually use the account extension in tests
- */
-function installAzureAccount(): Promise<void> {
-    const version = '0.4.3';
-    const extensionPath = path.join(os.homedir(), `.vscode/extensions/ms-vscode.azure-account-${version}`);
-    const existingExtensions = glob.sync(extensionPath.replace(version, '*'));
-    if (existingExtensions.length === 0) {
-        // tslint:disable-next-line:no-http-string
-        return download(`http://ms-vscode.gallery.vsassets.io/_apis/public/gallery/publisher/ms-vscode/extension/azure-account/${version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage`)
-            .pipe(decompress({
-                filter: file => file.path.startsWith('extension/'),
-                map: file => {
-                    file.path = file.path.slice(10);
-                    return file;
-                }
-            }))
-            .pipe(gulp.dest(extensionPath));
-    } else {
-        console.log('Azure Account extension already installed.');
-        return Promise.resolve();
-    }
-}
 
 function test(): cp.ChildProcess {
     env.DEBUGTELEMETRY = '1';
@@ -65,6 +31,6 @@ function spawn(command: string, args: string[], options: {}): cp.ChildProcess {
     return cp.spawn(command, args, options);
 }
 
-exports['webpack-dev'] = () => webpack('development');
-exports['webpack-prod'] = () => webpack('production');
-exports.test = gulp.series(installAzureAccount, test);
+exports['webpack-dev'] = () => gulp_webpack('development');
+exports['webpack-prod'] = () => gulp_webpack('production');
+exports.test = gulp.series(gulp_installAzureAccount, test);

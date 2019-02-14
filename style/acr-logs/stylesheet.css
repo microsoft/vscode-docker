@@ -324,8 +324,8 @@ main {
 .tooltip .tooltiptext {
     box-sizing: border-box;
     display: none;
-    background-color: var(--vscode-editor-foreground);
-    color: var(--vscode-activityBar-background);
+    background-color: var(--vscode-list-hoverBackground);
+    color: var(--vscode-list-foreground);
     text-align: center;
     padding: 5px 16px;
     position: absolute;

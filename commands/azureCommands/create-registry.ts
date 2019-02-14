@@ -8,7 +8,7 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
 import { skus } from '../../constants';
-import { dockerExplorerProvider } from '../../dockerExtension';
+import { dockerExplorerProvider } from '../../extension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';

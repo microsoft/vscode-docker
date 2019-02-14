@@ -5,7 +5,7 @@
 
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
-import { ext } from '../extension';
+import { ext } from '../extension.bundle';
 import { Suite, Test, Context } from 'mocha';
 import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';

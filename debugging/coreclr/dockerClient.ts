@@ -27,6 +27,17 @@ export type DockerContainerRemoveOptions = {
     force?: boolean;
 };
 
+export type DockerContainerPort = {
+    hostPort?: string;
+    containerPort: string;
+    protocol?: 'tcp' | 'udp';
+}
+
+export type DockerContainerExtraHost = {
+    hostname: string;
+    ip: string;
+}
+
 export type DockerContainerVolume = {
     localPath: string;
     containerPath: string;
@@ -39,12 +50,20 @@ export type DockerRunContainerOptions = {
     entrypoint?: string;
     env?: { [key: string]: string };
     envFiles?: string[];
+    extraHosts?: DockerContainerExtraHost[];
     labels?: { [key: string]: string };
+    network?: string;
+    ports?: DockerContainerPort[];
     volumes?: DockerContainerVolume[];
 };
 
 export type DockerVersionOptions = {
     format?: string;
+}
+
+export type DockerExecOptions = {
+    interactive?: boolean;
+    tty?: boolean;
 }
 
 export interface DockerClient {
@@ -56,6 +75,7 @@ export interface DockerClient {
     removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void>;
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
     trimId(id: string): string;
+    exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -187,12 +207,16 @@ export class CliDockerClient implements DockerClient {
         options = options || {};
 
         const command = CommandLineBuilder
-            .create('docker', 'run', '-dt', '-P')
+            .create('docker', 'run', '-dt')
+            .withFlagArg('-P', options.ports === undefined || options.ports.length < 1)
             .withNamedArg('--name', options.containerName)
+            .withNamedArg('--network', options.network)
             .withKeyValueArgs('-e', options.env)
             .withArrayArgs('--env-file', options.envFiles)
             .withKeyValueArgs('--label', options.labels)
             .withArrayArgs('-v', options.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
+            .withArrayArgs('-p', options.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
+            .withArrayArgs('--add-host', options.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
             .withArg(options.command)
@@ -222,6 +246,22 @@ export class CliDockerClient implements DockerClient {
         }
 
         return id.substring(0, 12);
+    }
+
+    public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
+        options = options || {};
+
+        const command = CommandLineBuilder
+            .create('docker', 'exec')
+            .withFlagArg('-i', options.interactive)
+            .withFlagArg('-t', options.tty)
+            .withQuotedArg(containerNameOrId)
+            .withArg(args)
+            .build();
+
+        const result = await this.processProvider.exec(command, {});
+
+        return result.stdout;
     }
 }
 

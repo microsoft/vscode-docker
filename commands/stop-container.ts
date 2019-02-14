@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
-import { docker } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
+import { dockerExplorerProvider } from '../extension';
+import { docker, ListContainerDescOptions } from './utils/docker-endpoint';
+import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
@@ -18,42 +18,32 @@ export async function stopContainer(actionContext: IActionContext, context: Root
     if (context instanceof ContainerNode && context.containerDesc) {
         containersToStop = [context.containerDesc];
     } else {
-        const opts = {
+        const opts: ListContainerDescOptions = {
             "filters": {
                 "status": ["restarting", "running", "paused"]
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
-        if (selectedItem) {
-            if (selectedItem.allContainers) {
-                containersToStop = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToStop = [selectedItem.containerDesc];
-            }
-        }
+        containersToStop = await quickPickContainerOrAll(actionContext, opts);
     }
 
-    if (containersToStop) {
+    const numContainers: number = containersToStop.length;
+    let containerCounter: number = 0;
 
-        const numContainers: number = containersToStop.length;
-        let containerCounter: number = 0;
-
-        vscode.window.setStatusBarMessage("Docker: Stopping Container(s)...", new Promise((resolve, reject) => {
-            containersToStop.forEach((c) => {
-                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-                docker.getContainer(c.Id).stop(function (err: Error, _data: any): void {
-                    containerCounter++;
-                    if (err) {
-                        vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers();
-                        reject();
-                    }
-                    if (containerCounter === numContainers) {
-                        dockerExplorerProvider.refreshContainers();
-                        resolve();
-                    }
-                });
+    vscode.window.setStatusBarMessage("Docker: Stopping Container(s)...", new Promise((resolve, reject) => {
+        containersToStop.forEach((c) => {
+            // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+            docker.getContainer(c.Id).stop(function (err: Error, _data: any): void {
+                containerCounter++;
+                if (err) {
+                    vscode.window.showErrorMessage(err.message);
+                    dockerExplorerProvider.refreshContainers();
+                    reject();
+                }
+                if (containerCounter === numContainers) {
+                    dockerExplorerProvider.refreshContainers();
+                    resolve();
+                }
             });
-        }));
-    }
+        });
+    }));
 }

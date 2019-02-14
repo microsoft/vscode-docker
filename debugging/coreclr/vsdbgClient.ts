@@ -12,6 +12,7 @@ import { OutputManager } from './outputManager';
 import { ProcessProvider } from './processProvider';
 
 export interface VsDbgClient {
+    getVsDbgFolder(): Promise<string>;
     getVsDbgVersion(version: string, runtime: string): Promise<string>;
 }
 
@@ -57,13 +58,18 @@ export class RemoteVsDbgClient implements VsDbgClient {
             };
     }
 
+    public async getVsDbgFolder(): Promise<string> {
+        return this.vsdbgPath;
+    }
+
     public async getVsDbgVersion(version: string, runtime: string): Promise<string> {
-        const vsdbgVersionPath = path.join(this.vsdbgPath, runtime, version);
+        const vsdbgRelativeVersionPath = path.join(runtime, version);
+        const vsdbgVersionPath = path.join(this.vsdbgPath, vsdbgRelativeVersionPath);
         const vsdbgVersionExists = await this.fileSystemProvider.dirExists(vsdbgVersionPath);
 
         if (vsdbgVersionExists && await this.isUpToDate(this.lastDebuggerAcquisitionKey(version, runtime))) {
             // The debugger is up to date...
-            return vsdbgVersionPath;
+            return vsdbgRelativeVersionPath;
         }
 
         return await this.dockerOutputManager.performOperation(
@@ -80,7 +86,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
 
                 await this.updateDate(this.lastDebuggerAcquisitionKey(version, runtime), new Date());
 
-                return vsdbgVersionPath;
+                return vsdbgRelativeVersionPath;
             },
             'Debugger acquired.',
             'Unable to acquire the .NET Core debugger.');

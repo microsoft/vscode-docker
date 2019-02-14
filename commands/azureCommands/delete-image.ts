@@ -2,11 +2,12 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { DialogResponses } from "vscode-azureextensionui";
-import { dockerExplorerProvider } from '../../dockerExtension';
 import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
+import { dockerExplorerProvider } from '../../extension';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
@@ -33,13 +34,14 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
         image = new AzureImage(repo, wholeName[1]);
     }
 
+    const untag: vscode.MessageItem = { title: "Untag" };
     const shouldDelete = await ext.ui.showWarningMessage(
         `Are you sure you want to untag '${image.toString()}'? This does not delete the manifest referenced by the tag.`,
         { modal: true },
-        DialogResponses.deleteResponse,
+        untag,
         DialogResponses.cancel);
 
-    if (shouldDelete === DialogResponses.deleteResponse) {
+    if (shouldDelete === untag) {
         await acrTools.untagImage(image);
         vscode.window.showInformationMessage(`Successfully untagged '${image.toString()}'`);
 

@@ -5,11 +5,11 @@
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
-import { dockerExplorerProvider } from '../dockerExtension';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
-import { docker } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
+import { dockerExplorerProvider } from '../extension';
+import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
+import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 const teleCmdId: string = 'vscode-docker.container.remove';
 
@@ -20,43 +20,34 @@ export async function removeContainer(actionContext: IActionContext, context: Ro
     if (context instanceof ContainerNode && context.containerDesc) {
         containersToRemove = [context.containerDesc];
     } else {
-        const opts = {
+        const opts: ListContainerDescOptions = {
             "filters": {
-                "status": ["created", "restarting", "running", "paused", "exited", "dead"]
+                "status": AllStatusFilter
             }
         };
-        const selectedItem: ContainerItem = await quickPickContainer(actionContext, true, opts);
-        if (selectedItem) {
-            if (selectedItem.allContainers) {
-                containersToRemove = await docker.getContainerDescriptors(opts);
-            } else {
-                containersToRemove = [selectedItem.containerDesc];
-            }
-        }
+        containersToRemove = await quickPickContainerOrAll(actionContext, opts);
+
     }
 
-    if (containersToRemove) {
+    const numContainers: number = containersToRemove.length;
+    let containerCounter: number = 0;
 
-        const numContainers: number = containersToRemove.length;
-        let containerCounter: number = 0;
-
-        vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
-            containersToRemove.forEach((c) => {
-                // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-                docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
-                    containerCounter++;
-                    if (err) {
-                        // TODO: parseError, proper error handling
-                        vscode.window.showErrorMessage(err.message);
-                        dockerExplorerProvider.refreshContainers();
-                        reject();
-                    }
-                    if (containerCounter === numContainers) {
-                        dockerExplorerProvider.refreshContainers();
-                        resolve();
-                    }
-                });
+    vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
+        containersToRemove.forEach((c) => {
+            // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
+            docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
+                containerCounter++;
+                if (err) {
+                    // TODO: parseError, proper error handling
+                    vscode.window.showErrorMessage(err.message);
+                    dockerExplorerProvider.refreshContainers();
+                    reject();
+                }
+                if (containerCounter === numContainers) {
+                    dockerExplorerProvider.refreshContainers();
+                    resolve();
+                }
             });
-        }));
-    }
+        });
+    }));
 }

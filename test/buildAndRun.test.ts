@@ -12,7 +12,7 @@ import { Uri } from 'vscode';
 import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
 import * as path from 'path';
-import { Platform, configure, httpsRequestBinary, ext } from '../extension';
+import { Platform, configure, httpsRequestBinary, ext } from '../extension.bundle';
 import { Suite, Context } from 'mocha';
 import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';

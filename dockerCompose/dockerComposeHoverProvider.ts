@@ -6,8 +6,7 @@
 'use strict';
 
 import { CancellationToken, Hover, HoverProvider, MarkedString, Position, Range, TextDocument } from 'vscode';
-import { KeyInfo } from "../dockerExtension";
-import hub = require('../dockerHubSearch');
+import { KeyInfo } from "../extension";
 import suggestHelper = require('../helpers/suggestSupportHelper');
 import parser = require('../parser');
 

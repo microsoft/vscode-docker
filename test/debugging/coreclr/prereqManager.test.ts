@@ -4,14 +4,14 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { FileSystemProvider } from '../../../extension';
-import { OSProvider } from '../../../extension';
-import { ProcessProvider } from '../../../extension';
-import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../extension';
-import { PlatformOS } from '../../../extension';
-import { DockerClient } from '../../../extension';
-import { DotNetClient } from '../../../extension';
-import { LaunchOptions } from '../../../extension';
+import { FileSystemProvider } from '../../../extension.bundle';
+import { OSProvider } from '../../../extension.bundle';
+import { ProcessProvider } from '../../../extension.bundle';
+import { MacNuGetFallbackFolderSharedPrerequisite, LinuxUserInDockerGroupPrerequisite, DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite } from '../../../extension.bundle';
+import { PlatformOS } from '../../../extension.bundle';
+import { DockerClient } from '../../../extension.bundle';
+import { DotNetClient } from '../../../extension.bundle';
+import { LaunchOptions } from '../../../extension.bundle';
 
 suite('debugging/coreclr/prereqManager', () => {
     suite('DockerDaemonIsLinuxPrerequisite', () => {
@@ -217,7 +217,7 @@ suite('debugging/coreclr/prereqManager', () => {
 
                 let wasFileExistsCalled = false;
 
-                const fsProvider = <FileSystemProvider> {
+                const fsProvider = <FileSystemProvider>{
                     fileExists: (path: string) => {
                         wasFileExistsCalled = true;
 
@@ -253,7 +253,7 @@ suite('debugging/coreclr/prereqManager', () => {
 
                 const prereq = new DockerfileExistsPrerequisite(fsProvider, showErrorMessage, executeCommand);
 
-                const options = <LaunchOptions> {
+                const options = <LaunchOptions>{
                     build: {
                         dockerfile
                     }
@@ -264,7 +264,7 @@ suite('debugging/coreclr/prereqManager', () => {
                 assert.equal(result, dockerfileExists, 'The prerequisite should return `true` when the Dockerfile exists.');
                 assert.equal(wasFileExistsCalled, true, 'The Dockerfile should have been tested for existence.');
                 assert.equal(wasShowErrorMessageCalled, !dockerfileExists, 'The user should be shown an error when the Dockerfile does not exist.');
-                assert.equal(wasCommandExecuted, !dockerfileExists && userElectsToScaffold === true, 'The scaffold command should be executed only if the Dockerfile does not exist and the user elects to scaffold.');
+                assert.equal(wasCommandExecuted, !dockerfileExists && userElectsToScaffold === true, 'The scaffold command should be executed only if the Dockerfile does not exist and the user elects to scaffold.');
             });
         };
 
