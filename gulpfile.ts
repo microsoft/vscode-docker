@@ -6,11 +6,7 @@
 // tslint:disable:no-implicit-dependencies
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
-import * as glob from 'glob';
 import * as gulp from 'gulp';
-import * as decompress from 'gulp-decompress';
-import * as download from 'gulp-download';
-import * as os from 'os';
 import * as path from 'path';
 import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
 

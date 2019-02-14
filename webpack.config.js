@@ -27,9 +27,6 @@ let config = dev.getDefaultWebpackConfig({
         // Keep this list small, because all the subdependencies will also be excluded
 
         // has binary
-        'clipboardy',
-
-        // has binary
         'win-ca'
     ],
     entries: {

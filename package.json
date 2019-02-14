@@ -992,6 +992,7 @@
     "@types/node": "^8.10.34",
     "@types/request-promise-native": "^1.0.15",
     "@types/semver": "^5.5.0",
+    "@types/string-replace-webpack-plugin": "^0.1.0",
     "@types/xml2js": "^0.4.3",
     "adm-zip": "^0.4.11",
     "copy-webpack-plugin": "^4.5.4",
