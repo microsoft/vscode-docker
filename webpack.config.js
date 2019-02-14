@@ -42,6 +42,8 @@ let config = dev.getDefaultWebpackConfig({
     {
         // ./getCoreNodeModule.js (path from keytar.ts) uses a dynamic require which can't be webpacked
         './getCoreNodeModule': 'commonjs getCoreNodeModule',
+
+        'win-ca/fallback': 'commonjs win-ca/fallback',
     }, // end of externals
 
     loaderRules: [
