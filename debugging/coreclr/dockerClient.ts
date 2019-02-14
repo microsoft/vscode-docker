@@ -61,6 +61,11 @@ export type DockerVersionOptions = {
     format?: string;
 }
 
+export type DockerExecOptions = {
+    interactive?: boolean;
+    tty?: boolean;
+}
+
 export interface DockerClient {
     buildImage(options: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string>;
     getVersion(options?: DockerVersionOptions): Promise<string>;
@@ -70,6 +75,7 @@ export interface DockerClient {
     removeContainer(containerNameOrId: string, options?: DockerContainerRemoveOptions): Promise<void>;
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
     trimId(id: string): string;
+    exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -240,6 +246,22 @@ export class CliDockerClient implements DockerClient {
         }
 
         return id.substring(0, 12);
+    }
+
+    public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
+        options = options || {};
+
+        const command = CommandLineBuilder
+            .create('docker', 'exec')
+            .withFlagArg('-i', options.interactive)
+            .withFlagArg('-t', options.tty)
+            .withQuotedArg(containerNameOrId)
+            .withArg(args)
+            .build();
+
+        const result = await this.processProvider.exec(command, {});
+
+        return result.stdout;
     }
 }
 

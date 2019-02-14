@@ -117,7 +117,7 @@ The exact folder to use for certificatePaths on Linux will depend on the distrib
 
 ## Debugging .NET Core (Preview)
 
-> Note that Windows containers are **not** currently supported, only Linux containers.
+> Note that Windows containers are **not** currently supported, only Linux containers. However, both standard and Alpine .NET Core runtime base images are supported.
 
 ### Prerequisites
 

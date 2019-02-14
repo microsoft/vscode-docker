@@ -187,7 +187,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const containerName = options.containerName;
 
-        const debuggerFolder = await this.debuggerClient.getDebugger(options.os);
+        const debuggerFolder = await this.debuggerClient.getDebuggerFolder();
 
         const command = options.os === 'Windows'
             ? '-t localhost'
@@ -236,6 +236,8 @@ export class DefaultDockerManager implements DockerManager {
 
         await this.addToDebugContainers(containerId);
 
+        const debuggerPath = await this.debuggerClient.getDebugger(options.run.os, containerId);
+
         const browserUrl = await this.getContainerWebEndpoint(containerId);
 
         const additionalProbingPaths = options.run.os === 'Windows'
@@ -255,7 +257,7 @@ export class DefaultDockerManager implements DockerManager {
 
         return {
             browserUrl,
-            debuggerPath: options.run.os === 'Windows' ? 'C:\\remote_debugger\\vsdbg' : '/remote_debugger/vsdbg',
+            debuggerPath: this.osProvider.pathJoin(options.run.os, options.run.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger', debuggerPath, 'vsdbg'),
             // tslint:disable-next-line:no-invalid-template-strings
             pipeArgs: ['exec', '-i', containerId, '${debuggerCommand}'],
             // tslint:disable-next-line:no-invalid-template-strings
