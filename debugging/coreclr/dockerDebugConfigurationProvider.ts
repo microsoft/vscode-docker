@@ -101,7 +101,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const { appProject, resolvedAppProject } = await this.inferAppProject(folder, debugConfiguration, resolvedAppFolder);
 
-        const appName = path.basename(resolvedAppProject, '.csproj');
+        const appName = path.parse(resolvedAppProject).name;
 
         const os = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.os
             ? debugConfiguration.dockerRun.os
@@ -195,8 +195,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private static inferVolumes(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): DockerContainerVolume[] {
         return debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes
-        ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: DockerDebugConfigurationProvider.resolveFolderPath(volume.localPath, folder) }))
-        : [];
+            ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: DockerDebugConfigurationProvider.resolveFolderPath(volume.localPath, folder) }))
+            : [];
     }
 
     private async inferAppFolder(folder: WorkspaceFolder, configuration: DockerDebugConfiguration): Promise<{ appFolder: string, resolvedAppFolder: string }> {
@@ -247,7 +247,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (appProject === undefined) {
             const files = await this.fsProvider.readDir(resolvedAppFolder);
 
-            const projectFile = files.find(file => path.extname(file) === '.csproj');
+            const projectFile = files.find(file => ['.csproj', '.fsproj'].includes(path.extname(file)));
 
             if (projectFile) {
                 appProject = path.join(resolvedAppFolder, projectFile);
