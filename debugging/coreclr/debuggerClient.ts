@@ -4,6 +4,7 @@
 
 import { PlatformOS } from '../../utils/platform';
 import { DockerClient } from './dockerClient';
+import { OSProvider } from './osProvider';
 import { VsDbgClient } from './vsdbgClient';
 
 export interface DebuggerClient {
@@ -19,10 +20,11 @@ export class DefaultDebuggerClient {
 
     // This script determines the "type" of Linux release (e.g. 'alpine', 'debian', etc.).
     // NOTE: The result may contain line endings.
-    private static debuggerLinuxReleaseIdScript: string = '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'';
+    private static debuggerLinuxReleaseIdScript: string = '/bin/sh -c \"ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\"';
 
     constructor(
         private readonly dockerClient: DockerClient,
+        private readonly osProvider: OSProvider,
         private readonly vsdbgClient: VsDbgClient) {
     }
 
@@ -32,11 +34,13 @@ export class DefaultDebuggerClient {
         } else {
             const result = await this.dockerClient.exec(containerId, DefaultDebuggerClient.debuggerLinuxReleaseIdScript, { interactive: true });
 
-            return await this.vsdbgClient.getVsDbgVersion(
+            const path = await this.vsdbgClient.getVsDbgVersion(
                 DefaultDebuggerClient.debuggerVersion,
                 result.trim() === 'alpine'
                     ? DefaultDebuggerClient.debuggerLinuxAlpineRuntime
                     : DefaultDebuggerClient.debuggerLinuxDefaultRuntime);
+
+            return this.osProvider.pathNormalize(os, path);
         }
     }
 

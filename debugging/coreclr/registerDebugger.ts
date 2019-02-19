@@ -39,6 +39,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
             new DefaultAppStorageProvider(fileSystemProvider),
             new DefaultDebuggerClient(
                 dockerClient,
+                osProvider,
                 new RemoteVsDbgClient(
                     dockerOutputManager,
                     fileSystemProvider,
