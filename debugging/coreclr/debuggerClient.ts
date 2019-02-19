@@ -21,7 +21,7 @@ export class DefaultDebuggerClient {
     // This script determines the "type" of Linux release (e.g. 'alpine', 'debian', etc.).
     // NOTES:
     //   - The result may contain line endings.
-    //   - Windows seems to insist on double quotes
+    //   - Windows seems to insist on double quotes.
     private static debuggerLinuxReleaseIdScript: string = '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'';
     private static debuggerLinuxReleaseIdScriptOnWindows: string = '/bin/sh -c \"ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\"';
 
