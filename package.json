@@ -804,7 +804,7 @@
       {
         "command": "vscode-docker.compose.down",
         "title": "Compose Down",
-        "description": "Stops a composition of containers",
+        "description": "Stops and removes a composition of containers",
         "category": "Docker"
       },
       {
@@ -814,9 +814,21 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.compose.start",
+        "title": "Compose Restart",
+        "description": "Builds and starts a composition of containers",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.compose.stop",
+        "title": "Compose Restart",
+        "description": "Stops a composition of containers (non-destructive)",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.compose.up",
         "title": "Compose Up",
-        "description": "Starts a composition of containers",
+        "description": "Builds a composition of containers",
         "category": "Docker"
       },
       {
