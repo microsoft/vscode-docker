@@ -38,7 +38,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-async function compose(commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+async function compose(commands: composeOperation[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To run Docker compose you must first open a folder or workspace in VS Code.');
 
     let commandParameterFileUris: vscode.Uri[];
@@ -59,7 +59,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         }
 
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
-        selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
+        selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file to ${message} containers.` })];
     }
 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker Compose');
@@ -78,13 +78,28 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
 }
 
 export async function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(['up'], 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose([composeOperation.up], 'bring up', dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(['down'], 'to take down', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose([composeOperation.down], 'take down', dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeRestart(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(['down', 'up'], 'to restart', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose([composeOperation.stop, composeOperation.start], 'restart', dockerComposeFileUri, selectedComposeFileUris);
+}
+
+export async function composeStart(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+    return await compose([composeOperation.start], 'start', dockerComposeFileUri, selectedComposeFileUris);
+}
+
+export async function composeStop(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+    return await compose([composeOperation.stop], 'stop', dockerComposeFileUri, selectedComposeFileUris);
+}
+
+enum composeOperation {
+    up = 'up',
+    down = 'down',
+    start = 'start',
+    stop = 'stop'
 }

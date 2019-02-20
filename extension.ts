@@ -24,7 +24,7 @@ import { runTask, runTaskFile } from "./commands/azureCommands/run-task";
 import { showTaskProperties } from "./commands/azureCommands/show-task";
 import { TaskContentProvider } from "./commands/azureCommands/task-utils/showTaskManager";
 import { buildImage } from './commands/build-image';
-import { composeDown, composeRestart, composeUp } from './commands/docker-compose';
+import { composeDown, composeRestart, composeStart, composeStop, composeUp } from './commands/docker-compose';
 import inspectImage from './commands/inspect-image';
 import { openShellContainer } from './commands/open-shell-container';
 import { pushImage } from './commands/push-image';
@@ -283,6 +283,8 @@ function registerDockerCommands(): void {
 
   registerCommand('vscode-docker.compose.down', composeDown);
   registerCommand('vscode-docker.compose.restart', composeRestart);
+  registerCommand('vscode-docker.compose.start', composeStart);
+  registerCommand('vscode-docker.compose.stop', composeStop);
   registerCommand('vscode-docker.compose.up', composeUp);
   registerCommand('vscode-docker.configure', async function (this: IActionContext): Promise<void> { await configure(this, undefined); });
   registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
