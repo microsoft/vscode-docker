@@ -8,7 +8,7 @@ import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/osVersion';
+import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../helpers/osVersion';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
@@ -36,8 +36,10 @@ const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
-    if (!isWindows() || isWindows10RS4OrNewer()) {
+    if (!isWindows() || isWindows10RS5OrNewer()) {
         // If we're not on Windows (and therefore can't detect the version), assume a Windows RS4 host
+        return "-nanoserver-1809";
+    } else if (isWindows10RS4OrNewer()) {
         return "-nanoserver-1803";
     } else if (isWindows10RS3OrNewer()) {
         return "-nanoserver-1709";
