@@ -37,7 +37,7 @@ const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
     if (!isWindows() || isWindows10RS5OrNewer()) {
-        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS4 host
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS5 host
         return "-nanoserver-1809";
     } else if (isWindows10RS4OrNewer()) {
         return "-nanoserver-1803";
