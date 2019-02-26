@@ -364,17 +364,19 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     }
 
     let targetFramework: string;
+    let projFile: string;
     let serviceNameAndPathRelativeToOutput: string;
     {
         // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
         if (platformType.toLowerCase().includes('.net')) {
             let projFilePath = await findCSProjOrFSProjFile(rootFolderPath);
-            serviceNameAndPathRelativeToRoot = projFilePath;
+            serviceNameAndPathRelativeToRoot = projFilePath.slice(0, -(path.extname(projFilePath).length));
             let projFileContents = (await fse.readFile(path.join(rootFolderPath, projFilePath))).toString();
 
             // Extract TargetFramework for version
             [targetFramework] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+            projFile = projFilePath;
 
             properties.packageFileType = projFilePath.endsWith('.csproj') ? '.csproj' : '.fsproj';
             properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
@@ -406,6 +408,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
     if (targetFramework) {
         packageInfo.version = targetFramework;
+        packageInfo.artifactName = projFile;
     }
 
     let filesWritten: string[] = [];
