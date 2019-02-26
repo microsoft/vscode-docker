@@ -237,12 +237,27 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     const crmClient = new ContainerRegistryManagementClient(await utilManager.getCredentialByTenantId(context.subscription), getSubscriptionId(context.subscription));
     let rg: ResourceGroup = (<ResourceGroupStep>wizard.findStep(step => step instanceof ResourceGroupStep, "Resource Group step not executed")).resourceGroup;
     let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
-    let webhookName: string = `webapp${websiteStep.website.name}`
-    let webhookCreateParameters: WebhookCreateParameters;
-    await crmClient.webhooks.create(rg.name, websiteStep.registry.name, webhookName, webhookCreateParameters);
+    let webhookName: string = `webapp${websiteStep.website.name}`;
+    let appLocation: string = websiteStep.website.location;
+    let appURI = `${website.name}scm.azurewebsites.net/docker/hook`;
+    if (context.serverUrl === appURI) {
+      //mock check to see if values match
+      appURI = context.serverUrl;
+    }
+    let webhookCreateParameters: WebhookCreateParameters = {
+      location: appLocation,
+      serviceUri: appURI,
+      scope: AzureImageTagNode.getImageNameWithTag(context.repositoryName, context.tag),
+      actions: ["push"]
+    };
+    const webhook = await crmClient.webhooks.create(rg.name, websiteStep.registry.name, webhookName, webhookCreateParameters);
+    ext.outputChannel.appendLine(`Created webhook ${webhook.name} with tag ${webhook.tags}, id: ${webhook.id}`);
+
   } else {
     // point to dockerhub to reate a webhook
     // http://cloud.docker.com/repository/<registryName>/<repoName>/webHooks
+    // registryname === username for dockerhub
+
   }
   return;
 }
