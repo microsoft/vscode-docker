@@ -4,6 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
+import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
+import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CoreOptions } from 'request';
@@ -51,7 +54,7 @@ import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileComplet
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
 import * as util from './explorer/deploy/util';
-import { WebAppCreator } from './explorer/deploy/webAppCreator';
+import { ResourceGroupStep, WebAppCreator, WebsiteStep } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { ContainerNode } from './explorer/models/containerNode';
@@ -67,6 +70,7 @@ import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
+import { getSubscriptionId } from './utils/nonNull';
 import { wrapError } from './utils/wrapError';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
@@ -226,6 +230,21 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
   } else if (result.status === 'Cancelled') {
     throw new UserCancelledError();
   }
+  const website = wizard.createdWebSite;
+  if (context instanceof AzureImageTagNode) {
+    // try creating a webhook
+    const utilManager = AzureUtilityManager.getInstance();
+    const crmClient = new ContainerRegistryManagementClient(await utilManager.getCredentialByTenantId(context.subscription), getSubscriptionId(context.subscription));
+    let rg: ResourceGroup = (<ResourceGroupStep>wizard.findStep(step => step instanceof ResourceGroupStep, "Resource Group step not executed")).resourceGroup;
+    let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
+    let webhookName: string = `webapp${websiteStep.website.name}`
+    let webhookCreateParameters: WebhookCreateParameters;
+    await crmClient.webhooks.create(rg.name, websiteStep.registry.name, webhookName, webhookCreateParameters);
+  } else {
+    // point to dockerhub to reate a webhook
+    // http://cloud.docker.com/repository/<registryName>/<repoName>/webHooks
+  }
+  return;
 }
 
 // Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed

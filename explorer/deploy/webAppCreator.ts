@@ -45,7 +45,7 @@ export class WebAppCreator extends WizardBase {
         return super.run(promptOnly);
     }
 
-    get createdWebSite(): WebSiteModels.Site {
+    public get createdWebSite(): WebSiteModels.Site {
         const websiteStep = this.steps.find(step => step instanceof WebsiteStep);
         return (<WebsiteStep>websiteStep).website;
     }
@@ -146,7 +146,7 @@ class SubscriptionStep extends SubscriptionStepBase {
     }
 }
 
-class ResourceGroupStep extends WebAppCreatorStepBase {
+export class ResourceGroupStep extends WebAppCreatorStepBase {
     private _createNew: boolean;
     private _rg: ResourceModels.ResourceGroup;
 
@@ -411,7 +411,7 @@ class AppServicePlanStep extends WebAppCreatorStepBase {
     }
 }
 
-class WebsiteStep extends WebAppCreatorStepBase {
+export class WebsiteStep extends WebAppCreatorStepBase {
     private _website: WebSiteModels.Site;
     private _serverUrl: string;
     private _serverUserName: string;
@@ -439,6 +439,10 @@ class WebsiteStep extends WebAppCreatorStepBase {
 
         this._imageName = context.label;
 
+    }
+
+    public get registry(): Registry {
+        return this._registry;
     }
 
     public async prompt(): Promise<void> {
