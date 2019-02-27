@@ -239,11 +239,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
     let webhookName: string = `webapp${websiteStep.website.name}`;
     let appLocation: string = websiteStep.website.location;
-    let appURI = `${website.name}scm.azurewebsites.net/docker/hook`;
-    if (context.serverUrl === appURI) {
-      //mock check to see if values match
-      appURI = context.serverUrl;
-    }
+    let appURI = `${website.name}.scm.azurewebsites.net/docker/hook`;
     let webhookCreateParameters: WebhookCreateParameters = {
       location: appLocation,
       serviceUri: appURI,
