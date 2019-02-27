@@ -25,7 +25,7 @@ export { IKeytar } from './utils/keytar';
 export { throwDockerConnectionError, internal } from './explorer/utils/dockerConnectionError';
 export { getImageOrContainerDisplayName } from './explorer/models/getImageOrContainerDisplayName';
 export { trimWithElipsis } from './explorer/utils/utils';
-export { isWindows10RS3OrNewer, isWindows10RS4OrNewer } from "./helpers/osVersion";
+export { isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from "./helpers/osVersion";
 export { LineSplitter } from './debugging/coreclr/lineSplitter';
 export { CommandLineBuilder } from './debugging/coreclr/commandLineBuilder';
 export { DockerClient } from './debugging/coreclr/dockerClient';
