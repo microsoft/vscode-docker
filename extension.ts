@@ -70,7 +70,6 @@ import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
-import { getSubscriptionId } from './utils/nonNull';
 import { wrapError } from './utils/wrapError';
 
 export let dockerExplorerProvider: DockerExplorerProvider;
@@ -234,12 +233,18 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
   if (context instanceof AzureImageTagNode) {
     // try creating a webhook
     const utilManager = AzureUtilityManager.getInstance();
-    const crmClient = new ContainerRegistryManagementClient(await utilManager.getCredentialByTenantId(context.subscription), getSubscriptionId(context.subscription));
+    const crmClient: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(context.subscription);
     let rg: ResourceGroup = (<ResourceGroupStep>wizard.findStep(step => step instanceof ResourceGroupStep, "Resource Group step not executed")).resourceGroup;
     let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
     let webhookName: string = `webapp${websiteStep.website.name}`;
     let appLocation: string = websiteStep.website.location;
     let appURI = `${website.name}.scm.azurewebsites.net/docker/hook`;
+
+    const registryList = await crmClient.registries.list();
+    if (!registryList.find((value) => value.name === websiteStep.registry.name)) {
+      throw new Error("We could not find the registry associated with the web app.");
+    }
+
     let webhookCreateParameters: WebhookCreateParameters = {
       location: appLocation,
       serviceUri: appURI,
