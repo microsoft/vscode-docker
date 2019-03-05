@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
 import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
@@ -36,6 +36,7 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[] | undefined;
     private _containerDebounceTimer: NodeJS.Timer | undefined;
     private _containersNode: RootNode | undefined;
+    private _dockerHubNode = new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined);
 
     constructor(
         public readonly label: string,

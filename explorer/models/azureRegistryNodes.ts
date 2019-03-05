@@ -12,7 +12,7 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
-import { getLoginServer, } from '../../utils/nonNull';
+import { getLoginServer } from '../../utils/nonNull';
 import { formatTag } from './commonRegistryUtils';
 import { IconPath, NodeBase } from './nodeBase';
 import { TaskRootNode } from './taskNode';
@@ -151,7 +151,7 @@ export class AzureImageTagNode extends NodeBase {
 
 export class AzureNotSignedInNode extends NodeBase {
     constructor() {
-        super('Click here to sign in to Azure...');
+        super('Sign in to Azure...');
     }
 
     public readonly contextValue: string = 'azureNotSignedInNode';

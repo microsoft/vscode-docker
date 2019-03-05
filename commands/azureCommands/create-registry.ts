@@ -7,8 +7,6 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
-import { skus } from '../../constants';
-import { dockerExplorerProvider } from '../../extension';
 import { ext } from '../../extensionVariables';
 import { isValidAzureName } from '../../utils/Azure/common';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
@@ -29,7 +27,7 @@ export async function createRegistry(): Promise<Registry> {
         'location': location
     });
     vscode.window.showInformationMessage(registry.name + ' has been created succesfully!');
-    dockerExplorerProvider.refreshRegistries();
+    ext.dockerExplorerProvider.refreshRegistries();
     return registry;
 }
 

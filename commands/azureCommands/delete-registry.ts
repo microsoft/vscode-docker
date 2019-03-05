@@ -7,7 +7,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from "azure-arm-resource";
 import * as vscode from "vscode";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
-import { dockerExplorerProvider } from '../../extension';
+import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { nonNullProp } from "../../utils/nonNull";
@@ -30,6 +30,6 @@ export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<
         const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
         await client.registries.beginDeleteMethod(resourceGroup, nonNullProp(registry, 'name'));
         vscode.window.showInformationMessage(`Successfully deleted registry ${registry.name}`);
-        dockerExplorerProvider.refreshRegistries();
+        ext.dockerExplorerProvider.refreshRegistries();
     }
 }
