@@ -36,7 +36,7 @@ export class RootNode extends NodeBase {
     private _containerCache: Docker.ContainerDesc[] | undefined;
     private _containerDebounceTimer: NodeJS.Timer | undefined;
     private _containersNode: RootNode | undefined;
-    private _dockerHubNode = new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined);
+    private _dockerHubNode: RegistryRootNode = new RegistryRootNode('Docker Hub', "dockerHubRootNode", undefined, undefined);
 
     constructor(
         public readonly label: string,
