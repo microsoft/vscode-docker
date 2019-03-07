@@ -116,6 +116,8 @@ export class RootNode extends NodeBase {
 
     public getTreeItem(): vscode.TreeItem {
         let label = this.label;
+        let id = this.label;
+
         if (this.isImages) {
             let groupedLabel = "";
 
@@ -139,9 +141,10 @@ export class RootNode extends NodeBase {
         }
 
         return {
-            label: label,
+            label,
+            id,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-            contextValue: this.contextValue
+            contextValue: this.contextValue,
         }
 
     }
