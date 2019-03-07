@@ -157,7 +157,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version, artifactName }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -166,11 +166,12 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let serviceName = path.basename(serviceNameAndRelativePath);
     let projectDirectory = path.dirname(serviceNameAndRelativePath);
-    let projectFileName = `${serviceName}.csproj`;
+    let projectFileName = path.basename(artifactName);
+
     // We don't want the project folder in $assembly_name$ because the assembly is in /app and WORKDIR has been set to that
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
-    let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
+    let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
     let exposeStatements = getExposeStatements(port);
 
     // Parse version from TargetFramework
