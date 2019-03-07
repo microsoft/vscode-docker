@@ -44,10 +44,10 @@
     "onCommand:vscode-docker.browseAzurePortal",
     "onCommand:vscode-docker.browseDockerHub",
     "onCommand:vscode-docker.compose.down",
-    "onCommand:vscode-docker.compose.restart",
+    "onCommand:vscode-docker.compose.up",
     "onCommand:vscode-docker.compose.start",
     "onCommand:vscode-docker.compose.stop",
-    "onCommand:vscode-docker.compose.up",
+    "onCommand:vscode-docker.compose.restart",
     "onCommand:vscode-docker.configure",
     "onCommand:vscode-docker.connectCustomRegistry",
     "onCommand:vscode-docker.container.open-shell",
@@ -119,17 +119,17 @@
         },
         {
           "when": "resourceFilename =~ /docker-compose(\\.debug)?\\.yml/",
-          "command": "vscode-docker.compose.restart",
-          "group": "docker"
-        },
-        {
-          "when": "resourceFilename =~ /docker-compose(\\.debug)?\\.yml/",
           "command": "vscode-docker.compose.start",
           "group": "docker"
         },
         {
           "when": "resourceFilename =~ /docker-compose(\\.debug)?\\.yml/",
           "command": "vscode-docker.compose.stop",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /docker-compose(\\.debug)?\\.yml/",
+          "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
@@ -156,11 +156,6 @@
         },
         {
           "when": "resourceFilename =~ /docker-compose/i",
-          "command": "vscode-docker.compose.restart",
-          "group": "docker"
-        },
-        {
-          "when": "resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
@@ -172,6 +167,11 @@
         {
           "when": "resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.stop",
+          "group": "docker"
+        },
+        {
+          "when": "resourceFilename =~ /docker-compose/i",
+          "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
@@ -804,31 +804,31 @@
       {
         "command": "vscode-docker.compose.down",
         "title": "Compose Down",
-        "description": "Stops and removes a composition of containers",
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.compose.restart",
-        "title": "Compose Restart",
-        "description": "Restarts a composition of containers",
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.compose.start",
-        "title": "Compose Restart",
-        "description": "Builds and starts a composition of containers",
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.compose.stop",
-        "title": "Compose Restart",
-        "description": "Stops a composition of containers (non-destructive)",
+        "description": "Stops containers and removes containers, networks, volumes, and images created by Compose Up.",
         "category": "Docker"
       },
       {
         "command": "vscode-docker.compose.up",
         "title": "Compose Up",
-        "description": "Builds a composition of containers",
+        "description": "Builds, (re)creates, starts, and attaches to containers for a service.",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.compose.start",
+        "title": "Compose Start",
+        "description": "Starts existing containers for a service",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.compose.stop",
+        "title": "Compose Stop",
+        "description": "Stops running containers without removing them",
+        "category": "Docker"
+      },
+      {
+        "command": "vscode-docker.compose.restart",
+        "title": "Compose Restart",
+        "description": "Restarts all stopped and running services.",
         "category": "Docker"
       },
       {
