@@ -129,7 +129,7 @@ export class RootNode extends NodeBase {
                     groupedLabel = " (Grouped by Repository)";
                     break;
                 case ImageGrouping.RepositoryName:
-                    groupedLabel = " (Grouped by Repository Name)";
+                    groupedLabel = " (Grouped by Name)";
                     break;
                 default:
                     assert(false, `Unexpected groupImagesBy ${ext.groupImagesBy}`)
