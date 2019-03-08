@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
@@ -56,14 +56,21 @@ export class RegistryRootNode extends NodeBase {
     }
 
     public async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
-        if (element.contextValue === 'azureRegistryRootNode') {
-            return this.getAzureRegistries();
-        } else if (element.contextValue === 'dockerHubRootNode') {
-            return this.getDockerHubOrgs();
-        } else {
-            assert(element.contextValue === 'customRootNode');
-            return await this.getCustomRegistryNodes();
-        }
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'registryRootNode';
+
+            if (element.contextValue === 'azureRegistryRootNode') {
+                return me.getAzureRegistries();
+            } else if (element.contextValue === 'dockerHubRootNode') {
+                return me.getDockerHubOrgs();
+            } else {
+                assert(element.contextValue === 'customRootNode');
+                return await me.getCustomRegistryNodes();
+            }
+        });
     }
 
     private async getDockerHubOrgs(): Promise<(DockerHubOrgNode | DockerHubNotSignedInNode)[]> {
