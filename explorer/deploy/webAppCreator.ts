@@ -11,6 +11,7 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
+import { nonNullProp } from '../../utils/nonNull';
 import { AzureImageTagNode } from '../models/azureRegistryNodes';
 import { CustomImageTagNode } from '../models/customRegistryNodes';
 import { DockerHubImageTagNode } from '../models/dockerHubNodes';
@@ -414,30 +415,35 @@ class AppServicePlanStep extends WebAppCreatorStepBase {
 class WebsiteStep extends WebAppCreatorStepBase {
     private _website: WebSiteModels.Site;
     private _serverUrl: string;
-    private _serverUserName: string;
-    private _serverPassword: string;
+    private _serverUserName: string | undefined; // For ACR, username/pwd are filled in later
+    private _serverPassword: string | undefined;
     private _imageName: string;
-    private _imageSubscription: Subscription;
-    private _registry: Registry;
+    private _acrInfo: {
+        imageSubscription: Subscription;
+        registry: Registry;
+    } | undefined;
 
     constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode | CustomImageTagNode) {
         super(wizard, 'Create Web App', azureAccount);
 
-        this._serverUrl = context.serverUrl;
+        this._serverUrl = nonNullProp(context, 'serverUrl');
         if (context instanceof DockerHubImageTagNode) {
-            this._serverPassword = context.password;
-            this._serverUserName = context.userName;
+            this._serverPassword = nonNullProp(context, 'password');
+            this._serverUserName = nonNullProp(context, 'userName');
         } else if (context instanceof AzureImageTagNode) {
-            this._imageSubscription = context.subscription;
-            this._registry = context.registry;
+            this._acrInfo = {
+                imageSubscription: nonNullProp(context, 'subscription'),
+                registry: nonNullProp(context, 'registry')
+            };
         } else if (context instanceof CustomImageTagNode) {
-            this._serverPassword = context.registry.credentials.password;
-            this._serverUserName = context.registry.credentials.userName;
+            let credentials = nonNullProp(nonNullProp(context, 'registry'), 'credentials');
+            this._serverPassword = credentials.password;
+            this._serverUserName = credentials.userName;
         } else {
             throw Error(`Invalid context, cannot deploy to Azure App services from ${context}`);
         }
 
-        this._imageName = context.label;
+        this._imageName = nonNullProp(context, 'label');
 
     }
 
@@ -469,7 +475,7 @@ class WebsiteStep extends WebAppCreatorStepBase {
                 await vscode.window.showWarningMessage(nameAvailability.message);
             }
         }
-        await this.acquireRegistryLoginCredentials();
+        await this.acquireAcrRegistryLoginCredentials();
         let linuxFXVersion: string;
         if (this._serverUrl.length > 0) {
             // azure container registry
@@ -552,14 +558,20 @@ class WebsiteStep extends WebAppCreatorStepBase {
     }
 
     //Implements new Service principal model for ACR container registries while maintaining old admin enabled use
-    private async acquireRegistryLoginCredentials(): Promise<void> {
-        if (this._serverPassword && this._serverUserName) { return; }
+    private async acquireAcrRegistryLoginCredentials(): Promise<void> {
+        if (!this._acrInfo) {
+            return;
+        }
 
-        if (this._registry.adminUserEnabled) {
-            const client = new ContainerRegistryManagementClient(this.azureAccount.getCredentialByTenantId(this._imageSubscription.tenantId), this._imageSubscription.subscriptionId);
+        if (this._acrInfo.registry.adminUserEnabled) {
+            const client = new ContainerRegistryManagementClient(
+                this.azureAccount.getCredentialByTenantId(this._acrInfo.imageSubscription.tenantId),
+                this._acrInfo.imageSubscription.subscriptionId);
             addExtensionUserAgent(client);
-            const resourceGroup: string = this._registry.id.slice(this._registry.id.search('resourceGroups/') + 'resourceGroups/'.length, this._registry.id.search('/providers/'));
-            let creds = await client.registries.listCredentials(resourceGroup, this._registry.name);
+            const resourceGroup: string = this._acrInfo.registry.id.slice(
+                this._acrInfo.registry.id.search('resourceGroups/') + 'resourceGroups/'.length,
+                this._acrInfo.registry.id.search('/providers/'));
+            let creds = await client.registries.listCredentials(resourceGroup, this._acrInfo.registry.name);
             this._serverPassword = creds.passwords[0].value;
             this._serverUserName = creds.username;
         } else {
