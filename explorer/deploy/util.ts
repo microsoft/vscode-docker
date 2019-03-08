@@ -60,10 +60,3 @@ export function getWebAppPublishCredential(azureAccount: AzureAccountWrapper, su
     const websiteClient = new WebSiteManagementClient(credentials, getSubscriptionId(subscription));
     return websiteClient.webApps.listPublishingCredentials(nonNullProp(site, 'resourceGroup'), nonNullProp(site, 'name'));
 }
-
-// Output channel for the extension
-const outputChannel = vscode.window.createOutputChannel("Docker");
-
-export function getOutputChannel(): vscode.OutputChannel {
-    return outputChannel;
-}
