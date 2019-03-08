@@ -105,7 +105,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 }
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
-  // tslint:disable-next-line:no-debugger
   perfStats.loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);

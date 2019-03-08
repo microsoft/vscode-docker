@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext, ImageGrouping } from '../extensionVariables';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
 

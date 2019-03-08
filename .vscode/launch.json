@@ -34,7 +34,7 @@
 			"sourceMaps": true,
 			"preLaunchTask": "npm: pretest",
 			"env": {
-				"MOCHA_grep": "getImageLabel", // RegExp of tests to run (empty means all)
+				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
 				"MOCHA_enableTimeouts": "0", // Disable time-outs
 				"DEBUGTELEMETRY": "1",
 				"NODE_DEBUG": ""
