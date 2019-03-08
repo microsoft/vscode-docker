@@ -91,7 +91,9 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.ui = new AzureUserInput(ctx.globalState);
   }
   ext.context = ctx;
-  ext.outputChannel = util.getOutputChannel();
+
+  ext.outputChannel = vscode.window.createOutputChannel("Docker");
+
   if (!ext.terminalProvider) {
     ext.terminalProvider = new DefaultTerminalProvider();
   }

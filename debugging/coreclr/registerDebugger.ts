@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { DefaultAppStorageProvider } from './appStorage';
 import OpnBrowserClient from './browserClient';
 import { DefaultDebuggerClient } from './debuggerClient';
@@ -28,11 +29,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
     const msBuildClient = new CommandLineDotNetClient(processProvider);
     const osProvider = new LocalOSProvider();
 
-    const dockerOutputChannel = vscode.window.createOutputChannel('Docker');
-
-    ctx.subscriptions.push(dockerOutputChannel);
-
-    const dockerOutputManager = new DefaultOutputManager(dockerOutputChannel);
+    const dockerOutputManager = new DefaultOutputManager(ext.outputChannel);
 
     const dockerManager =
         new DefaultDockerManager(
