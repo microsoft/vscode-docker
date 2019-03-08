@@ -50,7 +50,6 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
-import * as util from './explorer/deploy/util';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorer';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
@@ -93,6 +92,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   ext.context = ctx;
 
   ext.outputChannel = vscode.window.createOutputChannel("Docker");
+  ctx.subscriptions.push(ext.outputChannel);
 
   if (!ext.terminalProvider) {
     ext.terminalProvider = new DefaultTerminalProvider();
