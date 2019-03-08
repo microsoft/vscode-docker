@@ -5,7 +5,6 @@
 
 import * as assert from 'assert';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
-import * as ContainerOps from 'azure-arm-containerregistry/lib/operations';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -15,7 +14,7 @@ import { AzureAccount } from '../../typings/azure-account.api';
 import { AsyncPool } from '../../utils/asyncpool';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { getLoginServer } from '../../utils/nonNull';
-import * as dockerHub from '../utils/dockerHubUtils'
+import * as dockerHub from '../utils/dockerHubUtils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
 import { getCustomRegistries } from './customRegistries';
 import { CustomRegistryNode } from './customRegistryNodes';
@@ -67,9 +66,7 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 
-    private async getDockerHubOrgs(): Promise<DockerHubOrgNode[]> {
-        const orgNodes: DockerHubOrgNode[] = [];
-
+    private async getDockerHubOrgs(): Promise<(DockerHubOrgNode | DockerHubNotSignedInNode)[]> {
         let id: { username: string, password: string, token: string } | undefined;
 
         if (ext.keytar) {
@@ -81,29 +78,25 @@ export class RegistryRootNode extends NodeBase {
             }
         }
 
-        if (!id) {
-            id = await dockerHub.dockerHubLogin();
+        if (id && id.token) {
+            const orgNodes: DockerHubOrgNode[] = [];
 
-            if (id && id.token && ext.keytar) {
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
-            } else {
-                return orgNodes;
-            }
-        } else {
             dockerHub.setDockerHubToken(id.token);
+
+            if (id && id.token) {
+                const user: dockerHub.User = await dockerHub.getUser();
+                const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
+                const namespaces = [...new Set(myRepos.map(item => item.namespace))];
+                namespaces.forEach((namespace) => {
+                    let node = new DockerHubOrgNode(`${namespace}`, id.username, id.password, id.token);
+                    orgNodes.push(node);
+                });
+            }
+
+            return orgNodes;
+        } else {
+            return [new DockerHubNotSignedInNode()];
         }
-
-        const user: dockerHub.User = await dockerHub.getUser();
-        const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-        const namespaces = [...new Set(myRepos.map(item => item.namespace))];
-        namespaces.forEach((namespace) => {
-            let node = new DockerHubOrgNode(`${namespace}`, id.username, id.password, id.token);
-            orgNodes.push(node);
-        });
-
-        return orgNodes;
     }
 
     private async getCustomRegistryNodes(): Promise<CustomRegistryNode[]> {
@@ -186,6 +179,25 @@ export class RegistryRootNode extends NodeBase {
             return azureRegistryNodes;
         } else {
             return [];
+        }
+    }
+}
+
+export class DockerHubNotSignedInNode extends NodeBase {
+    constructor() {
+        super('Sign in to Docker Hub...');
+    }
+
+    public readonly contextValue: string = 'dockerHubNotSignedInNode';
+
+    public getTreeItem(): vscode.TreeItem {
+        return {
+            label: this.label,
+            command: {
+                title: this.label,
+                command: 'vscode-docker.dockerHubLogin'
+            },
+            collapsibleState: vscode.TreeItemCollapsibleState.None
         }
     }
 }

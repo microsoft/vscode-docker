@@ -58,6 +58,7 @@
     "onCommand:vscode-docker.container.stop",
     "onCommand:vscode-docker.createWebApp",
     "onCommand:vscode-docker.disconnectCustomRegistry",
+    "onCommand:vscode-docker.dockerHubLogin",
     "onCommand:vscode-docker.dockerHubLogout",
     "onCommand:vscode-docker.explorer.refresh",
     "onCommand:vscode-docker.image.build",
@@ -882,8 +883,13 @@
         "category": "Docker"
       },
       {
+        "command": "vscode-docker.dockerHubLogin",
+        "title": "Log In to Docker Hub",
+        "category": "Docker"
+      },
+      {
         "command": "vscode-docker.dockerHubLogout",
-        "title": "Docker Hub Logout",
+        "title": "Log Out of Docker Hub",
         "category": "Docker"
       },
       {
