@@ -50,7 +50,6 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
-import * as util from './explorer/deploy/util';
 import { WebAppCreator } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
@@ -61,7 +60,7 @@ import { ImageNode } from './explorer/models/imageNode';
 import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
-import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { browseDockerHub, dockerHubLogin, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext, ImageGrouping } from './extensionVariables';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
@@ -92,7 +91,10 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.ui = new AzureUserInput(ctx.globalState);
   }
   ext.context = ctx;
-  ext.outputChannel = util.getOutputChannel();
+
+  ext.outputChannel = vscode.window.createOutputChannel("Docker");
+  ctx.subscriptions.push(ext.outputChannel);
+
   if (!ext.terminalProvider) {
     ext.terminalProvider = new DefaultTerminalProvider();
   }
@@ -262,10 +264,10 @@ function registerCommand(
 
 // tslint:disable-next-line:max-func-body-length
 function registerDockerCommands(): void {
-  dockerExplorerProvider = new DockerExplorerProvider();
+  ext.dockerExplorerProvider = new DockerExplorerProvider();
   vscode.window.registerTreeDataProvider(
     'dockerExplorer',
-    dockerExplorerProvider
+    ext.dockerExplorerProvider
   );
 
   registerCommand('vscode-docker.images.cycleGroupBy', cycleGroupImagesBy);
@@ -308,7 +310,8 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context));
   registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
   registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-  registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
+  registerCommand('vscode-docker.dockerHubLogin', dockerHubLogin);
+  registerCommand('vscode-docker.explorer.refresh', () => ext.dockerExplorerProvider.refresh());
 
   registerCommand('vscode-docker.image.build', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await buildImage(this, item); });
   registerCommand('vscode-docker.image.inspect', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await inspectImage(this, node); });

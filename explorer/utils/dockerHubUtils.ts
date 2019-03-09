@@ -105,29 +105,47 @@ export interface Manifest {
     schemaVersion: number;
 }
 
+export function isLoggedIn(): boolean {
+    return !!_token;
+}
+
 export async function dockerHubLogout(): Promise<void> {
     if (ext.keytar) {
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
-    _token = null;
+
+    if (_token) {
+        ext.dockerExplorerProvider.refreshRegistries();
+        _token = null;
+    }
 }
 
 export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
+    let id = await coreLogIn();
 
+    if (id && id.token && ext.keytar) {
+        await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
+        await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
+        await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
+    }
+
+    return id;
+}
+
+async function coreLogIn(): Promise<{ username: string, password: string, token: string }> {
     const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
     if (username) {
         const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
         if (password) {
             _token = await login(username, password);
             if (_token) {
+                ext.dockerExplorerProvider.refreshRegistries();
                 return { username: username, password: password, token: _token.token };
             }
         }
     }
-
-    return;
 }
 
 export function setDockerHubToken(token: string): void {
