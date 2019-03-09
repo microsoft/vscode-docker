@@ -54,7 +54,6 @@ suite('getImageLabel: full tag truncated', () => {
     testGetImageLabelTruncated('registry.gitlab.com/sweatherford/hello-world/sub:latest', '{fullTag}', true, 7, 're...om/sweatherford/hello-world/sub:latest');
     testGetImageLabelTruncated('127.0.0.1:5443/registry:v2', '{fullTag}', true, 7, '12...43/registry:v2');
     testGetImageLabelTruncated('127.0.0.1:5443/hello-world/sub:latest', '{fullTag}', true, 7, '12...43/hello-world/sub:latest');
-    testGetImageLabelTruncated('127.0.0.1:5443/hello-world/sub:latest', '{fullTag}', true, 7, '12...43/hello-world/sub:latest');
 });
 
 suite('getImageLabel: repository truncated', () => {
@@ -67,9 +66,8 @@ suite('getImageLabel: repository truncated', () => {
     testGetImageLabelTruncated('abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest', '{repository}', true, 10, 'abc...wxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz');
     testGetImageLabelTruncated('abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest', '{repository}', true, 10, 'abc...wxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz');
     testGetImageLabelTruncated('registry.gitlab.com/sweatherford/hello-world/sub:latest', '{repository}', true, 7, 're...om/sweatherford/hello-world/sub');
-    testGetImageLabelTruncated('127.0.0.1:5443/registry:v2', '{fullTag}', true, 7, '12...43/registry:v2');
-    testGetImageLabelTruncated('127.0.0.1:5443/hello-world/sub:latest', '{fullTag}', true, 7, '12...43/hello-world/sub:latest');
-    testGetImageLabelTruncated('127.0.0.1:5443/hello-world/sub:latest', '{fullTag}', true, 7, '12...43/hello-world/sub:latest');
+    testGetImageLabelTruncated('127.0.0.1:5443/registry:v2', '{repository}', true, 7, '12...43/registry');
+    testGetImageLabelTruncated('127.0.0.1:5443/hello-world/sub:latest', '{repository}', true, 7, '12...43/hello-world/sub');
 });
 
 suite('getImageLabel: fullTag', () => {

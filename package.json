@@ -797,7 +797,7 @@
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
         },
-        "category": "Azure Storage"
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.images.groupBy.none",
@@ -806,7 +806,7 @@
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
         },
-        "category": "Azure Storage"
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.images.groupBy.imageId",
@@ -815,7 +815,7 @@
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
         },
-        "category": "Azure Storage"
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.images.groupBy.repository",
@@ -824,7 +824,7 @@
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
         },
-        "category": "Azure Storage"
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.images.groupBy.repositoryName",
@@ -833,7 +833,7 @@
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
         },
-        "category": "Azure Storage"
+        "category": "Docker"
       },
       {
         "command": "vscode-docker.acr.createRegistry",

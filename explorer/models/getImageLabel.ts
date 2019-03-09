@@ -50,7 +50,7 @@ function truncate(partialTag: string, options: { truncateLongRegistryPaths: bool
         let truncateMaxLength = config.get<number>('truncateMaxLength');
         options = {
             truncateLongRegistryPaths: typeof truncateLongRegistryPaths === "boolean" ? truncateLongRegistryPaths : false,
-            truncateMaxLength: typeof truncateMaxLength === 'number' ? truncateMaxLength : 0
+            truncateMaxLength: typeof truncateMaxLength === 'number' ? truncateMaxLength : 10
         }
     }
 
