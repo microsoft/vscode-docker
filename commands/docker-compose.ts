@@ -69,9 +69,9 @@ async function compose(commands: composeOperation[], message: string, dockerComp
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (let command of commands) {
-        selectedItems.forEach((item: Item) => {
-            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
-        });
+        let fileSpecifiers: string = selectedItems.map((item: Item) => `-f "${item.file}"`).join(" ");
+
+        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose  ${command} ${fileSpecifiers} ${detached} ${build}` : `docker-compose ${fileSpecifiers} ${command}`);
         terminal.show();
     }
 
