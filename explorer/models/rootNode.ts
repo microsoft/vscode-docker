@@ -336,20 +336,20 @@ export class RootNode extends NodeBase {
                     if (['exited', 'dead'].includes(container.State)) {
                         contextValue = "stoppedLocalContainerNode";
                         iconPath = {
-                            light: path.join(imagesPath, 'light', 'stoppedContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'stoppedContainer.svg')
+                            light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
+                            dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
                         };
                     } else if (me.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
                         iconPath = {
-                            light: path.join(imagesPath, 'light', 'unhealthyContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'unhealthyContainer.svg')
+                            light: path.join(imagesPath, 'light', 'StatusWarning_16x.svg'),
+                            dark: path.join(imagesPath, 'dark', 'StatusWarning_16x.svg'),
                         };
                     } else {
                         contextValue = "runningLocalContainerNode";
                         iconPath = {
-                            light: path.join(imagesPath, 'light', 'runningContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'runningContainer.svg')
+                            light: path.join(imagesPath, 'light', 'StatusRun_16x.svg'),
+                            dark: path.join(imagesPath, 'dark', 'StatusRun_16x.svg'),
                         };
                     }
 
