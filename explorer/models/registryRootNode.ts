@@ -185,7 +185,7 @@ export class RegistryRootNode extends NodeBase {
 
 export class DockerHubNotSignedInNode extends NodeBase {
     constructor() {
-        super('Sign in to Docker Hub...');
+        super('Log In to Docker Hub...');
     }
 
     public readonly contextValue: string = 'dockerHubNotSignedInNode';
