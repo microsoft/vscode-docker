@@ -9,10 +9,18 @@ import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel } from "vscode";
 import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ITerminalProvider } from "./commands/utils/TerminalProvider";
-import { DockerExplorerProvider } from './explorer/dockerExplorer';
+import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
 import { IKeytar } from './utils/keytar';
 
 type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
+
+export enum ImageGrouping {
+    None,
+    Repository,
+    RepositoryName,
+    ImageId
+}
+export const DefaultImageGrouping = ImageGrouping.Repository;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -38,4 +46,6 @@ export namespace ext {
         platform: osNode.platform(),
         release: osNode.release()
     };
+
+    export let groupImagesBy: ImageGrouping = ImageGrouping.ImageId;
 }

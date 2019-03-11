@@ -8,12 +8,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, throwDockerConnectionError, internal } from '../extension.bundle';
-import { Suite, Test, Context } from 'mocha';
-import { parseError, IActionContext } from 'vscode-azureextensionui';
+import { Suite } from 'mocha';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { ext, internal, throwDockerConnectionError } from '../extension.bundle';
 import { testUrl } from './testUrl';
 
 suite("throwDockerConnectionError", async function (this: Suite): Promise<void> {
+    this.timeout(4000);
+
     suite("connection error URLs", async function (this: Suite): Promise<void> {
         testUrl(internal.installDockerUrl);
         testUrl(internal.linuxPostInstallUrl);

@@ -3,16 +3,21 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
 import { imagesPath } from '../../constants';
+import { ext, ImageGrouping } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { showDockerConnectionError } from '../utils/dockerConnectionError';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ErrorNode } from './errorNode';
+import { getContainerLabel } from './getContainerLabel';
+import { getImageLabel } from './getImageLabel';
+import { ImageGroupNode } from './imageGroupNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
@@ -43,11 +48,23 @@ export class RootNode extends NodeBase {
         public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
-        if (this.contextValue === 'imagesRootNode') {
+        if (this.isImages) {
             this._imagesNode = this;
-        } else if (this.contextValue === 'containersRootNode') {
+        } else if (this.isContainers) {
             this._containersNode = this;
         }
+    }
+
+    private get isImages(): boolean {
+        return this.contextValue === "imagesRootNode";
+    }
+
+    private get isContainers(): boolean {
+        return this.contextValue === "containersRootNode";
+    }
+
+    private get isRegistries(): boolean {
+        return this.contextValue === "registriesRootNode";
     }
 
     public autoRefreshImages(): void {
@@ -98,10 +115,36 @@ export class RootNode extends NodeBase {
     }
 
     public getTreeItem(): vscode.TreeItem {
+        let label = this.label;
+        let id = this.label;
+
+        if (this.isImages) {
+            let groupedLabel = "";
+
+            switch (ext.groupImagesBy) {
+                case ImageGrouping.None:
+                    break;
+                case ImageGrouping.ImageId:
+                    groupedLabel = " (Grouped by Image Id)";
+                    break;
+                case ImageGrouping.Repository:
+                    groupedLabel = " (Grouped by Repository)";
+                    break;
+                case ImageGrouping.RepositoryName:
+                    groupedLabel = " (Grouped by Name)";
+                    break;
+                default:
+                    assert(false, `Unexpected groupImagesBy ${ext.groupImagesBy}`)
+            }
+
+            label += groupedLabel;
+        }
+
         return {
-            label: this.label,
+            label,
+            id,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-            contextValue: this.contextValue
+            contextValue: this.contextValue,
         }
 
     }
@@ -109,7 +152,7 @@ export class RootNode extends NodeBase {
     public async getChildren(element: RootNode): Promise<NodeBase[]> {
         switch (element.contextValue) {
             case 'imagesRootNode': {
-                return this.getImages();
+                return this.getImageNodes();
             }
             case 'containersRootNode': {
                 return this.getContainers();
@@ -123,41 +166,89 @@ export class RootNode extends NodeBase {
         }
     }
 
-    private async getImages(): Promise<(ImageNode | ErrorNode)[]> {
+    // tslint:disable:max-func-body-length cyclomatic-complexity
+    private async getImageNodes(): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
         // tslint:disable-next-line:no-this-assignment
         let me = this;
 
-        return await callWithTelemetryAndErrorHandling('getChildren.images', async function (this: IActionContext): Promise<(ImageNode | ErrorNode)[]> {
-            const imageNodes: ImageNode[] = [];
-            let images: Docker.ImageDesc[];
+        return await callWithTelemetryAndErrorHandling('getChildren.images', async function (this: IActionContext): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
+            this.properties.groupImagesBy = ImageGrouping[ext.groupImagesBy];
 
+            // Determine templates to use
+            let groupLabelTemplate: string;
+            let leafLabelTemplate: string;
+            switch (ext.groupImagesBy) {
+                case ImageGrouping.None:
+                    groupLabelTemplate = undefined; // (no group nodes)
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    break;
+                case ImageGrouping.ImageId:
+                    groupLabelTemplate = '{shortImageId}';
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    break;
+                case ImageGrouping.Repository:
+                    groupLabelTemplate = '{repository}';
+                    leafLabelTemplate = '{tag} ({createdSince})';
+                    break;
+                case ImageGrouping.RepositoryName:
+                    groupLabelTemplate = '{repositoryName}';
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    break;
+                default:
+                    assert(`Unexpected groupImagesBy ${ext.groupImagesBy}`);
+            }
+
+            // Get image descriptors
+            let descriptors: Docker.ImageDesc[];
             try {
-                images = await docker.getImageDescriptors(imageFilters);
-                if (!images || images.length === 0) {
+                descriptors = await docker.getImageDescriptors(imageFilters);
+                if (!descriptors || descriptors.length === 0) {
                     return [];
-                }
-
-                for (let image of images) {
-                    if (!image.RepoTags) {
-                        let node = new ImageNode(`<none>:<none>`, image, me.eventEmitter);
-                        node.imageDesc = image;
-                        imageNodes.push(node);
-                    } else {
-                        for (let repoTag of image.RepoTags) {
-                            let node = new ImageNode(`${repoTag}`, image, me.eventEmitter);
-                            node.imageDesc = image;
-                            imageNodes.push(node);
-                        }
-                    }
                 }
             } catch (error) {
                 let newError = showDockerConnectionError(this, error);
                 return [new ErrorNode(newError, ErrorNode.getImagesErrorContextValue)]
             }
 
+            // Get leaf image nodes
+            const imageNodes: ImageNode[] = [];
+            for (let descriptor of descriptors) {
+                if (!descriptor.RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, descriptor, leafLabelTemplate);
+                    imageNodes.push(node);
+                } else {
+                    for (let fullTag of descriptor.RepoTags) {
+                        let node = new ImageNode(fullTag, descriptor, leafLabelTemplate);
+                        imageNodes.push(node);
+                    }
+                }
+            }
+
+            // Get top-level nodes
+            let topLevelNodes: (ImageNode | ImageGroupNode | ErrorNode)[];
+            if (groupLabelTemplate) {
+                const groupsMap = new Map<string, ImageGroupNode>();
+                for (let imageNode of imageNodes) {
+                    let groupLabel = getImageLabel(imageNode.fullTag, imageNode.imageDesc, groupLabelTemplate);
+                    if (!groupsMap.has(groupLabel)) {
+                        // Need a new top-level group node
+                        let groupNode = new ImageGroupNode(groupLabel);
+                        groupsMap.set(groupLabel, groupNode);
+                    }
+
+                    // Add image to the group node
+                    groupsMap.get(groupLabel).children.push(imageNode);
+                }
+
+                topLevelNodes = Array.from(groupsMap.values());
+            } else {
+                // No grouping
+                topLevelNodes = imageNodes;
+            }
+
             me.autoRefreshImages();
 
-            return imageNodes;
+            return topLevelNodes;
         });
     }
 
@@ -262,7 +353,8 @@ export class RootNode extends NodeBase {
                         };
                     }
 
-                    let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
+                    let label = getContainerLabel(container, '{image} ({name}) ({status})');
+                    let containerNode: ContainerNode = new ContainerNode(label, container, contextValue, iconPath);
                     containerNodes.push(containerNode);
                 }
             } catch (error) {
