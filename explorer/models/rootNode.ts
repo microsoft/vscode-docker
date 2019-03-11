@@ -34,6 +34,14 @@ const containerFilters: GetContainerDescOptions = {
     }
 };
 
+type ContainerState = // https://docs.docker.com/engine/api/v1.21/
+    'created' |       // A container that has been created(e.g.with docker create) but not started
+    'restarting' |    // A container that is in the process of being restarted
+    'running' |       // A currently running container
+    'paused' |        // A container whose processes have been paused
+    'exited' |        // A container that ran and completed("stopped" in other contexts, although a created container is technically also "stopped")
+    'dead';           // A container that the daemon tried and failed to stop(usually due to a busy device or resource used by the c = container.State;
+
 export class RootNode extends NodeBase {
     private _sortedImageCache: Docker.ImageDesc[] | undefined;
     private _imageDebounceTimer: NodeJS.Timer | undefined;
@@ -333,24 +341,50 @@ export class RootNode extends NodeBase {
                 }
 
                 for (let container of containers) {
-                    if (['exited', 'dead'].includes(container.State)) {
+                    let state: ContainerState = <ContainerState>container.State;
+
+                    // Determine icon
+                    switch (state) {
+                        case "dead":
+                        case "exited":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
+                            };
+                            break;
+                        case "paused":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusPause_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusPause_16x.svg'),
+                            };
+                            break;
+                        case "created":
+                        case "restarting":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'Restart_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'Restart_16x.svg'),
+                            };
+                            break;
+                        case "running":
+                        default:
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusRun_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusRun_16x.svg'),
+                            };
+                    }
+
+                    // Determine contextValue
+                    if (['exited', 'dead'].includes(state)) {
                         contextValue = "stoppedLocalContainerNode";
-                        iconPath = {
-                            light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
-                            dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
-                        };
                     } else if (me.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
+                        // Override icon from above
                         iconPath = {
                             light: path.join(imagesPath, 'light', 'StatusWarning_16x.svg'),
                             dark: path.join(imagesPath, 'dark', 'StatusWarning_16x.svg'),
                         };
                     } else {
                         contextValue = "runningLocalContainerNode";
-                        iconPath = {
-                            light: path.join(imagesPath, 'light', 'StatusRun_16x.svg'),
-                            dark: path.join(imagesPath, 'dark', 'StatusRun_16x.svg'),
-                        };
                     }
 
                     let label = getContainerLabel(container, '{image} ({name}) ({status})');
