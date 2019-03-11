@@ -17,10 +17,10 @@ type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, Required
 export enum ImageGrouping {
     None,
     Repository,
-    default = Repository,
     RepositoryName,
     ImageId
 }
+export const DefaultImageGrouping = ImageGrouping.Repository;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts

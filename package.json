@@ -1,6 +1,7 @@
 {
   "name": "vscode-docker",
   "version": "0.5.3-alpha",
+  "preview": true,
   "publisher": "PeterJausovec",
   "displayName": "Docker",
   "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
@@ -109,10 +110,6 @@
         {
           "command": "vscode-docker.images.groupBy.repositoryName",
           "when": "never"
-        },
-        {
-          "command": "vscode-docker.images.cycleGroupBy",
-          "when": "never"
         }
       ],
       "editor/context": [
@@ -208,7 +205,7 @@
       ],
       "view/item/context": [
         {
-          "command": "vscode-docker.images.cycleGroupBy",
+          "command": "vscode-docker.images.selectGroupBy",
           "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
           "group": "inline"
         },
@@ -612,6 +609,17 @@
           "default": 1000,
           "description": "Explorer refresh interval, default is 1000ms"
         },
+        "docker.groupImagesBy": {
+          "type": "string",
+          "default": "Repository",
+          "description": "How to group items in the treeview Images node",
+          "enum": [
+            "None",
+            "Repository",
+            "RepositoryName",
+            "ImageId"
+          ]
+        },
         "docker.imageBuildContextPath": {
           "type": "string",
           "default": "",
@@ -792,8 +800,8 @@
     },
     "commands": [
       {
-        "command": "vscode-docker.images.cycleGroupBy",
-        "title": "Cycle Group By",
+        "command": "vscode-docker.images.selectGroupBy",
+        "title": "Group Images By...",
         "icon": {
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
