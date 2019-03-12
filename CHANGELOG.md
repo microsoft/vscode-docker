@@ -1,3 +1,27 @@
+## 0.6.0 - 12 March 2019
+
+### Added
+* Group By options for Images node [#603](https://github.com/Microsoft/vscode-docker/issues/603)
+* Add debugging and dockerfile creation for fsharp dotnet core projects (Thanks, @gdziadkiewicz) [#795](https://github.com/Microsoft/vscode-docker/pull/795)
+* Add support for Redstone 5 (Thanks, @tfenster) [#804](https://github.com/Microsoft/vscode-docker/pull/804)
+* Allow more customization of Docker run configuration (thanks @ismael-soriano)[#690](https://github.com/Microsoft/vscode-docker/pull/690/files)
+* Add `network` option to Docker run configuration [#748](https://github.com/Microsoft/vscode-docker/pull/748)
+
+### Fixed
+* Use colorblind-friendly icons [#811](https://github.com/Microsoft/vscode-docker/issues/811)
+* Don't ask to save registry path if no workspace [#824](https://github.com/Microsoft/vscode-docker/pull/824)
+* Two "Docker" tabs in output view [#715](https://github.com/Microsoft/vscode-docker/issues/715)
+* Error when deploying images to Azure App Service for a private registry with no authentication [#550](https://github.com/Microsoft/vscode-docker/issues/550)
+* Improve Docker Hub login experience [#429](https://github.com/Microsoft/vscode-docker/issues/429), [#375](https://github.com/Microsoft/vscode-docker/issues/375), [#817](https://github.com/Microsoft/vscode-docker/issues/817)
+* Resolve .NET Core debugging on Windows (Thanks, @gdziadkiewicz) [#798](https://github.com/Microsoft/vscode-docker/pull/798)
+* Earlier validation of Docker .NET Core configuration [#747](https://github.com/Microsoft/vscode-docker/pull/747)
+* [.NET Core Debugging] Add support for Alpine images [#771](https://github.com/Microsoft/vscode-docker/pull/771)
+* Support for ${workspaceFolder} in dockerRun/Volumes localPath and containerPath [#785](https://github.com/Microsoft/vscode-docker/issues/785)
+* Cannot read property 'useCertificateStore' of undefined [#735](https://github.com/Microsoft/vscode-docker/issues/735)
+* Operation cancelled error shows up when any user action is cancelled [#718](https://github.com/Microsoft/vscode-docker/issues/718)
+* Error showing logs if there are no running containers [#739](https://github.com/Microsoft/vscode-docker/issues/739)
+* Wrong DOCKER_HOST config when using docker.host configuration (thanks @ntcong) [#649](https://github.com/Microsoft/vscode-docker/issues/649)
+
 ## 0.5.2 - 30 January 2019
 
 ### Fixed
