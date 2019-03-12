@@ -15,15 +15,15 @@ import { docker } from './docker-endpoint';
 import { Item } from './quick-pick-file';
 
 export interface ImageItem extends vscode.QuickPickItem {
-    label: string;
+    label: string; // This is the full tag of the image
     imageDesc: Docker.ImageDesc;
     allImages: boolean;
 }
 
-function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
+function createItem(image: Docker.ImageDesc, fullTag: string): ImageItem {
     return <ImageItem>{
-        label: repoTag || '<none>',
-        imageDesc: image
+        label: fullTag,
+        imageDesc: image,
     };
 }
 
