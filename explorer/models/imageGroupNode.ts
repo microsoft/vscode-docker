@@ -12,7 +12,8 @@ import { NodeBase } from './nodeBase';
 export class ImageGroupNode extends NodeBase {
 
     constructor(
-        public readonly label: string
+        public readonly label: string,
+        public readonly iconName: string
     ) {
         super(label);
     }
@@ -28,8 +29,8 @@ export class ImageGroupNode extends NodeBase {
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: this.contextValue,
             iconPath: {
-                light: path.join(imagesPath, 'light', 'application.svg'),
-                dark: path.join(imagesPath, 'dark', 'application.svg')
+                light: path.join(imagesPath, 'light', this.iconName),
+                dark: path.join(imagesPath, 'dark', this.iconName)
             }
         }
     }
