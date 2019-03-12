@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.5.3-alpha",
+  "version": "0.6.0",
   "preview": true,
   "publisher": "PeterJausovec",
   "displayName": "Docker",
