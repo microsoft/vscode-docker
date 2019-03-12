@@ -347,6 +347,7 @@ export class RootNode extends NodeBase {
                     switch (state) {
                         case "dead":
                         case "exited":
+                        case "created":
                             iconPath = {
                                 light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
                                 dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
@@ -358,7 +359,6 @@ export class RootNode extends NodeBase {
                                 dark: path.join(imagesPath, 'dark', 'StatusPause_16x.svg'),
                             };
                             break;
-                        case "created":
                         case "restarting":
                             iconPath = {
                                 light: path.join(imagesPath, 'light', 'Restart_16x.svg'),

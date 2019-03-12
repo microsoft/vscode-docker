@@ -9,8 +9,7 @@ import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { docker, DockerEngineType, ListContainerDescOptions } from './utils/docker-endpoint';
-import { ContainerItem, quickPickContainer } from './utils/quick-pick-container';
-const teleCmdId: string = 'vscode-docker.container.open-shell';
+import { quickPickContainer } from './utils/quick-pick-container';
 
 function getEngineTypeShellCommands(engineType: DockerEngineType): string {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
