@@ -1,4 +1,4 @@
-## 0.6.0 - 12 February 2019
+## 0.6.0 - 12 March 2019
 
 ### Added
 * Group By options for Images node [#603](https://github.com/Microsoft/vscode-docker/issues/603)
