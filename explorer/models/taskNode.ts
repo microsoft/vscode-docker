@@ -44,8 +44,6 @@ export class TaskRootNode extends NodeBase {
 
     /* Making a list view of TaskNodes, or the Tasks of the current registry */
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
         return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<TaskNode[]> {
             this.suppressTelemetry = true;
             this.properties.source = 'taskRootNode';
