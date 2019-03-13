@@ -237,26 +237,25 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     let rg: ResourceGroup = (<ResourceGroupStep>wizard.findStep(step => step instanceof ResourceGroupStep, "Resource Group step not executed")).resourceGroup;
     let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
     let webhookName: string = `webapp${websiteStep.website.name}`;
-    let appLocation: string = websiteStep.website.location;
-    let appURI = `${website.name}.scm.azurewebsites.net/docker/hook`;
+    let appURI = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
 
     const registryList = await crmClient.registries.list();
-    if (!registryList.find((value) => value.name === websiteStep.registry.name)) {
-      throw new Error("We could not find the registry associated with the web app.");
-    }
+    const registryHandle = registryList.find((value) => value.name === websiteStep.registry.name);
+    let webhookLocation: string = registryHandle.location;
 
     let webhookCreateParameters: WebhookCreateParameters = {
-      location: appLocation,
+      location: webhookLocation,
       serviceUri: appURI,
       scope: AzureImageTagNode.getImageNameWithTag(context.repositoryName, context.tag),
-      actions: ["push"]
+      actions: ["push"],
+      status: 'enabled'
     };
     const webhook = await crmClient.webhooks.create(rg.name, websiteStep.registry.name, webhookName, webhookCreateParameters);
     ext.outputChannel.appendLine(`Created webhook ${webhook.name} with tag ${webhook.tags}, id: ${webhook.id}`);
 
   } else {
-    // point to dockerhub to reate a webhook
-    // http://cloud.docker.com/repository/<registryName>/<repoName>/webHooks
+    // point to dockerhub to create a webhook
+    // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
     // registryname === username for dockerhub
 
   }
