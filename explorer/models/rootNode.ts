@@ -177,22 +177,27 @@ export class RootNode extends NodeBase {
             // Determine templates to use
             let groupLabelTemplate: string;
             let leafLabelTemplate: string;
+            let groupIconName: string;
             switch (ext.groupImagesBy) {
                 case ImageGrouping.None:
                     groupLabelTemplate = undefined; // (no group nodes)
                     leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = '';
                     break;
                 case ImageGrouping.ImageId:
                     groupLabelTemplate = '{shortImageId}';
                     leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = 'ApplicationGroup_16x.svg';
                     break;
                 case ImageGrouping.Repository:
                     groupLabelTemplate = '{repository}';
                     leafLabelTemplate = '{tag} ({createdSince})';
+                    groupIconName = 'Repository_16x.svg';
                     break;
                 case ImageGrouping.RepositoryName:
                     groupLabelTemplate = '{repositoryName}';
                     leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = 'ApplicationGroup_16x.svg';
                     break;
                 default:
                     assert(`Unexpected groupImagesBy ${ext.groupImagesBy}`);
@@ -232,7 +237,7 @@ export class RootNode extends NodeBase {
                     let groupLabel = getImageLabel(imageNode.fullTag, imageNode.imageDesc, groupLabelTemplate);
                     if (!groupsMap.has(groupLabel)) {
                         // Need a new top-level group node
-                        let groupNode = new ImageGroupNode(groupLabel);
+                        let groupNode = new ImageGroupNode(groupLabel, groupIconName);
                         groupsMap.set(groupLabel, groupNode);
                     }
 

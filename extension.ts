@@ -266,10 +266,6 @@ function registerDockerCommands(): void {
   );
 
   registerCommand('vscode-docker.images.selectGroupBy', selectGroupImagesBy);
-  registerCommand('vscode-docker.images.groupBy.none', () => groupImagesBy(ImageGrouping.None));
-  registerCommand('vscode-docker.images.groupBy.repository', () => groupImagesBy(ImageGrouping.Repository));
-  registerCommand('vscode-docker.images.groupBy.imageId', () => groupImagesBy(ImageGrouping.ImageId));
-  registerCommand('vscode-docker.images.groupBy.repositoryName', () => groupImagesBy(ImageGrouping.RepositoryName));
   registerCommand('vscode-docker.acr.createRegistry', createRegistry);
   registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);

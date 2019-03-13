@@ -66,6 +66,7 @@
     "onCommand:vscode-docker.image.inspect",
     "onCommand:vscode-docker.image.push",
     "onCommand:vscode-docker.image.remove",
+    "onCommand:vscode-docker.images.selectGroupBy",
     "onCommand:vscode-docker.image.tag",
     "onCommand:vscode-docker.setRegistryAsDefault",
     "onCommand:vscode-docker.system.prune",
@@ -93,22 +94,6 @@
         },
         {
           "command": "vscode-docker.setRegistryAsDefault",
-          "when": "never"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.none",
-          "when": "never"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.imageId",
-          "when": "never"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.repository",
-          "when": "never"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.repositoryName",
           "when": "never"
         }
       ],
@@ -293,26 +278,6 @@
           "command": "vscode-docker.container.show-logs",
           "when": "view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
           "group": "default"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.none",
-          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
-          "group": "9_grouping@1"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.repository",
-          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
-          "group": "9_grouping@2"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.repositoryName",
-          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
-          "group": "9_grouping@3"
-        },
-        {
-          "command": "vscode-docker.images.groupBy.imageId",
-          "when": "view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
-          "group": "9_grouping@4"
         },
         {
           "command": "vscode-docker.container.start",
@@ -802,42 +767,6 @@
       {
         "command": "vscode-docker.images.selectGroupBy",
         "title": "Group Images By...",
-        "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
-        },
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.images.groupBy.none",
-        "title": "No Grouping",
-        "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
-        },
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.images.groupBy.imageId",
-        "title": "Group by Image ID",
-        "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
-        },
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.images.groupBy.repository",
-        "title": "Group by Repository",
-        "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
-        },
-        "category": "Docker"
-      },
-      {
-        "command": "vscode-docker.images.groupBy.repositoryName",
-        "title": "Group by Repository Name",
         "icon": {
           "light": "images/SortingGrouping_16x.svg",
           "dark": "images/SortingGrouping_16x.svg"
