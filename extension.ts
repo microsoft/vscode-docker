@@ -7,7 +7,9 @@ import * as assert from 'assert';
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
+import * as clipboardy from 'clipboardy';
 import * as fse from 'fs-extra';
+import * as opn from 'opn';
 import * as path from 'path';
 import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
@@ -230,6 +232,8 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     throw new UserCancelledError();
   }
   const website = wizard.createdWebSite;
+  let appUri = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
+
   if (context instanceof AzureImageTagNode) {
     // try creating a webhook
     const utilManager = AzureUtilityManager.getInstance();
@@ -237,7 +241,6 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     let rg: ResourceGroup = (<ResourceGroupStep>wizard.findStep(step => step instanceof ResourceGroupStep, "Resource Group step not executed")).resourceGroup;
     let websiteStep: WebsiteStep = (<WebsiteStep>wizard.findStep(step => step instanceof WebsiteStep, ""));
     let webhookName: string = `webapp${websiteStep.website.name}`;
-    let appURI = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
 
     const registryList = await crmClient.registries.list();
     const registryHandle = registryList.find((value) => value.name === websiteStep.registry.name);
@@ -245,7 +248,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
 
     let webhookCreateParameters: WebhookCreateParameters = {
       location: webhookLocation,
-      serviceUri: appURI,
+      serviceUri: appUri,
       scope: AzureImageTagNode.getImageNameWithTag(context.repositoryName, context.tag),
       actions: ["push"],
       status: 'enabled'
@@ -256,8 +259,12 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
   } else {
     // point to dockerhub to create a webhook
     // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-    // registryname === username for dockerhub
-
+    const dockerhubPrompt: string = "Copy webapp endpoint and head to dockerhub";
+    let response: string = await vscode.window.showInformationMessage("Please head to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
+    if (response) {
+      clipboardy.writeSync(appUri);
+      opn(`https://cloud.docker.com/repository/docker/${context.userName}/${context.repositoryName}/webHooks`);
+    }
   }
   return;
 }
