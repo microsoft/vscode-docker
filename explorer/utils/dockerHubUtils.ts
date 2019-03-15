@@ -153,8 +153,6 @@ export function setDockerHubToken(token: string): void {
 }
 
 async function login(username: string, password: string): Promise<Token> {
-    let t: Token;
-
     let options = {
         method: 'POST',
         uri: 'https://hub.docker.com/v2/users/login',

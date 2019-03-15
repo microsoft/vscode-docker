@@ -60,7 +60,9 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
         if (context instanceof TaskNode) {
             webViewTitle += '/' + context.label;
         }
-        const webview = new LogTableWebview(webViewTitle, logData);
+
+        let webview = new LogTableWebview(webViewTitle, logData);
+        webview = webview; // Keep compiler happy
     }
 }
 

@@ -11,8 +11,6 @@ import { ext } from '../extensionVariables';
 import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
-const teleCmdId: string = 'vscode-docker.container.remove';
-
 export async function removeContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containersToRemove: Docker.ContainerDesc[];

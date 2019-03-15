@@ -6,11 +6,10 @@
 import * as assertEx from './assertEx';
 import { commands, OutputChannel, window } from 'vscode';
 import { ext } from '../extension.bundle';
-import { Suite, Test, Context } from 'mocha';
+import { Suite, Context } from 'mocha';
 import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
 import { shouldSkipDockerTest } from './dockerInfo';
-import { debug } from 'util';
 
 const registryContainerName = 'test-registry';
 

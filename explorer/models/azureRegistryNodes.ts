@@ -106,8 +106,6 @@ export class AzureRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
         return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<AzureImageTagNode[]> {
             this.suppressTelemetry = true;
             this.properties.source = 'azureRepositoryNode';
