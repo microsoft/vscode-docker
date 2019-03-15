@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { Suite, Test, Context } from 'mocha';
+import { Suite } from 'mocha';
 import { nonNullProp } from '../extension.bundle';
 
 suite("nonNull", async function (this: Suite): Promise<void> {
@@ -21,7 +21,7 @@ suite("nonNull", async function (this: Suite): Promise<void> {
         });
     }
 
-    function testNonNullThrows<T>(testName: string, block: () => any) {
+    function testNonNullThrows(testName: string, block: () => any) {
         test(testName, () => {
             assert.throws(block, 'Expected an exception');
         });

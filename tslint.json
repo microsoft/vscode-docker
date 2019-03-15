@@ -53,7 +53,7 @@
         "no-parameter-properties": false,
         "no-relative-imports": false,
         "no-require-imports": false,
-        "no-suspicious-comment": false, // TODO
+        "no-suspicious-comment": false,
         "no-unnecessary-local-variable": false,
         "no-void-expression": [
             false,

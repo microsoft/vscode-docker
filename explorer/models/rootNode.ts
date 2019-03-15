@@ -71,10 +71,6 @@ export class RootNode extends NodeBase {
         return this.contextValue === "containersRootNode";
     }
 
-    private get isRegistries(): boolean {
-        return this.contextValue === "registriesRootNode";
-    }
-
     public autoRefreshImages(): void {
         const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
         const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);

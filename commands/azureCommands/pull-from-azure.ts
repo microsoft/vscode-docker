@@ -6,11 +6,7 @@
 import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
-import * as fse from 'fs-extra';
-import os = require('os');
-import * as path from "path";
 import vscode = require('vscode');
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -92,17 +88,17 @@ async function pullImage(loginServer: string, imageRequest: string, username: st
     terminal.sendText(`docker pull ${loginServer}/${imageRequest}`);
 }
 
-async function isLoggedIntoDocker(loginServer: string): Promise<{ configPath: string, loggedIn: boolean }> {
-    const home = os.homedir();
-    let configPath: string = path.join(home, '.docker', 'config.json');
-    let buffer: Buffer;
+// async function isLoggedIntoDocker(loginServer: string): Promise<{ configPath: string, loggedIn: boolean }> {
+//     const home = os.homedir();
+//     let configPath: string = path.join(home, '.docker', 'config.json');
+//     let buffer: Buffer;
 
-    await callWithTelemetryAndErrorHandling('findDockerConfig', async function (this: IActionContext): Promise<void> {
-        this.suppressTelemetry = true;
-        buffer = fse.readFileSync(configPath);
-    });
+//     await callWithTelemetryAndErrorHandling('findDockerConfig', async function (this: IActionContext): Promise<void> {
+//         this.suppressTelemetry = true;
+//         buffer = fse.readFileSync(configPath);
+//     });
 
-    let index = buffer.indexOf(loginServer);
-    let loggedIn = index >= 0; // Returns -1 if user is not logged into Docker
-    return { configPath, loggedIn }; // Returns object with configuration path and boolean indicating if user was logged in or not
-}
+//     let index = buffer.indexOf(loginServer);
+//     let loggedIn = index >= 0; // Returns -1 if user is not logged into Docker
+//     return { configPath, loggedIn }; // Returns object with configuration path and boolean indicating if user was logged in or not
+// }

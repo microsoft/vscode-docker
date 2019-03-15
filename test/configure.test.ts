@@ -143,6 +143,10 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
             }
         }
     }
+
+    if (expectedTelemetryProperties) {
+        verifyTelemetryProperties(actionContext, expectedTelemetryProperties);
+    }
 }
 
 //#region .NET Core Console projects
