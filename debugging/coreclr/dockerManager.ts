@@ -60,10 +60,12 @@ type LastImageBuildMetadata = {
     options: DockerBuildImageOptions;
 };
 
-// type LastContainerRunMetadata = {
-//     containerId: string;
-//     options: DockerRunContainerOptions;
-// }
+/*
+type LastContainerRunMetadata = {
+    containerId: string;
+    options: DockerRunContainerOptions;
+}
+*/
 
 export interface DockerManager {
     buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
