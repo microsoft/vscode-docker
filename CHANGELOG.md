@@ -1,3 +1,8 @@
+## 0.6.1 - 18 March 2019
+
+### Fixed
+* viewLogs are not readable in dark theme [#851](https://github.com/Microsoft/vscode-docker/issues/851)
+
 ## 0.6.0 - 12 March 2019
 
 ### Added
