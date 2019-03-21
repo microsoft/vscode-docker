@@ -15,15 +15,15 @@ import { docker } from './docker-endpoint';
 import { Item } from './quick-pick-file';
 
 export interface ImageItem extends vscode.QuickPickItem {
-    label: string;
+    label: string; // This is the full tag of the image
     imageDesc: Docker.ImageDesc;
     allImages: boolean;
 }
 
-function createItem(image: Docker.ImageDesc, repoTag: string): ImageItem {
+function createItem(image: Docker.ImageDesc, fullTag: string): ImageItem {
     return <ImageItem>{
-        label: repoTag || '<none>',
-        imageDesc: image
+        label: fullTag,
+        imageDesc: image,
     };
 }
 
@@ -59,7 +59,7 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
 export async function quickPickImage(actionContext: IActionContext, includeAll?: boolean): Promise<ImageItem> {
     let images: Docker.ImageDesc[];
     let properties: {
-        allImages?: boolean;
+        allImages?: string;
     } & TelemetryProperties = actionContext.properties;
 
     const imageFilters = {
@@ -78,7 +78,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     } else {
         const items: ImageItem[] = computeItems(images, includeAll);
         let response = await ext.ui.showQuickPick<ImageItem>(items, { placeHolder: 'Choose image...' });
-        properties.allContainers = includeAll ? String(response.allImages) : undefined;
+        properties.allImages = includeAll ? String(response.allImages) : undefined;
         return response;
     }
 }

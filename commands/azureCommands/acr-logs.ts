@@ -7,7 +7,7 @@ import { AzureImageTagNode, AzureRegistryNode } from '../../explorer/models/azur
 import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
-import { quickPickACRRegistry } from '../utils/quick-pick-azure'
+import { quickPickACRRegistry } from '../utils/quick-pick-azure';
 import { accessLog } from "./acr-logs-utils/logFileManager";
 import { LogData } from "./acr-logs-utils/tableDataManager";
 import { LogTableWebview } from "./acr-logs-utils/tableViewManager";

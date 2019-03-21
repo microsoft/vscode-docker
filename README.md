@@ -171,7 +171,7 @@ When possible, the location and output of the application will be inferred from 
 | Property | Description | Default |
 | --- | --- | --- |
 | `appFolder` | The root folder of the application | The workspace folder |
-| `appProject` | The path to the project file | The first `.csproj` found in the application folder |
+| `appProject` | The path to the project file | The first `.csproj` or `.fsproj` found in the application folder |
 | `appOutput` | The application folder relative path to the output assembly | The `TargetPath` MS Build property |
 
 > You can specify either `appFolder` or `appProject` but should not specify *both*.

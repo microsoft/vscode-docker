@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
-import { dockerExplorerProvider } from '../extension';
+import { RootNode } from '../explorer/models/rootNode';
+import { ext } from '../extensionVariables';
 import { docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
-import { RootNode } from '../explorer/models/rootNode';
 
 export async function stopContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
     let containersToStop: Docker.ContainerDesc[];
@@ -36,11 +36,11 @@ export async function stopContainer(actionContext: IActionContext, context: Root
                 containerCounter++;
                 if (err) {
                     vscode.window.showErrorMessage(err.message);
-                    dockerExplorerProvider.refreshContainers();
+                    ext.dockerExplorerProvider.refreshContainers();
                     reject();
                 }
                 if (containerCounter === numContainers) {
-                    dockerExplorerProvider.refreshContainers();
+                    ext.dockerExplorerProvider.refreshContainers();
                     resolve();
                 }
             });

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { NodeBase } from './models/nodeBase';
 import { RootNode } from './models/rootNode';
 
@@ -42,10 +43,17 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     }
 
     public async getChildren(element?: NodeBase): Promise<NodeBase[]> {
-        if (!element) {
-            return this.getRootNodes();
-        }
-        return element.getChildren(element);
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'dockerExplorer';
+
+            if (!element) {
+                return me.getRootNodes();
+            }
+            return element.getChildren(element);
+        });
     }
 
     private async getRootNodes(): Promise<RootNode[]> {

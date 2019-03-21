@@ -4,6 +4,7 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -43,26 +44,31 @@ export class TaskRootNode extends NodeBase {
 
     /* Making a list view of TaskNodes, or the Tasks of the current registry */
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
-        const taskNodes: TaskNode[] = [];
-        let tasks: ContainerModels.Task[] = [];
-        const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
-        const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
-        tasks = await client.tasks.list(resourceGroup, element.registry.name);
-        if (tasks.length === 0) {
-            const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
-            vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow).then(val => {
-                if (val === learnHow) {
-                    // tslint:disable-next-line:no-unsafe-any
-                    opn('https://aka.ms/acr/task');
-                }
-            })
-        }
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<TaskNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'taskRootNode';
 
-        for (let task of tasks) {
-            let node = new TaskNode(task, element.registry, element.subscription, element);
-            taskNodes.push(node);
-        }
-        return taskNodes;
+            const taskNodes: TaskNode[] = [];
+            let tasks: ContainerModels.Task[] = [];
+            const client: ContainerRegistryManagementClient = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(element.subscription);
+            const resourceGroup: string = acrTools.getResourceGroupName(element.registry);
+            tasks = await client.tasks.list(resourceGroup, element.registry.name);
+            if (tasks.length === 0) {
+                const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
+                vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow).then(val => {
+                    if (val === learnHow) {
+                        // tslint:disable-next-line:no-unsafe-any
+                        opn('https://aka.ms/acr/task');
+                    }
+                })
+            }
+
+            for (let task of tasks) {
+                let node = new TaskNode(task, element.registry, element.subscription, element);
+                taskNodes.push(node);
+            }
+            return taskNodes;
+        });
     }
 }
 export class TaskNode extends NodeBase {

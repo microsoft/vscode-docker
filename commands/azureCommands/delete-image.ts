@@ -7,7 +7,6 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { DialogResponses } from "vscode-azureextensionui";
 import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
-import { dockerExplorerProvider } from '../../extension';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureImage } from "../../utils/Azure/models/image";
@@ -46,9 +45,9 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
         vscode.window.showInformationMessage(`Successfully untagged '${image.toString()}'`);
 
         if (context) {
-            dockerExplorerProvider.refreshNode(context.parent);
+            ext.dockerExplorerProvider.refreshNode(context.parent);
         } else {
-            dockerExplorerProvider.refreshRegistries();
+            ext.dockerExplorerProvider.refreshRegistries();
         }
     }
 }
@@ -63,8 +62,8 @@ export async function deleteAzureImage(context?: AzureImageTagNode): Promise<voi
 
     if (!context) {
         registry = await quickPicks.quickPickACRRegistry();
-        repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to delete`);
-        image = await quickPicks.quickPickACRImage(repo, `Select the image you want to delete`);
+        repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to delete `);
+        image = await quickPicks.quickPickACRImage(repo, `Select the image you want to delete `);
 
     } else {
         registry = context.registry;
@@ -88,9 +87,9 @@ export async function deleteAzureImage(context?: AzureImageTagNode): Promise<voi
         vscode.window.showInformationMessage(`Successfully deleted manifest '${digest}' and the associated image(s): ${imageList}.`);
 
         if (context) {
-            dockerExplorerProvider.refreshNode(context.parent);
+            ext.dockerExplorerProvider.refreshNode(context.parent);
         } else {
-            dockerExplorerProvider.refreshRegistries();
+            ext.dockerExplorerProvider.refreshRegistries();
         }
     }
 }

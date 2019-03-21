@@ -19,6 +19,7 @@ const outputAllGeneratedFileContents = false;
 const windowsServer2016 = '10.0.14393';
 const windows10RS3 = '10.0.16299';
 const windows10RS4 = '10.0.17134';
+const windows10RS5 = '10.0.17763';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -570,13 +571,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     },
                     ['Windows']
                 ),
-                { message: "No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform." }
+                { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
         testInEmptyFolder("ASP.NET Core no project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', '1234']),
-                { message: "No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform." }
+                { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
@@ -607,7 +608,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'ConsoleApp1Folder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_21_ProjectFileContents,
@@ -615,10 +616,10 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
                     #For more information, please see https://aka.ms/containercompat
 
-                    FROM microsoft/dotnet:2.1-runtime-nanoserver-1803 AS base
+                    FROM microsoft/dotnet:2.1-runtime-nanoserver-1809 AS base
                     WORKDIR /app
 
-                    FROM microsoft/dotnet:2.1-sdk-nanoserver-1803 AS build
+                    FROM microsoft/dotnet:2.1-sdk-nanoserver-1809 AS build
                     WORKDIR /src
                     COPY ["ConsoleApp1Folder/ConsoleApp1.csproj", "ConsoleApp1Folder/"]
                     RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
@@ -676,7 +677,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_20_ProjectFileContents,
@@ -684,10 +685,10 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
                     #For more information, please see https://aka.ms/containercompat
 
-                    FROM microsoft/dotnet:2.0-runtime-nanoserver-1803 AS base
+                    FROM microsoft/dotnet:2.0-runtime-nanoserver-1809 AS base
                     WORKDIR /app
 
-                    FROM microsoft/dotnet:2.0-sdk-nanoserver-1803 AS build
+                    FROM microsoft/dotnet:2.0-sdk-nanoserver-1809 AS build
                     WORKDIR /src
                     COPY ["subfolder/projectFolder/ConsoleApp1.csproj", "subfolder/projectFolder/"]
                     RUN dotnet restore "subfolder/projectFolder/ConsoleApp1.csproj"
@@ -745,7 +746,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_11_ProjectFileContents);
@@ -775,14 +776,14 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'subfolder/projectFolder',
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_22_ProjectFileContents);
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-runtime-nanoserver-1803 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-runtime-nanoserver-1809 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -825,11 +826,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertNotFileContains('Dockerfile', 'EXPOSE');
         });
 
-        testInEmptyFolder("Windows 10 RS4", async () => {
+        testInEmptyFolder("Windows 10 RS5", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'AspNetApp1',
                 'project1.csproj',
                 aspNet_22_ProjectFileContents,
@@ -837,11 +838,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
                     #For more information, please see https://aka.ms/containercompat
 
-                    FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base
+                    FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1809 AS base
                     WORKDIR /app
                     EXPOSE 1234
 
-                    FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build
+                    FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build
                     WORKDIR /src
                     COPY ["AspNetApp1/project1.csproj", "AspNetApp1/"]
                     RUN dotnet restore "AspNetApp1/project1.csproj"
@@ -890,6 +891,19 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 `));
         });
 
+        testInEmptyFolder("Windows 10 RS4", async () => {
+            await testAspNetCore(
+                'Windows',
+                'Windows',
+                windows10RS4,
+                'AspNetApp1',
+                'project1.csproj',
+                aspNet_22_ProjectFileContents);
+
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build');
+        });
+
         testInEmptyFolder("Windows 10 RS3", async () => {
             await testAspNetCore(
                 'Windows',
@@ -925,8 +939,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1809 AS base');
+            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build');
         });
     });
 
@@ -935,7 +949,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testAspNetCore(
                 'Windows',
                 'Windows',
-                windows10RS4,
+                windows10RS5,
                 'AspNetApp1',
                 'project1.csproj',
                 aspNet_10_ProjectFileContents);

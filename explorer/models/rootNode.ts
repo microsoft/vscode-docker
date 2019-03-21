@@ -3,16 +3,21 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
 import { imagesPath } from '../../constants';
+import { ext, ImageGrouping } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { showDockerConnectionError } from '../utils/dockerConnectionError';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ErrorNode } from './errorNode';
+import { getContainerLabel } from './getContainerLabel';
+import { getImageLabel } from './getImageLabel';
+import { ImageGroupNode } from './imageGroupNode';
 import { ImageNode } from './imageNode';
 import { IconPath, NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
@@ -29,6 +34,14 @@ const containerFilters: GetContainerDescOptions = {
     }
 };
 
+type ContainerState = // https://docs.docker.com/engine/api/v1.21/
+    'created' |       // A container that has been created(e.g.with docker create) but not started
+    'restarting' |    // A container that is in the process of being restarted
+    'running' |       // A currently running container
+    'paused' |        // A container whose processes have been paused
+    'exited' |        // A container that ran and completed("stopped" in other contexts, although a created container is technically also "stopped")
+    'dead';           // A container that the daemon tried and failed to stop(usually due to a busy device or resource used by the c = container.State;
+
 export class RootNode extends NodeBase {
     private _sortedImageCache: Docker.ImageDesc[] | undefined;
     private _imageDebounceTimer: NodeJS.Timer | undefined;
@@ -43,11 +56,23 @@ export class RootNode extends NodeBase {
         public eventEmitter: vscode.EventEmitter<NodeBase>
     ) {
         super(label);
-        if (this.contextValue === 'imagesRootNode') {
+        if (this.isImages) {
             this._imagesNode = this;
-        } else if (this.contextValue === 'containersRootNode') {
+        } else if (this.isContainers) {
             this._containersNode = this;
         }
+    }
+
+    private get isImages(): boolean {
+        return this.contextValue === "imagesRootNode";
+    }
+
+    private get isContainers(): boolean {
+        return this.contextValue === "containersRootNode";
+    }
+
+    private get isRegistries(): boolean {
+        return this.contextValue === "registriesRootNode";
     }
 
     public autoRefreshImages(): void {
@@ -98,66 +123,149 @@ export class RootNode extends NodeBase {
     }
 
     public getTreeItem(): vscode.TreeItem {
+        let label = this.label;
+        let id = this.label;
+
+        if (this.isImages) {
+            let groupedLabel = "";
+
+            switch (ext.groupImagesBy) {
+                case ImageGrouping.None:
+                    break;
+                case ImageGrouping.ImageId:
+                    groupedLabel = " (Grouped by Image Id)";
+                    break;
+                case ImageGrouping.Repository:
+                    groupedLabel = " (Grouped by Repository)";
+                    break;
+                case ImageGrouping.RepositoryName:
+                    groupedLabel = " (Grouped by Name)";
+                    break;
+                default:
+                    assert(false, `Unexpected groupImagesBy ${ext.groupImagesBy}`)
+            }
+
+            label += groupedLabel;
+        }
+
         return {
-            label: this.label,
+            label,
+            id,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-            contextValue: this.contextValue
+            contextValue: this.contextValue,
         }
 
     }
 
     public async getChildren(element: RootNode): Promise<NodeBase[]> {
-        switch (element.contextValue) {
-            case 'imagesRootNode': {
-                return this.getImages();
+        // tslint:disable-next-line: no-this-assignment
+        let me = this;
+        // tslint:disable-next-line: no-function-expression
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
+            this.properties.source = 'rootNode';
+
+            switch (element.contextValue) {
+                case 'imagesRootNode':
+                    return me.getImageNodes();
+                case 'containersRootNode':
+                    return me.getContainers();
+                case 'registriesRootNode':
+                    return me.getRegistries();
+                default:
+                    throw new Error(`Unexpected contextValue ${element.contextValue}`);
             }
-            case 'containersRootNode': {
-                return this.getContainers();
-            }
-            case 'registriesRootNode': {
-                return this.getRegistries();
-            }
-            default: {
-                throw new Error(`Unexpected contextValue ${element.contextValue}`);
-            }
-        }
+        });
     }
 
-    private async getImages(): Promise<(ImageNode | ErrorNode)[]> {
+    // tslint:disable:max-func-body-length cyclomatic-complexity
+    private async getImageNodes(): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
         // tslint:disable-next-line:no-this-assignment
         let me = this;
 
-        return await callWithTelemetryAndErrorHandling('getChildren.images', async function (this: IActionContext): Promise<(ImageNode | ErrorNode)[]> {
-            const imageNodes: ImageNode[] = [];
-            let images: Docker.ImageDesc[];
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
+            this.properties.groupImagesBy = ImageGrouping[ext.groupImagesBy];
+            this.properties.source = 'rootNode.images';
 
+            // Determine templates to use
+            let groupLabelTemplate: string;
+            let leafLabelTemplate: string;
+            let groupIconName: string;
+            switch (ext.groupImagesBy) {
+                case ImageGrouping.None:
+                    groupLabelTemplate = undefined; // (no group nodes)
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = '';
+                    break;
+                case ImageGrouping.ImageId:
+                    groupLabelTemplate = '{shortImageId}';
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = 'ApplicationGroup_16x.svg';
+                    break;
+                case ImageGrouping.Repository:
+                    groupLabelTemplate = '{repository}';
+                    leafLabelTemplate = '{tag} ({createdSince})';
+                    groupIconName = 'Repository_16x.svg';
+                    break;
+                case ImageGrouping.RepositoryName:
+                    groupLabelTemplate = '{repositoryName}';
+                    leafLabelTemplate = '{fullTag} ({createdSince})';
+                    groupIconName = 'ApplicationGroup_16x.svg';
+                    break;
+                default:
+                    assert(`Unexpected groupImagesBy ${ext.groupImagesBy}`);
+            }
+
+            // Get image descriptors
+            let descriptors: Docker.ImageDesc[];
             try {
-                images = await docker.getImageDescriptors(imageFilters);
-                if (!images || images.length === 0) {
+                descriptors = await docker.getImageDescriptors(imageFilters);
+                if (!descriptors || descriptors.length === 0) {
                     return [];
-                }
-
-                for (let image of images) {
-                    if (!image.RepoTags) {
-                        let node = new ImageNode(`<none>:<none>`, image, me.eventEmitter);
-                        node.imageDesc = image;
-                        imageNodes.push(node);
-                    } else {
-                        for (let repoTag of image.RepoTags) {
-                            let node = new ImageNode(`${repoTag}`, image, me.eventEmitter);
-                            node.imageDesc = image;
-                            imageNodes.push(node);
-                        }
-                    }
                 }
             } catch (error) {
                 let newError = showDockerConnectionError(this, error);
                 return [new ErrorNode(newError, ErrorNode.getImagesErrorContextValue)]
             }
 
+            // Get leaf image nodes
+            const imageNodes: ImageNode[] = [];
+            for (let descriptor of descriptors) {
+                if (!descriptor.RepoTags) {
+                    let node = new ImageNode(`<none>:<none>`, descriptor, leafLabelTemplate);
+                    imageNodes.push(node);
+                } else {
+                    for (let fullTag of descriptor.RepoTags) {
+                        let node = new ImageNode(fullTag, descriptor, leafLabelTemplate);
+                        imageNodes.push(node);
+                    }
+                }
+            }
+
+            // Get top-level nodes
+            let topLevelNodes: (ImageNode | ImageGroupNode | ErrorNode)[];
+            if (groupLabelTemplate) {
+                const groupsMap = new Map<string, ImageGroupNode>();
+                for (let imageNode of imageNodes) {
+                    let groupLabel = getImageLabel(imageNode.fullTag, imageNode.imageDesc, groupLabelTemplate);
+                    if (!groupsMap.has(groupLabel)) {
+                        // Need a new top-level group node
+                        let groupNode = new ImageGroupNode(groupLabel, groupIconName);
+                        groupsMap.set(groupLabel, groupNode);
+                    }
+
+                    // Add image to the group node
+                    groupsMap.get(groupLabel).children.push(imageNode);
+                }
+
+                topLevelNodes = Array.from(groupsMap.values());
+            } else {
+                // No grouping
+                topLevelNodes = imageNodes;
+            }
+
             me.autoRefreshImages();
 
-            return imageNodes;
+            return topLevelNodes;
         });
     }
 
@@ -229,7 +337,9 @@ export class RootNode extends NodeBase {
         // tslint:disable-next-line:no-this-assignment
         let me = this;
 
-        return await callWithTelemetryAndErrorHandling('getChildren.containers', async function (this: IActionContext): Promise<(ContainerNode | ErrorNode)[]> {
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<(ContainerNode | ErrorNode)[]> {
+            this.properties.source = 'rootNode.containers';
+
             const containerNodes: ContainerNode[] = [];
             let containers: Docker.ContainerDesc[];
             let contextValue: ContainerNodeContextValue;
@@ -242,27 +352,54 @@ export class RootNode extends NodeBase {
                 }
 
                 for (let container of containers) {
-                    if (['exited', 'dead'].includes(container.State)) {
+                    let state: ContainerState = <ContainerState>container.State;
+
+                    // Determine icon
+                    switch (state) {
+                        case "dead":
+                        case "exited":
+                        case "created":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
+                            };
+                            break;
+                        case "paused":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusPause_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusPause_16x.svg'),
+                            };
+                            break;
+                        case "restarting":
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'Restart_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'Restart_16x.svg'),
+                            };
+                            break;
+                        case "running":
+                        default:
+                            iconPath = {
+                                light: path.join(imagesPath, 'light', 'StatusRun_16x.svg'),
+                                dark: path.join(imagesPath, 'dark', 'StatusRun_16x.svg'),
+                            };
+                    }
+
+                    // Determine contextValue
+                    if (['exited', 'dead'].includes(state)) {
                         contextValue = "stoppedLocalContainerNode";
-                        iconPath = {
-                            light: path.join(imagesPath, 'light', 'stoppedContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'stoppedContainer.svg')
-                        };
                     } else if (me.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
+                        // Override icon from above
                         iconPath = {
-                            light: path.join(imagesPath, 'light', 'unhealthyContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'unhealthyContainer.svg')
+                            light: path.join(imagesPath, 'light', 'StatusWarning_16x.svg'),
+                            dark: path.join(imagesPath, 'dark', 'StatusWarning_16x.svg'),
                         };
                     } else {
                         contextValue = "runningLocalContainerNode";
-                        iconPath = {
-                            light: path.join(imagesPath, 'light', 'runningContainer.svg'),
-                            dark: path.join(imagesPath, 'dark', 'runningContainer.svg')
-                        };
                     }
 
-                    let containerNode: ContainerNode = new ContainerNode(`${container.Image} (${container.Names[0].substring(1)}) (${container.Status})`, container, contextValue, iconPath);
+                    let label = getContainerLabel(container, '{image} ({name}) ({status})');
+                    let containerNode: ContainerNode = new ContainerNode(label, container, contextValue, iconPath);
                     containerNodes.push(containerNode);
                 }
             } catch (error) {

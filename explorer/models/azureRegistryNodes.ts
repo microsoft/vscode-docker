@@ -7,12 +7,13 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
-import { getLoginServer, } from '../../utils/nonNull';
+import { getLoginServer } from '../../utils/nonNull';
 import { formatTag } from './commonRegistryUtils';
 import { IconPath, NodeBase } from './nodeBase';
 import { TaskRootNode } from './taskNode';
@@ -43,30 +44,37 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
-        const repoNodes: NodeBase[] = [];
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'azureRegistryNodes';
 
-        //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
-        let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
-        repoNodes.push(taskNode);
+            const repoNodes: NodeBase[] = [];
 
-        if (!this.azureAccount) {
-            return [];
-        }
+            //Pushing single TaskRootNode under the current registry. All the following nodes added to registryNodes are type AzureRepositoryNode
+            let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
+            repoNodes.push(taskNode);
 
-        const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
-        for (let repository of repositories) {
-            let node = new AzureRepositoryNode(
-                repository.name,
-                element,
-                this.azureAccount,
-                element.subscription,
-                element.registry,
-                element.label);
-            repoNodes.push(node);
-        }
+            if (!me.azureAccount) {
+                return [];
+            }
 
-        //Note these are ordered by default in alphabetical order
-        return repoNodes;
+            const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
+            for (let repository of repositories) {
+                let node = new AzureRepositoryNode(
+                    repository.name,
+                    element,
+                    me.azureAccount,
+                    element.subscription,
+                    element.registry,
+                    element.label);
+                repoNodes.push(node);
+            }
+
+            //Note these are ordered by default in alphabetical order
+            return repoNodes;
+        });
     }
 }
 export class AzureRepositoryNode extends NodeBase {
@@ -98,24 +106,31 @@ export class AzureRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
-        const imageNodes: AzureImageTagNode[] = [];
-        let node: AzureImageTagNode;
-        let repo = await Repository.Create(element.registry, element.label);
-        let images: AzureImage[] = await getImagesByRepository(repo);
-        for (let img of images) {
-            node = new AzureImageTagNode(
-                element.azureAccount,
-                element,
-                img.subscription,
-                img.registry,
-                getLoginServer(img.registry),
-                img.repository.name,
-                img.tag,
-                img.created);
-            imageNodes.push(node);
-        }
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<AzureImageTagNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'azureRepositoryNode';
 
-        return imageNodes;
+            const imageNodes: AzureImageTagNode[] = [];
+            let node: AzureImageTagNode;
+            let repo = await Repository.Create(element.registry, element.label);
+            let images: AzureImage[] = await getImagesByRepository(repo);
+            for (let img of images) {
+                node = new AzureImageTagNode(
+                    element.azureAccount,
+                    element,
+                    img.subscription,
+                    img.registry,
+                    getLoginServer(img.registry),
+                    img.repository.name,
+                    img.tag,
+                    img.created);
+                imageNodes.push(node);
+            }
+
+            return imageNodes;
+        });
     }
 }
 
@@ -151,7 +166,7 @@ export class AzureImageTagNode extends NodeBase {
 
 export class AzureNotSignedInNode extends NodeBase {
     constructor() {
-        super('Click here to sign in to Azure...');
+        super('Sign in to Azure...');
     }
 
     public readonly contextValue: string = 'azureNotSignedInNode';
