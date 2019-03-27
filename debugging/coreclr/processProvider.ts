@@ -41,8 +41,8 @@ export class ChildProcessProvider implements ProcessProvider {
                 if (options.progress) {
                     const progress = options.progress;
 
-                    p.stderr.on('data', chunk => progress(chunk.toString()));
-                    p.stdout.on('data', chunk => progress(chunk.toString()));
+                    p.stderr.on('data', (chunk: Buffer) => progress(chunk.toString()));
+                    p.stdout.on('data', (chunk: Buffer) => progress(chunk.toString()));
                 }
             });
     }
