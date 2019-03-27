@@ -1,6 +1,6 @@
 .accordion {
     background-color: var(--vscode-editor-background);
-    color: var(--color);
+    color: var(--vscode-editor-foreground);
     cursor: pointer;
     margin: 0px;
     height: 30px;
@@ -83,7 +83,7 @@ h2 {
 body {
     padding: 0px;
     width: 100%;
-    color: var(--color);
+    color: var(--vscode-editor-foreground);
 }
 
 .logConsole {
@@ -325,6 +325,7 @@ main {
     box-sizing: border-box;
     display: none;
     background-color: var(--vscode-list-hoverBackground);
+    border: var(--vscode-dropdown-border);
     color: var(--vscode-list-foreground);
     text-align: center;
     padding: 5px 16px;

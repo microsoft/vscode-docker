@@ -73,6 +73,7 @@ export interface DockerManager {
 }
 
 export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
+const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 function compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
     const prop1 = obj1 ? getter(obj1) : undefined;
@@ -354,7 +355,8 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const nugetFallbackVolume: DockerContainerVolume = {
-            localPath: this.osProvider.os === 'Windows' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') : MacNuGetPackageFallbackFolderPath,
+            localPath: this.osProvider.os === 'Windows' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
+                (this.osProvider.isMac ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
             containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };
