@@ -8,7 +8,7 @@ import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer } from '../helpers/osVersion';
+import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../helpers/osVersion';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
@@ -36,8 +36,10 @@ const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
-    if (!isWindows() || isWindows10RS4OrNewer()) {
-        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS4 host
+    if (!isWindows() || isWindows10RS5OrNewer()) {
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows RS5 host
+        return "-nanoserver-1809";
+    } else if (isWindows10RS4OrNewer()) {
         return "-nanoserver-1803";
     } else if (isWindows10RS3OrNewer()) {
         return "-nanoserver-1709";
@@ -155,7 +157,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version, artifactName }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -164,11 +166,12 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let serviceName = path.basename(serviceNameAndRelativePath);
     let projectDirectory = path.dirname(serviceNameAndRelativePath);
-    let projectFileName = `${serviceName}.csproj`;
+    let projectFileName = path.basename(artifactName);
+
     // We don't want the project folder in $assembly_name$ because the assembly is in /app and WORKDIR has been set to that
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
-    let copyProjectCommands = `COPY ["${serviceNameAndRelativePath}.csproj", "${projectDirectory}/"]`
+    let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
     let exposeStatements = getExposeStatements(port);
 
     // Parse version from TargetFramework

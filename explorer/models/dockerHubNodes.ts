@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { imagesPath, MAX_CONCURRENT_REQUESTS } from '../../constants';
 import { AsyncPool } from '../../utils/asyncpool';
 import * as dockerHub from '../utils/dockerHubUtils';
@@ -44,26 +45,33 @@ export class DockerHubOrgNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
-        const repoNodes: DockerHubRepositoryNode[] = [];
-        let node: DockerHubRepositoryNode;
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubRepositoryNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'dockerHubOrgNode';
 
-        const user: dockerHub.User = await dockerHub.getUser();
-        const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-        const repoPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
-        // tslint:disable-next-line:prefer-for-of // Grandfathered in
-        for (let i = 0; i < myRepos.length; i++) {
-            repoPool.addTask(async () => {
-                let myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
-                node = new DockerHubRepositoryNode(myRepo.name);
-                node.repository = myRepo;
-                node.userName = element.userName;
-                node.password = element.password;
-                repoNodes.push(node);
-            });
-        }
-        await repoPool.runAll();
-        repoNodes.sort((a, b) => a.label.localeCompare(b.label));
-        return repoNodes;
+            const repoNodes: DockerHubRepositoryNode[] = [];
+            let node: DockerHubRepositoryNode;
+
+            const user: dockerHub.User = await dockerHub.getUser();
+            const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
+            const repoPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
+            for (let i = 0; i < myRepos.length; i++) {
+                repoPool.addTask(async () => {
+                    let myRepo: dockerHub.RepositoryInfo = await dockerHub.getRepositoryInfo(myRepos[i]);
+                    node = new DockerHubRepositoryNode(myRepo.name);
+                    node.repository = myRepo;
+                    node.userName = element.userName;
+                    node.password = element.password;
+                    repoNodes.push(node);
+                });
+            }
+            await repoPool.runAll();
+            repoNodes.sort((a, b) => a.label.localeCompare(b.label));
+            return repoNodes;
+        });
     }
 }
 
@@ -96,20 +104,27 @@ export class DockerHubRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageTagNode[]> {
-        const imageNodes: DockerHubImageTagNode[] = [];
-        let node: DockerHubImageTagNode;
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubImageTagNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'dockerHubRepositoryNode';
 
-        const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
-        for (let tag of myTags) {
-            node = new DockerHubImageTagNode(element.repository.name, tag.name);
-            node.password = element.password;
-            node.userName = element.userName;
-            node.repository = element.repository;
-            node.created = new Date(tag.last_updated);
-            imageNodes.push(node);
-        }
+            const imageNodes: DockerHubImageTagNode[] = [];
+            let node: DockerHubImageTagNode;
 
-        return imageNodes;
+            const myTags: dockerHub.Tag[] = await dockerHub.getRepositoryTags({ namespace: element.repository.namespace, name: element.repository.name });
+            for (let tag of myTags) {
+                node = new DockerHubImageTagNode(element.repository.name, tag.name);
+                node.password = element.password;
+                node.userName = element.userName;
+                node.repository = element.repository;
+                node.created = new Date(tag.last_updated);
+                imageNodes.push(node);
+            }
+
+            return imageNodes;
+        });
     }
 }
 

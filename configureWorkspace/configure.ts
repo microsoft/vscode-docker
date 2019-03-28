@@ -51,7 +51,7 @@ interface PomXmlContents {
 export type ConfigureTelemetryProperties = {
     configurePlatform?: Platform;
     configureOs?: PlatformOS;
-    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj'
+    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
 
@@ -238,17 +238,17 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
 }
 
 // Returns the relative path of the project file without the extension
-async function findCSProjFile(folderPath: string): Promise<string> {
+async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Project'
     }
 
-    const projectFiles: string[] = await globAsync('**/*.csproj', { cwd: folderPath });
+    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
 
     if (!projectFiles || !projectFiles.length) {
-        throw new Error("No .csproj file could be found. You need a C# project file in the workspace to generate Docker files for the selected platform.");
+        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
     }
 
     if (projectFiles.length > 1) {
@@ -364,19 +364,21 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
     }
 
     let targetFramework: string;
+    let projFile: string;
     let serviceNameAndPathRelativeToOutput: string;
     {
         // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
         if (platformType.toLowerCase().includes('.net')) {
-            let csProjFilePath = await findCSProjFile(rootFolderPath);
-            serviceNameAndPathRelativeToRoot = csProjFilePath.slice(0, -'.csproj'.length);
-            let csProjFileContents = (await fse.readFile(path.join(rootFolderPath, csProjFilePath))).toString();
+            let projFilePath = await findCSProjOrFSProjFile(rootFolderPath);
+            serviceNameAndPathRelativeToRoot = projFilePath.slice(0, -(path.extname(projFilePath).length));
+            let projFileContents = (await fse.readFile(path.join(rootFolderPath, projFilePath))).toString();
 
             // Extract TargetFramework for version
-            [targetFramework] = extractRegExGroups(csProjFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+            [targetFramework] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+            projFile = projFilePath;
 
-            properties.packageFileType = '.csproj';
+            properties.packageFileType = projFilePath.endsWith('.csproj') ? '.csproj' : '.fsproj';
             properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
         } else {
             serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
@@ -406,6 +408,7 @@ async function configureCore(actionContext: IActionContext, options: ConfigureAp
 
     if (targetFramework) {
         packageInfo.version = targetFramework;
+        packageInfo.artifactName = projFile;
     }
 
     let filesWritten: string[] = [];

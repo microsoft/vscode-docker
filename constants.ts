@@ -5,6 +5,8 @@
 
 import * as path from 'path';
 
+export const configPrefix: string = 'docker';
+
 export const imagesPath: string = path.join(__dirname, '../images');
 
 //AsyncPool Constants
@@ -24,6 +26,7 @@ export namespace keytarConstants {
 
 export namespace configurationKeys {
     export const defaultRegistryPath = "defaultRegistryPath";
+    export const groupImagesBy = 'groupImagesBy';
 }
 
 //Credentials Constants

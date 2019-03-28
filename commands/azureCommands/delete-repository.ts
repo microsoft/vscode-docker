@@ -6,7 +6,7 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { dockerExplorerProvider } from '../../extension';
+import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { Repository } from "../../utils/Azure/models/repository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
@@ -31,9 +31,9 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
         await acrTools.deleteRepository(repo);
         vscode.window.showInformationMessage(`Successfully deleted repository ${repo.name}`);
         if (context) {
-            dockerExplorerProvider.refreshNode(context.parent);
+            ext.dockerExplorerProvider.refreshNode(context.parent);
         } else {
-            dockerExplorerProvider.refreshRegistries();
+            ext.dockerExplorerProvider.refreshRegistries();
         }
     }
 }

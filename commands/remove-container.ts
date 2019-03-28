@@ -7,7 +7,7 @@ import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
-import { dockerExplorerProvider } from '../extension';
+import { ext } from '../extensionVariables';
 import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
@@ -40,11 +40,11 @@ export async function removeContainer(actionContext: IActionContext, context: Ro
                 if (err) {
                     // TODO: parseError, proper error handling
                     vscode.window.showErrorMessage(err.message);
-                    dockerExplorerProvider.refreshContainers();
+                    ext.dockerExplorerProvider.refreshContainers();
                     reject();
                 }
                 if (containerCounter === numContainers) {
-                    dockerExplorerProvider.refreshContainers();
+                    ext.dockerExplorerProvider.refreshContainers();
                     resolve();
                 }
             });

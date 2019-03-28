@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { imagesPath } from '../../constants';
 import { formatTag, getCatalog, getTags, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
@@ -46,17 +46,24 @@ export class CustomRegistryNode extends NodeBase {
     }
 
     public async getChildren(element: CustomRegistryNode): Promise<CustomRepositoryNode[]> {
-        const repoNodes: CustomRepositoryNode[] = [];
-        try {
-            let repositories = await getCatalog(this.registry.url, this.registry.credentials);
-            for (let repoName of repositories) {
-                repoNodes.push(new CustomRepositoryNode(repoName, this.registry));
-            }
-        } catch (error) {
-            vscode.window.showErrorMessage(parseError(error).message);
-        }
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<CustomRepositoryNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'customRegistryNode';
 
-        return repoNodes;
+            const repoNodes: CustomRepositoryNode[] = [];
+            try {
+                let repositories = await getCatalog(me.registry.url, me.registry.credentials);
+                for (let repoName of repositories) {
+                    repoNodes.push(new CustomRepositoryNode(repoName, me.registry));
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(parseError(error).message);
+            }
+
+            return repoNodes;
+        });
     }
 }
 
@@ -85,24 +92,31 @@ export class CustomRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: CustomRepositoryNode): Promise<CustomImageTagNode[]> {
-        const imageNodes: CustomImageTagNode[] = [];
-        let node: CustomImageTagNode;
+        // tslint:disable-next-line:no-this-assignment
+        let me = this;
+        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<CustomImageTagNode[]> {
+            this.suppressTelemetry = true;
+            this.properties.source = 'customRepositoryNode';
 
-        try {
-            let tagInfos = await getTags(this.registry.url, this.repositoryName, this.registry.credentials);
-            for (let tagInfo of tagInfos) {
-                node = new CustomImageTagNode(this.registry, this.repositoryName, tagInfo.tag, tagInfo.created);
-                imageNodes.push(node);
+            const imageNodes: CustomImageTagNode[] = [];
+            let node: CustomImageTagNode;
+
+            try {
+                let tagInfos = await getTags(me.registry.url, me.repositoryName, me.registry.credentials);
+                for (let tagInfo of tagInfos) {
+                    node = new CustomImageTagNode(me.registry, me.repositoryName, tagInfo.tag, tagInfo.created);
+                    imageNodes.push(node);
+                }
+
+                return imageNodes;
+            } catch (error) {
+                let message = `Docker: Unable to retrieve Repository Tags: ${parseError(error).message}`;
+                console.error(message);
+                vscode.window.showErrorMessage(message);
             }
 
             return imageNodes;
-        } catch (error) {
-            let message = `Docker: Unable to retrieve Repository Tags: ${parseError(error).message}`;
-            console.error(message);
-            vscode.window.showErrorMessage(message);
-        }
-
-        return imageNodes;
+        });
     }
 }
 

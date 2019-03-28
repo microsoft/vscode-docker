@@ -9,7 +9,6 @@ import os = require('os');
 import vscode = require('vscode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
-import { RootNode } from '../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
@@ -17,18 +16,17 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 /**
  * Image -> Run
  */
-export async function startContainer(actionContext: IActionContext, context: RootNode | ImageNode | undefined): Promise<void> {
+export async function startContainer(actionContext: IActionContext, context: ImageNode | undefined): Promise<void> {
     return await startContainerCore(actionContext, context, false);
 }
 
-export async function startContainerCore(actionContext: IActionContext, context: RootNode | ImageNode | undefined, interactive: boolean): Promise<void> {
-
+export async function startContainerCore(actionContext: IActionContext, context: ImageNode | undefined, interactive: boolean): Promise<void> {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
     if (context instanceof ImageNode && context.imageDesc) {
         imageToStart = context.imageDesc;
-        imageName = context.label;
+        imageName = context.fullTag;
     } else {
         const selectedItem: ImageItem = await quickPickImage(actionContext, false)
         if (selectedItem) {

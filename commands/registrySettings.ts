@@ -24,7 +24,7 @@ export async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegis
     } else if (node instanceof CustomRegistryNode) {
         registryName = node.registryName;
     } else {
-        return assertNever(node, 'type of registry node');
+        return assertNever(node, `Unexpected type of registry node: ${node ? (<object>node).constructor.name : String(node)}`);
     }
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
@@ -49,6 +49,11 @@ export async function askToSaveRegistryPath(imagePath: string, promptForSave?: b
     let askToSaveKey: string = 'docker.askToSaveRegistryPath';
     let askToSavePath: boolean = promptForSave || ext.context.globalState.get<boolean>(askToSaveKey, true);
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+
+    if (!vscode.workspace.workspaceFolders || !vscode.workspace.workspaceFolders.length) {
+        // Can't save to workspace settings if no workspace
+        return;
+    }
 
     let prefix = "";
     if (imagePath.includes('/')) {

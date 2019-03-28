@@ -46,7 +46,7 @@ import { docker } from './commands/utils/docker-endpoint';
 import { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 import { DockerDebugConfigProvider } from './configureWorkspace/configDebugProvider';
 import { configure, configureApi, ConfigureApiOptions } from './configureWorkspace/configure';
-import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN, configPrefix, configurationKeys } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugger';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
@@ -55,9 +55,8 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
-import * as util from './explorer/deploy/util';
 import { ResourceGroupStep, WebAppCreator, WebsiteStep } from './explorer/deploy/webAppCreator';
-import { DockerExplorerProvider } from './explorer/dockerExplorer';
+import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
 import { ContainerNode } from './explorer/models/containerNode';
 import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
@@ -66,15 +65,13 @@ import { ImageNode } from './explorer/models/imageNode';
 import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
-import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
-import { ext } from './extensionVariables';
+import { browseDockerHub, dockerHubLogin, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { DefaultImageGrouping, ext, ImageGrouping } from './extensionVariables';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { wrapError } from './utils/wrapError';
-
-export let dockerExplorerProvider: DockerExplorerProvider;
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -96,7 +93,10 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.ui = new AzureUserInput(ctx.globalState);
   }
   ext.context = ctx;
-  ext.outputChannel = util.getOutputChannel();
+
+  ext.outputChannel = vscode.window.createOutputChannel("Docker");
+  ctx.subscriptions.push(ext.outputChannel);
+
   if (!ext.terminalProvider) {
     ext.terminalProvider = new DefaultTerminalProvider();
   }
@@ -173,6 +173,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
       )
     );
     registerDebugConfigurationProvider(ctx);
+    readImageGrouping();
 
     await consolidateDefaultRegistrySettings();
     activateLanguageClient(ctx);
@@ -311,12 +312,13 @@ function registerCommand(
 
 // tslint:disable-next-line:max-func-body-length
 function registerDockerCommands(): void {
-  dockerExplorerProvider = new DockerExplorerProvider();
+  ext.dockerExplorerProvider = new DockerExplorerProvider();
   vscode.window.registerTreeDataProvider(
     'dockerExplorer',
-    dockerExplorerProvider
+    ext.dockerExplorerProvider
   );
 
+  registerCommand('vscode-docker.images.selectGroupBy', selectGroupImagesBy);
   registerCommand('vscode-docker.acr.createRegistry', createRegistry);
   registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
   registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
@@ -352,7 +354,8 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context));
   registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
   registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-  registerCommand('vscode-docker.explorer.refresh', () => dockerExplorerProvider.refresh());
+  registerCommand('vscode-docker.dockerHubLogin', dockerHubLogin);
+  registerCommand('vscode-docker.explorer.refresh', () => ext.dockerExplorerProvider.refresh());
 
   registerCommand('vscode-docker.image.build', async function (this: IActionContext, item: vscode.Uri | undefined): Promise<void> { await buildImage(this, item); });
   registerCommand('vscode-docker.image.inspect', async function (this: IActionContext, node: ImageNode | undefined): Promise<void> { await inspectImage(this, node); });
@@ -407,6 +410,7 @@ namespace Configuration {
           docker.refreshEndpoint();
           // tslint:disable-next-line: no-floating-promises
           setRequestDefaults();
+          readImageGrouping();
           vscode.commands.executeCommand('vscode-docker.explorer.refresh');
         }
       }
@@ -477,4 +481,32 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     });
     client.start();
   });
+}
+
+function readImageGrouping(): void {
+  const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(configPrefix);
+  let imageGrouping: string | undefined = configOptions.get<string>(configurationKeys.groupImagesBy);
+  ext.groupImagesBy = imageGrouping && imageGrouping in ImageGrouping ? <ImageGrouping>ImageGrouping[imageGrouping] : DefaultImageGrouping;
+}
+
+async function selectGroupImagesBy(): Promise<void> {
+  let response = await ext.ui.showQuickPick(
+    [
+      { label: "No grouping", data: ImageGrouping.None },
+      { label: "Group by repository", data: ImageGrouping.Repository },
+      { label: "Group by repository name", data: ImageGrouping.RepositoryName },
+      { label: "Group by image ID", data: ImageGrouping.ImageId },
+    ],
+    {
+      placeHolder: "Select how to group the Images node entries"
+    });
+
+  groupImagesBy(response.data);
+}
+
+function groupImagesBy(groupBy: ImageGrouping): void {
+  ext.groupImagesBy = groupBy;
+  const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(configPrefix);
+  configOptions.update(configurationKeys.groupImagesBy, ImageGrouping[ext.groupImagesBy], vscode.ConfigurationTarget.Global);
+  ext.dockerExplorerProvider.refreshImages();
 }
