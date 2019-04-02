@@ -1021,7 +1021,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.26.0"
+    "vscode": "^1.31.1"
   },
   "scripts": {
     "vscode:prepublish": "npm run webpack-prod",
@@ -1068,7 +1068,7 @@
     "typescript": "^3.3.4000",
     "umd-compat-loader": "^2.1.1",
     "vsce": "^1.59.0",
-    "vscode": "^1.1.18",
+    "vscode": "^1.1.31",
     "vscode-azureextensiondev": "^0.1.8",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
@@ -1079,7 +1079,6 @@
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
     "azure-storage": "^2.8.1",
-    "build": "^0.1.4",
     "clipboardy": "^1.2.3",
     "deep-equal": "^1.0.1",
     "dockerfile-language-server-nodejs": "^0.0.20",

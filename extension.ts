@@ -9,7 +9,6 @@ import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models'
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import * as clipboardy from 'clipboardy';
 import * as fse from 'fs-extra';
-import * as opn from 'opn';
 import * as path from 'path';
 import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
@@ -241,13 +240,13 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
   } else {
     // point to dockerhub to create a webhook
     // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-    const dockerhubPrompt: string = "Copy webapp endpoint and head to dockerhub";
-    let response: string = await vscode.window.showInformationMessage("Please head to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
+    const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
+    let response: string = await vscode.window.showInformationMessage("Please browse to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
     if (response) {
       // tslint:disable-next-line:no-unsafe-any
       clipboardy.writeSync(appUri);
       // tslint:disable-next-line:no-unsafe-any
-      opn(`https://cloud.docker.com/repository/docker/${context.userName}/${context.repositoryName}/webHooks`);
+      vscode.env.openExternal(vscode.Uri.parse(`https://cloud.docker.com/repository/docker/${context.userName}/${context.repositoryName}/webHooks`));
     }
   }
   return;
