@@ -220,6 +220,7 @@ export class DefaultDockerManager implements DockerManager {
                         extraHosts: options.extraHosts,
                         labels: options.labels,
                         network: options.network,
+                        networkAlias: options.networkAlias,
                         ports: options.ports,
                         volumes: [...(volumes || []), ...(options.volumes || [])]
                     });
