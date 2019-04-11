@@ -565,6 +565,18 @@
           "default": "",
           "description": "Full host address to connect to (with protocol). Equivalent to setting the DOCKER_HOST environment variable"
         },
+        "docker.baseComposeFilePath": {
+          "type": "string",
+          "description": "Default docker compose file path"
+        },
+        "docker.additionalComposeFilePaths": {
+          "type": "array",
+          "description": "Ordered list of docker compose file paths (overrides) to be passed into docker compose. Will be added after the base file",
+          "items": {
+            "type": "string",
+            "description": "path to a docker compose file"
+          }
+        },
         "docker.importCertificates": {
           "oneOf": [
             {
