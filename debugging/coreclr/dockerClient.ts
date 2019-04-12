@@ -53,6 +53,7 @@ export type DockerRunContainerOptions = {
     extraHosts?: DockerContainerExtraHost[];
     labels?: { [key: string]: string };
     network?: string;
+    networkAlias?: string;
     ports?: DockerContainerPort[];
     volumes?: DockerContainerVolume[];
 };
@@ -211,6 +212,7 @@ export class CliDockerClient implements DockerClient {
             .withFlagArg('-P', options.ports === undefined || options.ports.length < 1)
             .withNamedArg('--name', options.containerName)
             .withNamedArg('--network', options.network)
+            .withNamedArg('--network-alias', options.networkAlias)
             .withKeyValueArgs('-e', options.env)
             .withArrayArgs('--env-file', options.envFiles)
             .withKeyValueArgs('--label', options.labels)

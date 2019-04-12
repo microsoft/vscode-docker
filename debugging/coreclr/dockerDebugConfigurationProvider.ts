@@ -30,6 +30,7 @@ interface DockerDebugRunOptions {
     extraHosts?: DockerContainerExtraHost[];
     labels?: { [key: string]: string };
     network?: string;
+    networkAlias?: string;
     os?: PlatformOS;
     ports?: DockerContainerPort[];
     volumes?: DockerContainerVolume[];
@@ -176,6 +177,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             || DockerDebugConfigurationProvider.defaultLabels;
 
         const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
+        const networkAlias = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.networkAlias;
         const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
         const volumes = DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration);
         const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
@@ -187,6 +189,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             extraHosts,
             labels,
             network,
+            networkAlias,
             os,
             ports,
             volumes

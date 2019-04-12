@@ -230,6 +230,7 @@ Customize the Docker container run process by adding properties under the `docke
 | `extraHosts` | Hosts to be added to the container's `hosts` file for DNS resolution. | None |
 | `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
 | `network` | The network to which the container will be connected. Use values as described in the [Docker run documentation](https://docs.docker.com/engine/reference/run/#network-settings). | `bridge` |
+| `networkAlias` | The network-scoped alias to assign to the container. | None |
 | `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
 | `volumes` | Volumes that are going to be mapped to the container. | None |
 
@@ -271,6 +272,7 @@ Example run customization:
                     "label2": "value2"
                 },
                 "network": "host",
+                "networkAlias": "mycontainer",
                 "ports": [
                     {
                         "hostPort": 80,
