@@ -6,10 +6,10 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
-import * as opn from 'opn';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { skus } from '../../constants'
+import { skus } from '../../constants';
+import { openExternal } from '../../explorer/utils/openExternal';
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -79,12 +79,11 @@ export async function quickPickSubscription(): Promise<Subscription> {
     const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
         let openPortal = 'Open Portal';
-        vscode.window.showErrorMessage("You are not signed in to Azure, or you do not have any subscriptions. To sign in, select 'Azure: Sign In' from the command palette. Subscriptions can be created in the Azure portal", openPortal).then(val => {
-            if (val === openPortal) {
-                // tslint:disable-next-line:no-unsafe-any
-                opn('https://portal.azure.com/');
-            }
-        });
+        let response = await vscode.window.showErrorMessage("You are not signed in to Azure, or you do not have any subscriptions. To sign in, select 'Azure: Sign In' from the command palette. Subscriptions can be created in the Azure portal", openPortal);
+        if (response === openPortal) {
+            await openExternal('https://portal.azure.com/');
+        }
+
     }
     if (subscriptions.length === 1) { return subscriptions[0]; }
 

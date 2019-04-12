@@ -1,7 +1,6 @@
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as opn from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
@@ -9,6 +8,7 @@ import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { openExternal } from '../utils/openExternal';
 import { NodeBase } from './nodeBase';
 
 /* Single TaskRootNode under each Repository. Labeled "Tasks" */
@@ -55,12 +55,11 @@ export class TaskRootNode extends NodeBase {
             tasks = await client.tasks.list(resourceGroup, element.registry.name);
             if (tasks.length === 0) {
                 const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
-                vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow).then(val => {
-                    if (val === learnHow) {
-                        // tslint:disable-next-line:no-unsafe-any
-                        opn('https://aka.ms/acr/task');
-                    }
-                })
+                let response = await vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow)
+                if (response === learnHow) {
+                    await openExternal('https://aka.ms/acr/task');
+                }
+
             }
 
             for (let task of tasks) {

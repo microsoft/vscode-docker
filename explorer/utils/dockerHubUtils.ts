@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as opn from 'opn';
 import * as vscode from 'vscode';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { NodeBase } from '../models/nodeBase';
+import { openExternal } from './openExternal';
 
 let _token: Token;
 
@@ -261,7 +261,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     return tagsPage.results;
 }
 
-export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+export async function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): Promise<void> {
     if (node) {
         let url: string = 'https://hub.docker.com/';
         if (node instanceof DockerHubOrgNode) {
@@ -274,7 +274,6 @@ export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubReposito
             assert(false, `browseDockerHub: Unexpected node type, contextValue=${(<NodeBase>node).contextValue}`)
         }
 
-        // tslint:disable-next-line:no-unsafe-any
-        opn(url);
+        await openExternal(url);
     }
 }

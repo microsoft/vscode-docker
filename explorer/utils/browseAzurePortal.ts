@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as opn from 'opn';
 import { AzureSession } from '../../typings/azure-account.api';
 import { getTenantId, nonNullValue } from '../../utils/nonNull';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
+import { openExternal } from './openExternal';
 
 export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
     if (node && node.azureAccount) {
@@ -18,7 +18,7 @@ export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode
         if (node.contextValue === AzureImageTagNode.contextValue || node.contextValue === AzureRepositoryNode.contextValue) {
             url = `${url}/repository`;
         }
-        // tslint:disable-next-line:no-unsafe-any
-        opn(url);
+        // tslint:disable-next-line:no-floating-promises
+        openExternal(url);
     }
 }

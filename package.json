@@ -1021,7 +1021,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.26.0"
+    "vscode": "^1.31.0"
   },
   "scripts": {
     "vscode:prepublish": "npm run webpack-prod",
