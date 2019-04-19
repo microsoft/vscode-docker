@@ -55,10 +55,14 @@ export class TaskRootNode extends NodeBase {
             tasks = await client.tasks.list(resourceGroup, element.registry.name);
             if (tasks.length === 0) {
                 const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
-                let response = await vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow)
-                if (response === learnHow) {
-                    await openExternal('https://aka.ms/acr/task');
-                }
+                vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow)
+                    .then(response => {
+                        if (response === learnHow) {
+                            //don't wait for openExternal to finish. Intentional
+                            // tslint:disable-next-line: no-floating-promises
+                            openExternal('https://aka.ms/acr/task');
+                        }
+                    });
 
             }
 

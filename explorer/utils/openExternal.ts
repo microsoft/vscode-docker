@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { commands, Uri } from 'vscode';
-import { VersionedTextDocumentIdentifier } from 'vscode-languageclient';
 
 export async function openExternal(path: string, throwErrorOnFailure: boolean = false): Promise<void> {
     let uri = Uri.parse(path);

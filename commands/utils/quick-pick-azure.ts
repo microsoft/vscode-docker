@@ -79,10 +79,14 @@ export async function quickPickSubscription(): Promise<Subscription> {
     const subscriptions = await AzureUtilityManager.getInstance().getFilteredSubscriptionList();
     if (subscriptions.length === 0) {
         let openPortal = 'Open Portal';
-        let response = await vscode.window.showErrorMessage("You are not signed in to Azure, or you do not have any subscriptions. To sign in, select 'Azure: Sign In' from the command palette. Subscriptions can be created in the Azure portal", openPortal);
-        if (response === openPortal) {
-            await openExternal('https://portal.azure.com/');
-        }
+        vscode.window.showErrorMessage("You are not signed in to Azure, or you do not have any subscriptions. To sign in, select 'Azure: Sign In' from the command palette. Subscriptions can be created in the Azure portal", openPortal)
+            .then(response => {
+                if (response === openPortal) {
+                    //don't wait for openExternal to finish. Intentional
+                    // tslint:disable-next-line: no-floating-promises
+                    openExternal('https://portal.azure.com/');
+                }
+            });
 
     }
     if (subscriptions.length === 1) { return subscriptions[0]; }
