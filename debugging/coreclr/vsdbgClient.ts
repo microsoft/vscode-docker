@@ -59,6 +59,11 @@ export class RemoteVsDbgClient implements VsDbgClient {
     }
 
     public async getVsDbgFolder(): Promise<string> {
+        // NOTE: If non-existant, other processes (e.g. Docker when volume mounting) may attempt to create this folder.
+        //       This can lead to "access denied" if those processes run elevated compared to VS Code.
+        //       Therefore, ensure it's created before they're ever given the folder name.
+        await this.ensureVsDbgFolderExists();
+
         return this.vsdbgPath;
     }
 
@@ -92,6 +97,14 @@ export class RemoteVsDbgClient implements VsDbgClient {
             'Unable to acquire the .NET Core debugger.');
     }
 
+    private async ensureVsDbgFolderExists(): Promise<void> {
+        const directoryExists = await this.fileSystemProvider.dirExists(this.vsdbgPath);
+
+        if (!directoryExists) {
+            await this.fileSystemProvider.makeDir(this.vsdbgPath);
+        }
+    }
+
     private async getVsDbgAcquisitionScript(): Promise<void> {
         const vsdbgAcquisitionScriptPath = path.join(this.vsdbgPath, this.options.name);
         const acquisitionScriptExists = await this.fileSystemProvider.fileExists(vsdbgAcquisitionScriptPath);
@@ -101,11 +114,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
             return;
         }
 
-        const directoryExists = await this.fileSystemProvider.dirExists(this.vsdbgPath);
-
-        if (!directoryExists) {
-            await this.fileSystemProvider.makeDir(this.vsdbgPath);
-        }
+        await this.ensureVsDbgFolderExists();
 
         const script = await ext.request(this.options.url);
 
