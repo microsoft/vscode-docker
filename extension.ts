@@ -123,7 +123,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     const YAML_MODE_ID: vscode.DocumentFilter = {
       language: 'yaml',
       scheme: 'file',
-      pattern: COMPOSE_FILE_GLOB_PATTERN
+      pattern: vscode.workspace.getConfiguration("docker").get("composeFileGlobPattern", COMPOSE_FILE_GLOB_PATTERN)
     };
     let yamlHoverProvider = new DockerComposeHoverProvider(
       new DockerComposeParser(),

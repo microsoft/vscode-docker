@@ -10,7 +10,8 @@ import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from './utils/quickPickWorkspaceFolder';
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, undefined);
+    const pattern = vscode.workspace.getConfiguration("docker").get("composeFileGlobPattern", COMPOSE_FILE_GLOB_PATTERN);
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, pattern), null, 9999, undefined);
 }
 
 interface Item extends vscode.QuickPickItem {

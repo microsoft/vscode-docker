@@ -609,6 +609,16 @@
           "default": "",
           "description": "Full host address to connect to (with protocol). Equivalent to setting the DOCKER_HOST environment variable"
         },
+        "docker.composeFileGlobPattern": {
+          "type": "string",
+          "default": "**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}",
+          "description": "Specifies compose file glob pattern."
+        },
+        "docker.dockerfileGlobPattern": {
+          "type": "string",
+         "default": "**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}",
+          "description": "Specifies dockerfile glob pattern."
+        },
         "docker.importCertificates": {
           "oneOf": [
             {

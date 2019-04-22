@@ -51,9 +51,10 @@ export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUr
 
 export async function quickPickDockerFileItem(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
     let dockerFileItem: Item;
+    const pattern = vscode.workspace.getConfiguration("docker").get("dockerfileGlobPattern", DOCKERFILE_GLOB_PATTERN);
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, DOCKERFILE_GLOB_PATTERN, 'Choose a Dockerfile to build.');
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, pattern, 'Choose a Dockerfile to build.');
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {
