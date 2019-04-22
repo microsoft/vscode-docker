@@ -9,7 +9,8 @@
 		"dist/**": true
 	},
 	"files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true,
+	"files.insertFinalNewline": true,
+	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll": true
 	}

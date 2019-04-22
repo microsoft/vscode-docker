@@ -326,8 +326,10 @@ The Docker extension comes with a number of useful configuration settings allowi
 | --- |---|---|
 | `docker.attachShellCommand.linuxContainer` | Attach command to use for Linux containers | `/bin/sh`
 | `docker.attachShellCommand.windowsContainer` | Attach command to use for Windows containers | `powershell`
+| `docker.composeFileGlobPattern` | Specifies compose file glob pattern. | `"**/[dD][oO][cC][kK][eE][rR]-[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}"`
 | `docker.dockerComposeBuild` | Run docker-compose with the --build argument, defaults to true | `true`
 | `docker.dockerComposeDetached` | Run docker-compose with the --d (detached) argument, defaults to true | `true`
+| `docker.dockerfileGlobPattern` | Specifies dockerfile glob pattern. | `"**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]}"`
 | `docker.defaultRegistryPath` | Default registry and path when tagging an image | `""`
 | `docker.explorerRefreshInterval` | Explorer refresh interval, default is 1000ms | `1000`
 | `docker.host` | Host to connect to (same as setting the DOCKER_HOST environment variable) | `""`
