@@ -14,4 +14,4 @@ dist
 stats.json
 
 # Artifacts from running npm install
-npm-debug.log
+**/npm-debug.log
