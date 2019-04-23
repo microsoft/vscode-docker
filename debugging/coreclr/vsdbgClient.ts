@@ -98,11 +98,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
     }
 
     private async ensureVsDbgFolderExists(): Promise<void> {
-        const directoryExists = await this.fileSystemProvider.dirExists(this.vsdbgPath);
-
-        if (!directoryExists) {
-            await this.fileSystemProvider.makeDir(this.vsdbgPath);
-        }
+        await this.fileSystemProvider.ensureDir(this.vsdbgPath);
     }
 
     private async getVsDbgAcquisitionScript(): Promise<void> {

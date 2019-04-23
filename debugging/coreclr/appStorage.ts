@@ -38,9 +38,7 @@ export class DefaultAppStorage implements MementoAsync {
         if (item) {
             const itemDir = path.dirname(itemPath);
 
-            if (!await this.fileSystemProvider.dirExists(itemDir)) {
-                await this.fileSystemProvider.makeDir(itemDir);
-            }
+            await this.fileSystemProvider.ensureDir(itemDir);
 
             await this.fileSystemProvider.writeFile(itemPath, JSON.stringify(item));
         } else {

@@ -7,9 +7,9 @@ import * as fse from 'fs-extra';
 
 export interface FileSystemProvider {
     dirExists(path: string): Promise<boolean>;
+    ensureDir(path: string): Promise<void>;
     fileExists(path: string): Promise<boolean>;
     hashFile(path: string): Promise<string>;
-    makeDir(path: string): Promise<void>;
     readDir(path: string): Promise<string[]>;
     readFile(filename: string, encoding?: string): Promise<string>;
     unlinkFile(filename: string): Promise<void>;
@@ -31,6 +31,10 @@ export class LocalFileSystemProvider implements FileSystemProvider {
 
             throw err;
         }
+    }
+
+    public async ensureDir(path: string): Promise<void> {
+        return await fse.ensureDir(path);
     }
 
     public async fileExists(path: string): Promise<boolean> {
@@ -56,10 +60,6 @@ export class LocalFileSystemProvider implements FileSystemProvider {
         hash.update(contents);
 
         return hash.digest('hex');
-    }
-
-    public async makeDir(path: string): Promise<void> {
-        return await fse.mkdir(path);
     }
 
     public async readDir(path: string): Promise<string[]> {
