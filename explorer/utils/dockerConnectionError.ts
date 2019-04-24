@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as opn from 'opn';
-import { MessageItem } from "vscode";
 import * as vscode from 'vscode';
+import { MessageItem } from "vscode";
 import { IActionContext, parseError } from "vscode-azureextensionui";
 import { isLinux } from "../../helpers/osVersion";
 import { wrapError } from "../../utils/wrapError";
+import { openExternal } from './openExternal';
 
 const connectionMessage = 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running.';
 
@@ -37,8 +37,8 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
     actionContext.suppressErrorDisplay = true;
     vscode.window.showErrorMessage(parseError(wrappedError).message, ...items).then(response => {
         if (response) {
-            // tslint:disable-next-line:no-unsafe-any
-            opn(response.url);
+            // tslint:disable-next-line:no-floating-promises
+            openExternal(response.url);
         }
     });
 

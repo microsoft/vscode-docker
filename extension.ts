@@ -280,7 +280,7 @@ function registerDockerCommands(): void {
   registerCommand('vscode-docker.acr.viewLogs', viewACRLogs);
 
   registerCommand('vscode-docker.api.configure', async function (this: IActionContext, options: ConfigureApiOptions): Promise<void> { await configureApi(this, options); });
-  registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => { browseDockerHub(context); });
+  registerCommand('vscode-docker.browseDockerHub', async (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => { await browseDockerHub(context); });
   registerCommand('vscode-docker.browseAzurePortal', (context?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode) => { browseAzurePortal(context); });
 
   registerCommand('vscode-docker.compose.down', composeDown);
