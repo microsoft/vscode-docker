@@ -11,15 +11,32 @@ export interface ITerminalProvider {
 }
 
 export class DefaultTerminalProvider {
+  private _cwd: vscode.Uri | undefined;
+
+  constructor(extensionExecutionContext: vscode.ExtensionExecutionContext) {
+    // When the extension is executing locally but there is a remote present,
+    // creating a terminal defaults to the remote. Passing a file URI overrides
+    // this behavior so the terminal is created locally.
+    this._cwd = extensionExecutionContext === vscode.ExtensionExecutionContext.Remote
+      ? undefined
+      : process.platform === 'win32'
+        ? vscode.Uri.file(process.env.USERPROFILE || 'c:\\')
+        : vscode.Uri.file(process.env.HOME || '/');
+  }
+
   public createTerminal(name: string): Terminal {
-    let terminalOptions: vscode.TerminalOptions = {};
-    terminalOptions.name = name;
+    const terminalOptions: vscode.TerminalOptions = {
+      cwd: this._cwd,
+      name
+    };
+
     const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
     if (value) {
       terminalOptions.env = {
         DOCKER_HOST: value
       };
     }
+
     return vscode.window.createTerminal(terminalOptions);
   }
 }

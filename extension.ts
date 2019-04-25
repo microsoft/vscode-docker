@@ -93,7 +93,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   ctx.subscriptions.push(ext.outputChannel);
 
   if (!ext.terminalProvider) {
-    ext.terminalProvider = new DefaultTerminalProvider();
+    ext.terminalProvider = new DefaultTerminalProvider(ctx.executionContext);
   }
   ext.reporter = createTelemetryReporter(ctx);
   if (!ext.keytar) {
@@ -103,10 +103,27 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   registerUIExtensionVariables(ext);
 }
 
+async function setContextKeys(ctx: vscode.ExtensionContext): Promise<void> {
+  const isRemote = ctx.executionContext === vscode.ExtensionExecutionContext.Remote;
+  vscode.commands.executeCommand('setContext', 'docker:isRemote', isRemote);
+
+  const hasRemote = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0].uri.authority;
+  const hasShownInfoMessage = ctx.globalState.get('docker.hasShownRemoteNotification');
+  if (!hasShownInfoMessage && !isRemote && hasRemote) {
+    ctx.globalState.update('docker.hasShownRemoteNotification', true);
+    const result = await vscode.window.showInformationMessage('This workspace is in a remote environment, but the Docker extension is running on your local machine. Some of its functionality is limited.', 'Learn More');
+    if (result === 'Learn More') {
+      vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/vscode-remote/containers/docker'));
+    }
+  }
+}
+
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
   perfStats.loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);
+  // @ts-ignore
+  setContextKeys(ctx);
   await setRequestDefaults();
   await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
     this.properties.isActivationEvent = 'true';

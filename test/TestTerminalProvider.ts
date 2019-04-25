@@ -22,7 +22,7 @@ export class TestTerminalProvider {
     private _currentTerminal: TestTerminal | undefined;
 
     public createTerminal(name: string): TestTerminal {
-        let terminal = new DefaultTerminalProvider().createTerminal(name);
+        let terminal = new DefaultTerminalProvider(vscode.ExtensionExecutionContext.Local).createTerminal(name);
         let testTerminal = new TestTerminal(terminal);
         this._currentTerminal = testTerminal;
         return testTerminal;

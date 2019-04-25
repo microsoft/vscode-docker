@@ -102,7 +102,7 @@ export async function startAzureCLI(actionContext: IActionContext): Promise<cp.C
         }
 
         const cmd: string = `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`;
-        const terminal: vscode.Terminal = vscode.window.createTerminal('Azure CLI');
+        const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Azure CLI');
         terminal.sendText(cmd);
         terminal.show();
     }
