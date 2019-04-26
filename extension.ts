@@ -122,7 +122,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
   perfStats.loadEndTime = Date.now();
 
   initializeExtensionVariables(ctx);
-  // @ts-ignore
+  // tslint:disable-next-line
   setContextKeys(ctx);
   await setRequestDefaults();
   await callWithTelemetryAndErrorHandling('docker.activate', async function (this: IActionContext): Promise<void> {
