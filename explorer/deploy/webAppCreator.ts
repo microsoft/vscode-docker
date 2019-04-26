@@ -8,6 +8,7 @@ import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { ResourceManagementClient, ResourceModels, SubscriptionModels } from 'azure-arm-resource';
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as WebSiteModels from 'azure-arm-website/lib/models';
+import WebSiteManagementClient from 'azure-arm-website/lib/webSiteManagementClient';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
 import { nonNullProp } from '../../utils/nonNull';
@@ -17,7 +18,6 @@ import { DockerHubImageTagNode } from '../models/dockerHubNodes';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 import * as util from './util';
 import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
-import WebSiteManagementClient = require('azure-arm-website');
 
 export class WebAppCreator extends WizardBase {
     constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
@@ -283,7 +283,7 @@ class AppServicePlanStep extends WebAppCreatorStepBase {
             // Currently we only support Linux web apps.
             if (plan.kind.toLowerCase() === 'linux') {
                 quickPickItems.push({
-                    label: plan.appServicePlanName,
+                    label: plan.name,
                     description: `${plan.sku.name} (${plan.geoRegion})`,
                     detail: plan.resourceGroup,
                     data: plan
@@ -333,7 +333,7 @@ class AppServicePlanStep extends WebAppCreatorStepBase {
         const newPlanSku = pickedSkuItem.data;
         this._createNew = true;
         this._plan = {
-            appServicePlanName: newPlanName,
+            name: newPlanName,
             kind: 'linux',  // Currently we only support Linux web apps.
             sku: newPlanSku,
             location: rg.location,
@@ -343,15 +343,15 @@ class AppServicePlanStep extends WebAppCreatorStepBase {
 
     public async execute(): Promise<void> {
         if (!this._createNew) {
-            this.wizard.writeline(`Existing App Service Plan "${this._plan.appServicePlanName} (${this._plan.sku.name})" will be used.`);
+            this.wizard.writeline(`Existing App Service Plan "${this._plan.name} (${this._plan.sku.name})" will be used.`);
             return;
         }
 
-        this.wizard.writeline(`Creating new App Service Plan "${this._plan.appServicePlanName} (${this._plan.sku.name})"...`);
+        this.wizard.writeline(`Creating new App Service Plan "${this._plan.name} (${this._plan.sku.name})"...`);
         const subscription = this.getSelectedSubscription();
         const rg = this.getSelectedResourceGroup();
         const websiteClient = new WebSiteManagementClient(this.azureAccount.getCredentialByTenantId(subscription.tenantId), subscription.subscriptionId);
-        this._plan = await websiteClient.appServicePlans.createOrUpdate(rg.name, this._plan.appServicePlanName, this._plan);
+        this._plan = await websiteClient.appServicePlans.createOrUpdate(rg.name, this._plan.name, this._plan);
 
         this.wizard.writeline(`App Service Plan created.`);
     }
@@ -516,7 +516,7 @@ export class WebsiteStep extends WebAppCreatorStepBase {
         this._website = await websiteClient.webApps.createOrUpdate(rg.name, this._website.name, this._website);
 
         this.wizard.writeline('Updating Application Settings...');
-        let appSettings: WebSiteModels.StringDictionary;
+        let appSettings: WebSiteModels.StringDictionary & { "location": string };
 
         if (this._serverUrl.length > 0) {
             // azure container registry

@@ -237,8 +237,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
 
   if (context instanceof AzureImageTagNode) {
     const publishingCredentials: User = await getWebAppPublishCredential(wizard.azureAccount, context.subscription, website);
-
-    await createWebhookForWebApp(context, wizard, `https://${website.name}.scm.azurewebsites.net/docker/hook`);
+    await createWebhookForWebApp(context, wizard, publishingCredentials.scmUri);
 
   } else {
     // point to dockerhub to create a webhook
