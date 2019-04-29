@@ -28,11 +28,19 @@ export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
     defaultPort: undefined
 };
 
-const AspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
-const AspNetCoreSdkImageFormat = "microsoft/aspnetcore-build:{0}.{1}{2}";
-const DotNetCoreRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-runtime{2}";
-const DotNetCoreAspNetRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-aspnetcore-runtime{2}";
-const DotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
+// .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
+const LegacyAspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
+const LegacyAspNetCoreSdkImageFormat = "microsoft/aspnetcore-build:{0}.{1}{2}";
+const LegacyDotNetCoreRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-runtime{2}";
+const LegacyDotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
+
+// .NET Core 2.1+ images are now published to Microsoft Container Registry (MCR).
+// https://hub.docker.com/_/microsoft-dotnet-core-runtime/
+const DotNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/core/runtime:{0}.{1}{2}";
+// https://hub.docker.com/_/microsoft-dotnet-core-aspnet/
+const AspNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/core/aspnet:{0}.{1}{2}";
+// https://hub.docker.com/_/microsoft-dotnet-core-sdk/
+const DotNetCoreSdkImageFormat = "mcr.microsoft.com/dotnet/core/sdk:{0}.{1}{2}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
@@ -187,19 +195,29 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let baseImageFormat: string;
     let sdkImageNameFormat: string;
 
-    if (platform === 'ASP.NET Core') {
-        // See https://github.com/aspnet/Announcements/issues/298 - 2.1 and newer use microsoft/dotnet repo
-        if (semver.lt(netCoreAppVersion, '2.1.0')) {
+    // For .NET Core 2.1+ use mcr.microsoft.com/dotnet/core/[sdk|aspnet|runtime|runtime-deps] repository.
+    // See details here: https://devblogs.microsoft.com/dotnet/net-core-container-images-now-published-to-microsoft-container-registry/
+    if (semver.gte(netCoreAppVersion, '2.1.0')) {
+        if (platform === 'ASP.NET Core') {
             baseImageFormat = AspNetCoreRuntimeImageFormat;
-            sdkImageNameFormat = AspNetCoreSdkImageFormat;
+        } else if (platform === '.NET Core Console') {
+            baseImageFormat = DotNetCoreRuntimeImageFormat;
         } else {
-            baseImageFormat = DotNetCoreAspNetRuntimeImageFormat;
-            sdkImageNameFormat = DotNetCoreSdkImageFormat;
+            assert.fail(`Unknown platform`);
         }
-    } else {
-        assert.equal(platform, '.NET Core Console');
-        baseImageFormat = DotNetCoreRuntimeImageFormat;
+
         sdkImageNameFormat = DotNetCoreSdkImageFormat;
+    } else {
+        if (platform === 'ASP.NET Core') {
+            baseImageFormat = LegacyAspNetCoreRuntimeImageFormat;
+            sdkImageNameFormat = LegacyAspNetCoreSdkImageFormat;
+        } else if (platform === '.NET Core Console') {
+
+            baseImageFormat = LegacyDotNetCoreRuntimeImageFormat;
+            sdkImageNameFormat = LegacyDotNetCoreSdkImageFormat;
+        } else {
+            assert.fail(`Unknown platform`);
+        }
     }
 
     // When targeting Linux container or the dotnet core version is less than 2.0, use MA tag.

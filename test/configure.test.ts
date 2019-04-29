@@ -616,10 +616,10 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
                     #For more information, please see https://aka.ms/containercompat
 
-                    FROM microsoft/dotnet:2.1-runtime-nanoserver-1809 AS base
+                    FROM mcr.microsoft.com/dotnet/core/runtime:2.1-nanoserver-1809 AS base
                     WORKDIR /app
 
-                    FROM microsoft/dotnet:2.1-sdk-nanoserver-1809 AS build
+                    FROM mcr.microsoft.com/dotnet/core/sdk:2.1-nanoserver-1809 AS build
                     WORKDIR /src
                     COPY ["ConsoleApp1Folder/ConsoleApp1.csproj", "ConsoleApp1Folder/"]
                     RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
@@ -648,10 +648,10 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_21_ProjectFileContents,
                 removeIndentation(`
-                    FROM microsoft/dotnet:2.1-runtime AS base
+                    FROM mcr.microsoft.com/dotnet/core/runtime:2.1 AS base
                     WORKDIR /app
 
-                    FROM microsoft/dotnet:2.1-sdk AS build
+                    FROM mcr.microsoft.com/dotnet/core/sdk:2.1 AS build
                     WORKDIR /src
                     COPY ["ConsoleApp1Folder/ConsoleApp1.csproj", "ConsoleApp1Folder/"]
                     RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
@@ -782,8 +782,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 dotNetCoreConsole_22_ProjectFileContents);
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-runtime-nanoserver-1809 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2-nanoserver-1809 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -796,8 +796,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 dotNetCoreConsole_22_ProjectFileContents);
 
             assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-runtime AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build');
         });
     });
 
@@ -838,11 +838,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
                     #For more information, please see https://aka.ms/containercompat
 
-                    FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1809 AS base
+                    FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1809 AS base
                     WORKDIR /app
                     EXPOSE 1234
 
-                    FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build
+                    FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build
                     WORKDIR /src
                     COPY ["AspNetApp1/project1.csproj", "AspNetApp1/"]
                     RUN dotnet restore "AspNetApp1/project1.csproj"
@@ -869,11 +869,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project2.csproj',
                 aspNet_22_ProjectFileContents,
                 removeIndentation(`
-                    FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
+                    FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS base
                     WORKDIR /app
                     EXPOSE 1234
 
-                    FROM microsoft/dotnet:2.2-sdk AS build
+                    FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
                     WORKDIR /src
                     COPY ["project2/project2.csproj", "project2/"]
                     RUN dotnet restore "project2/project2.csproj"
@@ -900,8 +900,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1803 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1803 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1803 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1803 AS build');
         });
 
         testInEmptyFolder("Windows 10 RS3", async () => {
@@ -913,8 +913,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1709 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1709 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1709 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1709 AS build');
         });
 
         testInEmptyFolder("Windows Server 2016", async () => {
@@ -926,8 +926,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-sac2016 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-sac2016 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-sac2016 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-sac2016 AS build');
         });
 
         testInEmptyFolder("Host=Linux", async () => {
@@ -939,8 +939,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-aspnetcore-runtime-nanoserver-1809 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:2.2-sdk-nanoserver-1809 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1809 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
         });
     });
 
