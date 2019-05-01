@@ -1099,7 +1099,7 @@
     "request-promise-native": "^1.0.5",
     "semver": "^6.0.0",
     "tar": "^4.4.6",
-    "vscode-azureextensionui": "^0.23.1",
+    "vscode-azureextensionui": "^0.23.2",
     "vscode-languageclient": "^5.1.1",
     "win-ca": "^2.4.1",
     "xml2js": "^0.4.19"
