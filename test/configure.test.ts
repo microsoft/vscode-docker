@@ -10,7 +10,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Suite } from 'mocha';
 import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension.bundle';
-import { TestUserInput, IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { TestUserInput, IActionContext, TelemetryProperties, TestInput } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';
 
 // Can be useful for testing
@@ -63,7 +63,7 @@ async function readFile(pathRelativeToTestRootFolder: string): Promise<string> {
     return dockerFileContents;
 }
 
-async function testConfigureDockerViaApi(options: ConfigureApiOptions, inputs: (string | undefined)[] = [], expectedOutputFiles?: string[]): Promise<void> {
+async function testConfigureDockerViaApi(options: ConfigureApiOptions, inputs: (string | TestInput)[] = [], expectedOutputFiles?: string[]): Promise<void> {
     ext.ui = new TestUserInput(inputs);
     await vscode.commands.executeCommand('vscode-docker.api.configure', options);
     assert.equal(inputs.length, 0, 'Not all inputs were used.');
@@ -115,7 +115,7 @@ async function getFilesInProject(): Promise<string[]> {
     return files;
 }
 
-async function testConfigureDocker(platform: Platform, expectedTelemetryProperties?: ConfigureTelemetryProperties, inputs: (string | undefined)[] = [], expectedOutputFiles?: string[]): Promise<void> {
+async function testConfigureDocker(platform: Platform, expectedTelemetryProperties?: ConfigureTelemetryProperties, inputs: (string | TestInput)[] = [], expectedOutputFiles?: string[]): Promise<void> {
     // Set up simulated user input
     inputs.unshift(platform);
     const ui: TestUserInput = new TestUserInput(inputs);
@@ -809,7 +809,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'ASP.NET Core',
                 undefined,
-                ['Windows', undefined]
+                ['Windows', TestInput.UseDefaultValue]
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 80');
@@ -993,7 +993,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'Java',
                 undefined,
-                [undefined],
+                [TestInput.UseDefaultValue],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -1032,7 +1032,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'pom.xml',
                     packageFileSubfolderDepth: '0',
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -1068,7 +1068,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'pom.xml',
                     packageFileSubfolderDepth: '0',
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['pom.xml', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']);
 
             assertFileContains('Dockerfile', 'EXPOSE 3000');
@@ -1088,7 +1088,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'build.gradle',
                     packageFileSubfolderDepth: '0',
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -1110,7 +1110,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'build.gradle',
                     packageFileSubfolderDepth: '0',
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['build.gradle', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -1134,7 +1134,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -1157,7 +1157,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']);
 
             assertFileContains('Dockerfile', 'FROM ruby:2.5-slim');
@@ -1215,7 +1215,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                [undefined /*port*/],
+                [TestInput.UseDefaultValue /*port*/],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'package.json']);
 
             let dockerfileContents = await readFile('Dockerfile');
