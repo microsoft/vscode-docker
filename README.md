@@ -362,9 +362,15 @@ The default connection of the extension is to connect to the local docker daemon
 
 If the docker daemon is using TLS, the DOCKER_CERT_PATH environment variable must also be set (e.g. `$HOME\.docker\machine\machines\default`). See [docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
 
-## Running the extension inside a container (Dev Container mode)
+## Workaround for VS Code remote development
 
-NOTE: There can be issues running the docker daemon from inside a container. Follow [these instructions](https://github.com/Microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) to set up your dev container docker daemon, and the extension experience will mirror working on a local workspace.   
+If you are running the extension via VS Code remote development, you will have to configure the remote instance (WSL, SSH machine, dev container) to run docker commands smoothly (like `docker run hello world`). First, install docker-cli in the remote instance.
+
+In Windows subsystem for linux (WSL), you have to set the `DOCKER_HOST` environment variable in linux to connect to Docker for Windows. See [here](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) for more detailed instructions.
+
+In SSH, the setup for docker is dependent on the machine environment.
+
+There can be issues running the docker daemon from _inside the dev container_ (also called docker-in-docker). On the first build of the container, you might encounter an error about connecting to Docker. Follow [these docker-in-docker instructions](https://github.com/Microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) to set up your dev container docker daemon, and the extension experience will mirror working on a local workspace.
 
 ## Contributing
 
