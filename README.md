@@ -362,6 +362,10 @@ The default connection of the extension is to connect to the local docker daemon
 
 If the docker daemon is using TLS, the DOCKER_CERT_PATH environment variable must also be set (e.g. `$HOME\.docker\machine\machines\default`). See [docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
 
+## Running the extension inside a container (Dev Container mode)
+
+NOTE: There can be issues running the docker daemon from inside a container. Follow [these instructions](https://github.com/Microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) to set up your dev container docker daemon, and the extension experience will mirror working on a local workspace.   
+
 ## Contributing
 
 There are a couple of ways you can contribute to this repository:
