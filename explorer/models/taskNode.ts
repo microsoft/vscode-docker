@@ -1,13 +1,17 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { treeUtils } from '../../utils/treeUtils';
 import { openExternal } from '../utils/openExternal';
 import { NodeBase } from './nodeBase';
 
@@ -28,10 +32,7 @@ export class TaskRootNode extends NodeBase {
 
     public readonly contextValue: string = 'taskRootNode';
     public name: string;
-    public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'tasks_light.svg'),
-        dark: path.join(imagesPath, 'dark', 'tasks_dark.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('tasks');
 
     public getTreeItem(): vscode.TreeItem {
         return {

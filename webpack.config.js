@@ -148,7 +148,7 @@ let config = dev.getDefaultWebpackConfig({
         // Copy files to dist folder where the runtime can find them
         new CopyWebpackPlugin([
             // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
-            { from: './utils/getCoreNodeModule.js', to: 'node_modules' }
+            { from: './out/utils/getCoreNodeModule.js', to: 'node_modules' }
         ])
     ]
 });

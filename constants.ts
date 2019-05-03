@@ -3,11 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
-
 export const configPrefix: string = 'docker';
-
-export const imagesPath: string = path.join(__dirname, '../images');
 
 //AsyncPool Constants
 export const MAX_CONCURRENT_REQUESTS = 8;
