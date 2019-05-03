@@ -1,3 +1,15 @@
+## 0.6.2 - 2 May 2019
+
+### Fixed
+* Handle opening resources to use native vscode APIs
+* Running the extension in older versions of VS Code
+* Report an issue opening a blank webpage due to a large stack frame
+* Use appropriate nuget fallback volume mount for dotnet debugging - [#793](https://github.com/Microsoft/vscode-docker/pull/793)
+* Ensure debugger directory exists - [#897](https://github.com/Microsoft/vscode-docker/issues/897)
+
+### Added
+*  `networkAlias` option to Docker run configuration [#890](https://github.com/Microsoft/vscode-docker/pull/890)
+
 ## 0.6.1 - 18 March 2019
 
 ### Fixed
