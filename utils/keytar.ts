@@ -45,7 +45,7 @@ export interface IKeytar {
  */
 function getKeytarModule(): typeof keytarType {
     // tslint:disable-next-line: no-unsafe-any
-    const keytar = <typeof keytarType | undefined>getCoreNodeModule('keytar');
+    const keytar = getCoreNodeModule<typeof keytarType>('keytar');
     if (!keytar) {
         throw new Error("Internal error: Could not find keytar module for reading and writing passwords");
     } else {
