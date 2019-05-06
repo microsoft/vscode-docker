@@ -17,7 +17,7 @@
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/**/*.js"
+				"${workspaceFolder}/out/**/*.js"
 			],
 			"preLaunchTask": "npm: compile"
 		},
@@ -35,7 +35,7 @@
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/**/*.js"
+				"${workspaceFolder}/out/**/*.js"
 			],
 			"preLaunchTask": "npm: pretest"
 		},
@@ -51,6 +51,9 @@
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
 			"preLaunchTask": "npm: compile",
 			"env": {
 				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
@@ -72,6 +75,9 @@
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
 			"preLaunchTask": "npm: pretest",
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
