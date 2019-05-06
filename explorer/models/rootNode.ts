@@ -4,14 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
-import { imagesPath } from '../../constants';
 import { ext, ImageGrouping } from '../../extensionVariables';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import { treeUtils } from '../../utils/treeUtils';
 import { showDockerConnectionError } from '../utils/dockerConnectionError';
 import { ContainerNode, ContainerNodeContextValue } from './containerNode';
 import { ErrorNode } from './errorNode';
@@ -19,7 +18,7 @@ import { getContainerLabel } from './getContainerLabel';
 import { getImageLabel } from './getImageLabel';
 import { ImageGroupNode } from './imageGroupNode';
 import { ImageNode } from './imageNode';
-import { IconPath, NodeBase } from './nodeBase';
+import { NodeBase } from './nodeBase';
 import { RegistryRootNode } from './registryRootNode';
 
 const imageFilters = {
@@ -199,17 +198,17 @@ export class RootNode extends NodeBase {
                 case ImageGrouping.ImageId:
                     groupLabelTemplate = '{shortImageId}';
                     leafLabelTemplate = '{fullTag} ({createdSince})';
-                    groupIconName = 'ApplicationGroup_16x.svg';
+                    groupIconName = 'ApplicationGroup_16x';
                     break;
                 case ImageGrouping.Repository:
                     groupLabelTemplate = '{repository}';
                     leafLabelTemplate = '{tag} ({createdSince})';
-                    groupIconName = 'Repository_16x.svg';
+                    groupIconName = 'Repository_16x';
                     break;
                 case ImageGrouping.RepositoryName:
                     groupLabelTemplate = '{repositoryName}';
                     leafLabelTemplate = '{fullTag} ({createdSince})';
-                    groupIconName = 'ApplicationGroup_16x.svg';
+                    groupIconName = 'ApplicationGroup_16x';
                     break;
                 default:
                     assert(`Unexpected groupImagesBy ${ext.groupImagesBy}`);
@@ -343,7 +342,7 @@ export class RootNode extends NodeBase {
             const containerNodes: ContainerNode[] = [];
             let containers: Docker.ContainerDesc[];
             let contextValue: ContainerNodeContextValue;
-            let iconPath: IconPath;
+            let iconPath: treeUtils.IThemedIconPath;
 
             try {
                 containers = await docker.getContainerDescriptors(containerFilters);
@@ -359,29 +358,17 @@ export class RootNode extends NodeBase {
                         case "dead":
                         case "exited":
                         case "created":
-                            iconPath = {
-                                light: path.join(imagesPath, 'light', 'StatusStop_16x.svg'),
-                                dark: path.join(imagesPath, 'dark', 'StatusStop_16x.svg'),
-                            };
+                            iconPath = treeUtils.getThemedIconPath('StatusStop_16x');
                             break;
                         case "paused":
-                            iconPath = {
-                                light: path.join(imagesPath, 'light', 'StatusPause_16x.svg'),
-                                dark: path.join(imagesPath, 'dark', 'StatusPause_16x.svg'),
-                            };
+                            iconPath = treeUtils.getThemedIconPath('StatusPause_16x');
                             break;
                         case "restarting":
-                            iconPath = {
-                                light: path.join(imagesPath, 'light', 'Restart_16x.svg'),
-                                dark: path.join(imagesPath, 'dark', 'Restart_16x.svg'),
-                            };
+                            iconPath = treeUtils.getThemedIconPath('Restart_16x');
                             break;
                         case "running":
                         default:
-                            iconPath = {
-                                light: path.join(imagesPath, 'light', 'StatusRun_16x.svg'),
-                                dark: path.join(imagesPath, 'dark', 'StatusRun_16x.svg'),
-                            };
+                            iconPath = treeUtils.getThemedIconPath('StatusRun_16x');
                     }
 
                     // Determine contextValue
@@ -390,10 +377,7 @@ export class RootNode extends NodeBase {
                     } else if (me.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
                         // Override icon from above
-                        iconPath = {
-                            light: path.join(imagesPath, 'light', 'StatusWarning_16x.svg'),
-                            dark: path.join(imagesPath, 'dark', 'StatusWarning_16x.svg'),
-                        };
+                        iconPath = treeUtils.getThemedIconPath('StatusWarning_16x');
                     } else {
                         contextValue = "runningLocalContainerNode";
                     }

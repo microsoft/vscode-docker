@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { imagesPath } from '../../constants';
+import { treeUtils } from '../../utils/treeUtils';
 import { formatTag, getCatalog, getTags, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
 import { NodeBase } from './nodeBase';
@@ -18,10 +18,7 @@ export class CustomRegistryNode extends NodeBase {
     public static readonly contextValue: string = 'customRegistryNode';
     public contextValue: string = CustomRegistryNode.contextValue;
 
-    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Registry_16x');
 
     constructor(
         public registryName: string,
@@ -70,10 +67,7 @@ export class CustomRegistryNode extends NodeBase {
 export class CustomRepositoryNode extends NodeBase {
     public static readonly contextValue: string = 'customRepository';
     public contextValue: string = CustomRepositoryNode.contextValue;
-    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Repository_16x');
 
     constructor(
         public readonly repositoryName: string, // e.g. 'hello-world' or 'registry'

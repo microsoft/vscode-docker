@@ -1,33 +1,16 @@
-// Available variables which can be used inside of strings.
-// ${workspaceFolder}: the root folder of the team
-// ${file}: the current opened file
-// ${fileBasename}: the current opened file's basename
-// ${fileDirname}: the current opened file's dirname
-// ${fileExtname}: the current opened file's extension
-// ${cwd}: the current working directory of the spawned process
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558
-	// Also: https://raw.githubusercontent.com/Microsoft/vscode-tslint/master/tslint-tests/.vscode/tasks.json
-	// for the documentation about the tasks.json format
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "npm",
-			"type": "shell",
-			"command": "npm",
+			"type": "npm",
+			"script": "compile",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"args": [
-				"run",
-				"compile",
-				"--loglevel",
-				"silent"
-			],
 			"isBackground": true,
 			"presentation": {
-				"reveal": "never"
+				"reveal": "silent"
 			},
 			"problemMatcher": "$tsc-watch"
 		},

@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-
-export type IconPath = string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon;
+import { treeUtils } from '../../utils/treeUtils';
 
 export abstract class NodeBase {
     public readonly label: string;
@@ -28,5 +27,5 @@ export abstract class NodeBase {
         return [];
     }
 
-    public iconPath?: IconPath;
+    public iconPath?: string | vscode.Uri | treeUtils.IThemedIconPath | vscode.ThemeIcon;
 }

@@ -5,17 +5,16 @@
 
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { imagesPath } from '../../constants';
 import { AzureAccount } from '../../typings/azure-account.api';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
 import { AzureImage } from '../../utils/Azure/models/image';
 import { Repository } from '../../utils/Azure/models/repository';
 import { getLoginServer } from '../../utils/nonNull';
+import { treeUtils } from '../../utils/treeUtils';
 import { formatTag } from './commonRegistryUtils';
-import { IconPath, NodeBase } from './nodeBase';
+import { NodeBase } from './nodeBase';
 import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
@@ -29,10 +28,7 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public readonly contextValue: string = 'azureRegistryNode';
-    public readonly iconPath: IconPath = {
-        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Registry_16x');
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -91,10 +87,7 @@ export class AzureRepositoryNode extends NodeBase {
 
     public static readonly contextValue: string = 'azureRepositoryNode';
     public readonly contextValue: string = AzureRepositoryNode.contextValue;
-    public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Repository_16x');
 
     public getTreeItem(): vscode.TreeItem {
         return {

@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as vscode from 'vscode';
-import { imagesPath } from '../../constants';
+import { treeUtils } from '../../utils/treeUtils';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 
@@ -28,10 +27,7 @@ export class ImageGroupNode extends NodeBase {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: this.contextValue,
-            iconPath: {
-                light: path.join(imagesPath, 'light', this.iconName),
-                dark: path.join(imagesPath, 'dark', this.iconName)
-            }
+            iconPath: treeUtils.getThemedIconPath(this.iconName)
         }
     }
 
