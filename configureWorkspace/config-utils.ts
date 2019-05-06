@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isNumber } from 'util';
 import vscode = require('vscode');
-import { IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
 

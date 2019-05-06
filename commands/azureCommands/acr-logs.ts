@@ -60,7 +60,10 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
         if (context instanceof TaskNode) {
             webViewTitle += '/' + context.label;
         }
-        const webview = new LogTableWebview(webViewTitle, logData);
+
+        // grandfathered in - should ideally be refactored so that calling a constructor does not have side effects
+        // tslint:disable-next-line: no-unused-expression
+        new LogTableWebview(webViewTitle, logData);
     }
 }
 

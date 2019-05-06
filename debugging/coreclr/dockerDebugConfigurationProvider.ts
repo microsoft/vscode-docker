@@ -100,7 +100,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const { appFolder, resolvedAppFolder } = await this.inferAppFolder(folder, debugConfiguration);
 
-        const { appProject, resolvedAppProject } = await this.inferAppProject(folder, debugConfiguration, resolvedAppFolder);
+        const { resolvedAppProject } = await this.inferAppProject(folder, debugConfiguration, resolvedAppFolder);
 
         const appName = path.parse(resolvedAppProject).name;
 

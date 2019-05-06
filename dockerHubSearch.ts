@@ -6,7 +6,6 @@
 'use strict';
 
 import https = require('https');
-import vscode = require('vscode');
 import { httpsRequest } from './utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {

@@ -2,13 +2,12 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as path from 'path';
 import { DotNetClient } from "./dotNetClient";
 import { FileSystemProvider } from "./fsProvider";
 import { TempFileProvider } from './tempFileProvider';
 
 const getTargetPathProjectFileContent =
-`<Project>
+    `<Project>
     <Target Name="GetTargetPath">
         <MSBuild
             Projects="$(ProjectFilename)"

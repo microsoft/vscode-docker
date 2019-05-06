@@ -42,8 +42,6 @@ export class DockerHubOrgNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
         return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubRepositoryNode[]> {
             this.suppressTelemetry = true;
             this.properties.source = 'dockerHubOrgNode';
@@ -98,8 +96,6 @@ export class DockerHubRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageTagNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
         return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubImageTagNode[]> {
             this.suppressTelemetry = true;
             this.properties.source = 'dockerHubRepositoryNode';

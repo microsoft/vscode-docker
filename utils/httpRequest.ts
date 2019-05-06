@@ -5,7 +5,6 @@
 
 import * as https from 'https';
 import url = require('url');
-import { Uri } from 'vscode';
 import { addUserAgent } from './addUserAgent';
 
 function convertToOptions(options: https.RequestOptions | string): https.RequestOptions {
