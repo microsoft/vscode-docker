@@ -1,6 +1,5 @@
 
 import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
-import * as clipboardy from 'clipboardy'
 import * as path from 'path';
 import * as vscode from "vscode";
 import { callWithTelemetryAndErrorHandling } from "vscode-azureextensionui";
@@ -45,8 +44,7 @@ export class LogTableWebview {
                 await callWithTelemetryAndErrorHandling(
                     'ACRLogs-copyDigest',
                     async () => {
-                        // tslint:disable-next-line:no-unsafe-any
-                        clipboardy.writeSync(message.copyRequest.text);
+                        await vscode.env.clipboard.writeText(message.copyRequest.text);
                         vscode.window.showInformationMessage("The digest was successfully copied to the clipboard.");
                     });
             } else if (message.loadMore) {

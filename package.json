@@ -1025,7 +1025,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.26.0"
+    "vscode": "^1.31.0"
   },
   "scripts": {
     "vscode:prepublish": "npm run webpack-prod",
@@ -1083,7 +1083,6 @@
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^1.0.0-preview",
     "azure-storage": "^2.8.1",
-    "clipboardy": "^1.2.3",
     "deep-equal": "^1.0.1",
     "dockerfile-language-server-nodejs": "^0.0.20",
     "dockerode": "^2.5.8",
