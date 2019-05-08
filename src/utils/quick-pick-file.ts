@@ -29,12 +29,17 @@ function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): It
     };
 }
 
-export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPattern: string, message: string): Promise<Item | undefined> {
+export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPatterns: string[], message: string): Promise<Item | undefined> {
     if (fileUri) {
         return createFileItem(rootFolder, fileUri);
     }
 
-    let uris: vscode.Uri[] = await getFileUris(rootFolder, globPattern);
+    let uris: vscode.Uri[] = [];
+    await Promise.all(globPatterns.map(async (pattern: string) => {
+        uris.push(...await getFileUris(rootFolder, pattern));
+    }));
+    // de-dupe
+    uris = uris.filter((uri, index) => uris.findIndex(uri2 => uri.toString() === uri2.toString()) === index);
 
     if (!uris || uris.length === 0) {
         return undefined;
@@ -51,9 +56,10 @@ export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUr
 
 export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
     let dockerFileItem: Item;
+    const globPatterns: string[] = getDockerFileGlobPatterns();
 
     while (!dockerFileItem) {
-        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, DOCKERFILE_GLOB_PATTERN, 'Choose a Dockerfile to build.');
+        let resolvedItem: Item | undefined = await resolveFileItem(rootFolder, dockerFileUri, globPatterns, 'Choose a Dockerfile to build.');
         if (resolvedItem) {
             dockerFileItem = resolvedItem;
         } else {
@@ -68,8 +74,26 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
     return dockerFileItem;
 }
 
+function getDockerFileGlobPatterns(): string[] {
+    const result: string[] = [DOCKERFILE_GLOB_PATTERN];
+    try {
+        const config = vscode.workspace.getConfiguration('files').get<{}>('associations');
+        if (config) {
+            for (const globPattern of Object.keys(config)) {
+                const fileType = <string | undefined>config[globPattern];
+                if (fileType && /^dockerfile$/i.test(fileType)) {
+                    result.push(globPattern);
+                }
+            }
+        }
+    } catch {
+        // ignore and use default
+    }
+    return result;
+}
+
 export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noYamlFileMessage: string): Promise<Item> {
-    const fileItem: Item = await resolveFileItem(rootFolder, fileUri, YAML_GLOB_PATTERN, 'Choose a .yaml file to run.');
+    const fileItem: Item = await resolveFileItem(rootFolder, fileUri, [YAML_GLOB_PATTERN], 'Choose a .yaml file to run.');
     if (!fileItem) {
         throw new Error(noYamlFileMessage);
     }
