@@ -7,12 +7,13 @@ import * as assert from 'assert';
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
+import { User } from 'azure-arm-website/lib/models';
 import * as clipboardy from 'clipboardy';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CoreOptions } from 'request';
-import * as request from 'request-promise-native';
 import { RequestPromise } from 'request-promise-native';
+import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
@@ -54,6 +55,7 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
 import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
+import { getWebAppPublishCredential } from './explorer/deploy/util';
 import { ResourceGroupStep, WebAppCreator, WebsiteStep } from './explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
@@ -232,10 +234,10 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     throw new UserCancelledError();
   }
   const website = wizard.createdWebSite;
-  let appUri = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
 
   if (context instanceof AzureImageTagNode) {
-    await createWebhookForWebApp(context, wizard, appUri);
+    const publishingCredentials: User = await getWebAppPublishCredential(wizard.azureAccount, context.subscription, website);
+    await createWebhookForWebApp(context, wizard, publishingCredentials.scmUri);
 
   } else {
     // point to dockerhub to create a webhook
@@ -243,6 +245,7 @@ async function createWebApp(context?: AzureImageTagNode | DockerHubImageTagNode)
     const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
     let response: string = await vscode.window.showInformationMessage("Please browse to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
     if (response) {
+      let appUri = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
       // tslint:disable-next-line:no-unsafe-any
       clipboardy.writeSync(appUri);
       // tslint:disable-next-line:no-unsafe-any

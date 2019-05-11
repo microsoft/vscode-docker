@@ -1077,7 +1077,7 @@
     "adal-node": "^0.1.28",
     "azure-arm-containerregistry": "^3.0.0",
     "azure-arm-resource": "^2.0.0-preview",
-    "azure-arm-website": "^1.0.0-preview",
+    "azure-arm-website": "^5.0.0",
     "azure-storage": "^2.8.1",
     "clipboardy": "^1.2.3",
     "deep-equal": "^1.0.1",
