@@ -159,7 +159,7 @@ export class AzureImageTagNode extends NodeBase {
 
 export class AzureNotSignedInNode extends NodeBase {
     constructor() {
-        super('Sign in to Azure...');
+        super('Sign In to Azure...');
     }
 
     public readonly contextValue: string = 'azureNotSignedInNode';
