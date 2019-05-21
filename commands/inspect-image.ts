@@ -8,14 +8,14 @@ import DockerInspectDocumentContentProvider from "../documentContentProviders/do
 import { ImageNode } from "../explorer/models/imageNode";
 import { quickPickImage } from "./utils/quick-pick-image";
 
-export default async function inspectImage(actionContext: IActionContext, context: ImageNode | undefined): Promise<void> {
+export default async function inspectImage(context: IActionContext, node: ImageNode | undefined): Promise<void> {
 
     let imageToInspect: Docker.ImageDesc;
 
-    if (context && context.imageDesc) {
-        imageToInspect = context.imageDesc;
+    if (node && node.imageDesc) {
+        imageToInspect = node.imageDesc;
     } else {
-        const selectedImage = await quickPickImage(actionContext);
+        const selectedImage = await quickPickImage(context);
         if (selectedImage) {
             imageToInspect = selectedImage.imageDesc;
         }

@@ -42,9 +42,9 @@ export class DockerHubOrgNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubRepositoryNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'dockerHubOrgNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'dockerHubOrgNode';
 
             const repoNodes: DockerHubRepositoryNode[] = [];
             let node: DockerHubRepositoryNode;
@@ -96,9 +96,9 @@ export class DockerHubRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageTagNode[]> {
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubImageTagNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'dockerHubRepositoryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'dockerHubRepositoryNode';
 
             const imageNodes: DockerHubImageTagNode[] = [];
             let node: DockerHubImageTagNode;

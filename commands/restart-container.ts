@@ -11,19 +11,19 @@ import { ext } from '../extensionVariables';
 import { docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
-export async function restartContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
+export async function restartContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containersToRestart: Docker.ContainerDesc[];
 
-    if (context instanceof ContainerNode && context.containerDesc) {
-        containersToRestart = [context.containerDesc];
+    if (node instanceof ContainerNode && node.containerDesc) {
+        containersToRestart = [node.containerDesc];
     } else {
         const opts: ListContainerDescOptions = {
             "filters": {
                 "status": ["running", "paused", "exited"]
             }
         };
-        containersToRestart = await quickPickContainerOrAll(actionContext, opts);
+        containersToRestart = await quickPickContainerOrAll(context, opts);
     }
 
     const numContainers: number = containersToRestart.length;

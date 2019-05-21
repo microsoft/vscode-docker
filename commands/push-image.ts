@@ -12,12 +12,12 @@ import { ext } from '../extensionVariables';
 import { askToSaveRegistryPath } from './registrySettings';
 import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tag-image';
 
-export async function pushImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
+export async function pushImage(context: IActionContext, node: ImageNode | RootNode | undefined): Promise<void> {
     let properties: {
         pushWithoutRepositoryAnswer?: string;
-    } & TelemetryProperties = actionContext.properties;
+    } & TelemetryProperties = context.telemetry.properties;
 
-    let [imageToPush, imageName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
+    let [imageToPush, imageName] = await getOrAskForImageAndTag(context, node instanceof RootNode ? undefined : node);
 
     if (imageName.includes('/')) {
         await askToSaveRegistryPath(imageName);
@@ -39,13 +39,13 @@ export async function pushImage(actionContext: IActionContext, context: ImageNod
             //     ext.context.workspaceState.update(addPrefixImagePush, false);
             // }
             if (response === tagFirst) {
-                imageName = await tagImage(actionContext, <IHasImageDescriptorAndFullTag>{ imageDesc: imageToPush, fullTag: imageName }); //not passing this would ask the user a second time to pick an image
+                imageName = await tagImage(context, <IHasImageDescriptorAndFullTag>{ imageDesc: imageToPush, fullTag: imageName }); //not passing this would ask the user a second time to pick an image
             }
         }
     }
 
     if (imageToPush) {
-        addImageTaggingTelemetry(actionContext, imageName, '');
+        addImageTaggingTelemetry(context, imageName, '');
 
         const terminal = ext.terminalProvider.createTerminal(imageName);
         terminal.sendText(`docker push ${imageName}`);

@@ -12,13 +12,13 @@ import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 import { quickPickDockerFileItem } from "./utils/quick-pick-file";
 import { quickPickWorkspaceFolder } from "./utils/quickPickWorkspaceFolder";
 
-export async function buildImage(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
+export async function buildImage(context: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 
     let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To build Docker files you must first open a folder or workspace in VS Code.');
 
-    const dockerFileItem = await quickPickDockerFileItem(actionContext, dockerFileUri, rootFolder);
+    const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
 
     let contextPath: string = dockerFileItem.relativeFolderPath;
     if (defaultContextPath && defaultContextPath !== '') {
@@ -44,9 +44,9 @@ export async function buildImage(actionContext: IActionContext, dockerFileUri: v
     // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
     await delay(500);
 
-    addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
+    addImageTaggingTelemetry(context, suggestedImageName, '.before');
     const imageName: string = await getTagFromUserInput(suggestedImageName, !prevImageName);
-    addImageTaggingTelemetry(actionContext, imageName, '.after');
+    addImageTaggingTelemetry(context, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);
 

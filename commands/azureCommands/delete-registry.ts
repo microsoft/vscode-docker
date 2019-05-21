@@ -6,6 +6,7 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from "azure-arm-resource";
 import * as vscode from "vscode";
+import { IActionContext } from "vscode-azureextensionui";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -14,12 +15,12 @@ import { nonNullProp } from "../../utils/nonNull";
 import { confirmUserIntent, quickPickACRRegistry } from '../utils/quick-pick-azure';
 
 /** Delete a registry and all it's associated nested items
- * @param context : the AzureRegistryNode the user right clicked on to delete
+ * @param node : the AzureRegistryNode the user right clicked on to delete
  */
-export async function deleteAzureRegistry(context?: AzureRegistryNode): Promise<void> {
+export async function deleteAzureRegistry(_context: IActionContext, node?: AzureRegistryNode): Promise<void> {
     let registry: Registry;
-    if (context) {
-        registry = context.registry;
+    if (node) {
+        registry = node.registry;
     } else {
         registry = await quickPickACRRegistry(false, undefined, 'Select the registry you want to delete');
     }

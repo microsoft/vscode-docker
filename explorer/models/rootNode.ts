@@ -153,19 +153,16 @@ export class RootNode extends NodeBase {
     }
 
     public async getChildren(element: RootNode): Promise<NodeBase[]> {
-        // tslint:disable-next-line: no-this-assignment
-        let me = this;
-        // tslint:disable-next-line: no-function-expression
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.properties.source = 'rootNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.properties.source = 'rootNode';
 
             switch (element.contextValue) {
                 case 'imagesRootNode':
-                    return me.getImageNodes();
+                    return this.getImageNodes();
                 case 'containersRootNode':
-                    return me.getContainers();
+                    return this.getContainers();
                 case 'registriesRootNode':
-                    return me.getRegistries();
+                    return this.getRegistries();
                 default:
                     throw new Error(`Unexpected contextValue ${element.contextValue}`);
             }
@@ -174,12 +171,9 @@ export class RootNode extends NodeBase {
 
     // tslint:disable:max-func-body-length cyclomatic-complexity
     private async getImageNodes(): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<(ImageNode | ImageGroupNode | ErrorNode)[]> {
-            this.properties.groupImagesBy = ImageGrouping[ext.groupImagesBy];
-            this.properties.source = 'rootNode.images';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.properties.groupImagesBy = ImageGrouping[ext.groupImagesBy];
+            context.telemetry.properties.source = 'rootNode.images';
 
             // Determine templates to use
             let groupLabelTemplate: string;
@@ -218,7 +212,7 @@ export class RootNode extends NodeBase {
                     return [];
                 }
             } catch (error) {
-                let newError = showDockerConnectionError(this, error);
+                let newError = showDockerConnectionError(context, error);
                 return [new ErrorNode(newError, ErrorNode.getImagesErrorContextValue)]
             }
 
@@ -258,7 +252,7 @@ export class RootNode extends NodeBase {
                 topLevelNodes = imageNodes;
             }
 
-            me.autoRefreshImages();
+            this.autoRefreshImages();
 
             return topLevelNodes;
         });
@@ -329,11 +323,8 @@ export class RootNode extends NodeBase {
     }
 
     private async getContainers(): Promise<(ContainerNode | ErrorNode)[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<(ContainerNode | ErrorNode)[]> {
-            this.properties.source = 'rootNode.containers';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.properties.source = 'rootNode.containers';
 
             const containerNodes: ContainerNode[] = [];
             let containers: Docker.ContainerDesc[];
@@ -370,7 +361,7 @@ export class RootNode extends NodeBase {
                     // Determine contextValue
                     if (['exited', 'dead'].includes(state)) {
                         contextValue = "stoppedLocalContainerNode";
-                    } else if (me.isContainerUnhealthy(container)) {
+                    } else if (this.isContainerUnhealthy(container)) {
                         contextValue = "runningLocalContainerNode";
                         // Override icon from above
                         iconPath = treeUtils.getThemedIconPath('StatusWarning_16x');
@@ -383,11 +374,11 @@ export class RootNode extends NodeBase {
                     containerNodes.push(containerNode);
                 }
             } catch (error) {
-                let newError = showDockerConnectionError(this, error);
+                let newError = showDockerConnectionError(context, error);
                 return [new ErrorNode(newError, ErrorNode.getContainersErrorContextValue)]
             }
 
-            me.autoRefreshContainers();
+            this.autoRefreshContainers();
 
             return containerNodes;
         });

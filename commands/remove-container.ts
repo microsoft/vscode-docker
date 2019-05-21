@@ -11,19 +11,19 @@ import { ext } from '../extensionVariables';
 import { AllStatusFilter, docker, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
-export async function removeContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
+export async function removeContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containersToRemove: Docker.ContainerDesc[];
 
-    if (context instanceof ContainerNode && context.containerDesc) {
-        containersToRemove = [context.containerDesc];
+    if (node instanceof ContainerNode && node.containerDesc) {
+        containersToRemove = [node.containerDesc];
     } else {
         const opts: ListContainerDescOptions = {
             "filters": {
                 "status": AllStatusFilter
             }
         };
-        containersToRemove = await quickPickContainerOrAll(actionContext, opts);
+        containersToRemove = await quickPickContainerOrAll(context, opts);
 
     }
 

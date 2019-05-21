@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
+import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { AzureRegistryNode } from "../explorer/models/azureRegistryNodes";
 import { CustomRegistryNode } from "../explorer/models/customRegistryNodes";
@@ -15,7 +15,7 @@ import { assertNever } from '../helpers/assertNever';
 const defaultRegistryKey = "defaultRegistry";
 const hasCheckedRegistryPaths = "hasCheckedRegistryPaths"
 
-export async function setRegistryAsDefault(node: CustomRegistryNode | AzureRegistryNode | DockerHubOrgNode): Promise<void> {
+export async function setRegistryAsDefault(_context: IActionContext, node: CustomRegistryNode | AzureRegistryNode | DockerHubOrgNode): Promise<void> {
     let registryName: string;
     if (node instanceof DockerHubOrgNode) {
         registryName = node.namespace;

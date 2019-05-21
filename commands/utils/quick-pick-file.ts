@@ -49,7 +49,7 @@ export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUr
     }
 }
 
-export async function quickPickDockerFileItem(actionContext: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
+export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
     let dockerFileItem: Item;
 
     while (!dockerFileItem) {
@@ -58,9 +58,9 @@ export async function quickPickDockerFileItem(actionContext: IActionContext, doc
             dockerFileItem = resolvedItem;
         } else {
             let msg = "Couldn't find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?";
-            actionContext.properties.cancelStep = msg;
+            context.telemetry.properties.cancelStep = msg;
             await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
-            actionContext.properties.cancelStep = undefined;
+            context.telemetry.properties.cancelStep = undefined;
             await vscode.commands.executeCommand('vscode-docker.configure');
             // Try again
         }

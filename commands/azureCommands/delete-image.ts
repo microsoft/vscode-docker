@@ -5,7 +5,7 @@
 
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
-import { DialogResponses } from "vscode-azureextensionui";
+import { DialogResponses, IActionContext } from "vscode-azureextensionui";
 import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -14,21 +14,21 @@ import { Repository } from "../../utils/Azure/models/repository";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /** Function to untag an Azure hosted image
- * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
+ * @param node : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function untagAzureImage(context?: AzureImageTagNode): Promise<void> {
+export async function untagAzureImage(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
     let registry: Registry;
     let repo: Repository;
     let image: AzureImage;
 
-    if (!context) {
+    if (!node) {
         registry = await quickPicks.quickPickACRRegistry();
         repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to untag`);
         image = await quickPicks.quickPickACRImage(repo, `Select the image you want to untag`);
 
     } else {
-        registry = context.registry;
-        let wholeName: string[] = context.label.split(':');
+        registry = node.registry;
+        let wholeName: string[] = node.label.split(':');
         repo = await Repository.Create(registry, wholeName[0]);
         image = new AzureImage(repo, wholeName[1]);
     }
@@ -44,8 +44,8 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
         await acrTools.untagImage(image);
         vscode.window.showInformationMessage(`Successfully untagged '${image.toString()}'`);
 
-        if (context) {
-            ext.dockerExplorerProvider.refreshNode(context.parent);
+        if (node) {
+            ext.dockerExplorerProvider.refreshNode(node.parent);
         } else {
             ext.dockerExplorerProvider.refreshRegistries();
         }
@@ -53,21 +53,21 @@ export async function untagAzureImage(context?: AzureImageTagNode): Promise<void
 }
 
 /** Function to delete an Azure hosted image
- * @param context : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
+ * @param node : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function deleteAzureImage(context?: AzureImageTagNode): Promise<void> {
+export async function deleteAzureImage(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
     let registry: Registry;
     let repo: Repository;
     let image: AzureImage;
 
-    if (!context) {
+    if (!node) {
         registry = await quickPicks.quickPickACRRegistry();
         repo = await quickPicks.quickPickACRRepository(registry, `Select the repository of the image you want to delete `);
         image = await quickPicks.quickPickACRImage(repo, `Select the image you want to delete `);
 
     } else {
-        registry = context.registry;
-        let wholeName: string[] = context.label.split(':');
+        registry = node.registry;
+        let wholeName: string[] = node.label.split(':');
         repo = await Repository.Create(registry, wholeName[0]);
         image = new AzureImage(repo, wholeName[1]);
     }
@@ -86,8 +86,8 @@ export async function deleteAzureImage(context?: AzureImageTagNode): Promise<voi
         await acrTools.deleteImage(repo, digest);
         vscode.window.showInformationMessage(`Successfully deleted manifest '${digest}' and the associated image(s): ${imageList}.`);
 
-        if (context) {
-            ext.dockerExplorerProvider.refreshNode(context.parent);
+        if (node) {
+            ext.dockerExplorerProvider.refreshNode(node.parent);
         } else {
             ext.dockerExplorerProvider.refreshRegistries();
         }

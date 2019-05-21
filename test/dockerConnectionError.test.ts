@@ -25,16 +25,16 @@ suite("throwDockerConnectionError", async function (this: Suite): Promise<void> 
     function testThrowDockerConnectionError(platform: NodeJS.Platform, expectedMessage: string): void {
         test(platform, () => {
             let currentPlatform = ext.os.platform;
-            let actionContext: IActionContext = {
-                measurements: {},
-                properties: {},
+            let context: IActionContext = {
+                telemetry: { properties: {}, measurements: {} },
+                errorHandling: {}
             };
             try {
                 ext.os.platform = platform;
-                throwDockerConnectionError(actionContext, 'Whoops');
+                throwDockerConnectionError(context, 'Whoops');
             } catch (err) {
                 assert.equal(parseError(err).message, expectedMessage);
-                assert.equal(actionContext.suppressErrorDisplay, true);
+                assert.equal(context.errorHandling.suppressDisplay, true);
             } finally {
                 ext.os.platform = currentPlatform;
             }

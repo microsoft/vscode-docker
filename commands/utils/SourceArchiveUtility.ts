@@ -20,15 +20,15 @@ import { quickPickWorkspaceFolder } from './quickPickWorkspaceFolder';
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
 
-export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', actionContext?: IActionContext): Promise<void> {
+export async function scheduleRunRequest(fileUri: vscode.Uri, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', context: IActionContext): Promise<void> {
     //Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
     let imageName: string;
     if (requestType === 'DockerBuildRequest') {
         rootFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
-        fileItem = await quickPickDockerFileItem(actionContext, fileUri, rootFolder);
-        imageName = await quickPickImageName(actionContext, rootFolder, fileItem);
+        fileItem = await quickPickDockerFileItem(context, fileUri, rootFolder);
+        imageName = await quickPickImageName(context, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
         rootFolder = await quickPickWorkspaceFolder("To run a task from a .yaml file you must first open a folder or workspace in VS Code.");
         fileItem = await quickPickYamlFileItem(fileUri, rootFolder, "To run a task from a .yaml file you must have yaml file in your VS Code workspace.");

@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from './utils/quickPickWorkspaceFolder';
@@ -77,14 +78,14 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
 
 }
 
-export async function composeUp(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+export async function composeUp(_context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(['up'], 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export async function composeDown(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+export async function composeDown(_context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(['down'], 'to take down', dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export async function composeRestart(dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+export async function composeRestart(_context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(['down', 'up'], 'to restart', dockerComposeFileUri, selectedComposeFileUris);
 }

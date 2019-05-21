@@ -42,17 +42,15 @@ export class CustomRegistryNode extends NodeBase {
     }
 
     public async getChildren(element: CustomRegistryNode): Promise<CustomRepositoryNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<CustomRepositoryNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'customRegistryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'customRegistryNode';
 
             const repoNodes: CustomRepositoryNode[] = [];
             try {
-                let repositories = await getCatalog(me.registry.url, me.registry.credentials);
+                let repositories = await getCatalog(this.registry.url, this.registry.credentials);
                 for (let repoName of repositories) {
-                    repoNodes.push(new CustomRepositoryNode(repoName, me.registry));
+                    repoNodes.push(new CustomRepositoryNode(repoName, this.registry));
                 }
             } catch (error) {
                 vscode.window.showErrorMessage(parseError(error).message);
@@ -85,19 +83,17 @@ export class CustomRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: CustomRepositoryNode): Promise<CustomImageTagNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<CustomImageTagNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'customRepositoryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'customRepositoryNode';
 
             const imageNodes: CustomImageTagNode[] = [];
             let node: CustomImageTagNode;
 
             try {
-                let tagInfos = await getTags(me.registry.url, me.repositoryName, me.registry.credentials);
+                let tagInfos = await getTags(this.registry.url, this.repositoryName, this.registry.credentials);
                 for (let tagInfo of tagInfos) {
-                    node = new CustomImageTagNode(me.registry, me.repositoryName, tagInfo.tag, tagInfo.created);
+                    node = new CustomImageTagNode(this.registry, this.repositoryName, tagInfo.tag, tagInfo.created);
                     imageNodes.push(node);
                 }
 

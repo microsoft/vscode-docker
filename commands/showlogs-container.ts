@@ -10,19 +10,19 @@ import { ext } from '../extensionVariables';
 import { AllStatusFilter, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainer } from './utils/quick-pick-container';
 
-export async function showLogsContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
+export async function showLogsContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
 
     let containerToLog: Docker.ContainerDesc;
 
-    if (context instanceof ContainerNode && context.containerDesc) {
-        containerToLog = context.containerDesc;
+    if (node instanceof ContainerNode && node.containerDesc) {
+        containerToLog = node.containerDesc;
     } else {
         const opts: ListContainerDescOptions = {
             "filters": {
                 "status": AllStatusFilter
             }
         };
-        containerToLog = await quickPickContainer(actionContext, opts);
+        containerToLog = await quickPickContainer(context, opts);
     }
 
     const terminal = ext.terminalProvider.createTerminal(containerToLog.Image);

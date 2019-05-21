@@ -3,6 +3,7 @@
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import * as vscode from "vscode";
+import { IActionContext } from "vscode-azureextensionui";
 import { AzureImageTagNode, AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { TaskNode } from "../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
@@ -13,40 +14,40 @@ import { LogData } from "./acr-logs-utils/tableDataManager";
 import { LogTableWebview } from "./acr-logs-utils/tableViewManager";
 
 /**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view ACR logs for a given item. */
-export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
+export async function viewACRLogs(_context: IActionContext, node: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
     let registry: Registry;
     let subscription: Subscription;
-    if (!context) {
+    if (!node) {
         registry = await quickPickACRRegistry();
         subscription = await getSubscriptionFromRegistry(registry);
     } else {
-        registry = context.registry;
-        subscription = context.subscription;
+        registry = node.registry;
+        subscription = node.subscription;
     }
     let resourceGroup: string = getResourceGroupName(registry);
     const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);
     let logData: LogData = new LogData(client, registry, resourceGroup);
 
     // Filtering provided
-    if (context && context instanceof AzureImageTagNode) {
+    if (node && node instanceof AzureImageTagNode) {
         //ACR Image Logs
         await logData.loadLogs({
             webViewEvent: false,
             loadNext: false,
             removeOld: false,
-            filter: { image: context.label }
+            filter: { image: node.label }
         });
-        if (!hasValidLogContent(context, logData)) { return; }
+        if (!hasValidLogContent(node, logData)) { return; }
         const url = await logData.getLink(0);
         await accessLog(url, logData.logs[0].runId, false);
     } else {
-        if (context && context instanceof TaskNode) {
+        if (node && node instanceof TaskNode) {
             //ACR Task Logs
             await logData.loadLogs({
                 webViewEvent: false,
                 loadNext: false,
                 removeOld: false,
-                filter: { task: context.label }
+                filter: { task: node.label }
             });
         } else {
             //ACR Registry Logs
@@ -55,10 +56,10 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
                 loadNext: false
             });
         }
-        if (!hasValidLogContent(context, logData)) { return; }
+        if (!hasValidLogContent(node, logData)) { return; }
         let webViewTitle = registry.name;
-        if (context instanceof TaskNode) {
-            webViewTitle += '/' + context.label;
+        if (node instanceof TaskNode) {
+            webViewTitle += '/' + node.label;
         }
 
         // grandfathered in - should ideally be refactored so that calling a constructor does not have side effects
@@ -67,12 +68,12 @@ export async function viewACRLogs(context: AzureRegistryNode | AzureImageTagNode
     }
 }
 
-function hasValidLogContent(context: AzureRegistryNode | AzureImageTagNode | TaskNode, logData: LogData): boolean {
+function hasValidLogContent(node: AzureRegistryNode | AzureImageTagNode | TaskNode, logData: LogData): boolean {
     if (logData.logs.length === 0) {
         let itemType: string;
-        if (context && context instanceof TaskNode) {
+        if (node && node instanceof TaskNode) {
             itemType = 'task';
-        } else if (context && context instanceof AzureImageTagNode) {
+        } else if (node && node instanceof AzureImageTagNode) {
             itemType = 'image';
         } else {
             itemType = 'registry';

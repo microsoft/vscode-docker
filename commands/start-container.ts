@@ -16,19 +16,19 @@ import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 /**
  * Image -> Run
  */
-export async function startContainer(actionContext: IActionContext, context: ImageNode | undefined): Promise<void> {
-    return await startContainerCore(actionContext, context, false);
+export async function startContainer(context: IActionContext, node: ImageNode | undefined): Promise<void> {
+    return await startContainerCore(context, node, false);
 }
 
-export async function startContainerCore(actionContext: IActionContext, context: ImageNode | undefined, interactive: boolean): Promise<void> {
+export async function startContainerCore(context: IActionContext, node: ImageNode | undefined, interactive: boolean): Promise<void> {
     let imageName: string;
     let imageToStart: Docker.ImageDesc;
 
-    if (context instanceof ImageNode && context.imageDesc) {
-        imageToStart = context.imageDesc;
-        imageName = context.fullTag;
+    if (node instanceof ImageNode && node.imageDesc) {
+        imageToStart = node.imageDesc;
+        imageName = node.fullTag;
     } else {
-        const selectedItem: ImageItem = await quickPickImage(actionContext, false)
+        const selectedItem: ImageItem = await quickPickImage(context, false)
         if (selectedItem) {
             imageToStart = selectedItem.imageDesc;
             imageName = selectedItem.label;
@@ -59,15 +59,15 @@ export async function startContainerCore(actionContext: IActionContext, context:
 /**
  * Image -> Run Interactive
  */
-export async function startContainerInteractive(actionContext: IActionContext, context: ImageNode): Promise<void> {
-    await startContainerCore(actionContext, context, true);
+export async function startContainerInteractive(context: IActionContext, node: ImageNode): Promise<void> {
+    await startContainerCore(context, node, true);
 }
 
-export async function startAzureCLI(actionContext: IActionContext): Promise<cp.ChildProcess> {
+export async function startAzureCLI(context: IActionContext): Promise<cp.ChildProcess> {
 
     // block of we are running windows containers...
     const engineType: DockerEngineType = await docker.getEngineType();
-    actionContext.properties.engineType = DockerEngineType[engineType];
+    context.telemetry.properties.engineType = DockerEngineType[engineType];
 
     if (engineType === DockerEngineType.Windows) {
         const selected = await vscode.window.showErrorMessage<vscode.MessageItem>(

@@ -31,13 +31,12 @@ export class AzureUtilityManager {
     private async loadAzureAccountExtension(): Promise<AzureAccount> {
         let azureAccount: AzureAccount | undefined;
 
-        // tslint:disable-next-line:no-function-expression
-        await callWithTelemetryAndErrorHandling('docker.loadAzureAccountExt', async function (this: IActionContext): Promise<void> {
-            this.properties.isActivationEvent = 'true';
+        await callWithTelemetryAndErrorHandling('docker.loadAzureAccountExt', async (context: IActionContext) => {
+            context.telemetry.properties.isActivationEvent = 'true';
 
             try {
                 let azureAccountExtension = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
-                this.properties.found = azureAccountExtension ? 'true' : 'false';
+                context.telemetry.properties.found = azureAccountExtension ? 'true' : 'false';
                 if (azureAccountExtension) {
                     azureAccount = await azureAccountExtension.activate();
                 }

@@ -20,12 +20,12 @@ import * as util from './util';
 import { QuickPickItemWithData, SubscriptionStepBase, UserCancelledError, WizardBase, WizardResult, WizardStep } from './wizard';
 
 export class WebAppCreator extends WizardBase {
-    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
+    constructor(output: vscode.OutputChannel, readonly azureAccount: AzureAccountWrapper, node: AzureImageTagNode | DockerHubImageTagNode, subscription?: SubscriptionModels.Subscription) {
         super(output);
         this.steps.push(new SubscriptionStep(this, azureAccount, subscription));
         this.steps.push(new ResourceGroupStep(this, azureAccount));
         this.steps.push(new AppServicePlanStep(this, azureAccount));
-        this.steps.push(new WebsiteStep(this, azureAccount, context));
+        this.steps.push(new WebsiteStep(this, azureAccount, node));
 
     }
 
@@ -423,27 +423,27 @@ class WebsiteStep extends WebAppCreatorStepBase {
         registry: Registry;
     } | undefined;
 
-    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, context: AzureImageTagNode | DockerHubImageTagNode | CustomImageTagNode) {
+    constructor(wizard: WizardBase, azureAccount: AzureAccountWrapper, node: AzureImageTagNode | DockerHubImageTagNode | CustomImageTagNode) {
         super(wizard, 'Create Web App', azureAccount);
 
-        this._serverUrl = nonNullProp(context, 'serverUrl');
-        if (context instanceof DockerHubImageTagNode) {
-            this._serverPassword = nonNullProp(context, 'password');
-            this._serverUserName = nonNullProp(context, 'userName');
-        } else if (context instanceof AzureImageTagNode) {
+        this._serverUrl = nonNullProp(node, 'serverUrl');
+        if (node instanceof DockerHubImageTagNode) {
+            this._serverPassword = nonNullProp(node, 'password');
+            this._serverUserName = nonNullProp(node, 'userName');
+        } else if (node instanceof AzureImageTagNode) {
             this._acrInfo = {
-                imageSubscription: nonNullProp(context, 'subscription'),
-                registry: nonNullProp(context, 'registry')
+                imageSubscription: nonNullProp(node, 'subscription'),
+                registry: nonNullProp(node, 'registry')
             };
-        } else if (context instanceof CustomImageTagNode) {
-            let credentials = nonNullProp(nonNullProp(context, 'registry'), 'credentials');
+        } else if (node instanceof CustomImageTagNode) {
+            let credentials = nonNullProp(nonNullProp(node, 'registry'), 'credentials');
             this._serverPassword = credentials.password;
             this._serverUserName = credentials.userName;
         } else {
-            throw Error(`Invalid context, cannot deploy to Azure App services from ${context}`);
+            throw Error(`Invalid context, cannot deploy to Azure App services from ${node}`);
         }
 
-        this._imageName = nonNullProp(context, 'label');
+        this._imageName = nonNullProp(node, 'label');
 
     }
 

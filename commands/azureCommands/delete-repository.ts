@@ -5,6 +5,7 @@
 
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
+import { IActionContext } from "vscode-azureextensionui";
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -13,15 +14,15 @@ import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from 
 
 /**
  * function to delete an Azure repository and its associated images
- * @param context : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
+ * @param node : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function deleteRepository(context?: AzureRepositoryNode): Promise<void> {
+export async function deleteRepository(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
     let registry: Registry;
     let repo: Repository;
 
-    if (context) {
-        registry = context.registry;
-        repo = await Repository.Create(registry, context.label);
+    if (node) {
+        registry = node.registry;
+        repo = await Repository.Create(registry, node.label);
     } else {
         registry = await quickPickACRRegistry();
         repo = await quickPickACRRepository(registry, 'Select the repository you want to delete');
@@ -30,8 +31,8 @@ export async function deleteRepository(context?: AzureRepositoryNode): Promise<v
     if (shouldDelete) {
         await acrTools.deleteRepository(repo);
         vscode.window.showInformationMessage(`Successfully deleted repository ${repo.name}`);
-        if (context) {
-            ext.dockerExplorerProvider.refreshNode(context.parent);
+        if (node) {
+            ext.dockerExplorerProvider.refreshNode(node.parent);
         } else {
             ext.dockerExplorerProvider.refreshRegistries();
         }

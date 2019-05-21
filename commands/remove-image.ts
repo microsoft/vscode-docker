@@ -10,14 +10,14 @@ import { RootNode } from '../explorer/models/rootNode';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
-export async function removeImage(actionContext: IActionContext, context: ImageNode | RootNode | undefined): Promise<void> {
+export async function removeImage(context: IActionContext, node: ImageNode | RootNode | undefined): Promise<void> {
 
     let imagesToRemove: Docker.ImageDesc[];
 
-    if (context instanceof ImageNode && context.imageDesc) {
-        imagesToRemove = [context.imageDesc];
+    if (node instanceof ImageNode && node.imageDesc) {
+        imagesToRemove = [node.imageDesc];
     } else {
-        const selectedItem: ImageItem = await quickPickImage(actionContext, true);
+        const selectedItem: ImageItem = await quickPickImage(context, true);
         if (selectedItem) {
             if (selectedItem.allImages) {
                 imagesToRemove = await docker.getImageDescriptors();

@@ -313,14 +313,14 @@ export interface ConfigureApiOptions {
     openDockerFile?: boolean;
 }
 
-export async function configure(actionContext: IActionContext, rootFolderPath: string | undefined): Promise<void> {
+export async function configure(context: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     if (!rootFolderPath) {
         let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
         rootFolderPath = folder.uri.fsPath;
     }
 
     let filesWritten = await configureCore(
-        actionContext,
+        context,
         {
             rootPath: rootFolderPath,
             outputFolder: rootFolderPath,
@@ -338,13 +338,13 @@ export async function configure(actionContext: IActionContext, rootFolderPath: s
     }
 }
 
-export async function configureApi(actionContext: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    await configureCore(actionContext, options);
+export async function configureApi(context: IActionContext, options: ConfigureApiOptions): Promise<void> {
+    await configureCore(context, options);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(actionContext: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
-    let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
+async function configureCore(context: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
+    let properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     let rootFolderPath: string = options.rootPath;
     let outputFolder = options.outputFolder;
 

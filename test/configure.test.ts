@@ -82,9 +82,9 @@ async function testConfigureDockerViaApi(options: ConfigureApiOptions, inputs: (
     }
 }
 
-function verifyTelemetryProperties(actionContext: IActionContext, expectedTelemetryProperties?: ConfigureTelemetryProperties) {
+function verifyTelemetryProperties(context: IActionContext, expectedTelemetryProperties?: ConfigureTelemetryProperties) {
     if (expectedTelemetryProperties) {
-        let properties: TelemetryProperties & ConfigureTelemetryProperties = actionContext.properties;
+        let properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
         assert.equal(properties.configureOs, expectedTelemetryProperties.configureOs, "telemetry wrong: os");
         assert.equal(properties.packageFileSubfolderDepth, expectedTelemetryProperties.packageFileSubfolderDepth, "telemetry wrong: packageFileSubfolderDepth");
         assert.equal(properties.packageFileType, expectedTelemetryProperties.packageFileType, "telemetry wrong: packageFileType");
@@ -120,15 +120,12 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
     inputs.unshift(platform);
     const ui: TestUserInput = new TestUserInput(inputs);
     ext.ui = ui;
-    let actionContext: IActionContext = {
-        properties: { isActivationEvent: 'false', cancelStep: '', errorMessage: '', error: undefined, result: 'Succeeded' },
-        measurements: { duration: 0 },
-        suppressTelemetry: false,
-        rethrowError: false,
-        suppressErrorDisplay: false
+    let context: IActionContext = {
+        telemetry: { properties: {}, measurements: {} },
+        errorHandling: {}
     };
 
-    await configure(actionContext, testRootFolder);
+    await configure(context, testRootFolder);
     assert.equal(inputs.length, 0, 'Not all inputs were used.');
 
     if (expectedOutputFiles) {
@@ -144,7 +141,7 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
         }
     }
 
-    verifyTelemetryProperties(actionContext, expectedTelemetryProperties);
+    verifyTelemetryProperties(context, expectedTelemetryProperties);
 }
 
 //#region .NET Core Console projects

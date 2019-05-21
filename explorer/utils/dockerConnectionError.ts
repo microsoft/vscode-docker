@@ -20,7 +20,7 @@ export namespace internal {
 }
 
 // tslint:disable-next-line:no-any
-export function showDockerConnectionError(actionContext: IActionContext, error: any): Error {
+export function showDockerConnectionError(context: IActionContext, error: any): Error {
     let message = connectionMessage;
     let items: (MessageItem & { url: string })[] = [];
 
@@ -34,7 +34,7 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
     let wrappedError = wrapError(error, message);
 
     // Don't wait
-    actionContext.suppressErrorDisplay = true;
+    context.errorHandling.suppressDisplay = true;
     vscode.window.showErrorMessage(parseError(wrappedError).message, ...items).then(response => {
         if (response) {
             // tslint:disable-next-line:no-floating-promises
@@ -46,6 +46,6 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
 }
 
 // tslint:disable-next-line:no-any no-unsafe-any
-export function throwDockerConnectionError(actionContext: IActionContext, error: any): never {
-    throw showDockerConnectionError(actionContext, error);
+export function throwDockerConnectionError(context: IActionContext, error: any): never {
+    throw showDockerConnectionError(context, error);
 }

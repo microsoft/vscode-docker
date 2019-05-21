@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { keytarConstants, PAGE_SIZE } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
@@ -259,7 +260,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     return tagsPage.results;
 }
 
-export async function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): Promise<void> {
+export async function browseDockerHub(_context: IActionContext, node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): Promise<void> {
     if (node) {
         let url: string = 'https://hub.docker.com/';
         if (node instanceof DockerHubOrgNode) {
