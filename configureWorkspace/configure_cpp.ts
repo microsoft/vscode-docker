@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureCpp: IPlatformGeneratorInfo = {
   genDockerFile,
@@ -13,8 +13,6 @@ export let configureCpp: IPlatformGeneratorInfo = {
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(port);
-
   return `# GCC support can be specified at major, minor, or micro version
 # (e.g. 8, 8.2 or 8.2.0).
 # See https://hub.docker.com/r/library/gcc/ for all supported GCC

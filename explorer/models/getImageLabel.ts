@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ContainerDesc, ImageDesc } from 'dockerode';
+import { ImageDesc } from 'dockerode';
 import * as moment from 'moment';
 import * as vscode from 'vscode';
 import { extractRegExGroups } from '../../helpers/extractRegExGroups';

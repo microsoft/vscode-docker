@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as nodeOs from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';

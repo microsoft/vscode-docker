@@ -143,6 +143,8 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
             }
         }
     }
+
+    verifyTelemetryProperties(actionContext, expectedTelemetryProperties);
 }
 
 //#region .NET Core Console projects
@@ -394,7 +396,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     configurePlatform: '.NET Core Console',
                     configureOs: os,
                     packageFileType: '.csproj',
-                    packageFileSubfolderDepth: '1'
+                    packageFileSubfolderDepth: projectFolder.includes('/') ? '2' : '1'
                 },
                 [os /* it doesn't ask for a port, so we don't specify one here */],
                 ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
@@ -1186,6 +1188,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'WORKDIR /usr/src/myapp');
             assertFileContains('Dockerfile', 'RUN g++ -o myapp main.cpp');
             assertFileContains('Dockerfile', 'CMD ["./myapp"]');
+            assertNotFileContains('Dockerfile', 'EXPOSE');
         });
     });
 
@@ -1212,8 +1215,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 {
                     configurePlatform: 'Other',
                     configureOs: undefined,
-                    packageFileType: undefined,
-                    packageFileSubfolderDepth: undefined
+                    packageFileType: 'package.json',
+                    packageFileSubfolderDepth: '0'
                 },
                 [TestInput.UseDefaultValue /*port*/],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'package.json']);

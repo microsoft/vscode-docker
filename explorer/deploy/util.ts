@@ -6,9 +6,7 @@
 import { SubscriptionModels } from 'azure-arm-resource';
 import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
-import { ServiceClientCredentials } from 'ms-rest';
-import * as vscode from 'vscode';
-import { getSubscriptionId, getTenantId, nonNullProp, nonNullValue } from '../../utils/nonNull';
+import { getSubscriptionId, nonNullProp } from '../../utils/nonNull';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 
 export interface PartialList<T> extends Array<T> {
