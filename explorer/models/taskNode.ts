@@ -10,9 +10,9 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import * as acrTools from '../../src/utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
+import { openExternal } from '../../src/utils/openExternal';
 import { treeUtils } from '../../src/utils/treeUtils';
 import { AzureAccount } from '../../typings/azure-account.api';
-import { openExternal } from '../utils/openExternal';
 import { NodeBase } from './nodeBase';
 
 /* Single TaskRootNode under each Repository. Labeled "Tasks" */

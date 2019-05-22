@@ -15,10 +15,10 @@ export class LogTableWebview {
         this.panel = vscode.window.createWebviewPanel('log Viewer', webviewName, vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
 
         //Get path to resource on disk
-        const extensionPath = ext.context.extensionPath;
-        const scriptFile = vscode.Uri.file(path.join(extensionPath, 'commands', 'azureCommands', 'acr-logs-utils', 'logScripts.js')).with({ scheme: 'vscode-resource' });
-        const styleFile = vscode.Uri.file(path.join(extensionPath, 'style', 'acr-logs', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
-        const iconStyle = vscode.Uri.file(path.join(extensionPath, 'style', 'acr-logs', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
+        const resourceRoot: string = ext.context.asAbsolutePath(path.join('src', 'commands', 'azure', 'acr-logs-utils'));
+        const scriptFile = vscode.Uri.file(path.join(resourceRoot, 'logScripts.js')).with({ scheme: 'vscode-resource' });
+        const styleFile = vscode.Uri.file(path.join(resourceRoot, 'style', 'stylesheet.css')).with({ scheme: 'vscode-resource' });
+        const iconStyle = vscode.Uri.file(path.join(resourceRoot, 'style', 'fabric-components', 'css', 'vscmdl2-icons.css')).with({ scheme: 'vscode-resource' });
         //Populate Webview
         this.panel.webview.html = this.getBaseHtml(scriptFile, styleFile, iconStyle);
         this.setupIncomingListeners();

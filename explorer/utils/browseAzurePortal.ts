@@ -5,9 +5,9 @@
 
 import { IActionContext } from 'vscode-azureextensionui';
 import { getTenantId, nonNullValue } from '../../src/utils/nonNull';
+import { openExternal } from '../../src/utils/openExternal';
 import { AzureSession } from '../../typings/azure-account.api';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
-import { openExternal } from './openExternal';
 
 export function browseAzurePortal(_context: IActionContext, node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
     if (node && node.azureAccount) {

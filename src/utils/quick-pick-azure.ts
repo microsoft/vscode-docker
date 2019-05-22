@@ -9,7 +9,6 @@ import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { openExternal } from '../../explorer/utils/openExternal';
 import { createRegistry } from '../commands/azure/create-registry';
 import { skus } from '../constants';
 import { ext } from '../extensionVariables';
@@ -18,6 +17,7 @@ import { isValidAzureName } from './Azure/common';
 import { AzureImage } from "./Azure/models/image";
 import { Repository } from "./Azure/models/repository";
 import { AzureUtilityManager } from './azureUtilityManager';
+import { openExternal } from './openExternal';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
