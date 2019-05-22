@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from '../../src/extensionVariables';
+import { ext } from '../../extensionVariables';
 import { DefaultAppStorageProvider } from './appStorage';
 import OpnBrowserClient from './browserClient';
 import { DefaultDebuggerClient } from './debuggerClient';

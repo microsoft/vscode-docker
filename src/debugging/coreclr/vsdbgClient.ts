@@ -5,7 +5,7 @@
 import * as path from 'path';
 import * as process from 'process';
 import { Memento } from 'vscode';
-import { ext } from '../../src/extensionVariables';
+import { ext } from '../../extensionVariables';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './osProvider';
 import { OutputManager } from './outputManager';

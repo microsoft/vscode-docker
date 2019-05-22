@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import { Uri } from "vscode";
-import { openExternal } from '../../explorer/utils/openExternal';
+import { openExternal } from '../../../explorer/utils/openExternal';
 
 export interface BrowserClient {
     openBrowser(url: string): void;
