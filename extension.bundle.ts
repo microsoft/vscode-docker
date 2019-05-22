@@ -41,5 +41,5 @@ export { compareBuildImageOptions } from "./src/debugging/coreclr/dockerManager"
 export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './src/configureWorkspace/configure';
 export { globAsync } from './src/utils/async';
 export { httpsRequestBinary } from './src/utils/httpRequest';
-export { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
-export { docker } from './commands/utils/docker-endpoint';
+export { DefaultTerminalProvider } from './src/utils/TerminalProvider';
+export { docker } from './src/utils/docker-endpoint';

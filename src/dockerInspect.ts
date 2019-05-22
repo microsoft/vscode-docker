@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TextDocumentContentProvider, Uri, window, workspace } from "vscode";
-import { docker } from "../commands/utils/docker-endpoint";
+import { docker } from "./utils/docker-endpoint";
 
 export const IMAGE_DOMAIN = "image";
 export const SCHEME = "docker-inspect";

@@ -2,9 +2,9 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import CommandLineBuilder from "./commandLineBuilder";
 import { LineSplitter } from "./lineSplitter";
 import { ProcessProvider } from "./processProvider";
-import CommandLineBuilder from "./commandLineBuilder";
 
 export type DockerBuildImageOptions = {
     args?: { [key: string]: string };
