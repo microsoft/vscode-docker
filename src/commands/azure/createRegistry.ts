@@ -8,7 +8,7 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
 import { ext } from '../../extensionVariables';
-import { isValidAzureName } from '../../utils/Azure/common';
+import { isValidAzureName } from '../../utils/Azure/isValidAzureName';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { nonNullProp } from '../../utils/nonNull';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../../utils/quick-pick-azure';

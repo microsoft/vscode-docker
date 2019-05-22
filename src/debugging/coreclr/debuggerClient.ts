@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import { PlatformOS } from '../../utils/platform';
-import { DockerClient } from './dockerClient';
-import { OSProvider } from './osProvider';
+import { DockerClient } from './CliDockerClient';
+import { OSProvider } from './LocalOSProvider';
 import { VsDbgClient } from './vsdbgClient';
 
 export interface DebuggerClient {

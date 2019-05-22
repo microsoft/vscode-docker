@@ -11,8 +11,8 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/repository";
+import { AzureImage } from "../../utils/Azure/models/AzureImage";
+import { AzureRepository } from "../../utils/Azure/models/AzureRepository";
 import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../../utils/quick-pick-azure';
 
 export async function pullRepoFromAzure(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
@@ -41,7 +41,7 @@ async function pullFromAzure(node: AzureImageTagNode | AzureRepositoryNode, pull
 
     } else { // Command Palette
         registry = await quickPickACRRegistry();
-        const repository: Repository = await quickPickACRRepository(registry, 'Select the repository of the image you want to pull.');
+        const repository: AzureRepository = await quickPickACRRepository(registry, 'Select the repository of the image you want to pull.');
         if (pullAll) {
             imageRequest = `${repository.name} -a`;
         } else {

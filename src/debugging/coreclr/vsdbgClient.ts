@@ -6,10 +6,10 @@ import * as path from 'path';
 import * as process from 'process';
 import { Memento } from 'vscode';
 import { ext } from '../../extensionVariables';
+import { ProcessProvider } from './ChildProcessProvider';
 import { FileSystemProvider } from './fsProvider';
-import { OSProvider } from './osProvider';
+import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';
-import { ProcessProvider } from './processProvider';
 
 export interface VsDbgClient {
     getVsDbgFolder(): Promise<string>;

@@ -10,7 +10,7 @@ import { RootNode } from '../../explorer/models/rootNode';
 import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
 import { askToSaveRegistryPath } from './registrySettings';
-import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tag-image';
+import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageNode | RootNode | undefined): Promise<void> {
     let properties: {

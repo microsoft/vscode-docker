@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 import { Registry } from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import { Repository } from './repository';
+import { AzureRepository } from './AzureRepository';
 
 /** Class Azure Image: Used locally, Organizes data for managing images */
 export class AzureImage {
     public registry: Registry;
-    public repository: Repository;
+    public repository: AzureRepository;
     public tag: string;
     public subscription: SubscriptionModels.Subscription;
     public resourceGroupName: string;
@@ -17,7 +17,7 @@ export class AzureImage {
     public password?: string;
     public username?: string;
 
-    constructor(repository: Repository, tag: string, created?: Date) {
+    constructor(repository: AzureRepository, tag: string, created?: Date) {
         this.registry = repository.registry;
         this.repository = repository;
         this.tag = tag;

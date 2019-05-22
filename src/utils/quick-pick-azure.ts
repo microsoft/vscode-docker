@@ -9,17 +9,17 @@ import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { createRegistry } from '../commands/azure/create-registry';
+import { createRegistry } from '../commands/azure/createRegistry';
 import { skus } from '../constants';
 import { ext } from '../extensionVariables';
 import * as acrTools from './Azure/acrTools';
-import { isValidAzureName } from './Azure/common';
-import { AzureImage } from "./Azure/models/image";
-import { Repository } from "./Azure/models/repository";
+import { isValidAzureName } from './Azure/isValidAzureName';
+import { AzureImage } from "./Azure/models/AzureImage";
+import { AzureRepository } from "./Azure/models/AzureRepository";
 import { AzureUtilityManager } from './azureUtilityManager';
 import { openExternal } from './openExternal';
 
-export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {
+export async function quickPickACRImage(repository: AzureRepository, prompt?: string): Promise<AzureImage> {
     const placeHolder = prompt ? prompt : 'Select image to use';
     const repoImages: AzureImage[] = await acrTools.getImagesByRepository(repository);
     const imageListNames = repoImages.map(img => <IAzureQuickPickItem<AzureImage>>{ label: img.tag, data: img });
@@ -27,10 +27,10 @@ export async function quickPickACRImage(repository: Repository, prompt?: string)
     return desiredImage.data;
 }
 
-export async function quickPickACRRepository(registry: Registry, prompt?: string): Promise<Repository> {
+export async function quickPickACRRepository(registry: Registry, prompt?: string): Promise<AzureRepository> {
     const placeHolder = prompt ? prompt : 'Select repository to use';
-    const repositories: Repository[] = await acrTools.getRepositoriesByRegistry(registry);
-    const quickPickRepoList = repositories.map(repo => <IAzureQuickPickItem<Repository>>{ label: repo.name, data: repo });
+    const repositories: AzureRepository[] = await acrTools.getRepositoriesByRegistry(registry);
+    const quickPickRepoList = repositories.map(repo => <IAzureQuickPickItem<AzureRepository>>{ label: repo.name, data: repo });
     let desiredRepo = await ext.ui.showQuickPick(quickPickRepoList, { 'canPickMany': false, 'placeHolder': placeHolder });
     return desiredRepo.data;
 }

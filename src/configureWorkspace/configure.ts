@@ -11,19 +11,19 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
 import { ext } from '../extensionVariables';
-import { globAsync } from '../utils/async';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { globAsync } from '../utils/globAsync';
 import { Platform, PlatformOS } from '../utils/platform';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
-import { configureCpp } from './configure_cpp';
-import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';
-import { configureGo } from './configure_go';
-import { configureJava } from './configure_java';
-import { configureNode } from './configure_node';
-import { configureOther } from './configure_other';
-import { configurePython } from './configure_python';
-import { configureRuby } from './configure_ruby';
+import { configureCpp } from './configureCpp';
+import { configureAspDotNetCore, configureDotNetCoreConsole } from './configureDotNetCore';
+import { configureGo } from './configureGo';
+import { configureJava } from './configureJava';
+import { configureNode } from './configureNode';
+import { configureOther } from './configureOther';
+import { configurePython } from './configurePython';
+import { configureRuby } from './configureRuby';
+import { promptForPort, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
     npmStart: boolean; //has npm start

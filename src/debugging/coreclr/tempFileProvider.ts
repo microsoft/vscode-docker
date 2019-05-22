@@ -3,8 +3,8 @@
  *--------------------------------------------------------*/
 
 import * as path from 'path';
-import { OSProvider } from "./osProvider";
-import { ProcessProvider } from './processProvider';
+import { ProcessProvider } from './ChildProcessProvider';
+import { OSProvider } from "./LocalOSProvider";
 
 export interface TempFileProvider {
     getTempFilename(prefix?: string): string;

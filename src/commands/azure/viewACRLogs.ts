@@ -9,9 +9,9 @@ import { TaskNode } from "../../../explorer/models/taskNode";
 import { getResourceGroupName, getSubscriptionFromRegistry } from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { quickPickACRRegistry } from '../../utils/quick-pick-azure';
-import { accessLog } from "./acr-log-utils/logFileManager";
-import { LogData } from "./acr-log-utils/tableDataManager";
-import { LogTableWebview } from "./acr-log-utils/tableViewManager";
+import { accessLog } from "./acr-log-utils/LogContentProvider";
+import { LogData } from "./acr-log-utils/LogData";
+import { LogTableWebview } from "./acr-log-utils/LogTableWebview";
 
 /**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view ACR logs for a given item. */
 export async function viewACRLogs(_context: IActionContext, node: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {

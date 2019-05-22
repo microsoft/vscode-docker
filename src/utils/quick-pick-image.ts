@@ -8,7 +8,7 @@ import * as path from "path";
 import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
-import { addImageTaggingTelemetry, getTagFromUserInput } from '../commands/tag-image';
+import { addImageTaggingTelemetry, getTagFromUserInput } from '../commands/tagImage';
 import { ext } from '../extensionVariables';
 import { delay } from './delay';
 import { docker } from './docker-endpoint';

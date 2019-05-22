@@ -9,7 +9,7 @@ import { IActionContext } from "vscode-azureextensionui";
 import { AzureRepositoryNode } from '../../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
 import * as acrTools from '../../utils/Azure/acrTools';
-import { Repository } from "../../utils/Azure/models/repository";
+import { AzureRepository } from "../../utils/Azure/models/AzureRepository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../../utils/quick-pick-azure';
 
 /**
@@ -18,11 +18,11 @@ import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from 
  */
 export async function deleteRepository(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
     let registry: Registry;
-    let repo: Repository;
+    let repo: AzureRepository;
 
     if (node) {
         registry = node.registry;
-        repo = await Repository.Create(registry, node.label);
+        repo = await AzureRepository.Create(registry, node.label);
     } else {
         registry = await quickPickACRRegistry();
         repo = await quickPickACRRepository(registry, 'Select the repository you want to delete');

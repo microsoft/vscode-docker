@@ -4,8 +4,8 @@ import * as path from 'path';
 import * as vscode from "vscode";
 import { callWithTelemetryAndErrorHandling } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
-import { accessLog } from './logFileManager';
-import { Filter, LogData } from './tableDataManager'
+import { accessLog } from './LogContentProvider';
+import { Filter, LogData } from './LogData'
 export class LogTableWebview {
     private logData: LogData;
     private panel: vscode.WebviewPanel;

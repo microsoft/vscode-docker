@@ -20,8 +20,8 @@ import { NULL_GUID } from "../../constants";
 import { ext } from '../../extensionVariables';
 import { AzureUtilityManager } from '../azureUtilityManager';
 import { getId, getLoginServer } from '../nonNull';
-import { AzureImage } from "./models/image";
-import { Repository } from "./models/repository";
+import { AzureImage } from "./models/AzureImage";
+import { AzureRepository } from "./models/AzureRepository";
 
 //General helpers
 /** Gets the subscription for a given registry
@@ -57,7 +57,7 @@ export async function getResourceGroup(registry: Registry, subscription: Subscri
 
 //Registry item management
 /** List images under a specific Repository */
-export async function getImagesByRepository(repo: Repository): Promise<AzureImage[]> {
+export async function getImagesByRepository(repo: AzureRepository): Promise<AzureImage[]> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
     let response = await sendRequest<{ tags: { name: string, lastUpdateTime: string }[] }>(
         'get',
@@ -79,7 +79,7 @@ export async function getImagesByRepository(repo: Repository): Promise<AzureImag
 }
 
 /** List images under a specific digest */
-export async function getImagesByDigest(repo: Repository, digest: string): Promise<AzureImage[]> {
+export async function getImagesByDigest(repo: AzureRepository, digest: string): Promise<AzureImage[]> {
     let allImages: AzureImage[] = [];
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, 'repository:' + repo.name + ':pull');
     let response = await sendRequest<{ manifest: ACRManifest }>('get', getLoginServer(repo.registry), `acr/v1/${repo.name}/_manifests/${digest}`, acrAccessToken);
@@ -91,14 +91,14 @@ export async function getImagesByDigest(repo: Repository, digest: string): Promi
 }
 
 /** List repositories on a given Registry. */
-export async function getRepositoriesByRegistry(registry: Registry): Promise<Repository[]> {
+export async function getRepositoriesByRegistry(registry: Registry): Promise<AzureRepository[]> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(registry, "registry:catalog:*");
     let response = await sendRequest<{ repositories: string[] }>('get', getLoginServer(registry), 'acr/v1/_catalog', acrAccessToken);
 
-    let allRepos: Repository[] = [];
+    let allRepos: AzureRepository[] = [];
     if (!isNull(response.repositories)) {
         for (let tempRepo of response.repositories) {
-            allRepos.push(await Repository.Create(registry, tempRepo));
+            allRepos.push(await AzureRepository.Create(registry, tempRepo));
         }
     }
 
@@ -106,12 +106,12 @@ export async function getRepositoriesByRegistry(registry: Registry): Promise<Rep
     return allRepos;
 }
 
-export async function deleteRepository(repo: Repository): Promise<void> {
+export async function deleteRepository(repo: AzureRepository): Promise<void> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, `repository:${repo.name}:*`);
     await sendRequest('delete', getLoginServer(repo.registry), `v2/_acr/${repo.name}/repository`, acrAccessToken);
 }
 
-export async function deleteImage(repo: Repository, imageDigest: string): Promise<void> {
+export async function deleteImage(repo: AzureRepository, imageDigest: string): Promise<void> {
     const { acrAccessToken } = await acquireACRAccessTokenFromRegistry(repo.registry, `repository:${repo.name}:*`);
     await sendRequest('delete', getLoginServer(repo.registry), `v2/${repo.name}/manifests/${imageDigest}`, acrAccessToken);
 }

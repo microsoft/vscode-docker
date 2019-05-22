@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { ProcessProvider } from "./processProvider";
+import { ProcessProvider } from "./ChildProcessProvider";
 
 export type MSBuildExecOptions = {
     target?: string;

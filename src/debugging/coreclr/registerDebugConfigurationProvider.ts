@@ -5,19 +5,19 @@
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { DefaultAppStorageProvider } from './appStorage';
-import OpnBrowserClient from './browserClient';
+import ChildProcessProvider from './ChildProcessProvider';
+import CliDockerClient from './CliDockerClient';
+import CommandLineDotNetClient from './CommandLineDotNetClient';
 import { DefaultDebuggerClient } from './debuggerClient';
 import { DockerDebugSessionManager } from './debugSessionManager';
-import CliDockerClient from './dockerClient';
 import DockerDebugConfigurationProvider from './dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './dockerManager';
-import CommandLineDotNetClient from './dotNetClient';
 import { LocalFileSystemProvider } from './fsProvider';
+import LocalOSProvider from './LocalOSProvider';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
-import LocalOSProvider from './osProvider';
+import OpnBrowserClient from './OpnBrowserClient';
 import { DefaultOutputManager } from './outputManager';
 import { AggregatePrerequisite, DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetExtensionInstalledPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
-import ChildProcessProvider from './processProvider';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';
 

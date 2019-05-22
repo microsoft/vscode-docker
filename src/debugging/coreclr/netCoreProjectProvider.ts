@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { DotNetClient } from "./dotNetClient";
+import { DotNetClient } from "./CommandLineDotNetClient";
 import { FileSystemProvider } from "./fsProvider";
 import { TempFileProvider } from './tempFileProvider';
 

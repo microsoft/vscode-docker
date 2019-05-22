@@ -10,7 +10,7 @@ import { ext } from "../extensionVariables";
 import { delay } from "../utils/delay";
 import { quickPickDockerFileItem } from "../utils/quick-pick-file";
 import { quickPickWorkspaceFolder } from "../utils/quickPickWorkspaceFolder";
-import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
+import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
 
 export async function buildImage(context: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');

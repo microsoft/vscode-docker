@@ -8,7 +8,7 @@ import { TaskNode } from "../../../explorer/models/taskNode";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../../utils/quick-pick-azure';
-import { scheduleRunRequest } from '../../utils/SourceArchiveUtility';
+import { scheduleRunRequest } from '../../utils/scheduleRunRequest';
 
 // Runs the selected yaml file. Equivalent to az acr run -f <yaml file> <directory>
 // Selected source code must contain a path to the desired dockerfile.

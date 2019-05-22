@@ -3,8 +3,8 @@ import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-contain
 import vscode = require('vscode');
 import { parseError } from "vscode-azureextensionui";
 import { getImageDigest } from "../../../utils/Azure/acrTools";
-import { AzureImage } from "../../../utils/Azure/models/image";
-import { Repository } from "../../../utils/Azure/models/repository";
+import { AzureImage } from "../../../utils/Azure/models/AzureImage";
+import { AzureRepository } from "../../../utils/Azure/models/AzureRepository";
 
 /** Class to manage data and data acquisition for logs */
 export class LogData {
@@ -126,7 +126,7 @@ export class LogData {
             if (items.length !== 2) {
                 throw new Error('Wrong format: It should be <image>:<tag>');
             }
-            const image = new AzureImage(await Repository.Create(this.registry, items[0]), items[1]);
+            const image = new AzureImage(await AzureRepository.Create(this.registry, items[0]), items[1]);
             const imageDigest: string = await getImageDigest(image);
 
             if (parsedFilter.length > 0) { parsedFilter += ' and '; }

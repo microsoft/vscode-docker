@@ -4,13 +4,13 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { BrowserClient } from './browserClient';
-import { DockerClient } from './dockerClient';
+import { ProcessProvider } from './ChildProcessProvider';
+import { DockerClient } from './CliDockerClient';
+import { DotNetClient } from './CommandLineDotNetClient';
 import { LaunchOptions, MacNuGetPackageFallbackFolderPath } from './dockerManager';
-import { DotNetClient } from './dotNetClient';
 import { FileSystemProvider } from './fsProvider';
-import { OSProvider } from './osProvider';
-import { ProcessProvider } from './processProvider';
+import { OSProvider } from './LocalOSProvider';
+import { BrowserClient } from './OpnBrowserClient';
 
 export interface Prerequisite {
     checkPrerequisite(options: LaunchOptions): Promise<boolean>;

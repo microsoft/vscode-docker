@@ -8,8 +8,8 @@ import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { getImagesByRepository, getRepositoriesByRegistry } from '../../src/utils/Azure/acrTools';
-import { AzureImage } from '../../src/utils/Azure/models/image';
-import { Repository } from '../../src/utils/Azure/models/repository';
+import { AzureImage } from '../../src/utils/Azure/models/AzureImage';
+import { AzureRepository } from '../../src/utils/Azure/models/AzureRepository';
 import { getLoginServer } from '../../src/utils/nonNull';
 import { treeUtils } from '../../src/utils/treeUtils';
 import { AzureAccount } from '../../typings/azure-account.api';
@@ -54,7 +54,7 @@ export class AzureRegistryNode extends NodeBase {
                 return [];
             }
 
-            const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
+            const repositories: AzureRepository[] = await getRepositoriesByRegistry(element.registry);
             for (let repository of repositories) {
                 let node = new AzureRepositoryNode(
                     repository.name,
@@ -103,7 +103,7 @@ export class AzureRepositoryNode extends NodeBase {
 
             const imageNodes: AzureImageTagNode[] = [];
             let node: AzureImageTagNode;
-            let repo = await Repository.Create(element.registry, element.label);
+            let repo = await AzureRepository.Create(element.registry, element.label);
             let images: AzureImage[] = await getImagesByRepository(repo);
             for (let img of images) {
                 node = new AzureImageTagNode(
