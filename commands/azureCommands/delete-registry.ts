@@ -8,7 +8,7 @@ import { SubscriptionModels } from "azure-arm-resource";
 import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
-import { ext } from "../../extensionVariables";
+import { ext } from "../../src/extensionVariables";
 import * as acrTools from '../../src/utils/Azure/acrTools';
 import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
 import { nonNullProp } from "../../src/utils/nonNull";

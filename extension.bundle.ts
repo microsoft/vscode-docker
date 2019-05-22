@@ -10,7 +10,7 @@
  */
 
 // Export activate/deactivate for main.js
-export { activateInternal, deactivateInternal } from './extension';
+export { activateInternal, deactivateInternal } from './src/extension';
 
 // Exports for tests
 // The tests are not packaged with the webpack bundle and therefore only have access to code exported from this file.
@@ -19,7 +19,7 @@ export { activateInternal, deactivateInternal } from './extension';
 // At runtime the tests live in dist/tests and will therefore pick up the main webpack bundle at dist/extension.bundle.js.
 export { AsyncPool } from './src/utils/asyncpool';
 export { wrapError } from './src/utils/wrapError';
-export { ext } from './extensionVariables';
+export { ext } from './src/extensionVariables';
 export { nonNullProp } from './src/utils/nonNull';
 export { IKeytar } from './src/utils/keytar';
 export { throwDockerConnectionError, internal } from './explorer/utils/dockerConnectionError';

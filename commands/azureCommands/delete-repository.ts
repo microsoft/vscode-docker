@@ -7,7 +7,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { ext } from "../../extensionVariables";
+import { ext } from "../../src/extensionVariables";
 import * as acrTools from '../../src/utils/Azure/acrTools';
 import { Repository } from "../../src/utils/Azure/models/repository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';

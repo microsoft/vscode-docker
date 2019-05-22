@@ -8,7 +8,7 @@ import * as https from 'https';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from "vscode-azureextensionui";
-import { ext } from '../../extensionVariables';
+import { ext } from '../extensionVariables';
 import { globAsync } from './async';
 import { isLinux, isMac, isWindows } from './osVersion';
 

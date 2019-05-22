@@ -6,9 +6,9 @@
 'use strict';
 
 import vscode = require('vscode');
-import { FROM_DIRECTIVE_PATTERN } from '../../constants';
-import hub = require('../../dockerHubSearch');
-import parser = require('../../parser');
+import { FROM_DIRECTIVE_PATTERN } from '../constants';
+import hub = require('../dockerHubSearch');
+import parser = require('../parser');
 
 export class SuggestSupportHelper {
     // tslint:disable-next-line:promise-function-async // Grandfathered in

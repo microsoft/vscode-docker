@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ContainerNode } from '../explorer/models/containerNode';
 import { RootNode } from '../explorer/models/rootNode';
-import { ext } from '../extensionVariables';
+import { ext } from '../src/extensionVariables';
 import { docker, DockerEngineType, ListContainerDescOptions } from './utils/docker-endpoint';
 import { quickPickContainer } from './utils/quick-pick-container';
 

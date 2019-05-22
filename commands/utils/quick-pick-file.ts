@@ -6,8 +6,8 @@
 import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, YAML_GLOB_PATTERN } from "../../constants";
-import { ext } from '../../extensionVariables';
+import { DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, YAML_GLOB_PATTERN } from "../../src/constants";
+import { ext } from '../../src/extensionVariables';
 
 export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;

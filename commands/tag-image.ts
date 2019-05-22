@@ -5,11 +5,11 @@
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
-import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { delay } from '../explorer/utils/utils';
-import { ext } from '../extensionVariables';
+import { configurationKeys } from '../src/constants';
+import { ext } from '../src/extensionVariables';
 import { extractRegExGroups } from '../src/utils/extractRegExGroups';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';

@@ -11,7 +11,7 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
 import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFolder';
-import { ext } from '../extensionVariables';
+import { ext } from '../src/extensionVariables';
 import { globAsync } from '../src/utils/async';
 import { extractRegExGroups } from '../src/utils/extractRegExGroups';
 import { Platform, PlatformOS } from '../src/utils/platform';

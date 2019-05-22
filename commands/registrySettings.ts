@@ -5,11 +5,11 @@
 
 import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { configurationKeys } from '../constants';
 import { AzureRegistryNode } from "../explorer/models/azureRegistryNodes";
 import { CustomRegistryNode } from "../explorer/models/customRegistryNodes";
 import { DockerHubOrgNode } from "../explorer/models/dockerHubNodes";
-import { ext } from '../extensionVariables';
+import { configurationKeys } from '../src/constants';
+import { ext } from '../src/extensionVariables';
 import { assertNever } from '../src/utils/assertNever';
 
 const defaultRegistryKey = "defaultRegistry";

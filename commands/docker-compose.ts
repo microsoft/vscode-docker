@@ -6,8 +6,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { COMPOSE_FILE_GLOB_PATTERN } from '../constants';
-import { ext } from '../extensionVariables';
+import { COMPOSE_FILE_GLOB_PATTERN } from '../src/constants';
+import { ext } from '../src/extensionVariables';
 import { quickPickWorkspaceFolder } from './utils/quickPickWorkspaceFolder';
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {

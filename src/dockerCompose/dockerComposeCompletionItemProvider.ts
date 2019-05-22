@@ -7,7 +7,7 @@
 
 import { CancellationToken, CompletionItem, CompletionItemKind, CompletionItemProvider, Position, TextDocument } from 'vscode';
 import { KeyInfo } from '../extension';
-import helper = require('../src/utils/suggestSupportHelper');
+import helper = require('../utils/suggestSupportHelper');
 import composeVersions from './dockerComposeKeyInfo';
 
 export class DockerComposeCompletionItemProvider implements CompletionItemProvider {

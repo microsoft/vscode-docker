@@ -9,7 +9,7 @@ import os = require('os');
 import vscode = require('vscode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { ImageNode } from '../explorer/models/imageNode';
-import { ext } from '../extensionVariables';
+import { ext } from '../src/extensionVariables';
 import { docker, DockerEngineType } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 

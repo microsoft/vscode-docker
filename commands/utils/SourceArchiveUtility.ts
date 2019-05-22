@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as tar from 'tar';
 import vscode = require('vscode');
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
+import { ext } from '../../src/extensionVariables';
 import { getBlobInfo, getResourceGroupName, streamLogs } from "../../src/utils/Azure/acrTools";
 import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
 import { quickPickACRRegistry, quickPickSubscription } from './quick-pick-azure';

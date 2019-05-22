@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { throwDockerConnectionError } from '../explorer/utils/dockerConnectionError';
-import { ext } from '../extensionVariables';
+import { ext } from '../src/extensionVariables';
 import { docker } from './utils/docker-endpoint';
 
 export async function systemPrune(context: IActionContext): Promise<void> {

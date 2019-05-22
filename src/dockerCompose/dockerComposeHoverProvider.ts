@@ -8,7 +8,7 @@
 import { CancellationToken, Hover, HoverProvider, MarkedString, Position, Range, TextDocument } from 'vscode';
 import { KeyInfo } from "../extension";
 import parser = require('../parser');
-import suggestHelper = require('../src/utils/suggestSupportHelper');
+import suggestHelper = require('../utils/suggestSupportHelper');
 
 export class DockerComposeHoverProvider implements HoverProvider {
     public _parser: parser.Parser;

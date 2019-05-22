@@ -3,7 +3,7 @@ import { ImageDescriptor, Run } from "azure-arm-containerregistry/lib/models";
 import * as path from 'path';
 import * as vscode from "vscode";
 import { callWithTelemetryAndErrorHandling } from "vscode-azureextensionui";
-import { ext } from "../../../extensionVariables";
+import { ext } from "../../../src/extensionVariables";
 import { accessLog } from './logFileManager';
 import { Filter, LogData } from './tableDataManager'
 export class LogTableWebview {

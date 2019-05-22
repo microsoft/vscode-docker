@@ -9,7 +9,7 @@ import { ContainerDesc } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { throwDockerConnectionError } from '../../explorer/utils/dockerConnectionError';
-import { ext } from '../../extensionVariables';
+import { ext } from '../../src/extensionVariables';
 import { docker, ListContainerDescOptions } from './docker-endpoint';
 
 export interface ContainerItem extends vscode.QuickPickItem {

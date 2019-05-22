@@ -9,7 +9,7 @@ import { exec } from 'child_process';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
-import { ext } from '../../extensionVariables';
+import { ext } from '../../src/extensionVariables';
 import * as acrTools from '../../src/utils/Azure/acrTools';
 import { AzureImage } from "../../src/utils/Azure/models/image";
 import { Repository } from "../../src/utils/Azure/models/repository";

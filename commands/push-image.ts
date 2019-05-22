@@ -5,10 +5,10 @@
 
 import vscode = require('vscode');
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
-import { configurationKeys } from '../constants';
 import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
-import { ext } from '../extensionVariables';
+import { configurationKeys } from '../src/constants';
+import { ext } from '../src/extensionVariables';
 import { askToSaveRegistryPath } from './registrySettings';
 import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tag-image';
 

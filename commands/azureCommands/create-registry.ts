@@ -7,7 +7,7 @@ import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/mo
 import { SubscriptionModels } from 'azure-arm-resource';
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import * as vscode from "vscode";
-import { ext } from '../../extensionVariables';
+import { ext } from '../../src/extensionVariables';
 import { isValidAzureName } from '../../src/utils/Azure/common';
 import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
 import { nonNullProp } from '../../src/utils/nonNull';

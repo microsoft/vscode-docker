@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "vscode-azureextensionui";
-import DockerInspectDocumentContentProvider from "../documentContentProviders/dockerInspect";
 import { ImageNode } from "../explorer/models/imageNode";
+import DockerInspectDocumentContentProvider from "../src/dockerInspect";
 import { quickPickImage } from "./utils/quick-pick-image";
 
 export default async function inspectImage(context: IActionContext, node: ImageNode | undefined): Promise<void> {

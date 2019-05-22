@@ -7,7 +7,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { delay } from "../explorer/utils/utils";
-import { ext } from "../extensionVariables";
+import { ext } from "../src/extensionVariables";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tag-image";
 import { quickPickDockerFileItem } from "./utils/quick-pick-file";
 import { quickPickWorkspaceFolder } from "./utils/quickPickWorkspaceFolder";

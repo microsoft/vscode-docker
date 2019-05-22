@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { docker, ListContainerDescOptions as GetContainerDescOptions } from '../../commands/utils/docker-endpoint';
-import { ext, ImageGrouping } from '../../extensionVariables';
+import { ext, ImageGrouping } from '../../src/extensionVariables';
 import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
 import { treeUtils } from '../../src/utils/treeUtils';
 import { AzureAccount } from '../../typings/azure-account.api';

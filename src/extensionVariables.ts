@@ -8,9 +8,9 @@ import { RequestAPI, RequiredUriUrl } from 'request';
 import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel } from "vscode";
 import { IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
-import { ITerminalProvider } from "./commands/utils/TerminalProvider";
-import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
-import { IKeytar } from './src/utils/keytar';
+import { ITerminalProvider } from "../commands/utils/TerminalProvider";
+import { DockerExplorerProvider } from '../explorer/dockerExplorerProvider';
+import { IKeytar } from './utils/keytar';
 
 type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
 

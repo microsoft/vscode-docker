@@ -7,7 +7,7 @@ import { Registry } from "azure-arm-containerregistry/lib/models";
 import * as vscode from "vscode";
 import { DialogResponses, IActionContext } from "vscode-azureextensionui";
 import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
-import { ext } from "../../extensionVariables";
+import { ext } from "../../src/extensionVariables";
 import * as acrTools from '../../src/utils/Azure/acrTools';
 import { AzureImage } from "../../src/utils/Azure/models/image";
 import { Repository } from "../../src/utils/Azure/models/repository";
