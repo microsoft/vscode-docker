@@ -8,8 +8,8 @@ import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
-import * as acrTools from '../../utils/Azure/acrTools';
-import { Repository } from "../../utils/Azure/models/repository";
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { Repository } from "../../src/utils/Azure/models/repository";
 import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 /**

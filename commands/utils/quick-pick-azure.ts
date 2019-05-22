@@ -12,11 +12,11 @@ import { skus } from '../../constants';
 import { openExternal } from '../../explorer/utils/openExternal';
 import { ext } from '../../extensionVariables';
 import { ResourceManagementClient } from '../../node_modules/azure-arm-resource';
-import * as acrTools from '../../utils/Azure/acrTools';
-import { isValidAzureName } from '../../utils/Azure/common';
-import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/repository";
-import { AzureUtilityManager } from '../../utils/azureUtilityManager';
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { isValidAzureName } from '../../src/utils/Azure/common';
+import { AzureImage } from "../../src/utils/Azure/models/image";
+import { Repository } from "../../src/utils/Azure/models/repository";
+import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
 import { createRegistry } from '../azureCommands/create-registry';
 
 export async function quickPickACRImage(repository: Repository, prompt?: string): Promise<AzureImage> {

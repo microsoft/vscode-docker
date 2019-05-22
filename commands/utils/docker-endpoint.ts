@@ -5,7 +5,7 @@
 
 import * as Docker from 'dockerode';
 import * as vscode from "vscode";
-import { nonNullValue } from '../../utils/nonNull';
+import { nonNullValue } from '../../src/utils/nonNull';
 
 export type ContainerStatus = "created" | "restarting" | "running" | "paused" | "exited" | "dead";
 export type ListContainerDescOptions = {

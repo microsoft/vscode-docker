@@ -9,7 +9,7 @@ import { Disposable, ExtensionContext } from 'vscode';
 import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
-import { getSubscriptionId, getTenantId } from '../../utils/nonNull';
+import { getSubscriptionId, getTenantId } from '../../src/utils/nonNull';
 
 export class NotSignedInError extends Error { }
 

@@ -4,7 +4,7 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { PlatformOS } from '../../utils/platform';
+import { PlatformOS } from '../../src/utils/platform';
 
 export interface OSProvider {
     homedir: string;

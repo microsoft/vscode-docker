@@ -11,9 +11,9 @@ import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { ServiceClientCredentials } from 'ms-rest';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent, callWithTelemetryAndErrorHandling, IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
-import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../constants';
-import { openExternal } from '../explorer/utils/openExternal';
-import { AzureAccount, AzureSession } from '../typings/azure-account.api';
+import { MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
+import { openExternal } from '../../explorer/utils/openExternal';
+import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
 import { AsyncPool } from './asyncpool';
 import { getSubscriptionId, getTenantId } from './nonNull';
 

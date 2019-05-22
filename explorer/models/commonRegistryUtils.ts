@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { MAX_CONCURRENT_REQUESTS, PAGE_SIZE } from '../../constants'
 import { ext } from '../../extensionVariables';
-import { AsyncPool } from '../../utils/asyncpool';
+import { AsyncPool } from '../../src/utils/asyncpool';
 import { Manifest, ManifestHistoryV1Compatibility } from '../utils/dockerHubUtils';
 
 interface RegistryNonsensitiveInfo {

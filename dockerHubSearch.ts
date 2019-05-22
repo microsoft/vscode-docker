@@ -6,7 +6,7 @@
 'use strict';
 
 import https = require('https');
-import { httpsRequest } from './utils/httpRequest';
+import { httpsRequest } from './src/utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     let tags: string[] = [];

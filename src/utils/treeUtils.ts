@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { ext } from '../extensionVariables';
+import { ext } from '../../extensionVariables';
 
 export namespace treeUtils {
     export interface IThemedIconPath {

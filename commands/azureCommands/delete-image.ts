@@ -8,9 +8,9 @@ import * as vscode from "vscode";
 import { DialogResponses, IActionContext } from "vscode-azureextensionui";
 import { AzureImageTagNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
-import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/repository";
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { AzureImage } from "../../src/utils/Azure/models/image";
+import { Repository } from "../../src/utils/Azure/models/repository";
 import * as quickPicks from '../utils/quick-pick-azure';
 
 /** Function to untag an Azure hosted image

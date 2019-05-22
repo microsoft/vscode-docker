@@ -9,9 +9,9 @@ import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { AzureRegistryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from "../../extensionVariables";
-import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureUtilityManager } from '../../utils/azureUtilityManager';
-import { nonNullProp } from "../../utils/nonNull";
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
+import { nonNullProp } from "../../src/utils/nonNull";
 import { confirmUserIntent, quickPickACRRegistry } from '../utils/quick-pick-azure';
 
 /** Delete a registry and all it's associated nested items

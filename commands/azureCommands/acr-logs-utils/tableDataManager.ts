@@ -2,9 +2,9 @@ import ContainerRegistryManagementClient from "azure-arm-containerregistry";
 import { Registry, Run, RunGetLogResult, RunListResult } from "azure-arm-containerregistry/lib/models";
 import vscode = require('vscode');
 import { parseError } from "vscode-azureextensionui";
-import { getImageDigest } from "../../../utils/Azure/acrTools";
-import { AzureImage } from "../../../utils/Azure/models/image";
-import { Repository } from "../../../utils/Azure/models/repository";
+import { getImageDigest } from "../../../src/utils/Azure/acrTools";
+import { AzureImage } from "../../../src/utils/Azure/models/image";
+import { Repository } from "../../../src/utils/Azure/models/repository";
 
 /** Class to manage data and data acquisition for logs */
 export class LogData {

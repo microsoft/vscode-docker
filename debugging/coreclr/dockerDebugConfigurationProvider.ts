@@ -5,7 +5,7 @@
 import * as path from 'path';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
-import { PlatformOS } from '../../utils/platform';
+import { PlatformOS } from '../../src/utils/platform';
 import { DebugSessionManager } from './debugSessionManager';
 import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './dockerClient';
 import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';

@@ -3,8 +3,8 @@ import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
 import { IActionContext } from "vscode-azureextensionui";
 import { TaskNode } from "../../explorer/models/taskNode";
-import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureUtilityManager } from "../../utils/azureUtilityManager";
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { AzureUtilityManager } from "../../src/utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../utils/quick-pick-azure';
 import { openTask } from "./task-utils/showTaskManager";
 

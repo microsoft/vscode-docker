@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { treeUtils } from '../../utils/treeUtils';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { formatTag, getCatalog, getTags, registryRequest } from './commonRegistryUtils';
 import { CustomRegistry } from './customRegistries';
 import { NodeBase } from './nodeBase';

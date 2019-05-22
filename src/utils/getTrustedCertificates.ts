@@ -8,9 +8,9 @@ import * as https from 'https';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from "vscode-azureextensionui";
-import { ext } from '../extensionVariables';
-import { globAsync } from '../helpers/async';
-import { isLinux, isMac, isWindows } from '../helpers/osVersion';
+import { ext } from '../../extensionVariables';
+import { globAsync } from '../../helpers/async';
+import { isLinux, isMac, isWindows } from '../../helpers/osVersion';
 
 let _systemCertificates: (string | Buffer)[] | undefined;
 

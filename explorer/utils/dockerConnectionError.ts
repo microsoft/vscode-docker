@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { MessageItem } from "vscode";
 import { IActionContext, parseError } from "vscode-azureextensionui";
 import { isLinux } from "../../helpers/osVersion";
-import { wrapError } from "../../utils/wrapError";
+import { wrapError } from "../../src/utils/wrapError";
 import { openExternal } from './openExternal';
 
 const connectionMessage = 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running.';

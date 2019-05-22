@@ -10,9 +10,9 @@ import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
-import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureImage } from "../../utils/Azure/models/image";
-import { Repository } from "../../utils/Azure/models/repository";
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { AzureImage } from "../../src/utils/Azure/models/image";
+import { Repository } from "../../src/utils/Azure/models/repository";
 import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
 export async function pullRepoFromAzure(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {

@@ -17,11 +17,11 @@ export { activateInternal, deactivateInternal } from './extension';
 //
 // The tests should import '../extension.bundle.ts'. At design-time they live in tests/ and so will pick up this file (extension.bundle.ts).
 // At runtime the tests live in dist/tests and will therefore pick up the main webpack bundle at dist/extension.bundle.js.
-export { AsyncPool } from './utils/asyncpool';
-export { wrapError } from './utils/wrapError';
+export { AsyncPool } from './src/utils/asyncpool';
+export { wrapError } from './src/utils/wrapError';
 export { ext } from './extensionVariables';
-export { nonNullProp } from './utils/nonNull';
-export { IKeytar } from './utils/keytar';
+export { nonNullProp } from './src/utils/nonNull';
+export { IKeytar } from './src/utils/keytar';
 export { throwDockerConnectionError, internal } from './explorer/utils/dockerConnectionError';
 export { getImageLabel } from './explorer/models/getImageLabel';
 export { trimWithElipsis } from './explorer/utils/utils';
@@ -35,11 +35,11 @@ export { FileSystemProvider } from './debugging/coreclr/fsProvider';
 export { OSProvider } from './debugging/coreclr/osProvider';
 export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './debugging/coreclr/prereqManager';
 export { ProcessProvider } from './debugging/coreclr/processProvider';
-export { PlatformOS, Platform } from './utils/platform';
+export { PlatformOS, Platform } from './src/utils/platform';
 export { DockerBuildImageOptions } from "./debugging/coreclr/dockerClient";
 export { compareBuildImageOptions } from "./debugging/coreclr/dockerManager";
 export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './configureWorkspace/configure';
 export { globAsync } from './helpers/async';
-export { httpsRequestBinary } from './utils/httpRequest';
+export { httpsRequestBinary } from './src/utils/httpRequest';
 export { DefaultTerminalProvider } from './commands/utils/TerminalProvider';
 export { docker } from './commands/utils/docker-endpoint';

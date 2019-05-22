@@ -11,7 +11,7 @@ import WebSiteManagementClient = require('azure-arm-website');
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import * as vscode from 'vscode';
 import { addExtensionUserAgent } from 'vscode-azureextensionui';
-import { nonNullProp } from '../../utils/nonNull';
+import { nonNullProp } from '../../src/utils/nonNull';
 import { AzureImageTagNode } from '../models/azureRegistryNodes';
 import { CustomImageTagNode } from '../models/customRegistryNodes';
 import { DockerHubImageTagNode } from '../models/dockerHubNodes';

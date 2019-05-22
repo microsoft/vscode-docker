@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { PlatformOS } from '../../utils/platform';
+import { PlatformOS } from '../../src/utils/platform';
 import { DockerClient } from './dockerClient';
 import { OSProvider } from './osProvider';
 import { VsDbgClient } from './vsdbgClient';

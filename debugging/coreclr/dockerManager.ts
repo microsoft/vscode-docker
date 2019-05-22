@@ -5,7 +5,7 @@
 import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
-import { PlatformOS } from '../../utils/platform';
+import { PlatformOS } from '../../src/utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { DebuggerClient } from './debuggerClient';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./dockerClient";

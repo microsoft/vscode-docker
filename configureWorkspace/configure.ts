@@ -14,7 +14,7 @@ import { quickPickWorkspaceFolder } from '../commands/utils/quickPickWorkspaceFo
 import { ext } from '../extensionVariables';
 import { globAsync } from '../helpers/async';
 import { extractRegExGroups } from '../helpers/extractRegExGroups';
-import { Platform, PlatformOS } from '../utils/platform';
+import { Platform, PlatformOS } from '../src/utils/platform';
 import { promptForPort, quickPickOS, quickPickPlatform } from './config-utils';
 import { configureCpp } from './configure_cpp';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configure_dotnetcore';

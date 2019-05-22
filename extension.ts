@@ -59,11 +59,11 @@ import { NodeBase } from './explorer/models/nodeBase';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogin, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { DefaultImageGrouping, ext, ImageGrouping } from './extensionVariables';
-import { addUserAgent } from './utils/addUserAgent';
-import { AzureUtilityManager } from './utils/azureUtilityManager';
-import { getTrustedCertificates } from './utils/getTrustedCertificates';
-import { Keytar } from './utils/keytar';
-import { wrapError } from './utils/wrapError';
+import { addUserAgent } from './src/utils/addUserAgent';
+import { AzureUtilityManager } from './src/utils/azureUtilityManager';
+import { getTrustedCertificates } from './src/utils/getTrustedCertificates';
+import { Keytar } from './src/utils/keytar';
+import { wrapError } from './src/utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
 

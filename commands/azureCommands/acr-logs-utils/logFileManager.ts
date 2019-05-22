@@ -3,7 +3,7 @@ import * as fse from 'fs-extra';
 import { isNullOrUndefined } from 'util';
 import * as vscode from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
-import { getBlobInfo, getBlobToText, IBlobInfo } from '../../../utils/Azure/acrTools';
+import { getBlobInfo, getBlobToText, IBlobInfo } from '../../../src/utils/Azure/acrTools';
 
 export class LogContentProvider implements vscode.TextDocumentContentProvider {
     public static scheme: string = 'purejs';

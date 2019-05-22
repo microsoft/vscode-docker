@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { treeUtils } from '../../utils/treeUtils';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { NodeBase } from './nodeBase';
 
 export type IconPath = string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon;
