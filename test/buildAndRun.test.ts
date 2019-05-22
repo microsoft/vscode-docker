@@ -78,15 +78,12 @@ suite("Build Image", function (this: Suite): void {
         let testTerminalProvider = new TestTerminalProvider();
         ext.terminalProvider = testTerminalProvider;
 
-        let actionContext: IActionContext = {
-            properties: { isActivationEvent: 'false', cancelStep: '', errorMessage: '', error: undefined, result: 'Succeeded' },
-            measurements: { duration: 0 },
-            suppressTelemetry: false,
-            rethrowError: false,
-            suppressErrorDisplay: false
+        let context: IActionContext = {
+            telemetry: { properties: {}, measurements: {} },
+            errorHandling: {}
         };
 
-        await configure(actionContext, testRootFolder);
+        await configure(context, testRootFolder);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for configure docker files');
 
         // Build image

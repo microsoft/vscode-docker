@@ -40,11 +40,9 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'azureRegistryNodes';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'azureRegistryNodes';
 
             const repoNodes: NodeBase[] = [];
 
@@ -52,7 +50,7 @@ export class AzureRegistryNode extends NodeBase {
             let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
             repoNodes.push(taskNode);
 
-            if (!me.azureAccount) {
+            if (!this.azureAccount) {
                 return [];
             }
 
@@ -61,7 +59,7 @@ export class AzureRegistryNode extends NodeBase {
                 let node = new AzureRepositoryNode(
                     repository.name,
                     element,
-                    me.azureAccount,
+                    this.azureAccount,
                     element.subscription,
                     element.registry,
                     element.label);
@@ -99,9 +97,9 @@ export class AzureRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<AzureImageTagNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'azureRepositoryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'azureRepositoryNode';
 
             const imageNodes: AzureImageTagNode[] = [];
             let node: AzureImageTagNode;

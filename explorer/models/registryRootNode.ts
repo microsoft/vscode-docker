@@ -56,19 +56,17 @@ export class RegistryRootNode extends NodeBase {
     }
 
     public async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'registryRootNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'registryRootNode';
 
             if (element.contextValue === 'azureRegistryRootNode') {
-                return me.getAzureRegistries();
+                return this.getAzureRegistries();
             } else if (element.contextValue === 'dockerHubRootNode') {
-                return me.getDockerHubOrgs();
+                return this.getDockerHubOrgs();
             } else {
                 assert(element.contextValue === 'customRootNode');
-                return await me.getCustomRegistryNodes();
+                return await this.getCustomRegistryNodes();
             }
         });
     }

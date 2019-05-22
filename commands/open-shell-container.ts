@@ -23,24 +23,24 @@ function getEngineTypeShellCommands(engineType: DockerEngineType): string {
     }
 }
 
-export async function openShellContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
+export async function openShellContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
     let containerToAttach: Docker.ContainerDesc;
 
-    if (context instanceof ContainerNode && context.containerDesc) {
-        containerToAttach = context.containerDesc;
+    if (node instanceof ContainerNode && node.containerDesc) {
+        containerToAttach = node.containerDesc;
     } else {
         const opts: ListContainerDescOptions = {
             "filters": {
                 "status": ["running"]
             }
         };
-        containerToAttach = await quickPickContainer(actionContext, opts);
+        containerToAttach = await quickPickContainer(context, opts);
     }
 
     let engineType = await docker.getEngineType();
-    actionContext.properties.engineType = DockerEngineType[engineType];
+    context.telemetry.properties.engineType = DockerEngineType[engineType];
     const shellCommand = getEngineTypeShellCommands(engineType);
-    actionContext.properties.shellCommand = shellCommand;
+    context.telemetry.properties.shellCommand = shellCommand;
     const terminal = ext.terminalProvider.createTerminal(`Shell: ${containerToAttach.Image}`);
     terminal.sendText(`docker exec -it ${containerToAttach.Id} ${shellCommand}`);
     terminal.show();

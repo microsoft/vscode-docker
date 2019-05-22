@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from 'vscode-azureextensionui';
 import { AzureSession } from '../../typings/azure-account.api';
 import { getTenantId, nonNullValue } from '../../utils/nonNull';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 import { openExternal } from './openExternal';
 
-export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
+export function browseAzurePortal(_context: IActionContext, node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
     if (node && node.azureAccount) {
         const tenantId: string = getTenantId(node.subscription);
         const session: AzureSession = nonNullValue(

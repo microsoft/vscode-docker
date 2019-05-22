@@ -43,27 +43,27 @@ function computeItems(containers: Docker.ContainerDesc[], includeAll: boolean): 
     return items;
 }
 
-export async function quickPickContainer(actionContext: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc> {
-    let results = await quickPickContainersCore(actionContext, false, opts);
+export async function quickPickContainer(context: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc> {
+    let results = await quickPickContainersCore(context, false, opts);
     assert(results.length === 1);
     return results[0];
 }
 
-export async function quickPickContainerOrAll(actionContext: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
-    return await quickPickContainersCore(actionContext, true, opts);
+export async function quickPickContainerOrAll(context: IActionContext, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
+    return await quickPickContainersCore(context, true, opts);
 }
 
-async function quickPickContainersCore(actionContext: IActionContext, allowSelectingAll: boolean, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
+async function quickPickContainersCore(context: IActionContext, allowSelectingAll: boolean, opts: ListContainerDescOptions): Promise<ContainerDesc[]> {
     let properties: {
         allContainers?: string;
-    } & TelemetryProperties = actionContext.properties;
+    } & TelemetryProperties = context.telemetry.properties;
 
     let containers: ContainerDesc[];
 
     try {
         containers = await docker.getContainerDescriptors(opts);
     } catch (err) {
-        throwDockerConnectionError(actionContext, err);
+        throwDockerConnectionError(context, err);
     }
 
     if (containers.length === 0) {

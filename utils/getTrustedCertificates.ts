@@ -27,16 +27,15 @@ const defaultCertificatePaths: string[] = [
 ];
 
 export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
-    // tslint:disable-next-line:no-function-expression
-    return callWithTelemetryAndErrorHandling('docker.certificates', async function (this: IActionContext): Promise<(string | Buffer)[] | undefined> {
-        this.suppressTelemetry = true;
+    return callWithTelemetryAndErrorHandling('docker.certificates', async (context: IActionContext) => {
+        context.telemetry.suppressIfSuccessful = true;
 
         let importSetting = vscode.workspace.getConfiguration('docker').get<ImportCertificatesSetting>('importCertificates');
 
         // If value is false or null/undefined or anything not an object or boolean...
         if (!importSetting || (typeof importSetting !== "object" && typeof importSetting !== "boolean")) {
             // ... then use default Node.js behavior
-            this.properties.importCertificates = 'false';
+            context.telemetry.properties.importCertificates = 'false';
             return undefined;
         }
 
@@ -44,24 +43,24 @@ export async function getTrustedCertificates(): Promise<(string | Buffer)[]> {
         let certificatePaths: string[];
 
         if (importSetting === true) {
-            this.properties.importCertificates = 'true';
+            context.telemetry.properties.importCertificates = 'true';
             useCertificateStore = true;
             certificatePaths = defaultCertificatePaths;
         } else {
-            this.properties.importCertificates = 'custom';
+            context.telemetry.properties.importCertificates = 'custom';
             useCertificateStore = !!importSetting.useCertificateStore;
             certificatePaths = importSetting.certificatePaths || [];
         }
 
-        this.properties.useCertStore = String(useCertificateStore);
+        context.telemetry.properties.useCertStore = String(useCertificateStore);
         let systemCerts: (string | Buffer)[] = useCertificateStore ? getCertificatesFromSystem() : [];
 
         let filesCerts: Buffer[];
-        this.properties.certPathsCount = String(certificatePaths.length);
+        context.telemetry.properties.certPathsCount = String(certificatePaths.length);
         filesCerts = await getCertificatesFromPaths(certificatePaths);
 
-        this.properties.systemCertsCount = String(systemCerts.length);
-        this.properties.fileCertsCount = String(filesCerts.length);
+        context.telemetry.properties.systemCertsCount = String(systemCerts.length);
+        context.telemetry.properties.fileCertsCount = String(filesCerts.length);
 
         let certificates = systemCerts;
         certificates.push(...filesCerts);

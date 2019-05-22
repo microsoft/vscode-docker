@@ -45,9 +45,9 @@ export class TaskRootNode extends NodeBase {
 
     /* Making a list view of TaskNodes, or the Tasks of the current registry */
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<TaskNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'taskRootNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'taskRootNode';
 
             const taskNodes: TaskNode[] = [];
             let tasks: ContainerModels.Task[] = [];

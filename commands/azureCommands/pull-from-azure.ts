@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { exec } from 'child_process';
 import vscode = require('vscode');
+import { IActionContext } from 'vscode-azureextensionui';
 import { AzureImageTagNode, AzureRepositoryNode } from '../../explorer/models/azureRegistryNodes';
 import { ext } from '../../extensionVariables';
 import * as acrTools from '../../utils/Azure/acrTools';
@@ -14,26 +15,26 @@ import { AzureImage } from "../../utils/Azure/models/image";
 import { Repository } from "../../utils/Azure/models/repository";
 import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../utils/quick-pick-azure';
 
-export async function pullRepoFromAzure(context?: AzureRepositoryNode): Promise<void> {
-    await pullFromAzure(context, true);
+export async function pullRepoFromAzure(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
+    await pullFromAzure(node, true);
 }
 
-export async function pullImageFromAzure(context?: AzureImageTagNode): Promise<void> {
-    await pullFromAzure(context, false);
+export async function pullImageFromAzure(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
+    await pullFromAzure(node, false);
 }
 
 /* Pulls an image from Azure. The context is the image node the user has right clicked on */
-async function pullFromAzure(context: AzureImageTagNode | AzureRepositoryNode, pullAll: boolean): Promise<void> {
+async function pullFromAzure(node: AzureImageTagNode | AzureRepositoryNode, pullAll: boolean): Promise<void> {
     let registry: Registry;
     let imageRequest: string;
 
-    if (context) { // Right Click
-        registry = context.registry;
+    if (node) { // Right Click
+        registry = node.registry;
 
-        if (context instanceof AzureImageTagNode) { // Right Click on AzureImageNode
-            imageRequest = context.label;
-        } else if (context instanceof AzureRepositoryNode) { // Right Click on AzureRepositoryNode
-            imageRequest = `${context.label} -a`; // Pull all images in repository
+        if (node instanceof AzureImageTagNode) { // Right Click on AzureImageNode
+            imageRequest = node.label;
+        } else if (node instanceof AzureRepositoryNode) { // Right Click on AzureRepositoryNode
+            imageRequest = `${node.label} -a`; // Pull all images in repository
         } else {
             assert.fail(`Unexpected node type`);
         }

@@ -12,18 +12,18 @@ import { quickPickContainerOrAll } from './utils/quick-pick-container';
 
 import vscode = require('vscode');
 
-export async function stopContainer(actionContext: IActionContext, context: RootNode | ContainerNode | undefined): Promise<void> {
+export async function stopContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
     let containersToStop: Docker.ContainerDesc[];
 
-    if (context instanceof ContainerNode && context.containerDesc) {
-        containersToStop = [context.containerDesc];
+    if (node instanceof ContainerNode && node.containerDesc) {
+        containersToStop = [node.containerDesc];
     } else {
         const opts: ListContainerDescOptions = {
             "filters": {
                 "status": ["restarting", "running", "paused"]
             }
         };
-        containersToStop = await quickPickContainerOrAll(actionContext, opts);
+        containersToStop = await quickPickContainerOrAll(context, opts);
     }
 
     const numContainers: number = containersToStop.length;

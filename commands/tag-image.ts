@@ -14,14 +14,14 @@ import { extractRegExGroups } from '../helpers/extractRegExGroups';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 
-export async function tagImage(actionContext: IActionContext, context: ImageNode | RootNode | IHasImageDescriptorAndFullTag | undefined): Promise<string> {
+export async function tagImage(context: IActionContext, node: ImageNode | RootNode | IHasImageDescriptorAndFullTag | undefined): Promise<string> {
     // If a RootNode or no node is passed in, we ask the user to pick an image
-    let [imageToTag, currentName] = await getOrAskForImageAndTag(actionContext, context instanceof RootNode ? undefined : context);
+    let [imageToTag, currentName] = await getOrAskForImageAndTag(context, node instanceof RootNode ? undefined : node);
 
     if (imageToTag) {
-        addImageTaggingTelemetry(actionContext, currentName, '.before');
+        addImageTaggingTelemetry(context, currentName, '.before');
         let newTaggedName: string = await getTagFromUserInput(currentName, true);
-        addImageTaggingTelemetry(actionContext, newTaggedName, '.after');
+        addImageTaggingTelemetry(context, newTaggedName, '.after');
 
         let repo: string = newTaggedName;
         let tag: string = 'latest';
@@ -73,15 +73,15 @@ export interface IHasImageDescriptorAndFullTag {
     fullTag: string;
 }
 
-export async function getOrAskForImageAndTag(actionContext: IActionContext, context: IHasImageDescriptorAndFullTag | undefined): Promise<[Docker.ImageDesc, string]> {
+export async function getOrAskForImageAndTag(context: IActionContext, node: IHasImageDescriptorAndFullTag | undefined): Promise<[Docker.ImageDesc, string]> {
     let name: string;
     let description: Docker.ImageDesc;
 
-    if (context && context.imageDesc) {
-        description = context.imageDesc;
-        name = context.fullTag;
+    if (node && node.imageDesc) {
+        description = node.imageDesc;
+        name = node.fullTag;
     } else {
-        const selectedItem: ImageItem = await quickPickImage(actionContext, false);
+        const selectedItem: ImageItem = await quickPickImage(context, false);
         if (selectedItem) {
             description = selectedItem.imageDesc
             name = selectedItem.label;
@@ -113,7 +113,7 @@ const KnownRegistries: { type: string, regex: RegExp }[] = [
     { type: 'none', regex: /./ } // no slash
 ];
 
-export function addImageTaggingTelemetry(actionContext: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
+export function addImageTaggingTelemetry(context: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
     try {
         let defaultRegistryPath: string = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath', '');
         let properties: {
@@ -139,7 +139,7 @@ export function addImageTaggingTelemetry(actionContext: IActionContext, fullImag
         properties.registryType = knownRegistry.type;
 
         for (let propertyName of Object.getOwnPropertyNames(properties)) {
-            actionContext.properties[propertyName + propertyPostfix] = <string>properties[propertyName];
+            context.telemetry.properties[propertyName + propertyPostfix] = <string>properties[propertyName];
         }
     } catch (error) {
         console.error(error);

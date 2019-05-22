@@ -56,11 +56,11 @@ function computeItems(images: Docker.ImageDesc[], includeAll?: boolean): ImageIt
     return items;
 }
 
-export async function quickPickImage(actionContext: IActionContext, includeAll?: boolean): Promise<ImageItem> {
+export async function quickPickImage(context: IActionContext, includeAll?: boolean): Promise<ImageItem> {
     let images: Docker.ImageDesc[];
     let properties: {
         allImages?: string;
-    } & TelemetryProperties = actionContext.properties;
+    } & TelemetryProperties = context.telemetry.properties;
 
     const imageFilters = {
         "filters": {
@@ -71,7 +71,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     try {
         images = await docker.getImageDescriptors(imageFilters);
     } catch (error) {
-        throwDockerConnectionError(actionContext, error);
+        throwDockerConnectionError(context, error);
     }
     if (!images || images.length === 0) {
         throw new Error('There are no docker images. Try Docker Build first.');
@@ -83,7 +83,7 @@ export async function quickPickImage(actionContext: IActionContext, includeAll?:
     }
 }
 
-export async function quickPickImageName(actionContext: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
+export async function quickPickImageName(context: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
     let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
     let dockerFileKey = `ACR_buildTag_${absFilePath}`;
     let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
@@ -104,9 +104,9 @@ export async function quickPickImageName(actionContext: IActionContext, rootFold
     // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
     await delay(500);
 
-    addImageTaggingTelemetry(actionContext, suggestedImageName, '.before');
+    addImageTaggingTelemetry(context, suggestedImageName, '.before');
     const imageName: string = await getTagFromUserInput(suggestedImageName, false);
-    addImageTaggingTelemetry(actionContext, imageName, '.after');
+    addImageTaggingTelemetry(context, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);
     return imageName;
