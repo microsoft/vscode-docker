@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { MessageItem } from "vscode";
 import { IActionContext, parseError } from "vscode-azureextensionui";
-import { isLinux } from "../../helpers/osVersion";
+import { isLinux } from "../../src/utils/osVersion";
 import { wrapError } from "../../src/utils/wrapError";
 import { openExternal } from './openExternal';
 

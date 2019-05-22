@@ -10,7 +10,7 @@ import { ImageNode } from '../explorer/models/imageNode';
 import { RootNode } from '../explorer/models/rootNode';
 import { delay } from '../explorer/utils/utils';
 import { ext } from '../extensionVariables';
-import { extractRegExGroups } from '../helpers/extractRegExGroups';
+import { extractRegExGroups } from '../src/utils/extractRegExGroups';
 import { docker } from './utils/docker-endpoint';
 import { ImageItem, quickPickImage } from './utils/quick-pick-image';
 

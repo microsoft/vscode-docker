@@ -7,7 +7,7 @@
 
 import { CancellationToken, CompletionItem, CompletionItemProvider, Position, TextDocument } from 'vscode';
 import { FROM_DIRECTIVE_PATTERN } from '../constants';
-import helper = require('../helpers/suggestSupportHelper');
+import helper = require('../src/utils/suggestSupportHelper');
 
 // IntelliSense
 export class DockerfileCompletionItemProvider implements CompletionItemProvider {

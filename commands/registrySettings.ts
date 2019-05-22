@@ -10,7 +10,7 @@ import { AzureRegistryNode } from "../explorer/models/azureRegistryNodes";
 import { CustomRegistryNode } from "../explorer/models/customRegistryNodes";
 import { DockerHubOrgNode } from "../explorer/models/dockerHubNodes";
 import { ext } from '../extensionVariables';
-import { assertNever } from '../helpers/assertNever';
+import { assertNever } from '../src/utils/assertNever';
 
 const defaultRegistryKey = "defaultRegistry";
 const hasCheckedRegistryPaths = "hasCheckedRegistryPaths"

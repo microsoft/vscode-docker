@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import { ImageDesc } from 'dockerode';
 import * as moment from 'moment';
 import * as vscode from 'vscode';
-import { extractRegExGroups } from '../../helpers/extractRegExGroups';
+import { extractRegExGroups } from '../../src/utils/extractRegExGroups';
 import { trimWithElipsis } from '../utils/utils';
 
 // If options not specified, retrieves them from user settings

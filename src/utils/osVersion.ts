@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as semver from 'semver';
-import { ext } from '../extensionVariables';
+import { ext } from '../../extensionVariables';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';
@@ -20,11 +20,11 @@ export function isWindows(): boolean {
 }
 
 export function isWindows10RS5OrNewer(): boolean {
-  if (!isWindows()) {
-    return false;
-  }
+    if (!isWindows()) {
+        return false;
+    }
 
-  return semver.gte(ext.os.release, windows10RS5MinVersion);
+    return semver.gte(ext.os.release, windows10RS5MinVersion);
 }
 
 export function isWindows10RS4OrNewer(): boolean {
