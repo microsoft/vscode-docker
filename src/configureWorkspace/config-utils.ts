@@ -5,8 +5,8 @@
 
 import vscode = require('vscode');
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { ext } from "../src/extensionVariables";
-import { Platform, PlatformOS } from '../src/utils/platform';
+import { ext } from "../extensionVariables";
+import { Platform, PlatformOS } from '../utils/platform';
 
 /**
  * Prompts for a port number

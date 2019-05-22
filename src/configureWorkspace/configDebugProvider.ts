@@ -6,7 +6,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { ext } from '../src/extensionVariables';
+import { ext } from '../extensionVariables';
 
 export class DockerDebugConfigProvider implements vscode.DebugConfigurationProvider {
 

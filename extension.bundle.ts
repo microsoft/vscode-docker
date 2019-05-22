@@ -38,7 +38,7 @@ export { ProcessProvider } from './src/debugging/coreclr/processProvider';
 export { PlatformOS, Platform } from './src/utils/platform';
 export { DockerBuildImageOptions } from "./src/debugging/coreclr/dockerClient";
 export { compareBuildImageOptions } from "./src/debugging/coreclr/dockerManager";
-export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './configureWorkspace/configure';
+export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './src/configureWorkspace/configure';
 export { globAsync } from './src/utils/async';
 export { httpsRequestBinary } from './src/utils/httpRequest';
 export { DefaultTerminalProvider } from './commands/utils/TerminalProvider';

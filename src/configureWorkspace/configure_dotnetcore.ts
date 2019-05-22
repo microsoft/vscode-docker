@@ -6,9 +6,9 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as semver from 'semver';
-import { extractRegExGroups } from '../src/utils/extractRegExGroups';
-import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../src/utils/osVersion';
-import { Platform, PlatformOS } from '../src/utils/platform';
+import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osVersion';
+import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 // This file handles both ASP.NET core and .NET Core Console
