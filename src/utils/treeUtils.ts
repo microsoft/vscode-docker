@@ -13,17 +13,17 @@ export namespace treeUtils {
     }
 
     export function getIconPath(iconName: string): string {
-        return path.join(getImagesPath(), `${iconName}.svg`);
+        return path.join(getResourcesPath(), `${iconName}.svg`);
     }
 
     export function getThemedIconPath(iconName: string): IThemedIconPath {
         return {
-            light: path.join(getImagesPath(), 'light', `${iconName}.svg`),
-            dark: path.join(getImagesPath(), 'dark', `${iconName}.svg`)
+            light: path.join(getResourcesPath(), 'light', `${iconName}.svg`),
+            dark: path.join(getResourcesPath(), 'dark', `${iconName}.svg`)
         };
     }
 
-    function getImagesPath(): string {
-        return ext.context.asAbsolutePath('images');
+    function getResourcesPath(): string {
+        return ext.context.asAbsolutePath('resources');
     }
 }
