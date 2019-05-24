@@ -6,11 +6,11 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { keytarConstants, PAGE_SIZE } from '../../constants';
-import { ext } from '../../extensionVariables';
+import { keytarConstants, PAGE_SIZE } from '../../src/constants';
+import { ext } from '../../src/extensionVariables';
+import { openExternal } from '../../src/utils/openExternal';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { NodeBase } from '../models/nodeBase';
-import { openExternal } from './openExternal';
 
 let _token: Token;
 

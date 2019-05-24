@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { treeUtils } from '../../utils/treeUtils';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { ImageNode } from './imageNode';
 import { NodeBase } from './nodeBase';
 

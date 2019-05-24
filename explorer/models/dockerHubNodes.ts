@@ -5,9 +5,9 @@
 
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants';
-import { AsyncPool } from '../../utils/asyncpool';
-import { treeUtils } from '../../utils/treeUtils';
+import { MAX_CONCURRENT_REQUESTS } from '../../src/constants';
+import { AsyncPool } from '../../src/utils/asyncpool';
+import { treeUtils } from '../../src/utils/treeUtils';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { formatTag } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';

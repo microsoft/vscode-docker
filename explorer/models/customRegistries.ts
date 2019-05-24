@@ -5,9 +5,9 @@
 
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { keytarConstants } from '../../constants'
-import { ext } from '../../extensionVariables';
-import { nonNullValue } from '../../utils/nonNull';
+import { keytarConstants } from '../../src/constants'
+import { ext } from '../../src/extensionVariables';
+import { nonNullValue } from '../../src/utils/nonNull';
 import { CustomRegistryNode } from './customRegistryNodes';
 
 interface CustomRegistryNonsensitive {

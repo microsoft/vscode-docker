@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { treeUtils } from '../../utils/treeUtils';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { NodeBase } from './nodeBase';
 
 export type ContainerNodeContextValue = 'stoppedLocalContainerNode' | 'runningLocalContainerNode';

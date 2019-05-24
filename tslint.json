@@ -30,7 +30,7 @@
             false,
             "classes"
         ],
-        "export-name": false,
+        "export-name": true,
         "function-name": false,
         "import-name": false,
         "interface-name": false,

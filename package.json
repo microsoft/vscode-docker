@@ -772,8 +772,8 @@
         "command": "vscode-docker.images.selectGroupBy",
         "title": "Group Images By...",
         "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
+          "light": "resources/SortingGrouping_16x.svg",
+          "dark": "resources/SortingGrouping_16x.svg"
         },
         "category": "Docker"
       },
@@ -956,8 +956,8 @@
         "title": "Refresh Explorer",
         "category": "Docker",
         "icon": {
-          "light": "images/light/refresh.svg",
-          "dark": "images/dark/refresh.svg"
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
         }
       },
       {
@@ -1000,8 +1000,8 @@
         "title": "System Prune",
         "category": "Docker",
         "icon": {
-          "light": "images/light/prune.svg",
-          "dark": "images/dark/prune.svg"
+          "light": "resources/light/prune.svg",
+          "dark": "resources/dark/prune.svg"
         }
       }
     ],
@@ -1017,7 +1017,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "icon": "images/docker.svg",
+          "icon": "resources/docker.svg",
           "id": "dockerView",
           "title": "Docker"
         }
