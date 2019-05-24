@@ -49,7 +49,7 @@ import { systemPrune } from './commands/systemPrune';
 import { tagImage } from './commands/tagImage';
 import { configure, configureApi } from './configureWorkspace/configure';
 import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
-import { COMPOSE_FILE_GLOB_PATTERN, configPrefix, configurationKeys } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN, configPrefix, configurationKeys, ignoreBundle } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
@@ -377,7 +377,7 @@ function activateLanguageClient(): void {
     context.telemetry.properties.isActivationEvent = 'true';
     let serverModule = ext.context.asAbsolutePath(
       path.join(
-        "dist",
+        ignoreBundle ? "node_modules" : "dist",
         "dockerfile-language-server-nodejs",
         "lib",
         "server.js"

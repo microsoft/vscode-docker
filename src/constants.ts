@@ -42,3 +42,5 @@ export const YAML_GLOB_PATTERN = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 
 //File search max ammout
 export const FILE_SEARCH_MAX_RESULT = 1000;
+
+export const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
