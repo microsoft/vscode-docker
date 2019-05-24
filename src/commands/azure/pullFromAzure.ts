@@ -15,11 +15,11 @@ import { AzureImage } from "../../utils/Azure/models/AzureImage";
 import { AzureRepository } from "../../utils/Azure/models/AzureRepository";
 import { quickPickACRImage, quickPickACRRegistry, quickPickACRRepository } from '../../utils/quick-pick-azure';
 
-export async function pullRepoFromAzure(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
+export async function pullAzureRepository(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
     await pullFromAzure(node, true);
 }
 
-export async function pullImageFromAzure(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
+export async function pullAzureImage(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
     await pullFromAzure(node, false);
 }
 

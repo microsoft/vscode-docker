@@ -16,7 +16,7 @@ import { confirmUserIntent, quickPickACRRegistry, quickPickACRRepository } from 
  * function to delete an Azure repository and its associated images
  * @param node : if called through right click on AzureRepositoryNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function deleteRepository(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
+export async function deleteAzureRepository(_context: IActionContext, node?: AzureRepositoryNode): Promise<void> {
     let registry: Registry;
     let repo: AzureRepository;
 

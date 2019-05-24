@@ -16,7 +16,7 @@ import * as quickPicks from '../../utils/quick-pick-azure';
 /** Function to untag an Azure hosted image
  * @param node : if called through right click on AzureImageNode, the node object will be passed in. See azureRegistryNodes.ts for more info
  */
-export async function untagImage(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
+export async function untagAzureImage(_context: IActionContext, node?: AzureImageTagNode): Promise<void> {
     let registry: Registry;
     let repo: AzureRepository;
     let image: AzureImage;

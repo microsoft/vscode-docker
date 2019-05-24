@@ -2,6 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Registry, RegistryNameStatus } from "azure-arm-containerregistry/lib/models";
 import { SubscriptionModels } from 'azure-arm-resource';
@@ -14,7 +15,7 @@ import { nonNullProp } from '../../utils/nonNull';
 import { quickPickLocation, quickPickResourceGroup, quickPickSKU, quickPickSubscription } from '../../utils/quick-pick-azure';
 
 /* Creates a new Azure container registry based on user input/selection of features */
-export async function createRegistry(): Promise<Registry> {
+export async function createAzureRegistry(): Promise<Registry> {
     const subscription: SubscriptionModels.Subscription = await quickPickSubscription();
     const resourceGroup: ResourceGroup = await quickPickResourceGroup(true, subscription);
     const client = await AzureUtilityManager.getInstance().getContainerRegistryManagementClient(subscription);

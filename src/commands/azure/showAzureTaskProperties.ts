@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { Registry, Task } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
@@ -6,9 +11,9 @@ import { TaskNode } from "../../../explorer/models/taskNode";
 import * as acrTools from '../../utils/Azure/acrTools';
 import { AzureUtilityManager } from "../../utils/azureUtilityManager";
 import { quickPickACRRegistry, quickPickSubscription, quickPickTask } from '../../utils/quick-pick-azure';
-import { openTask } from "./showTaskManager";
+import { openTask } from "./AzureTaskContentProvider";
 
-export async function showTaskProperties(_context: IActionContext, node?: TaskNode): Promise<void> {
+export async function showAzureTaskProperties(_context: IActionContext, node?: TaskNode): Promise<void> {
     let subscription: Subscription;
     let registry: Registry;
     let resourceGroup: ResourceGroup;

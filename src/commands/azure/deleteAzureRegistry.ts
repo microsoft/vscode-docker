@@ -17,7 +17,7 @@ import { confirmUserIntent, quickPickACRRegistry } from '../../utils/quick-pick-
 /** Delete a registry and all it's associated nested items
  * @param node : the AzureRegistryNode the user right clicked on to delete
  */
-export async function deleteRegistry(_context: IActionContext, node?: AzureRegistryNode): Promise<void> {
+export async function deleteAzureRegistry(_context: IActionContext, node?: AzureRegistryNode): Promise<void> {
     let registry: Registry;
     if (node) {
         registry = node.registry;

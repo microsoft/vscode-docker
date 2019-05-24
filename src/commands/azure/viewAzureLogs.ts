@@ -1,4 +1,7 @@
-"use strict";
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { Subscription } from "azure-arm-resource/lib/subscription/models";
@@ -14,7 +17,7 @@ import { LogData } from "./acr-log-utils/LogData";
 import { LogTableWebview } from "./acr-log-utils/LogTableWebview";
 
 /**  This command is used through a right click on an azure registry, repository or image in the Docker Explorer. It is used to view ACR logs for a given item. */
-export async function viewACRLogs(_context: IActionContext, node: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
+export async function viewAzureLogs(_context: IActionContext, node: AzureRegistryNode | AzureImageTagNode | TaskNode): Promise<void> {
     let registry: Registry;
     let subscription: Subscription;
     if (!node) {

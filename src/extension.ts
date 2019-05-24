@@ -22,17 +22,17 @@ import { NodeBase } from '../explorer/models/nodeBase';
 import { browseAzurePortal } from '../explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogin, dockerHubLogout } from '../explorer/utils/dockerHubUtils';
 import { LogContentProvider } from "./commands/azure/acr-log-utils/LogContentProvider";
-import { createRegistry } from './commands/azure/createRegistry';
-import { deleteImage } from './commands/azure/deleteImage';
-import { deleteRegistry } from './commands/azure/deleteRegistry';
-import { deleteRepository } from './commands/azure/deleteRepository';
-import { pullImageFromAzure, pullRepoFromAzure } from './commands/azure/pullFromAzure';
-import { quickBuild } from "./commands/azure/quickBuild";
-import { runTask, runTaskFile } from "./commands/azure/runTask";
-import { TaskContentProvider } from "./commands/azure/showTaskManager";
-import { showTaskProperties } from "./commands/azure/showTaskProperties";
-import { untagImage } from './commands/azure/untagImage';
-import { viewACRLogs } from "./commands/azure/viewACRLogs";
+import { AzureTaskContentProvider } from "./commands/azure/AzureTaskContentProvider";
+import { createAzureRegistry } from './commands/azure/createAzureRegistry';
+import { deleteAzureImage } from './commands/azure/deleteAzureImage';
+import { deleteAzureRegistry } from './commands/azure/deleteAzureRegistry';
+import { deleteAzureRepository } from './commands/azure/deleteAzureRepository';
+import { pullAzureImage, pullAzureRepository } from './commands/azure/pullFromAzure';
+import { runAzureQuickBuild } from "./commands/azure/runAzureQuickBuild";
+import { runAzureTask, runAzureTaskFromFile } from "./commands/azure/runAzureTask";
+import { showAzureTaskProperties } from "./commands/azure/showAzureTaskProperties";
+import { untagAzureImage } from './commands/azure/untagAzureImage';
+import { viewAzureLogs } from "./commands/azure/viewAzureLogs";
 import { buildImage } from './commands/buildImage';
 import { composeDown, composeRestart, composeUp } from './commands/compose';
 import inspectImage from './commands/inspectImage';
@@ -152,8 +152,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     );
     ctx.subscriptions.push(
       vscode.workspace.registerTextDocumentContentProvider(
-        TaskContentProvider.scheme,
-        new TaskContentProvider()
+        AzureTaskContentProvider.scheme,
+        new AzureTaskContentProvider()
       )
     );
 
@@ -264,18 +264,19 @@ function registerDockerCommands(): void {
   );
 
   registerCommand('vscode-docker.images.selectGroupBy', selectGroupImagesBy);
-  registerCommand('vscode-docker.acr.createRegistry', createRegistry);
-  registerCommand('vscode-docker.acr.deleteImage', deleteImage);
-  registerCommand('vscode-docker.acr.deleteRegistry', deleteRegistry);
-  registerCommand('vscode-docker.acr.deleteRepository', deleteRepository);
-  registerCommand('vscode-docker.acr.pullImage', pullImageFromAzure);
-  registerCommand('vscode-docker.acr.pullRepo', pullRepoFromAzure);
-  registerCommand('vscode-docker.acr.quickBuild', quickBuild);
-  registerCommand('vscode-docker.acr.runTask', runTask);
-  registerCommand("vscode-docker.acr.runTaskFile", runTaskFile);
-  registerCommand('vscode-docker.acr.showTask', showTaskProperties);
-  registerCommand('vscode-docker.acr.untagImage', untagImage);
-  registerCommand('vscode-docker.acr.viewLogs', viewACRLogs);
+
+  registerCommand('vscode-docker.acr.createRegistry', createAzureRegistry);
+  registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
+  registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
+  registerCommand('vscode-docker.acr.deleteRepository', deleteAzureRepository);
+  registerCommand('vscode-docker.acr.pullImage', pullAzureImage);
+  registerCommand('vscode-docker.acr.pullRepo', pullAzureRepository);
+  registerCommand('vscode-docker.acr.quickBuild', runAzureQuickBuild);
+  registerCommand('vscode-docker.acr.runTask', runAzureTask);
+  registerCommand("vscode-docker.acr.runTaskFile", runAzureTaskFromFile);
+  registerCommand('vscode-docker.acr.showTask', showAzureTaskProperties);
+  registerCommand('vscode-docker.acr.untagImage', untagAzureImage);
+  registerCommand('vscode-docker.acr.viewLogs', viewAzureLogs);
 
   registerCommand('vscode-docker.api.configure', configureApi);
   registerCommand('vscode-docker.browseDockerHub', browseDockerHub);

@@ -9,7 +9,7 @@ import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { Location, Subscription } from 'azure-arm-resource/lib/subscription/models';
 import * as vscode from "vscode";
 import { IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
-import { createRegistry } from '../commands/azure/createRegistry';
+import { createAzureRegistry } from '../commands/azure/createAzureRegistry';
 import { skus } from '../constants';
 import { ext } from '../extensionVariables';
 import * as acrTools from './Azure/acrTools';
@@ -59,7 +59,7 @@ export async function quickPickACRRegistry(canCreateNew: boolean = false, subscr
     });
     let registry: Registry;
     if (desiredReg === createNewItem) {
-        registry = await createRegistry();
+        registry = await createAzureRegistry();
     } else {
         registry = desiredReg.data;
     }

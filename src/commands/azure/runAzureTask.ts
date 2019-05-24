@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { Registry } from "azure-arm-containerregistry/lib/models";
 import { TaskRunRequest } from "azure-arm-containerregistry/lib/models";
 import { ResourceGroup } from "azure-arm-resource/lib/resource/models";
@@ -12,11 +17,11 @@ import { scheduleRunRequest } from '../../utils/scheduleRunRequest';
 
 // Runs the selected yaml file. Equivalent to az acr run -f <yaml file> <directory>
 // Selected source code must contain a path to the desired dockerfile.
-export async function runTaskFile(context: IActionContext, yamlFileUri?: vscode.Uri): Promise<void> {
+export async function runAzureTaskFromFile(context: IActionContext, yamlFileUri?: vscode.Uri): Promise<void> {
     await scheduleRunRequest(yamlFileUri, "FileTaskRunRequest", context);
 }
 
-export async function runTask(_context: IActionContext, node?: TaskNode): Promise<void> {
+export async function runAzureTask(_context: IActionContext, node?: TaskNode): Promise<void> {
     let taskName: string;
     let subscription: Subscription;
     let resourceGroup: ResourceGroup;
