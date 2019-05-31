@@ -11,12 +11,31 @@
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"env": {
+				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
 				"DEBUGTELEMETRY": "1"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/../dist/**/*.js"
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"preLaunchTask": "npm: compile"
+		},
+		{
+			"name": "Launch Extension (webpack)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"env": {
+				"DEBUGTELEMETRY": "1"
+			},
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
 			],
 			"preLaunchTask": "npm: pretest"
 		},
@@ -28,10 +47,37 @@
 			"args": [
 				"${workspaceFolder}/test/test.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"preLaunchTask": "npm: compile",
+			"env": {
+				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
+				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
+				"MOCHA_enableTimeouts": "0", // Disable time-outs
+				"DEBUGTELEMETRY": "1",
+				"NODE_DEBUG": ""
+			}
+		},
+		{
+			"name": "Launch Tests (webpack)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"${workspaceFolder}/test/test.code-workspace",
+				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/dist/test"
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
 			"preLaunchTask": "npm: pretest",
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)

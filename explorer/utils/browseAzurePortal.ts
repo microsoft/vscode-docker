@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as opn from 'opn';
+import { IActionContext } from 'vscode-azureextensionui';
+import { getTenantId, nonNullValue } from '../../src/utils/nonNull';
+import { openExternal } from '../../src/utils/openExternal';
 import { AzureSession } from '../../typings/azure-account.api';
-import { getTenantId, nonNullValue } from '../../utils/nonNull';
 import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from '../models/azureRegistryNodes';
 
-export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
+export function browseAzurePortal(_context: IActionContext, node?: AzureRegistryNode | AzureRepositoryNode | AzureImageTagNode): void {
     if (node && node.azureAccount) {
         const tenantId: string = getTenantId(node.subscription);
         const session: AzureSession = nonNullValue(
@@ -18,7 +19,7 @@ export function browseAzurePortal(node?: AzureRegistryNode | AzureRepositoryNode
         if (node.contextValue === AzureImageTagNode.contextValue || node.contextValue === AzureRepositoryNode.contextValue) {
             url = `${url}/repository`;
         }
-        // tslint:disable-next-line:no-unsafe-any
-        opn(url);
+        // tslint:disable-next-line:no-floating-promises
+        openExternal(url);
     }
 }

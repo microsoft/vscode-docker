@@ -12,3 +12,6 @@ testOutput
 test-results.xml
 dist
 stats.json
+
+# Artifacts from running npm install
+**/npm-debug.log

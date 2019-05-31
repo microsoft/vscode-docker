@@ -5,9 +5,9 @@
 
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { keytarConstants } from '../../constants'
-import { ext } from '../../extensionVariables';
-import { nonNullValue } from '../../utils/nonNull';
+import { keytarConstants } from '../../src/constants'
+import { ext } from '../../src/extensionVariables';
+import { nonNullValue } from '../../src/utils/nonNull';
 import { CustomRegistryNode } from './customRegistryNodes';
 
 interface CustomRegistryNonsensitive {
@@ -87,7 +87,7 @@ export async function connectCustomRegistry(): Promise<void> {
     await refresh();
 }
 
-export async function disconnectCustomRegistry(node: CustomRegistryNode): Promise<void> {
+export async function disconnectCustomRegistry(_context: IActionContext, node: CustomRegistryNode): Promise<void> {
     let registries = await getCustomRegistries();
     let registry = registries.find(reg => reg.url.toLowerCase() === node.registry.url.toLowerCase());
 
@@ -111,8 +111,8 @@ export async function getCustomRegistries(): Promise<CustomRegistry[]> {
     let registries: CustomRegistry[] = [];
 
     for (let reg of nonsensitive) {
-        await callWithTelemetryAndErrorHandling('getCustomRegistryUsernamePwd', async function (this: IActionContext): Promise<void> {
-            this.suppressTelemetry = true;
+        await callWithTelemetryAndErrorHandling('getCustomRegistryUsernamePwd', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
 
             try {
                 if (ext.keytar) {

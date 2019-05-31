@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as opn from 'opn';
-import { MessageItem } from "vscode";
 import * as vscode from 'vscode';
+import { MessageItem } from "vscode";
 import { IActionContext, parseError } from "vscode-azureextensionui";
-import { isLinux } from "../../helpers/osVersion";
-import { wrapError } from "../../utils/wrapError";
+import { openExternal } from '../../src/utils/openExternal';
+import { isLinux } from "../../src/utils/osVersion";
+import { wrapError } from "../../src/utils/wrapError";
 
 const connectionMessage = 'Unable to connect to Docker. Please make sure you have installed Docker and that it is running.';
 
@@ -20,7 +20,7 @@ export namespace internal {
 }
 
 // tslint:disable-next-line:no-any
-export function showDockerConnectionError(actionContext: IActionContext, error: any): Error {
+export function showDockerConnectionError(context: IActionContext, error: any): Error {
     let message = connectionMessage;
     let items: (MessageItem & { url: string })[] = [];
 
@@ -34,11 +34,11 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
     let wrappedError = wrapError(error, message);
 
     // Don't wait
-    actionContext.suppressErrorDisplay = true;
+    context.errorHandling.suppressDisplay = true;
     vscode.window.showErrorMessage(parseError(wrappedError).message, ...items).then(response => {
         if (response) {
-            // tslint:disable-next-line:no-unsafe-any
-            opn(response.url);
+            // tslint:disable-next-line:no-floating-promises
+            openExternal(response.url);
         }
     });
 
@@ -46,6 +46,6 @@ export function showDockerConnectionError(actionContext: IActionContext, error: 
 }
 
 // tslint:disable-next-line:no-any no-unsafe-any
-export function throwDockerConnectionError(actionContext: IActionContext, error: any): never {
-    throw showDockerConnectionError(actionContext, error);
+export function throwDockerConnectionError(context: IActionContext, error: any): never {
+    throw showDockerConnectionError(context, error);
 }

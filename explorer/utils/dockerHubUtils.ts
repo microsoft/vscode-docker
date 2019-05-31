@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as opn from 'opn';
 import * as vscode from 'vscode';
-import { keytarConstants, PAGE_SIZE } from '../../constants';
-import { ext } from '../../extensionVariables';
+import { IActionContext } from 'vscode-azureextensionui';
+import { keytarConstants, PAGE_SIZE } from '../../src/constants';
+import { ext } from '../../src/extensionVariables';
+import { openExternal } from '../../src/utils/openExternal';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { NodeBase } from '../models/nodeBase';
 
@@ -153,8 +154,6 @@ export function setDockerHubToken(token: string): void {
 }
 
 async function login(username: string, password: string): Promise<Token> {
-    let t: Token;
-
     let options = {
         method: 'POST',
         uri: 'https://hub.docker.com/v2/users/login',
@@ -261,7 +260,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     return tagsPage.results;
 }
 
-export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): void {
+export async function browseDockerHub(_context: IActionContext, node?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode): Promise<void> {
     if (node) {
         let url: string = 'https://hub.docker.com/';
         if (node instanceof DockerHubOrgNode) {
@@ -274,7 +273,6 @@ export function browseDockerHub(node?: DockerHubImageTagNode | DockerHubReposito
             assert(false, `browseDockerHub: Unexpected node type, contextValue=${(<NodeBase>node).contextValue}`)
         }
 
-        // tslint:disable-next-line:no-unsafe-any
-        opn(url);
+        await openExternal(url);
     }
 }

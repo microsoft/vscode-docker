@@ -5,13 +5,11 @@
 
 import { SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import { ServiceClientCredentials } from 'ms-rest';
-import { AzureEnvironment } from 'ms-rest-azure';
-import { Disposable, Extension, ExtensionContext, extensions } from 'vscode';
+import { Disposable, ExtensionContext } from 'vscode';
 import { AzureAccount, AzureLoginStatus, AzureSession } from '../../typings/azure-account.api';
 
 import { Subscription } from 'azure-arm-resource/lib/subscription/models';
-import { getSubscriptionId, getTenantId, nonNullValue } from '../../utils/nonNull';
-import * as util from './util';
+import { getSubscriptionId, getTenantId } from '../../src/utils/nonNull';
 
 export class NotSignedInError extends Error { }
 
@@ -34,7 +32,7 @@ export class AzureAccountWrapper {
 
     public getCredentialByTenantId(tenantIdOrSubscription: string | Subscription): ServiceClientCredentials {
         let tenantId = typeof tenantIdOrSubscription === 'string' ? tenantIdOrSubscription : getTenantId(tenantIdOrSubscription);
-        const session = this.getAzureSessions().find((s, i, array) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
+        const session = this.getAzureSessions().find((s) => s.tenantId.toLowerCase() === tenantId.toLowerCase());
 
         if (session) {
             return session.credentials;

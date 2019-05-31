@@ -230,6 +230,7 @@ Customize the Docker container run process by adding properties under the `docke
 | `extraHosts` | Hosts to be added to the container's `hosts` file for DNS resolution. | None |
 | `labels` | The set of labels added to the container. | `com.microsoft.created-by` = `visual-studio-code` |
 | `network` | The network to which the container will be connected. Use values as described in the [Docker run documentation](https://docs.docker.com/engine/reference/run/#network-settings). | `bridge` |
+| `networkAlias` | The network-scoped alias to assign to the container. | None |
 | `ports` | Ports that are going to be mapped on the host. | All ports exposed by the Dockerfile will be bound to a random port on the host machine |
 | `volumes` | Volumes that are going to be mapped to the container. | None |
 
@@ -271,6 +272,7 @@ Example run customization:
                     "label2": "value2"
                 },
                 "network": "host",
+                "networkAlias": "mycontainer",
                 "ports": [
                     {
                         "hostPort": 80,
@@ -359,6 +361,16 @@ By default, Docker runs as the root user, requiring other users to access it wit
 The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host or if you set the `docker.host` configuration setting.
 
 If the docker daemon is using TLS, the DOCKER_CERT_PATH environment variable must also be set (e.g. `$HOME\.docker\machine\machines\default`). See [docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
+
+## Workaround for VS Code remote development
+
+If you are running the extension via VS Code remote development, you will have to configure the remote instance (WSL, SSH machine, dev container) to run docker commands smoothly (like `docker run hello world`). First, install docker-cli in the remote instance.
+
+In Windows subsystem for linux (WSL), you have to set the `DOCKER_HOST` environment variable in linux to connect to Docker for Windows. See [here](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) for more detailed instructions.
+
+In SSH, the setup for docker is dependent on the machine environment.
+
+There can be issues running the docker daemon from _inside the dev container_ (also called docker-in-docker). On the first build of the container, you might encounter an error about connecting to Docker. Follow [these docker-in-docker instructions](https://github.com/Microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) to set up your dev container docker daemon, and the extension experience will mirror working on a local workspace.
 
 ## Contributing
 

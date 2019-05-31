@@ -1,14 +1,18 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as opn from 'opn';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { imagesPath } from '../../constants';
+import * as acrTools from '../../src/utils/Azure/acrTools';
+import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
+import { openExternal } from '../../src/utils/openExternal';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { AzureAccount } from '../../typings/azure-account.api';
-import * as acrTools from '../../utils/Azure/acrTools';
-import { AzureUtilityManager } from '../../utils/azureUtilityManager';
 import { NodeBase } from './nodeBase';
 
 /* Single TaskRootNode under each Repository. Labeled "Tasks" */
@@ -28,10 +32,7 @@ export class TaskRootNode extends NodeBase {
 
     public readonly contextValue: string = 'taskRootNode';
     public name: string;
-    public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'tasks_light.svg'),
-        dark: path.join(imagesPath, 'dark', 'tasks_dark.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('tasks');
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -44,9 +45,9 @@ export class TaskRootNode extends NodeBase {
 
     /* Making a list view of TaskNodes, or the Tasks of the current registry */
     public async getChildren(element: TaskRootNode): Promise<TaskNode[]> {
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<TaskNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'taskRootNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'taskRootNode';
 
             const taskNodes: TaskNode[] = [];
             let tasks: ContainerModels.Task[] = [];
@@ -55,12 +56,15 @@ export class TaskRootNode extends NodeBase {
             tasks = await client.tasks.list(resourceGroup, element.registry.name);
             if (tasks.length === 0) {
                 const learnHow: vscode.MessageItem = { title: "Learn How to Create Build Tasks" };
-                vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow).then(val => {
-                    if (val === learnHow) {
-                        // tslint:disable-next-line:no-unsafe-any
-                        opn('https://aka.ms/acr/task');
-                    }
-                })
+                vscode.window.showInformationMessage(`You do not have any Tasks in the registry '${element.registry.name}'.`, learnHow)
+                    .then(response => {
+                        if (response === learnHow) {
+                            //don't wait for openExternal to finish. Intentional
+                            // tslint:disable-next-line: no-floating-promises
+                            openExternal('https://aka.ms/acr/task');
+                        }
+                    });
+
             }
 
             for (let task of tasks) {

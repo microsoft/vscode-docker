@@ -142,13 +142,13 @@ let config = dev.getDefaultWebpackConfig({
         // Replace vscode-languageserver/lib/files.js with a modified version that doesn't have webpack issues
         new webpack.NormalModuleReplacementPlugin(
             /[/\\]vscode-languageserver[/\\]lib[/\\]files\.js/,
-            require.resolve('./build/vscode-languageserver-files-stub.js')
+            require.resolve('./resources/vscode-languageserver-files-stub.js')
         ),
 
         // Copy files to dist folder where the runtime can find them
         new CopyWebpackPlugin([
             // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
-            { from: './utils/getCoreNodeModule.js', to: 'node_modules' }
+            { from: './out/src/utils/getCoreNodeModule.js', to: 'node_modules' }
         ])
     ]
 });

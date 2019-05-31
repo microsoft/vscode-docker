@@ -6,7 +6,7 @@
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as WebSiteModels from 'azure-arm-website/lib/models';
 import WebSiteManagementClient from 'azure-arm-website/lib/webSiteManagementClient';
-import { getSubscriptionId, getTenantId, nonNullProp, nonNullValue } from '../../utils/nonNull';
+import { getSubscriptionId, nonNullProp } from '../../src/utils/nonNull';
 import { AzureAccountWrapper } from './azureAccountWrapper';
 
 export interface PartialList<T> extends Array<T> {

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { imagesPath, MAX_CONCURRENT_REQUESTS } from '../../constants';
-import { AsyncPool } from '../../utils/asyncpool';
+import { MAX_CONCURRENT_REQUESTS } from '../../src/constants';
+import { AsyncPool } from '../../src/utils/asyncpool';
+import { treeUtils } from '../../src/utils/treeUtils';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { formatTag } from './commonRegistryUtils';
 import { NodeBase } from './nodeBase';
@@ -30,10 +30,7 @@ export class DockerHubOrgNode extends NodeBase {
     public readonly contextValue: string = DockerHubOrgNode.contextValue;
     public readonly label: string = this.namespace;
 
-    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Registry_16x');
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -45,11 +42,9 @@ export class DockerHubOrgNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubOrgNode): Promise<DockerHubRepositoryNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubRepositoryNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'dockerHubOrgNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'dockerHubOrgNode';
 
             const repoNodes: DockerHubRepositoryNode[] = [];
             let node: DockerHubRepositoryNode;
@@ -86,10 +81,7 @@ export class DockerHubRepositoryNode extends NodeBase {
     public static readonly contextValue: string = 'dockerHubRepositoryNode';
     public readonly contextValue: string = DockerHubRepositoryNode.contextValue;
 
-    public iconPath: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Repository_16x');
     public repository: dockerHub.RepositoryInfo;
     public userName: string;
     public password: string;
@@ -104,11 +96,9 @@ export class DockerHubRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: DockerHubRepositoryNode): Promise<DockerHubImageTagNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<DockerHubImageTagNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'dockerHubRepositoryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'dockerHubRepositoryNode';
 
             const imageNodes: DockerHubImageTagNode[] = [];
             let node: DockerHubImageTagNode;

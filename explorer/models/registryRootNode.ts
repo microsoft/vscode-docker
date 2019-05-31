@@ -8,12 +8,12 @@ import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../constants';
-import { ext } from '../../extensionVariables';
+import { keytarConstants, MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../src/constants';
+import { ext } from '../../src/extensionVariables';
+import { AsyncPool } from '../../src/utils/asyncpool';
+import { AzureUtilityManager } from '../../src/utils/azureUtilityManager';
+import { getLoginServer } from '../../src/utils/nonNull';
 import { AzureAccount } from '../../typings/azure-account.api';
-import { AsyncPool } from '../../utils/asyncpool';
-import { AzureUtilityManager } from '../../utils/azureUtilityManager';
-import { getLoginServer } from '../../utils/nonNull';
 import * as dockerHub from '../utils/dockerHubUtils';
 import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
 import { getCustomRegistries } from './customRegistries';
@@ -56,19 +56,17 @@ export class RegistryRootNode extends NodeBase {
     }
 
     public async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'registryRootNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'registryRootNode';
 
             if (element.contextValue === 'azureRegistryRootNode') {
-                return me.getAzureRegistries();
+                return this.getAzureRegistries();
             } else if (element.contextValue === 'dockerHubRootNode') {
-                return me.getDockerHubOrgs();
+                return this.getDockerHubOrgs();
             } else {
                 assert(element.contextValue === 'customRootNode');
-                return await me.getCustomRegistryNodes();
+                return await this.getCustomRegistryNodes();
             }
         });
     }

@@ -5,17 +5,16 @@
 
 import * as ContainerModels from 'azure-arm-containerregistry/lib/models';
 import { SubscriptionModels } from 'azure-arm-resource';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { imagesPath } from '../../constants';
+import { getImagesByRepository, getRepositoriesByRegistry } from '../../src/utils/Azure/acrTools';
+import { AzureImage } from '../../src/utils/Azure/models/AzureImage';
+import { AzureRepository } from '../../src/utils/Azure/models/AzureRepository';
+import { getLoginServer } from '../../src/utils/nonNull';
+import { treeUtils } from '../../src/utils/treeUtils';
 import { AzureAccount } from '../../typings/azure-account.api';
-import { getImagesByRepository, getRepositoriesByRegistry } from '../../utils/Azure/acrTools';
-import { AzureImage } from '../../utils/Azure/models/image';
-import { Repository } from '../../utils/Azure/models/repository';
-import { getLoginServer } from '../../utils/nonNull';
 import { formatTag } from './commonRegistryUtils';
-import { IconPath, NodeBase } from './nodeBase';
+import { NodeBase } from './nodeBase';
 import { TaskRootNode } from './taskNode';
 
 export class AzureRegistryNode extends NodeBase {
@@ -29,10 +28,7 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public readonly contextValue: string = 'azureRegistryNode';
-    public readonly iconPath: IconPath = {
-        light: path.join(imagesPath, 'light', 'Registry_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Registry_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Registry_16x');
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -44,11 +40,9 @@ export class AzureRegistryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRegistryNode): Promise<NodeBase[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'azureRegistryNodes';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'azureRegistryNodes';
 
             const repoNodes: NodeBase[] = [];
 
@@ -56,16 +50,16 @@ export class AzureRegistryNode extends NodeBase {
             let taskNode = new TaskRootNode("Tasks", element.azureAccount, element.subscription, element.registry);
             repoNodes.push(taskNode);
 
-            if (!me.azureAccount) {
+            if (!this.azureAccount) {
                 return [];
             }
 
-            const repositories: Repository[] = await getRepositoriesByRegistry(element.registry);
+            const repositories: AzureRepository[] = await getRepositoriesByRegistry(element.registry);
             for (let repository of repositories) {
                 let node = new AzureRepositoryNode(
                     repository.name,
                     element,
-                    me.azureAccount,
+                    this.azureAccount,
                     element.subscription,
                     element.registry,
                     element.label);
@@ -91,10 +85,7 @@ export class AzureRepositoryNode extends NodeBase {
 
     public static readonly contextValue: string = 'azureRepositoryNode';
     public readonly contextValue: string = AzureRepositoryNode.contextValue;
-    public readonly iconPath: { light: string | vscode.Uri; dark: string | vscode.Uri } = {
-        light: path.join(imagesPath, 'light', 'Repository_16x.svg'),
-        dark: path.join(imagesPath, 'dark', 'Repository_16x.svg')
-    };
+    public readonly iconPath: treeUtils.IThemedIconPath = treeUtils.getThemedIconPath('Repository_16x');
 
     public getTreeItem(): vscode.TreeItem {
         return {
@@ -106,15 +97,13 @@ export class AzureRepositoryNode extends NodeBase {
     }
 
     public async getChildren(element: AzureRepositoryNode): Promise<AzureImageTagNode[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<AzureImageTagNode[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'azureRepositoryNode';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'azureRepositoryNode';
 
             const imageNodes: AzureImageTagNode[] = [];
             let node: AzureImageTagNode;
-            let repo = await Repository.Create(element.registry, element.label);
+            let repo = await AzureRepository.Create(element.registry, element.label);
             let images: AzureImage[] = await getImagesByRepository(repo);
             for (let img of images) {
                 node = new AzureImageTagNode(
@@ -166,7 +155,7 @@ export class AzureImageTagNode extends NodeBase {
 
 export class AzureNotSignedInNode extends NodeBase {
     constructor() {
-        super('Sign in to Azure...');
+        super('Sign In to Azure...');
     }
 
     public readonly contextValue: string = 'azureNotSignedInNode';

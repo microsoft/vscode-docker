@@ -43,14 +43,12 @@ export class DockerExplorerProvider implements vscode.TreeDataProvider<NodeBase>
     }
 
     public async getChildren(element?: NodeBase): Promise<NodeBase[]> {
-        // tslint:disable-next-line:no-this-assignment
-        let me = this;
-        return await callWithTelemetryAndErrorHandling('getChildren', async function (this: IActionContext): Promise<NodeBase[]> {
-            this.suppressTelemetry = true;
-            this.properties.source = 'dockerExplorer';
+        return await callWithTelemetryAndErrorHandling('getChildren', async (context: IActionContext) => {
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.source = 'dockerExplorer';
 
             if (!element) {
-                return me.getRootNodes();
+                return this.getRootNodes();
             }
             return element.getChildren(element);
         });

@@ -13,7 +13,7 @@
         "noImplicitAny": false, // TODO
         "noImplicitReturns": false, // TODO
         "noImplicitThis": true,
-        "noUnusedLocals": false, // TODO
+        "noUnusedLocals": true,
         "noUnusedParameters": false, // TODO
         "strictNullChecks": false, // TODO
         "strict": true

@@ -1,6 +1,6 @@
 {
   "name": "vscode-docker",
-  "version": "0.6.2-alpha",
+  "version": "0.6.3-alpha",
   "preview": true,
   "publisher": "PeterJausovec",
   "displayName": "Docker",
@@ -452,6 +452,10 @@
                     "type": "string",
                     "description": "The network to which the container will be connected."
                   },
+                  "networkAlias": {
+                    "type": "string",
+                    "description": "The network-scoped alias to assign to the container."
+                  },
                   "ports": {
                     "type": "array",
                     "description": "Ports that are going to be mapped on the host.",
@@ -768,8 +772,8 @@
         "command": "vscode-docker.images.selectGroupBy",
         "title": "Group Images By...",
         "icon": {
-          "light": "images/SortingGrouping_16x.svg",
-          "dark": "images/SortingGrouping_16x.svg"
+          "light": "resources/SortingGrouping_16x.svg",
+          "dark": "resources/SortingGrouping_16x.svg"
         },
         "category": "Docker"
       },
@@ -952,8 +956,8 @@
         "title": "Refresh Explorer",
         "category": "Docker",
         "icon": {
-          "light": "images/light/refresh.svg",
-          "dark": "images/dark/refresh.svg"
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
         }
       },
       {
@@ -996,8 +1000,8 @@
         "title": "System Prune",
         "category": "Docker",
         "icon": {
-          "light": "images/light/prune.svg",
-          "dark": "images/dark/prune.svg"
+          "light": "resources/light/prune.svg",
+          "dark": "resources/dark/prune.svg"
         }
       }
     ],
@@ -1013,7 +1017,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "icon": "images/docker.svg",
+          "icon": "resources/docker.svg",
           "id": "dockerView",
           "title": "Docker"
         }
@@ -1021,7 +1025,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.31.1"
+    "vscode": "^1.31.0"
   },
   "scripts": {
     "vscode:prepublish": "npm run webpack-prod",
@@ -1068,7 +1072,7 @@
     "typescript": "^3.3.4000",
     "umd-compat-loader": "^2.1.1",
     "vsce": "^1.59.0",
-    "vscode": "^1.1.31",
+    "vscode": "^1.1.34",
     "vscode-azureextensiondev": "^0.1.8",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
@@ -1079,7 +1083,6 @@
     "azure-arm-resource": "^2.0.0-preview",
     "azure-arm-website": "^5.0.0",
     "azure-storage": "^2.8.1",
-    "clipboardy": "^1.2.3",
     "deep-equal": "^1.0.1",
     "dockerfile-language-server-nodejs": "^0.0.20",
     "dockerode": "^2.5.8",
@@ -1095,7 +1098,7 @@
     "request-promise-native": "^1.0.5",
     "semver": "^6.0.0",
     "tar": "^4.4.6",
-    "vscode-azureextensionui": "^0.20.4",
+    "vscode-azureextensionui": "^0.25.0",
     "vscode-languageclient": "^5.1.1",
     "win-ca": "^2.4.1",
     "xml2js": "^0.4.19"

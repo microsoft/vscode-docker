@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IconPath, NodeBase } from './nodeBase';
+import { treeUtils } from '../../src/utils/treeUtils';
+import { NodeBase } from './nodeBase';
 
 export type ContainerNodeContextValue = 'stoppedLocalContainerNode' | 'runningLocalContainerNode';
 
@@ -14,7 +15,7 @@ export class ContainerNode extends NodeBase {
         public readonly label: string,
         public readonly containerDesc: Docker.ContainerDesc,
         public readonly contextValue: ContainerNodeContextValue,
-        public readonly iconPath: IconPath
+        public readonly iconPath: treeUtils.IThemedIconPath
     ) {
         super(label)
     }
