@@ -54,7 +54,10 @@ export async function deployImageToAzure(context: IActionContext, node?: TagTree
     await wizard.execute();
 
     const site = nonNullProp(wizardContext, 'site');
-    window.showInformationMessage(`https://${site.defaultHostName}`);
+    const createdNewWebApp: string = `Successfully created web app "${site.name}": https://${site.defaultHostName}`;
+    ext.outputChannel.appendLine(createdNewWebApp);
+    // don't wait
+    window.showInformationMessage(createdNewWebApp);
 }
 
 async function getNewSiteConfig(node: TagTreeItemBase): Promise<SiteConfig> {
@@ -73,7 +76,7 @@ async function getNewSiteConfig(node: TagTreeItemBase): Promise<SiteConfig> {
             throw new Error("Failed to get credentials for Docker Hub.");
         }
     } else {
-        imagePath = registryTI.baseUrl;
+        imagePath = registryTI.host;
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
 
         if (registryTI instanceof AzureRegistryTreeItem) {
@@ -120,7 +123,7 @@ class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardConte
     }
 
     public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const creatingNewApp: string = `Creating new web app "${context.newSiteName}"...`;
+        const creatingNewApp: string = `Creating web app "${context.newSiteName}"...`;
         ext.outputChannel.appendLine(creatingNewApp);
         progress.report({ message: creatingNewApp });
 

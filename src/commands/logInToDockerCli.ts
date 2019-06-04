@@ -21,13 +21,14 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
 
     let username: string | undefined;
     let password: string | undefined;
-    let url: string | undefined;
+    let url: string;
 
     if (node instanceof DockerHubRegistryTreeItem) {
         node = node.parent;
     }
 
     if (node instanceof DockerHubAccountTreeItem) {
+        url = '';
         username = node.username;
         password = node.password;
 
