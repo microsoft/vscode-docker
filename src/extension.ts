@@ -7,46 +7,49 @@ import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CoreOptions } from 'request';
-import { RequestPromise } from 'request-promise-native';
 import * as request from 'request-promise-native';
+import { RequestPromise } from 'request-promise-native';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
-import { AzureAccountWrapper } from '../explorer/deploy/azureAccountWrapper';
-import { WebAppCreator } from '../explorer/deploy/webAppCreator';
-import { DockerExplorerProvider } from '../explorer/dockerExplorerProvider';
-import { AzureImageTagNode } from '../explorer/models/azureRegistryNodes';
-import { connectCustomRegistry, disconnectCustomRegistry } from '../explorer/models/customRegistries';
-import { DockerHubImageTagNode } from '../explorer/models/dockerHubNodes';
-import { NodeBase } from '../explorer/models/nodeBase';
-import { browseAzurePortal } from '../explorer/utils/browseAzurePortal';
-import { browseDockerHub, dockerHubLogin, dockerHubLogout } from '../explorer/utils/dockerHubUtils';
-import { LogContentProvider } from "./commands/azure/acr-log-utils/LogContentProvider";
-import { AzureTaskContentProvider } from "./commands/azure/AzureTaskContentProvider";
+import { attachShellContainer } from './commands/attachShellContainer';
 import { createAzureRegistry } from './commands/azure/createAzureRegistry';
-import { deleteAzureImage } from './commands/azure/deleteAzureImage';
 import { deleteAzureRegistry } from './commands/azure/deleteAzureRegistry';
 import { deleteAzureRepository } from './commands/azure/deleteAzureRepository';
-import { pullAzureImage, pullAzureRepository } from './commands/azure/pullFromAzure';
-import { runAzureQuickBuild } from "./commands/azure/runAzureQuickBuild";
-import { runAzureTask, runAzureTaskFromFile } from "./commands/azure/runAzureTask";
-import { showAzureTaskProperties } from "./commands/azure/showAzureTaskProperties";
+import { deployImageToAzure } from './commands/azure/deployImageToAzure';
+import { openInAzurePortal } from './commands/azure/openInAzurePortal';
+import { buildImageInAzure } from "./commands/azure/tasks/buildImageInAzure";
+import { runAzureTask } from "./commands/azure/tasks/runAzureTask";
+import { runFileAsAzureTask } from './commands/azure/tasks/runFileAsAzureTask';
+import { viewAzureTaskLogs } from "./commands/azure/tasks/viewAzureTaskLogs";
 import { untagAzureImage } from './commands/azure/untagAzureImage';
-import { viewAzureLogs } from "./commands/azure/viewAzureLogs";
+import { viewAzureProperties } from "./commands/azure/viewAzureProperties";
 import { buildImage } from './commands/buildImage';
 import { composeDown, composeRestart, composeUp } from './commands/compose';
-import inspectImage from './commands/inspectImage';
-import { openShellContainer } from './commands/openShellContainer';
+import { copyImageDigest } from './commands/copyImageDigest';
+import { deleteImage } from './commands/deleteImage';
+import { openDockerHubInBrowser } from './commands/dockerHub/openDockerHubInBrowser';
+import { inspectImage } from './commands/inspectImage';
+import { logInToDockerCli } from './commands/logInToDockerCli';
+import { logOutOfDockerCli } from './commands/logOutOfDockerCli';
+import { connectPrivateRegistry } from './commands/private/connectPrivateRegistry';
+import { disconnectPrivateRegistry } from './commands/private/disconnectPrivateRegistry';
+import { pruneContainers } from './commands/pruneContainers';
+import { pruneImages } from './commands/pruneImages';
+import { pullImage, pullRepository } from './commands/pullImages';
 import { pushImage } from './commands/pushImage';
 import { consolidateDefaultRegistrySettings, setRegistryAsDefault } from './commands/registrySettings';
 import { removeContainer } from './commands/removeContainer';
 import { removeImage } from './commands/removeImage';
 import { restartContainer } from './commands/restartContainer';
-import { showLogsContainer } from './commands/showLogsContainer';
-import { startAzureCLI, startContainer, startContainerInteractive } from './commands/startContainer';
+import { runAzureCliImage } from './commands/runAzureCliImage';
+import { runImage, runImageInteractive } from './commands/runImage';
+import { startContainer } from './commands/startContainer';
 import { stopContainer } from './commands/stopContainer';
 import { systemPrune } from './commands/systemPrune';
 import { tagImage } from './commands/tagImage';
+import { viewContainerLogs } from './commands/viewContainerLogs';
 import { configure, configureApi } from './configureWorkspace/configure';
 import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
 import { COMPOSE_FILE_GLOB_PATTERN, configPrefix, configurationKeys, ignoreBundle } from './constants';
@@ -56,10 +59,9 @@ import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverPr
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
-import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './dockerInspect';
 import { DefaultImageGrouping, ext, ImageGrouping } from './extensionVariables';
+import { initTrees } from './tree/initTrees';
 import { addUserAgent } from './utils/addUserAgent';
-import { AzureUtilityManager } from './utils/azureUtilityManager';
 import { docker } from './utils/docker-endpoint';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
@@ -99,6 +101,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
   }
 
   registerUIExtensionVariables(ext);
+  registerAppServiceExtensionVariables(ext);
 }
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
@@ -138,25 +141,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
       )
     );
 
-    ctx.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        DOCKER_INSPECT_SCHEME,
-        new DockerInspectDocumentContentProvider()
-      )
-    );
-    ctx.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        LogContentProvider.scheme,
-        new LogContentProvider()
-      )
-    );
-    ctx.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        AzureTaskContentProvider.scheme,
-        new AzureTaskContentProvider()
-      )
-    );
-
+    initTrees();
     registerDockerCommands();
 
     ctx.subscriptions.push(
@@ -170,13 +155,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
     await consolidateDefaultRegistrySettings();
     activateLanguageClient();
-
-    // Start loading the Azure account after we're completely done activating.
-    setTimeout(
-      // Do not wait
-      // tslint:disable-next-line:promise-function-async
-      () => AzureUtilityManager.getInstance().tryGetAzureAccount(),
-      1);
   });
 }
 
@@ -213,104 +191,60 @@ async function setRequestDefaults(): Promise<void> {
   ext.request = requestWithDefaults;
 }
 
-async function createWebApp(_context: IActionContext, node?: AzureImageTagNode | DockerHubImageTagNode): Promise<void> {
-  assert(!!node, "Should not be available through command palette");
-
-  let azureAccount = await AzureUtilityManager.getInstance().requireAzureAccount();
-  const azureAccountWrapper = new AzureAccountWrapper(ext.context, azureAccount);
-  const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, node);
-  const result = await wizard.run();
-  if (result.status === 'Faulted') {
-    throw result.error;
-  } else if (result.status === 'Cancelled') {
-    throw new UserCancelledError();
-  }
-}
-
-// Remove this when https://github.com/Microsoft/vscode-docker/issues/445 fixed
-function registerCommand(
-  commandId: string,
-  // tslint:disable-next-line: no-any
-  callback: (context: IActionContext, ...args: any[]) => any
-): void {
-  return uiRegisterCommand(
-    commandId,
-    // tslint:disable-next-line: no-any
-    async (context: IActionContext, ...args: any[]) => {
-      if (args.length) {
-        let properties: {
-          contextValue?: string;
-        } & TelemetryProperties = context.telemetry.properties;
-        const contextArg = args[0];
-
-        if (contextArg instanceof NodeBase) {
-          properties.contextValue = contextArg.contextValue;
-        } else if (contextArg instanceof vscode.Uri) {
-          properties.contextValue = "Uri";
-        }
-      }
-
-      return callback(context, ...args);
-    }
-  );
-}
-
-// tslint:disable-next-line:max-func-body-length
 function registerDockerCommands(): void {
-  ext.dockerExplorerProvider = new DockerExplorerProvider();
-  vscode.window.registerTreeDataProvider(
-    'dockerExplorer',
-    ext.dockerExplorerProvider
-  );
-
-  registerCommand('vscode-docker.images.selectGroupBy', selectGroupImagesBy);
-
-  registerCommand('vscode-docker.acr.createRegistry', createAzureRegistry);
-  registerCommand('vscode-docker.acr.deleteImage', deleteAzureImage);
-  registerCommand('vscode-docker.acr.deleteRegistry', deleteAzureRegistry);
-  registerCommand('vscode-docker.acr.deleteRepository', deleteAzureRepository);
-  registerCommand('vscode-docker.acr.pullImage', pullAzureImage);
-  registerCommand('vscode-docker.acr.pullRepo', pullAzureRepository);
-  registerCommand('vscode-docker.acr.quickBuild', runAzureQuickBuild);
-  registerCommand('vscode-docker.acr.runTask', runAzureTask);
-  registerCommand("vscode-docker.acr.runTaskFile", runAzureTaskFromFile);
-  registerCommand('vscode-docker.acr.showTask', showAzureTaskProperties);
-  registerCommand('vscode-docker.acr.untagImage', untagAzureImage);
-  registerCommand('vscode-docker.acr.viewLogs', viewAzureLogs);
-
   registerCommand('vscode-docker.api.configure', configureApi);
-  registerCommand('vscode-docker.browseDockerHub', browseDockerHub);
-  registerCommand('vscode-docker.browseAzurePortal', browseAzurePortal);
-
   registerCommand('vscode-docker.compose.down', composeDown);
   registerCommand('vscode-docker.compose.restart', composeRestart);
   registerCommand('vscode-docker.compose.up', composeUp);
   registerCommand('vscode-docker.configure', configure);
-  registerCommand('vscode-docker.connectCustomRegistry', connectCustomRegistry);
-
-  registerCommand('vscode-docker.container.open-shell', openShellContainer);
-  registerCommand('vscode-docker.container.remove', removeContainer);
-  registerCommand('vscode-docker.container.restart', restartContainer);
-  registerCommand('vscode-docker.container.show-logs', showLogsContainer);
-  registerCommand('vscode-docker.container.start', startContainer);
-  registerCommand('vscode-docker.container.start.azurecli', startAzureCLI);
-  registerCommand('vscode-docker.container.start.interactive', startContainerInteractive);
-  registerCommand('vscode-docker.container.stop', stopContainer);
-
-  registerCommand('vscode-docker.createWebApp', createWebApp);
-  registerCommand('vscode-docker.disconnectCustomRegistry', disconnectCustomRegistry);
-  registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
-  registerCommand('vscode-docker.dockerHubLogin', dockerHubLogin);
-  registerCommand('vscode-docker.explorer.refresh', () => ext.dockerExplorerProvider.refresh());
-
-  registerCommand('vscode-docker.image.build', buildImage);
-  registerCommand('vscode-docker.image.inspect', inspectImage);
-  registerCommand('vscode-docker.image.push', pushImage);
-  registerCommand('vscode-docker.image.remove', removeImage);
-  registerCommand('vscode-docker.image.tag', tagImage);
-
-  registerCommand('vscode-docker.setRegistryAsDefault', setRegistryAsDefault);
   registerCommand('vscode-docker.system.prune', systemPrune);
+
+  registerCommand('vscode-docker.containers.attachShell', attachShellContainer);
+  registerCommand('vscode-docker.containers.prune', pruneContainers);
+  registerCommand('vscode-docker.containers.remove', removeContainer);
+  registerCommand('vscode-docker.containers.restart', restartContainer);
+  registerCommand('vscode-docker.containers.start', startContainer);
+  registerCommand('vscode-docker.containers.stop', stopContainer);
+  registerCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
+
+  registerCommand('vscode-docker.images.build', buildImage);
+  registerCommand('vscode-docker.images.groupBy', groupImagesBy);
+  registerCommand('vscode-docker.images.inspect', inspectImage);
+  registerCommand('vscode-docker.images.prune', pruneImages);
+  registerCommand('vscode-docker.images.push', pushImage);
+  registerCommand('vscode-docker.images.remove', removeImage);
+  registerCommand('vscode-docker.images.run', runImage);
+  registerCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
+  registerCommand('vscode-docker.images.runInteractive', runImageInteractive);
+  registerCommand('vscode-docker.images.tag', tagImage);
+
+  registerCommand('vscode-docker.registries.copyImageDigest', copyImageDigest);
+  registerCommand('vscode-docker.registries.deleteImage', deleteImage);
+  registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
+  registerCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
+  registerCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
+  registerCommand('vscode-docker.registries.pullImage', pullImage);
+  registerCommand('vscode-docker.registries.pullRepository', pullRepository);
+  registerCommand('vscode-docker.registries.setAsDefault', setRegistryAsDefault);
+
+  registerCommand('vscode-docker.registries.dockerHub.logIn', (context: IActionContext) => ext.dockerHubAccountTreeItem.logIn(context));
+  registerCommand('vscode-docker.registries.dockerHub.logOut', () => ext.dockerHubAccountTreeItem.logOut());
+  registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
+
+  registerCommand('vscode-docker.registries.azure.buildImage', buildImageInAzure);
+  registerCommand('vscode-docker.registries.azure.createRegistry', createAzureRegistry);
+  registerCommand('vscode-docker.registries.azure.deleteRegistry', deleteAzureRegistry);
+  registerCommand('vscode-docker.registries.azure.deleteRepository', deleteAzureRepository);
+  registerCommand('vscode-docker.registries.azure.openInPortal', openInAzurePortal);
+  registerCommand('vscode-docker.registries.azure.runTask', runAzureTask);
+  registerCommand('vscode-docker.registries.azure.runFileAsTask', runFileAsAzureTask);
+  registerCommand('vscode-docker.registries.azure.selectSubscriptions', () => vscode.commands.executeCommand("azure-account.selectSubscriptions"));
+  registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
+  registerCommand('vscode-docker.registries.azure.viewProperties', viewAzureProperties);
+  registerCommand('vscode-docker.registries.azure.viewTaskLogs', viewAzureTaskLogs);
+
+  registerCommand('vscode-docker.registries.private.connectRegistry', connectPrivateRegistry);
+  registerCommand('vscode-docker.registries.private.disconnectRegistry', disconnectPrivateRegistry);
 }
 
 export async function deactivateInternal(): Promise<void> {
@@ -345,7 +279,7 @@ namespace Configuration {
 
   export function initialize(): void {
     configurationListener = vscode.workspace.onDidChangeConfiguration(
-      (e: vscode.ConfigurationChangeEvent) => {
+      async (e: vscode.ConfigurationChangeEvent) => {
         // notify the language server that settings have change
         client.sendNotification(DidChangeConfigurationNotification.type, {
           settings: null
@@ -357,7 +291,7 @@ namespace Configuration {
           // tslint:disable-next-line: no-floating-promises
           setRequestDefaults();
           readImageGrouping();
-          vscode.commands.executeCommand('vscode-docker.explorer.refresh');
+          await ext.imagesTree.refresh();
         }
       }
     );
@@ -435,7 +369,7 @@ function readImageGrouping(): void {
   ext.groupImagesBy = imageGrouping && imageGrouping in ImageGrouping ? <ImageGrouping>ImageGrouping[imageGrouping] : DefaultImageGrouping;
 }
 
-async function selectGroupImagesBy(): Promise<void> {
+async function groupImagesBy(): Promise<void> {
   let response = await ext.ui.showQuickPick(
     [
       { label: "No grouping", data: ImageGrouping.None },
@@ -447,12 +381,8 @@ async function selectGroupImagesBy(): Promise<void> {
       placeHolder: "Select how to group the Images node entries"
     });
 
-  groupImagesBy(response.data);
-}
-
-function groupImagesBy(groupBy: ImageGrouping): void {
-  ext.groupImagesBy = groupBy;
+  ext.groupImagesBy = response.data;
   const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(configPrefix);
   configOptions.update(configurationKeys.groupImagesBy, ImageGrouping[ext.groupImagesBy], vscode.ConfigurationTarget.Global);
-  ext.dockerExplorerProvider.refreshImages();
+  await ext.imagesTree.refresh();
 }

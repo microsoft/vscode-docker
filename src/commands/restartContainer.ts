@@ -5,45 +5,29 @@
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
-import { ContainerNode } from '../../explorer/models/containerNode';
-import { RootNode } from '../../explorer/models/rootNode';
 import { ext } from '../extensionVariables';
-import { docker, ListContainerDescOptions } from '../utils/docker-endpoint';
-import { quickPickContainerOrAll } from '../utils/quick-pick-container';
+import { ContainerTreeItem } from '../tree/ContainerTreeItem';
+import { docker } from '../utils/docker-endpoint';
 
-export async function restartContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
-
-    let containersToRestart: Docker.ContainerDesc[];
-
-    if (node instanceof ContainerNode && node.containerDesc) {
-        containersToRestart = [node.containerDesc];
+export async function restartContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
+    let nodes: ContainerTreeItem[];
+    if (node) {
+        nodes = [node];
     } else {
-        const opts: ListContainerDescOptions = {
-            "filters": {
-                "status": ["running", "paused", "exited"]
-            }
-        };
-        containersToRestart = await quickPickContainerOrAll(context, opts);
+        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused|running)Container$/i, { ...context, canPickMany: true });
     }
 
-    const numContainers: number = containersToRestart.length;
-    let containerCounter: number = 0;
-
-    vscode.window.setStatusBarMessage("Docker: Restarting Container(s)...", new Promise((resolve, reject) => {
-        containersToRestart.forEach((container) => {
-            // tslint:disable-next-line:no-any
-            docker.getContainer(container.Id).restart((err: Error, _data: any) => {
-                containerCounter++;
-                if (err) {
-                    vscode.window.showErrorMessage(err.message);
-                    ext.dockerExplorerProvider.refreshContainers();
-                    reject();
-                }
-                if (containerCounter === numContainers) {
-                    ext.dockerExplorerProvider.refreshContainers();
-                    resolve();
-                }
+    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Restarting Container(s)..." }, async () => {
+        await Promise.all(nodes.map(async n => {
+            await new Promise((resolve, reject) => {
+                docker.getContainer(n.container.Id).restart((error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
             });
-        });
-    }));
+        }));
+    });
 }

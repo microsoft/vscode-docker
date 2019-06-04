@@ -4,45 +4,43 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
-import { ImageNode } from '../../explorer/models/imageNode';
-import { RootNode } from '../../explorer/models/rootNode';
+import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
-import { delay } from '../utils/delay';
+import { ImageTreeItem } from '../tree/ImageTreeItem';
 import { docker } from '../utils/docker-endpoint';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
-import { ImageItem, quickPickImage } from '../utils/quick-pick-image';
 
-export async function tagImage(context: IActionContext, node: ImageNode | RootNode | IHasImageDescriptorAndFullTag | undefined): Promise<string> {
-    // If a RootNode or no node is passed in, we ask the user to pick an image
-    let [imageToTag, currentName] = await getOrAskForImageAndTag(context, node instanceof RootNode ? undefined : node);
+export async function tagImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
+    if (!node) {
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+    }
 
-    if (imageToTag) {
-        addImageTaggingTelemetry(context, currentName, '.before');
-        let newTaggedName: string = await getTagFromUserInput(currentName, true);
-        addImageTaggingTelemetry(context, newTaggedName, '.after');
+    addImageTaggingTelemetry(context, node.fullTag, '.before');
+    let newTaggedName: string = await getTagFromUserInput(node.fullTag, true);
+    addImageTaggingTelemetry(context, newTaggedName, '.after');
 
-        let repo: string = newTaggedName;
-        let tag: string = 'latest';
+    let repo: string = newTaggedName;
+    let tag: string = 'latest';
 
-        if (newTaggedName.lastIndexOf(':') > 0) {
-            repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
-            tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
-        }
+    if (newTaggedName.lastIndexOf(':') > 0) {
+        repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
+        tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
+    }
 
-        const image: Docker.Image = docker.getImage(imageToTag.Id);
+    const image: Docker.Image = docker.getImage(node.image.Id);
 
-        // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-        image.tag({ repo: repo, tag: tag }, function (err: { message?: string }, _data: any): void {
-            if (err) {
-                // TODO: use parseError, proper error handling
-                vscode.window.showErrorMessage('Docker Tag error: ' + err.message);
+    await new Promise((resolve, reject) => {
+        image.tag({ repo: repo, tag: tag }, (error) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
             }
         });
+    });
 
-        return newTaggedName;
-    }
+    return newTaggedName;
 }
 
 export async function getTagFromUserInput(imageName: string, addDefaultRegistry: boolean): Promise<string> {
@@ -68,32 +66,6 @@ export async function getTagFromUserInput(imageName: string, addDefaultRegistry:
     return nameWithTag;
 }
 
-export interface IHasImageDescriptorAndFullTag {
-    imageDesc: Docker.ImageDesc;
-    fullTag: string;
-}
-
-export async function getOrAskForImageAndTag(context: IActionContext, node: IHasImageDescriptorAndFullTag | undefined): Promise<[Docker.ImageDesc, string]> {
-    let name: string;
-    let description: Docker.ImageDesc;
-
-    if (node && node.imageDesc) {
-        description = node.imageDesc;
-        name = node.fullTag;
-    } else {
-        const selectedItem: ImageItem = await quickPickImage(context, false);
-        if (selectedItem) {
-            description = selectedItem.imageDesc
-            name = selectedItem.label;
-        }
-
-        // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
-        await delay(500);
-    }
-
-    return [description, name];
-}
-
 const KnownRegistries: { type: string, regex: RegExp }[] = [
     // Like username/path
     { type: 'dockerhub-namespace', regex: /^[^.:]+\/[^.:]+\/$/ },
@@ -116,14 +88,7 @@ const KnownRegistries: { type: string, regex: RegExp }[] = [
 export function addImageTaggingTelemetry(context: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
     try {
         let defaultRegistryPath: string = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath', '');
-        let properties: {
-            numSlashes?: string;
-            hasTag?: string;
-            isDefaultRegistryPathSet?: string; // docker.defaultRegistryPath has a value
-            isDefaultRegistryPathInName?: string;  // image name starts with defaultRegistryPath
-            safeTag?: string;
-            registryType?: string;
-        } = {};
+        let properties: TelemetryProperties = {};
 
         let [repository, tag] = extractRegExGroups(fullImageName, /^(.*):(.*)$/, [fullImageName, '']);
 
@@ -136,10 +101,12 @@ export function addImageTaggingTelemetry(context: IActionContext, fullImageName:
         properties.isDefaultRegistryPathSet = String(!!defaultRegistryPath);
 
         let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
-        properties.registryType = knownRegistry.type;
+        if (knownRegistry) {
+            properties.registryType = knownRegistry.type;
+        }
 
-        for (let propertyName of Object.getOwnPropertyNames(properties)) {
-            context.telemetry.properties[propertyName + propertyPostfix] = <string>properties[propertyName];
+        for (let propertyName of Object.keys(properties)) {
+            context.telemetry.properties[propertyName + propertyPostfix] = properties[propertyName];
         }
     } catch (error) {
         console.error(error);

@@ -17,13 +17,11 @@ export { activateInternal, deactivateInternal } from './src/extension';
 //
 // The tests should import '../extension.bundle.ts'. At design-time they live in tests/ and so will pick up this file (extension.bundle.ts).
 // At runtime the tests live in dist/tests and will therefore pick up the main webpack bundle at dist/extension.bundle.js.
-export { AsyncPool } from './src/utils/asyncpool';
 export { wrapError } from './src/utils/wrapError';
 export { ext } from './src/extensionVariables';
 export { nonNullProp } from './src/utils/nonNull';
 export { IKeytar } from './src/utils/keytar';
-export { throwDockerConnectionError, internal } from './explorer/utils/dockerConnectionError';
-export { getImageLabel, trimWithElipsis } from './explorer/models/getImageLabel';
+export { getImageLabel, trimWithElipsis } from './src/tree/getImageLabel';
 export { isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from "./src/utils/osVersion";
 export { LineSplitter } from './src/debugging/coreclr/lineSplitter';
 export { CommandLineBuilder } from './src/debugging/coreclr/commandLineBuilder';

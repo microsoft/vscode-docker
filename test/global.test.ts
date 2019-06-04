@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode";
-import * as path from "path";
-import * as fse from "fs-extra";
-import mocha = require("mocha");
 import * as assert from 'assert';
+import * as fse from "fs-extra";
+import * as mocha from 'mocha';
+import * as path from "path";
+import * as vscode from "vscode";
 import { ext } from "../extension.bundle";
 import { TestKeytar } from "../test/testKeytar";
 
@@ -69,7 +69,7 @@ suiteSetup(async function (this: mocha.IHookCallbackContext): Promise<void> {
     ext.keytar = new TestKeytar();
 
     console.log("Refreshing tree to make sure extension is activated");
-    await vscode.commands.executeCommand('vscode-docker.explorer.refresh');
+    await vscode.commands.executeCommand('vscode-docker.registries.refresh');
     console.log("Refresh done");
     assert(!!ext.context, "Extension not activated");
 });

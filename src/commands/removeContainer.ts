@@ -4,48 +4,33 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
-import { ContainerNode } from '../../explorer/models/containerNode';
-import { RootNode } from '../../explorer/models/rootNode';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { AllStatusFilter, docker, ListContainerDescOptions } from '../utils/docker-endpoint';
-import { quickPickContainerOrAll } from '../utils/quick-pick-container';
+import { ContainerTreeItem } from '../tree/ContainerTreeItem';
 
-export async function removeContainer(context: IActionContext, node: RootNode | ContainerNode | undefined): Promise<void> {
-
-    let containersToRemove: Docker.ContainerDesc[];
-
-    if (node instanceof ContainerNode && node.containerDesc) {
-        containersToRemove = [node.containerDesc];
+export async function removeContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
+    let nodes: ContainerTreeItem[] = [];
+    if (node) {
+        nodes = [node];
     } else {
-        const opts: ListContainerDescOptions = {
-            "filters": {
-                "status": AllStatusFilter
-            }
-        };
-        containersToRemove = await quickPickContainerOrAll(context, opts);
-
+        nodes = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.allContextRegExp, { ...context, canPickMany: true, suppressCreatePick: true });
     }
 
-    const numContainers: number = containersToRemove.length;
-    let containerCounter: number = 0;
+    let confirmRemove: string;
+    if (nodes.length === 0) {
+        throw new UserCancelledError();
+    } else if (nodes.length === 1) {
+        node = nodes[0];
+        confirmRemove = `Are you sure you want to remove container "${node.label}"?`;
+    } else {
+        confirmRemove = "Are you sure you want to remove selected containers?";
+    }
 
-    vscode.window.setStatusBarMessage("Docker: Removing Container(s)...", new Promise((resolve, reject) => {
-        containersToRemove.forEach((c) => {
-            // tslint:disable-next-line:no-function-expression no-any // Grandfathered in
-            docker.getContainer(c.Id).remove({ force: true }, function (err: Error, _data: any): void {
-                containerCounter++;
-                if (err) {
-                    // TODO: parseError, proper error handling
-                    vscode.window.showErrorMessage(err.message);
-                    ext.dockerExplorerProvider.refreshContainers();
-                    reject();
-                }
-                if (containerCounter === numContainers) {
-                    ext.dockerExplorerProvider.refreshContainers();
-                    resolve();
-                }
-            });
-        });
-    }));
+    // no need to check result - cancel will throw a UserCancelledError
+    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: 'Remove' });
+
+    let removing: string = "Removing container(s)...";
+    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {
+        await Promise.all(nodes.map(async n => await n.deleteTreeItem(context)));
+    });
 }

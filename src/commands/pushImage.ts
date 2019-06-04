@@ -4,51 +4,42 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
-import { ImageNode } from '../../explorer/models/imageNode';
-import { RootNode } from '../../explorer/models/rootNode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
+import { ImageTreeItem } from '../tree/ImageTreeItem';
 import { askToSaveRegistryPath } from './registrySettings';
-import { addImageTaggingTelemetry, getOrAskForImageAndTag, IHasImageDescriptorAndFullTag, tagImage } from './tagImage';
+import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
-export async function pushImage(context: IActionContext, node: ImageNode | RootNode | undefined): Promise<void> {
-    let properties: {
-        pushWithoutRepositoryAnswer?: string;
-    } & TelemetryProperties = context.telemetry.properties;
+export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
+    if (!node) {
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+    }
 
-    let [imageToPush, imageName] = await getOrAskForImageAndTag(context, node instanceof RootNode ? undefined : node);
-
-    if (imageName.includes('/')) {
-        await askToSaveRegistryPath(imageName);
+    let fullTag: string = node.fullTag;
+    if (fullTag.includes('/')) {
+        await askToSaveRegistryPath(fullTag);
     } else {
-        //let addPrefixImagePush = "addPrefixImagePush";
-        let askToPushPrefix: boolean = true; // ext.context.workspaceState.get(addPrefixImagePush, true);
+        let askToPushPrefix: boolean = true;
         let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get(configurationKeys.defaultRegistryPath);
         if (askToPushPrefix && defaultRegistryPath) {
-            properties.pushWithoutRepositoryAnswer = 'Cancel';
+            context.telemetry.properties.pushWithoutRepositoryAnswer = 'Cancel';
 
-            // let alwaysPush: vscode.MessageItem = { title: "Always push" };
             let tagFirst: vscode.MessageItem = { title: "Tag first" };
             let pushAnyway: vscode.MessageItem = { title: "Push anyway" }
             let options: vscode.MessageItem[] = [tagFirst, pushAnyway];
             let response: vscode.MessageItem = await ext.ui.showWarningMessage(`This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image like <docker-id-or-registry-server>/<imagename>`, ...options);
-            properties.pushWithoutRepositoryAnswer = response.title;
+            context.telemetry.properties.pushWithoutRepositoryAnswer = response.title;
 
-            // if (response === alwaysPush) {
-            //     ext.context.workspaceState.update(addPrefixImagePush, false);
-            // }
             if (response === tagFirst) {
-                imageName = await tagImage(context, <IHasImageDescriptorAndFullTag>{ imageDesc: imageToPush, fullTag: imageName }); //not passing this would ask the user a second time to pick an image
+                fullTag = await tagImage(context, node);
             }
         }
     }
 
-    if (imageToPush) {
-        addImageTaggingTelemetry(context, imageName, '');
+    addImageTaggingTelemetry(context, fullTag, '');
 
-        const terminal = ext.terminalProvider.createTerminal(imageName);
-        terminal.sendText(`docker push ${imageName}`);
-        terminal.show();
-    }
+    const terminal = ext.terminalProvider.createTerminal(fullTag);
+    terminal.sendText(`docker push ${fullTag}`);
+    terminal.show();
 }

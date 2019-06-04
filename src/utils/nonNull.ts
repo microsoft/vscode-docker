@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Registry } from 'azure-arm-containerregistry/lib/models';
-import { Subscription } from 'azure-arm-resource/lib/subscription/models';
 import { isNullOrUndefined } from 'util';
 
 /**
@@ -30,18 +28,11 @@ export function nonNullValue<T>(value: T | undefined, propertyNameOrMessage?: st
     return value;
 }
 
-export function getId(registry: Registry): string {
-    return nonNullProp(registry, 'id');
-}
-
-export function getLoginServer(registry: Registry): string {
-    return nonNullProp(registry, 'loginServer');
-}
-
-export function getTenantId(subscription: Subscription): string {
-    return nonNullProp(subscription, 'tenantId');
-}
-
-export function getSubscriptionId(subscription: Subscription): string {
-    return nonNullProp(subscription, 'subscriptionId');
+/**
+ * Validates that a given object is not null and not undefined.
+ * Then retrieves a property by name from that object and checks that it's not null and not undefined.  It is strongly typed
+ * for the property and will give a compile error if the given name is not a property of the source.
+ */
+export function nonNullValueAndProp<TSource, TKey extends keyof TSource>(source: TSource | undefined, name: TKey): NonNullable<TSource[TKey]> {
+    return nonNullProp(nonNullValue(source, <string>name), name);
 }

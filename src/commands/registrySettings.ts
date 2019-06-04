@@ -5,32 +5,23 @@
 
 import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { AzureRegistryNode } from "../../explorer/models/azureRegistryNodes";
-import { CustomRegistryNode } from "../../explorer/models/customRegistryNodes";
-import { DockerHubOrgNode } from "../../explorer/models/dockerHubNodes";
 import { configurationKeys } from '../constants';
 import { ext } from '../extensionVariables';
-import { assertNever } from '../utils/assertNever';
+import { RegistryTreeItemBase } from '../tree/RegistryTreeItemBase';
 
 const defaultRegistryKey = "defaultRegistry";
 const hasCheckedRegistryPaths = "hasCheckedRegistryPaths"
 
-export async function setRegistryAsDefault(_context: IActionContext, node: CustomRegistryNode | AzureRegistryNode | DockerHubOrgNode): Promise<void> {
-    let registryName: string;
-    if (node instanceof DockerHubOrgNode) {
-        registryName = node.namespace;
-    } else if (node instanceof AzureRegistryNode) {
-        registryName = node.registry.loginServer || node.label;
-    } else if (node instanceof CustomRegistryNode) {
-        registryName = node.registryName;
-    } else {
-        return assertNever(node, `Unexpected type of registry node: ${node ? (<object>node).constructor.name : String(node)}`);
+export async function setRegistryAsDefault(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
+    if (!node) {
+        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(RegistryTreeItemBase.allContextRegExp, context);
     }
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    await configOptions.update(configurationKeys.defaultRegistryPath, registryName, vscode.ConfigurationTarget.Global);
-    vscode.window.showInformationMessage(`Updated the docker.defaultRegistryPath setting to "${registryName}"`);
+    await configOptions.update(configurationKeys.defaultRegistryPath, node.host, vscode.ConfigurationTarget.Global);
+    vscode.window.showInformationMessage(`Updated the docker.defaultRegistryPath setting to "${node.host}"`);
 }
+
 export async function consolidateDefaultRegistrySettings(): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const combineRegistryPaths: boolean = !(ext.context.workspaceState.get(hasCheckedRegistryPaths));

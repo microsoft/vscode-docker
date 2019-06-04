@@ -4,24 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "vscode-azureextensionui";
-import { ImageNode } from "../../explorer/models/imageNode";
-import DockerInspectDocumentContentProvider from "../dockerInspect";
-import { quickPickImage } from "../utils/quick-pick-image";
+import { ext } from "../extensionVariables";
+import { ImageTreeItem } from "../tree/ImageTreeItem";
+import { docker } from "../utils/docker-endpoint";
+import { fsUtils } from "../utils/fsUtils";
 
-export default async function inspectImage(context: IActionContext, node: ImageNode | undefined): Promise<void> {
-
-    let imageToInspect: Docker.ImageDesc;
-
-    if (node && node.imageDesc) {
-        imageToInspect = node.imageDesc;
-    } else {
-        const selectedImage = await quickPickImage(context);
-        if (selectedImage) {
-            imageToInspect = selectedImage.imageDesc;
-        }
+export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
+    if (!node) {
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
     }
 
-    if (imageToInspect) {
-        await DockerInspectDocumentContentProvider.openImageInspectDocument(imageToInspect);
-    }
+    const imageMetadata = await new Promise((resolve, reject) => {
+        docker.getImage(node.image.Id).inspect((error: Error, data: {}) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+
+    await fsUtils.openJsonInEditor(imageMetadata);
 }
