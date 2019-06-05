@@ -12,7 +12,7 @@ import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzure
 import { ext } from "../../extensionVariables";
 import { validateAzureAccountInstalled } from '../../tree/azure/AzureAccountTreeItem';
 import { AzureRegistryTreeItem } from '../../tree/azure/AzureRegistryTreeItem';
-import { DockerHubRegistryTreeItem } from '../../tree/dockerHub/DockerHubRegistryTreeItem';
+import { DockerHubNamespaceTreeItem } from '../../tree/dockerHub/DockerHubNamespaceTreeItem';
 import { PrivateRegistryTreeItem } from '../../tree/private/PrivateRegistryTreeItem';
 import { RegistryTreeItemBase } from '../../tree/RegistryTreeItemBase';
 import { RemoteTagTreeItemBase } from '../../tree/RemoteTagTreeItemBase';
@@ -67,7 +67,7 @@ async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig
     let password: string | undefined;
     let imagePath: string;
     let appSettings: NameValuePair[] = [];
-    if (registryTI instanceof DockerHubRegistryTreeItem) {
+    if (registryTI instanceof DockerHubNamespaceTreeItem) {
         imagePath = registryTI.namespace;
         username = registryTI.parent.username;
         password = registryTI.parent.password;

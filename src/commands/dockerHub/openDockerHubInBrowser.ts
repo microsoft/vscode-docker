@@ -6,18 +6,18 @@
 import { IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl } from "../../constants";
 import { ext } from "../../extensionVariables";
-import { DockerHubRegistryTreeItem } from "../../tree/dockerHub/DockerHubRegistryTreeItem";
+import { DockerHubNamespaceTreeItem } from "../../tree/dockerHub/DockerHubNamespaceTreeItem";
 import { DockerHubRepositoryTreeItem } from "../../tree/dockerHub/DockerHubRepositoryTreeItem";
 import { DockerHubTagTreeItem } from "../../tree/dockerHub/DockerHubTagTreeItem";
 import { openExternal } from "../../utils/openExternal";
 
-export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubRegistryTreeItem | DockerHubRepositoryTreeItem | DockerHubTagTreeItem): Promise<void> {
+export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | DockerHubTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerHubRegistryTreeItem>(DockerHubRegistryTreeItem.contextValue, context);
+        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(DockerHubNamespaceTreeItem.contextValue, context);
     }
 
     let url = dockerHubUrl;
-    if (node instanceof DockerHubRegistryTreeItem) {
+    if (node instanceof DockerHubNamespaceTreeItem) {
         url += `u/${node.namespace}`;
     } else if (node instanceof DockerHubRepositoryTreeItem) {
         url += `r/${node.parent.namespace}/${node.repoName}`;

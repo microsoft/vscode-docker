@@ -11,7 +11,7 @@ import { nonNullProp } from "../../utils/nonNull";
 import { registryRequest } from "../../utils/registryRequestUtils";
 import { treeUtils } from "../../utils/treeUtils";
 import { isAncestoryOfRegistryType, RegistryType } from "../RegistryType";
-import { DockerHubRegistryTreeItem } from "./DockerHubRegistryTreeItem";
+import { DockerHubNamespaceTreeItem } from "./DockerHubNamespaceTreeItem";
 import { DockerHubPasswordStep } from "./loginWizard/DockerHubPasswordStep";
 import { DockerHubUsernameStep } from "./loginWizard/DockerHubUsernameStep";
 import { IDockerHubWizardContext } from "./loginWizard/IDockerHubWizardContext";
@@ -63,7 +63,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem {
             return this.createTreeItemsWithErrorHandling(
                 response.body.namespaces,
                 'invalidDockerHubNamespace',
-                n => new DockerHubRegistryTreeItem(this, n),
+                n => new DockerHubNamespaceTreeItem(this, n),
                 n => n
             );
         }

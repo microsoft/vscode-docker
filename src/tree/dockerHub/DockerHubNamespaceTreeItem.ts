@@ -11,9 +11,9 @@ import { RegistryType } from "../RegistryType";
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
 import { DockerHubRepositoryTreeItem } from "./DockerHubRepositoryTreeItem";
 
-export class DockerHubRegistryTreeItem extends RegistryTreeItemBase {
+export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
     public static contextValue: string = RegistryType.dockerHub + RegistryTreeItemBase.contextValueSuffix;
-    public contextValue: string = DockerHubRegistryTreeItem.contextValue;
+    public contextValue: string = DockerHubNamespaceTreeItem.contextValue;
     public parent: DockerHubAccountTreeItem;
     public baseUrl: string = dockerHubUrl;
     public namespace: string;

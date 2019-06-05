@@ -7,7 +7,7 @@ import { Terminal } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { DockerHubAccountTreeItem } from '../tree/dockerHub/DockerHubAccountTreeItem';
-import { DockerHubRegistryTreeItem } from '../tree/dockerHub/DockerHubRegistryTreeItem';
+import { DockerHubNamespaceTreeItem } from '../tree/dockerHub/DockerHubNamespaceTreeItem';
 import { RegistryTreeItemBase } from '../tree/RegistryTreeItemBase';
 
 export async function logOutOfDockerCli(context: IActionContext, node?: RegistryTreeItemBase | DockerHubAccountTreeItem): Promise<void> {
@@ -17,7 +17,7 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
 
     let command = 'docker logout';
 
-    if (node instanceof DockerHubRegistryTreeItem) {
+    if (node instanceof DockerHubNamespaceTreeItem) {
         node = node.parent;
     }
 

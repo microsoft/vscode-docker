@@ -6,7 +6,7 @@
 import { Terminal } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from '../extensionVariables';
-import { DockerHubRegistryTreeItem } from '../tree/dockerHub/DockerHubRegistryTreeItem';
+import { DockerHubNamespaceTreeItem } from '../tree/dockerHub/DockerHubNamespaceTreeItem';
 import { RegistryTreeItemBase } from '../tree/RegistryTreeItemBase';
 import { RemoteRepositoryTreeItemBase } from "../tree/RemoteRepositoryTreeItemBase";
 import { RemoteTagTreeItemBase } from '../tree/RemoteTagTreeItemBase';
@@ -31,7 +31,7 @@ export async function pullImage(context: IActionContext, node?: RemoteTagTreeIte
 async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
     await logInToDockerCli(context, node);
 
-    let imagePath: string = node instanceof DockerHubRegistryTreeItem ? node.namespace : node.host;
+    let imagePath: string = node instanceof DockerHubNamespaceTreeItem ? node.namespace : node.host;
     const terminal: Terminal = ext.terminalProvider.createTerminal("docker pull");
     terminal.show();
     terminal.sendText(`docker pull ${imagePath}/${imageRequest}`);

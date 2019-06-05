@@ -8,15 +8,15 @@ import { PAGE_SIZE } from "../../constants";
 import { registryRequest } from "../../utils/registryRequestUtils";
 import { RegistryType } from "../RegistryType";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
-import { DockerHubRegistryTreeItem } from "./DockerHubRegistryTreeItem";
+import { DockerHubNamespaceTreeItem } from "./DockerHubNamespaceTreeItem";
 import { DockerHubTagTreeItem } from "./DockerHubTagTreeItem";
 
 export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
     public static contextValue: string = RegistryType.dockerHub + RemoteRepositoryTreeItemBase.contextValueSuffix;
     public contextValue: string = DockerHubRepositoryTreeItem.contextValue;
-    public parent: DockerHubRegistryTreeItem;
+    public parent: DockerHubNamespaceTreeItem;
 
-    public constructor(parent: DockerHubRegistryTreeItem, name: string) {
+    public constructor(parent: DockerHubNamespaceTreeItem, name: string) {
         super(parent, name);
     }
 

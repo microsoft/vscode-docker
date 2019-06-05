@@ -9,7 +9,7 @@ import { NULL_GUID } from '../constants';
 import { ext } from '../extensionVariables';
 import { AzureRegistryTreeItem } from '../tree/azure/AzureRegistryTreeItem';
 import { DockerHubAccountTreeItem } from '../tree/dockerHub/DockerHubAccountTreeItem';
-import { DockerHubRegistryTreeItem } from '../tree/dockerHub/DockerHubRegistryTreeItem';
+import { DockerHubNamespaceTreeItem } from '../tree/dockerHub/DockerHubNamespaceTreeItem';
 import { PrivateRegistryTreeItem } from '../tree/private/PrivateRegistryTreeItem';
 import { RegistryTreeItemBase } from '../tree/RegistryTreeItemBase';
 import { acquireAcrRefreshToken } from '../utils/azureUtils';
@@ -23,7 +23,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
     let password: string | undefined;
     let url: string;
 
-    if (node instanceof DockerHubRegistryTreeItem) {
+    if (node instanceof DockerHubNamespaceTreeItem) {
         node = node.parent;
     }
 
