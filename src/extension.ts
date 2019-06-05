@@ -8,17 +8,17 @@ import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
 import { ResourceGroup } from 'azure-arm-resource/lib/resource/models';
 import { User } from 'azure-arm-website/lib/models';
-import * as clipboardy from 'clipboardy';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CoreOptions } from 'request';
-import { RequestPromise } from 'request-promise-native';
 import * as request from 'request-promise-native';
+import { RequestPromise } from 'request-promise-native';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerCommand as uiRegisterCommand, registerUIExtensionVariables, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { AzureAccountWrapper } from '../explorer/deploy/azureAccountWrapper';
-import { WebAppCreator } from '../explorer/deploy/webAppCreator';
+import { getWebAppPublishCredential } from '../explorer/deploy/util';
+import { ResourceGroupStep, WebAppCreator, WebsiteStep } from '../explorer/deploy/webAppCreator';
 import { DockerExplorerProvider } from '../explorer/dockerExplorerProvider';
 import { AzureImageTagNode } from '../explorer/models/azureRegistryNodes';
 import { connectCustomRegistry, disconnectCustomRegistry } from '../explorer/models/customRegistries';
@@ -60,21 +60,6 @@ import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerCompo
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
-import { DockerfileCompletionItemProvider } from './dockerfile/dockerfileCompletionItemProvider';
-import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './documentContentProviders/dockerInspect';
-import { AzureAccountWrapper } from './explorer/deploy/azureAccountWrapper';
-import { getWebAppPublishCredential } from './explorer/deploy/util';
-import { ResourceGroupStep, WebAppCreator, WebsiteStep } from './explorer/deploy/webAppCreator';
-import { DockerExplorerProvider } from './explorer/dockerExplorerProvider';
-import { AzureImageTagNode, AzureRegistryNode, AzureRepositoryNode } from './explorer/models/azureRegistryNodes';
-import { ContainerNode } from './explorer/models/containerNode';
-import { connectCustomRegistry, disconnectCustomRegistry } from './explorer/models/customRegistries';
-import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from './explorer/models/dockerHubNodes';
-import { ImageNode } from './explorer/models/imageNode';
-import { NodeBase } from './explorer/models/nodeBase';
-import { RootNode } from './explorer/models/rootNode';
-import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
-import { browseDockerHub, dockerHubLogin, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import DockerInspectDocumentContentProvider, { SCHEME as DOCKER_INSPECT_SCHEME } from './dockerInspect';
 import { DefaultImageGrouping, ext, ImageGrouping } from './extensionVariables';
@@ -233,11 +218,11 @@ async function setRequestDefaults(): Promise<void> {
   ext.request = requestWithDefaults;
 }
 
-async function createWebApp(_context: IActionContext, node?: AzureImageTagNode | DockerHubImageTagNode): Promise<void> {
+async function createWebApp(context: IActionContext, node?: AzureImageTagNode | DockerHubImageTagNode): Promise<void> {
   assert(!!node, "Should not be available through command palette");
 
   let azureAccount = await AzureUtilityManager.getInstance().requireAzureAccount();
-  const azureAccountWrapper = new AzureAccountWrapper(ext.context, azureAccount);
+  const azureAccountWrapper: AzureAccountWrapper = new AzureAccountWrapper(ext.context, azureAccount);
   const wizard = new WebAppCreator(ext.outputChannel, azureAccountWrapper, node);
   const result = await wizard.run();
   if (result.status === 'Faulted') {
@@ -247,9 +232,9 @@ async function createWebApp(_context: IActionContext, node?: AzureImageTagNode |
   }
   const website = wizard.createdWebSite;
 
-  if (context instanceof AzureImageTagNode) {
-    const publishingCredentials: User = await getWebAppPublishCredential(wizard.azureAccount, context.subscription, website);
-    await createWebhookForWebApp(context, wizard, publishingCredentials.scmUri);
+  if (node instanceof AzureImageTagNode) {
+    const publishingCredentials: User = await getWebAppPublishCredential(wizard.azureAccount, node.subscription, website);
+    await createWebhookForWebApp(node, wizard, publishingCredentials.scmUri);
 
   } else {
     // point to dockerhub to create a webhook
@@ -259,9 +244,9 @@ async function createWebApp(_context: IActionContext, node?: AzureImageTagNode |
     if (response) {
       let appUri = `https://${website.name}.scm.azurewebsites.net/docker/hook`;
       // tslint:disable-next-line:no-unsafe-any
-      clipboardy.writeSync(appUri);
+      await vscode.env.clipboard.writeText(appUri);
       // tslint:disable-next-line:no-unsafe-any
-      vscode.env.openExternal(vscode.Uri.parse(`https://cloud.docker.com/repository/docker/${context.userName}/${context.repositoryName}/webHooks`));
+      vscode.env.openExternal(vscode.Uri.parse(`https://cloud.docker.com/repository/docker/${node.userName}/${node.repositoryName}/webHooks`));
     }
   }
   return;
