@@ -57,20 +57,11 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem {
             ti.commandArgs = [this];
             return [ti];
         } else {
-            const namespaces: string[] = [];
-
-            if (!this._nextLink) {
-                let userReponse = await registryRequest<IUser>(this, 'GET', 'v2/user');
-                namespaces.push(userReponse.body.username);
-            }
-
-            const url: string = this._nextLink ? this._nextLink : `v2/user/orgs?page_size=${PAGE_SIZE}`;
-            let orgsResponse = await registryRequest<IOrgs>(this, 'GET', url);
-            namespaces.push(...orgsResponse.body.results.map(o => o.orgname));
-            this._nextLink = orgsResponse.body.next;
-
+            const url: string = this._nextLink ? this._nextLink : `v2/repositories/namespaces?page_size=${PAGE_SIZE}`;
+            let response = await registryRequest<INamespaces>(this, 'GET', url);
+            this._nextLink = response.body.next;
             return this.createTreeItemsWithErrorHandling(
-                namespaces,
+                response.body.namespaces,
                 'invalidDockerHubNamespace',
                 n => new DockerHubRegistryTreeItem(this, n),
                 n => n
@@ -150,15 +141,7 @@ interface IToken {
     token: string
 }
 
-interface IUser {
-    username: string;
-}
-
-interface IOrgs {
-    results: IOrg[];
+interface INamespaces {
+    namespaces: string[];
     next?: string;
-}
-
-interface IOrg {
-    orgname: string;
 }
