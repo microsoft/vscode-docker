@@ -7,12 +7,12 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { acquireAcrAccessToken } from "../../utils/azureUtils";
 import { registryRequest } from "../../utils/registryRequestUtils";
 import { RegistryType } from "../RegistryType";
-import { RepositoryTreeItemBase } from "../RepositoryTreeItemBase";
+import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTagTreeItem } from "./AzureTagTreeItem";
 
-export class AzureRepositoryTreeItem extends RepositoryTreeItemBase {
-    public static contextValue: string = RegistryType.azure + RepositoryTreeItemBase.contextValueSuffix;
+export class AzureRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
+    public static contextValue: string = RegistryType.azure + RemoteRepositoryTreeItemBase.contextValueSuffix;
     public contextValue: string = AzureRepositoryTreeItem.contextValue;
     public parent: AzureRegistryTreeItem;
 

@@ -8,21 +8,21 @@ import { IActionContext } from "vscode-azureextensionui";
 import { ext } from '../extensionVariables';
 import { DockerHubRegistryTreeItem } from '../tree/dockerHub/DockerHubRegistryTreeItem';
 import { RegistryTreeItemBase } from '../tree/RegistryTreeItemBase';
-import { RepositoryTreeItemBase } from "../tree/RepositoryTreeItemBase";
-import { TagTreeItemBase } from '../tree/TagTreeItemBase';
+import { RemoteRepositoryTreeItemBase } from "../tree/RemoteRepositoryTreeItemBase";
+import { RemoteTagTreeItemBase } from '../tree/RemoteTagTreeItemBase';
 import { logInToDockerCli } from "./logInToDockerCli";
 
-export async function pullRepository(context: IActionContext, node?: RepositoryTreeItemBase): Promise<void> {
+export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RepositoryTreeItemBase>(RepositoryTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(RemoteRepositoryTreeItemBase.allContextRegExp, context);
     }
 
     await pullImages(context, node.parent, node.repoName + ' -a');
 }
 
-export async function pullImage(context: IActionContext, node?: TagTreeItemBase): Promise<void> {
+export async function pullImage(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<TagTreeItemBase>(TagTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(RemoteTagTreeItemBase.allContextRegExp, context);
     }
 
     await pullImages(context, node.parent.parent, node.fullTag);

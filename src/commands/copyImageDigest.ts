@@ -7,12 +7,12 @@ import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../extensionVariables";
 import { AzureTaskRunTreeItem } from "../tree/azure/AzureTaskRunTreeItem";
-import { TagTreeItemBase } from "../tree/TagTreeItemBase";
+import { RemoteTagTreeItemBase } from "../tree/RemoteTagTreeItemBase";
 import { nonNullProp } from "../utils/nonNull";
 
-export async function copyImageDigest(context: IActionContext, node?: TagTreeItemBase | AzureTaskRunTreeItem): Promise<void> {
+export async function copyImageDigest(context: IActionContext, node?: RemoteTagTreeItemBase | AzureTaskRunTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<TagTreeItemBase>(/^(azure|private)Tag$/i, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(/^(azure|private)Tag$/i, context);
     }
 
     let digest: string;
@@ -24,7 +24,7 @@ export async function copyImageDigest(context: IActionContext, node?: TagTreeIte
         }
     } else {
         await node.runWithTemporaryDescription('Getting digest...', async () => {
-            digest = await (<TagTreeItemBase>node).getDigest();
+            digest = await (<RemoteTagTreeItemBase>node).getDigest();
         });
     }
 

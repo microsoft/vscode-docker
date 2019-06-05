@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RegistryType } from "../RegistryType";
-import { TagTreeItemBase } from "../TagTreeItemBase";
+import { RemoteTagTreeItemBase } from "../RemoteTagTreeItemBase";
 import { DockerHubRepositoryTreeItem } from "./DockerHubRepositoryTreeItem";
 
-export class DockerHubTagTreeItem extends TagTreeItemBase {
-    public static contextValue: string = RegistryType.dockerHub + TagTreeItemBase.contextValueSuffix;
+export class DockerHubTagTreeItem extends RemoteTagTreeItemBase {
+    public static contextValue: string = RegistryType.dockerHub + RemoteTagTreeItemBase.contextValueSuffix;
     public contextValue: string = DockerHubTagTreeItem.contextValue;
     public parent: DockerHubRepositoryTreeItem;
 

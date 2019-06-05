@@ -9,7 +9,7 @@ import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azure
 import { PAGE_SIZE } from "../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../utils/registryRequestUtils";
 import { treeUtils } from "../utils/treeUtils";
-import { RepositoryTreeItemBase } from "./RepositoryTreeItemBase";
+import { RemoteRepositoryTreeItemBase } from "./RemoteRepositoryTreeItemBase";
 
 export abstract class RegistryTreeItemBase extends AzExtParentTreeItem {
     public static contextValueSuffix: string = 'Registry';
@@ -24,7 +24,7 @@ export abstract class RegistryTreeItemBase extends AzExtParentTreeItem {
 
     public abstract baseUrl: string;
     public abstract addAuth(options: RequestPromiseOptions): Promise<void>;
-    public abstract createRepositoryTreeItem(name: string): RepositoryTreeItemBase;
+    public abstract createRepositoryTreeItem(name: string): RemoteRepositoryTreeItemBase;
 
     public get host(): string {
         return new URL(this.baseUrl).host;

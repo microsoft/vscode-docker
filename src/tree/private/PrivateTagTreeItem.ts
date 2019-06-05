@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RegistryType } from "../RegistryType";
-import { TagTreeItemBase } from "../TagTreeItemBase";
+import { RemoteTagTreeItemBase } from "../RemoteTagTreeItemBase";
 import { PrivateRepositoryTreeItem } from "./PrivateRepositoryTreeItem";
 
-export class PrivateTagTreeItem extends TagTreeItemBase {
-    public static contextValue: string = RegistryType.private + TagTreeItemBase.contextValueSuffix;
+export class PrivateTagTreeItem extends RemoteTagTreeItemBase {
+    public static contextValue: string = RegistryType.private + RemoteTagTreeItemBase.contextValueSuffix;
     public contextValue: string = PrivateTagTreeItem.contextValue;
     public parent: PrivateRepositoryTreeItem;
 

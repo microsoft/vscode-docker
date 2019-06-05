@@ -9,9 +9,9 @@ import { PAGE_SIZE } from "../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../utils/registryRequestUtils";
 import { treeUtils } from "../utils/treeUtils";
 import { RegistryTreeItemBase } from "./RegistryTreeItemBase";
-import { TagTreeItemBase } from "./TagTreeItemBase";
+import { RemoteTagTreeItemBase } from "./RemoteTagTreeItemBase";
 
-export abstract class RepositoryTreeItemBase extends AzExtParentTreeItem {
+export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem {
     public static contextValueSuffix: string = 'Repository';
     public static allContextRegExp: RegExp = /Repository$/;
     public childTypeLabel: string = 'tag';
@@ -37,7 +37,7 @@ export abstract class RepositoryTreeItemBase extends AzExtParentTreeItem {
     }
 
     public abstract addAuth(options: RequestPromiseOptions): Promise<void>;
-    public abstract createTagTreeItem(tag: string, time: string): TagTreeItemBase;
+    public abstract createTagTreeItem(tag: string, time: string): RemoteTagTreeItemBase;
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
@@ -75,7 +75,7 @@ export abstract class RepositoryTreeItemBase extends AzExtParentTreeItem {
     }
 
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
-        if (ti1 instanceof TagTreeItemBase && ti2 instanceof TagTreeItemBase) {
+        if (ti1 instanceof RemoteTagTreeItemBase && ti2 instanceof RemoteTagTreeItemBase) {
             return ti2.time.valueOf() - ti1.time.valueOf();
         } else {
             return super.compareChildrenImpl(ti1, ti2);

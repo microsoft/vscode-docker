@@ -14,6 +14,7 @@ export class ContainersTreeItem extends AutoRefreshTreeItemBase<ContainerDesc> {
     public contextValue: string = ContainersTreeItem.contextValue;
     public label: string = 'Containers';
     public childTypeLabel: string = 'container';
+    public noItemsMessage: string = "Successfully connected, but no containers found.";
 
     public getItemID(item: ContainerDesc): string {
         return item.Id + item.State;

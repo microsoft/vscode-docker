@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RegistryType } from "../RegistryType";
-import { TagTreeItemBase } from "../TagTreeItemBase";
+import { RemoteTagTreeItemBase } from "../RemoteTagTreeItemBase";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 
-export class AzureTagTreeItem extends TagTreeItemBase {
-    public static contextValue: string = RegistryType.azure + TagTreeItemBase.contextValueSuffix;
+export class AzureTagTreeItem extends RemoteTagTreeItemBase {
+    public static contextValue: string = RegistryType.azure + RemoteTagTreeItemBase.contextValueSuffix;
     public contextValue: string = AzureTagTreeItem.contextValue;
     public parent: AzureRepositoryTreeItem;
 

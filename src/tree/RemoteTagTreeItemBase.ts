@@ -9,16 +9,16 @@ import { AzExtTreeItem } from "vscode-azureextensionui";
 import { nonNullProp } from '../utils/nonNull';
 import { registryRequest } from '../utils/registryRequestUtils';
 import { treeUtils } from "../utils/treeUtils";
-import { RepositoryTreeItemBase } from './RepositoryTreeItemBase';
+import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 
-export abstract class TagTreeItemBase extends AzExtTreeItem {
+export abstract class RemoteTagTreeItemBase extends AzExtTreeItem {
     public static contextValueSuffix: string = 'Tag';
     public static allContextRegExp: RegExp = /Tag$/;
-    public parent: RepositoryTreeItemBase;
+    public parent: RemoteRepositoryTreeItemBase;
     public tag: string;
     public time: Date;
 
-    public constructor(parent: RepositoryTreeItemBase, tag: string, time: string) {
+    public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
         super(parent);
         this.tag = tag;
         this.time = new Date(time);

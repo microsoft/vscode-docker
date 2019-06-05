@@ -7,12 +7,12 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { PAGE_SIZE } from "../../constants";
 import { registryRequest } from "../../utils/registryRequestUtils";
 import { RegistryType } from "../RegistryType";
-import { RepositoryTreeItemBase } from "../RepositoryTreeItemBase";
+import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { DockerHubRegistryTreeItem } from "./DockerHubRegistryTreeItem";
 import { DockerHubTagTreeItem } from "./DockerHubTagTreeItem";
 
-export class DockerHubRepositoryTreeItem extends RepositoryTreeItemBase {
-    public static contextValue: string = RegistryType.dockerHub + RepositoryTreeItemBase.contextValueSuffix;
+export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
+    public static contextValue: string = RegistryType.dockerHub + RemoteRepositoryTreeItemBase.contextValueSuffix;
     public contextValue: string = DockerHubRepositoryTreeItem.contextValue;
     public parent: DockerHubRegistryTreeItem;
 

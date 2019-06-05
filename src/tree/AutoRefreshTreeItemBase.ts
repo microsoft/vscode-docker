@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { isLinux } from "../utils/osVersion";
+import { treeUtils } from "../utils/treeUtils";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 
 export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
@@ -13,6 +14,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
     private _itemsFromPolling: T[] | undefined;
     private _failedToConnect: boolean = false;
 
+    public abstract noItemsMessage: string;
     public abstract getItemID(item: T): string;
     public abstract getItems(): Promise<T[]>;
     public abstract convertToTreeItems(items: T[]): Promise<AzExtTreeItem[]>;
@@ -40,7 +42,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
         });
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();
             this._itemsFromPolling = undefined;
@@ -48,10 +50,20 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
         } catch (error) {
             this._currentItems = undefined;
             this._failedToConnect = true;
+            context.telemetry.properties.failedToConnect = 'true';
             return this.getDockerErrorTreeItems(error);
         }
 
-        return await this.convertToTreeItems(this._currentItems);
+        if (this._currentItems.length === 0) {
+            context.telemetry.properties.noItems = 'true';
+            return [new GenericTreeItem(this, {
+                label: this.noItemsMessage,
+                iconPath: treeUtils.getThemedIconPath('info'),
+                contextValue: 'dockerNoItems'
+            })];
+        } else {
+            return await this.convertToTreeItems(this._currentItems);
+        }
     }
 
     public hasMoreChildrenImpl(): boolean {

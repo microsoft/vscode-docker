@@ -5,12 +5,12 @@
 
 import { RequestPromiseOptions } from "request-promise-native";
 import { RegistryType } from "../RegistryType";
-import { RepositoryTreeItemBase } from "../RepositoryTreeItemBase";
+import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { PrivateRegistryTreeItem } from "./PrivateRegistryTreeItem";
 import { PrivateTagTreeItem } from "./PrivateTagTreeItem";
 
-export class PrivateRepositoryTreeItem extends RepositoryTreeItemBase {
-    public static contextValue: string = RegistryType.private + RepositoryTreeItemBase.contextValueSuffix;
+export class PrivateRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
+    public static contextValue: string = RegistryType.private + RemoteRepositoryTreeItemBase.contextValueSuffix;
     public contextValue: string = PrivateRepositoryTreeItem.contextValue;
     public parent: PrivateRegistryTreeItem;
 

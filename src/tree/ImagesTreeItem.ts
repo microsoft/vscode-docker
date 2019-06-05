@@ -15,6 +15,7 @@ export class ImagesTreeItem extends AutoRefreshTreeItemBase<IImageAndTag> {
     public static contextValue: string = ImagesTreeItem.contextValue;
     public contextValue: string = 'images';
     public label: string = 'Images';
+    public noItemsMessage: string = "Successfully connected, but no images found.";
 
     public get childTypeLabel(): string {
         switch (ext.groupImagesBy) {

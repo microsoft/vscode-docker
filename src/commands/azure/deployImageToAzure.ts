@@ -15,12 +15,12 @@ import { AzureRegistryTreeItem } from '../../tree/azure/AzureRegistryTreeItem';
 import { DockerHubRegistryTreeItem } from '../../tree/dockerHub/DockerHubRegistryTreeItem';
 import { PrivateRegistryTreeItem } from '../../tree/private/PrivateRegistryTreeItem';
 import { RegistryTreeItemBase } from '../../tree/RegistryTreeItemBase';
-import { TagTreeItemBase } from '../../tree/TagTreeItemBase';
+import { RemoteTagTreeItemBase } from '../../tree/RemoteTagTreeItemBase';
 import { nonNullProp, nonNullValueAndProp } from "../../utils/nonNull";
 
-export async function deployImageToAzure(context: IActionContext, node?: TagTreeItemBase): Promise<void> {
+export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<TagTreeItemBase>(TagTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(RemoteTagTreeItemBase.allContextRegExp, context);
     }
 
     const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
@@ -60,7 +60,7 @@ export async function deployImageToAzure(context: IActionContext, node?: TagTree
     window.showInformationMessage(createdNewWebApp);
 }
 
-async function getNewSiteConfig(node: TagTreeItemBase): Promise<SiteConfig> {
+async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig> {
     let registryTI: RegistryTreeItemBase = node.parent.parent;
 
     let username: string | undefined;

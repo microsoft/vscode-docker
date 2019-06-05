@@ -6,11 +6,11 @@
 import { ProgressLocation, window } from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { TagTreeItemBase } from '../tree/TagTreeItemBase';
+import { RemoteTagTreeItemBase } from '../tree/RemoteTagTreeItemBase';
 
-export async function deleteImage(context: IActionContext, node?: TagTreeItemBase): Promise<void> {
+export async function deleteImage(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<TagTreeItemBase>(/^(azure|private)Tag$/i, { ...context, suppressCreatePick: true });
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(/^(azure|private)Tag$/i, { ...context, suppressCreatePick: true });
     }
 
     const confirmDelete = `Are you sure you want to delete image "${node.fullTag}"? This will delete all images that have the same digest.`;
