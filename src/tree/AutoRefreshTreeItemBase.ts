@@ -6,7 +6,7 @@
 import { TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { isLinux } from "../utils/osVersion";
-import { treeUtils } from "../utils/treeUtils";
+import { getThemedIconPath } from "./IconPath";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 
 export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
@@ -58,7 +58,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
             context.telemetry.properties.noItems = 'true';
             return [new GenericTreeItem(this, {
                 label: this.noItemsMessage,
-                iconPath: treeUtils.getThemedIconPath('info'),
+                iconPath: getThemedIconPath('info'),
                 contextValue: 'dockerNoItems'
             })];
         } else {

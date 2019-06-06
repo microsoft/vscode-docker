@@ -10,7 +10,7 @@ import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
 import { ISubscriptionContext, parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { AzureRegistryTreeItem } from '../tree/azure/AzureRegistryTreeItem';
+import { AzureRegistryTreeItem } from '../tree/registries/azure/AzureRegistryTreeItem';
 
 function parseResourceId(id: string): RegExpMatchArray {
     const matches: RegExpMatchArray | null = id.match(/\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/(.*)\/(.*)/i);

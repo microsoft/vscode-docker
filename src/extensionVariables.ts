@@ -8,7 +8,7 @@ import { RequestAPI, RequiredUriUrl } from 'request';
 import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
-import { DockerHubAccountTreeItem } from './tree/dockerHub/DockerHubAccountTreeItem';
+import { DockerHubAccountTreeItem } from './tree/registries/dockerHub/DockerHubAccountTreeItem';
 import { IKeytar } from './utils/keytar';
 import { ITerminalProvider } from "./utils/TerminalProvider";
 

@@ -6,10 +6,10 @@
 import { window } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerCommand } from "vscode-azureextensionui";
 import { ext } from '../extensionVariables';
-import { ContainersTreeItem } from './ContainersTreeItem';
-import { ImagesTreeItem } from "./ImagesTreeItem";
+import { ContainersTreeItem } from './containers/ContainersTreeItem';
+import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
-import { RegistriesTreeItem } from "./RegistriesTreeItem";
+import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
 
 export function initTrees(): void {
     const containersTreeItem = new ContainersTreeItem(undefined);

@@ -5,7 +5,7 @@
 
 import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
 import { openExternal } from "../utils/openExternal";
-import { treeUtils } from "../utils/treeUtils";
+import { getThemedIconPath } from "./IconPath";
 
 export class OpenUrlTreeItem extends GenericTreeItem {
     private _url: string;
@@ -14,7 +14,7 @@ export class OpenUrlTreeItem extends GenericTreeItem {
         super(parent, {
             commandId: 'vscode-docker.openUrl',
             contextValue: 'openUrl',
-            iconPath: treeUtils.getThemedIconPath('web'),
+            iconPath: getThemedIconPath('web'),
             includeInTreeItemPicker: true,
             label
         });
