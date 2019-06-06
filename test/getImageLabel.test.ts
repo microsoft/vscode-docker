@@ -4,19 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { getImageLabel } from '../extension.bundle';
 import { date } from 'azure-storage';
+import { ImageInfo } from 'dockerode';
+import { getImageLabel } from '../extension.bundle';
 
 function testGetImageLabelTruncated(fullTag: string, labelTemplate: string, truncateLongRegistryPaths: boolean, truncateMaxLength: number, expected: string): void {
     test(`${String(fullTag)}: "${labelTemplate}"/${truncateLongRegistryPaths}/${truncateMaxLength}`, () => {
-        let label = getImageLabel(fullTag, <Docker.ImageDesc>{}, labelTemplate, { truncateLongRegistryPaths, truncateMaxLength });
+        let label = getImageLabel(fullTag, <ImageInfo>{}, labelTemplate, { truncateLongRegistryPaths, truncateMaxLength });
         assert.equal(label, expected);
     });
 }
 
 function testGetImageLabel(fullTag: string, labelTemplate: string, expected: string): void {
     test(`${String(fullTag)}: "${labelTemplate}", no truncation`, () => {
-        let s2 = getImageLabel(fullTag, <Docker.ImageDesc>{}, labelTemplate, { truncateLongRegistryPaths: false, truncateMaxLength: 1 });
+        let s2 = getImageLabel(fullTag, <ImageInfo>{}, labelTemplate, { truncateLongRegistryPaths: false, truncateMaxLength: 1 });
         assert.equal(s2, expected);
     });
 }
@@ -110,12 +111,12 @@ suite('getImageLabel: tag', () => {
 });
 
 suite('getImageLabel: createdSince', () => {
-    let label = getImageLabel('hello', <Docker.ImageDesc>{ Created: date.daysFromNow(-1).valueOf() / 1000 }, '{createdSince}');
+    let label = getImageLabel('hello', <ImageInfo>{ Created: date.daysFromNow(-1).valueOf() / 1000 }, '{createdSince}');
     assert.equal(label, 'a day ago');
 });
 
 suite('getImageLabel: shortImageId', () => {
-    let label = getImageLabel('hello', <Docker.ImageDesc>{ Created: date.daysFromNow(-1).valueOf() / 1000, Id: 'sha256:d0eed8dad114db55d81c870efb8c148026da4a0f61dc7710c053da55f9604849' }, '{shortImageId}');
+    let label = getImageLabel('hello', <ImageInfo>{ Created: date.daysFromNow(-1).valueOf() / 1000, Id: 'sha256:d0eed8dad114db55d81c870efb8c148026da4a0f61dc7710c053da55f9604849' }, '{shortImageId}');
     assert.equal(label, 'd0eed8dad114');
 });
 

@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as Docker from 'dockerode';
+import { ImageInfo } from 'dockerode';
 import * as moment from 'moment';
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext, ImageGrouping } from '../../extensionVariables';
-import { docker } from '../../utils/docker-endpoint';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getImageLabel } from './getImageLabel';
 
 export interface IImageAndTag {
-    image: Docker.ImageDesc;
+    image: ImageInfo;
     fullTag: string;
 }
 
@@ -20,7 +19,7 @@ export class ImageTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
 
-    public image: Docker.ImageDesc;
+    public image: ImageInfo;
     public fullTag: string;
 
     public constructor(parent: AzExtParentTreeItem, item: IImageAndTag) {
@@ -54,15 +53,7 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public async deleteTreeItemImpl(): Promise<void> {
-        await new Promise((resolve, reject) => {
-            docker.getImage(this.image.Id).remove({ force: true }, (error) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve();
-                }
-            });
-        });
+        await ext.dockerode.getImage(this.image.Id).remove({ force: true });
     }
 }
 

@@ -7,15 +7,14 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { docker, DockerEngineType } from '../../utils/docker-endpoint';
 import { openExternal } from '../../utils/openExternal';
+import { getDockerOSType } from '../../utils/osUtils';
 
 export async function runAzureCliImage(context: IActionContext): Promise<void> {
-    // block if we are running windows containers...
-    const engineType: DockerEngineType = await docker.getEngineType();
-    context.telemetry.properties.engineType = DockerEngineType[engineType];
+    let osType = await getDockerOSType();
+    context.telemetry.properties.dockerOSType = osType;
 
-    if (engineType === DockerEngineType.Windows) {
+    if (osType === "windows") {
         const message = 'Currently, you can only run the Azure CLI when running Linux based containers.';
         if (await vscode.window.showErrorMessage(message, DialogResponses.learnMore) === DialogResponses.learnMore) {
             await openExternal('https://docs.docker.com/docker-for-windows/#/switch-between-windows-and-linux-containers');

@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as Docker from 'dockerode';
+import { ContainerInfo } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
-import { docker } from '../../utils/docker-endpoint';
+import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
 
 export class ContainerTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
-    public container: Docker.ContainerDesc;
+    public container: ContainerInfo;
 
-    public constructor(parent: AzExtParentTreeItem, container: Docker.ContainerDesc) {
+    public constructor(parent: AzExtParentTreeItem, container: ContainerInfo) {
         super(parent);
         this.container = container;
     }
@@ -66,14 +66,6 @@ export class ContainerTreeItem extends AzExtTreeItem {
     }
 
     public async deleteTreeItemImpl(): Promise<void> {
-        await new Promise((resolve, reject) => {
-            docker.getContainer(this.container.Id).remove({ force: true }, (error) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve();
-                }
-            });
-        });
+        await ext.dockerode.getContainer(this.container.Id).remove({ force: true });
     }
 }

@@ -6,7 +6,6 @@
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { docker } from '../../utils/docker-endpoint';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     return await runImageCore(context, node, false);
@@ -21,7 +20,9 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
     }
 
-    const ports: string[] = await docker.getExposedPorts(node.image.Id);
+    const inspectInfo = await ext.dockerode.getImage(node.image.Id).inspect();
+    const ports: string[] = inspectInfo.Config.ExposedPorts ? Object.keys(inspectInfo.Config.ExposedPorts) : [];
+
     let options = `--rm ${interactive ? '-it' : '-d'}`;
     if (ports.length) {
         const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`); //'port' is of the form number/protocol, eg. 8080/udp.

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
 import { RequestAPI, RequiredUriUrl } from 'request';
 import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
@@ -32,6 +33,7 @@ export namespace ext {
     export let reporter: ITelemetryReporter;
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
+    export let dockerode: Dockerode;
 
     export let imagesTree: AzExtTreeDataProvider;
     export let imagesTreeView: TreeView<AzExtTreeItem>;

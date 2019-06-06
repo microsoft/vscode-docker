@@ -3,34 +3,34 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerDesc } from "dockerode";
+import { ContainerInfo } from "dockerode";
 import { AzExtTreeItem } from "vscode-azureextensionui";
-import { docker, ListContainerDescOptions } from "../../utils/docker-endpoint";
+import { ext } from "../../extensionVariables";
 import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
-export class ContainersTreeItem extends AutoRefreshTreeItemBase<ContainerDesc> {
+export class ContainersTreeItem extends AutoRefreshTreeItemBase<ContainerInfo> {
     public static contextValue: string = 'containers';
     public contextValue: string = ContainersTreeItem.contextValue;
     public label: string = 'Containers';
     public childTypeLabel: string = 'container';
     public noItemsMessage: string = "Successfully connected, but no containers found.";
 
-    public getItemID(item: ContainerDesc): string {
+    public getItemID(item: ContainerInfo): string {
         return item.Id + item.State;
     }
 
-    public async getItems(): Promise<ContainerDesc[]> {
-        const options: ListContainerDescOptions = {
+    public async getItems(): Promise<ContainerInfo[]> {
+        const options = {
             "filters": {
                 "status": ["created", "restarting", "running", "paused", "exited", "dead"]
             }
         };
 
-        return await docker.getContainerDescriptors(options) || [];
+        return await ext.dockerode.listContainers(options) || [];
     }
 
-    public async  convertToTreeItems(items: ContainerDesc[]): Promise<AzExtTreeItem[]> {
+    public async  convertToTreeItems(items: ContainerInfo[]): Promise<AzExtTreeItem[]> {
         return items.map(c => new ContainerTreeItem(this, c));
     }
 

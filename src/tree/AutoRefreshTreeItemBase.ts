@@ -5,7 +5,7 @@
 
 import { TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
-import { isLinux } from "../utils/osVersion";
+import { isLinux } from "../utils/osUtils";
 import { getThemedIconPath } from "./IconPath";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 
@@ -16,7 +16,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
 
     public abstract noItemsMessage: string;
     public abstract getItemID(item: T): string;
-    public abstract getItems(): Promise<T[]>;
+    public abstract getItems(): Promise<T[] | undefined>;
     public abstract convertToTreeItems(items: T[]): Promise<AzExtTreeItem[]>;
 
     public initAutoRefresh(treeView: TreeView<AzExtTreeItem>): void {
@@ -98,7 +98,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
     }
 
     private async getSortedItems(): Promise<T[]> {
-        const items: T[] = await this.getItems();
+        const items: T[] = await this.getItems() || [];
         return items.sort((a, b) => this.getItemID(a).localeCompare(this.getItemID(b)));
     }
 

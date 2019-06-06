@@ -7,27 +7,22 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { docker, DockerEngineType } from '../../utils/docker-endpoint';
+import { getDockerOSType } from '../../utils/osUtils';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
     }
 
-    let engineType = await docker.getEngineType();
-    context.telemetry.properties.engineType = DockerEngineType[engineType];
+    let osType = await getDockerOSType();
+    context.telemetry.properties.dockerOSType = osType;
 
     let shellCommand: string;
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    switch (engineType) {
-        case DockerEngineType.Linux:
-            shellCommand = configOptions.get('attachShellCommand.linuxContainer');
-            break;
-        case DockerEngineType.Windows:
-            shellCommand = configOptions.get('attachShellCommand.windowsContainer');
-            break;
-        default:
-            throw new RangeError(`Unexpected engine type ${engineType}`);
+    if (osType === 'windows') {
+        shellCommand = configOptions.get('attachShellCommand.windowsContainer');
+    } else {
+        shellCommand = configOptions.get('attachShellCommand.linuxContainer');
     }
     context.telemetry.properties.shellCommand = shellCommand;
 

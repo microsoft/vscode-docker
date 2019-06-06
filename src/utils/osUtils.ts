@@ -50,3 +50,16 @@ export function isLinux(): boolean {
 export function isMac(): boolean {
     return ext.os.platform === 'darwin';
 }
+
+export type DockerOSType = "windows" | "linux";
+
+export async function getDockerOSType(): Promise<DockerOSType> {
+    if (!isWindows()) {
+        // On Linux or macOS, this can only ever be linux,
+        // so short-circuit the Docker call entirely.
+        return "linux";
+    } else {
+        const info = <{ OSType: DockerOSType }>await ext.dockerode.info();
+        return info.OSType;
+    }
+}

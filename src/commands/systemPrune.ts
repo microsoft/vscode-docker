@@ -7,7 +7,6 @@ import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { docker } from '../utils/docker-endpoint';
 
 export async function systemPrune(_context: IActionContext): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
@@ -25,9 +24,7 @@ export async function systemPrune(_context: IActionContext): Promise<void> {
         }
     }
 
-    // EngineInfo in dockerode is incomplete
-    const info = <Docker.EngineInfo & { ServerVersion: string }>await docker.getEngineInfo();
-
+    const info = <{ ServerVersion: string }>await ext.dockerode.info();
     // in docker 17.06.1 and higher you must specify the --volumes flag
     if (semver.gte(info.ServerVersion, '17.6.1', true)) {
         terminal.sendText(`docker system prune --volumes -f`);

@@ -7,7 +7,6 @@ import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { docker } from '../../utils/docker-endpoint';
 
 export async function startContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
     let nodes: ContainerTreeItem[];
@@ -19,15 +18,7 @@ export async function startContainer(context: IActionContext, node: ContainerTre
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Starting Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
-            await new Promise((resolve, reject) => {
-                docker.getContainer(n.container.Id).start((error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
+            await ext.dockerode.getContainer(n.container.Id).start();
         }));
     });
 }

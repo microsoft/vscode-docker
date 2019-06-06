@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ImageDesc } from 'dockerode';
+import { ImageInfo } from 'dockerode';
 import * as moment from 'moment';
 import * as vscode from 'vscode';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 // If options not specified, retrieves them from user settings
-export function getImageLabel(fullTag: string, image: ImageDesc, labelTemplate: string, options?: { truncateLongRegistryPaths: boolean, truncateMaxLength: number }): string {
+export function getImageLabel(fullTag: string, image: ImageInfo, labelTemplate: string, options?: { truncateLongRegistryPaths: boolean, truncateMaxLength: number }): string {
     let truncatedRepository = truncate(getRepository(fullTag), options);
     let repositoryName = getRepositoryName(fullTag);
     let tag = getTag(fullTag);

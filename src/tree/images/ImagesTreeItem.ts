@@ -5,7 +5,6 @@
 
 import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext, ImageGrouping } from "../../extensionVariables";
-import { docker } from "../../utils/docker-endpoint";
 import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
 import { getImageLabel } from "./getImageLabel";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
@@ -41,7 +40,7 @@ export class ImagesTreeItem extends AutoRefreshTreeItemBase<IImageAndTag> {
             }
         };
 
-        const images = await docker.getImageDescriptors(options) || [];
+        const images = await ext.dockerode.listImages(options) || [];
         let result: IImageAndTag[] = [];
         for (const image of images) {
             if (!image.RepoTags) {

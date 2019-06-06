@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import vscode = require('vscode');
+import { Image } from 'dockerode';
+import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { docker } from '../../utils/docker-endpoint';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
@@ -28,18 +28,8 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
         tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
     }
 
-    const image: Docker.Image = docker.getImage(node.image.Id);
-
-    await new Promise((resolve, reject) => {
-        image.tag({ repo: repo, tag: tag }, (error) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
-        });
-    });
-
+    const image: Image = ext.dockerode.getImage(node.image.Id);
+    await image.tag({ repo: repo, tag: tag });
     return newTaggedName;
 }
 
