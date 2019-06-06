@@ -11,7 +11,7 @@ import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
 
-export function initTrees(): void {
+export function registerTrees(): void {
     const containersTreeItem = new ContainersTreeItem(undefined);
     const containersLoadMore = 'vscode-docker.containers.loadMore';
     ext.containersTree = new AzExtTreeDataProvider(containersTreeItem, containersLoadMore);
