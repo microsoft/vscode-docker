@@ -17,11 +17,14 @@ export async function deleteRemoteImage(context: IActionContext, node?: RemoteTa
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
 
+    const repoTI = node.parent;
     const deleting = `Deleting image "${node.fullTag}"...`;
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
         await node.deleteTreeItem(context);
     });
 
+    // Other tags that also matched the image may have been deleted, so refresh the whole repository
+    await repoTI.refresh();
     const message = `Successfully deleted image "${node.fullTag}".`;
     // don't wait
     window.showInformationMessage(message);
