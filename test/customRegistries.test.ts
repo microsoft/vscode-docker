@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assertEx from './assertEx';
+import { Context, Suite } from 'mocha';
 import { commands, OutputChannel, window } from 'vscode';
-import { ext } from '../extension.bundle';
-import { Suite, Context } from 'mocha';
-import { TestTerminalProvider } from './TestTerminalProvider';
 import { TestUserInput } from 'vscode-azureextensionui';
+import { ext } from '../extension.bundle';
+import * as assertEx from './assertEx';
 import { shouldSkipDockerTest } from './dockerInfo';
+import { TestTerminalProvider } from './TestTerminalProvider';
 
 const registryContainerName = 'test-registry';
 
@@ -70,7 +70,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
                 ''
             ]);
             ext.ui = input;
-            await commands.executeCommand('vscode-docker.connectCustomRegistry');
+            await commands.executeCommand('vscode-docker.registries.private.connectRegistry');
 
             // TODO: Verify the node is there (have to start using common tree provider first)
         });
@@ -85,7 +85,7 @@ suite("Custom registries", async function (this: Suite): Promise<void> {
                     ''
                 ]);
                 ext.ui = input;
-                await commands.executeCommand('vscode-docker.connectCustomRegistry');
+                await commands.executeCommand('vscode-docker.registries.private.connectRegistry');
 
                 // TODO: Verify the node is there (have to start using common tree provider first)
             } finally {

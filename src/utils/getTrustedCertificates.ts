@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../extensionVariables';
 import { globAsync } from './globAsync';
-import { isLinux, isMac, isWindows } from './osVersion';
+import { isLinux, isMac, isWindows } from './osUtils';
 
 let _systemCertificates: (string | Buffer)[] | undefined;
 

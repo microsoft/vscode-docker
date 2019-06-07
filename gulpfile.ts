@@ -31,6 +31,25 @@ function spawn(command: string, args: string[], options: {}): cp.ChildProcess {
     return cp.spawn(command, args, options);
 }
 
+async function sortPackageJson(): Promise<void> {
+    const fsPath = path.join(__dirname, 'package.json');
+    console.log(fsPath);
+    // tslint:disable: no-any no-unsafe-any
+    const packageJson: any = await fse.readJSON(fsPath);
+    packageJson.activationEvents.sort();
+    packageJson.contributes.menus["view/item/context"].sort((a, b) => {
+        if (a.group === b.group) {
+            return a.command.localeCompare(b.command);
+        } else {
+            return a.group.localeCompare(b.group);
+        }
+    });
+    packageJson.contributes.commands.sort((a, b) => a.command.localeCompare(b.command));
+    await fse.writeFile(fsPath, JSON.stringify(packageJson, undefined, 4));
+    // tslint:enable: no-any no-unsafe-any
+}
+
+exports.sortPackageJson = sortPackageJson;
 exports['webpack-dev'] = () => gulp_webpack('development');
 exports['webpack-prod'] = () => gulp_webpack('production');
 exports.test = gulp.series(gulp_installAzureAccount, test);

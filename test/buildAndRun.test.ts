@@ -4,20 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 // The module 'assert' provides assertion methods from node
-import * as assert from 'assert';
-import * as assertEx from './assertEx';
-import * as vscode from 'vscode';
-import { commands } from 'vscode';
-import { Uri } from 'vscode';
-import * as fse from 'fs-extra';
 import * as AdmZip from 'adm-zip';
+import * as assert from 'assert';
+import * as fse from 'fs-extra';
+import { Context, Suite } from 'mocha';
 import * as path from 'path';
-import { Platform, configure, httpsRequestBinary, ext } from '../extension.bundle';
-import { Suite, Context } from 'mocha';
-import { TestUserInput, IActionContext } from 'vscode-azureextensionui';
+import * as vscode from 'vscode';
+import { commands, Uri } from 'vscode';
+import { IActionContext, TestUserInput } from 'vscode-azureextensionui';
+import { configure, ext, httpsRequestBinary, Platform } from '../extension.bundle';
+import * as assertEx from './assertEx';
+import { shouldSkipDockerTest } from './dockerInfo';
 import { getTestRootFolder, testInEmptyFolder } from './global.test';
 import { TestTerminalProvider } from './TestTerminalProvider';
-import { shouldSkipDockerTest } from './dockerInfo';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -89,7 +88,7 @@ suite("Build Image", function (this: Suite): void {
         // Build image
         ext.ui = new TestUserInput(buildInputs);
         let dockerFile = Uri.file(path.join(testRootFolder, 'Dockerfile'));
-        await commands.executeCommand('vscode-docker.image.build', dockerFile);
+        await commands.executeCommand('vscode-docker.images.build', dockerFile);
         assert.equal(configureInputs.length, 0, 'Not all inputs were used for Build Image');
 
         let { outputText, errorText } = await testTerminalProvider.currentTerminal!.exit();
