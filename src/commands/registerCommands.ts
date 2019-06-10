@@ -9,6 +9,7 @@ import { configure, configureApi } from "../configureWorkspace/configure";
 import { ext } from "../extensionVariables";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
+import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
 import { restartContainer } from "./containers/restartContainer";
@@ -58,6 +59,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.system.prune', systemPrune);
 
     registerCommand('vscode-docker.containers.attachShell', attachShellContainer);
+    registerCommand('vscode-docker.containers.inspect', inspectContainer);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);

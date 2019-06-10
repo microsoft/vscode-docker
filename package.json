@@ -35,6 +35,7 @@
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.containers.attachShell",
+        "onCommand:vscode-docker.containers.inspect",
         "onCommand:vscode-docker.containers.prune",
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
@@ -237,19 +238,24 @@
                     "group": "containers_1_general@2"
                 },
                 {
+                    "command": "vscode-docker.containers.inspect",
+                    "when": "view == dockerContainers && viewItem =~ /container$/i",
+                    "group": "containers_1_general@3"
+                },
+                {
                     "command": "vscode-docker.containers.start",
                     "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused)Container$/i",
-                    "group": "containers_1_general@3"
+                    "group": "containers_1_general@4"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
                     "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i",
-                    "group": "containers_1_general@4"
+                    "group": "containers_1_general@5"
                 },
                 {
                     "command": "vscode-docker.containers.restart",
                     "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i",
-                    "group": "containers_1_general@5"
+                    "group": "containers_1_general@6"
                 },
                 {
                     "command": "vscode-docker.containers.remove",
@@ -918,6 +924,11 @@
             {
                 "command": "vscode-docker.containers.attachShell",
                 "title": "Attach Shell",
+                "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.containers.inspect",
+                "title": "Inspect",
                 "category": "Docker Containers"
             },
             {
