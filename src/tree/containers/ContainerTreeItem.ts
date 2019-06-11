@@ -7,6 +7,7 @@ import { ContainerInfo } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
+import { workspace } from 'vscode';
 
 export class ContainerTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
@@ -18,13 +19,11 @@ export class ContainerTreeItem extends AzExtTreeItem {
     }
 
     public get label(): string {
-        return this.container.Image;
+        return this.configuredLabel;
     }
 
     public get description(): string {
-        let name = this.container.Names[0].substr(1); // Remove start '/'
-        let status = this.container.Status;
-        return [name, status].join(' - ');
+        return this.configuredDescription;
     }
 
     public get id(): string {
@@ -67,5 +66,35 @@ export class ContainerTreeItem extends AzExtTreeItem {
 
     public async deleteTreeItemImpl(): Promise<void> {
         await ext.dockerode.getContainer(this.container.Id).remove({ force: true });
+    }
+
+    private get configuredLabel(): string {
+        let config = workspace.getConfiguration('docker');
+        let imageFirst = config.get<boolean>('imageFirst');
+        if (imageFirst) {
+            return this.getImage;
+        } else {
+            return this.getNameAndState;
+        }
+    }
+
+    private get configuredDescription(): string {
+        let config = workspace.getConfiguration('docker');
+        let imageFirst = config.get<boolean>('imageFirst');
+        if (imageFirst) {
+            return this.getNameAndState;
+        } else {
+            return this.getImage;
+        }
+    }
+
+    private get getImage(): string {
+        return this.container.Image;
+    }
+
+    private get getNameAndState(): string {
+        let name = this.container.Names[0].substr(1); // Remove start '/'
+        let status = this.container.Status;
+        return [name, status].join(' - ');
     }
 }

@@ -892,6 +892,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Run docker-compose with the --d (detached) argument, defaults to true"
+                },
+                "docker.imageFirst": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "When displaying containers, show the image first if true, otherwise show the container name first; defaults to true"
                 }
             }
         },
