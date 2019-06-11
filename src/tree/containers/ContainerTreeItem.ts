@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerInfo } from "dockerode";
+import { workspace } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { workspace } from 'vscode';
 
 export class ContainerTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
