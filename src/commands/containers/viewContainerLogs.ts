@@ -12,7 +12,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
     }
 
-    const terminal = ext.terminalProvider.createTerminal(node.container.Image);
-    terminal.sendText(`docker logs -f ${node.container.Id}`);
+    const terminal = ext.terminalProvider.createTerminal(node.fullTag);
+    terminal.sendText(`docker logs -f ${node.containerId}`);
     terminal.show();
 }

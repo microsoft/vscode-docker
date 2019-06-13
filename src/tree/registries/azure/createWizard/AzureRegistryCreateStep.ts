@@ -5,8 +5,8 @@
 
 import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
 import { Progress } from 'vscode';
-import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 import { AzureWizardExecuteStep, createAzureClient } from 'vscode-azureextensionui';
+import { ext } from '../../../../extensionVariables';
 import { nonNullProp } from '../../../../utils/nonNull';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 

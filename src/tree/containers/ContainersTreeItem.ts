@@ -3,43 +3,45 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerInfo } from "dockerode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "../settings/commonTreeSettings";
+import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
+import { ContainerProperty, ContainersGroupBy, ContainersSortBy, containersTreePrefix, getContainerPropertyValue } from "./containersTreeSettings";
 import { ContainerTreeItem } from "./ContainerTreeItem";
+import { LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainersTreeItem extends AutoRefreshTreeItemBase<ContainerInfo> {
-    public static contextValue: string = 'containers';
-    public contextValue: string = ContainersTreeItem.contextValue;
+export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo> {
+    public treePrefix: string = containersTreePrefix;
     public label: string = 'Containers';
-    public childTypeLabel: string = 'container';
     public noItemsMessage: string = "Successfully connected, but no containers found.";
+    public childType: LocalChildType<LocalContainerInfo> = ContainerTreeItem;
+    public childGroupType: LocalChildGroupType<LocalContainerInfo> = ContainerGroupTreeItem;
+    public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = ContainersSortBy;
+    public groupBySettingInfo: ITreeSettingInfo<ContainerProperty | CommonGroupBy> = ContainersGroupBy;
 
-    public getItemID(item: ContainerInfo): string {
-        return item.Id + item.State;
+    public get childTypeLabel(): string {
+        const groupBy = getTreeSetting(ContainersGroupBy);
+        return groupBy === 'None' ? 'container' : 'container group';
     }
 
-    public async getItems(): Promise<ContainerInfo[]> {
+    public async getItems(): Promise<LocalContainerInfo[]> {
         const options = {
             "filters": {
                 "status": ["created", "restarting", "running", "paused", "exited", "dead"]
             }
         };
 
-        return await ext.dockerode.listContainers(options) || [];
+        const items = await ext.dockerode.listContainers(options) || [];
+        return items.map(c => new LocalContainerInfo(c));
     }
 
-    public async  convertToTreeItems(items: ContainerInfo[]): Promise<AzExtTreeItem[]> {
-        return items.map(c => new ContainerTreeItem(this, c));
-    }
-
-    public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
-        if (ti1 instanceof ContainerTreeItem && ti2 instanceof ContainerTreeItem) {
-            // tslint:disable-next-line: no-unsafe-any no-any
-            return (<any>ti2.container).Created - (<any>ti1.container).Created;
+    public getGroup(item: LocalContainerInfo): string | undefined {
+        let groupBy = getTreeSetting(ContainersGroupBy);
+        if (groupBy === 'None') {
+            return undefined;
         } else {
-            return super.compareChildrenImpl(ti1, ti2);
+            return getContainerPropertyValue(item, groupBy);
         }
     }
 }

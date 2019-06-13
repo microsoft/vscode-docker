@@ -6,16 +6,16 @@
 import { IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getTreeSetting } from "../settings/commonTreeSettings";
-import { getImageGroupIcon, ImagesGroupBy } from "./imagesTreeSettings";
-import { ILocalImageInfo } from "./LocalImageInfo";
+import { ContainersGroupBy, getContainerGroupIcon } from "./containersTreeSettings";
+import { LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ImageGroupTreeItem extends LocalGroupTreeItemBase<ILocalImageInfo> {
-    public static readonly contextValue: string = 'imageGroup';
-    public readonly contextValue: string = ImageGroupTreeItem.contextValue;
-    public childTypeLabel: string = 'image';
+export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContainerInfo> {
+    public static readonly contextValue: string = 'containerGroup';
+    public readonly contextValue: string = ContainerGroupTreeItem.contextValue;
+    public childTypeLabel: string = 'container';
 
     public get iconPath(): IconPath {
-        let groupBy = getTreeSetting(ImagesGroupBy);
-        return getImageGroupIcon(groupBy);
+        let groupBy = getTreeSetting(ContainersGroupBy);
+        return getContainerGroupIcon(groupBy, this.group);
     }
 }

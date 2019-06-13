@@ -28,12 +28,12 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
         tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
     }
 
-    const image: Image = ext.dockerode.getImage(node.image.Id);
+    const image: Image = node.getImage();
     await image.tag({ repo: repo, tag: tag });
     return newTaggedName;
 }
 
-export async function getTagFromUserInput(imageName: string, addDefaultRegistry: boolean): Promise<string> {
+export async function getTagFromUserInput(fullTag: string, addDefaultRegistry: boolean): Promise<string> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
 
@@ -42,15 +42,15 @@ export async function getTagFromUserInput(imageName: string, addDefaultRegistry:
         prompt: 'Tag image as...',
     };
     if (addDefaultRegistry) {
-        let registryLength: number = imageName.indexOf('/');
+        let registryLength: number = fullTag.indexOf('/');
         if (defaultRegistryPath.length > 0 && registryLength < 0) {
-            imageName = defaultRegistryPath + '/' + imageName;
+            fullTag = defaultRegistryPath + '/' + fullTag;
             registryLength = defaultRegistryPath.length;
         }
         opt.valueSelection = registryLength < 0 ? undefined : [0, registryLength + 1];  //include the '/'
     }
 
-    opt.value = imageName;
+    opt.value = fullTag;
 
     const nameWithTag: string = await ext.ui.showInputBox(opt);
     return nameWithTag;

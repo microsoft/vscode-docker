@@ -3,23 +3,43 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
+import { ConfigurationChangeEvent, TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
+import { configPrefix } from "../constants";
 import { isLinux } from "../utils/osUtils";
 import { getThemedIconPath } from "./IconPath";
+import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
+import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "./settings/commonTreeSettings";
 
-export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
+export interface ILocalItem {
+    createdTime: number;
+    treeId: string;
+    data: {};
+}
+
+export type LocalChildType<T extends ILocalItem> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; };
+export type LocalChildGroupType<T extends ILocalItem> = new (parent: LocalRootTreeItemBase<T>, group: string, items: T[]) => LocalGroupTreeItemBase<T>;
+
+export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtParentTreeItem {
     private _currentItems: T[] | undefined;
     private _itemsFromPolling: T[] | undefined;
     private _failedToConnect: boolean = false;
 
+    public abstract treePrefix: string;
     public abstract noItemsMessage: string;
-    public abstract getItemID(item: T): string;
+    public abstract childType: LocalChildType<T>;
+    public abstract childGroupType: LocalChildGroupType<T>;
     public abstract getItems(): Promise<T[] | undefined>;
-    public abstract convertToTreeItems(items: T[]): Promise<AzExtTreeItem[]>;
+    public abstract getGroup(item: T): string | undefined;
+    public abstract sortBySettingInfo: ITreeSettingInfo<CommonSortBy>;
+    public abstract groupBySettingInfo: ITreeSettingInfo<string | CommonGroupBy>;
 
-    public initAutoRefresh(treeView: TreeView<AzExtTreeItem>): void {
+    public get contextValue(): string {
+        return this.treePrefix;
+    }
+
+    public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
         let intervalId: NodeJS.Timeout;
         registerEvent('treeView.onDidChangeVisibility', treeView.onDidChangeVisibility, (context: IActionContext, e: TreeViewVisibilityChangeEvent) => {
             context.errorHandling.suppressDisplay = true;
@@ -38,6 +58,16 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
                     refreshInterval);
             } else {
                 clearInterval(intervalId);
+            }
+        });
+
+        registerEvent('treeView.onDidChangeConfiguration', workspace.onDidChangeConfiguration, async (context: IActionContext, e: ConfigurationChangeEvent) => {
+            context.errorHandling.suppressDisplay = true;
+            context.telemetry.suppressIfSuccessful = true;
+            context.telemetry.properties.isActivationEvent = 'true';
+
+            if (e.affectsConfiguration(`${configPrefix}.${this.treePrefix}`)) {
+                await this.refresh();
             }
         });
     }
@@ -62,7 +92,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
                 contextValue: 'dockerNoItems'
             })];
         } else {
-            return await this.convertToTreeItems(this._currentItems);
+            return this.groupItems(this._currentItems);
         }
     }
 
@@ -74,8 +104,59 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
         if (this._failedToConnect) {
             return 0; // children are already sorted
         } else {
+            if (ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType) {
+                const groupBy = getTreeSetting(this.groupBySettingInfo);
+                if (groupBy === 'CreatedTime' && ti2.maxCreatedTime !== ti1.maxCreatedTime) {
+                    return ti2.maxCreatedTime - ti1.maxCreatedTime;
+                }
+            } else if (ti1 instanceof this.childType && ti2 instanceof this.childType) {
+                const sortBy = getTreeSetting(this.sortBySettingInfo)
+                if (sortBy === 'CreatedTime' && ti2.createdTime !== ti1.createdTime) {
+                    return ti2.createdTime - ti1.createdTime;
+                }
+            }
+
             return super.compareChildrenImpl(ti1, ti2);
         }
+    }
+
+    private async groupItems(items: T[]): Promise<AzExtTreeItem[]> {
+        const itemsWithNoGroup: T[] = [];
+        const groupMap = new Map<string, T[]>();
+        for (const item of items) {
+            const groupName: string | undefined = this.getGroup(item);
+            if (!groupName) {
+                itemsWithNoGroup.push(item);
+            } else {
+                const groupedItems = groupMap.get(groupName);
+                if (groupedItems) {
+                    groupedItems.push(item);
+                } else {
+                    groupMap.set(groupName, [item]);
+                }
+            }
+        }
+
+        return await this.createTreeItemsWithErrorHandling(
+            [...itemsWithNoGroup, ...groupMap.entries()],
+            'invalidLocalItemOrGroup',
+            itemOrGroup => {
+                if (Array.isArray(itemOrGroup)) {
+                    const [groupName, groupedItems] = itemOrGroup;
+                    return new this.childGroupType(this, groupName, groupedItems);
+                } else {
+                    return new this.childType(this, itemOrGroup);
+                }
+            },
+            itemOrGroup => {
+                if (Array.isArray(itemOrGroup)) {
+                    const [group] = itemOrGroup;
+                    return group;
+                } else {
+                    return itemOrGroup.treeId;
+                }
+            }
+        );
     }
 
     private getDockerErrorTreeItems(error: unknown): AzExtTreeItem[] {
@@ -99,7 +180,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
 
     private async getSortedItems(): Promise<T[]> {
         const items: T[] = await this.getItems() || [];
-        return items.sort((a, b) => this.getItemID(a).localeCompare(this.getItemID(b)));
+        return items.sort((a, b) => a.treeId.localeCompare(b.treeId));
     }
 
     private async hasChanged(): Promise<boolean> {
@@ -120,7 +201,7 @@ export abstract class AutoRefreshTreeItemBase<T> extends AzExtParentTreeItem {
                 return false;
             } else {
                 return !array1.some((item1, index) => {
-                    return this.getItemID(item1) !== this.getItemID(array2[index]);
+                    return item1.treeId !== array2[index].treeId;
                 });
             }
         } else {

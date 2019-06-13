@@ -3,69 +3,67 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerInfo } from "dockerode";
+import { Container } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
+import { getTreeArraySetting, getTreeSetting } from "../settings/commonTreeSettings";
+import { ContainerDescription, ContainerLabel, getContainerPropertyValue, getStateIcon } from "./containersTreeSettings";
+import { LocalContainerInfo } from "./LocalContainerInfo";
 
 export class ContainerTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
-    public container: ContainerInfo;
+    private readonly _item: LocalContainerInfo;
 
-    public constructor(parent: AzExtParentTreeItem, container: ContainerInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalContainerInfo) {
         super(parent);
-        this.container = container;
-    }
-
-    public get label(): string {
-        return this.container.Image;
-    }
-
-    public get description(): string {
-        let name = this.container.Names[0].substr(1); // Remove start '/'
-        let status = this.container.Status;
-        return [name, status].join(' - ');
+        this._item = itemInfo;
     }
 
     public get id(): string {
-        return this.container.Id;
+        return this._item.treeId;
+    }
+
+    public get createdTime(): number {
+        return this._item.createdTime;
+    }
+
+    public get containerId(): string {
+        return this._item.containerId;
+    }
+
+    public get fullTag(): string {
+        return this._item.fullTag;
+    }
+
+    public get label(): string {
+        const prop = getTreeSetting(ContainerLabel);
+        return getContainerPropertyValue(this._item, prop);
+    }
+
+    public get description(): string {
+        let props = getTreeArraySetting(ContainerDescription);
+        const values: string[] = props.map(prop => getContainerPropertyValue(this._item, prop));
+        return values.join(' - ');
     }
 
     public get contextValue(): string {
-        return this.container.State + 'Container';
+        return this._item.state + 'Container';
     }
 
     public get iconPath(): IconPath {
-        let icon: string;
-        if (this.isUnhealthy) {
-            icon = 'statusWarning';
+        if (this._item.status.includes('(unhealthy)')) {
+            return getThemedIconPath('statusWarning');
         } else {
-            switch (this.container.State) {
-                case "created":
-                case "dead":
-                case "exited":
-                    icon = 'statusStop';
-                    break;
-                case "paused":
-                    icon = 'statusPause';
-                    break;
-                case "restarting":
-                    icon = 'restart';
-                    break;
-                case "running":
-                default:
-                    icon = 'statusRun';
-            }
+            return getStateIcon(this._item.state);
         }
-
-        return getThemedIconPath(icon);
     }
 
-    private get isUnhealthy(): boolean {
-        return this.container.Status.includes('(unhealthy)');
+    public getContainer(): Container {
+        return ext.dockerode.getContainer(this.containerId);
     }
 
     public async deleteTreeItemImpl(): Promise<void> {
-        await ext.dockerode.getContainer(this.container.Id).remove({ force: true });
+        await this.getContainer().remove({ force: true });
     }
 }

@@ -20,7 +20,7 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
     }
 
-    const inspectInfo = await ext.dockerode.getImage(node.image.Id).inspect();
+    const inspectInfo = await node.getImage().inspect();
     const ports: string[] = inspectInfo.Config.ExposedPorts ? Object.keys(inspectInfo.Config.ExposedPorts) : [];
 
     let options = `--rm ${interactive ? '-it' : '-d'}`;

@@ -9,6 +9,7 @@ import { configure, configureApi } from "../configureWorkspace/configure";
 import { ext } from "../extensionVariables";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
+import { configureContainersExplorer } from "./containers/configureContainersExplorer";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
@@ -17,7 +18,7 @@ import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
 import { buildImage } from "./images/buildImage";
-import { groupImagesBy } from "./images/groupImagesBy";
+import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pushImage } from "./images/pushImage";
@@ -48,6 +49,7 @@ import { disconnectPrivateRegistry } from "./registries/private/disconnectPrivat
 import { pullImage, pullRepository } from "./registries/pullImages";
 import { setRegistryAsDefault } from "./registries/registrySettings";
 import { systemPrune } from "./systemPrune";
+import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
@@ -62,6 +64,7 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.containers.attachShell', attachShellContainer);
     registerCommand('vscode-docker.containers.inspect', inspectContainer);
+    registerCommand('vscode-docker.containers.configureExplorer', configureContainersExplorer);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);
@@ -70,7 +73,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
 
     registerCommand('vscode-docker.images.build', buildImage);
-    registerCommand('vscode-docker.images.groupBy', groupImagesBy);
+    registerCommand('vscode-docker.images.configureExplorer', configureImagesExplorer);
     registerCommand('vscode-docker.images.inspect', inspectImage);
     registerCommand('vscode-docker.images.prune', pruneImages);
     registerCommand('vscode-docker.images.push', pushImage);
@@ -111,6 +114,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.private.connectRegistry', connectPrivateRegistry);
     registerCommand('vscode-docker.registries.private.disconnectRegistry', disconnectPrivateRegistry);
 
+    registerCommand('vscode-docker.volumes.configureExplorer', configureVolumesExplorer);
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);

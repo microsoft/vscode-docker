@@ -16,14 +16,14 @@ import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelect
 import { registerCommands } from './commands/registerCommands';
 import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
 import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
-import { COMPOSE_FILE_GLOB_PATTERN, configPrefix, configurationKeys, ignoreBundle } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN, ignoreBundle } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
-import { DefaultImageGrouping, ext, ImageGrouping } from './extensionVariables';
+import { ext } from './extensionVariables';
 import { registerTrees } from './tree/registerTrees';
 import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
@@ -116,7 +116,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerDebugConfigurationProvider(ctx);
 
         refreshDockerode();
-        refreshImageGrouping();
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient();
@@ -199,8 +198,6 @@ namespace Configuration {
                     refreshDockerode();
                     // tslint:disable-next-line: no-floating-promises
                     setRequestDefaults();
-                    refreshImageGrouping();
-                    await ext.imagesTree.refresh();
                 }
             }
         );
@@ -270,12 +267,6 @@ function activateLanguageClient(): void {
         });
         client.start();
     });
-}
-
-function refreshImageGrouping(): void {
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(configPrefix);
-    let imageGrouping: string | undefined = configOptions.get<string>(configurationKeys.groupImagesBy);
-    ext.groupImagesBy = imageGrouping && imageGrouping in ImageGrouping ? <ImageGrouping>ImageGrouping[imageGrouping] : DefaultImageGrouping;
 }
 
 function refreshDockerode(): void {

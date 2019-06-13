@@ -6,16 +6,16 @@
 import { IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getTreeSetting } from "../settings/commonTreeSettings";
-import { getImageGroupIcon, ImagesGroupBy } from "./imagesTreeSettings";
-import { ILocalImageInfo } from "./LocalImageInfo";
+import { LocalVolumeInfo } from "./LocalVolumeInfo";
+import { getVolumeGroupIcon, VolumesGroupBy } from "./volumeTreeSettings";
 
-export class ImageGroupTreeItem extends LocalGroupTreeItemBase<ILocalImageInfo> {
-    public static readonly contextValue: string = 'imageGroup';
-    public readonly contextValue: string = ImageGroupTreeItem.contextValue;
-    public childTypeLabel: string = 'image';
+export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<LocalVolumeInfo> {
+    public static readonly contextValue: string = 'volumeGroup';
+    public readonly contextValue: string = VolumeGroupTreeItem.contextValue;
+    public childTypeLabel: string = 'volume';
 
     public get iconPath(): IconPath {
-        let groupBy = getTreeSetting(ImagesGroupBy);
-        return getImageGroupIcon(groupBy);
+        let groupBy = getTreeSetting(VolumesGroupBy);
+        return getVolumeGroupIcon(groupBy);
     }
 }

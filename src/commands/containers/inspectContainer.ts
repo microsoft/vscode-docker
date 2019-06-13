@@ -12,6 +12,6 @@ export async function inspectContainer(context: IActionContext, node?: Container
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
     }
 
-    const inspectInfo = await ext.dockerode.getContainer(node.container.Id).inspect();
+    const inspectInfo = await node.getContainer().inspect();
     await openReadOnlyJson(node, inspectInfo);
 }

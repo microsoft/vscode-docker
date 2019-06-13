@@ -35,6 +35,7 @@
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.containers.attachShell",
+        "onCommand:vscode-docker.containers.configureExplorer",
         "onCommand:vscode-docker.containers.inspect",
         "onCommand:vscode-docker.containers.prune",
         "onCommand:vscode-docker.containers.refresh",
@@ -44,7 +45,7 @@
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
         "onCommand:vscode-docker.images.build",
-        "onCommand:vscode-docker.images.groupBy",
+        "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
         "onCommand:vscode-docker.images.prune",
         "onCommand:vscode-docker.images.push",
@@ -82,6 +83,7 @@
         "onCommand:vscode-docker.registries.refresh",
         "onCommand:vscode-docker.registries.setAsDefault",
         "onCommand:vscode-docker.system.prune",
+        "onCommand:vscode-docker.volumes.configureExplorer",
         "onCommand:vscode-docker.volumes.inspect",
         "onCommand:vscode-docker.volumes.prune",
         "onCommand:vscode-docker.volumes.refresh",
@@ -195,6 +197,11 @@
                     "group": "navigation@1"
                 },
                 {
+                    "command": "vscode-docker.containers.configureExplorer",
+                    "when": "view == dockerContainers",
+                    "group": "navigation@8"
+                },
+                {
                     "command": "vscode-docker.containers.refresh",
                     "when": "view == dockerContainers",
                     "group": "navigation@9"
@@ -210,14 +217,14 @@
                     "group": "navigation@9"
                 },
                 {
-                    "command": "vscode-docker.images.groupBy",
-                    "when": "view == dockerImages",
-                    "group": "navigation@1"
-                },
-                {
                     "command": "vscode-docker.images.prune",
                     "when": "view == dockerImages",
                     "group": "navigation@2"
+                },
+                {
+                    "command": "vscode-docker.images.configureExplorer",
+                    "when": "view == dockerImages",
+                    "group": "navigation@8"
                 },
                 {
                     "command": "vscode-docker.images.refresh",
@@ -233,6 +240,11 @@
                     "command": "vscode-docker.volumes.prune",
                     "when": "view == dockerVolumes",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-docker.volumes.configureExplorer",
+                    "when": "view == dockerVolumes",
+                    "group": "navigation@8"
                 },
                 {
                     "command": "vscode-docker.volumes.refresh",
@@ -725,15 +737,179 @@
                     "default": 1000,
                     "description": "Explorer refresh interval, default is 1000ms"
                 },
-                "docker.groupImagesBy": {
+                "docker.containers.groupBy": {
                     "type": "string",
-                    "default": "Repository",
-                    "description": "How to group items in the treeview Images node",
+                    "default": "None",
+                    "description": "The property to use when grouping containers.",
                     "enum": [
+                        "ContainerId",
+                        "ContainerName",
+                        "CreatedTime",
+                        "FullTag",
+                        "ImageId",
                         "None",
+                        "Registry",
                         "Repository",
                         "RepositoryName",
-                        "ImageId"
+                        "RepositoryNameAndTag",
+                        "State",
+                        "Status",
+                        "Tag"
+                    ]
+                },
+                "docker.containers.description": {
+                    "type": "array",
+                    "default": [
+                        "ContainerName",
+                        "Status"
+                    ],
+                    "description": "Any secondary properties to display for a container.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "ContainerId",
+                            "ContainerName",
+                            "CreatedTime",
+                            "FullTag",
+                            "ImageId",
+                            "Registry",
+                            "Repository",
+                            "RepositoryName",
+                            "RepositoryNameAndTag",
+                            "State",
+                            "Status",
+                            "Tag"
+                        ]
+                    }
+                },
+                "docker.containers.label": {
+                    "type": "string",
+                    "default": "FullTag",
+                    "description": "The primary property to display for a container.",
+                    "enum": [
+                        "ContainerId",
+                        "ContainerName",
+                        "CreatedTime",
+                        "FullTag",
+                        "ImageId",
+                        "Registry",
+                        "Repository",
+                        "RepositoryName",
+                        "RepositoryNameAndTag",
+                        "State",
+                        "Status",
+                        "Tag"
+                    ]
+                },
+                "docker.containers.sortBy": {
+                    "type": "string",
+                    "default": "CreatedTime",
+                    "description": "The property to use when sorting containers.",
+                    "enum": [
+                        "CreatedTime",
+                        "Label"
+                    ]
+                },
+                "docker.images.groupBy": {
+                    "type": "string",
+                    "default": "Repository",
+                    "description": "The property to use when grouping images.",
+                    "enum": [
+                        "CreatedTime",
+                        "FullTag",
+                        "ImageId",
+                        "None",
+                        "Registry",
+                        "Repository",
+                        "RepositoryName",
+                        "RepositoryNameAndTag",
+                        "Tag"
+                    ]
+                },
+                "docker.images.description": {
+                    "type": "array",
+                    "default": [
+                        "CreatedTime"
+                    ],
+                    "description": "Any secondary properties to display for a image.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "CreatedTime",
+                            "FullTag",
+                            "ImageId",
+                            "Registry",
+                            "Repository",
+                            "RepositoryName",
+                            "RepositoryNameAndTag",
+                            "Tag"
+                        ]
+                    }
+                },
+                "docker.images.label": {
+                    "type": "string",
+                    "default": "Tag",
+                    "description": "The primary property to display for a image.",
+                    "enum": [
+                        "CreatedTime",
+                        "FullTag",
+                        "ImageId",
+                        "Registry",
+                        "Repository",
+                        "RepositoryName",
+                        "RepositoryNameAndTag",
+                        "Tag"
+                    ]
+                },
+                "docker.images.sortBy": {
+                    "type": "string",
+                    "default": "CreatedTime",
+                    "description": "The property to use when sorting images.",
+                    "enum": [
+                        "CreatedTime",
+                        "Label"
+                    ]
+                },
+                "docker.volumes.groupBy": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "The property to use when grouping volumes.",
+                    "enum": [
+                        "CreatedTime",
+                        "VolumeName",
+                        "None"
+                    ]
+                },
+                "docker.volumes.description": {
+                    "type": "array",
+                    "default": [
+                        "CreatedTime"
+                    ],
+                    "description": "Any secondary properties to display for a volume.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "CreatedTime",
+                            "VolumeName"
+                        ]
+                    }
+                },
+                "docker.volumes.label": {
+                    "type": "string",
+                    "default": "VolumeName",
+                    "description": "The primary property to display for a volume.",
+                    "enum": [
+                        "CreatedTime",
+                        "VolumeName"
+                    ]
+                },
+                "docker.volumes.sortBy": {
+                    "type": "string",
+                    "default": "CreatedTime",
+                    "description": "The property to use when sorting volumes.",
+                    "enum": [
+                        "CreatedTime",
+                        "Label"
                     ]
                 },
                 "docker.imageBuildContextPath": {
@@ -946,6 +1122,15 @@
                 "category": "Docker Containers"
             },
             {
+                "command": "vscode-docker.containers.configureExplorer",
+                "title": "Configure Explorer...",
+                "category": "Docker Containers",
+                "icon": {
+                    "light": "resources/light/settings.svg",
+                    "dark": "resources/dark/settings.svg"
+                }
+            },
+            {
                 "command": "vscode-docker.containers.inspect",
                 "title": "Inspect",
                 "category": "Docker Containers"
@@ -999,12 +1184,12 @@
                 "category": "Docker Images"
             },
             {
-                "command": "vscode-docker.images.groupBy",
-                "title": "Group By...",
+                "command": "vscode-docker.images.configureExplorer",
+                "title": "Configure Explorer...",
                 "category": "Docker Images",
                 "icon": {
-                    "light": "resources/light/grouping.svg",
-                    "dark": "resources/dark/grouping.svg"
+                    "light": "resources/light/settings.svg",
+                    "dark": "resources/dark/settings.svg"
                 }
             },
             {
@@ -1226,6 +1411,15 @@
                 "icon": {
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
+                }
+            },
+            {
+                "command": "vscode-docker.volumes.configureExplorer",
+                "title": "Configure Explorer...",
+                "category": "Docker Volumes",
+                "icon": {
+                    "light": "resources/light/settings.svg",
+                    "dark": "resources/dark/settings.svg"
                 }
             },
             {

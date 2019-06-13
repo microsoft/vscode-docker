@@ -3,60 +3,60 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ImageInfo } from 'dockerode';
-import * as moment from 'moment';
+import { Image } from 'dockerode';
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
-import { ext, ImageGrouping } from '../../extensionVariables';
+import { ext } from '../../extensionVariables';
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { getImageLabel } from './getImageLabel';
-
-export interface IImageAndTag {
-    image: ImageInfo;
-    fullTag: string;
-}
+import { getTreeArraySetting, getTreeSetting } from '../settings/commonTreeSettings';
+import { getImagePropertyValue, ImageDescription, ImageLabel } from './imagesTreeSettings';
+import { ILocalImageInfo } from './LocalImageInfo';
 
 export class ImageTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
+    private readonly _item: ILocalImageInfo;
 
-    public image: ImageInfo;
-    public fullTag: string;
-
-    public constructor(parent: AzExtParentTreeItem, item: IImageAndTag) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: ILocalImageInfo) {
         super(parent);
-        this.image = item.image;
-        this.fullTag = item.fullTag;
+        this._item = itemInfo;
     }
 
     public get id(): string {
-        return this.image.Id + this.fullTag;
+        return this._item.treeId;
+    }
+
+    public get createdTime(): number {
+        return this._item.createdTime;
+    }
+
+    public get imageId(): string {
+        return this._item.imageId;
+    }
+
+    public get fullTag(): string {
+        return this._item.fullTag;
     }
 
     public get label(): string {
-        let template: string;
-        switch (ext.groupImagesBy) {
-            case ImageGrouping.Repository:
-                template = '{tag}';
-                break;
-            default:
-                template = '{fullTag}';
-        }
-        return getImageLabel(this.fullTag, this.image, template);
+        const prop = getTreeSetting(ImageLabel);
+        return getImagePropertyValue(this._item, prop);
     }
 
     public get description(): string | undefined {
-        return this.image.Created ? moment(new Date(this.image.Created * 1000)).fromNow() : undefined;
+        const props = getTreeArraySetting(ImageDescription);
+        const values: string[] = props.map(prop => getImagePropertyValue(this._item, prop));
+        return values.join(' - ');
     }
 
     public get iconPath(): IconPath {
         return getThemedIconPath('application');
     }
 
-    public async deleteTreeItemImpl(): Promise<void> {
-        await ext.dockerode.getImage(this.image.Id).remove({ force: true });
+    public getImage(): Image {
+        return ext.dockerode.getImage(this.imageId);
     }
-}
 
-export function sortImages(ti1: ImageTreeItem, ti2: ImageTreeItem): number {
-    return ti2.image.Created - ti1.image.Created;
+    public async deleteTreeItemImpl(): Promise<void> {
+        await this.getImage().remove({ force: true });
+    }
 }
