@@ -41,6 +41,9 @@ export namespace ext {
     export let containersTree: AzExtTreeDataProvider;
     export let containersTreeView: TreeView<AzExtTreeItem>;
 
+    export let networksTree: AzExtTreeDataProvider;
+    export let networksTreeView: TreeView<AzExtTreeItem>;
+
     export let registriesTree: AzExtTreeDataProvider;
     export let registriesTreeView: TreeView<AzExtTreeItem>;
     export let dockerHubAccountTreeItem: DockerHubAccountTreeItem;
