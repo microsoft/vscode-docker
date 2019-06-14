@@ -171,6 +171,24 @@ suite('Containers Tree', async () => {
             ]);
     });
 
+    test('Ports', async () => {
+        await validateContainersTree(
+            {
+                label: 'Ports',
+                description: []
+            },
+            [
+                { label: "<none>" },
+                { label: "5000" },
+                { label: "<none>" },
+                { label: "2222,8000" },
+                { label: "<none>" },
+                { label: "80" },
+                { label: "<none>" },
+                { label: "<none>" },
+            ]);
+    });
+
     test('Status', async () => {
         await validateContainersTree(
             {

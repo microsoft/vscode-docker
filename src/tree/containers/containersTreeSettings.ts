@@ -9,11 +9,12 @@ import { CommonGroupBy, CommonSortBy, groupByNoneProperty, ITreeArraySettingInfo
 import { LocalContainerInfo } from "./LocalContainerInfo";
 
 export const containersTreePrefix = 'containers';
-export type ContainerProperty = ImageProperty | 'ContainerId' | 'ContainerName' | 'State' | 'Status';
+export type ContainerProperty = ImageProperty | 'ContainerId' | 'ContainerName' | 'Ports' | 'State' | 'Status';
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     ...imageProperties,
     { property: 'ContainerId', exampleValue: 'fdeab20e859d' },
     { property: 'ContainerName', exampleValue: 'amazing_hoover' },
+    { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' }
 ];
@@ -56,6 +57,8 @@ export function getContainerPropertyValue(item: LocalContainerInfo, property: Co
             return item.containerId.slice(0, 12);
         case 'ContainerName':
             return item.containerName;
+        case 'Ports':
+            return item.ports.length > 0 ? item.ports.join(',') : '<none>';
         case 'State':
             return item.state;
         case 'Status':
@@ -70,6 +73,7 @@ export function getContainerGroupIcon(property: ContainerProperty | CommonGroupB
     switch (property) {
         case 'ContainerId':
         case 'ContainerName':
+        case 'Ports':
         case 'Status':
             icon = 'applicationGroup';
             break;
