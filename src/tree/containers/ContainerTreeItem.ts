@@ -7,8 +7,7 @@ import { Container } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { getTreeArraySetting, getTreeSetting } from "../settings/commonTreeSettings";
-import { ContainerDescription, ContainerLabel, getContainerPropertyValue, getStateIcon } from "./containersTreeSettings";
+import { getContainerStateIcon } from "./ContainerProperties";
 import { LocalContainerInfo } from "./LocalContainerInfo";
 
 export class ContainerTreeItem extends AzExtTreeItem {
@@ -37,14 +36,11 @@ export class ContainerTreeItem extends AzExtTreeItem {
     }
 
     public get label(): string {
-        const prop = getTreeSetting(ContainerLabel);
-        return getContainerPropertyValue(this._item, prop);
+        return ext.containersRoot.getTreeItemLabel(this._item);
     }
 
-    public get description(): string {
-        let props = getTreeArraySetting(ContainerDescription);
-        const values: string[] = props.map(prop => getContainerPropertyValue(this._item, prop));
-        return values.join(' - ');
+    public get description(): string | undefined {
+        return ext.containersRoot.getTreeItemDescription(this._item);
     }
 
     public get contextValue(): string {
@@ -55,7 +51,7 @@ export class ContainerTreeItem extends AzExtTreeItem {
         if (this._item.status.includes('(unhealthy)')) {
             return getThemedIconPath('statusWarning');
         } else {
-            return getStateIcon(this._item.state);
+            return getContainerStateIcon(this._item.state);
         }
     }
 

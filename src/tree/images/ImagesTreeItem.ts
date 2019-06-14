@@ -5,24 +5,38 @@
 
 import { ext } from "../../extensionVariables";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
-import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "../settings/commonTreeSettings";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
-import { getImagePropertyValue, ImageProperty, ImagesGroupBy, ImagesSortBy, imagesTreePrefix } from "./imagesTreeSettings";
+import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
 import { ILocalImageInfo, LocalImageInfo } from "./LocalImageInfo";
 
-export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo> {
-    public treePrefix: string = imagesTreePrefix;
+export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, ImageProperty> {
+    public treePrefix: string = 'images';
     public label: string = 'Images';
-    public noItemsMessage: string = "Successfully connected, but no images found.";
+    public configureExplorerTitle: string = 'Configure images explorer';
+
     public childType: LocalChildType<ILocalImageInfo> = ImageTreeItem;
-    public childGroupType: LocalChildGroupType<ILocalImageInfo> = ImageGroupTreeItem;
-    public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = ImagesSortBy;
-    public groupBySettingInfo: ITreeSettingInfo<ImageProperty | CommonGroupBy> = ImagesGroupBy;
+    public childGroupType: LocalChildGroupType<ILocalImageInfo, ImageProperty> = ImageGroupTreeItem;
+
+    public labelSettingInfo: ITreeSettingInfo<ImageProperty> = {
+        properties: imageProperties,
+        defaultProperty: 'Tag',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<ImageProperty> = {
+        properties: imageProperties,
+        defaultProperty: ['CreatedTime'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<ImageProperty | CommonGroupBy> = {
+        properties: [...imageProperties, groupByNoneProperty],
+        defaultProperty: 'Repository',
+    };
 
     public get childTypeLabel(): string {
-        const groupBy = getTreeSetting(ImagesGroupBy);
-        return groupBy === 'None' ? 'image' : 'image group';
+        return this.groupBySetting === 'None' ? 'image' : 'image group';
     }
 
     public async getItems(): Promise<ILocalImageInfo[]> {
@@ -47,12 +61,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo> {
         return result;
     }
 
-    public getGroup(item: ILocalImageInfo): string | undefined {
-        let groupBy = getTreeSetting(ImagesGroupBy);
-        if (groupBy === 'None') {
-            return undefined;
-        } else {
-            return getImagePropertyValue(item, groupBy);
-        }
+    public getPropertyValue(item: ILocalImageInfo, property: ImageProperty): string {
+        return getImagePropertyValue(item, property);
     }
 }

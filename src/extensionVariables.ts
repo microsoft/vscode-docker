@@ -33,11 +33,11 @@ export namespace ext {
 
     export let imagesTree: AzExtTreeDataProvider;
     export let imagesTreeView: TreeView<AzExtTreeItem>;
-    export let imagesRootTreeItem: ImagesTreeItem;
+    export let imagesRoot: ImagesTreeItem;
 
     export let containersTree: AzExtTreeDataProvider;
     export let containersTreeView: TreeView<AzExtTreeItem>;
-    export let containersRootTreeItem: ContainersTreeItem;
+    export let containersRoot: ContainersTreeItem;
 
     export let networksTree: AzExtTreeDataProvider;
     export let networksTreeView: TreeView<AzExtTreeItem>;
@@ -48,7 +48,7 @@ export namespace ext {
 
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;
-    export let volumesRootTreeItem: VolumesTreeItem;
+    export let volumesRoot: VolumesTreeItem;
 
     /**
      * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)

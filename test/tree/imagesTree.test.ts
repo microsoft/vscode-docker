@@ -92,7 +92,7 @@ interface IValidateImagesTreeOptions extends IValidateTreeOptions {
 async function validateImagesTree(options: IValidateImagesTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
     await runWithSetting('truncateLongRegistryPaths', options.truncate, async () => {
         await runWithSetting('truncateMaxLength', options.truncateLength, async () => {
-            await validateTree(ext.imagesRootTreeItem, 'images', options, { images: testImages }, expectedNodes);
+            await validateTree(ext.imagesRoot, 'images', options, { images: testImages }, expectedNodes);
         });
     });
 }

@@ -3,19 +3,32 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IconPath } from "../IconPath";
+import { getThemedIconPath, IconPath } from "../IconPath";
+import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
-import { getTreeSetting } from "../settings/commonTreeSettings";
-import { ContainersGroupBy, getContainerGroupIcon } from "./containersTreeSettings";
+import { ContainerProperty, getContainerStateIcon } from "./ContainerProperties";
 import { LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContainerInfo> {
+export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContainerInfo, ContainerProperty> {
     public static readonly contextValue: string = 'containerGroup';
     public readonly contextValue: string = ContainerGroupTreeItem.contextValue;
     public childTypeLabel: string = 'container';
 
     public get iconPath(): IconPath {
-        let groupBy = getTreeSetting(ContainersGroupBy);
-        return getContainerGroupIcon(groupBy, this.group);
+        let icon: string;
+        switch (this.parent.groupBySetting) {
+            case 'ContainerId':
+            case 'ContainerName':
+            case 'Ports':
+            case 'Status':
+                icon = 'applicationGroup';
+                break;
+            case 'State':
+                return getContainerStateIcon(this.group);
+            default:
+                return getImageGroupIcon(this.parent.groupBySetting);
+        }
+
+        return getThemedIconPath(icon);
     }
 }

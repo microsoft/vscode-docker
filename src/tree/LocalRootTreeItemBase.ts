@@ -3,14 +3,19 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationChangeEvent, TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
+import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
+import { nonNullProp } from "../utils/nonNull";
 import { isLinux } from "../utils/osUtils";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
-import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "./settings/commonTreeSettings";
+import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSettingInfo";
+import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./settings/ITreeSettingsWizardContext";
+import { TreeSettingListStep } from "./settings/TreeSettingListStep";
+import { TreeSettingStep } from "./settings/TreeSettingStep";
 
 export interface ILocalItem {
     createdTime: number;
@@ -19,24 +24,45 @@ export interface ILocalItem {
 }
 
 export type LocalChildType<T extends ILocalItem> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; };
-export type LocalChildGroupType<T extends ILocalItem> = new (parent: LocalRootTreeItemBase<T>, group: string, items: T[]) => LocalGroupTreeItemBase<T>;
+export type LocalChildGroupType<TItem extends ILocalItem, TProperty extends string | CommonProperty> = new (parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) => LocalGroupTreeItemBase<TItem, TProperty>;
 
-export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtParentTreeItem {
-    private _currentItems: T[] | undefined;
-    private _itemsFromPolling: T[] | undefined;
-    private _failedToConnect: boolean = false;
+const groupByKey: string = 'groupBy';
+const sortByKey: string = 'sortBy';
+const labelKey: string = 'label';
+const descriptionKey: string = 'description';
+
+export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
+    public abstract labelSettingInfo: ITreeSettingInfo<TProperty>;
+    public abstract descriptionSettingInfo: ITreeArraySettingInfo<TProperty>;
+    public abstract groupBySettingInfo: ITreeSettingInfo<TProperty | CommonGroupBy>;
+    public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = {
+        properties: sortByProperties,
+        defaultProperty: 'CreatedTime',
+    }
 
     public abstract treePrefix: string;
-    public abstract noItemsMessage: string;
-    public abstract childType: LocalChildType<T>;
-    public abstract childGroupType: LocalChildGroupType<T>;
-    public abstract getItems(): Promise<T[] | undefined>;
-    public abstract getGroup(item: T): string | undefined;
-    public abstract sortBySettingInfo: ITreeSettingInfo<CommonSortBy>;
-    public abstract groupBySettingInfo: ITreeSettingInfo<string | CommonGroupBy>;
+    public abstract configureExplorerTitle: string;
+    public abstract childType: LocalChildType<TItem>;
+    public abstract childGroupType: LocalChildGroupType<TItem, TProperty>;
+
+    public abstract getItems(): Promise<TItem[] | undefined>;
+    public abstract getPropertyValue(item: TItem, property: TProperty): string;
+
+    public groupBySetting: TProperty | CommonGroupBy;
+    public sortBySetting: CommonSortBy;
+    public labelSetting: TProperty;
+    public descriptionSetting: TProperty[];
+
+    private _currentItems: TItem[] | undefined;
+    private _itemsFromPolling: TItem[] | undefined;
+    private _failedToConnect: boolean = false;
 
     public get contextValue(): string {
         return this.treePrefix;
+    }
+
+    public get config(): WorkspaceConfiguration {
+        return workspace.getConfiguration(`${configPrefix}.${this.treePrefix}`);
     }
 
     public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
@@ -87,11 +113,20 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
         if (this._currentItems.length === 0) {
             context.telemetry.properties.noItems = 'true';
             return [new GenericTreeItem(this, {
-                label: this.noItemsMessage,
+                label: "Successfully connected, but no items found.",
                 iconPath: getThemedIconPath('info'),
                 contextValue: 'dockerNoItems'
             })];
         } else {
+            this.groupBySetting = this.getTreeSetting(groupByKey, this.groupBySettingInfo);
+            context.telemetry.properties.groupBySetting = this.groupBySetting;
+            this.sortBySetting = this.getTreeSetting(sortByKey, this.sortBySettingInfo);
+            context.telemetry.properties.sortBySetting = this.sortBySetting;
+            this.labelSetting = this.getTreeSetting(labelKey, this.labelSettingInfo);
+            context.telemetry.properties.labelSetting = this.labelSetting;
+            this.descriptionSetting = this.getTreeArraySetting(descriptionKey, this.descriptionSettingInfo);
+            context.telemetry.properties.descriptionSetting = this.descriptionSetting.toString();
+
             return this.groupItems(this._currentItems);
         }
     }
@@ -105,13 +140,11 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
             return 0; // children are already sorted
         } else {
             if (ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType) {
-                const groupBy = getTreeSetting(this.groupBySettingInfo);
-                if (groupBy === 'CreatedTime' && ti2.maxCreatedTime !== ti1.maxCreatedTime) {
+                if (this.groupBySetting === 'CreatedTime' && ti2.maxCreatedTime !== ti1.maxCreatedTime) {
                     return ti2.maxCreatedTime - ti1.maxCreatedTime;
                 }
             } else if (ti1 instanceof this.childType && ti2 instanceof this.childType) {
-                const sortBy = getTreeSetting(this.sortBySettingInfo)
-                if (sortBy === 'CreatedTime' && ti2.createdTime !== ti1.createdTime) {
+                if (this.sortBySetting === 'CreatedTime' && ti2.createdTime !== ti1.createdTime) {
                     return ti2.createdTime - ti1.createdTime;
                 }
             }
@@ -120,19 +153,24 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
         }
     }
 
-    private async groupItems(items: T[]): Promise<AzExtTreeItem[]> {
-        const itemsWithNoGroup: T[] = [];
-        const groupMap = new Map<string, T[]>();
-        for (const item of items) {
-            const groupName: string | undefined = this.getGroup(item);
-            if (!groupName) {
-                itemsWithNoGroup.push(item);
-            } else {
-                const groupedItems = groupMap.get(groupName);
-                if (groupedItems) {
-                    groupedItems.push(item);
+    private async groupItems(items: TItem[]): Promise<AzExtTreeItem[]> {
+        let itemsWithNoGroup: TItem[] = [];
+        const groupMap = new Map<string, TItem[]>();
+
+        if (this.groupBySetting === 'None') {
+            itemsWithNoGroup = items;
+        } else {
+            for (const item of items) {
+                const groupName: string | undefined = this.getPropertyValue(item, this.groupBySetting);
+                if (!groupName) {
+                    itemsWithNoGroup.push(item);
                 } else {
-                    groupMap.set(groupName, [item]);
+                    const groupedItems = groupMap.get(groupName);
+                    if (groupedItems) {
+                        groupedItems.push(item);
+                    } else {
+                        groupMap.set(groupName, [item]);
+                    }
                 }
             }
         }
@@ -159,6 +197,82 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
         );
     }
 
+    public getTreeItemLabel(item: TItem): string {
+        return this.getPropertyValue(item, this.labelSetting);
+    }
+
+    public getTreeItemDescription(item: TItem): string {
+        const values: string[] = this.descriptionSetting.map(prop => this.getPropertyValue(item, prop));
+        return values.join(' - ');
+    }
+
+    public getTreeSetting<T extends string>(setting: string, settingInfo: ITreeSettingInfo<T>): T {
+        const value = this.config.get<T>(setting);
+        if (value && settingInfo.properties.find(propInfo => propInfo.property === value)) {
+            return value;
+        } else {
+            return settingInfo.defaultProperty;
+        }
+    }
+
+    public getTreeArraySetting<T extends string>(setting: string, settingInfo: ITreeArraySettingInfo<T>): T[] {
+        const value = this.config.get<T[]>(setting);
+        if (Array.isArray(value) && value.every(v1 => !!settingInfo.properties.find(v2 => v1 === v2.property))) {
+            return value;
+        } else {
+            return settingInfo.defaultProperty;
+        }
+    }
+
+    public getSettingWizardInfoList(): ITreeSettingWizardInfo[] {
+        return [
+            {
+                label: 'Label',
+                setting: labelKey,
+                currentValue: this.labelSetting,
+                description: 'The primary property to display.',
+                settingInfo: this.labelSettingInfo
+            },
+            {
+                label: 'Description',
+                setting: descriptionKey,
+                currentValue: this.descriptionSetting,
+                description: 'Any secondary properties to display.',
+                settingInfo: this.descriptionSettingInfo
+            },
+            {
+                label: 'Group By',
+                setting: groupByKey,
+                currentValue: this.groupBySetting,
+                description: 'The property used for grouping.',
+                settingInfo: this.groupBySettingInfo
+            },
+            {
+                label: 'Sort By',
+                setting: sortByKey,
+                currentValue: this.sortBySetting,
+                description: 'The property used for sorting.',
+                settingInfo: this.sortBySettingInfo
+            },
+        ]
+    }
+
+    public async configureExplorer(context: IActionContext): Promise<void> {
+        const wizardContext: ITreeSettingsWizardContext = { infoList: this.getSettingWizardInfoList(), ...context };
+        const wizard = new AzureWizard(wizardContext, {
+            title: this.configureExplorerTitle,
+            promptSteps: [
+                new TreeSettingListStep(),
+                new TreeSettingStep()
+            ],
+            hideStepCount: true
+        });
+        await wizard.prompt();
+        await wizard.execute();
+        const info = nonNullProp(wizardContext, 'info');
+        this.config.update(info.setting, wizardContext.newValue, ConfigurationTarget.Global);
+    }
+
     private getDockerErrorTreeItems(error: unknown): AzExtTreeItem[] {
         const connectionMessage = 'Failed to connect. Is Docker installed and running?';
         const installDockerUrl = 'https://aka.ms/AA37qtj';
@@ -178,8 +292,8 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
         return result;
     }
 
-    private async getSortedItems(): Promise<T[]> {
-        const items: T[] = await this.getItems() || [];
+    private async getSortedItems(): Promise<TItem[]> {
+        const items: TItem[] = await this.getItems() || [];
         return items.sort((a, b) => a.treeId.localeCompare(b.treeId));
     }
 
@@ -193,7 +307,7 @@ export abstract class LocalRootTreeItemBase<T extends ILocalItem> extends AzExtP
         return !this.areArraysEqual(this._currentItems, this._itemsFromPolling);
     }
 
-    private areArraysEqual(array1: T[] | undefined, array2: T[] | undefined): boolean {
+    private areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
         if (array1 === array2) {
             return true;
         } else if (array1 && array2) {

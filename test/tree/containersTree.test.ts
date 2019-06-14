@@ -96,7 +96,7 @@ const testContainers: Partial<ContainerInfo>[] = [
 ];
 
 async function validateContainersTree(options: IValidateTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
-    await validateTree(ext.containersRootTreeItem, 'containers', options, { containers: testContainers }, expectedNodes);
+    await validateTree(ext.containersRoot, 'containers', options, { containers: testContainers }, expectedNodes);
 }
 
 suite('Containers Tree', async () => {

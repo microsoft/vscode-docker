@@ -3,19 +3,27 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IconPath } from "../IconPath";
+import { getThemedIconPath, IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
-import { getTreeSetting } from "../settings/commonTreeSettings";
+import { getCommonGroupIcon } from "../settings/CommonProperties";
 import { LocalVolumeInfo } from "./LocalVolumeInfo";
-import { getVolumeGroupIcon, VolumesGroupBy } from "./volumeTreeSettings";
+import { VolumeProperty } from "./VolumeProperties";
 
-export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<LocalVolumeInfo> {
+export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<LocalVolumeInfo, VolumeProperty> {
     public static readonly contextValue: string = 'volumeGroup';
     public readonly contextValue: string = VolumeGroupTreeItem.contextValue;
     public childTypeLabel: string = 'volume';
 
     public get iconPath(): IconPath {
-        let groupBy = getTreeSetting(VolumesGroupBy);
-        return getVolumeGroupIcon(groupBy);
+        let icon: string;
+        switch (this.parent.groupBySetting) {
+            case 'VolumeName':
+                icon = 'volume';
+                break;
+            default:
+                return getCommonGroupIcon(this.parent.groupBySetting);
+        }
+
+        return getThemedIconPath(icon);
     }
 }

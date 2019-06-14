@@ -7,9 +7,7 @@ import { Volume } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from "../IconPath";
-import { getTreeArraySetting, getTreeSetting } from "../settings/commonTreeSettings";
 import { LocalVolumeInfo } from "./LocalVolumeInfo";
-import { getVolumePropertyValue, VolumeDescription, VolumeLabel } from "./volumeTreeSettings";
 
 export class VolumeTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'volume';
@@ -34,14 +32,11 @@ export class VolumeTreeItem extends AzExtTreeItem {
     }
 
     public get label(): string {
-        const prop = getTreeSetting(VolumeLabel);
-        return getVolumePropertyValue(this._item, prop);
+        return ext.volumesRoot.getTreeItemLabel(this._item);
     }
 
     public get description(): string | undefined {
-        const props = getTreeArraySetting(VolumeDescription);
-        const values: string[] = props.map(prop => getVolumePropertyValue(this._item, prop));
-        return values.join(' - ');
+        return ext.volumesRoot.getTreeItemDescription(this._item);
     }
 
     public get iconPath(): IconPath {

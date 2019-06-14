@@ -5,13 +5,14 @@
 
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ILocalItem, LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
+import { CommonProperty } from "./settings/CommonProperties";
 
-export abstract class LocalGroupTreeItemBase<T extends ILocalItem> extends AzExtParentTreeItem {
-    public parent: LocalRootTreeItemBase<T>;
+export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
+    public parent: LocalRootTreeItemBase<TItem, TProperty>;
     public group: string;
-    private _items: T[];
+    private _items: TItem[];
 
-    public constructor(parent: LocalRootTreeItemBase<T>, group: string, items: T[]) {
+    public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);
         this.group = group;
         this._items = items;

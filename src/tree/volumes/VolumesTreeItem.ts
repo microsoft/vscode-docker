@@ -5,21 +5,38 @@
 
 import { ext } from "../../extensionVariables";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
-import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "../settings/commonTreeSettings";
+import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { LocalVolumeInfo } from "./LocalVolumeInfo";
 import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
+import { volumeProperties, VolumeProperty } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
-import { getVolumePropertyValue, VolumeProperty, VolumesGroupBy, VolumesSortBy, volumesTreePrefix } from "./volumeTreeSettings";
 
-export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo> {
-    public treePrefix: string = volumesTreePrefix;
+export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, VolumeProperty> {
+    public treePrefix: string = 'volumes';
     public label: string = 'Volumes';
-    public childTypeLabel: string = 'volume';
-    public noItemsMessage: string = "Successfully connected, but no volumes found.";
+    public configureExplorerTitle: string = 'Configure volumes explorer';
     public childType: LocalChildType<LocalVolumeInfo> = VolumeTreeItem;
-    public childGroupType: LocalChildGroupType<LocalVolumeInfo> = VolumeGroupTreeItem;
-    public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = VolumesSortBy;
-    public groupBySettingInfo: ITreeSettingInfo<VolumeProperty | CommonGroupBy> = VolumesGroupBy;
+    public childGroupType: LocalChildGroupType<LocalVolumeInfo, VolumeProperty> = VolumeGroupTreeItem;
+
+    public labelSettingInfo: ITreeSettingInfo<VolumeProperty> = {
+        properties: volumeProperties,
+        defaultProperty: 'VolumeName',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<VolumeProperty> = {
+        properties: volumeProperties,
+        defaultProperty: ['CreatedTime'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<VolumeProperty | CommonGroupBy> = {
+        properties: [...volumeProperties, groupByNoneProperty],
+        defaultProperty: 'None',
+    };
+
+    public get childTypeLabel(): string {
+        return this.groupBySetting === 'None' ? 'volume' : 'volume group';
+    }
 
     public async getItems(): Promise<LocalVolumeInfo[]> {
         const result = await ext.dockerode.listVolumes();
@@ -27,12 +44,12 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo> {
         return volumes.map(v => new LocalVolumeInfo(v));
     }
 
-    public getGroup(item: LocalVolumeInfo): string | undefined {
-        let groupBy = getTreeSetting(VolumesGroupBy);
-        if (groupBy === 'None') {
-            return undefined;
-        } else {
-            return getVolumePropertyValue(item, groupBy);
+    public getPropertyValue(item: LocalVolumeInfo, property: VolumeProperty): string {
+        switch (property) {
+            case 'VolumeName':
+                return item.volumeName;
+            default:
+                return getCommonPropertyValue(item, property);
         }
     }
 }

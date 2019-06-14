@@ -4,25 +4,40 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext } from "../../extensionVariables";
+import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
-import { CommonGroupBy, CommonSortBy, getTreeSetting, ITreeSettingInfo } from "../settings/commonTreeSettings";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { ContainerProperty, ContainersGroupBy, ContainersSortBy, containersTreePrefix, getContainerPropertyValue } from "./containersTreeSettings";
+import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 import { LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo> {
-    public treePrefix: string = containersTreePrefix;
+export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo, ContainerProperty> {
+    public treePrefix: string = 'containers';
     public label: string = 'Containers';
-    public noItemsMessage: string = "Successfully connected, but no containers found.";
+    public configureExplorerTitle: string = 'Configure containers explorer';
+
     public childType: LocalChildType<LocalContainerInfo> = ContainerTreeItem;
-    public childGroupType: LocalChildGroupType<LocalContainerInfo> = ContainerGroupTreeItem;
-    public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = ContainersSortBy;
-    public groupBySettingInfo: ITreeSettingInfo<ContainerProperty | CommonGroupBy> = ContainersGroupBy;
+    public childGroupType: LocalChildGroupType<LocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
+
+    public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
+        properties: containerProperties,
+        defaultProperty: 'FullTag',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<ContainerProperty> = {
+        properties: containerProperties,
+        defaultProperty: ['ContainerName', 'Status'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<ContainerProperty | CommonGroupBy> = {
+        properties: [...containerProperties, groupByNoneProperty],
+        defaultProperty: 'None',
+    };
 
     public get childTypeLabel(): string {
-        const groupBy = getTreeSetting(ContainersGroupBy);
-        return groupBy === 'None' ? 'container' : 'container group';
+        return this.groupBySetting === 'None' ? 'container' : 'container group';
     }
 
     public async getItems(): Promise<LocalContainerInfo[]> {
@@ -36,12 +51,20 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo
         return items.map(c => new LocalContainerInfo(c));
     }
 
-    public getGroup(item: LocalContainerInfo): string | undefined {
-        let groupBy = getTreeSetting(ContainersGroupBy);
-        if (groupBy === 'None') {
-            return undefined;
-        } else {
-            return getContainerPropertyValue(item, groupBy);
+    public getPropertyValue(item: LocalContainerInfo, property: ContainerProperty): string {
+        switch (property) {
+            case 'ContainerId':
+                return item.containerId.slice(0, 12);
+            case 'ContainerName':
+                return item.containerName;
+            case 'Ports':
+                return item.ports.length > 0 ? item.ports.join(',') : '<none>';
+            case 'State':
+                return item.state;
+            case 'Status':
+                return item.status;
+            default:
+                return getImagePropertyValue(item, property);
         }
     }
 }

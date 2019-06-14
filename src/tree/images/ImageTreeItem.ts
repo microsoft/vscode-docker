@@ -7,8 +7,6 @@ import { Image } from 'dockerode';
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { getTreeArraySetting, getTreeSetting } from '../settings/commonTreeSettings';
-import { getImagePropertyValue, ImageDescription, ImageLabel } from './imagesTreeSettings';
 import { ILocalImageInfo } from './LocalImageInfo';
 
 export class ImageTreeItem extends AzExtTreeItem {
@@ -38,14 +36,11 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public get label(): string {
-        const prop = getTreeSetting(ImageLabel);
-        return getImagePropertyValue(this._item, prop);
+        return ext.imagesRoot.getTreeItemLabel(this._item);
     }
 
     public get description(): string | undefined {
-        const props = getTreeArraySetting(ImageDescription);
-        const values: string[] = props.map(prop => getImagePropertyValue(this._item, prop));
-        return values.join(' - ');
+        return ext.imagesRoot.getTreeItemDescription(this._item);
     }
 
     public get iconPath(): IconPath {

@@ -9,7 +9,7 @@ import { configPrefix } from "../extension.bundle";
 export async function runWithSetting<T>(key: string, value: T | undefined, callback: () => Promise<void>): Promise<void> {
     const config: WorkspaceConfiguration = workspace.getConfiguration(configPrefix);
     const result = config.inspect<T>(key);
-    const oldValue: T = result && result.globalValue;
+    const oldValue: T | undefined = result && result.globalValue;
     try {
         await config.update(key, value, ConfigurationTarget.Global);
         await callback();

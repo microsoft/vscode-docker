@@ -3,41 +3,34 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationTarget } from "vscode";
 import { AzureWizardPromptStep, IAzureQuickPickItem, IAzureQuickPickOptions } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { nonNullProp } from "../../utils/nonNull";
-import { getTreeArraySetting, getTreeConfig, ITreeArraySettingInfo, ITreePropertyInfo } from "./commonTreeSettings";
+import { ITreePropertyInfo } from "./ITreeSettingInfo";
 import { ITreeSettingsWizardContext } from "./ITreeSettingsWizardContext";
 
 export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardContext> {
     public async prompt(context: ITreeSettingsWizardContext): Promise<void> {
-        const settingInfo = nonNullProp(context, 'settingInfo');
-        context.telemetry.properties.setting = settingInfo.setting;
+        const info = nonNullProp(context, 'info');
+        context.telemetry.properties.setting = info.setting;
 
-        let picks: IAzureQuickPickItem<string>[] = settingInfo.properties.map(convertPropertyInfoToPick);
+        let picks: IAzureQuickPickItem<string>[] = info.settingInfo.properties.map(convertPropertyInfoToPick);
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
 
         let options: IAzureQuickPickOptions = {
-            placeHolder: settingInfo.description,
+            placeHolder: info.description,
             suppressPersistence: true
         }
 
-        options.canPickMany = Array.isArray(settingInfo.defaultProperty);
-        if (options.canPickMany) {
-            const currentValue = getTreeArraySetting(<ITreeArraySettingInfo<string>>settingInfo);
-            options.isPickSelected = (p: Partial<IAzureQuickPickItem>) => currentValue.includes(p.data);
-        }
-
-        const result: IAzureQuickPickItem<string> | IAzureQuickPickItem<string>[] = await ext.ui.showQuickPick(picks, options);
-        let newValue: string | string[];
-        if (Array.isArray(result)) {
-            newValue = result.map((p: IAzureQuickPickItem) => p.data);
+        if (Array.isArray(info.currentValue)) {
+            options.isPickSelected = (p: Partial<IAzureQuickPickItem<string>>) => !!p.data && info.currentValue.includes(p.data);
+            const result = await ext.ui.showQuickPick(picks, { ...options, canPickMany: true });
+            context.newValue = result.map(p => p.data);
         } else {
-            newValue = result.data;
+            const result = await ext.ui.showQuickPick(picks, options);
+            context.newValue = result.data;
         }
-        context.telemetry.properties.newValue = newValue.toString();
-        getTreeConfig(settingInfo).update(settingInfo.setting, newValue, ConfigurationTarget.Global);
+        context.telemetry.properties.newValue = context.newValue.toString();
     }
 
     public shouldPrompt(_context: ITreeSettingsWizardContext): boolean {
@@ -46,8 +39,9 @@ export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardCo
 }
 
 function convertPropertyInfoToPick(info: ITreePropertyInfo<string>): IAzureQuickPickItem<string> {
-    let description: string;
-    let detail: string;
+    let description: string | undefined;
+    let detail: string | undefined;
+
     if (info.exampleValue) {
         description = `e.g. "${info.exampleValue}"`;
         detail = info.description;

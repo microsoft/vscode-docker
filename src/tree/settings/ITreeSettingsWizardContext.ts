@@ -4,8 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "vscode-azureextensionui";
-import { ITreeArraySettingInfo, ITreeSettingInfo } from "./commonTreeSettings";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "./ITreeSettingInfo";
+
+export interface ITreeSettingWizardInfo {
+    setting: string;
+    label: string;
+    description: string;
+    settingInfo: ITreeSettingInfo<string> | ITreeArraySettingInfo<string>;
+    currentValue: string | string[];
+}
 
 export interface ITreeSettingsWizardContext extends IActionContext {
-    settingInfo?: ITreeSettingInfo<string> | ITreeArraySettingInfo<string>;
+    infoList: ITreeSettingWizardInfo[];
+    info?: ITreeSettingWizardInfo;
+    newValue?: string | string[];
 }

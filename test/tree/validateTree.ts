@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import * as Dockerode from 'dockerode';
-import { ext, AzExtParentTreeItem, AzExtTreeItem, IActionContext } from '../../extension.bundle';
+import { AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext } from '../../extension.bundle';
 import { runWithSetting } from '../runWithSetting';
 
 export function generateCreatedTimeInSec(days: number): number {
@@ -37,6 +37,8 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
             await runWithSetting(`${treePrefix}.label`, treeOptions.label, async () => {
                 await runWithSetting(`${treePrefix}.description`, treeOptions.description, async () => {
                     await runWithDockerode(dockerodeOptions, async () => {
+                        await rootTreeItem.refresh();
+
                         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: {} };
 
                         const actualNodes = await rootTreeItem.getCachedChildren(context);

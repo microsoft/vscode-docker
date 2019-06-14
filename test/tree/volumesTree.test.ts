@@ -27,7 +27,7 @@ const testVolumes: Partial<VolumeInspectInfo & { CreatedAt: string }>[] = [
 ];
 
 async function validateVolumesTree(options: IValidateTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
-    await validateTree(ext.volumesRootTreeItem, 'volumes', options, { volumes: testVolumes }, expectedNodes);
+    await validateTree(ext.volumesRoot, 'volumes', options, { volumes: testVolumes }, expectedNodes);
 }
 
 suite('Volumes Tree', async () => {
