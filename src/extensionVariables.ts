@@ -48,6 +48,9 @@ export namespace ext {
     export let registriesTreeView: TreeView<AzExtTreeItem>;
     export let dockerHubAccountTreeItem: DockerHubAccountTreeItem;
 
+    export let volumesTree: AzExtTreeDataProvider;
+    export let volumesTreeView: TreeView<AzExtTreeItem>;
+
     /**
      * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)
      */

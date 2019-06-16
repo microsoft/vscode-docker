@@ -9,6 +9,7 @@ import { configure, configureApi } from "../configureWorkspace/configure";
 import { ext } from "../extensionVariables";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
+import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
 import { restartContainer } from "./containers/restartContainer";
@@ -47,6 +48,9 @@ import { disconnectPrivateRegistry } from "./registries/private/disconnectPrivat
 import { pullImage, pullRepository } from "./registries/pullImages";
 import { setRegistryAsDefault } from "./registries/registrySettings";
 import { systemPrune } from "./systemPrune";
+import { inspectVolume } from "./volumes/inspectVolume";
+import { pruneVolumes } from "./volumes/pruneVolumes";
+import { removeVolume } from "./volumes/removeVolume";
 
 export function registerCommands(): void {
     registerCommand('vscode-docker.api.configure', configureApi);
@@ -57,6 +61,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.system.prune', systemPrune);
 
     registerCommand('vscode-docker.containers.attachShell', attachShellContainer);
+    registerCommand('vscode-docker.containers.inspect', inspectContainer);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);
@@ -105,4 +110,8 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.registries.private.connectRegistry', connectPrivateRegistry);
     registerCommand('vscode-docker.registries.private.disconnectRegistry', disconnectPrivateRegistry);
+
+    registerCommand('vscode-docker.volumes.inspect', inspectVolume);
+    registerCommand('vscode-docker.volumes.prune', pruneVolumes);
+    registerCommand('vscode-docker.volumes.remove', removeVolume);
 }

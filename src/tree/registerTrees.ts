@@ -11,6 +11,7 @@ import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { NetworksTreeItem } from "./networks/NetworksTreeItem";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
+import { VolumesTreeItem } from "./volumes/VolumesTreeItem";
 
 export function registerTrees(): void {
     const containersTreeItem = new ContainersTreeItem(undefined);
@@ -47,6 +48,15 @@ export function registerTrees(): void {
     ext.context.subscriptions.push(ext.registriesTreeView);
     registerCommand(registriesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.registriesTree.loadMore(node, context));
     registerCommand('vscode-docker.registries.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.registriesTree.refresh(node));
+
+    const volumesTreeItem = new VolumesTreeItem(undefined);
+    const volumesLoadMore = 'vscode-docker.volumes.loadMore';
+    ext.volumesTree = new AzExtTreeDataProvider(volumesTreeItem, volumesLoadMore);
+    ext.volumesTreeView = window.createTreeView('dockerVolumes', { treeDataProvider: ext.volumesTree });
+    ext.context.subscriptions.push(ext.volumesTreeView);
+    volumesTreeItem.initAutoRefresh(ext.volumesTreeView);
+    registerCommand(volumesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.volumesTree.loadMore(node, context));
+    registerCommand('vscode-docker.volumes.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.volumesTree.refresh(node));
 
     registerCommand('vscode-docker.openUrl', async (_context: IActionContext, node: OpenUrlTreeItem) => node.openUrl());
 }
