@@ -278,7 +278,7 @@ function refreshDockerode(): void {
     const oldEnv = process.env;
     try {
         process.env = { ...process.env }; // make a clone before we change anything
-        addDockerSettingsToEnv(process.env);
+        addDockerSettingsToEnv(process.env, oldEnv);
         ext.dockerodeError = undefined;
         ext.dockerode = new Dockerode();
     } catch (error) {

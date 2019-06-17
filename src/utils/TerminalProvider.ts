@@ -16,7 +16,7 @@ export class DefaultTerminalProvider {
     let terminalOptions: vscode.TerminalOptions = {};
     terminalOptions.name = name;
     terminalOptions.env = {};
-    addDockerSettingsToEnv(terminalOptions.env);
+    addDockerSettingsToEnv(terminalOptions.env, process.env);
     return vscode.window.createTerminal(terminalOptions);
   }
 }
