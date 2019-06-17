@@ -1365,7 +1365,7 @@
         "request-promise-native": "^1.0.5",
         "semver": "^6.0.0",
         "tar": "^4.4.6",
-        "vscode-azureextensionui": "^0.25.1",
+        "vscode-azureextensionui": "^0.25.2",
         "vscode-azureappservice": "^0.42.0",
         "vscode-languageclient": "^5.1.1",
         "win-ca": "^2.4.1",
