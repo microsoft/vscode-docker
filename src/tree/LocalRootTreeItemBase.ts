@@ -294,11 +294,11 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     private async getSortedItems(): Promise<TItem[]> {
-        if (ext.dockerodeError === undefined) {
+        if (ext.dockerodeInitError === undefined) {
             const items: TItem[] = await this.getItems() || [];
             return items.sort((a, b) => a.treeId.localeCompare(b.treeId));
         } else {
-            throw ext.dockerodeError;
+            throw ext.dockerodeInitError;
         }
     }
 
