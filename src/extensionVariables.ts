@@ -11,6 +11,7 @@ import { ExtensionContext, OutputChannel, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
+import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { DockerHubAccountTreeItem } from './tree/registries/dockerHub/DockerHubAccountTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { IKeytar } from './utils/keytar';
@@ -41,6 +42,7 @@ export namespace ext {
 
     export let networksTree: AzExtTreeDataProvider;
     export let networksTreeView: TreeView<AzExtTreeItem>;
+    export let networksRoot: NetworksTreeItem;
 
     export let registriesTree: AzExtTreeDataProvider;
     export let registriesTreeView: TreeView<AzExtTreeItem>;

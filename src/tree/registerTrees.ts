@@ -23,12 +23,12 @@ export function registerTrees(): void {
     registerCommand(containersLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.containersTree.loadMore(node, context));
     registerCommand('vscode-docker.containers.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.containersTree.refresh(node));
 
-    const networksTreeItem = new NetworksTreeItem(undefined);
+    ext.networksRoot = new NetworksTreeItem(undefined);
     const networksLoadMore = 'vscode-docker.networks.loadMore';
-    ext.networksTree = new AzExtTreeDataProvider(networksTreeItem, networksLoadMore);
+    ext.networksTree = new AzExtTreeDataProvider(ext.networksRoot, networksLoadMore);
     ext.networksTreeView = window.createTreeView('dockerNetworks', { treeDataProvider: ext.networksTree });
     ext.context.subscriptions.push(ext.networksTreeView);
-    networksTreeItem.initAutoRefresh(ext.networksTreeView);
+    ext.networksRoot.registerRefreshEvents(ext.networksTreeView);
     registerCommand(networksLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.networksTree.loadMore(node, context));
     registerCommand('vscode-docker.networks.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.networksTree.refresh(node));
 

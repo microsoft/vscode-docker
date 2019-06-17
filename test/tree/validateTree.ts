@@ -63,7 +63,8 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
 interface ITestDockerodeOptions {
     containers?: Partial<Dockerode.ContainerInfo>[],
     images?: Partial<Dockerode.ImageInfo>[],
-    volumes?: Partial<Dockerode.VolumeInspectInfo>[]
+    volumes?: Partial<Dockerode.VolumeInspectInfo>[],
+    networks?: Partial<Dockerode.NetworkInspectInfo>[]
 }
 
 async function runWithDockerode(options: ITestDockerodeOptions, callback: () => Promise<void>): Promise<void> {
@@ -72,7 +73,8 @@ async function runWithDockerode(options: ITestDockerodeOptions, callback: () => 
         ext.dockerode = <Dockerode><any>{
             listContainers: async () => options.containers,
             listImages: async () => options.images,
-            listVolumes: async () => { return { Volumes: options.volumes } }
+            listVolumes: async () => { return { Volumes: options.volumes } },
+            listNetworks: async () => options.networks
         };
         await callback();
     } finally {

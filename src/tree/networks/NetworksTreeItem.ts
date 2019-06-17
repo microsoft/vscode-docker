@@ -4,27 +4,56 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { NetworkInspectInfo } from "dockerode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { LocalNetworkInfo } from "./LocalNetworkInfo";
+import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
+import { networkProperties, NetworkProperty } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
 
-export class NetworksTreeItem extends AutoRefreshTreeItemBase<NetworkInspectInfo> {
-    public static contextValue: string = 'networks';
-    public contextValue: string = NetworksTreeItem.contextValue;
+export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, NetworkProperty> {
+    public treePrefix: string = 'networks';
     public label: string = 'Networks';
-    public childTypeLabel: string = 'network';
-    public noItemsMessage: string = "Successfully connected, but no networks found.";
+    public configureExplorerTitle: string = 'Configure networks explorer';
+    public childType: LocalChildType<LocalNetworkInfo> = NetworkTreeItem;
+    public childGroupType: LocalChildGroupType<LocalNetworkInfo, NetworkProperty> = NetworkGroupTreeItem;
 
-    public getItemID(item: NetworkInspectInfo): string {
-        return item.Id;
+    public labelSettingInfo: ITreeSettingInfo<NetworkProperty> = {
+        properties: networkProperties,
+        defaultProperty: 'NetworkName',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<NetworkProperty> = {
+        properties: networkProperties,
+        defaultProperty: ['NetworkDriver', 'CreatedTime'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<NetworkProperty | CommonGroupBy> = {
+        properties: [...networkProperties, groupByNoneProperty],
+        defaultProperty: 'None',
+    };
+
+    public get childTypeLabel(): string {
+        return this.groupBySetting === 'None' ? 'network' : 'network group';
     }
 
-    public async getItems(): Promise<NetworkInspectInfo[]> {
-        return await ext.dockerode.listNetworks() || [];
+    public async getItems(): Promise<LocalNetworkInfo[]> {
+        const networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+        return networks.map(n => new LocalNetworkInfo(n));
     }
 
-    public async  convertToTreeItems(items: NetworkInspectInfo[]): Promise<AzExtTreeItem[]> {
-        return items.map(n => new NetworkTreeItem(this, n));
+    public getPropertyValue(item: LocalNetworkInfo, property: NetworkProperty): string {
+        switch (property) {
+            case 'NetworkDriver':
+                return item.networkDriver;
+            case 'NetworkId':
+                return item.networkId.slice(0, 12);
+            case 'NetworkName':
+                return item.networkName;
+            default:
+                return getCommonPropertyValue(item, property);
+        }
     }
 }

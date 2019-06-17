@@ -3,43 +3,51 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NetworkInspectInfo } from "dockerode";
+import { Network } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
+import { LocalNetworkInfo } from "./LocalNetworkInfo";
 
 export class NetworkTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'network';
     public contextValue: string = NetworkTreeItem.contextValue;
+    private readonly _item: LocalNetworkInfo;
 
-    public network: NetworkInspectInfo;
-
-    public constructor(parent: AzExtParentTreeItem, network: NetworkInspectInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalNetworkInfo) {
         super(parent);
-        this.network = network;
-    }
-
-    public get label(): string {
-        return this.network.Name;
-    }
-
-    public get description(): string {
-        return this.network.Driver;
-    }
-
-    public hasMoreChildrenImpl(): boolean {
-        return false;
+        this._item = itemInfo;
     }
 
     public get id(): string {
-        return this.network.Id;
+        return this._item.treeId;
+    }
+
+    public get networkId(): string {
+        return this._item.networkId;
+    }
+
+    public get createdTime(): number {
+        return this._item.createdTime;
+    }
+
+    public get label(): string {
+        return ext.networksRoot.getTreeItemLabel(this._item);
+    }
+
+    public get description(): string | undefined {
+        return ext.networksRoot.getTreeItemDescription(this._item);
     }
 
     public get iconPath(): IconPath {
         return getThemedIconPath('network');
     }
 
+    public getNetwork(): Network {
+        return ext.dockerode.getNetwork(this.networkId);
+    }
+
     public async deleteTreeItemImpl(): Promise<void> {
-        await ext.dockerode.getNetwork(this.network.Id).remove();
+        await this.getNetwork().remove({ force: true });
     }
 }

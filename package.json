@@ -55,6 +55,7 @@
         "onCommand:vscode-docker.images.runAzureCli",
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
+        "onCommand:vscode-docker.networks.configureExplorer",
         "onCommand:vscode-docker.networks.prune",
         "onCommand:vscode-docker.networks.refresh",
         "onCommand:vscode-docker.networks.remove",
@@ -199,6 +200,11 @@
                 {
                     "command": "vscode-docker.containers.configureExplorer",
                     "when": "view == dockerContainers",
+                    "group": "navigation@8"
+                },
+                {
+                    "command": "vscode-docker.networks.configureExplorer",
+                    "when": "view == dockerNetworks",
                     "group": "navigation@8"
                 },
                 {
@@ -873,6 +879,55 @@
                         "Label"
                     ]
                 },
+                "docker.networks.groupBy": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "The property to use when grouping networks.",
+                    "enum": [
+                        "CreatedTime",
+                        "NetworkDriver",
+                        "NetworkId",
+                        "NetworkName",
+                        "None"
+                    ]
+                },
+                "docker.networks.description": {
+                    "type": "array",
+                    "default": [
+                        "NetworkDriver",
+                        "CreatedTime"
+                    ],
+                    "description": "Any secondary properties to display for a network.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "CreatedTime",
+                            "NetworkDriver",
+                            "NetworkId",
+                            "NetworkName"
+                        ]
+                    }
+                },
+                "docker.networks.label": {
+                    "type": "string",
+                    "default": "NetworkName",
+                    "description": "The primary property to display for a network.",
+                    "enum": [
+                        "CreatedTime",
+                        "NetworkDriver",
+                        "NetworkId",
+                        "NetworkName"
+                    ]
+                },
+                "docker.networks.sortBy": {
+                    "type": "string",
+                    "default": "CreatedTime",
+                    "description": "The property to use when sorting networks.",
+                    "enum": [
+                        "CreatedTime",
+                        "Label"
+                    ]
+                },
                 "docker.volumes.groupBy": {
                     "type": "string",
                     "default": "None",
@@ -1247,6 +1302,15 @@
                 "command": "vscode-docker.images.tag",
                 "title": "Tag...",
                 "category": "Docker Images"
+            },
+            {
+                "command": "vscode-docker.networks.configureExplorer",
+                "title": "Configure Explorer...",
+                "category": "Docker Networks",
+                "icon": {
+                    "light": "resources/light/settings.svg",
+                    "dark": "resources/dark/settings.svg"
+                }
             },
             {
                 "command": "vscode-docker.networks.prune",
