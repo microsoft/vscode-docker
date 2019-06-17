@@ -25,6 +25,7 @@ import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
 import { registerTrees } from './tree/registerTrees';
+import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
@@ -269,32 +270,21 @@ function activateLanguageClient(): void {
     });
 }
 
+/**
+ * Dockerode parses and handles the well-known `DOCKER_*` environment variables, but it doesn't let us pass those values as-is to the constructor
+ * Thus we will temporarily update `process.env` and pass nothing to the constructor
+ */
 function refreshDockerode(): void {
-    const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
-    if (value) {
-        let newHost: string = '';
-        let newPort: number = 2375;
-        let sep: number = -1;
-
-        sep = value.lastIndexOf(':');
-
-        const errorMessage = 'The docker.host configuration setting must be entered as <host>:<port>, e.g. dockerhost:2375';
-        if (sep < 0) {
-            vscode.window.showErrorMessage(errorMessage);
-        } else {
-            newHost = value.slice(0, sep);
-            newPort = Number(value.slice(sep + 1));
-            if (isNaN(newPort)) {
-                vscode.window.showErrorMessage(errorMessage);
-            } else {
-                ext.dockerode = new Dockerode({ host: newHost, port: newPort });
-            }
-        }
-    }
-
-    if (!ext.dockerode || !value) {
-        // Pass no options so that the defaultOpts of docker-modem will be used if the endpoint wasn't created
-        // or the user went from configured setting to empty settign
+    const oldEnv = process.env;
+    try {
+        process.env = { ...process.env }; // make a clone before we change anything
+        addDockerSettingsToEnv(process.env, oldEnv);
+        ext.dockerodeInitError = undefined;
         ext.dockerode = new Dockerode();
+    } catch (error) {
+        // This will be displayed in the tree
+        ext.dockerodeInitError = error;
+    } finally {
+        process.env = oldEnv;
     }
 }

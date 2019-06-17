@@ -6,6 +6,7 @@
 import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
+import { ext } from "../extensionVariables";
 import { nonNullProp } from "../utils/nonNull";
 import { isLinux } from "../utils/osUtils";
 import { getThemedIconPath } from "./IconPath";
@@ -293,8 +294,12 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     private async getSortedItems(): Promise<TItem[]> {
-        const items: TItem[] = await this.getItems() || [];
-        return items.sort((a, b) => a.treeId.localeCompare(b.treeId));
+        if (ext.dockerodeInitError === undefined) {
+            const items: TItem[] = await this.getItems() || [];
+            return items.sort((a, b) => a.treeId.localeCompare(b.treeId));
+        } else {
+            throw ext.dockerodeInitError;
+        }
     }
 
     private async hasChanged(): Promise<boolean> {

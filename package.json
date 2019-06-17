@@ -988,7 +988,22 @@
                 "docker.host": {
                     "type": "string",
                     "default": "",
-                    "description": "Full host address to connect to (with protocol). Equivalent to setting the DOCKER_HOST environment variable"
+                    "description": "Equivalent to setting the DOCKER_HOST environment variable."
+                },
+                "docker.certPath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Equivalent to setting the DOCKER_CERT_PATH environment variable."
+                },
+                "docker.tlsVerify": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Equivalent to setting the DOCKER_TLS_VERIFY environment variable."
+                },
+                "docker.machineName": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Equivalent to setting the DOCKER_MACHINE_NAME environment variable."
                 },
                 "docker.importCertificates": {
                     "oneOf": [
