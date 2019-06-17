@@ -54,6 +54,9 @@
         "onCommand:vscode-docker.images.runAzureCli",
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
+        "onCommand:vscode-docker.networks.prune",
+        "onCommand:vscode-docker.networks.refresh",
+        "onCommand:vscode-docker.networks.remove",
         "onCommand:vscode-docker.registries.azure.buildImage",
         "onCommand:vscode-docker.registries.azure.createRegistry",
         "onCommand:vscode-docker.registries.azure.deleteRegistry",
@@ -89,6 +92,7 @@
         "onLanguage:yaml",
         "onView:dockerContainers",
         "onView:dockerImages",
+        "onView:dockerNetworks",
         "onView:dockerRegistries",
         "onView:dockerVolumes"
     ],
@@ -193,6 +197,16 @@
                 {
                     "command": "vscode-docker.containers.refresh",
                     "when": "view == dockerContainers",
+                    "group": "navigation@9"
+                },
+                {
+                    "command": "vscode-docker.networks.prune",
+                    "when": "view == dockerNetworks",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-docker.networks.refresh",
+                    "when": "view == dockerNetworks",
                     "group": "navigation@9"
                 },
                 {
@@ -301,6 +315,11 @@
                     "command": "vscode-docker.registries.azure.viewTaskLogs",
                     "when": "view == dockerRegistries && viewItem == azureTaskRun",
                     "group": "inline"
+                },
+                {
+                    "command": "vscode-docker.networks.remove",
+                    "when": "view == dockerNetworks && viewItem == network",
+                    "group": "networks_1_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.createRegistry",
@@ -1042,6 +1061,29 @@
                 "category": "Docker Images"
             },
             {
+                "command": "vscode-docker.networks.prune",
+                "title": "Prune...",
+                "category": "Docker Networks",
+                "icon": {
+                    "light": "resources/light/prune.svg",
+                    "dark": "resources/dark/prune.svg"
+                }
+            },
+            {
+                "command": "vscode-docker.networks.refresh",
+                "title": "Refresh",
+                "category": "Docker Networks",
+                "icon": {
+                    "light": "resources/light/refresh.svg",
+                    "dark": "resources/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "vscode-docker.networks.remove",
+                "title": "Remove...",
+                "category": "Docker Networks"
+            },
+            {
                 "command": "vscode-docker.registries.azure.buildImage",
                 "title": "Build Image in Azure...",
                 "category": "Azure Container Registry"
@@ -1230,6 +1272,10 @@
                     "name": "Registries"
                 },
                 {
+                    "id": "dockerNetworks",
+                    "name": "Networks"
+                },
+                {
                     "id": "dockerVolumes",
                     "name": "Volumes"
                 }
@@ -1270,7 +1316,7 @@
     "devDependencies": {
         "@types/adm-zip": "^0.4.32",
         "@types/deep-equal": "^1.0.1",
-        "@types/dockerode": "^2.5.12",
+        "@types/dockerode": "^2.5.19",
         "@types/fs-extra": "^5.0.5",
         "@types/glob": "5.0.35",
         "@types/keytar": "^4.4.0",

@@ -25,6 +25,8 @@ import { removeImage } from "./images/removeImage";
 import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { tagImage } from "./images/tagImage";
+import { pruneNetworks } from "./networks/pruneNetworks";
+import { removeNetwork } from "./networks/removeNetwork";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
@@ -77,6 +79,9 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
     registerCommand('vscode-docker.images.runInteractive', runImageInteractive);
     registerCommand('vscode-docker.images.tag', tagImage);
+
+    registerCommand('vscode-docker.networks.remove', removeNetwork);
+    registerCommand('vscode-docker.networks.prune', pruneNetworks);
 
     registerCommand('vscode-docker.registries.copyImageDigest', copyRemoteImageDigest);
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
