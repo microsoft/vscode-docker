@@ -31,6 +31,7 @@ export namespace ext {
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;
+    export let dockerodeError: unknown;
 
     export let imagesTree: AzExtTreeDataProvider;
     export let imagesTreeView: TreeView<AzExtTreeItem>;

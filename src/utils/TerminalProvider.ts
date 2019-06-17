@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { Terminal } from 'vscode';
+import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
 export interface ITerminalProvider {
   createTerminal(name: string): Terminal;
@@ -14,12 +15,8 @@ export class DefaultTerminalProvider {
   public createTerminal(name: string): Terminal {
     let terminalOptions: vscode.TerminalOptions = {};
     terminalOptions.name = name;
-    const value: string = vscode.workspace.getConfiguration("docker").get("host", "");
-    if (value) {
-      terminalOptions.env = {
-        DOCKER_HOST: value
-      };
-    }
+    terminalOptions.env = {};
+    addDockerSettingsToEnv(terminalOptions.env);
     return vscode.window.createTerminal(terminalOptions);
   }
 }
