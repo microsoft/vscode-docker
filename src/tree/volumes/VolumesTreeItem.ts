@@ -3,29 +3,53 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VolumeInspectInfo } from "dockerode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { LocalVolumeInfo } from "./LocalVolumeInfo";
+import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
+import { volumeProperties, VolumeProperty } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
 
-export class VolumesTreeItem extends AutoRefreshTreeItemBase<VolumeInspectInfo> {
-    public static contextValue: string = 'volumes';
-    public contextValue: string = VolumesTreeItem.contextValue;
+export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, VolumeProperty> {
+    public treePrefix: string = 'volumes';
     public label: string = 'Volumes';
-    public childTypeLabel: string = 'volume';
-    public noItemsMessage: string = "Successfully connected, but no volumes found.";
+    public configureExplorerTitle: string = 'Configure volumes explorer';
+    public childType: LocalChildType<LocalVolumeInfo> = VolumeTreeItem;
+    public childGroupType: LocalChildGroupType<LocalVolumeInfo, VolumeProperty> = VolumeGroupTreeItem;
 
-    public getItemID(item: VolumeInspectInfo): string {
-        return item.Name;
+    public labelSettingInfo: ITreeSettingInfo<VolumeProperty> = {
+        properties: volumeProperties,
+        defaultProperty: 'VolumeName',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<VolumeProperty> = {
+        properties: volumeProperties,
+        defaultProperty: ['CreatedTime'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<VolumeProperty | CommonGroupBy> = {
+        properties: [...volumeProperties, groupByNoneProperty],
+        defaultProperty: 'None',
+    };
+
+    public get childTypeLabel(): string {
+        return this.groupBySetting === 'None' ? 'volume' : 'volume group';
     }
 
-    public async getItems(): Promise<VolumeInspectInfo[]> {
+    public async getItems(): Promise<LocalVolumeInfo[]> {
         const result = await ext.dockerode.listVolumes();
-        return (result && result.Volumes) || [];
+        const volumes = (result && result.Volumes) || [];
+        return volumes.map(v => new LocalVolumeInfo(v));
     }
 
-    public async  convertToTreeItems(items: VolumeInspectInfo[]): Promise<AzExtTreeItem[]> {
-        return items.map(v => new VolumeTreeItem(this, v));
+    public getPropertyValue(item: LocalVolumeInfo, property: VolumeProperty): string {
+        switch (property) {
+            case 'VolumeName':
+                return item.volumeName;
+            default:
+                return getCommonPropertyValue(item, property);
+        }
     }
 }

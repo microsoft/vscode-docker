@@ -18,7 +18,7 @@ export async function stopContainer(context: IActionContext, node: ContainerTree
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Stopping Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
-            await ext.dockerode.getContainer(n.container.Id).stop();
+            await n.getContainer().stop();
         }));
     });
 }

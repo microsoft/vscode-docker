@@ -26,7 +26,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     }
     context.telemetry.properties.shellCommand = shellCommand;
 
-    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.container.Image}`);
-    terminal.sendText(`docker exec -it ${node.container.Id} ${shellCommand}`);
+    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.fullTag}`);
+    terminal.sendText(`docker exec -it ${node.containerId} ${shellCommand}`);
     terminal.show();
 }

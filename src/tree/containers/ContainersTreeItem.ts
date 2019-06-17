@@ -3,43 +3,68 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerInfo } from "dockerode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
+import { getImagePropertyValue } from "../images/ImageProperties";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
+import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
+import { LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainersTreeItem extends AutoRefreshTreeItemBase<ContainerInfo> {
-    public static contextValue: string = 'containers';
-    public contextValue: string = ContainersTreeItem.contextValue;
+export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo, ContainerProperty> {
+    public treePrefix: string = 'containers';
     public label: string = 'Containers';
-    public childTypeLabel: string = 'container';
-    public noItemsMessage: string = "Successfully connected, but no containers found.";
+    public configureExplorerTitle: string = 'Configure containers explorer';
 
-    public getItemID(item: ContainerInfo): string {
-        return item.Id + item.State;
+    public childType: LocalChildType<LocalContainerInfo> = ContainerTreeItem;
+    public childGroupType: LocalChildGroupType<LocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
+
+    public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
+        properties: containerProperties,
+        defaultProperty: 'FullTag',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<ContainerProperty> = {
+        properties: containerProperties,
+        defaultProperty: ['ContainerName', 'Status'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<ContainerProperty | CommonGroupBy> = {
+        properties: [...containerProperties, groupByNoneProperty],
+        defaultProperty: 'None',
+    };
+
+    public get childTypeLabel(): string {
+        return this.groupBySetting === 'None' ? 'container' : 'container group';
     }
 
-    public async getItems(): Promise<ContainerInfo[]> {
+    public async getItems(): Promise<LocalContainerInfo[]> {
         const options = {
             "filters": {
                 "status": ["created", "restarting", "running", "paused", "exited", "dead"]
             }
         };
 
-        return await ext.dockerode.listContainers(options) || [];
+        const items = await ext.dockerode.listContainers(options) || [];
+        return items.map(c => new LocalContainerInfo(c));
     }
 
-    public async  convertToTreeItems(items: ContainerInfo[]): Promise<AzExtTreeItem[]> {
-        return items.map(c => new ContainerTreeItem(this, c));
-    }
-
-    public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
-        if (ti1 instanceof ContainerTreeItem && ti2 instanceof ContainerTreeItem) {
-            // tslint:disable-next-line: no-unsafe-any no-any
-            return (<any>ti2.container).Created - (<any>ti1.container).Created;
-        } else {
-            return super.compareChildrenImpl(ti1, ti2);
+    public getPropertyValue(item: LocalContainerInfo, property: ContainerProperty): string {
+        switch (property) {
+            case 'ContainerId':
+                return item.containerId.slice(0, 12);
+            case 'ContainerName':
+                return item.containerName;
+            case 'Ports':
+                return item.ports.length > 0 ? item.ports.join(',') : '<none>';
+            case 'State':
+                return item.state;
+            case 'Status':
+                return item.status;
+            default:
+                return getImagePropertyValue(item, property);
         }
     }
 }

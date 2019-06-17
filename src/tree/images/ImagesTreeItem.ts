@@ -3,37 +3,43 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem } from "vscode-azureextensionui";
-import { ext, ImageGrouping } from "../../extensionVariables";
-import { AutoRefreshTreeItemBase } from "../AutoRefreshTreeItemBase";
-import { getImageLabel } from "./getImageLabel";
+import { ext } from "../../extensionVariables";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
+import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
-import { IImageAndTag, ImageTreeItem, sortImages } from "./ImageTreeItem";
+import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
+import { ImageTreeItem } from "./ImageTreeItem";
+import { ILocalImageInfo, LocalImageInfo } from "./LocalImageInfo";
 
-export class ImagesTreeItem extends AutoRefreshTreeItemBase<IImageAndTag> {
-    public static contextValue: string = ImagesTreeItem.contextValue;
-    public contextValue: string = 'images';
+export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, ImageProperty> {
+    public treePrefix: string = 'images';
     public label: string = 'Images';
-    public noItemsMessage: string = "Successfully connected, but no images found.";
+    public configureExplorerTitle: string = 'Configure images explorer';
+
+    public childType: LocalChildType<ILocalImageInfo> = ImageTreeItem;
+    public childGroupType: LocalChildGroupType<ILocalImageInfo, ImageProperty> = ImageGroupTreeItem;
+
+    public labelSettingInfo: ITreeSettingInfo<ImageProperty> = {
+        properties: imageProperties,
+        defaultProperty: 'Tag',
+    };
+
+    public descriptionSettingInfo: ITreeArraySettingInfo<ImageProperty> = {
+        properties: imageProperties,
+        defaultProperty: ['CreatedTime'],
+    };
+
+    public groupBySettingInfo: ITreeSettingInfo<ImageProperty | CommonGroupBy> = {
+        properties: [...imageProperties, groupByNoneProperty],
+        defaultProperty: 'Repository',
+    };
 
     public get childTypeLabel(): string {
-        switch (ext.groupImagesBy) {
-            case ImageGrouping.ImageId:
-                return 'image id';
-            case ImageGrouping.Repository:
-                return 'repository';
-            case ImageGrouping.RepositoryName:
-                return 'repository name';
-            default:
-                return 'image';
-        }
+        return this.groupBySetting === 'None' ? 'image' : 'image group';
     }
 
-    public getItemID(item: IImageAndTag): string {
-        return item.image.Id + item.fullTag;
-    }
-
-    public async getItems(): Promise<IImageAndTag[]> {
+    public async getItems(): Promise<ILocalImageInfo[]> {
         const options = {
             "filters": {
                 "dangling": ["false"]
@@ -41,62 +47,21 @@ export class ImagesTreeItem extends AutoRefreshTreeItemBase<IImageAndTag> {
         };
 
         const images = await ext.dockerode.listImages(options) || [];
-        let result: IImageAndTag[] = [];
+        let result: ILocalImageInfo[] = [];
         for (const image of images) {
             if (!image.RepoTags) {
-                result.push({ image, fullTag: '<none>:<none>' });
+                result.push(new LocalImageInfo(image, '<none>:<none>'));
             } else {
                 for (let fullTag of image.RepoTags) {
-                    result.push({ image, fullTag });
+                    result.push(new LocalImageInfo(image, fullTag));
                 }
             }
         }
-        return result;
-    }
-
-    public async convertToTreeItems(items: IImageAndTag[]): Promise<AzExtTreeItem[]> {
-        const groupMap = new Map<string | undefined, IImageAndTag[]>();
-        for (const item of items) {
-            let groupTemplate: string | undefined;
-            switch (ext.groupImagesBy) {
-                case ImageGrouping.ImageId:
-                    groupTemplate = '{shortImageId}';
-                    break;
-                case ImageGrouping.Repository:
-                    groupTemplate = '{repository}';
-                    break;
-                case ImageGrouping.RepositoryName:
-                    groupTemplate = '{repositoryName}';
-                    break;
-                default:
-            }
-
-            const group: string | undefined = groupTemplate ? getImageLabel(item.fullTag, item.image, groupTemplate) : undefined;
-            const tags = groupMap.get(group);
-            if (tags) {
-                tags.push(item);
-            } else {
-                groupMap.set(group, [item]);
-            }
-        }
-
-        const result: AzExtTreeItem[] = [];
-        for (const [group, groupedItems] of groupMap.entries()) {
-            if (!group) {
-                result.push(...groupedItems.map(r => new ImageTreeItem(this, r)));
-            } else {
-                result.push(new ImageGroupTreeItem(this, group, groupedItems));
-            }
-        }
 
         return result;
     }
 
-    public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
-        if (ti1 instanceof ImageTreeItem && ti2 instanceof ImageTreeItem) {
-            return sortImages(ti1, ti2);
-        } else {
-            return super.compareChildrenImpl(ti1, ti2);
-        }
+    public getPropertyValue(item: ILocalImageInfo, property: ImageProperty): string {
+        return getImagePropertyValue(item, property);
     }
 }

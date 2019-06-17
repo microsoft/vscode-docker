@@ -18,7 +18,7 @@ export async function startContainer(context: IActionContext, node: ContainerTre
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Starting Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
-            await ext.dockerode.getContainer(n.container.Id).start();
+            await n.getContainer().start();
         }));
     });
 }
