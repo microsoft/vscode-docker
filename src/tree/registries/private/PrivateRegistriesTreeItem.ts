@@ -21,7 +21,7 @@ const customRegistriesKey = 'customRegistries';
 export class PrivateRegistriesTreeItem extends AzExtParentTreeItem {
     public static contextValue: string = RegistryType.private + 'Registries';
     public contextValue: string = PrivateRegistriesTreeItem.contextValue;
-    public createNewLabel: string = 'Connect registry... (Preview)';
+    public createNewLabel: string = 'Connect Registry... (Preview)';
     public childTypeLabel: string = 'registry';
     public label: string = 'Private';
 
