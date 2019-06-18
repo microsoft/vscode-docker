@@ -1,3 +1,8 @@
+## 0.6.3 - 18 June 2019
+
+### Changed
+* Changed publisher from "PeterJausovec" to "ms-azuretools"
+
 ## 0.6.2 - 2 May 2019
 
 ### Fixed
