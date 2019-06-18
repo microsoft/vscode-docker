@@ -1,8 +1,8 @@
 {
     "name": "vscode-docker",
-    "version": "0.6.3-alpha",
+    "version": "0.6.4-alpha",
     "preview": true,
-    "publisher": "PeterJausovec",
+    "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
     "license": "SEE LICENSE IN LICENSE.md",
