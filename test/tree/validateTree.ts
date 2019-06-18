@@ -31,7 +31,8 @@ export interface ITestTreeItem {
     children?: ITestTreeItem[];
 }
 
-export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix: string, treeOptions: IValidateTreeOptions, dockerodeOptions: ITestDockerodeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
+export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix: string, treeOptions: IValidateTreeOptions, dockerodeOptions: ITestDockerodeOptions, expectedNodes: ITestTreeItem[]): Promise<AzExtTreeItem[]> {
+    let actualNodes: AzExtTreeItem[] = [];
     await runWithSetting(`${treePrefix}.sortBy`, treeOptions.sortBy, async () => {
         await runWithSetting(`${treePrefix}.groupBy`, treeOptions.groupBy, async () => {
             await runWithSetting(`${treePrefix}.label`, treeOptions.label, async () => {
@@ -41,7 +42,7 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
 
                         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: {} };
 
-                        const actualNodes = await rootTreeItem.getCachedChildren(context);
+                        actualNodes = await rootTreeItem.getCachedChildren(context);
 
                         const actual = await Promise.all(actualNodes.map(async node => {
                             const actualNode: ITestTreeItem = convertToTestTreeItem(node);
@@ -58,6 +59,7 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
             });
         });
     });
+    return actualNodes;
 }
 
 interface ITestDockerodeOptions {
