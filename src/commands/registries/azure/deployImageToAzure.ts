@@ -85,13 +85,15 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
 }
 
 async function createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<void> {
-    const crmClient = createAzureClient(node.parent.parent.parent.root, ContainerRegistryManagementClient);
-    let resourceGroupName: string = wizardContext.resourceGroup.name;
+    // fields derived from the app service wizard
     let siteName: string = wizardContext.site.name;
-    let registryName = node.parent.parent.registryName;
     let webhookName: string = `webapp${siteName}`;
 
-    // check that the regsitry is searchabe from the client
+    // variables derived from the container registry
+    const crmClient = createAzureClient(node.parent.parent.parent.root, ContainerRegistryManagementClient);
+    let registryResourceGroupName: string = node.parent.parent.resourceGroup;
+    let registryName = node.parent.parent.registryName;
+
     const registryList = await crmClient.registries.list();
     const registryHandle = registryList.find((value) => value.name === registryName);
     if (!registryHandle) {
@@ -99,7 +101,8 @@ async function createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActio
     }
     let webhookLocation: string = registryHandle.location;
 
-    if ((await crmClient.webhooks.list(resourceGroupName, registryName)).find((hook) => hook.name === webhookName)) {
+    const existingWebhooks = await crmClient.webhooks.list(registryResourceGroupName, registryName);
+    if (existingWebhooks.find((hook) => hook.name === webhookName)) {
         return;
     }
 
@@ -111,8 +114,8 @@ async function createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActio
         status: 'enabled'
     };
 
-    const webhook = await crmClient.webhooks.create(resourceGroupName, registryName, webhookName, webhookCreateParameters);
-    ext.outputChannel.appendLine(`Created webhook ${webhook.name} with tag ${webhook.tags}, id: ${webhook.id}`);
+    const webhook = await crmClient.webhooks.create(registryResourceGroupName, registryName, webhookName, webhookCreateParameters);
+    ext.outputChannel.appendLine(`Created webhook ${webhook.name} with scope ${webhook.scope}, id: ${webhook.id} and location: ${webhook.location}`);
 }
 
 async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig> {
