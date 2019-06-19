@@ -98,228 +98,228 @@
         },
         {
           "command": "vscode-docker.acr.createRegistry",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.deleteImage",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.deleteRegistry",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.deleteRepository",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.pullImage",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.pullRepo",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.quickBuild",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.runTask",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.runTaskFile",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.showTask",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.untagImage",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.acr.viewLogs",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.compose.down",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.compose.restart",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.compose.up",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.configure",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.restart",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.start",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.start.azurecli",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.dockerHubLogin",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.explorer.refresh",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.image.build",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.images.selectGroupBy",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         },
         {
           "command": "vscode-docker.system.prune",
-          "when": "!isOldPublisherInstalled"
+          "when": "!isOldDockerPublisherInstalled"
         }
       ],
       "editor/context": [
         {
-          "when": "!isOldPublisherInstalled && editorLangId == dockerfile && isAzureAccountInstalled",
+          "when": "!isOldDockerPublisherInstalled && editorLangId == dockerfile && isAzureAccountInstalled",
           "command": "vscode-docker.acr.quickBuild",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && editorLangId == yaml",
+          "when": "!isOldDockerPublisherInstalled && editorLangId == yaml",
           "command": "vscode-docker.acr.runTaskFile",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.yml",
           "command": "vscode-docker.compose.down",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.yml",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.yml",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.debug.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.debug.yml",
           "command": "vscode-docker.compose.down",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.debug.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.debug.yml",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename == docker-compose.debug.yml",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename == docker-compose.debug.yml",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && editorLangId == dockerfile",
+          "when": "!isOldDockerPublisherInstalled && editorLangId == dockerfile",
           "command": "vscode-docker.image.build",
           "group": "docker"
         }
       ],
       "explorer/context": [
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /(^|\\.)dockerfile$/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /(^|\\.)dockerfile$/i",
           "command": "vscode-docker.acr.quickBuild",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /^(?:(?!^docker-compose\\.ya?ml$).)*\\.ya?ml$/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /^(?:(?!^docker-compose\\.ya?ml$).)*\\.ya?ml$/i",
           "command": "vscode-docker.acr.runTaskFile",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /docker-compose/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.down",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /docker-compose/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.restart",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /docker-compose/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /docker-compose/i",
           "command": "vscode-docker.compose.up",
           "group": "docker"
         },
         {
-          "when": "!isOldPublisherInstalled && resourceFilename =~ /dockerfile/i",
+          "when": "!isOldDockerPublisherInstalled && resourceFilename =~ /dockerfile/i",
           "command": "vscode-docker.image.build",
           "group": "docker"
         }
@@ -327,159 +327,159 @@
       "view/title": [
         {
           "command": "vscode-docker.explorer.refresh",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer",
           "group": "navigation@1"
         },
         {
           "command": "vscode-docker.system.prune",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
           "command": "vscode-docker.images.selectGroupBy",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^imagesRootNode$/",
           "group": "inline"
         },
         {
           "command": "vscode-docker.acr.createRegistry",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureRegistryRootNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureRegistryRootNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteImage",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteRegistry",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureRegistryNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureRegistryNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.deleteRepository",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureRepositoryNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureRepositoryNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.pullImage",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.pullRepo",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureRepositoryNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureRepositoryNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.runTask",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == taskNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == taskNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.showTask",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == taskNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == taskNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.untagImage",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == azureImageTagNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.acr.viewLogs",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureImageTagNode|taskNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.browseDockerHub",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(dockerHubImageTagNode|dockerHubRepositoryNode|dockerHubOrgNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.browseAzurePortal",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureRegistryNode|azureRepositoryNode|azureImageTagNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.connectCustomRegistry",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == customRootNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == customRootNode",
           "group": "default"
         },
         {
           "command": "vscode-docker.container.open-shell",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.container.remove",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(stoppedLocalContainerNode|runningLocalContainerNode|containersRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(stoppedLocalContainerNode|runningLocalContainerNode|containersRootNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.container.restart",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.container.show-logs",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|stoppedLocalContainerNode|containersRootNode)$/",
           "group": "default"
         },
         {
           "command": "vscode-docker.container.start",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.container.start.interactive",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.container.stop",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(runningLocalContainerNode|containersRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.createWebApp",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(azureImageTagNode|dockerHubImageTagNode|customImageTagNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.disconnectCustomRegistry",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(customRegistryNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.dockerHubLogout",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem == dockerHubRootNode",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem == dockerHubRootNode",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.image.inspect",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.image.push",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.image.remove",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.image.tag",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(localImageNode|imagesRootNode)$/",
           "group": "5_default"
         },
         {
           "command": "vscode-docker.setRegistryAsDefault",
-          "when": "!isOldPublisherInstalled && view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/",
+          "when": "!isOldDockerPublisherInstalled && view == dockerExplorer && viewItem =~ /^(customRegistryNode|azureRegistryNode|dockerHubOrgNode)$/",
           "group": "5_default"
         }
       ]

@@ -116,8 +116,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     if (extension) {
       // temporary workaround for https://github.com/microsoft/vscode-docker/issues/1008
       // We will essentially defer all functionality to the old publisher's extension if we detect both installed
-      vscode.commands.executeCommand('setContext', 'isOldPublisherInstalled', true);
-      this.properties.isOldPublisherInstalled = 'true';
+      vscode.commands.executeCommand('setContext', 'isOldDockerPublisherInstalled', true);
+      this.properties.isOldDockerPublisherInstalled = 'true';
       return;
     }
 
