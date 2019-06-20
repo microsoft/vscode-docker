@@ -48,6 +48,7 @@ export class LocalContainerInfo implements ILocalImageInfo {
     }
 
     public get treeId(): string {
-        return this.containerId;
+        // include state in treeId so that auto-refresh will detect and show a new icon when state changes
+        return this.containerId + this.state;
     }
 }

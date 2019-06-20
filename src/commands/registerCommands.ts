@@ -29,6 +29,7 @@ import { tagImage } from "./images/tagImage";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
+import { pruneSystem } from "./pruneSystem";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
@@ -49,7 +50,6 @@ import { connectPrivateRegistry } from "./registries/private/connectPrivateRegis
 import { disconnectPrivateRegistry } from "./registries/private/disconnectPrivateRegistry";
 import { pullImage, pullRepository } from "./registries/pullImages";
 import { setRegistryAsDefault } from "./registries/registrySettings";
-import { systemPrune } from "./systemPrune";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
@@ -61,7 +61,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.compose.up', composeUp);
     registerCommand('vscode-docker.configure', configure);
-    registerCommand('vscode-docker.system.prune', systemPrune);
+    registerCommand('vscode-docker.pruneSystem', pruneSystem);
 
     registerCommand('vscode-docker.containers.attachShell', attachShellContainer);
     registerCommand('vscode-docker.containers.inspect', inspectContainer);
