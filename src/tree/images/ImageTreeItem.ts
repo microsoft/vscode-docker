@@ -44,7 +44,15 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public get iconPath(): IconPath {
-        return getThemedIconPath('application');
+        let icon: string;
+        switch (ext.imagesRoot.labelSetting) {
+            case 'Tag':
+                icon = 'tag';
+                break;
+            default:
+                icon = 'application';
+        }
+        return getThemedIconPath(icon);
     }
 
     public getImage(): Image {
