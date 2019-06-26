@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ImageInfo } from "dockerode";
 import { ext } from "../../extensionVariables";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
@@ -50,7 +51,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, Image
         let result: ILocalImageInfo[] = [];
         for (const image of images) {
             if (!image.RepoTags) {
-                result.push(new LocalImageInfo(image, '<none>:<none>'));
+                result.push(new LocalImageInfo(image, getFullTagFromDigest(image)));
             } else {
                 for (let fullTag of image.RepoTags) {
                     result.push(new LocalImageInfo(image, fullTag));
@@ -64,4 +65,19 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, Image
     public getPropertyValue(item: ILocalImageInfo, property: ImageProperty): string {
         return getImagePropertyValue(item, property);
     }
+}
+
+function getFullTagFromDigest(image: ImageInfo): string {
+    let repo = '<none>';
+    let tag = '<none>';
+
+    const digest = image.RepoDigests[0];
+    if (digest) {
+        const index = digest.indexOf('@');
+        if (index > 0) {
+            repo = digest.substring(0, index);
+        }
+    }
+
+    return `${repo}:${tag}`;
 }
