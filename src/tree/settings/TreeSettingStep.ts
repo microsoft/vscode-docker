@@ -33,8 +33,8 @@ export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardCo
         context.telemetry.properties.newValue = context.newValue.toString();
     }
 
-    public shouldPrompt(_context: ITreeSettingsWizardContext): boolean {
-        return true;
+    public shouldPrompt(context: ITreeSettingsWizardContext): boolean {
+        return !!context.info;
     }
 }
 

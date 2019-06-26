@@ -7,7 +7,6 @@ import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibi
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
-import { nonNullProp } from "../utils/nonNull";
 import { isLinux } from "../utils/osUtils";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
@@ -259,7 +258,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     public async configureExplorer(context: IActionContext): Promise<void> {
-        const wizardContext: ITreeSettingsWizardContext = { infoList: this.getSettingWizardInfoList(), ...context };
+        const infoList = this.getSettingWizardInfoList();
+        const wizardContext: ITreeSettingsWizardContext = { infoList, ...context };
         const wizard = new AzureWizard(wizardContext, {
             title: this.configureExplorerTitle,
             promptSteps: [
@@ -270,8 +270,15 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         });
         await wizard.prompt();
         await wizard.execute();
-        const info = nonNullProp(wizardContext, 'info');
-        this.config.update(info.setting, wizardContext.newValue, ConfigurationTarget.Global);
+
+        if (wizardContext.info) {
+            this.config.update(wizardContext.info.setting, wizardContext.newValue, ConfigurationTarget.Global);
+        } else {
+            // reset settings
+            for (const info of infoList) {
+                this.config.update(info.setting, undefined, ConfigurationTarget.Global);
+            }
+        }
     }
 
     private getDockerErrorTreeItems(error: unknown): AzExtTreeItem[] {
