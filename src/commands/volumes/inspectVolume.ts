@@ -12,6 +12,6 @@ export async function inspectVolume(context: IActionContext, node?: VolumeTreeIt
         node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, context);
     }
 
-    const inspectInfo = node.getVolume().inspect();
+    const inspectInfo = await node.getVolume().inspect();
     await openReadOnlyJson(node, inspectInfo);
 }
