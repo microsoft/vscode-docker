@@ -13,6 +13,7 @@ import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
+import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { getBlobInfo, streamLogs } from "../../../../utils/azureUtils";
 import { delay } from '../../../../utils/delay';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quick-pick-file';
@@ -38,7 +39,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         throw new Error("Run Request Type Currently not supported.");
     }
 
-    const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(AzureRegistryTreeItem.contextValue, context);
+    const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
     const osType: string = (await ext.ui.showQuickPick(osPick, { 'placeHolder': 'Select image base OS' })).data;

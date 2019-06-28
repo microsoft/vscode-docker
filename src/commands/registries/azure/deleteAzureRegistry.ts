@@ -7,10 +7,11 @@ import { ProgressLocation, window } from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 
 export async function deleteAzureRegistry(context: IActionContext, node?: AzureRegistryTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(AzureRegistryTreeItem.contextValue, { ...context, suppressCreatePick: true });
+        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, { ...context, suppressCreatePick: true });
     }
 
     const confirmDelete: string = `Are you sure you want to delete registry "${node.registryName}" and its associated images?`;

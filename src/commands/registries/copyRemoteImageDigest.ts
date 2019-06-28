@@ -7,12 +7,13 @@ import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { AzureTaskRunTreeItem } from "../../tree/registries/azure/AzureTaskRunTreeItem";
-import { RemoteTagTreeItemBase } from "../../tree/registries/RemoteTagTreeItemBase";
+import { DockerV2TagTreeItem } from "../../tree/registries/dockerV2/DockerV2TagTreeItem";
+import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
 import { nonNullProp } from "../../utils/nonNull";
 
-export async function copyRemoteImageDigest(context: IActionContext, node?: RemoteTagTreeItemBase | AzureTaskRunTreeItem): Promise<void> {
+export async function copyRemoteImageDigest(context: IActionContext, node?: DockerV2TagTreeItem | AzureTaskRunTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(/^(azure|private)Tag$/i, context);
+        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, context);
     }
 
     let digest: string;
@@ -24,7 +25,7 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Remo
         }
     } else {
         await node.runWithTemporaryDescription('Getting digest...', async () => {
-            digest = await (<RemoteTagTreeItemBase>node).getDigest();
+            digest = await (<DockerV2TagTreeItem>node).getDigest();
         });
     }
 

@@ -6,26 +6,27 @@
 import { ProgressLocation, window } from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { RemoteTagTreeItemBase } from '../../tree/registries/RemoteTagTreeItemBase';
+import { DockerV2TagTreeItem } from '../../tree/registries/dockerV2/DockerV2TagTreeItem';
+import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 
-export async function deleteRemoteImage(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
+export async function deleteRemoteImage(context: IActionContext, node?: DockerV2TagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(/^(azure|private)Tag$/i, { ...context, suppressCreatePick: true });
+        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, { ...context, suppressCreatePick: true });
     }
 
-    const confirmDelete = `Are you sure you want to delete image "${node.fullTag}"? This will delete all images that have the same digest.`;
+    const confirmDelete = `Are you sure you want to delete image "${node.repoNameAndTag}"? This will delete all images that have the same digest.`;
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
 
     const repoTI = node.parent;
-    const deleting = `Deleting image "${node.fullTag}"...`;
+    const deleting = `Deleting image "${node.repoNameAndTag}"...`;
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
         await node.deleteTreeItem(context);
     });
 
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
     await repoTI.refresh();
-    const message = `Successfully deleted image "${node.fullTag}".`;
+    const message = `Successfully deleted image "${node.repoNameAndTag}".`;
     // don't wait
     window.showInformationMessage(message);
 }

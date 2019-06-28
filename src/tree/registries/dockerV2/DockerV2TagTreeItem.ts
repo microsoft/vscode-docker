@@ -3,43 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as moment from 'moment';
 import { RequestPromiseOptions } from 'request-promise-native';
-import { AzExtTreeItem } from "vscode-azureextensionui";
-import { nonNullProp } from '../../utils/nonNull';
-import { registryRequest } from '../../utils/registryRequestUtils';
-import { getThemedIconPath, IconPath } from '../IconPath';
-import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
+import { nonNullProp } from '../../../utils/nonNull';
+import { registryRequest } from '../../../utils/registryRequestUtils';
+import { RemoteTagTreeItem } from '../RemoteTagTreeItem';
 
-export abstract class RemoteTagTreeItemBase extends AzExtTreeItem {
-    public static contextValueSuffix: string = 'Tag';
-    public static allContextRegExp: RegExp = /Tag$/;
-    public parent: RemoteRepositoryTreeItemBase;
-    public tag: string;
-    public time: Date;
-
-    public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
-        super(parent);
-        this.tag = tag;
-        this.time = new Date(time);
-    }
-
-    public get label(): string {
-        return this.tag;
-    }
-
-    public get fullTag(): string {
-        return this.parent.repoName + ':' + this.tag;
-    }
-
-    public get description(): string {
-        return moment(this.time).fromNow();
-    }
-
-    public get iconPath(): IconPath {
-        return getThemedIconPath('tag');
-    }
-
+export class DockerV2TagTreeItem extends RemoteTagTreeItem {
     public async getDigest(): Promise<string> {
         const digestOptions: RequestPromiseOptions = {
             headers: {

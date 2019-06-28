@@ -5,27 +5,27 @@
 
 import { URL } from 'url';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../../../extensionVariables';
-import { IPrivateRegistryWizardContext } from './IPrivateRegistryWizardContext';
+import { ext } from '../../../extensionVariables';
+import { ILogInWizardContext } from './ILogInWizardContext';
 
-export class PrivateRegistryUrlStep extends AzureWizardPromptStep<IPrivateRegistryWizardContext> {
-    public async prompt(context: IPrivateRegistryWizardContext): Promise<void> {
-        const prompt: string = "Enter the URL for the registry (OAuth not yet supported)";
+export class RegistryUrlStep extends AzureWizardPromptStep<ILogInWizardContext> {
+    public async prompt(context: ILogInWizardContext): Promise<void> {
+        const prompt: string = context.urlPrompt || "Enter the URL for the registry provider";
         const placeHolder: string = "Example: http://localhost:5000";
-        context.newRegistryUrl = (await ext.ui.showInputBox({
+        context.url = (await ext.ui.showInputBox({
             prompt,
             placeHolder,
             validateInput: v => this.validateUrl(context, v)
         }));
     }
 
-    public shouldPrompt(context: IPrivateRegistryWizardContext): boolean {
-        return !context.newRegistryUrl;
+    public shouldPrompt(context: ILogInWizardContext): boolean {
+        return !!context.includeUrl && !context.url;
     }
 
-    private validateUrl(context: IPrivateRegistryWizardContext, value: string): string | undefined {
+    private validateUrl(context: ILogInWizardContext, value: string): string | undefined {
         if (!value) {
-            return "Registry URL cannot be empty.";
+            return "URL cannot be empty.";
         } else {
             let protocol: string | undefined;
             let host: string | undefined;
@@ -39,8 +39,8 @@ export class PrivateRegistryUrlStep extends AzureWizardPromptStep<IPrivateRegist
 
             if (!protocol || !host) {
                 return "Please enter a valid URL";
-            } else if (context.existingUrls.find(u => u === value)) {
-                return `Private registry "${value}" is already connected.`;
+            } else if (context.existingProviders.find(rp => rp.url === value)) {
+                return `URL "${value}" is already connected.`;
             } else {
                 return undefined;
             }

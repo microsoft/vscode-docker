@@ -3,38 +3,26 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, extensions } from "vscode";
-import { AzExtParentTreeItem, AzureAccountTreeItemBase, ISubscriptionContext, UserCancelledError } from "vscode-azureextensionui";
-import { ext } from "../../../extensionVariables";
+import { AzExtParentTreeItem, AzureAccountTreeItemBase, ISubscriptionContext } from "vscode-azureextensionui";
 import { getIconPath, IconPath } from "../../IconPath";
-import { isAncestoryOfRegistryType, RegistryType } from "../RegistryType";
+import { ICachedRegistryProvider, IRegistryProviderTreeItem } from "../IRegistryProvider";
+import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
-const azureAccountExtensionId: string = 'ms-vscode.azure-account';
+export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
+    public cachedProvider: ICachedRegistryProvider;
 
-let azureAccountTreeItemTask: Promise<AzureAccountTreeItem | undefined>;
-
-export class AzureAccountTreeItem extends AzureAccountTreeItemBase {
-    private constructor(parent: AzExtParentTreeItem) {
+    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
         super(parent);
+        this.cachedProvider = cachedProvider;
     }
 
-    public static async create(parent: AzExtParentTreeItem): Promise<AzureAccountTreeItem | undefined> {
-        azureAccountTreeItemTask = this.createInternal(parent);
-        return await azureAccountTreeItemTask;
+    public get contextValue(): string {
+        return getRegistryContextValue(this, registryProviderSuffix);
     }
 
-    private static async createInternal(parent: AzExtParentTreeItem): Promise<AzureAccountTreeItem | undefined> {
-        const azureAccountExtension = extensions.getExtension(azureAccountExtensionId);
-        await commands.executeCommand('setContext', 'isAzureAccountInstalled', !!azureAccountExtension);
-        if (azureAccountExtension) {
-            if (!azureAccountExtension.isActive) {
-                await azureAccountExtension.activate();
-            }
-            return new AzureAccountTreeItem(parent);
-        } else {
-            return undefined;
-        }
+    public set contextValue(_value: string) {
+        // ignore
     }
 
     public get iconPath(): IconPath {
@@ -43,24 +31,5 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase {
 
     public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {
         return new SubscriptionTreeItem(this, subContext);
-    }
-
-    public isAncestorOfImpl(expectedContextValue: string): boolean {
-        return isAncestoryOfRegistryType(expectedContextValue, RegistryType.azure);
-    }
-}
-
-export async function validateAzureAccountInstalled(): Promise<AzureAccountTreeItem> {
-    const ti = await azureAccountTreeItemTask;
-    if (ti) {
-        return ti;
-    } else {
-        const message = "This functionality requires installing the Azure Account extension.";
-        const viewInMarketplace = { title: "View in Marketplace" };
-        if (await ext.ui.showWarningMessage(message, viewInMarketplace) === viewInMarketplace) {
-            await commands.executeCommand('extension.open', azureAccountExtensionId);
-        }
-
-        throw new UserCancelledError();
     }
 }

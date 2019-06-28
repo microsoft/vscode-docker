@@ -8,10 +8,11 @@ import { ext } from '../../../extensionVariables';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
 import { SubscriptionTreeItem } from '../../../tree/registries/azure/SubscriptionTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 
 export async function openInAzurePortal(context: IActionContext, node?: SubscriptionTreeItem | AzureRegistryTreeItem | AzureRepositoryTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(AzureRegistryTreeItem.contextValue, context);
+        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
     }
 
     if (node instanceof SubscriptionTreeItem) {

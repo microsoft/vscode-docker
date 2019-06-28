@@ -8,12 +8,13 @@ import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { DockerHubNamespaceTreeItem } from "../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem";
 import { DockerHubRepositoryTreeItem } from "../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem";
-import { DockerHubTagTreeItem } from "../../../tree/registries/dockerHub/DockerHubTagTreeItem";
+import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
+import { RemoteTagTreeItem } from "../../../tree/registries/RemoteTagTreeItem";
 import { openExternal } from "../../../utils/openExternal";
 
-export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | DockerHubTagTreeItem): Promise<void> {
+export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | RemoteTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(DockerHubNamespaceTreeItem.contextValue, context);
+        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, context);
     }
 
     let url = dockerHubUrl;
@@ -22,7 +23,8 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Doc
     } else if (node instanceof DockerHubRepositoryTreeItem) {
         url += `r/${node.parent.namespace}/${node.repoName}`;
     } else {
-        url += `r/${node.parent.parent.namespace}/${node.parent.repoName}/tags`
+        const repoTI = <DockerHubRepositoryTreeItem>node.parent;
+        url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`
     }
 
     await openExternal(url);
