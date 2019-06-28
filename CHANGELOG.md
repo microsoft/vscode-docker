@@ -1,3 +1,13 @@
+## 0.6.4 - 19 June 2019
+
+### Fixed
+* Mitigate error "command 'vscode-docker.images.selectGroupBy' already exists" [#1008](https://github.com/microsoft/vscode-docker/issues/1008)
+
+## 0.6.3 - 18 June 2019
+
+### Changed
+* Changed publisher from "PeterJausovec" to "ms-azuretools"
+
 ## 0.6.2 - 2 May 2019
 
 ### Fixed

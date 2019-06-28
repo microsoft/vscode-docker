@@ -18,7 +18,7 @@ export async function restartContainer(context: IActionContext, node: ContainerT
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Restarting Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
-            await ext.dockerode.getContainer(n.container.Id).restart();
+            await n.getContainer().restart();
         }));
     });
 }

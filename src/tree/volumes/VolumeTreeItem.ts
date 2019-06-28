@@ -3,44 +3,51 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VolumeInspectInfo } from "dockerode";
-import * as moment from 'moment';
+import { Volume } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from "../IconPath";
+import { LocalVolumeInfo } from "./LocalVolumeInfo";
 
 export class VolumeTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
-    public volume: VolumeInspectInfo;
+    private readonly _item: LocalVolumeInfo;
 
-    public constructor(parent: AzExtParentTreeItem, volume: VolumeInspectInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalVolumeInfo) {
         super(parent);
-        this.volume = volume;
+        this._item = itemInfo;
+    }
+
+    public get id(): string {
+        return this._item.treeId;
+    }
+
+    public get createdTime(): number {
+        return this._item.createdTime;
+    }
+
+    public get volumeName(): string {
+        return this._item.volumeName;
     }
 
     public get label(): string {
-        return this.volume.Name;
+        return ext.volumesRoot.getTreeItemLabel(this._item);
+    }
+
+    public get description(): string | undefined {
+        return ext.volumesRoot.getTreeItemDescription(this._item);
     }
 
     public get iconPath(): IconPath {
         return getThemedIconPath('volume');
     }
 
-    public get description(): string | undefined {
-        return this.createdAt ? moment(new Date(this.createdAt)).fromNow() : undefined;
-    }
-
-    public get id(): string {
-        return this.volume.Name;
-    }
-
-    public get createdAt(): string | undefined {
-        // tslint:disable-next-line: no-unsafe-any no-any
-        return (<any>this.volume).CreatedAt;
+    public getVolume(): Volume {
+        return ext.dockerode.getVolume(this.volumeName);
     }
 
     public async deleteTreeItemImpl(): Promise<void> {
-        await ext.dockerode.getVolume(this.volume.Name).remove({ force: true });
+        await this.getVolume().remove({ force: true });
     }
 }

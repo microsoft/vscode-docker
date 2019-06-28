@@ -15,6 +15,7 @@ const env = process.env;
 function test(): cp.ChildProcess {
     env.DEBUGTELEMETRY = '1';
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
+    env.MOCHA_timeout = String(10 * 1000);
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
     return spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
 }

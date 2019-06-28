@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
-import { IActionContext } from "vscode-azureextensionui";
+import { IActionContext, openReadOnlyContent } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
 import { AzureTaskRunTreeItem } from "../../../../tree/registries/azure/AzureTaskRunTreeItem";
 import { getBlobInfo, getBlobToText, IBlobInfo } from "../../../../utils/azureUtils";
-import { fsUtils } from "../../../../utils/fsUtils";
 import { nonNullProp } from "../../../../utils/nonNull";
 
 export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTaskRunTreeItem): Promise<void> {
@@ -22,6 +21,6 @@ export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTas
         let blobInfo: IBlobInfo = getBlobInfo(nonNullProp(result, 'logLink'));
         let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
         let content = await getBlobToText(blobInfo, blob, 0);
-        await fsUtils.openLogInEditor(content);
+        await openReadOnlyContent(node, content, '.log');
     });
 }
