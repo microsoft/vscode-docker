@@ -10,6 +10,12 @@ export enum RegistryApi {
     DockerV2 = 'DockerV2',
 
     /**
+     * https://docs.gitlab.com/ee/api/README.html
+     * https://docs.gitlab.com/ee/api/container_registry.html
+     */
+    GitLabV4 = 'GitLabV4',
+
+    /**
      * No public docs found
      */
     DockerHubV2 = 'DockerHubV2'
