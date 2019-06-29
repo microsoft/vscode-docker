@@ -11,7 +11,6 @@ export const azureRegistryProviderId: string = 'azure';
 
 export const azureRegistryProvider: IRegistryProvider = {
     label: "Azure",
-    description: "ACR",
     id: azureRegistryProviderId,
     api: RegistryApi.DockerV2,
     onlyOneAllowed: true,
