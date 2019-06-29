@@ -5,7 +5,8 @@
 
 import { AzExtParentTreeItem, AzureAccountTreeItemBase, ISubscriptionContext } from "vscode-azureextensionui";
 import { getIconPath, IconPath } from "../../IconPath";
-import { ICachedRegistryProvider, IRegistryProviderTreeItem } from "../IRegistryProvider";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
@@ -22,7 +23,7 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
     }
 
     public set contextValue(_value: string) {
-        // ignore
+        // this is needed because the parent `AzureAccountTreeItemBase` has a setter, but we ignore `_value` in favor of the above getter
     }
 
     public get iconPath(): IconPath {

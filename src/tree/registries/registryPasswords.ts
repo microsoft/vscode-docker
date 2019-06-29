@@ -5,7 +5,7 @@
 
 import * as crypto from 'crypto';
 import { ext } from '../../extensionVariables';
-import { ICachedRegistryProvider } from './IRegistryProvider';
+import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 
 const sessionPasswords: Map<string, string> = new Map<string, string>();
 

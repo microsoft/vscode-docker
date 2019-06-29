@@ -5,6 +5,8 @@
 
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { RegistryApi } from "./all/RegistryApi";
+import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 import { ILogInWizardOptions } from "./logInWizard/ILogInWizardOptions";
 
 export interface IRegistryProvider {
@@ -53,18 +55,4 @@ export interface IRegistryProvider {
      * The tree item class to instantiate after a provider is connected
      */
     treeItemType: new (parent: AzExtParentTreeItem, cached: ICachedRegistryProvider) => AzExtParentTreeItem & IRegistryProviderTreeItem;
-}
-
-/**
- * Basic _non-sensitive_ information that will be cached across sessions
- */
-export interface ICachedRegistryProvider {
-    id: string;
-    api: RegistryApi;
-    url?: string;
-    username?: string;
-}
-
-export interface IRegistryProviderTreeItem {
-    cachedProvider: ICachedRegistryProvider;
 }

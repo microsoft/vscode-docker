@@ -7,7 +7,8 @@ import { AzExtTreeItem } from "vscode-azureextensionui";
 import { RegistryApi } from "./all/RegistryApi";
 import { azureRegistryProviderId } from "./azure/azureRegistryProvider";
 import { dockerHubRegistryProviderId } from "./dockerHub/dockerHubRegistryProvider";
-import { ICachedRegistryProvider, IRegistryProviderTreeItem } from "./IRegistryProvider";
+import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 
 export const registryProviderSuffix = 'RegistryProvider';
 export const registrySuffix = 'Registry';

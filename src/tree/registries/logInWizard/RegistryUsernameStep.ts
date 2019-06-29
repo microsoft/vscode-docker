@@ -10,7 +10,7 @@ import { ILogInWizardContext } from './ILogInWizardContext';
 
 export class RegistryUsernameStep extends AzureWizardPromptStep<ILogInWizardContext> {
     public async prompt(context: ILogInWizardContext): Promise<void> {
-        let prompt = context.usernamePrompt || (context.isUsernameOptional ? "Enter your username, or press 'Enter' for none" : "Enter your username");
+        let prompt: string = context.usernamePrompt || (context.isUsernameOptional ? "Enter your username, or press 'Enter' for none" : "Enter your username");
         const options: InputBoxOptions = {
             prompt,
             validateInput: (value: string | undefined) => this.validateInput(context, value)

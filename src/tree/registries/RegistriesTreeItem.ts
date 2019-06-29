@@ -9,7 +9,9 @@ import { openExternal } from "../../utils/openExternal";
 import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";
-import { ICachedRegistryProvider, IRegistryProvider, IRegistryProviderTreeItem } from "./IRegistryProvider";
+import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
+import { IRegistryProvider } from "./IRegistryProvider";
+import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 import { ILogInWizardContext } from "./logInWizard/ILogInWizardContext";
 import { RegistryPasswordStep } from "./logInWizard/RegistryPasswordStep";
 import { RegistryUrlStep } from "./logInWizard/RegistryUrlStep";
@@ -44,9 +46,8 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 commandId: 'vscode-docker.registries.connectRegistry'
             })];
         } else {
-            let hasAddedConnectedRegistriesTreeItem: boolean = false;
             this._connectedRegistriesTreeItem.children = [];
-            return await this.createTreeItemsWithErrorHandling(
+            const children: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 this._cachedProviders,
                 'invalidRegistryProvider',
                 cachedProvider => {
@@ -59,18 +60,19 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     const treeItem = this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
                     if (provider.isSingleRegistry) {
                         this._connectedRegistriesTreeItem.children.push(treeItem);
-                        if (hasAddedConnectedRegistriesTreeItem) {
-                            return undefined;
-                        } else {
-                            hasAddedConnectedRegistriesTreeItem = true;
-                            return this._connectedRegistriesTreeItem;
-                        }
+                        return undefined;
                     } else {
                         return treeItem;
                     }
                 },
                 cachedInfo => cachedInfo.id
-            )
+            );
+
+            if (this._connectedRegistriesTreeItem.children.length > 0) {
+                children.push(this._connectedRegistriesTreeItem);
+            }
+
+            return children;
         }
     }
 

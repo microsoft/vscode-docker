@@ -5,7 +5,7 @@
 
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { IRegistryProviderTreeItem } from "../../tree/registries/IRegistryProvider";
+import { IRegistryProviderTreeItem } from "../../tree/registries/IRegistryProviderTreeItem";
 import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
 
 export async function disconnectRegistry(context: IActionContext, node?: IRegistryProviderTreeItem & AzExtTreeItem): Promise<void> {

@@ -9,7 +9,7 @@ import { ILogInWizardContext } from './ILogInWizardContext';
 
 export class RegistryPasswordStep extends AzureWizardPromptStep<ILogInWizardContext> {
     public async prompt(context: ILogInWizardContext): Promise<void> {
-        const prompt = context.passwordPrompt || "Enter your password";
+        const prompt: string = context.passwordPrompt || "Enter your password";
         context.password = await ext.ui.showInputBox({ prompt, validateInput, password: true });
     }
 

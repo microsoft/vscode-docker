@@ -7,7 +7,8 @@ import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as
 import { window } from 'vscode';
 import { AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
 import { nonNullProp } from '../../../utils/nonNull';
-import { ICachedRegistryProvider, IRegistryProviderTreeItem } from '../IRegistryProvider';
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { AzureAccountTreeItem } from './AzureAccountTreeItem';
 import { AzureRegistryTreeItem } from './AzureRegistryTreeItem';
 import { AzureRegistryCreateStep } from './createWizard/AzureRegistryCreateStep';

@@ -24,7 +24,7 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Doc
         url += `r/${node.parent.namespace}/${node.repoName}`;
     } else {
         const repoTI = <DockerHubRepositoryTreeItem>node.parent;
-        url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`
+        url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`;
     }
 
     await openExternal(url);
