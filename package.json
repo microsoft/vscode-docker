@@ -730,8 +730,7 @@
             }
         ],
         "configuration": {
-            "type": "object",
-            "title": "Docker configuration options",
+            "title": "Docker",
             "properties": {
                 "docker.defaultRegistryPath": {
                     "type": "string",
