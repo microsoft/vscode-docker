@@ -6,7 +6,7 @@
 import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
 import { WebSiteManagementClient } from 'azure-arm-website';
-import { SiteConfig } from 'azure-arm-website/lib/models';
+import { Site, SiteConfig } from 'azure-arm-website/lib/models';
 import { AuthOptions, NameValuePair } from 'request';
 import { Progress, window } from "vscode";
 import * as vscode from 'vscode';
@@ -22,6 +22,7 @@ import { PrivateRegistryTreeItem } from '../../../tree/registries/private/Privat
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItemBase } from '../../../tree/registries/RemoteTagTreeItemBase';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
+import { openExternal } from '../../../utils/openExternal';
 
 export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
     if (!node) {
@@ -50,7 +51,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
     const siteConfig: SiteConfig = await getNewSiteConfig(node);
     const executeSteps: AzureWizardExecuteStep<IAppServiceWizardContext>[] = [
-        new DockerSiteCreateStep(siteConfig)
+        new DockerSiteCreateStep(siteConfig),
+        new DockerWebhookCreateStep(node)
     ];
 
     const title = 'Create new web app';
@@ -58,64 +60,11 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     await wizard.prompt();
     await wizard.execute();
 
-    const site = nonNullProp(wizardContext, 'site');
+    const site: Site = nonNullProp(wizardContext, 'site');
     const createdNewWebApp: string = `Successfully created web app "${site.name}": https://${site.defaultHostName}`;
-    if (node instanceof AzureTagTreeItem) {
-        let siteClient = new SiteClient(site, node.parent.parent.parent.root);
-        let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
-        await createWebhookForApp(node, wizardContext, appUri);
-    } else if (node instanceof DockerHubTagTreeItem) {
-        // point to dockerhub to create a webhook
-        // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-        const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
-        let response: string = await vscode.window.showInformationMessage("Please browse to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
-        if (response) {
-            let appUri = `https://${site.name}.scm.azurewebsites.net/docker/hook`;
-            // tslint:disable-next-line:no-unsafe-any
-            await vscode.env.clipboard.writeText(appUri);
-            // account.name, repository.name
-            // tslint:disable-next-line:no-unsafe-any
-            vscode.env.openExternal(vscode.Uri.parse(`https://cloud.docker.com/repository/docker/${node.parent.parent.parent.username}/${node.parent.repoName}/webHooks`));
-        }
-    }
-
     ext.outputChannel.appendLine(createdNewWebApp);
     // don't wait
     window.showInformationMessage(createdNewWebApp);
-}
-
-async function createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<void> {
-    // fields derived from the app service wizard
-    let siteName: string = wizardContext.site.name;
-    let webhookName: string = `webapp${siteName}`;
-
-    // variables derived from the container registry
-    const crmClient = createAzureClient(node.parent.parent.parent.root, ContainerRegistryManagementClient);
-    let registryResourceGroupName: string = node.parent.parent.resourceGroup;
-    let registryName = node.parent.parent.registryName;
-
-    const registryList = await crmClient.registries.list();
-    const registryHandle = registryList.find((value) => value.name === registryName);
-    if (!registryHandle) {
-        return;
-    }
-    let webhookLocation: string = registryHandle.location;
-
-    const existingWebhooks = await crmClient.webhooks.list(registryResourceGroupName, registryName);
-    if (existingWebhooks.find((hook) => hook.name === webhookName)) {
-        return;
-    }
-
-    let webhookCreateParameters: WebhookCreateParameters = {
-        location: webhookLocation,
-        serviceUri: appUri,
-        scope: `${node.parent.repoName}:${node.tag}`,
-        actions: ["push"],
-        status: 'enabled'
-    };
-
-    const webhook = await crmClient.webhooks.create(registryResourceGroupName, registryName, webhookName, webhookCreateParameters);
-    ext.outputChannel.appendLine(`Created webhook ${webhook.name} with scope ${webhook.scope}, id: ${webhook.id} and location: ${webhook.location}`);
 }
 
 async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig> {
@@ -197,5 +146,70 @@ class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardConte
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
         return !context.site;
+    }
+}
+
+class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
+    public priority: number = 141; // execute after DockerSiteCreate
+
+    private _treeItem: RemoteTagTreeItemBase;
+
+    public constructor(treeItem: RemoteTagTreeItemBase) {
+        super();
+        this._treeItem = treeItem;
+    }
+
+    public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
+        const creatingNewApp: string = `Creating webhook for webapp "${context.newSiteName}"...`;
+        ext.outputChannel.appendLine(creatingNewApp);
+        progress.report({ message: creatingNewApp });
+
+        const site: Site = nonNullProp(context, 'site');
+        let siteClient = new SiteClient(site, context);
+        let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
+        if (this._treeItem instanceof AzureTagTreeItem) {
+            await this.createWebhookForApp(this._treeItem, context, appUri);
+        } else if (this._treeItem instanceof DockerHubTagTreeItem) {
+            // point to dockerhub to create a webhook
+            // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
+            const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
+            let response: string = await vscode.window.showInformationMessage("Please browse to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
+            if (response) {
+                await vscode.env.clipboard.writeText(appUri);
+                await openExternal(`https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`);
+            }
+        }
+
+    }
+
+    public shouldExecute(context: IAppServiceWizardContext): boolean {
+        return !!context.site;
+    }
+
+    private async createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<void> {
+        // fields derived from the app service wizard
+        let siteName: string = wizardContext.site.name;
+        let webhookName: string = `webapp${siteName}`;
+
+        // variables derived from the container registry
+        const crmClient = createAzureClient(node.parent.parent.parent.root, ContainerRegistryManagementClient);
+        let registryResourceGroupName: string = node.parent.parent.resourceGroup;
+        let registryName = node.parent.parent.registryName;
+
+        const existingWebhooks = await crmClient.webhooks.list(registryResourceGroupName, registryName);
+        if (existingWebhooks.find((hook) => hook.name === webhookName)) {
+            return;
+        }
+
+        let webhookCreateParameters: WebhookCreateParameters = {
+            location: node.parent.parent.registryLocation,
+            serviceUri: appUri,
+            scope: `${node.parent.repoName}:${node.tag}`,
+            actions: ["push"],
+            status: 'enabled'
+        };
+
+        const webhook = await crmClient.webhooks.create(registryResourceGroupName, registryName, webhookName, webhookCreateParameters);
+        ext.outputChannel.appendLine(`Created webhook '${webhook.name}' with scope '${webhook.scope}', id: '${webhook.id}' and location: '${webhook.location}'`);
     }
 }
