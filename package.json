@@ -56,6 +56,7 @@
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
         "onCommand:vscode-docker.networks.configureExplorer",
+        "onCommand:vscode-docker.networks.inspect",
         "onCommand:vscode-docker.networks.prune",
         "onCommand:vscode-docker.networks.refresh",
         "onCommand:vscode-docker.networks.remove",
@@ -335,9 +336,14 @@
                     "group": "inline"
                 },
                 {
+                    "command": "vscode-docker.networks.inspect",
+                    "when": "view == dockerNetworks && viewItem == network",
+                    "group": "networks_1_general@1"
+                },
+                {
                     "command": "vscode-docker.networks.remove",
                     "when": "view == dockerNetworks && viewItem == network",
-                    "group": "networks_1_destructive@1"
+                    "group": "networks_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.createRegistry",
@@ -1326,6 +1332,11 @@
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
                 }
+            },
+            {
+                "command": "vscode-docker.networks.inspect",
+                "title": "Inspect",
+                "category": "Docker Networks"
             },
             {
                 "command": "vscode-docker.networks.prune",
