@@ -6,6 +6,8 @@
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
+import { ext } from "../../../extensionVariables";
+import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { getIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
@@ -20,6 +22,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public baseUrl: string = 'https://gitlab.com/';
     public cachedProvider: ICachedRegistryProvider;
 
+    private _token?: string;
     private _nextLink?: string;
 
     public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
@@ -31,13 +34,30 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return getRegistryContextValue(this, registryProviderSuffix);
     }
 
+    public get description(): string | undefined {
+        return ext.registriesRoot.hasMultiplesOfProvider(this.cachedProvider) ? this.username : undefined;
+    }
+
     public get iconPath(): IconPath {
         return getIconPath('gitLab');
+    }
+
+    public get id(): string {
+        return this.cachedProvider.id + this.username;
+    }
+
+    public get username(): string {
+        return nonNullProp(this.cachedProvider, 'username');
+    }
+
+    public async getPassword(): Promise<string> {
+        return await getRegistryPassword(this.cachedProvider);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
+            await this.refreshToken();
         }
 
         const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;
@@ -56,13 +76,33 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     }
 
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        options.headers = {
-            "Private-Token": await getRegistryPassword(this.cachedProvider)
+        if (this._token) {
+            options.auth = {
+                bearer: this._token
+            }
         }
+    }
+
+    private async refreshToken(): Promise<void> {
+        this._token = undefined;
+        const options = {
+            form: {
+                grant_type: "password",
+                username: this.username,
+                password: await this.getPassword()
+            }
+        };
+
+        const response = await registryRequest<IToken>(this, 'POST', 'oauth/token', options);
+        this._token = response.body.access_token;
     }
 }
 
 interface IProject {
     id: number;
     path_with_namespace: string;
+}
+
+interface IToken {
+    access_token: string
 }

@@ -7,7 +7,6 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getRegistryPassword } from "../registryPasswords";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { GitLabAccountTreeItem } from "./GitLabAccountTreeItem";
 import { GitLabRepositoryTreeItem } from "./GitLabRepositoryTreeItem";
@@ -71,7 +70,8 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         return {
             registryPath: gitLabRegistryUrl,
             auth: {
-                token: await getRegistryPassword(this.parent.cachedProvider)
+                username: this.parent.username,
+                password: await this.parent.getPassword()
             }
         };
     }

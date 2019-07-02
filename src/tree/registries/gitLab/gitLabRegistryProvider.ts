@@ -13,9 +13,8 @@ export const gitLabRegistryProvider: IRegistryProvider = {
     api: RegistryApi.GitLabV4,
     connectWizardOptions: {
         wizardTitle: 'Sign in to GitLab',
-        passwordPrompt: 'Enter your personal access token',
+        includeUsername: true,
         includePassword: true,
     },
-    onlyOneAllowed: true,
     treeItemType: GitLabAccountTreeItem
 }
