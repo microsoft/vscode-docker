@@ -39,7 +39,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
     }
 
     public get id(): string {
-        return 'dockerHub' + this.username;
+        return this.cachedProvider.id + this.username;
     }
 
     public get iconPath(): IconPath {

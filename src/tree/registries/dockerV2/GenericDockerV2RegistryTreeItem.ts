@@ -45,7 +45,8 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
                 // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
                 await registryRequest(this, 'GET', 'v2');
             } catch (error) {
-                if (parseError(error).errorType === "401") {
+                const errorType: string = parseError(error).errorType.toLowerCase();
+                if (errorType === "401" || errorType === "unauthorized") {
                     const message = 'OAuth support has not yet been implemented in this preview feature. This registry does not appear to support basic authentication.';
                     throw new Error(message);
                 } else {
