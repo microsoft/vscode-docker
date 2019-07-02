@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { Response } from "request";
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
@@ -17,6 +18,7 @@ import { DockerV2RepositoryTreeItem } from "./DockerV2RepositoryTreeItem";
 
 export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase implements IRegistryProviderTreeItem {
     public cachedProvider: ICachedRegistryProvider;
+    private _token?: string;
 
     public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
         super(parent);
@@ -41,13 +43,16 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
+            this._token = undefined;
+
             try {
                 // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
                 await registryRequest(this, 'GET', 'v2');
             } catch (error) {
-                if (parseError(error).errorType === "401") {
-                    const message = 'OAuth support has not yet been implemented in this preview feature. This registry does not appear to support basic authentication.';
-                    throw new Error(message);
+                const header = getWwwAuthenticateHeader(error);
+                if (header) {
+                    await this.refreshToken(header);
+                    await registryRequest(this, 'GET', 'v2');
                 } else {
                     throw error;
                 }
@@ -62,7 +67,11 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
     }
 
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        if (this.cachedProvider.username) {
+        if (this._token) {
+            options.headers = {
+                Authorization: 'Bearer ' + this._token
+            }
+        } else if (this.cachedProvider.username) {
             options.auth = {
                 username: this.cachedProvider.username,
                 password: await getRegistryPassword(this.cachedProvider)
@@ -84,4 +93,44 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
 
         return creds;
     }
+
+    private async refreshToken(header: string): Promise<void> {
+        this._token = undefined;
+        const options = {
+            baseUrl: getAuthHeaderPart(header, 'realm'),
+            form: {
+                grant_type: "password",
+                client_id: 'docker',
+                service: getAuthHeaderPart(header, 'service'),
+                scope: getAuthHeaderPart(header, 'scope'),
+                offline_token: true
+            },
+            headers: {
+                "Content-Type": 'application/x-www-form-urlencoded'
+            }
+        };
+
+        const response = await registryRequest<IToken>(this, 'GET', '', options);
+        this._token = response.body.token;
+    }
+}
+
+interface IToken {
+    token: string
+}
+
+function getWwwAuthenticateHeader(error: unknown): string | undefined {
+    const errorType = parseError(error).errorType;
+    if (errorType === "401" || errorType.toLowerCase() === 'unauthorized') {
+        const response = error && typeof error === 'object' && (<{ response?: Response }>error).response;
+        const header = response && typeof response === 'object' && response.headers && response.headers['www-authenticate'];
+        return header;
+    }
+
+    return undefined;
+}
+
+function getAuthHeaderPart(authHeader: string, part: string): string | undefined {
+    const match = authHeader.match(new RegExp(`${part}="([^"]*)"`, 'i'));
+    return match ? match[1] : undefined;
 }
