@@ -8,7 +8,8 @@ import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azure
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { getIconPath, IconPath } from "../../IconPath";
-import { ICachedRegistryProvider, IRegistryProviderTreeItem } from "../IRegistryProvider";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { getRegistryPassword } from "../registryPasswords";
 import { GitLabProjectTreeItem } from "./GitLabProjectTreeItem";
