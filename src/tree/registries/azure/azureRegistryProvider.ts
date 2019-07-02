@@ -14,6 +14,6 @@ export const azureRegistryProvider: IRegistryProvider = {
     id: azureRegistryProviderId,
     api: RegistryApi.DockerV2,
     onlyOneAllowed: true,
-    logInOptions: undefined,
+    connectWizardOptions: undefined,
     treeItemType: AzureAccountTreeItem
 }

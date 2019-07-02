@@ -6,10 +6,10 @@
 import { URL } from 'url';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
-import { ILogInWizardContext } from './ILogInWizardContext';
+import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
-export class RegistryUrlStep extends AzureWizardPromptStep<ILogInWizardContext> {
-    public async prompt(context: ILogInWizardContext): Promise<void> {
+export class RegistryUrlStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
+    public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
         const prompt: string = context.urlPrompt || "Enter the URL for the registry provider";
         const placeHolder: string = "Example: http://localhost:5000";
         context.url = (await ext.ui.showInputBox({
@@ -19,11 +19,11 @@ export class RegistryUrlStep extends AzureWizardPromptStep<ILogInWizardContext> 
         }));
     }
 
-    public shouldPrompt(context: ILogInWizardContext): boolean {
+    public shouldPrompt(context: IConnectRegistryWizardContext): boolean {
         return !!context.includeUrl && !context.url;
     }
 
-    private validateUrl(context: ILogInWizardContext, value: string): string | undefined {
+    private validateUrl(context: IConnectRegistryWizardContext, value: string): string | undefined {
         if (!value) {
             return "URL cannot be empty.";
         } else {

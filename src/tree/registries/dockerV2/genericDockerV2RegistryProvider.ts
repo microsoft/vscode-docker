@@ -14,7 +14,7 @@ export const genericDockerV2RegistryProvider: IRegistryProvider = {
     id: 'genericDockerV2',
     api: RegistryApi.DockerV2,
     isSingleRegistry: true,
-    logInOptions: {
+    connectWizardOptions: {
         wizardTitle: 'Connect Docker Registry',
         includeUrl: true,
         urlPrompt: 'Enter the URL for the registry (OAuth not yet supported)',

@@ -9,13 +9,13 @@ import { openExternal } from "../../utils/openExternal";
 import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";
+import { IConnectRegistryWizardContext } from "./connectWizard/IConnectRegistryWizardContext";
+import { RegistryPasswordStep } from "./connectWizard/RegistryPasswordStep";
+import { RegistryUrlStep } from "./connectWizard/RegistryUrlStep";
+import { RegistryUsernameStep } from "./connectWizard/RegistryUsernameStep";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
-import { ILogInWizardContext } from "./logInWizard/ILogInWizardContext";
-import { RegistryPasswordStep } from "./logInWizard/RegistryPasswordStep";
-import { RegistryUrlStep } from "./logInWizard/RegistryUrlStep";
-import { RegistryUsernameStep } from "./logInWizard/RegistryUsernameStep";
 import { anyContextValuePart, contextValueSeparator } from "./registryContextValues";
 import { deleteRegistryPassword, setRegistryPassword } from "./registryPasswords";
 
@@ -113,11 +113,11 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             api: provider.api,
         }
 
-        if (provider.logInOptions) {
+        if (provider.connectWizardOptions) {
             const existingProviders: ICachedRegistryProvider[] = this._cachedProviders.filter(rp => rp.id === provider.id);
-            const wizardContext: ILogInWizardContext = { ...context, ...provider.logInOptions, existingProviders };
+            const wizardContext: IConnectRegistryWizardContext = { ...context, ...provider.connectWizardOptions, existingProviders };
             const wizard = new AzureWizard(wizardContext, {
-                title: provider.logInOptions.wizardTitle,
+                title: provider.connectWizardOptions.wizardTitle,
                 promptSteps: [
                     new RegistryUrlStep(),
                     new RegistryUsernameStep(),

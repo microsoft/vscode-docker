@@ -5,9 +5,9 @@
 
 import { IActionContext } from 'vscode-azureextensionui';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { ILogInWizardOptions } from './ILogInWizardOptions';
+import { IConnectRegistryWizardOptions } from './IConnectRegistryWizardOptions';
 
-export interface ILogInWizardContext extends IActionContext, ILogInWizardOptions {
+export interface IConnectRegistryWizardContext extends IActionContext, IConnectRegistryWizardOptions {
     existingProviders: ICachedRegistryProvider[];
 
     username?: string;

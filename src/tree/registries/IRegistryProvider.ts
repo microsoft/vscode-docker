@@ -5,9 +5,9 @@
 
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { RegistryApi } from "./all/RegistryApi";
+import { IConnectRegistryWizardOptions } from "./connectWizard/IConnectRegistryWizardOptions";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
-import { ILogInWizardOptions } from "./logInWizard/ILogInWizardOptions";
 
 export interface IRegistryProvider {
     /**
@@ -49,7 +49,7 @@ export interface IRegistryProvider {
     /**
      * Describes the wizard to be used when connecting this provider
      */
-    logInOptions?: ILogInWizardOptions;
+    connectWizardOptions?: IConnectRegistryWizardOptions;
 
     /**
      * The tree item class to instantiate after a provider is connected

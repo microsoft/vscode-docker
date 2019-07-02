@@ -13,8 +13,8 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
     label: "Docker Hub",
     id: dockerHubRegistryProviderId,
     api: RegistryApi.DockerHubV2,
-    logInOptions: {
-        wizardTitle: 'Log In to Docker Hub',
+    connectWizardOptions: {
+        wizardTitle: 'Sign in to Docker Hub',
         includeUsername: true,
         usernamePrompt: 'Enter your Docker ID',
         includePassword: true,

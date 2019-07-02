@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export interface ILogInWizardOptions {
+export interface IConnectRegistryWizardOptions {
     /**
-     * The title for the wizard (e.g. "Log In To Docker Hub")
+     * The title for the wizard (e.g. "Sign In To Docker Hub")
      */
     wizardTitle: string;
 
