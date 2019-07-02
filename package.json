@@ -60,6 +60,7 @@
         "onCommand:vscode-docker.networks.prune",
         "onCommand:vscode-docker.networks.refresh",
         "onCommand:vscode-docker.networks.remove",
+        "onCommand:vscode-docker.pruneSystem",
         "onCommand:vscode-docker.registries.azure.buildImage",
         "onCommand:vscode-docker.registries.azure.createRegistry",
         "onCommand:vscode-docker.registries.azure.deleteRegistry",
@@ -84,7 +85,6 @@
         "onCommand:vscode-docker.registries.pullRepository",
         "onCommand:vscode-docker.registries.refresh",
         "onCommand:vscode-docker.registries.setAsDefault",
-        "onCommand:vscode-docker.system.prune",
         "onCommand:vscode-docker.volumes.configureExplorer",
         "onCommand:vscode-docker.volumes.inspect",
         "onCommand:vscode-docker.volumes.prune",
@@ -1151,11 +1151,6 @@
                     "default": "powershell",
                     "description": "Attach command to use for Windows containers"
                 },
-                "docker.promptOnSystemPrune": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Prompt for confirmation when running System Prune command"
-                },
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,
@@ -1361,6 +1356,11 @@
                 "category": "Docker Networks"
             },
             {
+                "command": "vscode-docker.pruneSystem",
+                "title": "Prune System...",
+                "category": "Docker"
+            },
+            {
                 "command": "vscode-docker.registries.azure.buildImage",
                 "title": "Build Image in Azure...",
                 "category": "Azure Container Registry"
@@ -1495,15 +1495,6 @@
                 "command": "vscode-docker.registries.setAsDefault",
                 "title": "Set as Default",
                 "category": "Docker Registries"
-            },
-            {
-                "command": "vscode-docker.system.prune",
-                "title": "System Prune",
-                "category": "Docker",
-                "icon": {
-                    "light": "resources/light/prune.svg",
-                    "dark": "resources/dark/prune.svg"
-                }
             },
             {
                 "command": "vscode-docker.volumes.configureExplorer",
