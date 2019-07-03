@@ -11,7 +11,7 @@ import { CoreOptions } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerUIExtensionVariables } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
@@ -77,6 +77,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
 
+        validateOldPublisher(activateContext);
+
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 DOCUMENT_SELECTOR,
@@ -121,6 +123,27 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient();
     });
+}
+
+/**
+ * Workaround for https://github.com/microsoft/vscode/issues/76211 (only necessary if people are on old versions of VS Code that don't have the fix)
+ */
+function validateOldPublisher(activateContext: IActionContext): void {
+    const extension = vscode.extensions.getExtension('PeterJausovec.vscode-docker');
+    if (extension) {
+        let message: string = 'Please reload Visual Studio Code to complete updating the Docker extension.';
+        let reload: vscode.MessageItem = { title: 'Reload Now' };
+        // Don't wait
+        // tslint:disable-next-line: no-floating-promises
+        ext.ui.showWarningMessage(message, reload).then(async result => {
+            if (result === reload) {
+                await vscode.commands.executeCommand('workbench.action.reloadWindow');
+            }
+        });
+
+        activateContext.telemetry.properties.cancelStep = 'oldPublisherInstalled';
+        throw new UserCancelledError();
+    }
 }
 
 async function setRequestDefaults(): Promise<void> {
