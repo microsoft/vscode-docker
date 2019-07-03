@@ -1,7 +1,7 @@
 ## 0.7.0 - 9 July 2019
 ### Added
 * Revamped Docker Explorer
-  * Containers, images, and registries now have their own explorer which can be hidden, resized, or reordered
+  * Containers, images, and registries now have their own explorer which can be hid, resized, or reordered
   * Added per-explorer settings for display format, grouping, and sorting
   * Modified icons to respect theme
   * Moved connection errors and troubleshooting links directly into the explorer instead of as a separate notification
