@@ -5,22 +5,27 @@
 
 import { WebSiteManagementClient } from 'azure-arm-website';
 import { SiteConfig } from 'azure-arm-website/lib/models';
-import { AuthOptions, NameValuePair } from 'request';
+import { NameValuePair } from 'request';
 import { Progress, window } from "vscode";
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
-import { validateAzureAccountInstalled } from '../../../tree/registries/azure/AzureAccountTreeItem';
+import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
+import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
+import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
-import { PrivateRegistryTreeItem } from '../../../tree/registries/private/PrivateRegistryTreeItem';
+import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
+import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/dockerV2/GenericDockerV2RegistryTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
+import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
-import { RemoteTagTreeItemBase } from '../../../tree/registries/RemoteTagTreeItemBase';
+import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
 
-export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
+export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(RemoteTagTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
 
     const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
@@ -29,7 +34,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         newSiteKind: AppKind.app
     };
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
-    const azureAccountTreeItem = await validateAzureAccountInstalled();
+    // Create a temporary azure account tree item since Azure might not be connected
+    const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
     const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
     if (subscriptionStep) {
         promptSteps.push(subscriptionStep);
@@ -60,23 +66,16 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     window.showInformationMessage(createdNewWebApp);
 }
 
-async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig> {
+async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {
     let registryTI: RegistryTreeItemBase = node.parent.parent;
 
     let username: string | undefined;
     let password: string | undefined;
-    let imagePath: string;
     let appSettings: NameValuePair[] = [];
     if (registryTI instanceof DockerHubNamespaceTreeItem) {
-        imagePath = registryTI.namespace;
         username = registryTI.parent.username;
-        password = registryTI.parent.password;
-
-        if (!username || !password) {
-            throw new Error("Failed to get credentials for Docker Hub.");
-        }
-    } else {
-        imagePath = registryTI.host;
+        password = await registryTI.parent.getPassword();
+    } else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
 
         if (registryTI instanceof AzureRegistryTreeItem) {
@@ -88,23 +87,22 @@ async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig
                 password = nonNullProp(cred, 'passwords')[0].value;
             }
             appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
-        } else if (registryTI instanceof PrivateRegistryTreeItem) {
-            const auth: AuthOptions = await registryTI.getAuth();
-            username = auth.username;
-            password = auth.password;
+        } else if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
+            username = registryTI.cachedProvider.username;
+            password = await getRegistryPassword(registryTI.cachedProvider);
         } else {
             throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
         }
-
-        if (!username || !password) {
-            throw new Error(`Failed to get credentials for registry "${registryTI.host}".`);
-        }
+    } else {
+        throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
     }
 
-    appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
-    appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
+    if (username && password) {
+        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
+        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
+    }
 
-    let linuxFxVersion = `DOCKER|${imagePath}/${node.fullTag}`;
+    let linuxFxVersion = `DOCKER|${registryTI.baseImagePath}/${node.repoNameAndTag}`;
 
     return {
         linuxFxVersion,

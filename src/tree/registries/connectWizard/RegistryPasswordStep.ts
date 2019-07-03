@@ -4,17 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../../../extensionVariables';
-import { IDockerHubWizardContext } from './IDockerHubWizardContext';
+import { ext } from '../../../extensionVariables';
+import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
-export class DockerHubPasswordStep extends AzureWizardPromptStep<IDockerHubWizardContext> {
-    public async prompt(context: IDockerHubWizardContext): Promise<void> {
-        const prompt: string = "Enter your password";
+export class RegistryPasswordStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
+    public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
+        const prompt: string = context.passwordPrompt || "Enter your password";
         context.password = await ext.ui.showInputBox({ prompt, validateInput, password: true });
     }
 
-    public shouldPrompt(context: IDockerHubWizardContext): boolean {
-        return !context.password;
+    public shouldPrompt(context: IConnectRegistryWizardContext): boolean {
+        return !!context.includePassword && !context.password;
     }
 }
 

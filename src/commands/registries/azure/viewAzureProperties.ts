@@ -8,10 +8,11 @@ import { ext } from "../../../extensionVariables";
 import { AzureRegistryTreeItem } from "../../../tree/registries/azure/AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "../../../tree/registries/azure/AzureTaskRunTreeItem";
 import { AzureTaskTreeItem } from "../../../tree/registries/azure/AzureTaskTreeItem";
+import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
 
 export async function viewAzureProperties(context: IActionContext, node?: AzureRegistryTreeItem | AzureTaskTreeItem | AzureTaskRunTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(AzureRegistryTreeItem.contextValue, context);
+        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
     }
 
     await openReadOnlyJson(node, node.properties);

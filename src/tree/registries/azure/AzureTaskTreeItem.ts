@@ -7,14 +7,14 @@ import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-contai
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";
 import { getThemedIconPath, IconPath } from "../../IconPath";
-import { RegistryType } from "../RegistryType";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
 
 export class AzureTaskTreeItem extends AzExtParentTreeItem {
-    public static contextValue: string = RegistryType.azure + 'Task';
+    public static contextValue: string = 'azureTask';
     private static _noTaskFilter: string = 'TaskName eq null';
+    public childTypeLabel: string = 'task run';
     public parent: AzureTasksTreeItem;
 
     private _task: AcrModels.Task | undefined;

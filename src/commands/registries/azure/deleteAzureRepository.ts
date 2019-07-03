@@ -7,10 +7,11 @@ import { ProgressLocation, window } from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 
 export async function deleteAzureRepository(context: IActionContext, node?: AzureRepositoryTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<AzureRepositoryTreeItem>(AzureRepositoryTreeItem.contextValue, { ...context, suppressCreatePick: true });
+        node = await ext.registriesTree.showTreeItemPicker<AzureRepositoryTreeItem>(registryExpectedContextValues.azure.repository, { ...context, suppressCreatePick: true });
     }
 
     const confirmDelete = `Are you sure you want to delete repository "${node.repoName}" and its associated images?`;

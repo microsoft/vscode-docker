@@ -7,12 +7,11 @@ import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-contai
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { OpenUrlTreeItem } from "../../OpenUrlTreeItem";
-import { RegistryType } from "../RegistryType";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
 export class AzureTasksTreeItem extends AzExtParentTreeItem {
-    public static contextValue: string = RegistryType.azure + 'Tasks';
+    public static contextValue: string = 'azureTasks';
     public contextValue: string = AzureTasksTreeItem.contextValue;
     public label: string = 'Tasks';
     public childTypeLabel: string = 'task';

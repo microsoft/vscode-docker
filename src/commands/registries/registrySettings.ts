@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
-import { DockerHubNamespaceTreeItem } from '../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
+import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 
 const defaultRegistryKey = "defaultRegistry";
@@ -15,19 +15,12 @@ const hasCheckedRegistryPaths = "hasCheckedRegistryPaths"
 
 export async function setRegistryAsDefault(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(RegistryTreeItemBase.allContextRegExp, context);
-    }
-
-    let defaultPath: string;
-    if (node instanceof DockerHubNamespaceTreeItem) {
-        defaultPath = node.namespace;
-    } else {
-        defaultPath = node.host;
+        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
     }
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    await configOptions.update(configurationKeys.defaultRegistryPath, defaultPath, vscode.ConfigurationTarget.Global);
-    vscode.window.showInformationMessage(`Updated setting "docker.defaultRegistryPath" to "${defaultPath}".`);
+    await configOptions.update(configurationKeys.defaultRegistryPath, node.baseImagePath, vscode.ConfigurationTarget.Global);
+    vscode.window.showInformationMessage(`Updated setting "docker.defaultRegistryPath" to "${node.baseImagePath}".`);
 }
 
 export async function consolidateDefaultRegistrySettings(): Promise<void> {

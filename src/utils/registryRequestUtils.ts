@@ -19,7 +19,7 @@ export function getNextLinkFromHeaders(response: Response): string | undefined {
     }
 }
 
-export async function registryRequest<T>(node: ISupportsAuth, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestPromiseOptions): Promise<IResponse<T>> {
+export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestPromiseOptions): Promise<IResponse<T>> {
     let httpSettings = workspace.getConfiguration('http');
     let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
     const options = {
@@ -30,11 +30,16 @@ export async function registryRequest<T>(node: ISupportsAuth, method: 'GET' | 'D
         ...customOptions
     }
 
-    await node.addAuth(options);
+    if (node.addAuth) {
+        await node.addAuth(options);
+    } else {
+        await (<IRepositoryAuthTreeItem>node).parent.addAuth(options);
+    }
 
+    const baseUrl = node.baseUrl || (<IRepositoryAuthTreeItem>node).parent.baseUrl;
     let fullUrl: string = url;
-    if (!url.startsWith(node.baseUrl)) {
-        let parsed = new URL(url, node.baseUrl);
+    if (!url.startsWith(baseUrl)) {
+        let parsed = new URL(url, baseUrl);
         fullUrl = parsed.toString();
     }
 
@@ -45,7 +50,11 @@ interface IResponse<T> extends Response {
     body: T;
 }
 
-interface ISupportsAuth {
+export interface IRegistryAuthTreeItem {
     addAuth(options: RequestPromiseOptions): Promise<void>;
     baseUrl: string;
+}
+
+export interface IRepositoryAuthTreeItem extends Partial<IRegistryAuthTreeItem> {
+    parent: IRegistryAuthTreeItem;
 }

@@ -41,10 +41,10 @@ export function registerTrees(): void {
     registerCommand(imagesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.imagesTree.loadMore(node, context));
     registerCommand('vscode-docker.images.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.imagesTree.refresh(node));
 
-    const registriesTreeItem = new RegistriesTreeItem(undefined);
+    ext.registriesRoot = new RegistriesTreeItem();
     const registriesLoadMore = 'vscode-docker.registries.loadMore';
-    ext.registriesTree = new AzExtTreeDataProvider(registriesTreeItem, registriesLoadMore);
-    ext.registriesTreeView = window.createTreeView('dockerRegistries', { treeDataProvider: ext.registriesTree });
+    ext.registriesTree = new AzExtTreeDataProvider(ext.registriesRoot, registriesLoadMore);
+    ext.registriesTreeView = window.createTreeView('dockerRegistries', { treeDataProvider: ext.registriesTree, showCollapseAll: true });
     ext.context.subscriptions.push(ext.registriesTreeView);
     registerCommand(registriesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.registriesTree.loadMore(node, context));
     registerCommand('vscode-docker.registries.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => ext.registriesTree.refresh(node));

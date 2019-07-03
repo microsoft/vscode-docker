@@ -6,33 +6,32 @@
 import { Terminal } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
-import { DockerHubNamespaceTreeItem } from '../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
+import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 import { RemoteRepositoryTreeItemBase } from "../../tree/registries/RemoteRepositoryTreeItemBase";
-import { RemoteTagTreeItemBase } from '../../tree/registries/RemoteTagTreeItemBase';
+import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
 import { logInToDockerCli } from "./logInToDockerCli";
 
 export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(RemoteRepositoryTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(registryExpectedContextValues.all.repository, context);
     }
 
     await pullImages(context, node.parent, node.repoName + ' -a');
 }
 
-export async function pullImage(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
+export async function pullImage(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(RemoteTagTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.all.tag, context);
     }
 
-    await pullImages(context, node.parent.parent, node.fullTag);
+    await pullImages(context, node.parent.parent, node.repoNameAndTag);
 }
 
 async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
     await logInToDockerCli(context, node);
 
-    let imagePath: string = node instanceof DockerHubNamespaceTreeItem ? node.namespace : node.host;
     const terminal: Terminal = ext.terminalProvider.createTerminal("docker pull");
     terminal.show();
-    terminal.sendText(`docker pull ${imagePath}/${imageRequest}`);
+    terminal.sendText(`docker pull ${node.baseImagePath}/${imageRequest}`);
 }

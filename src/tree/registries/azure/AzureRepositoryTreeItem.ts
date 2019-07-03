@@ -6,14 +6,10 @@
 import { RequestPromiseOptions } from "request-promise-native";
 import { acquireAcrAccessToken } from "../../../utils/azureUtils";
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { RegistryType } from "../RegistryType";
-import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
+import { DockerV2RepositoryTreeItem } from "../dockerV2/DockerV2RepositoryTreeItem";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
-import { AzureTagTreeItem } from "./AzureTagTreeItem";
 
-export class AzureRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
-    public static contextValue: string = RegistryType.azure + RemoteRepositoryTreeItemBase.contextValueSuffix;
-    public contextValue: string = AzureRepositoryTreeItem.contextValue;
+export class AzureRepositoryTreeItem extends DockerV2RepositoryTreeItem {
     public parent: AzureRegistryTreeItem;
 
     public constructor(parent: AzureRegistryTreeItem, name: string) {
@@ -25,10 +21,6 @@ export class AzureRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
         options.auth = {
             bearer: await acquireAcrAccessToken(this.parent.host, this.parent.parent.root, azureAuthScope)
         };
-    }
-
-    public createTagTreeItem(tag: string, time: string): AzureTagTreeItem {
-        return new AzureTagTreeItem(this, tag, time);
     }
 
     public async deleteTreeItemImpl(): Promise<void> {

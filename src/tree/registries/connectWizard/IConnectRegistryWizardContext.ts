@@ -4,8 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from 'vscode-azureextensionui';
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IConnectRegistryWizardOptions } from './IConnectRegistryWizardOptions';
 
-export interface IDockerHubWizardContext extends IActionContext {
-    password?: string;
+export interface IConnectRegistryWizardContext extends IActionContext, IConnectRegistryWizardOptions {
+    existingProviders: ICachedRegistryProvider[];
+
     username?: string;
+    password?: string;
+    url?: string;
 }

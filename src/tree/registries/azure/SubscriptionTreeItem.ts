@@ -7,15 +7,24 @@ import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as
 import { window } from 'vscode';
 import { AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
 import { nonNullProp } from '../../../utils/nonNull';
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
+import { AzureAccountTreeItem } from './AzureAccountTreeItem';
 import { AzureRegistryTreeItem } from './AzureRegistryTreeItem';
 import { AzureRegistryCreateStep } from './createWizard/AzureRegistryCreateStep';
 import { AzureRegistryNameStep } from './createWizard/AzureRegistryNameStep';
 import { AzureRegistrySkuStep } from './createWizard/AzureRegistrySkuStep';
 import { IAzureRegistryWizardContext } from './createWizard/IAzureRegistryWizardContext';
 
-export class SubscriptionTreeItem extends SubscriptionTreeItemBase {
+export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IRegistryProviderTreeItem {
     public childTypeLabel: string = 'registry';
+    public parent: AzureAccountTreeItem;
+
     private _nextLink: string | undefined;
+
+    public get cachedProvider(): ICachedRegistryProvider {
+        return this.parent.cachedProvider;
+    }
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
