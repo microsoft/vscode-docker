@@ -1,113 +1,85 @@
-# Docker Support for Visual Studio Code
+## Docker for Visual Studio Code (Preview)
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/vscode-docker)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=8)
 
-The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code, for example:
-
-* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press `F1` and search for `Docker: Add Docker files to Workspace`)
-* Syntax highlighting, hover tips, IntelliSense (completions) for `docker-compose.yml` and `Dockerfile` files
-* Linting (errors and warnings) for `Dockerfile` files
-* Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
-* Explorer integration for managing Images, running Containers, and Docker Hub registries
-* Deploy images from Docker Hub and Azure Container Registries directly to Azure App Service
-* [Debug .NET Core applications](https://github.com/microsoft/vscode-docker/wiki/Debug-.NET-Core-(Preview)) running in Linux Docker containers
-* [Working with docker](https://code.visualstudio.com/docs/azure/docker) will walk you through many of the features of this extension
+The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code. Check out the ["Working with Docker" tutorial](https://code.visualstudio.com/docs/azure/docker) to get started.
 
 **Visit the [wiki](https://github.com/Microsoft/vscode-docker/wiki) for additional information about the extension.**
 
 ## Prerequisites
 
-To use much of the Docker extension functionality, you will need to [install Docker](https://aka.ms/AA37qtj) on your machine and set up on the system path.
+Install [Docker](https://aka.ms/AA37qtj) on your machine and add it to the system path.
 
-### Linux
+On Linux, you must also follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://aka.ms/AA37yk6) because VS Code runs as a non-root user.
 
-Since VS Code runs as a non-root user, you will also need to follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://aka.ms/AA37yk6) for the extension to be able to access docker.
+## Features
 
-## Generating Docker Files
+* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press `F1` and search for `Docker: Add Docker files to Workspace`)
+* Syntax highlighting, hover tips, IntelliSense (completions) for `docker-compose.yml` and `Dockerfile` files
+* Linting (errors and warnings) for `Dockerfile` files
+* Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
+* Explorer integration for managing images, containers, registries, and more
+* Deploy images from a registry directly to Azure App Service
+* [Debug .NET Core applications](https://github.com/microsoft/vscode-docker/wiki/Debug-.NET-Core-(Preview)) running in Linux Docker containers
+
+### Generating Docker Files
 
 Press `F1` and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
 
-![dockerfile](images/generateFiles.gif)
+![dockerfile](resources/readme/generateFiles.gif)
 
 > Note: The `docker-compose.yml` and `docker-compose.debug.yml` files are not generated for .NET Core applications.
 
-## Editing
+### Editing
 
 Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
-![IntelliSense for DockerFiles](images/intelliSense.gif)
+![IntelliSense for DockerFiles](resources/readme/intelliSense.gif)
 
-## Docker commands
+### Docker Commands
 
-Many of the most common Docker and docker compose commands are built right into the Command Palette (`F1`).
+Many of the most common Docker commands are built right into the Command Palette (`F1`):
 
-![IntelliSense](images/commands.gif)
+![commands](resources/readme/commands.png)
 
-## Docker View
+### Docker View
 
-The Docker extension contributes a new `Docker` View to VS Code. Within the View, the Explorer lets you view and manage your Images, Containers, and browse your Docker Hub registry. If the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension is installed, you can browse your [Azure Container Registries](https://docs.microsoft.com/en-us/azure/container-registry/) as well.
+The Docker extension contributes explorers to view and manage containers, images, registries, volumes, and networks. The right click context menus provide quick access to the same rich set of commands found in the Command Palette (`F1`).
 
-The right click context menu provides quick access to the same rich set of commands found in the Command Palette (`F1`).
+![explorers](resources/readme/explorers.png)
 
-![explorer integration](images/explorer.png)
+**TIP**: You can reorder the explorers by clicking and dragging on the explorer title. You can also hide the entire view by right clicking on the Docker icon or hide individual explorers by right clicking on the explorer title.
 
-You can move the View up or down by dragging the Docker icon and you can hide the View by right clicking on the icon and choosing `Hide`. To bring it back, right click on the Activity Bar area and check the `Docker` item.
+![hideView](resources/readme/hideView.png) ![hideExplorer](resources/readme/hideExplorer.png)
 
-![show and hide the view](images/viewRightClick.png)
+#### Registries
 
-The `showExplorer` configuration setting controls the visibility of the Docker View.
+The first time you expand the registries explorer you'll be prompted to connect a registry. This will prompt you for credentials based on your provider (Azure, Docker Hub, etc.). These credentials will be stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to sign in every time. You can right click on a registry provider to disconnect it and remove credentials from the OS store.
 
-``` json
-"docker.showExplorer": false
+> **NOTE**: Azure leverages the [Azure Account Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) instead of storing Docker-specific credentials. After connecting Azure, you will be prompted separately to install that extension and/or sign in.
+
+### Deploy images to Azure App Service
+
+With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance. Check out [this tutorial](https://code.visualstudio.com/tutorials/docker-extension/getting-started) to get started.
+
+### Azure CLI
+
+Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
+
+After the container is started, you will be prompted to sign in to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to sign in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
+
+### Connect to `docker-machine`
+
+The default behavior of the extension is to connect to the local Docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the [Docker environment variables](https://docs.docker.com/machine/reference/env/) set in your environment or through the following VS Code settings: `docker.host`, `docker.certPath`, `docker.tlsVerify`, and `docker.machineName`.
+
+### VS Code remote development
+
+By default, the Docker extension will run against your local VS Code instance. You can change this behavior to run against your remote VS Code instance with the following VS Code setting:
+```json
+"remote.extensionKind": {
+    "ms-azuretools.vscode-docker": "workspace"
+}
 ```
-
-## Docker Hub Login
-
-The first time you expand the Docker Hub node you'll be prompted to log in to your Docker Hub account.
-
-![Docker Hub Login](images/dockerHubLogin.gif)
-
-Your user name and password are stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to log in every time. You can log out of Docker Hub by right clicking on the Docker Hub label and choosing log out. This will delete the credentials from the OS store.
-
-## Deploying images to Azure App Service
-
-With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance, as detailed in this [getting started](https://code.visualstudio.com/tutorials/docker-extension/getting-started) guide. This functionality requires installing the [Azure Account](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) extension and an Azure Subscription. If you do not have an Azure subscription, [sign up today](https://azure.microsoft.com/en-us/free/?b=16.48) for a free 30 day account and get $200 in Azure Credits to try out any combination of Azure services.
-
-To log into Azure, press `F1` and search for `Azure Sign In`. You will then sign into your account using the Device Login flow. Click on "Copy & Open" to open your default browser.
-
-![Azure Login](images/devicelogin.png)
-
-Paste in the access code and continue the sign in process.
-
-![Azure Login](images/devicelogin2.png)
-
-You can now right click on an image in Docker Hub or an Azure Container Registry and choose "Deploy Image to Azure App Service".
-
-![Deploy to Azure](images/deploytoazure.png)
-
-From here you will be prompted for a Resource Group, location, an App Service Plan, and a globally unique website name.
-
-## Azure CLI
-
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker: Azure CLI`). The extension will then run an interactive terminal attached to the container.
-
-After the container is started, you will be prompted to login to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to login in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
-
-## Connecting to `docker-machine`
-
-The default connection of the extension is to connect to the local docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the DOCKER_HOST environment variable set to a valid host or if you set the `docker.host` configuration setting.
-
-If the docker daemon is using TLS, the DOCKER_CERT_PATH environment variable must also be set (e.g. `$HOME\.docker\machine\machines\default`). See [docker documentation](https://docs.docker.com/machine/reference/env/) for more information.
-
-## Workaround for VS Code remote development
-
-If you are running the extension via VS Code remote development, you will have to configure the remote instance (WSL, SSH machine, dev container) to run docker commands smoothly (like `docker run hello world`). First, install docker-cli in the remote instance.
-
-In Windows subsystem for linux (WSL), you have to set the `DOCKER_HOST` environment variable in linux to connect to Docker for Windows. See [here](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) for more detailed instructions.
-
-In SSH, the setup for docker is dependent on the machine environment.
-
-There can be issues running the docker daemon from _inside the dev container_ (also called docker-in-docker). On the first build of the container, you might encounter an error about connecting to Docker. Follow [these docker-in-docker instructions](https://github.com/Microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) to set up your dev container docker daemon, and the extension experience will mirror working on a local workspace.
 
 ## Contributing
 
