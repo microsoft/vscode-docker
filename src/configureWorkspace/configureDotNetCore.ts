@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as path from 'path';
 import * as semver from 'semver';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
-import { isWindows, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer, isWindows1019H1OrNewer } from '../utils/osUtils';
+import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
