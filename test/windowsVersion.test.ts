@@ -78,8 +78,8 @@ suite("windowsVersion", () => {
     suite('isWindows1019H1OrNewer', () => {
         testIsWindows1019H1OrNewer('10.0.18362', true);
         testIsWindows1019H1OrNewer('10.0.18363', true);
-        testIsWindows1019H1OrNewer('10.0.18364', false);
-        testIsWindows1019H1OrNewer('9.9.18364', false);
+        testIsWindows1019H1OrNewer('10.0.18361', false);
+        testIsWindows1019H1OrNewer('9.9.18363', false);
         testIsWindows1019H1OrNewer('10.1.0', true);
         testIsWindows1019H1OrNewer('11.1.0', true);
 
@@ -102,7 +102,6 @@ suite("windowsVersion", () => {
     suite('isWindows10RS4OrNewer', () => {
         testIsWindows10RS4OrNewer('10.0.17134', true);
         testIsWindows10RS4OrNewer('10.0.17135', true);
-        testIsWindows10RS4OrNewer('10.0.17133', false);
         testIsWindows10RS4OrNewer('10.0.17133', false);
         testIsWindows10RS4OrNewer('9.9.17135', false);
         testIsWindows10RS4OrNewer('10.1.0', true);

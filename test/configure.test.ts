@@ -938,8 +938,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1809 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1903 AS base');
+            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1903 AS build');
         });
     });
 
