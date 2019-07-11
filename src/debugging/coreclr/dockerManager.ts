@@ -40,6 +40,8 @@ export type LaunchRunOptions = Omit<DockerManagerRunContainerOptions, 'appFolder
 export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
+    appProject: string;
+    appName: string;
     build: LaunchBuildOptions;
     run: LaunchRunOptions;
 };
@@ -61,6 +63,15 @@ type LastImageBuildMetadata = {
     imageId: string;
     options: DockerBuildImageOptions;
 };
+
+interface IHostPort {
+    HostIp: string,
+    HostPort: string,
+}
+
+interface IPortMappings {
+    [key: string]: IHostPort[];
+}
 
 export interface DockerManager {
     buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
@@ -232,6 +243,10 @@ export class DefaultDockerManager implements DockerManager {
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
 
+        const certificateExportPfxPath = path.join(this.getSecretsPaths(options.run.os).certificateExportPath, `${options.appName}.pfx`)
+
+        await this.dotNetClient.trustAndExportCertificate(options.appProject, certificateExportPfxPath, uuidv4());
+
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
         await this.addToDebugContainers(containerId);
@@ -310,13 +325,19 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     private async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {
-        const webPorts = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{(index (index .NetworkSettings.Ports \\\"80/tcp\\\") 0).HostPort}}' });
+        let portMappingsString = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
+        let portMappings = <IPortMappings>JSON.parse(portMappingsString);
 
-        if (webPorts) {
-            const webPort = webPorts.split('\n')[0];
+        if (portMappings) {
+            let httpsPort = portMappings["443/tcp"] && portMappings["443/tcp"][0] && portMappings["443/tcp"][0].HostPort || null;
+            let httpPort = portMappings["80/tcp"] && portMappings["80/tcp"][0] && portMappings["80/tcp"][0].HostPort || null;
 
-            // tslint:disable-next-line:no-http-string
-            return `http://localhost:${webPort}`;
+            if (httpsPort) {
+                return `https://localhost:${httpsPort}`;
+            } else if (httpPort) {
+                // tslint:disable-next-line:no-http-string
+                return `http://localhost:${httpPort}`;
+            }
         }
 
         return undefined;
@@ -361,26 +382,16 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
-        let appDataEnvironmentVariable: string | undefined;
-
-        if (this.osProvider.os === 'Windows') {
-            appDataEnvironmentVariable = this.processProvider.env[DefaultDockerManager.AppDataEnvironmentVariable];
-
-            if (appDataEnvironmentVariable === undefined) {
-                throw new Error(`The environment variable '${DefaultDockerManager.AppDataEnvironmentVariable}' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.`);
-            }
-        }
+        const { certificateExportPath, userSecretsPath } = this.getSecretsPaths(options.os);
 
         const certVolume: DockerContainerVolume = {
-            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
-                path.join(this.osProvider.homedir, '.aspnet', 'https'),
+            localPath: certificateExportPath,
             containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
             permissions: 'ro'
         };
 
         const userSecretsVolume: DockerContainerVolume = {
-            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
-                path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+            localPath: userSecretsPath,
             containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
             permissions: 'ro'
         };
@@ -395,5 +406,28 @@ export class DefaultDockerManager implements DockerManager {
         ];
 
         return volumes;
+    }
+
+    private getSecretsPaths(os: string): { certificateExportPath: string, userSecretsPath: string } {
+        let appDataEnvironmentVariable: string | undefined;
+
+        if (this.osProvider.os === 'Windows') {
+            appDataEnvironmentVariable = this.processProvider.env[DefaultDockerManager.AppDataEnvironmentVariable];
+
+            if (appDataEnvironmentVariable === undefined) {
+                throw new Error(`The environment variable '${DefaultDockerManager.AppDataEnvironmentVariable}' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.`);
+            }
+        }
+
+        const folders = {
+            certificateExportPath: os === 'Windows' ?
+                path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
+                path.join(this.osProvider.homedir, '.aspnet', 'https'),
+            userSecretsPath: os === 'Windows' ?
+                path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
+                path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+        }
+
+        return folders;
     }
 }

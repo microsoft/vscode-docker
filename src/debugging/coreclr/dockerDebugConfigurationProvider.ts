@@ -115,7 +115,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const launchOptions = {
             appFolder: resolvedAppFolder,
-            appOutput,
+            appOutput: appOutput,
+            appProject: resolvedAppProject,
+            appName: appName,
             build: buildOptions,
             run: runOptions
         };

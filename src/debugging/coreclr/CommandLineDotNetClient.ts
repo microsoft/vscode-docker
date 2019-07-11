@@ -12,6 +12,7 @@ export type MSBuildExecOptions = {
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
+    trustAndExportCertificate(projectFile: string, exportPath: string, password: string): Promise<void>;
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
@@ -47,6 +48,17 @@ export class CommandLineDotNetClient implements DotNetClient {
         } catch {
             return undefined;
         }
+    }
+
+    public async trustAndExportCertificate(projectFile: string, exportPath: string, password: string): Promise<void> {
+        const exportCommand = `dotnet dev-certs https --trust -ep "${exportPath}" -p "${password}"`;
+        await this.processProvider.exec(exportCommand, {});
+
+        const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
+        await this.processProvider.exec(userSecretsPasswordCommand, {});
+
+        const userSecretsPathCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Path "${exportPath}"`;
+        await this.processProvider.exec(userSecretsPathCommand, {});
     }
 }
 
