@@ -369,13 +369,15 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const certVolume: DockerContainerVolume = {
-            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') : path.join(this.osProvider.homedir, '.aspnet', 'https'),
+            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
+                path.join(this.osProvider.homedir, '.aspnet', 'https'),
             containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
             permissions: 'ro'
         };
 
         const userSecretsVolume: DockerContainerVolume = {
-            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') : path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
+                path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
             containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
             permissions: 'ro'
         };
