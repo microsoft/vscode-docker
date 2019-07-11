@@ -30,7 +30,7 @@ export interface NetCoreProjectProvider {
 export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
     constructor(
         private readonly fsProvider: FileSystemProvider,
-        private readonly msBuildClient: DotNetClient,
+        private readonly dotNetClient: DotNetClient,
         private readonly tempFileProvider: TempFileProvider) {
     }
 
@@ -39,7 +39,7 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
         const targetOutputFilename = this.tempFileProvider.getTempFilename();
         await this.fsProvider.writeFile(getTargetPathProjectFile, getTargetPathProjectFileContent);
         try {
-            await this.msBuildClient.execTarget(
+            await this.dotNetClient.execTarget(
                 getTargetPathProjectFile,
                 {
                     target: 'GetTargetPath',

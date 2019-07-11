@@ -74,12 +74,12 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 
 export class DotNetSdkInstalledPrerequisite implements Prerequisite {
     constructor(
-        private readonly msbuildClient: DotNetClient,
+        private readonly dotNetClient: DotNetClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
-        const result = await this.msbuildClient.getVersion();
+        const result = await this.dotNetClient.getVersion();
 
         if (result) {
             return true;

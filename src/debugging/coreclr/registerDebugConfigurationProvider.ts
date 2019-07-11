@@ -26,7 +26,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
 
     const processProvider = new ChildProcessProvider();
     const dockerClient = new CliDockerClient(processProvider);
-    const msBuildClient = new CommandLineDotNetClient(processProvider);
+    const dotNetClient = new CommandLineDotNetClient(processProvider);
     const osProvider = new LocalOSProvider();
 
     const dockerOutputManager = new DefaultOutputManager(ext.outputChannel);
@@ -44,6 +44,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                     osProvider,
                     processProvider)),
             dockerClient,
+            dotNetClient,
             dockerOutputManager,
             fileSystemProvider,
             osProvider,
@@ -67,7 +68,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                 osProvider,
                 new MsBuildNetCoreProjectProvider(
                     fileSystemProvider,
-                    msBuildClient,
+                    dotNetClient,
                     new OSTempFileProvider(
                         osProvider,
                         processProvider)),
@@ -80,7 +81,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
                         vscode.extensions.getExtension,
                         vscode.window.showErrorMessage),
                     new DotNetSdkInstalledPrerequisite(
-                        msBuildClient,
+                        dotNetClient,
                         vscode.window.showErrorMessage),
                     new MacNuGetFallbackFolderSharedPrerequisite(
                         fileSystemProvider,

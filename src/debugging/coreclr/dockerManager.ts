@@ -9,6 +9,7 @@ import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./CliDockerClient";
+import { DotNetClient } from './CommandLineDotNetClient';
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import Lazy from './lazy';
@@ -117,6 +118,7 @@ export class DefaultDockerManager implements DockerManager {
         private readonly appCacheFactory: AppStorageProvider,
         private readonly debuggerClient: DebuggerClient,
         private readonly dockerClient: DockerClient,
+        private readonly dotNetClient: DotNetClient,
         private readonly dockerOutputManager: OutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
@@ -193,7 +195,7 @@ export class DefaultDockerManager implements DockerManager {
             ? 'ping'
             : 'tail';
 
-        const volumes = this.getVolumes(debuggerFolder, options);
+        const additionalVolumes = this.getVolumes(debuggerFolder, options);
 
         const containerId = await this.dockerOutputManager.performOperation(
             'Starting container...',
@@ -217,7 +219,7 @@ export class DefaultDockerManager implements DockerManager {
                         network: options.network,
                         networkAlias: options.networkAlias,
                         ports: options.ports,
-                        volumes: [...(volumes || []), ...(options.volumes || [])]
+                        volumes: [...(additionalVolumes || []), ...(options.volumes || [])]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
