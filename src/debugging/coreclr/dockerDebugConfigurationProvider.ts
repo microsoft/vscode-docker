@@ -117,7 +117,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             appFolder: resolvedAppFolder,
             appOutput: appOutput,
             appProject: resolvedAppProject,
-            appName: appName,
             build: buildOptions,
             run: runOptions
         };

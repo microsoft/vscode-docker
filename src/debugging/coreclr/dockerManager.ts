@@ -41,7 +41,6 @@ export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
     appProject: string;
-    appName: string;
     build: LaunchBuildOptions;
     run: LaunchRunOptions;
 };
@@ -243,9 +242,11 @@ export class DefaultDockerManager implements DockerManager {
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
 
-        const certificateExportPfxPath = path.join(this.getSecretsPaths(options.run.os).certificateExportPath, `${options.appName}.pfx`)
+        const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
+        const hostCertificateExportPfxPath = path.join(this.getHostSecretsPaths().hostCertificateExportPath, `${appOutputName}.pfx`);
+        const containerCertificateExportPfxPath = this.osProvider.pathJoin(options.run.os, this.getContainerSecretsPaths(options.run.os).containerCertificateExportPath, `${appOutputName}.pfx`)
 
-        await this.dotNetClient.trustAndExportCertificate(options.appProject, certificateExportPfxPath, uuidv4());
+        await this.dotNetClient.trustAndExportCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath, uuidv4());
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
@@ -382,17 +383,18 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
-        const { certificateExportPath, userSecretsPath } = this.getSecretsPaths(options.os);
+        const { hostCertificateExportPath, hostUserSecretsPath } = this.getHostSecretsPaths();
+        const { containerCertificateExportPath, containerUserSecretsPath } = this.getContainerSecretsPaths(options.os);
 
         const certVolume: DockerContainerVolume = {
-            localPath: certificateExportPath,
-            containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
+            localPath: hostCertificateExportPath,
+            containerPath: containerCertificateExportPath,
             permissions: 'ro'
         };
 
         const userSecretsVolume: DockerContainerVolume = {
-            localPath: userSecretsPath,
-            containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
+            localPath: hostUserSecretsPath,
+            containerPath: containerUserSecretsPath,
             permissions: 'ro'
         };
 
@@ -408,7 +410,7 @@ export class DefaultDockerManager implements DockerManager {
         return volumes;
     }
 
-    private getSecretsPaths(os: string): { certificateExportPath: string, userSecretsPath: string } {
+    private getHostSecretsPaths(): { hostCertificateExportPath: string, hostUserSecretsPath: string } {
         let appDataEnvironmentVariable: string | undefined;
 
         if (this.osProvider.os === 'Windows') {
@@ -420,12 +422,21 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const folders = {
-            certificateExportPath: os === 'Windows' ?
+            hostCertificateExportPath: this.osProvider.os === 'Windows' ?
                 path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
                 path.join(this.osProvider.homedir, '.aspnet', 'https'),
-            userSecretsPath: os === 'Windows' ?
+            hostUserSecretsPath: this.osProvider.os === 'Windows' ?
                 path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
                 path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+        }
+
+        return folders;
+    }
+
+    private getContainerSecretsPaths(os: string): { containerCertificateExportPath: string, containerUserSecretsPath: string } {
+        const folders = {
+            containerCertificateExportPath: os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
+            containerUserSecretsPath: os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
         }
 
         return folders;
