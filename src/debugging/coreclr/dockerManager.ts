@@ -4,6 +4,7 @@
 
 import deepEqual = require('deep-equal');
 import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
