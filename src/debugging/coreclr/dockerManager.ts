@@ -320,6 +320,7 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     private static readonly ProgramFilesEnvironmentVariable: string = 'ProgramFiles';
+    private static readonly AppDataEnvironmentVariable: string = 'AppData';
 
     private getVolumes(debuggerFolder: string, options: DockerManagerRunContainerOptions): DockerContainerVolume[] {
         const appVolume: DockerContainerVolume = {
@@ -357,11 +358,35 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
+        let appDataEnvironmentVariable: string | undefined;
+
+        if (this.osProvider.os === 'Windows') {
+            appDataEnvironmentVariable = this.processProvider.env[DefaultDockerManager.AppDataEnvironmentVariable];
+
+            if (appDataEnvironmentVariable === undefined) {
+                throw new Error(`The environment variable '${DefaultDockerManager.AppDataEnvironmentVariable}' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.`);
+            }
+        }
+
+        const certVolume: DockerContainerVolume = {
+            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') : path.join(this.osProvider.homedir, '.aspnet', 'https'),
+            containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
+            permissions: 'ro'
+        };
+
+        const userSecretsVolume: DockerContainerVolume = {
+            localPath: options.os === 'Windows' ? path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') : path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+            containerPath: options.os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
+            permissions: 'ro'
+        };
+
         const volumes: DockerContainerVolume[] = [
             appVolume,
             debuggerVolume,
             nugetVolume,
-            nugetFallbackVolume
+            nugetFallbackVolume,
+            certVolume,
+            userSecretsVolume,
         ];
 
         return volumes;
