@@ -421,24 +421,24 @@ export class DefaultDockerManager implements DockerManager {
             }
         }
 
-        const folders = {
+        return {
             hostCertificateExportPath: this.osProvider.os === 'Windows' ?
                 path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
                 path.join(this.osProvider.homedir, '.aspnet', 'https'),
             hostUserSecretsPath: this.osProvider.os === 'Windows' ?
                 path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
                 path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
-        }
-
-        return folders;
+        };
     }
 
     private getContainerSecretsPaths(os: string): { containerCertificateExportPath: string, containerUserSecretsPath: string } {
-        const folders = {
-            containerCertificateExportPath: os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' : '/root/.aspnet/https',
-            containerUserSecretsPath: os === 'Windows' ? 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' : '/root/.microsoft/usersecrets',
-        }
-
-        return folders;
+        return {
+            containerCertificateExportPath: os === 'Windows' ?
+                'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
+                '/root/.aspnet/https',
+            containerUserSecretsPath: os === 'Windows' ?
+                'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' :
+                '/root/.microsoft/usersecrets',
+        };
     }
 }
