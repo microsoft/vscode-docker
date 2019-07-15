@@ -26,8 +26,8 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
 
     const processProvider = new ChildProcessProvider();
     const dockerClient = new CliDockerClient(processProvider);
-    const dotNetClient = new CommandLineDotNetClient(processProvider);
     const osProvider = new LocalOSProvider();
+    const dotNetClient = new CommandLineDotNetClient(processProvider, fileSystemProvider, osProvider);
 
     const dockerOutputManager = new DefaultOutputManager(ext.outputChannel);
 
