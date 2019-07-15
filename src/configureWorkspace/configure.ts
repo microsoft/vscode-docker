@@ -23,7 +23,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { promptForPort, quickPickOS, quickPickPlatform } from './configUtils';
+import { promptForPorts, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
     npmStart: boolean; //has npm start
@@ -59,11 +59,15 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
-    defaultPort: string | undefined // '' = defaults to empty but still asks user if they want a port, undefined = don't ask at all
+    defaultPorts: Number[] | undefined // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
 }
 
-export function getExposeStatements(port: string): string {
-    return port ? `EXPOSE ${port}` : '';
+export function getExposeStatements(ports: Number[]): string {
+    return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
+}
+
+export function getComposePorts(ports: Number[]): string {
+    return ports ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
 }
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
@@ -77,11 +81,11 @@ generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('Other', configureOther);
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[] | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
-        let contents = generators.genDockerFile(serviceNameAndRelativePath, platform, os, port, { cmd, author, version, artifactName });
+        let contents = generators.genDockerFile(serviceNameAndRelativePath, platform, os, ports, { cmd, author, version, artifactName });
 
         // Remove multiple empty lines with single empty lines, as might be produced
         // if $expose_statements$ or another template variable is an empty string
@@ -92,23 +96,23 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[]): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
-        return generators.genDockerCompose(serviceNameAndRelativePath, platform, os, port);
+        return generators.genDockerCompose(serviceNameAndRelativePath, platform, os, ports);
     }
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[], packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
-        return generators.genDockerComposeDebug(serviceNameAndRelativePath, platform, os, port, packageInfo);
+        return generators.genDockerComposeDebug(serviceNameAndRelativePath, platform, os, ports, packageInfo);
     }
 }
 
-function genDockerIgnoreFile(service: string, platformType: string, os: string, port: string): string {
+function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: Number[]): string {
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -260,7 +264,7 @@ async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
     }
 }
 
-type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, port: string, packageJson?: Partial<PackageInfo>) => string;
+type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: Number[], packageJson?: Partial<PackageInfo>) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -298,9 +302,9 @@ export interface ConfigureApiOptions {
     platform?: Platform;
 
     /**
-     * Port to expose
+     * Ports to expose
      */
-    port?: string;
+    ports?: Number[];
 
     /**
      * The OS for the images. Currently only needed for .NET platforms.
@@ -358,9 +362,9 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     }
     properties.configureOs = os;
 
-    let port: string | undefined = options.port;
-    if (!port && generatorInfo.defaultPort !== undefined) {
-        port = await promptForPort(generatorInfo.defaultPort);
+    let ports: Number[] | undefined = options.ports;
+    if (!ports && generatorInfo.defaultPorts !== undefined) {
+        ports = await promptForPorts(generatorInfo.defaultPorts);
     }
 
     let targetFramework: string;
@@ -432,7 +436,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
 
         if (writeFile) {
             // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
-            let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, port, packageInfo);
+            let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, ports, packageInfo);
             if (fileContents) {
                 fse.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
                 filesWritten.push(filePath);

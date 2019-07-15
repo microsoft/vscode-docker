@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureJava: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPort: '3000'
+  defaultPorts: [3000]
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(port);
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+  let exposeStatements = getExposeStatements(ports);
   const artifact = artifactName ? artifactName : `${serviceNameAndRelativePath}.jar`;
 
   return `
@@ -29,18 +29,17 @@ ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceNameAndRelativePath}.jar
 `;
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[]): string {
   return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:
     image: ${serviceNameAndRelativePath}
     build: .
-    ports:
-      - ${port}:${port}`;
+${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
   return `version: '2.1'
 
 services:
@@ -51,8 +50,5 @@ services:
       dockerfile: Dockerfile
     environment:
       JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
-    ports:
-      - ${port}:${port}
-      - 5005:5005
-    `;
+${getComposePorts(ports.concat(5005))}`;
 }
