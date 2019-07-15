@@ -16,6 +16,8 @@ export interface DotNetClient {
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
+    private static KnownConfiguredProjects: Set<string>;
+
     constructor(private readonly processProvider: ProcessProvider) {
     }
 
@@ -51,16 +53,21 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     public async trustAndExportCertificate(projectFile: string, hostExportPath: string, containerExportPath: string, password: string): Promise<void> {
-        // TODO : skip this for projects where it has already been done
-        // TODO : trust doesn't work for Linux users; need to direct them to manually fixing
+        if (CommandLineDotNetClient.KnownConfiguredProjects.has(projectFile)) {
+            return;
+        }
 
+        // TODO : trust doesn't work for Linux users; need to direct them to manually trust the cert
         const exportCommand = `dotnet dev-certs https --trust -ep "${hostExportPath}" -p "${password}"`;
         await this.processProvider.exec(exportCommand, {});
 
         const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
         await this.processProvider.exec(userSecretsPasswordCommand, {});
 
+        CommandLineDotNetClient.KnownConfiguredProjects.add(projectFile);
+
         // This is not honored due to https://github.com/aspnet/AspNetCore.Docs/issues/6199#issuecomment-418194220
+        // Consequently, the certificate name must be equal to <binaryName>.pfx, i.e. MyWebApp.dll => MyWebApp.pfx
         //const userSecretsPathCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Path "${containerExportPath}"`;
         //await this.processProvider.exec(userSecretsPathCommand, {});
     }
