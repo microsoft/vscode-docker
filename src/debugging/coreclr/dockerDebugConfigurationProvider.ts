@@ -78,6 +78,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 dockerBuild: {
                 },
                 dockerRun: {
+                    env: { "ASPNETCORE_ENVIRONMENT": "Development" }
                 }
             }
         ];

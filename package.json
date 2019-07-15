@@ -490,7 +490,11 @@
                             "request": "launch",
                             "preLaunchTask": "build",
                             "dockerBuild": {},
-                            "dockerRun": {}
+                            "dockerRun": {
+                                "env": {
+                                    "ASPNETCORE_ENVIRONMENT": "Development"
+                                }
+                            }
                         }
                     }
                 ],
