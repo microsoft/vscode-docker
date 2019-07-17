@@ -250,7 +250,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let contents = template.replace('$base_image_name$', baseImageName)
         .replace(/\$expose_statements\$/g, exposeStatements)
-        .replace(/\$env_statements$/g, envStatements)
+        .replace(/\$env_statements\$/g, envStatements)
         .replace(/\$sdk_image_name\$/g, sdkImageName)
         .replace(/\$container_project_directory\$/g, projectDirectory)
         .replace(/\$project_file_name\$/g, projectFileName)
@@ -279,7 +279,7 @@ function getEnvStatements(ports: Number[]): string {
     });
 
     if (urls.length > 0) {
-        return `ENV ASPNETCORE_URLS=${urls.join(';')}`;
+        return `ENV ASPNETCORE_URLS="${urls.join(';')}"`;
     }
 
     return '';
