@@ -6,26 +6,16 @@
 import { Terminal } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { DockerHubAccountTreeItem } from '../../tree/registries/dockerHub/DockerHubAccountTreeItem';
-import { DockerHubNamespaceTreeItem } from '../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
+import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 
-export async function logOutOfDockerCli(context: IActionContext, node?: RegistryTreeItemBase | DockerHubAccountTreeItem): Promise<void> {
+export async function logOutOfDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase | DockerHubAccountTreeItem>([DockerHubAccountTreeItem.contextValue, /^(azure|private)Registry$/i], context);
+        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
     }
 
-    let command = 'docker logout';
-
-    if (node instanceof DockerHubNamespaceTreeItem) {
-        node = node.parent;
-    }
-
-    if (!(node instanceof DockerHubAccountTreeItem)) {
-        command = `${command} ${node.baseUrl}`;
-    }
-
+    let creds = await node.getDockerCliCredentials();
     const terminal: Terminal = ext.terminalProvider.createTerminal('docker logout');
-    terminal.sendText(command);
+    terminal.sendText(`docker logout ${creds.registryPath}`);
     terminal.show();
 }

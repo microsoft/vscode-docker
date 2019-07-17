@@ -13,6 +13,7 @@ docs/**
 gulp*
 node_modules/**
 out/**
+resources/readme/**
 src/**
 stats.json
 test-results.xml

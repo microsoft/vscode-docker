@@ -12,7 +12,7 @@ import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReport
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
-import { DockerHubAccountTreeItem } from './tree/registries/dockerHub/DockerHubAccountTreeItem';
+import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { IKeytar } from './utils/keytar';
 import { ITerminalProvider } from "./utils/TerminalProvider";
@@ -47,7 +47,7 @@ export namespace ext {
 
     export let registriesTree: AzExtTreeDataProvider;
     export let registriesTreeView: TreeView<AzExtTreeItem>;
-    export let dockerHubAccountTreeItem: DockerHubAccountTreeItem;
+    export let registriesRoot: RegistriesTreeItem;
 
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;

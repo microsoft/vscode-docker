@@ -8,11 +8,10 @@ import * as moment from 'moment';
 import { AzExtTreeItem } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getThemedIconPath, IconPath } from "../../IconPath";
-import { RegistryType } from "../RegistryType";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
 export class AzureTaskRunTreeItem extends AzExtTreeItem {
-    public static contextValue: string = RegistryType.azure + 'TaskRun';
+    public static contextValue: string = 'azureTaskRun';
     public contextValue: string = AzureTaskRunTreeItem.contextValue;
     public parent: AzureTaskTreeItem;
 

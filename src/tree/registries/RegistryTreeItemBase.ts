@@ -4,58 +4,63 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RequestPromiseOptions } from "request-promise-native";
-import { URL } from "url";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { PAGE_SIZE } from "../../constants";
-import { getNextLinkFromHeaders, registryRequest } from "../../utils/registryRequestUtils";
+import { AzExtParentTreeItem } from "vscode-azureextensionui";
+import { IRegistryAuthTreeItem } from "../../utils/registryRequestUtils";
 import { getThemedIconPath, IconPath } from "../IconPath";
-import { RemoteRepositoryTreeItemBase } from "./RemoteRepositoryTreeItemBase";
+import { getRegistryContextValue, registrySuffix } from "./registryContextValues";
 
-export abstract class RegistryTreeItemBase extends AzExtParentTreeItem {
-    public static contextValueSuffix: string = 'Registry';
-    public static allContextRegExp: RegExp = /Registry$/;
+/**
+ * Base class for all registries
+ * NOTE: A registry is loosely defined as anything that contains repositories (e.g. a private registry or a Docker Hub namespace)
+ */
+export abstract class RegistryTreeItemBase extends AzExtParentTreeItem implements IRegistryAuthTreeItem {
     public childTypeLabel: string = 'repository';
-
-    protected _nextLink: string | undefined;
+    public parent: AzExtParentTreeItem;
 
     public get iconPath(): IconPath {
         return getThemedIconPath('registry');
     }
 
+    public get contextValue(): string {
+        return getRegistryContextValue(this, registrySuffix);
+    }
+
+    /**
+     * Used for an image's full tag
+     * For example, if the full tag is "example.azurecr.io/hello-world:latest", this would return "example.azurecr.io"
+     * NOTE: This usually would _not_ include the protocol part of a url
+     */
+    public abstract baseImagePath: string;
+
+    /**
+     * Used for registry requests
+     * NOTE: This _should_ include the protocol part of a url
+     */
     public abstract baseUrl: string;
+
+    /**
+     * This will be called before each registry request to add authentication
+     */
     public abstract addAuth(options: RequestPromiseOptions): Promise<void>;
-    public abstract createRepositoryTreeItem(name: string): RemoteRepositoryTreeItemBase;
 
-    public get host(): string {
-        return new URL(this.baseUrl).host;
-    }
-
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
-        if (clearCache) {
-            this._nextLink = undefined;
-        }
-
-        const repos = await this.getRepositories();
-        return await this.createTreeItemsWithErrorHandling(
-            repos,
-            'invalidRepository',
-            r => this.createRepositoryTreeItem(r),
-            r => r
-        );
-    }
-
-    public async getRepositories(): Promise<string[]> {
-        let url = this._nextLink || `v2/_catalog?n=${PAGE_SIZE}`;
-        let response = await registryRequest<IRepositories>(this, 'GET', url);
-        this._nextLink = getNextLinkFromHeaders(response);
-        return response.body.repositories;
-    }
-
-    public hasMoreChildrenImpl(): boolean {
-        return !!this._nextLink;
-    }
+    /**
+     * Describes credentials used to log in to the docker cli before pushing or pulling an image
+     */
+    public abstract getDockerCliCredentials(): Promise<IDockerCliCredentials>;
 }
 
-interface IRepositories {
-    repositories: string[];
+export interface IDockerCliCredentials {
+    /**
+     * Return either username/password or token credentials
+     * Return undefined if this registry doesn't require logging in to the docker cli
+     * NOTE: This may or may not be the same credentials used for registry requests
+     */
+    auth?: { token: string } | { username: string; password: string };
+
+    /**
+     * The registry to log in to
+     * For central registries, this will usually be at an account level (aka empty for all of Docker Hub)
+     * For private registries, this will usually be at the registry level (aka the registry url)
+     */
+    registryPath: string;
 }

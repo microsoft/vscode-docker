@@ -7,26 +7,31 @@ import ContainerRegistryManagementClient from 'azure-arm-containerregistry';
 import { WebhookCreateParameters } from 'azure-arm-containerregistry/lib/models';
 import { WebSiteManagementClient } from 'azure-arm-website';
 import { Site, SiteConfig } from 'azure-arm-website/lib/models';
-import { AuthOptions, NameValuePair } from 'request';
+import { NameValuePair } from 'request';
 import { Progress, window } from "vscode";
 import * as vscode from 'vscode';
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteClient, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
-import { validateAzureAccountInstalled } from '../../../tree/registries/azure/AzureAccountTreeItem';
+import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
+import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
+import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
-import { AzureTagTreeItem } from '../../../tree/registries/azure/AzureTagTreeItem';
+import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
-import { DockerHubTagTreeItem } from '../../../tree/registries/dockerHub/DockerHubTagTreeItem';
-import { PrivateRegistryTreeItem } from '../../../tree/registries/private/PrivateRegistryTreeItem';
+import { DockerHubRepositoryTreeItem } from '../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem';
+import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
+import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/dockerV2/GenericDockerV2RegistryTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
+import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
-import { RemoteTagTreeItemBase } from '../../../tree/registries/RemoteTagTreeItemBase';
+import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
 import { openExternal } from '../../../utils/openExternal';
 
-export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItemBase): Promise<void> {
+export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItemBase>(RemoteTagTreeItemBase.allContextRegExp, context);
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
 
     const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
@@ -35,7 +40,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         newSiteKind: AppKind.app
     };
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
-    const azureAccountTreeItem = await validateAzureAccountInstalled();
+    // Create a temporary azure account tree item since Azure might not be connected
+    const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
     const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
     if (subscriptionStep) {
         promptSteps.push(subscriptionStep);
@@ -67,23 +73,16 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     window.showInformationMessage(createdNewWebApp);
 }
 
-async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig> {
+async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {
     let registryTI: RegistryTreeItemBase = node.parent.parent;
 
     let username: string | undefined;
     let password: string | undefined;
-    let imagePath: string;
     let appSettings: NameValuePair[] = [];
     if (registryTI instanceof DockerHubNamespaceTreeItem) {
-        imagePath = registryTI.namespace;
         username = registryTI.parent.username;
-        password = registryTI.parent.password;
-
-        if (!username || !password) {
-            throw new Error("Failed to get credentials for Docker Hub.");
-        }
-    } else {
-        imagePath = registryTI.host;
+        password = await registryTI.parent.getPassword();
+    } else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
 
         if (registryTI instanceof AzureRegistryTreeItem) {
@@ -95,23 +94,22 @@ async function getNewSiteConfig(node: RemoteTagTreeItemBase): Promise<SiteConfig
                 password = nonNullProp(cred, 'passwords')[0].value;
             }
             appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
-        } else if (registryTI instanceof PrivateRegistryTreeItem) {
-            const auth: AuthOptions = await registryTI.getAuth();
-            username = auth.username;
-            password = auth.password;
+        } else if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
+            username = registryTI.cachedProvider.username;
+            password = await getRegistryPassword(registryTI.cachedProvider);
         } else {
             throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
         }
-
-        if (!username || !password) {
-            throw new Error(`Failed to get credentials for registry "${registryTI.host}".`);
-        }
+    } else {
+        throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
     }
 
-    appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
-    appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
+    if (username && password) {
+        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
+        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
+    }
 
-    let linuxFxVersion = `DOCKER|${imagePath}/${node.fullTag}`;
+    let linuxFxVersion = `DOCKER|${registryTI.baseImagePath}/${node.repoNameAndTag}`;
 
     return {
         linuxFxVersion,
@@ -152,9 +150,9 @@ class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardConte
 class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreate
 
-    private _treeItem: RemoteTagTreeItemBase;
+    private _treeItem: RemoteTagTreeItem;
 
-    public constructor(treeItem: RemoteTagTreeItemBase) {
+    public constructor(treeItem: RemoteTagTreeItem) {
         super();
         this._treeItem = treeItem;
     }
@@ -167,9 +165,9 @@ class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardCo
         const site: Site = nonNullProp(context, 'site');
         let siteClient = new SiteClient(site, context);
         let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
-        if (this._treeItem instanceof AzureTagTreeItem) {
+        if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
             await this.createWebhookForApp(this._treeItem, context, appUri);
-        } else if (this._treeItem instanceof DockerHubTagTreeItem) {
+        } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
             const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
@@ -186,30 +184,29 @@ class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardCo
         return !!context.site;
     }
 
-    private async createWebhookForApp(node: AzureTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<void> {
+    private async createWebhookForApp(node: RemoteTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<void> {
         // fields derived from the app service wizard
         let siteName: string = wizardContext.site.name;
         let webhookName: string = `webapp${siteName}`;
 
         // variables derived from the container registry
-        const crmClient = createAzureClient(node.parent.parent.parent.root, ContainerRegistryManagementClient);
-        let registryResourceGroupName: string = node.parent.parent.resourceGroup;
-        let registryName = node.parent.parent.registryName;
+        const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
+        const crmClient = createAzureClient(registryTreeItem.parent.root, ContainerRegistryManagementClient);
 
-        const existingWebhooks = await crmClient.webhooks.list(registryResourceGroupName, registryName);
+        const existingWebhooks = await crmClient.webhooks.list(registryTreeItem.resourceGroup, registryTreeItem.registryName);
         if (existingWebhooks.find((hook) => hook.name === webhookName)) {
             return;
         }
 
         let webhookCreateParameters: WebhookCreateParameters = {
-            location: node.parent.parent.registryLocation,
+            location: registryTreeItem.registryLocation,
             serviceUri: appUri,
             scope: `${node.parent.repoName}:${node.tag}`,
             actions: ["push"],
             status: 'enabled'
         };
 
-        const webhook = await crmClient.webhooks.create(registryResourceGroupName, registryName, webhookName, webhookCreateParameters);
+        const webhook = await crmClient.webhooks.create(registryTreeItem.resourceGroup, registryTreeItem.registryName, webhookName, webhookCreateParameters);
         ext.outputChannel.appendLine(`Created webhook '${webhook.name}' with scope '${webhook.scope}', id: '${webhook.id}' and location: '${webhook.location}'`);
     }
 }

@@ -1,3 +1,49 @@
+## 0.7.0 - 9 July 2019
+### Added
+* Revamped Docker Explorer
+  * Containers, images, and registries now have their own explorer which can be hid, resized, or reordered
+  * Added per-explorer settings for display format, grouping, and sorting
+  * Modified icons to respect theme
+  * Moved connection errors and troubleshooting links directly into the explorer instead of as a separate notification
+  * Added support for "Load more..." if not all items are retrieved in the first batch
+  * Local explorers poll less often (only if the explorer is open)
+  * Added per-explorer prune command (system prune is still available from the command palette)
+  * Ensured all desctructive actions have a confirmation and are grouped separately in context menus
+* Generalized registries view to better support more providers
+  * All registries regardless of provider now support viewing repos/tags, pulling images, and setting a registry as default
+  * Added docs for contributing a new registry provider
+  * Multiple registry providers of the same type can now be connected (e.g. multiple Docker Hub accounts)
+  * Added support for GitLab (not including self-hosted)
+* Update to version 0.0.21 of the language server (thanks @rcjsuen)
+  * Improves linting checks so that there are fewer false positives
+  * Fixes variable resolution to ensure that only alphanumeric and underscore characters are considered
+* Revamped command palette support
+  * Commands are grouped by explorer
+  * Commands respect "Group By" setting when prompting for items
+  * Leveraged multi-select quick pick to execute a command for multiple items at a time
+* Revamped Azure support
+  * Registries are grouped by subscription, with option to filter by subscription
+  * Tasks are shown in the explorer instead of a webview
+  * Task commands and "Deploy to App Service" are supported from the command palette
+  * Creating a registry or web app now supports async validation, the back button, and related-name recommendations
+* View all namespaces for your Docker Hub account, not just username
+* Added explorer for Volumes, including prune, remove, and inspect commands
+* Added explorer for Networks (thanks @stuartthomson), including prune, remove, and inspect commands
+* Added VS Code settings `docker.certPath`, `docker.tlsVerify`, and `docker.machineName` which directly map to environment variables `DOCKER_CERT_PATH`, `DOCKER_TLS_VERIFY`, and `DOCKER_MACHINE_NAME`
+
+### [Fixed](https://github.com/Microsoft/vscode-docker/issues?q=is%3Aissue+milestone%3A0.7.0+is%3Aclosed+label%3Abug)
+* Modified `docker.host` setting to _actually_ be equivalent to `DOCKER_HOST` environment variable
+* Respect `file.associations` setting when prompting for a Dockerfile
+* Better handle expired credentials for Docker Hub
+* `docker.truncateLongRegistryPaths` is now respected for containers as well as images
+
+### Changed
+* In order to support more providers and still keep the registries view clean, you must now explicitly connect a provider. Previously signed-in providers will need to be re-connected
+* Azure Tasks no longer support custom filtering. This functionality is still available in the portal
+* Removed `docker.groupImagesBy` setting in favor of `docker.images.groupBy` (based on a new pattern for all explorers)
+* Removed `docker.showExplorer` setting. Instead, right click on the explorer title to hide.
+* Removed `docker.promptOnSystemPrune` setting as a part of making all destructive actions consistent
+
 ## 0.6.4 - 19 June 2019
 
 ### Fixed

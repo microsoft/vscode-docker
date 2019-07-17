@@ -23,7 +23,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty
     }
 
     public get id(): string {
-        return this.group;
+        return this.group + '|LocalGroup'; // Add suffix to ensure this id doesn't coincidentally overlap with a non-grouped item
     }
 
     public get maxCreatedTime(): number {

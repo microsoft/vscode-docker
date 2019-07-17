@@ -6,18 +6,16 @@
 import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "azure-arm-containerregistry";
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
-import { acquireAcrAccessToken, getResourceGroupFromId } from "../../../utils/azureUtils";
+import { acquireAcrAccessToken, acquireAcrRefreshToken, getResourceGroupFromId } from "../../../utils/azureUtils";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getIconPath, IconPath } from "../../IconPath";
-import { RegistryTreeItemBase } from "../RegistryTreeItemBase";
-import { RegistryType } from "../RegistryType";
+import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
+import { IDockerCliCredentials } from "../RegistryTreeItemBase";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
-export class AzureRegistryTreeItem extends RegistryTreeItemBase {
-    public static contextValue: string = RegistryType.azure + RegistryTreeItemBase.contextValueSuffix;
-    public contextValue: string = AzureRegistryTreeItem.contextValue;
+export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     public parent: SubscriptionTreeItem;
 
     private _tasksTreeItem: AzureTasksTreeItem;
@@ -76,6 +74,15 @@ export class AzureRegistryTreeItem extends RegistryTreeItemBase {
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
         options.auth = {
             bearer: await acquireAcrAccessToken(this.host, this.parent.root, 'registry:catalog:*')
+        };
+    }
+
+    public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
+        return {
+            registryPath: this.baseUrl,
+            auth: {
+                token: await acquireAcrRefreshToken(this.host, this.parent.root)
+            }
         };
     }
 

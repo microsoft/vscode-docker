@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 
@@ -11,7 +12,10 @@ export async function pruneNetworks(_context: IActionContext): Promise<void> {
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
-    const terminal = ext.terminalProvider.createTerminal("docker prune");
-    terminal.sendText('docker network prune -f');
-    terminal.show();
+    const result = await ext.dockerode.pruneNetworks();
+
+    const numDeleted = (result.NetworksDeleted || []).length;
+    let message = `Removed ${numDeleted} networks(s).`;
+    // don't wait
+    window.showInformationMessage(message);
 }

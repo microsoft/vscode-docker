@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
 import { ContainerInfo } from 'dockerode';
 import { ext } from '../../extension.bundle';
 import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
@@ -378,6 +379,36 @@ suite('Containers Tree', async () => {
                     ]
                 }
             ]);
+    });
+
+    /**
+     * This test verifies we maintain support for the "Attach Visual Studio Code" context menu item that the "Remote Containers" extension adds to our tree (specifically running containers)
+     * https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
+     */
+    test('Remote Containers - Attach Visual Studio Code', async () => {
+        const containers = [
+            {
+                Id: "faeb6f02af06df748a0040476ba7c335fb8aaefd76f6ea14a76800faf0fa3910",
+                Names: ["/elegant_knuth"],
+                Image: "registry:latest",
+                ImageID: "sha256:f32a97de94e13d29835a19851acd6cbc7979d1d50f703725541e44bb89a1ce91",
+                Created: generateCreatedTimeInSec(2),
+                Ports: [
+                    { "IP": "0.0.0.0", "PrivatePort": 5000, "PublicPort": 5000, "Type": "tcp" }
+                ],
+                State: "running",
+                Status: "Up 6 minutes",
+            },
+        ];
+
+        const expectedNodes = [
+            { label: "registry:latest", description: "elegant_knuth - Up 6 minutes" },
+        ];
+
+        const actualNodes = await validateTree(ext.containersRoot, 'containers', {}, { containers: containers }, expectedNodes);
+
+        assert.equal(actualNodes[0].contextValue, 'runningContainer', 'Must have context value "runningContainer"');
+        assert.equal((<any>actualNodes[0]).containerDesc.Id, 'faeb6f02af06df748a0040476ba7c335fb8aaefd76f6ea14a76800faf0fa3910', 'Must have property "containerDesc"');
     });
 });
 

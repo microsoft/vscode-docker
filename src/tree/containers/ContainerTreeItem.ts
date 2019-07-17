@@ -47,6 +47,15 @@ export class ContainerTreeItem extends AzExtTreeItem {
         return this._item.state + 'Container';
     }
 
+    /**
+     * @deprecated This is only kept for backwards compatability with the "Remote Containers" extension
+     * They add a context menu item "Attach Visual Studio Code" to our container nodes that relies on containerDesc
+     * https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
+     */
+    public get containerDesc(): {} {
+        return this._item.data;
+    }
+
     public get iconPath(): IconPath {
         if (this._item.status.includes('(unhealthy)')) {
             return getThemedIconPath('statusWarning');
