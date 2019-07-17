@@ -20,7 +20,7 @@ export interface DotNetClient {
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
-    private static KnownConfiguredProjects: Set<string>;
+    private static KnownConfiguredProjects: Set<string> = new Set<string>();
 
     constructor(private readonly processProvider: ProcessProvider, private readonly fsProvider: FileSystemProvider, private readonly osProvider: LocalOSProvider) {
     }
@@ -64,11 +64,11 @@ export class CommandLineDotNetClient implements DotNetClient {
         await this.addUserSecretsIfNecessary(projectFile);
 
         // Trust doesn't work for Linux users; need to direct them to manually trust the cert
-        const exportCommand = `dotnet dev-certs https ${this.osProvider.os === 'Linux' ? '' : '--trust'} -ep "${hostExportPath}" -p "${password}"`;
+        const exportCommand = `dotnet dev-certs https ${this.osProvider.os === 'Linux' ? '' : '--trust'} -ep "${hostExportPath}" -p "foobar"`;
         await this.processProvider.exec(exportCommand, {});
 
-        const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
-        await this.processProvider.exec(userSecretsPasswordCommand, {});
+        //const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
+        //await this.processProvider.exec(userSecretsPasswordCommand, {});
 
         CommandLineDotNetClient.KnownConfiguredProjects.add(projectFile);
 
