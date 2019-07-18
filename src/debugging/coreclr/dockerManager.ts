@@ -4,7 +4,6 @@
 
 import deepEqual = require('deep-equal');
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
@@ -246,7 +245,7 @@ export class DefaultDockerManager implements DockerManager {
         const hostCertificateExportPfxPath = path.join(this.getHostSecretsPaths().hostCertificateExportPath, `${appOutputName}.pfx`);
         const containerCertificateExportPfxPath = this.osProvider.pathJoin(options.run.os, this.getContainerSecretsPaths(options.run.os).containerCertificateExportPath, `${appOutputName}.pfx`)
 
-        await this.dotNetClient.trustAndExportCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath, uuidv4());
+        await this.dotNetClient.exportCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath);
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
