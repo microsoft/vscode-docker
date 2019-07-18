@@ -54,6 +54,7 @@ interface DockerDebugConfiguration extends DebugConfiguration {
     appProject?: string;
     dockerBuild?: DockerDebugBuildOptions;
     dockerRun?: DockerDebugRunOptions;
+    configureSslCertificate?: boolean;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -165,6 +166,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS): LaunchRunOptions {
         const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
             ? debugConfiguration.dockerRun.containerName
@@ -184,6 +186,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const volumes = DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration);
         const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
 
+        const configureSslCertificate = debugConfiguration && debugConfiguration.configureSslCertificate;
+
         return {
             containerName,
             env,
@@ -194,7 +198,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             networkAlias,
             os,
             ports,
-            volumes
+            volumes,
+            configureSslCertificate
         };
     }
 

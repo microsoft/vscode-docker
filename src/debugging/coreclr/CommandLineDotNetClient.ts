@@ -15,7 +15,7 @@ export type MSBuildExecOptions = {
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
-    exportCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void>;
+    exportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void>;
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
@@ -57,7 +57,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
     }
 
-    public async exportCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void> {
+    public async exportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void> {
         if (CommandLineDotNetClient.KnownConfiguredProjects.has(projectFile)) {
             return;
         }

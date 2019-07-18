@@ -29,6 +29,7 @@ export type DockerManagerRunContainerOptions
     & {
         appFolder: string;
         os: PlatformOS;
+        configureSslCertificate: boolean;
     };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -241,11 +242,12 @@ export class DefaultDockerManager implements DockerManager {
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
 
-        const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
-        const hostCertificateExportPfxPath = path.join(this.getHostSecretsPaths().hostCertificateExportPath, `${appOutputName}.pfx`);
-        const containerCertificateExportPfxPath = this.osProvider.pathJoin(options.run.os, this.getContainerSecretsPaths(options.run.os).containerCertificateExportPath, `${appOutputName}.pfx`)
-
-        await this.dotNetClient.exportCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath);
+        if (options.run.configureSslCertificate) {
+            const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
+            const hostCertificateExportPfxPath = path.join(this.getHostSecretsPaths().hostCertificateExportPath, `${appOutputName}.pfx`);
+            const containerCertificateExportPfxPath = this.osProvider.pathJoin(options.run.os, this.getContainerSecretsPaths(options.run.os).containerCertificateExportPath, `${appOutputName}.pfx`);
+            await this.dotNetClient.exportSslCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath);
+        }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
@@ -382,29 +384,32 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
-        const { hostCertificateExportPath, hostUserSecretsPath } = this.getHostSecretsPaths();
-        const { containerCertificateExportPath, containerUserSecretsPath } = this.getContainerSecretsPaths(options.os);
-
-        const certVolume: DockerContainerVolume = {
-            localPath: hostCertificateExportPath,
-            containerPath: containerCertificateExportPath,
-            permissions: 'ro'
-        };
-
-        const userSecretsVolume: DockerContainerVolume = {
-            localPath: hostUserSecretsPath,
-            containerPath: containerUserSecretsPath,
-            permissions: 'ro'
-        };
-
-        const volumes: DockerContainerVolume[] = [
+        let volumes: DockerContainerVolume[] = [
             appVolume,
             debuggerVolume,
             nugetVolume,
             nugetFallbackVolume,
-            certVolume,
-            userSecretsVolume,
         ];
+
+        if (options.configureSslCertificate) {
+            const { hostCertificateExportPath, hostUserSecretsPath } = this.getHostSecretsPaths();
+            const { containerCertificateExportPath, containerUserSecretsPath } = this.getContainerSecretsPaths(options.os);
+
+            const certVolume: DockerContainerVolume = {
+                localPath: hostCertificateExportPath,
+                containerPath: containerCertificateExportPath,
+                permissions: 'ro'
+            };
+
+            const userSecretsVolume: DockerContainerVolume = {
+                localPath: hostUserSecretsPath,
+                containerPath: containerUserSecretsPath,
+                permissions: 'ro'
+            };
+
+            volumes.push(certVolume);
+            volumes.push(userSecretsVolume);
+        }
 
         return volumes;
     }

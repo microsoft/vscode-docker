@@ -663,6 +663,11 @@
                                         }
                                     }
                                 }
+                            },
+                            "configureSslCertificate": {
+                                "type": "boolean",
+                                "default": true,
+                                "description": "Whether to configure an SSL certificate for ASP.NET Core web services."
                             }
                         }
                     }
