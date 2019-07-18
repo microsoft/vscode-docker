@@ -494,7 +494,8 @@
                                 "env": {
                                     "ASPNETCORE_ENVIRONMENT": "Development"
                                 }
-                            }
+                            },
+                            "configureSslCertificate": true
                         }
                     }
                 ],

@@ -80,7 +80,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 },
                 dockerRun: {
                     env: { "ASPNETCORE_ENVIRONMENT": "Development" }
-                }
+                },
+                configureSslCertificate: true
             }
         ];
     }
