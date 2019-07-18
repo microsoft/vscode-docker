@@ -55,6 +55,6 @@ services:
     build: .
     environment:
       NODE_ENV: development
-${getComposePorts(ports.concat(9299))}
+${getComposePorts(ports.concat(9229))}
     ${cmd}`;
 }
