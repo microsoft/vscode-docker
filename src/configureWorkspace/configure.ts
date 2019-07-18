@@ -89,8 +89,8 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
         // Remove multiple empty lines with single empty lines, as might be produced
         // if $expose_statements$ or another template variable is an empty string
-        contents = contents.replace(/(\r\n){3}/g, "\r\n\r\n")
-            .replace(/(\n){3}/g, "\n\n");
+        contents = contents.replace(/(\r\n){3,4}/g, "\r\n\r\n")
+            .replace(/(\n){3,4}/g, "\n\n");
 
         return contents;
     }

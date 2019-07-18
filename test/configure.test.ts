@@ -1238,8 +1238,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     image: testoutput
                     build: .
                     ports:
-                      - 3000:3000
-                `));
+                      - 3000:3000`));
             assert.strictEqual(debugComposeContents, removeIndentation(`
                 version: '2.1'
 
@@ -1250,8 +1249,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                       context: .
                       dockerfile: Dockerfile
                     ports:
-                      - 3000:3000
-                `));
+                      - 3000:3000`));
         });
     });
 
