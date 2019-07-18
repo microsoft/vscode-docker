@@ -73,7 +73,6 @@ const aspNetCoreWindowsTemplate = `#Depending on the operating system of the hos
 FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
-$env_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
@@ -96,7 +95,6 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 const aspNetCoreLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
-$env_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
@@ -126,7 +124,6 @@ const dotNetCoreConsoleWindowsTemplate = `#Depending on the operating system of 
 FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
-$env_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
@@ -149,7 +146,6 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 const dotNetCoreConsoleLinuxTemplate = `FROM $base_image_name$ AS base
 WORKDIR /app
 $expose_statements$
-$env_statements$
 
 FROM $sdk_image_name$ AS build
 WORKDIR /src
@@ -186,7 +182,6 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
     let exposeStatements = getExposeStatements(ports);
-    let envStatements = getEnvStatements(ports, platform);
 
     // Parse version from TargetFramework
     // Example: netcoreapp1.0
@@ -252,7 +247,6 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let contents = template.replace('$base_image_name$', baseImageName)
         .replace(/\$expose_statements\$/g, exposeStatements)
-        .replace(/\$env_statements\$/g, envStatements)
         .replace(/\$sdk_image_name\$/g, sdkImageName)
         .replace(/\$container_project_directory\$/g, projectDirectory)
         .replace(/\$project_file_name\$/g, projectFileName)
@@ -265,23 +259,4 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 
     return contents;
-}
-
-function getEnvStatements(ports: Number[], platform: Platform): string {
-    if (platform !== 'ASP.NET Core') {
-        return '';
-    }
-
-    let urls: string[] = [];
-
-    ports.forEach(port => {
-        // If 443 is exposed, listen on https://+:443; for everything else listen on http://+:${port}
-        urls.push(`${port === 443 ? 'https' : 'http'}://+:${port}`);
-    });
-
-    if (urls.length > 0) {
-        return `ENV ASPNETCORE_URLS="${urls.join(';')}"`;
-    }
-
-    return '';
 }

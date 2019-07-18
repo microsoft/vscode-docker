@@ -840,7 +840,6 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1809 AS base
                     WORKDIR /app
                     EXPOSE 1234
-                    ENV ASPNETCORE_URLS="http://+:1234"
 
                     FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build
                     WORKDIR /src
@@ -872,7 +871,6 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS base
                     WORKDIR /app
                     EXPOSE 1234
-                    ENV ASPNETCORE_URLS="http://+:1234"
 
                     FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
                     WORKDIR /src

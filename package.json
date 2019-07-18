@@ -492,7 +492,8 @@
                             "dockerBuild": {},
                             "dockerRun": {
                                 "env": {
-                                    "ASPNETCORE_ENVIRONMENT": "Development"
+                                    "ASPNETCORE_ENVIRONMENT": "Development",
+                                    "ASPNETCORE_URLS": "http://+:80;https://+:443"
                                 }
                             },
                             "configureSslCertificate": true

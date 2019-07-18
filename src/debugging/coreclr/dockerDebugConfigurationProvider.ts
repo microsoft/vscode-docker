@@ -79,7 +79,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 dockerBuild: {
                 },
                 dockerRun: {
-                    env: { "ASPNETCORE_ENVIRONMENT": "Development" }
+                    env: {
+                        "ASPNETCORE_ENVIRONMENT": "Development",
+                        //tslint:disable-next-line:no-http-string
+                        "ASPNETCORE_URLS": "http://+:80;https://+:443"
+                    }
                 },
                 configureSslCertificate: true
             }
