@@ -88,7 +88,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
 
         const dotNetVer = await this.getVersion();
-        if (semver.gte(dotNetVer, '3.0')) {
+        if (semver.gte(dotNetVer, '3.0.0')) {
             const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${uuidv4()}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
         }
