@@ -247,7 +247,7 @@ export class DefaultDockerManager implements DockerManager {
             const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
             const hostCertificateExportPfxPath = path.join(this.getHostSecretsPaths().hostCertificateExportPath, `${appOutputName}.pfx`);
             const containerCertificateExportPfxPath = this.osProvider.pathJoin(options.run.os, this.getContainerSecretsPaths(options.run.os).containerCertificateExportPath, `${appOutputName}.pfx`);
-            await this.dotNetClient.exportSslCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath);
+            await this.dotNetClient.trustAndExportSslCertificate(options.appProject, hostCertificateExportPfxPath, containerCertificateExportPfxPath);
         }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });

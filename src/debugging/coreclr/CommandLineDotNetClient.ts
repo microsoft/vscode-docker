@@ -2,7 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as cp from 'child_process';
 import * as semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 import { window } from 'vscode';
@@ -18,7 +17,7 @@ export type MSBuildExecOptions = {
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
-    exportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void>;
+    trustAndExportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void>;
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
@@ -61,7 +60,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
     }
 
-    public async exportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void> {
+    public async trustAndExportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void> {
         if (CommandLineDotNetClient.KnownConfiguredProjects.has(projectFile)) {
             return;
         }
@@ -69,22 +68,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         await this.addUserSecretsIfNecessary(projectFile);
 
         if (this.osProvider.os === 'Windows' || this.osProvider.isMac) {
-            try {
-                // Check if the certificate is already trusted
-                const checkCommand = `dotnet dev-certs https --check`;
-                await this.processProvider.exec(checkCommand, {});
-            } catch {
-                // It is not trusted--ask if they want to do so
-                window.showWarningMessage(
-                    "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
-                    { modal: false },
-                    ...['Yes', 'No']).then(selection => {
-                        if (selection === 'Yes') {
-                            const trustCommand = `dotnet dev-certs https --trust`;
-                            cp.spawn(trustCommand, { shell: true, windowsHide: false, detached: true });
-                        }
-                    });
-            }
+            await this.promptAndTrustCertificateIfNecessary();
         }
 
         const password = uuidv4();
@@ -117,6 +101,33 @@ export class CommandLineDotNetClient implements DotNetClient {
         if (semver.gte(dotNetVer, '3.0.0')) {
             const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${uuidv4()}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
+        }
+    }
+
+    private async promptAndTrustCertificateIfNecessary(): Promise<void> {
+        try {
+            const checkCommand = `dotnet dev-certs https --check --trust`;
+            await this.processProvider.exec(checkCommand, {});
+        } catch {
+            const selection = await window.showInformationMessage(
+                "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
+                { modal: true },
+                ...['Yes', 'No']);
+
+            if (selection === 'Yes') {
+                const trustCommand = `dotnet dev-certs https --trust ; exit 0`; // Exiting afterward means we can listen for this terminal instance to be closed
+                const terminal = window.createTerminal('Trust Certificate');
+                terminal.sendText(trustCommand);
+                terminal.show();
+
+                return new Promise<void>((resolve, reject) => {
+                    window.onDidCloseTerminal((t) => {
+                        if (t === terminal) {
+                            resolve();
+                        }
+                    });
+                });
+            }
         }
     }
 }
