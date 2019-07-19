@@ -346,6 +346,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             program: result.program,
             args: result.programArgs.join(' '),
             cwd: result.programCwd,
+            env: result.programEnv,
             launchBrowser,
             pipeTransport: {
                 pipeCwd: result.pipeCwd,

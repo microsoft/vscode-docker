@@ -54,6 +54,7 @@ export type LaunchResult = {
     program: string;
     programArgs: string[];
     programCwd: string;
+    programEnv: { [key: string]: string };
 };
 
 type LastImageBuildMetadata = {
@@ -282,7 +283,8 @@ export class DefaultDockerManager implements DockerManager {
             pipeProgram: 'docker',
             program: 'dotnet',
             programArgs: [additionalProbingPathsArgs, containerAppOutput],
-            programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app'
+            programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app',
+            programEnv: {}
         };
     }
 
