@@ -1586,7 +1586,7 @@
         "dockerode": "^2.5.8",
         "fs-extra": "^6.0.1",
         "glob": "7.1.2",
-        "gradle-to-js": "^1.2.1",
+        "gradle-to-js": "^2.0.0",
         "mac-ca": "^1.0.4",
         "moment": "^2.24.0",
         "ms-rest": "^2.5.0",
