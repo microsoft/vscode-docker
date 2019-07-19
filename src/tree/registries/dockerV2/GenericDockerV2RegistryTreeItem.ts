@@ -43,7 +43,8 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
         if (clearCache) {
             try {
                 // If the call succeeds, it's a V2 registry (https://docs.docker.com/registry/spec/api/#api-version-check)
-                await registryRequest(this, 'GET', 'v2');
+                // NOTE: Trailing slash is necessary (https://github.com/microsoft/vscode-docker/issues/1142)
+                await registryRequest(this, 'GET', 'v2/');
             } catch (error) {
                 const errorType: string = parseError(error).errorType.toLowerCase();
                 if (errorType === "401" || errorType === "unauthorized") {
