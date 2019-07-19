@@ -482,10 +482,10 @@
                 "label": "Docker: Launch .NET Core (Preview)",
                 "configurationSnippets": [
                     {
-                        "label": "Docker: Launch .NET Core (Preview)",
-                        "description": "Docker: Launch .NET Core (Preview)",
+                        "label": "Docker: Launch ASP.NET Core (Preview)",
+                        "description": "Docker: Launch ASP.NET Core (Preview)",
                         "body": {
-                            "name": "Docker: Launch .NET Core (Preview)",
+                            "name": "Docker: Launch ASP.NET Core (Preview)",
                             "type": "docker-coreclr",
                             "request": "launch",
                             "preLaunchTask": "build",
@@ -497,6 +497,18 @@
                                 }
                             },
                             "configureSslCertificate": true
+                        }
+                    },
+                    {
+                        "label": "Docker: Launch .NET Core Console (Preview)",
+                        "description": "Docker: Launch .NET Core Console (Preview)",
+                        "body": {
+                            "name": "Docker: Launch .NET Core Console (Preview)",
+                            "type": "docker-coreclr",
+                            "request": "launch",
+                            "preLaunchTask": "build",
+                            "dockerBuild": {},
+                            "dockerRun": {}
                         }
                     }
                 ],
