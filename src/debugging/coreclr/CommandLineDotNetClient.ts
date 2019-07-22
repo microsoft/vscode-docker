@@ -66,10 +66,8 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
 
         await this.addUserSecretsIfNecessary(projectFile);
-
-        if (this.osProvider.os === 'Windows' || this.osProvider.isMac) {
-            await this.promptAndTrustCertificateIfNecessary();
-        }
+        // tslint:disable-next-line: no-floating-promises
+        this.promptAndTrustCertificateIfNecessary();
 
         const password = uuidv4();
 
@@ -105,28 +103,29 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     private async promptAndTrustCertificateIfNecessary(): Promise<void> {
+        if (this.osProvider.os !== 'Windows' && !this.osProvider.isMac) {
+            // No centralized notion of trust on Linux
+            return;
+        }
+
         try {
             const checkCommand = `dotnet dev-certs https --check --trust`;
             await this.processProvider.exec(checkCommand, {});
         } catch {
-            const selection = await window.showInformationMessage(
-                "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
-                { modal: true },
-                ...['Yes', 'No']);
+            if (this.osProvider.os === 'Windows') {
+                const selection = await window.showWarningMessage(
+                    "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
+                    { modal: false },
+                    ...['Yes', 'No']);
 
-            if (selection === 'Yes') {
-                const trustCommand = `dotnet dev-certs https --trust ; exit 0`; // Exiting afterward means we can listen for this terminal instance to be closed
-                const terminal = window.createTerminal('Trust Certificate');
-                terminal.sendText(trustCommand);
-                terminal.show();
-
-                return new Promise<void>((resolve, reject) => {
-                    window.onDidCloseTerminal((t) => {
-                        if (t === terminal) {
-                            resolve();
-                        }
-                    });
-                });
+                if (selection === 'Yes') {
+                    const trustCommand = `dotnet dev-certs https --trust`;
+                    await this.processProvider.exec(trustCommand, {});
+                }
+            } else if (this.osProvider.isMac) {
+                await window.showWarningMessage(
+                    "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
+                    { modal: false });
             }
         }
     }
