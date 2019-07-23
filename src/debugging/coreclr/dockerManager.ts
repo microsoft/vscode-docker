@@ -437,7 +437,7 @@ export class DefaultDockerManager implements DockerManager {
         };
     }
 
-    private getContainerSecretsPaths(os: string): { containerCertificateExportPath: string, containerUserSecretsPath: string } {
+    private getContainerSecretsPaths(os: PlatformOS): { containerCertificateExportPath: string, containerUserSecretsPath: string } {
         return {
             containerCertificateExportPath: os === 'Windows' ?
                 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
