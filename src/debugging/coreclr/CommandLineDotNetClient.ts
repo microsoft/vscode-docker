@@ -4,7 +4,8 @@
 
 import * as semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import { window } from 'vscode';
+import { DialogResponses } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { ProcessProvider } from "./ChildProcessProvider";
 import { FileSystemProvider } from "./fsProvider";
 import { OSProvider } from "./LocalOSProvider";
@@ -112,17 +113,17 @@ export class CommandLineDotNetClient implements DotNetClient {
             await this.processProvider.exec(checkCommand, {});
         } catch {
             if (this.osProvider.os === 'Windows') {
-                const selection = await window.showWarningMessage(
+                const selection = await ext.ui.showWarningMessage(
                     "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
                     { modal: true },
-                    ...['Yes', 'No']);
+                    DialogResponses.yes, DialogResponses.no);
 
-                if (selection === 'Yes') {
+                if (selection === DialogResponses.yes) {
                     const trustCommand = `dotnet dev-certs https --trust`;
                     await this.processProvider.exec(trustCommand, {});
                 }
             } else if (this.osProvider.isMac) {
-                await window.showWarningMessage(
+                await ext.ui.showWarningMessage(
                     "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
                     { modal: true });
             }
