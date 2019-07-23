@@ -66,8 +66,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
 
         await this.addUserSecretsIfNecessary(projectFile);
-        // tslint:disable-next-line: no-floating-promises
-        this.promptAndTrustCertificateIfNecessary();
+        await this.promptAndTrustCertificateIfNecessary();
 
         const password = uuidv4();
 
@@ -115,7 +114,7 @@ export class CommandLineDotNetClient implements DotNetClient {
             if (this.osProvider.os === 'Windows') {
                 const selection = await window.showWarningMessage(
                     "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
-                    { modal: false },
+                    { modal: true },
                     ...['Yes', 'No']);
 
                 if (selection === 'Yes') {
@@ -125,7 +124,7 @@ export class CommandLineDotNetClient implements DotNetClient {
             } else if (this.osProvider.isMac) {
                 await window.showWarningMessage(
                     "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
-                    { modal: false });
+                    { modal: true });
             }
         }
     }
