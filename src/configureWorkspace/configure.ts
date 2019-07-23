@@ -67,7 +67,7 @@ export function getExposeStatements(ports: Number[]): string {
 }
 
 export function getComposePorts(ports: Number[]): string {
-    return ports ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
+    return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
 }
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
