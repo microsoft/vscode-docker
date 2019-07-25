@@ -4,6 +4,7 @@
 
 import * as crypto from 'crypto';
 import * as semver from 'semver';
+import { MessageItem } from 'vscode';
 import { DialogResponses, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ProcessProvider } from "./ChildProcessProvider";
@@ -109,21 +110,26 @@ export class CommandLineDotNetClient implements DotNetClient {
         } catch (err) {
             const error = parseError(err);
 
-            if (error.errorType === "6" || error.errorType === "7") { // 6 = certificate not found, 7 = certificate not trusted
+            if (error.errorType === '6' || error.errorType === '7') { // 6 = certificate not found, 7 = certificate not trusted
                 if (this.osProvider.os === 'Windows') {
-                    const selection = await ext.ui.showWarningMessage(
-                        "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
-                        { modal: true },
-                        DialogResponses.yes, DialogResponses.no);
+                    const trust: MessageItem = { title: 'Trust' };
 
-                    if (selection === DialogResponses.yes) {
+                    const selection = await ext.ui.showWarningMessage(
+                        'The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.',
+                        { modal: true, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
+                        trust, DialogResponses.skipForNow);
+
+                    if (selection === trust) {
                         const trustCommand = `dotnet dev-certs https --trust`;
                         await this.processProvider.exec(trustCommand, {});
                     }
                 } else if (this.osProvider.isMac) {
+                    const debugAnyway: MessageItem = { title: 'Debug Anyway' };
+
                     await ext.ui.showWarningMessage(
-                        "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
-                        { modal: true });
+                        'The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.',
+                        { modal: true, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
+                        debugAnyway);
                 }
             } else { throw err; }
         }
