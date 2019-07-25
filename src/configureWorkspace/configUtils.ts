@@ -12,7 +12,7 @@ import { Platform, PlatformOS } from '../utils/platform';
  * Prompts for port numbers
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function promptForPorts(ports: Number[]): Promise<Number[]> {
+export async function promptForPorts(ports: number[]): Promise<number[]> {
     let opt: vscode.InputBoxOptions = {
         placeHolder: `${ports.join(', ')}`,
         prompt: 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.',
@@ -30,7 +30,7 @@ export async function promptForPorts(ports: Number[]): Promise<Number[]> {
     return splitPorts(await ext.ui.showInputBox(opt));
 }
 
-function splitPorts(value: string): Number[] | undefined {
+function splitPorts(value: string): number[] | undefined {
     value = value ? value : '';
     let matches = value.match(/\d+/g);
 

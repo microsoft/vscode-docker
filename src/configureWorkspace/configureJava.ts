@@ -12,7 +12,7 @@ export let configureJava: IPlatformGeneratorInfo = {
   defaultPorts: [3000]
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
   let exposeStatements = getExposeStatements(ports);
   const artifact = artifactName ? artifactName : `${serviceNameAndRelativePath}.jar`;
 
@@ -29,7 +29,7 @@ ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceNameAndRelativePath}.jar
 `;
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[]): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
   return `version: '2.1'
 
 services:
@@ -39,7 +39,7 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: Number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
   return `version: '2.1'
 
 services:

@@ -59,14 +59,14 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
-    defaultPorts: Number[] | undefined // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
+    defaultPorts: number[] | undefined // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
 }
 
-export function getExposeStatements(ports: Number[]): string {
+export function getExposeStatements(ports: number[]): string {
     return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
 }
 
-export function getComposePorts(ports: Number[]): string {
+export function getComposePorts(ports: number[]): string {
     return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
 }
 
@@ -81,7 +81,7 @@ generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('Other', configureOther);
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[] | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[] | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find dockerfile generator functions for "${platform}"`);
     if (generators.genDockerFile) {
@@ -96,7 +96,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[]): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[]): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker compose file generator function for "${platform}"`);
     if (generators.genDockerCompose) {
@@ -104,7 +104,7 @@ function genDockerCompose(serviceNameAndRelativePath: string, platform: Platform
     }
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[], packageInfo: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageInfo: Partial<PackageInfo>): string {
     let generators = generatorsByPlatform.get(platform);
     assert(generators, `Could not find docker debug compose file generator function for "${platform}"`);
     if (generators.genDockerComposeDebug) {
@@ -112,7 +112,7 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
     }
 }
 
-function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: Number[]): string {
+function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: number[]): string {
     return `node_modules
 npm-debug.log
 Dockerfile*
@@ -264,7 +264,7 @@ async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
     }
 }
 
-type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: Number[], packageJson?: Partial<PackageInfo>) => string;
+type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -304,7 +304,7 @@ export interface ConfigureApiOptions {
     /**
      * Ports to expose
      */
-    ports?: Number[];
+    ports?: number[];
 
     /**
      * The OS for the images. Currently only needed for .NET platforms.
@@ -362,7 +362,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     }
     properties.configureOs = os;
 
-    let ports: Number[] | undefined = options.ports;
+    let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
         ports = await promptForPorts(generatorInfo.defaultPorts);
     }

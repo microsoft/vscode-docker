@@ -166,7 +166,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: Number[], { version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], { version, artifactName }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
