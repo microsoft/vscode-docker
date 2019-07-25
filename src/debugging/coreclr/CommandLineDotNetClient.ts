@@ -79,11 +79,6 @@ export class CommandLineDotNetClient implements DotNetClient {
         const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
         await this.processProvider.exec(userSecretsPasswordCommand, {});
 
-        // This is not honored due to https://github.com/aspnet/AspNetCore.Docs/issues/6199#issuecomment-418194220
-        // Consequently, the certificate name must be equal to <binaryName>.pfx, i.e. MyWebApp.dll => MyWebApp.pfx
-        //const userSecretsPathCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Path "${containerExportPath}"`;
-        //await this.processProvider.exec(userSecretsPathCommand, {});
-
         // Cache the project so we don't do this all over again every F5
         CommandLineDotNetClient._KnownConfiguredProjects.add(projectFile);
     }
