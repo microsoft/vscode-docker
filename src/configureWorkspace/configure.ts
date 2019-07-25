@@ -6,7 +6,6 @@
 import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
-import { EOL as osEOL } from 'os';
 import * as path from "path";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
@@ -64,11 +63,11 @@ export interface IPlatformGeneratorInfo {
 }
 
 export function getExposeStatements(ports: number[]): string {
-    return ports ? ports.map(port => `EXPOSE ${port}`).join(osEOL) : '';
+    return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
 }
 
 export function getComposePorts(ports: number[]): string {
-    return ports && ports.length > 0 ? `    ports:${osEOL}` + ports.map(port => `      - ${port}:${port}`).join(osEOL) : '';
+    return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
 }
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
