@@ -4,7 +4,7 @@
 
 import * as crypto from 'crypto';
 import * as semver from 'semver';
-import { DialogResponses } from 'vscode-azureextensionui';
+import { DialogResponses, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ProcessProvider } from "./ChildProcessProvider";
 import { FileSystemProvider } from "./fsProvider";
@@ -111,22 +111,26 @@ export class CommandLineDotNetClient implements DotNetClient {
         try {
             const checkCommand = `dotnet dev-certs https --check --trust`;
             await this.processProvider.exec(checkCommand, {});
-        } catch {
-            if (this.osProvider.os === 'Windows') {
-                const selection = await ext.ui.showWarningMessage(
-                    "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
-                    { modal: true },
-                    DialogResponses.yes, DialogResponses.no);
+        } catch (err) {
+            const error = parseError(err);
 
-                if (selection === DialogResponses.yes) {
-                    const trustCommand = `dotnet dev-certs https --trust`;
-                    await this.processProvider.exec(trustCommand, {});
+            if (error.errorType === "6" || error.errorType === "7") { // 6 = certificate not found, 7 = certificate not trusted
+                if (this.osProvider.os === 'Windows') {
+                    const selection = await ext.ui.showWarningMessage(
+                        "The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? A prompt may be shown.",
+                        { modal: true },
+                        DialogResponses.yes, DialogResponses.no);
+
+                    if (selection === DialogResponses.yes) {
+                        const trustCommand = `dotnet dev-certs https --trust`;
+                        await this.processProvider.exec(trustCommand, {});
+                    }
+                } else if (this.osProvider.isMac) {
+                    await ext.ui.showWarningMessage(
+                        "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
+                        { modal: true });
                 }
-            } else if (this.osProvider.isMac) {
-                await ext.ui.showWarningMessage(
-                    "The ASP.NET Core HTTPS development certificate is not trusted. Run `dotnet dev-certs https --trust` to trust the certificate.",
-                    { modal: true });
-            }
+            } else { throw err; }
         }
     }
 
