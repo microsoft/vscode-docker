@@ -2,8 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import * as crypto from 'crypto';
 import * as semver from 'semver';
-import { v4 as uuidv4 } from 'uuid';
 import { DialogResponses } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ProcessProvider } from "./ChildProcessProvider";
@@ -69,7 +69,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         await this.addUserSecretsIfNecessary(projectFile);
         await this.promptAndTrustCertificateIfNecessary();
 
-        const password = uuidv4();
+        const password = this.getRandomHexString(32);
 
         // Export the certificate
         const exportCommand = `dotnet dev-certs https -ep "${hostExportPath}" -p "${password}"`;
@@ -97,7 +97,7 @@ export class CommandLineDotNetClient implements DotNetClient {
 
         const dotNetVer = await this.getVersion();
         if (semver.gte(dotNetVer, '3.0.0')) {
-            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${uuidv4()}`;
+            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${this.getRandomHexString(32)}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
         }
     }
@@ -128,6 +128,11 @@ export class CommandLineDotNetClient implements DotNetClient {
                     { modal: true });
             }
         }
+    }
+
+    private getRandomHexString(length: number): string {
+        const buffer: Buffer = crypto.randomBytes(Math.ceil(length / 2));
+        return buffer.toString('hex').slice(0, length);
     }
 }
 
