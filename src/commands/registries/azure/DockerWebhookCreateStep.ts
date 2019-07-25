@@ -34,20 +34,21 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         let siteClient = new SiteClient(site, context);
         let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
         if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
-            const creatingNewApp: string = `Creating webhook for webapp "${context.newSiteName}"...`;
-            ext.outputChannel.appendLine(creatingNewApp);
-            progress.report({ message: creatingNewApp });
+            const creatingNewWebhook: string = `Creating webhook for web app "${context.newSiteName}"...`;
+            ext.outputChannel.appendLine(creatingNewWebhook);
+            progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(this._treeItem, context, appUri);
             ext.outputChannel.appendLine(`Created webhook '${webhook.name}' with scope '${webhook.scope}', id: '${webhook.id}' and location: '${webhook.location}'`);
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-            const dockerhubPrompt: string = "Copy web app endpoint and browse to dockerhub";
-            let response: string = await vscode.window.showInformationMessage("Please browse to your dockerhub account to set up a CI/CD webhook", dockerhubPrompt);
+            const dockerhubPrompt: string = "Copy & open";
+            const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`;
+            let response: string = await vscode.window.showInformationMessage(`To set up a CI/CD webhook, open the page '${dockerhubUri}' and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt);
             if (response) {
                 vscode.env.clipboard.writeText(appUri);
                 // tslint:disable-next-line: no-floating-promises
-                openExternal(`https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`);
+                openExternal(dockerhubUri);
             }
         }
     }
