@@ -171,40 +171,25 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
     private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS): LaunchRunOptions {
-        const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
-            ? debugConfiguration.dockerRun.containerName
-            : `${appName}-dev`; // CONSIDER: Use unique ID instead?
+        debugConfiguration.dockerRun = debugConfiguration.dockerRun || {};
 
-        const env = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.env;
-        const envFiles = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.envFiles
+        const envFiles = debugConfiguration.dockerRun.envFiles
             ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
             : undefined;
 
-        const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
-            || DockerDebugConfigurationProvider.defaultLabels;
-
-        const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
-        const networkAlias = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.networkAlias;
-        const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
-        const volumes = DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration);
-        const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
-
-        const configureSslCertificate = debugConfiguration && debugConfiguration.configureSslCertificate;
-
         return {
-            containerName,
-            env,
+            containerName: debugConfiguration.dockerRun.containerName || `${appName}-dev`,
+            env: debugConfiguration.dockerRun.env,
             envFiles,
-            extraHosts,
-            labels,
-            network,
-            networkAlias,
+            extraHosts: debugConfiguration.dockerRun.extraHosts,
+            labels: debugConfiguration.dockerRun.labels || DockerDebugConfigurationProvider.defaultLabels,
+            network: debugConfiguration.dockerRun.network,
+            networkAlias: debugConfiguration.dockerRun.networkAlias,
             os,
-            ports,
-            volumes,
-            configureSslCertificate
+            ports: debugConfiguration.dockerRun.ports,
+            volumes: DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration),
+            configureSslCertificate: debugConfiguration.configureSslCertificate
         };
     }
 
