@@ -72,12 +72,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         return [
             {
-                name: 'Docker: Launch .NET Core (Preview)',
+                name: 'Docker: Launch ASP.NET Core (Preview)',
                 type: 'docker-coreclr',
                 request: 'launch',
                 preLaunchTask: 'build',
-                dockerBuild: {
-                },
+                dockerBuild: {},
                 dockerRun: {
                     env: {
                         "ASPNETCORE_ENVIRONMENT": "Development",
@@ -86,6 +85,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     }
                 },
                 configureSslCertificate: true
+            },
+            {
+                name: 'Docker: Launch .NET Core Console (Preview)',
+                type: 'docker-coreclr',
+                request: 'launch',
+                preLaunchTask: 'build',
+                dockerBuild: {},
+                dockerRun: {}
             }
         ];
     }
