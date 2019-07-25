@@ -22,7 +22,7 @@ export interface DotNetClient {
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
-    private static KnownConfiguredProjects: Set<string> = new Set<string>();
+    private static _KnownConfiguredProjects: Set<string> = new Set<string>();
 
     constructor(
         private readonly processProvider: ProcessProvider,
@@ -62,7 +62,7 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     public async trustAndExportSslCertificate(projectFile: string, hostExportPath: string, containerExportPath: string): Promise<void> {
-        if (CommandLineDotNetClient.KnownConfiguredProjects.has(projectFile)) {
+        if (CommandLineDotNetClient._KnownConfiguredProjects.has(projectFile)) {
             return;
         }
 
@@ -85,13 +85,13 @@ export class CommandLineDotNetClient implements DotNetClient {
         //await this.processProvider.exec(userSecretsPathCommand, {});
 
         // Cache the project so we don't do this all over again every F5
-        CommandLineDotNetClient.KnownConfiguredProjects.add(projectFile);
+        CommandLineDotNetClient._KnownConfiguredProjects.add(projectFile);
     }
 
     private async addUserSecretsIfNecessary(projectFile: string): Promise<void> {
         const contents = await this.fsProvider.readFile(projectFile);
 
-        if (contents.indexOf('UserSecretsId') >= 0) {
+        if (/UserSecretsId/i.test(contents)) {
             return;
         }
 
