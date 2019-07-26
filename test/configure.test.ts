@@ -627,11 +627,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
@@ -659,11 +659,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
@@ -696,11 +696,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
@@ -728,11 +728,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
@@ -850,11 +850,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "project1.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "project1.csproj" -c Release -o /app
+                    RUN dotnet publish "project1.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "project1.dll"]
                 `));
         });
@@ -881,11 +881,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet build "project2.csproj" -c Release -o /app
 
                     FROM build AS publish
-                    RUN dotnet publish "project2.csproj" -c Release -o /app
+                    RUN dotnet publish "project2.csproj" -c Release -o /app/publish
 
                     FROM base AS final
                     WORKDIR /app
-                    COPY --from=publish /app .
+                    COPY --from=publish /app/publish .
                     ENTRYPOINT ["dotnet", "project2.dll"]
                 `));
         });
