@@ -51,6 +51,7 @@ export type LaunchResult = {
     program: string;
     programArgs: string[];
     programCwd: string;
+    programEnv: { [key: string]: string };
 };
 
 type LastImageBuildMetadata = {
@@ -193,7 +194,7 @@ export class DefaultDockerManager implements DockerManager {
             ? 'ping'
             : 'tail';
 
-        const volumes = this.getVolumes(debuggerFolder, options);
+        const additionalVolumes = this.getVolumes(debuggerFolder, options);
 
         const containerId = await this.dockerOutputManager.performOperation(
             'Starting container...',
@@ -217,7 +218,7 @@ export class DefaultDockerManager implements DockerManager {
                         network: options.network,
                         networkAlias: options.networkAlias,
                         ports: options.ports,
-                        volumes: [...(volumes || []), ...(options.volumes || [])]
+                        volumes: [...(additionalVolumes || []), ...(options.volumes || [])]
                     });
             },
             id => `Container ${this.dockerClient.trimId(id)} started.`,
@@ -262,7 +263,8 @@ export class DefaultDockerManager implements DockerManager {
             pipeProgram: 'docker',
             program: 'dotnet',
             programArgs: [additionalProbingPathsArgs, containerAppOutput],
-            programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app'
+            programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app',
+            programEnv: {}
         };
     }
 

@@ -9,24 +9,45 @@ import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
 
 /**
- * Prompts for a port number
+ * Prompts for port numbers
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function promptForPort(port: string): Promise<string> {
+export async function promptForPorts(ports: number[]): Promise<number[]> {
     let opt: vscode.InputBoxOptions = {
-        placeHolder: `${port}`,
-        prompt: 'What port does your app listen on? ENTER for none.',
-        value: `${port}`,
+        placeHolder: `${ports.join(', ')}`,
+        prompt: 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.',
+        value: `${ports.join(', ')}`,
         validateInput: (value: string): string | undefined => {
-            if (value && (!Number.isInteger(Number(value)) || Number(value) <= 0)) {
-                return 'Port must be a positive integer or else empty for no exposed port';
+            let result = splitPorts(value);
+            if (!result) {
+                return 'Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.';
             }
 
             return undefined;
         }
     }
 
-    return ext.ui.showInputBox(opt);
+    return splitPorts(await ext.ui.showInputBox(opt));
+}
+
+function splitPorts(value: string): number[] | undefined {
+    value = value ? value : '';
+    let matches = value.match(/\d+/g);
+
+    if (!matches && value !== '') {
+        return undefined;
+    } else if (!matches) {
+        return []; // Empty list
+    }
+
+    let ports = matches.map(Number);
+
+    // If anything is non-integral or less than 1 or greater than 65535, it's not valid
+    if (ports.some(p => !Number.isInteger(p) || p < 1 || p > 65535)) {
+        return undefined;
+    }
+
+    return ports;
 }
 
 /**

@@ -13,6 +13,7 @@ export interface OSProvider {
     tmpdir: string;
     pathJoin(os: PlatformOS, ...paths: string[]): string;
     pathNormalize(os: PlatformOS, rawPath: string): string;
+    pathParse(os: PlatformOS, rawPath: string): path.ParsedPath;
 }
 
 export class LocalOSProvider implements OSProvider {
@@ -40,6 +41,10 @@ export class LocalOSProvider implements OSProvider {
         return rawPath.replace(
             pathOS === 'Windows' ? /\//g : /\\/g,
             pathOS === 'Windows' ? '\\' : '/');
+    }
+
+    public pathParse(pathOS: PlatformOS, rawPath: string): path.ParsedPath {
+        return pathOS === 'Windows' ? path.win32.parse(rawPath) : path.posix.parse(rawPath);
     }
 }
 
