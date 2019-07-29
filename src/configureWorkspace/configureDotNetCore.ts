@@ -80,7 +80,7 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
@@ -102,7 +102,7 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
@@ -131,7 +131,7 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
@@ -153,7 +153,7 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "$project_file_name$" -c Release -o /app/publish

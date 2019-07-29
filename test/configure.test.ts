@@ -624,7 +624,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
                     COPY . .
                     WORKDIR "/src/ConsoleApp1Folder"
-                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
@@ -656,7 +656,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "ConsoleApp1Folder/ConsoleApp1.csproj"
                     COPY . .
                     WORKDIR "/src/ConsoleApp1Folder"
-                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
@@ -693,7 +693,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "subfolder/projectFolder/ConsoleApp1.csproj"
                     COPY . .
                     WORKDIR "/src/subfolder/projectFolder"
-                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
@@ -725,7 +725,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "subfolder/projectFolder/ConsoleApp1.csproj"
                     COPY . .
                     WORKDIR "/src/subfolder/projectFolder"
-                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app
+                    RUN dotnet build "ConsoleApp1.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "ConsoleApp1.csproj" -c Release -o /app/publish
@@ -847,7 +847,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "AspNetApp1/project1.csproj"
                     COPY . .
                     WORKDIR "/src/AspNetApp1"
-                    RUN dotnet build "project1.csproj" -c Release -o /app
+                    RUN dotnet build "project1.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "project1.csproj" -c Release -o /app/publish
@@ -878,7 +878,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     RUN dotnet restore "project2/project2.csproj"
                     COPY . .
                     WORKDIR "/src/project2"
-                    RUN dotnet build "project2.csproj" -c Release -o /app
+                    RUN dotnet build "project2.csproj" -c Release -o /app/build
 
                     FROM build AS publish
                     RUN dotnet publish "project2.csproj" -c Release -o /app/publish
