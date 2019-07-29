@@ -80,14 +80,14 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
@@ -102,14 +102,14 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
@@ -131,14 +131,14 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
@@ -153,14 +153,14 @@ $copy_project_commands$
 RUN dotnet restore "$container_project_directory$/$project_file_name$"
 COPY . .
 WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app
+RUN dotnet build "$project_file_name$" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app
+RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
