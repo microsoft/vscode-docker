@@ -11,11 +11,11 @@ import { Context, Suite } from 'mocha';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { commands, Uri } from 'vscode';
-import { IActionContext, TestUserInput } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { configure, ext, httpsRequestBinary, Platform } from '../extension.bundle';
 import * as assertEx from './assertEx';
 import { shouldSkipDockerTest } from './dockerInfo';
-import { getTestRootFolder, testInEmptyFolder } from './global.test';
+import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
 import { TestTerminalProvider } from './TestTerminalProvider';
 
 let testRootFolder: string = getTestRootFolder();
@@ -73,7 +73,6 @@ suite("Build Image", function (this: Suite): void {
     ): Promise<void> {
         // Set up simulated user input
         configureInputs.unshift(platform);
-        ext.ui = new TestUserInput(configureInputs);
         let testTerminalProvider = new TestTerminalProvider();
         ext.terminalProvider = testTerminalProvider;
 
@@ -82,14 +81,15 @@ suite("Build Image", function (this: Suite): void {
             errorHandling: {}
         };
 
-        await configure(context, testRootFolder);
-        assert.equal(configureInputs.length, 0, 'Not all inputs were used for configure docker files');
+        await testUserInput.runWithInputs(configureInputs, async () => {
+            await configure(context, testRootFolder);
+        });
 
         // Build image
-        ext.ui = new TestUserInput(buildInputs);
         let dockerFile = Uri.file(path.join(testRootFolder, 'Dockerfile'));
-        await commands.executeCommand('vscode-docker.images.build', dockerFile);
-        assert.equal(configureInputs.length, 0, 'Not all inputs were used for Build Image');
+        await testUserInput.runWithInputs(buildInputs, async () => {
+            await commands.executeCommand('vscode-docker.images.build', dockerFile);
+        });
 
         let { outputText, errorText } = await testTerminalProvider.currentTerminal!.exit();
 
