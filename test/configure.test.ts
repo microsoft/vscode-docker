@@ -1236,8 +1236,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     image: testoutput
                     build: .
                     ports:
-                      - 3000:3000
-                `));
+                      - 3000:3000`));
             assert.strictEqual(debugComposeContents, removeIndentation(`
                 version: '2.1'
 
@@ -1248,8 +1247,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                       context: .
                       dockerfile: Dockerfile
                     ports:
-                      - 3000:3000
-                `));
+                      - 3000:3000`));
         });
     });
 
@@ -1263,7 +1261,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                         rootPath: testRootFolder,
                         outputFolder: testRootFolder,
                         platform: 'Ruby',
-                        port: '234'
+                        ports: [234]
                     }
                 );
             });
@@ -1307,7 +1305,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     {
                         rootPath: testRootFolder,
                         outputFolder: testRootFolder,
-                        port: "444"
+                        ports: [444]
                     },
                     ["Ruby"],
                     ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
@@ -1333,7 +1331,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             rootPath: path.join(testRootFolder, 'serviceFolder'),
                             outputFolder: path.join(testRootFolder, 'serviceFolder'),
                             os: "Linux",
-                            port: "1234"
+                            ports: [1234]
                         },
                         ['.NET Core Console'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/somefile1.cs', 'serviceFolder/aspnetapp.csproj']
@@ -1352,7 +1350,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             rootPath: path.join(testRootFolder, 'serviceFolder'),
                             outputFolder: path.join(testRootFolder, 'serviceFolder'),
                             os: "Windows",
-                            port: "1234"
+                            ports: [1234]
                         },
                         ['.NET Core Console'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
@@ -1370,7 +1368,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             rootPath: path.join(testRootFolder, 'serviceFolder'),
                             outputFolder: path.join(testRootFolder, 'serviceFolder', 'subfolder1'),
                             os: "Windows",
-                            port: "1234"
+                            ports: [1234, 5678]
                         },
                         ['ASP.NET Core'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );

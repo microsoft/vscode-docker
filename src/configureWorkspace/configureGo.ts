@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureGo: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPort: '3000'
+  defaultPorts: [3000]
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(port);
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+  let exposeStatements = getExposeStatements(ports);
 
   return `
 #build stage
@@ -34,18 +34,17 @@ ${exposeStatements}
 `;
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
   return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:
     image: ${serviceNameAndRelativePath}
     build: .
-    ports:
-      - ${port}:${port}`;
+${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
   return `version: '2.1'
 
 services:
@@ -54,7 +53,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-        - ${port}:${port}
-`;
+${getComposePorts(ports)}`;
 }

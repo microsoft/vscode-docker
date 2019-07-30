@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureNode: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPort: '3000'
+  defaultPorts: [3000]
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(port);
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+  let exposeStatements = getExposeStatements(ports);
 
   return `FROM node:10.13-alpine
 ENV NODE_ENV production
@@ -25,7 +25,7 @@ ${exposeStatements}
 CMD ${cmd}`;
 }
 
-function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string): string {
+function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
   return `version: '2.1'
 
 services:
@@ -34,11 +34,10 @@ services:
     build: .
     environment:
       NODE_ENV: production
-    ports:
-      - ${port}:${port}`;
+${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, port: string, { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
 
   const cmdArray: string[] = cmd.split(' ');
   if (cmdArray[0].toLowerCase() === 'node') {
@@ -56,8 +55,6 @@ services:
     build: .
     environment:
       NODE_ENV: development
-    ports:
-      - ${port}:${port}
-      - 9229:9229
+${getComposePorts(ports.concat(9229))}
     ${cmd}`;
 }

@@ -17,14 +17,14 @@ export const configureAspDotNetCore: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
     genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPort: '80'
+    defaultPorts: [80, 443]
 };
 
 export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
     genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPort: undefined
+    defaultPorts: undefined
 };
 
 // .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
@@ -166,7 +166,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 //#endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, port: string, { version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], { version, artifactName }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -181,7 +181,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
-    let exposeStatements = getExposeStatements(port);
+    let exposeStatements = getExposeStatements(ports);
 
     // Parse version from TargetFramework
     // Example: netcoreapp1.0
