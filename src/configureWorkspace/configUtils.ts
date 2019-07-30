@@ -16,7 +16,7 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
     let opt: vscode.InputBoxOptions = {
         placeHolder: `${ports.join(', ')}`,
         prompt: 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.',
-        value: `${ports.join(', ')}`,
+        value: ports.join(', '),
         validateInput: (value: string): string | undefined => {
             let result = splitPorts(value);
             if (!result) {
