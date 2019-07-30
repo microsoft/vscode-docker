@@ -60,6 +60,15 @@ type LastImageBuildMetadata = {
     options: DockerBuildImageOptions;
 };
 
+interface IHostPort {
+    HostIp: string,
+    HostPort: string,
+}
+
+interface IPortMappings {
+    [key: string]: IHostPort[];
+}
+
 export interface DockerManager {
     buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
     runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string>;
@@ -307,13 +316,19 @@ export class DefaultDockerManager implements DockerManager {
     }
 
     private async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {
-        const webPorts = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{(index (index .NetworkSettings.Ports \\\"80/tcp\\\") 0).HostPort}}' });
+        let portMappingsString = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
+        let portMappings = <IPortMappings>JSON.parse(portMappingsString);
 
-        if (webPorts) {
-            const webPort = webPorts.split('\n')[0];
+        if (portMappings) {
+            let httpsPort = portMappings["443/tcp"] && portMappings["443/tcp"][0] && portMappings["443/tcp"][0].HostPort || null;
+            let httpPort = portMappings["80/tcp"] && portMappings["80/tcp"][0] && portMappings["80/tcp"][0].HostPort || null;
 
-            // tslint:disable-next-line:no-http-string
-            return `http://localhost:${webPort}`;
+            if (httpsPort) {
+                return `https://localhost:${httpsPort}`;
+            } else if (httpPort) {
+                // tslint:disable-next-line:no-http-string
+                return `http://localhost:${httpPort}`;
+            }
         }
 
         return undefined;
