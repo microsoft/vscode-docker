@@ -4,7 +4,7 @@
 
 import deepEqual = require('deep-equal');
 import * as path from 'path';
-import { Memento, Uri } from 'vscode';
+import { Memento } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
@@ -247,7 +247,7 @@ export class DefaultDockerManager implements DockerManager {
             const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
             const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
             await this.aspNetCoreSslManager.trustCertificateIfNecessary();
-            await this.aspNetCoreSslManager.exportCertificateIfNecessary(Uri.file(options.appProject), certificateExportPath);
+            await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
         }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });

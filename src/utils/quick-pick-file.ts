@@ -12,6 +12,8 @@ import { ext } from '../extensionVariables';
 export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
     relativeFolderPath: string;
+    absoluteFilePath: string;
+    absoluteFolderPath: string;
 }
 
 async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string): Promise<vscode.Uri[]> {
@@ -25,7 +27,9 @@ function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): It
         description: undefined,
         relativeFilePath: relativeFilePath,
         label: relativeFilePath,
-        relativeFolderPath: path.dirname(relativeFilePath)
+        relativeFolderPath: path.dirname(relativeFilePath),
+        absoluteFilePath: uri.fsPath,
+        absoluteFolderPath: rootFolder.uri.fsPath,
     };
 }
 
