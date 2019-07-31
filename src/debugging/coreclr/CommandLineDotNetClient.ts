@@ -17,7 +17,7 @@ export type MSBuildExecOptions = {
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
-    isCertificateTrusted(): Promise<boolean>;
+    isCertificateTrusted(): Promise<boolean | undefined>;
     exportCertificate(projectFile: string, certificateExportPath: string): Promise<void>;
 }
 

@@ -51,6 +51,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
 
         const config: WorkspaceConfiguration = workspace.getConfiguration('docker');
         if (!config.get<boolean>('promptToTrustAspNetCoreCertificate')) {
+            LocalAspNetCoreSslManager._CertificateTrustedOrSkipped = true;
             return;
         }
 
