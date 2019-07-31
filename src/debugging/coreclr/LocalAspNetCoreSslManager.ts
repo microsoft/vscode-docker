@@ -4,10 +4,12 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { ConfigurationTarget, MessageItem, workspace, WorkspaceConfiguration } from 'vscode';
+import { ConfigurationTarget, MessageItem, Uri, workspace, WorkspaceConfiguration } from 'vscode';
 import { DialogResponses } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { PlatformOS } from '../../utils/platform';
+import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DotNetClient } from './CommandLineDotNetClient';
 import { OSProvider } from './LocalOSProvider';
@@ -25,7 +27,7 @@ export type ContainerSecretsFolders = {
 
 export interface AspNetCoreSslManager {
     trustCertificateIfNecessary(): Promise<void>;
-    exportCertificateIfNecessary(projectFile: string | undefined, certificateExportPath: string | undefined): Promise<void>;
+    exportCertificateIfNecessary(projectFile: Uri | undefined, certificateExportPath: string | undefined): Promise<void>;
     getHostSecretsFolders(): HostSecretsFolders;
     getContainerSecretsFolders(platform: PlatformOS): ContainerSecretsFolders;
 }
@@ -93,17 +95,18 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         LocalAspNetCoreSslManager._CertificateTrustedOrSkipped = true;
     }
 
-    public async exportCertificateIfNecessary(projectFile: string | undefined, certificateExportPath: string | undefined): Promise<void> {
-        projectFile = projectFile || await this.pickProjectFile();
+    public async exportCertificateIfNecessary(projectFile: Uri | undefined, certificateExportPath: string | undefined): Promise<void> {
+        const workspaceFolder = await quickPickWorkspaceFolder("To configure SSL for an ASP.NET Core project you must first open a folder or workspace in VSCode.");
+        const projectItem = await quickPickProjectFileItem(projectFile, workspaceFolder, "No project files were found.");
 
-        if (LocalAspNetCoreSslManager._KnownConfiguredProjects.has(projectFile)) {
+        if (LocalAspNetCoreSslManager._KnownConfiguredProjects.has(projectItem.relativeFilePath)) {
             return;
         }
 
-        certificateExportPath = certificateExportPath || await this.netCoreProjectProvider.getTargetPath(projectFile);
+        certificateExportPath = certificateExportPath || await this.netCoreProjectProvider.getTargetPath(projectItem.relativeFilePath);
 
-        await this.dotNetClient.exportCertificate(projectFile, certificateExportPath);
-        LocalAspNetCoreSslManager._KnownConfiguredProjects.add(projectFile)
+        await this.dotNetClient.exportCertificate(projectItem.relativeFilePath, certificateExportPath);
+        LocalAspNetCoreSslManager._KnownConfiguredProjects.add(projectItem.relativeFilePath)
     }
 
     public getHostSecretsFolders(): HostSecretsFolders {
@@ -136,11 +139,6 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
                 'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' :
                 '/root/.microsoft/usersecrets',
         };
-    }
-
-    private async pickProjectFile(): Promise<string> {
-        // TODO
-        return '';
     }
 }
 

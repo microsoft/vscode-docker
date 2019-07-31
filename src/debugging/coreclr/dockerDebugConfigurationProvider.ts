@@ -305,29 +305,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return debugConfiguration.configureSslCertificate;
         }
 
+        // TODO: infer from launchSettings.json?
         return false;
-
-        // TODO: launchSettings.json uses a BOM which chokes JSON.parse
-        // TODO: launchSettings.json uses a dictionary instead of array of profiles, complicating finding the one that is commandName === 'Project'
-
-        /*
-
-        const launchSettingsPath = path.join(path.dirname(projectFile), 'Properties', 'launchSettings.json');
-        const launchSettingsString = await this.fsProvider.readFile(launchSettingsPath);
-        const launchSettings = JSON.parse(launchSettingsString);
-
-        //tslint:disable:no-unsafe-any
-        if (launchSettings && launchSettings.profiles instanceof Array) {
-            const projectProfile = launchSettings.profiles.find(p => p.commandName === 'Project');
-
-            if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
-                return true;
-            }
-        }
-        //tslint:enable:no-unsafe-any
-
-        return false;
-        */
     }
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {

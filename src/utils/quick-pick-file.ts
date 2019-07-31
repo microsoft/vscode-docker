@@ -6,7 +6,7 @@
 import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, YAML_GLOB_PATTERN } from "../constants";
+import { CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
 import { ext } from '../extensionVariables';
 
 export interface Item extends vscode.QuickPickItem {
@@ -96,6 +96,14 @@ export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vsc
     const fileItem: Item = await resolveFileItem(rootFolder, fileUri, [YAML_GLOB_PATTERN], 'Choose a .yaml file to run.');
     if (!fileItem) {
         throw new Error(noYamlFileMessage);
+    }
+    return fileItem;
+}
+
+export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
+    const fileItem: Item = await resolveFileItem(rootFolder, fileUri, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN], 'Choose a project file.');
+    if (!fileItem) {
+        throw new Error(noProjectFileMessage);
     }
     return fileItem;
 }
