@@ -38,13 +38,13 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             ext.outputChannel.appendLine(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(this._treeItem, context, appUri);
-            ext.outputChannel.appendLine(`Created webhook '${webhook.name}' with scope '${webhook.scope}', id: '${webhook.id}' and location: '${webhook.location}'`);
+            ext.outputChannel.appendLine(`Created webhook "${webhook.name}" with scope "${webhook.scope}", id: "${webhook.id}" and location: "${webhook.location}"`);
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
             const dockerhubPrompt: string = "Copy & open";
             const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`;
-            let response: string = await vscode.window.showInformationMessage(`To set up a CI/CD webhook, open the page '${dockerhubUri}' and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt);
+            let response: string = await vscode.window.showInformationMessage(`To set up a CI/CD webhook, open the page "${dockerhubUri}" and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt);
             if (response) {
                 vscode.env.clipboard.writeText(appUri);
                 // tslint:disable-next-line: no-floating-promises
