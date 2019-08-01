@@ -43,6 +43,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 label: 'Connect Registry...',
                 contextValue: 'connectRegistry',
                 iconPath: getThemedIconPath('connect'),
+                includeInTreeItemPicker: true,
                 commandId: 'vscode-docker.registries.connectRegistry'
             })];
         } else {
