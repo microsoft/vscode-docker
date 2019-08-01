@@ -9,7 +9,7 @@ import { Site } from 'azure-arm-website/lib/models';
 import { Progress } from "vscode";
 import * as vscode from "vscode";
 import { IAppServiceWizardContext, SiteClient } from "vscode-azureappservice";
-import { AzureWizardExecuteStep, createAzureClient, IActionContext } from "vscode-azureextensionui";
+import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
@@ -37,12 +37,12 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             const creatingNewWebhook: string = `Creating webhook for web app "${context.newSiteName}"...`;
             ext.outputChannel.appendLine(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
-            const webhook = await this.createWebhookForApp(this._treeItem, context, appUri);
+            const webhook = await this.createWebhookForApp(this._treeItem, context.site, appUri);
             ext.outputChannel.appendLine(`Created webhook "${webhook.name}" with scope "${webhook.scope}", id: "${webhook.id}" and location: "${webhook.location}"`);
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-            const dockerhubPrompt: string = "Copy & open";
+            const dockerhubPrompt: string = "Copy & Open";
             const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`;
             let response: string = await vscode.window.showInformationMessage(`To set up a CI/CD webhook, open the page "${dockerhubUri}" and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt);
             if (response) {
@@ -57,9 +57,9 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         return !!context.site && (this._treeItem.parent instanceof AzureRepositoryTreeItem || this._treeItem.parent instanceof DockerHubRepositoryTreeItem);
     }
 
-    private async createWebhookForApp(node: RemoteTagTreeItem, wizardContext: IActionContext & Partial<IAppServiceWizardContext>, appUri: string): Promise<Webhook | undefined> {
+    private async createWebhookForApp(node: RemoteTagTreeItem, site: Site, appUri: string): Promise<Webhook | undefined> {
         // fields derived from the app service wizard
-        let siteName: string = wizardContext.site.name;
+        let siteName: string = site.name;
         let baseName = `webapp${siteName}`;
         let webhookName: string = baseName;
         // variables derived from the container registry
