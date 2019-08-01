@@ -2,10 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as os from 'os';
 import * as path from 'path';
-import { ConfigurationTarget, MessageItem, workspace, WorkspaceConfiguration } from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
+import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
@@ -49,12 +47,6 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             return;
         }
 
-        const config: WorkspaceConfiguration = workspace.getConfiguration('docker');
-        if (!config.get<boolean>('promptToTrustAspNetCoreCertificate')) {
-            LocalAspNetCoreSslManager._CertificateTrustedOrSkipped = true;
-            return;
-        }
-
         const trusted: boolean | undefined = await this.dotNetClient.isCertificateTrusted();
 
         if (trusted === undefined || trusted) {
@@ -62,35 +54,23 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             return;
         }
 
+        const isWindows: boolean = this.osProvider.os === 'Windows';
+
         const trust: MessageItem = { title: 'Trust' };
-        const prompt = this.osProvider.os === 'Windows' ? 'A prompt may be shown.' : 'You may be prompted for your login password.';
-        const message = `The ASP.NET Core HTTPS development certificate is not trusted. Would you like to trust the certificate? ${prompt}`;
+        let message = 'The ASP.NET Core HTTPS development certificate is not trusted. Your browser may show warnings about the site when opened. To trust the certificate, run \`dotnet dev-certs https --trust\`.';
+        if (isWindows) {
+            message += ' Click "Trust" to run this command automatically. You may be prompted to trust the certificate.';
+        }
 
         const selection = await ext.ui.showWarningMessage(
             message,
-            { modal: true, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
-            trust, DialogResponses.skipForNow, DialogResponses.dontWarnAgain);
+            { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
+            isWindows ? trust : undefined);
 
-        if (selection === trust) {
-            const trustCommand = `${this.osProvider.os === 'Windows' ? '' : 'sudo -S '}dotnet dev-certs https --trust`;
-            let attempts = 0;
-
-            await this.processProvider.exec(trustCommand, {
-                progress: async (output, process) => {
-                    if (this.osProvider.os === 'Windows') {
-                        return;
-                    }
-
-                    if (/Password:/i.test(output)) {
-                        const passwordPrompt = attempts++ < 1 ? 'Please enter your login password.' : 'Sorry, please enter your login password again.';
-                        const password = await ext.ui.showInputBox({ prompt: passwordPrompt, password: true });
-                        process.stdin.write(password);
-                        process.stdin.write(os.EOL);
-                    }
-                }
-            });
-        } else if (selection === DialogResponses.dontWarnAgain) {
-            await config.update('promptToTrustAspNetCoreCertificate', false, ConfigurationTarget.Global);
+        if (isWindows && selection === trust) {
+            const trustCommand = `dotnet dev-certs https --trust`;
+            await this.processProvider.exec(trustCommand, {});
+            LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
         }
 
         LocalAspNetCoreSslManager._CertificateTrustedOrSkipped = true;

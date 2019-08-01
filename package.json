@@ -1113,11 +1113,6 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Run docker-compose with the --d (detached) argument, defaults to true"
-                },
-                "docker.promptToTrustAspNetCoreCertificate": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Prompt to trust the ASP.NET Core HTTPS development certificate, if necessary"
                 }
             }
         },
