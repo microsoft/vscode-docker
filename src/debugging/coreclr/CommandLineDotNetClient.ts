@@ -97,8 +97,24 @@ export class CommandLineDotNetClient implements DotNetClient {
 
         const dotNetVer = await this.getVersion();
         if (semver.gte(dotNetVer, '3.0.0')) {
+            // The dotnet 3.0 CLI has `dotnet user-secrets init`, let's use that if possible
             const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${this.getRandomHexString(32)}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
+        } else {
+            // Otherwise try to manually edit the project file by adding a property group immediately after the <Project> tag
+            // Allowing for leading and trailing whitespace, as well as XML attributes, this regex matches the <Project> tag as long as it is alone on its line
+            const projectTagRegex = /^[ \t]*<Project.*>[ \t]*$/im;
+
+            const matches = contents.match(projectTagRegex);
+            if (matches && matches[0]) {
+                // If found, add the new property group immediately after
+                const propertyGroup = `
+  <PropertyGroup>
+    <UserSecretsId>${this.getRandomHexString(32)}</UserSecretsId>
+  </PropertyGroup>`;
+                const newContents = contents.replace(matches[0], matches[0] + propertyGroup);
+                await this.fsProvider.writeFile(projectFile, newContents);
+            }
         }
     }
 
