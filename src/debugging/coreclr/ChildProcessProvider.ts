@@ -5,7 +5,7 @@
 import * as cp from 'child_process';
 import * as process from 'process';
 
-export type ProcessProviderExecOptions = cp.ExecOptions & { progress?(content: string): void };
+export type ProcessProviderExecOptions = cp.ExecOptions & { progress?(content: string, process: cp.ChildProcess): void };
 
 export interface ProcessProvider {
     env: { [key: string]: string | undefined };
@@ -41,8 +41,8 @@ export class ChildProcessProvider implements ProcessProvider {
                 if (options.progress) {
                     const progress = options.progress;
 
-                    p.stderr.on('data', (chunk: Buffer) => progress(chunk.toString()));
-                    p.stdout.on('data', (chunk: Buffer) => progress(chunk.toString()));
+                    p.stderr.on('data', (chunk: Buffer) => progress(chunk.toString(), p));
+                    p.stdout.on('data', (chunk: Buffer) => progress(chunk.toString(), p));
                 }
             });
     }

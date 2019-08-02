@@ -54,6 +54,7 @@ interface DockerDebugConfiguration extends DebugConfiguration {
     appProject?: string;
     dockerBuild?: DockerDebugBuildOptions;
     dockerRun?: DockerDebugRunOptions;
+    configureAspNetCoreSsl?: boolean;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -75,10 +76,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 type: 'docker-coreclr',
                 request: 'launch',
                 preLaunchTask: 'build',
-                dockerBuild: {
-                },
-                dockerRun: {
-                }
+                dockerBuild: {},
+                dockerRun: {}
             }
         ];
     }
@@ -109,13 +108,15 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             : 'Linux';
 
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
+        const ssl = await this.inferSsl(debugConfiguration, resolvedAppProject);
 
         const buildOptions = await this.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
-        const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os);
+        const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os, ssl);
 
         const launchOptions = {
             appFolder: resolvedAppFolder,
-            appOutput,
+            appOutput: appOutput,
+            appProject: resolvedAppProject,
             build: buildOptions,
             run: runOptions
         };
@@ -163,36 +164,32 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
-    private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS): LaunchRunOptions {
-        const containerName = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.containerName
-            ? debugConfiguration.dockerRun.containerName
-            : `${appName}-dev`; // CONSIDER: Use unique ID instead?
+    private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS, ssl: boolean): LaunchRunOptions {
+        debugConfiguration.dockerRun = debugConfiguration.dockerRun || {};
 
-        const env = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.env;
-        const envFiles = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.envFiles
+        const envFiles = debugConfiguration.dockerRun.envFiles
             ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
             : undefined;
 
-        const labels = (debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.labels)
-            || DockerDebugConfigurationProvider.defaultLabels;
-
-        const network = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.network;
-        const networkAlias = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.networkAlias;
-        const ports = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.ports;
-        const volumes = DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration);
-        const extraHosts = debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.extraHosts;
+        if (ssl) {
+            debugConfiguration.dockerRun.env = debugConfiguration.dockerRun.env || {};
+            debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT = debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT || 'Development';
+            //tslint:disable-next-line:no-http-string
+            debugConfiguration.dockerRun.env.ASPNETCORE_URLS = debugConfiguration.dockerRun.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
+        }
 
         return {
-            containerName,
-            env,
+            containerName: debugConfiguration.dockerRun.containerName || `${appName}-dev`,
+            env: debugConfiguration.dockerRun.env,
             envFiles,
-            extraHosts,
-            labels,
-            network,
-            networkAlias,
+            extraHosts: debugConfiguration.dockerRun.extraHosts,
+            labels: debugConfiguration.dockerRun.labels || DockerDebugConfigurationProvider.defaultLabels,
+            network: debugConfiguration.dockerRun.network,
+            networkAlias: debugConfiguration.dockerRun.networkAlias,
             os,
-            ports,
-            volumes
+            ports: debugConfiguration.dockerRun.ports,
+            volumes: DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration),
+            configureAspNetCoreSsl: ssl
         };
     }
 
@@ -301,6 +298,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
 
         return dockerfile;
+    }
+
+    private async inferSsl(debugConfiguration: DockerDebugConfiguration, projectFile: string): Promise<boolean> {
+        if (debugConfiguration.configureAspNetCoreSsl !== undefined) {
+            return debugConfiguration.configureAspNetCoreSsl;
+        }
+
+        return false;
     }
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {

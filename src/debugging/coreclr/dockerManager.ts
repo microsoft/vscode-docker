@@ -11,7 +11,8 @@ import { ProcessProvider } from './ChildProcessProvider';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./CliDockerClient";
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
-import Lazy from './lazy';
+import { Lazy } from './lazy';
+import { AspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';
 
@@ -28,6 +29,7 @@ export type DockerManagerRunContainerOptions
     & {
         appFolder: string;
         os: PlatformOS;
+        configureAspNetCoreSsl: boolean;
     };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -38,6 +40,7 @@ export type LaunchRunOptions = Omit<DockerManagerRunContainerOptions, 'appFolder
 export type LaunchOptions = {
     appFolder: string;
     appOutput: string;
+    appProject: string;
     build: LaunchBuildOptions;
     run: LaunchRunOptions;
 };
@@ -127,6 +130,7 @@ export class DefaultDockerManager implements DockerManager {
         private readonly appCacheFactory: AppStorageProvider,
         private readonly debuggerClient: DebuggerClient,
         private readonly dockerClient: DockerClient,
+        private readonly aspNetCoreSslManager: AspNetCoreSslManager,
         private readonly dockerOutputManager: OutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
@@ -238,6 +242,13 @@ export class DefaultDockerManager implements DockerManager {
 
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
+
+        if (options.run.configureAspNetCoreSsl) {
+            const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
+            const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
+            await this.aspNetCoreSslManager.trustCertificateIfNecessary();
+            await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
+        }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
 
@@ -374,12 +385,32 @@ export class DefaultDockerManager implements DockerManager {
             permissions: 'ro'
         };
 
-        const volumes: DockerContainerVolume[] = [
+        let volumes: DockerContainerVolume[] = [
             appVolume,
             debuggerVolume,
             nugetVolume,
-            nugetFallbackVolume
+            nugetFallbackVolume,
         ];
+
+        if (options.configureAspNetCoreSsl) {
+            const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
+            const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(options.os);
+
+            const certVolume: DockerContainerVolume = {
+                localPath: hostSecretsFolders.certificateFolder,
+                containerPath: containerSecretsFolders.certificateFolder,
+                permissions: 'ro'
+            };
+
+            const userSecretsVolume: DockerContainerVolume = {
+                localPath: hostSecretsFolders.userSecretsFolder,
+                containerPath: containerSecretsFolders.userSecretsFolder,
+                permissions: 'ro'
+            };
+
+            volumes.push(certVolume);
+            volumes.push(userSecretsVolume);
+        }
 
         return volumes;
     }

@@ -659,6 +659,11 @@
                                         }
                                     }
                                 }
+                            },
+                            "configureAspNetCoreSsl": {
+                                "type": "boolean",
+                                "default": true,
+                                "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
                             }
                         }
                     }
