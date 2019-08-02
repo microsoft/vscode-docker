@@ -310,12 +310,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (await this.fsProvider.fileExists(launchSettingsPath)) {
             let launchSettingsString = await this.fsProvider.readFile(launchSettingsPath);
             if (launchSettingsString.charCodeAt(0) === 0xFEFF) {
+                // Remove byte order mark if needed
                 launchSettingsString = launchSettingsString.slice(1);
             }
             const launchSettings = JSON.parse(launchSettingsString);
 
             //tslint:disable:no-unsafe-any no-any
             if (launchSettings && launchSettings.profiles) {
+                // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
                 const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
 
                 if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
