@@ -38,7 +38,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-  const inspectConfig = '--inspect=0.0.0.0:9229'
+  const inspectConfig = '--inspect=0.0.0.0:9229';
   const cmdArray: string[] = cmd.split(' ');
   if (cmdArray[0].toLowerCase() === 'node') {
     cmdArray.splice(1, 0, inspectConfig);
