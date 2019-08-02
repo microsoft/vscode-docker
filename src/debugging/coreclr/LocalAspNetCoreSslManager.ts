@@ -51,7 +51,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
 
         if (this.osProvider.os === 'Windows') {
             const trust: MessageItem = { title: 'Trust' };
-            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. Your browser may show warnings about the site when opened. To trust the certificate manually, run \`dotnet dev-certs https --trust\`, or click "Trust" to run this command automatically. You may be prompted to trust the certificate.';
+            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.';
 
             // Don't wait
             // tslint:disable-next-line: no-floating-promises
@@ -66,7 +66,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
                     }
                 });
         } else if (this.osProvider.isMac) {
-            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. Your browser may show warnings about the site when opened. To trust the certificate manually, run \`dotnet dev-certs https --trust\`.';
+            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.';
 
             // Don't wait
             // tslint:disable-next-line: no-floating-promises
