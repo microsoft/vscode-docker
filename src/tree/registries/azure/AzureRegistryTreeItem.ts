@@ -39,6 +39,10 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         return getResourceGroupFromId(this.registryId);
     }
 
+    public get registryLocation(): string {
+        return this._registry.location;
+    }
+
     public get client(): ContainerRegistryManagementClient {
         return createAzureClient(this.parent.root, ContainerRegistryManagementClient);
     }
