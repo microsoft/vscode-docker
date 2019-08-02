@@ -44,7 +44,7 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: str
     cmdArray.splice(1, 0, inspectConfig);
     cmd = `command: ${cmdArray.join(' ')}`;
   } else {
-    cmd = `## set your startup file here\n    command: node ${inspectConfig} index.js';
+    cmd = `## set your startup file here\n    command: node ${inspectConfig} index.js`;
   }
 
   return `version: '2.1'
