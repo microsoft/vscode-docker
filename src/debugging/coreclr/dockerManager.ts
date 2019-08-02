@@ -256,7 +256,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const debuggerPath = await this.debuggerClient.getDebugger(options.run.os, containerId);
 
-        const browserUrl = await this.getContainerWebEndpoint(containerId);
+        const { browserUrl, httpsPort } = await this.getContainerWebEndpoint(containerId);
 
         const additionalProbingPaths = options.run.os === 'Windows'
             ? [
@@ -273,6 +273,8 @@ export class DefaultDockerManager implements DockerManager {
             ? this.osProvider.pathJoin(options.run.os, 'C:\\app', options.appOutput)
             : this.osProvider.pathJoin(options.run.os, '/app', options.appOutput);
 
+        const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
+
         return {
             browserUrl,
             debuggerPath: this.osProvider.pathJoin(options.run.os, options.run.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger', debuggerPath, 'vsdbg'),
@@ -284,7 +286,7 @@ export class DefaultDockerManager implements DockerManager {
             program: 'dotnet',
             programArgs: [additionalProbingPathsArgs, containerAppOutput],
             programCwd: options.run.os === 'Windows' ? 'C:\\app' : '/app',
-            programEnv: {}
+            programEnv: programEnv
         };
     }
 
@@ -328,7 +330,7 @@ export class DefaultDockerManager implements DockerManager {
         await this.workspaceState.update(DefaultDockerManager.DebugContainersKey, runningContainers);
     }
 
-    private async getContainerWebEndpoint(containerNameOrId: string): Promise<string | undefined> {
+    private async getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }> {
         let portMappingsString = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
         let portMappings = <IPortMappings>JSON.parse(portMappingsString);
 
@@ -337,14 +339,23 @@ export class DefaultDockerManager implements DockerManager {
             let httpPort = portMappings["80/tcp"] && portMappings["80/tcp"][0] && portMappings["80/tcp"][0].HostPort || null;
 
             if (httpsPort) {
-                return `https://localhost:${httpsPort}`;
+                return {
+                    browserUrl: `https://localhost:${httpsPort}`,
+                    httpsPort: httpsPort
+                };
             } else if (httpPort) {
-                // tslint:disable-next-line:no-http-string
-                return `http://localhost:${httpPort}`;
+                return {
+                    // tslint:disable-next-line:no-http-string
+                    browserUrl: `http://localhost:${httpPort}`,
+                    httpsPort: undefined
+                };
             }
         }
 
-        return undefined;
+        return {
+            browserUrl: undefined,
+            httpsPort: undefined
+        };
     }
 
     private static readonly ProgramFilesEnvironmentVariable: string = 'ProgramFiles';
