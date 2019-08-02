@@ -14,10 +14,16 @@ export type MSBuildExecOptions = {
     properties?: { [key: string]: string };
 };
 
+export enum TrustState {
+    Trusted,
+    NotTrusted,
+    NotApplicable
+}
+
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
-    isCertificateTrusted(): Promise<boolean | undefined>;
+    isCertificateTrusted(): Promise<TrustState>;
     exportCertificate(projectFile: string, certificateExportPath: string): Promise<void>;
 }
 
@@ -59,20 +65,20 @@ export class CommandLineDotNetClient implements DotNetClient {
         }
     }
 
-    public async isCertificateTrusted(): Promise<boolean | undefined> {
+    public async isCertificateTrusted(): Promise<TrustState> {
         if (this.osProvider.os !== 'Windows' && !this.osProvider.isMac) {
             // No centralized notion of trust on Linux
-            return undefined;
+            return TrustState.NotApplicable;
         }
 
         try {
             const checkCommand = `dotnet dev-certs https --check --trust`;
             await this.processProvider.exec(checkCommand, {});
-            return true;
+            return TrustState.Trusted;
         } catch (err) {
             const error = parseError(err);
             if (error.errorType === '6' || error.errorType === '7') {
-                return false;
+                return TrustState.NotTrusted;
             } else { throw err; }
         }
     }

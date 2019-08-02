@@ -9,16 +9,11 @@ import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ProcessProvider } from './ChildProcessProvider';
-import { DotNetClient } from './CommandLineDotNetClient';
+import { DotNetClient, TrustState } from './CommandLineDotNetClient';
 import { OSProvider } from './LocalOSProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 
-export type HostSecretsFolders = {
-    certificateFolder: string;
-    userSecretsFolder: string;
-}
-
-export type ContainerSecretsFolders = {
+export type SecretsFolders = {
     certificateFolder: string;
     userSecretsFolder: string;
 }
@@ -26,8 +21,8 @@ export type ContainerSecretsFolders = {
 export interface AspNetCoreSslManager {
     trustCertificateIfNecessary(): Promise<void>;
     exportCertificateIfNecessary(projectFile: string | undefined, certificateExportPath: string | undefined): Promise<void>;
-    getHostSecretsFolders(): HostSecretsFolders;
-    getContainerSecretsFolders(platform: PlatformOS): ContainerSecretsFolders;
+    getHostSecretsFolders(): SecretsFolders;
+    getContainerSecretsFolders(platform: PlatformOS): SecretsFolders;
 }
 
 export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
@@ -47,9 +42,9 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             return;
         }
 
-        const trusted: boolean | undefined = await this.dotNetClient.isCertificateTrusted();
+        const trusted = await this.dotNetClient.isCertificateTrusted();
 
-        if (trusted === undefined || trusted) {
+        if (trusted === TrustState.Trusted || trusted === TrustState.NotApplicable) {
             LocalAspNetCoreSslManager._CertificateTrustedOrSkipped = true;
             return;
         }
@@ -96,7 +91,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         LocalAspNetCoreSslManager._KnownConfiguredProjects.add(projectFile)
     }
 
-    public getHostSecretsFolders(): HostSecretsFolders {
+    public getHostSecretsFolders(): SecretsFolders {
         let appDataEnvironmentVariable: string | undefined;
 
         if (this.osProvider.os === 'Windows') {
@@ -117,7 +112,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         };
     }
 
-    public getContainerSecretsFolders(platform: PlatformOS): ContainerSecretsFolders {
+    public getContainerSecretsFolders(platform: PlatformOS): SecretsFolders {
         return {
             certificateFolder: platform === 'Windows' ?
                 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
