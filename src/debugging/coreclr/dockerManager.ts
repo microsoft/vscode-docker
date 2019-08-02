@@ -29,7 +29,7 @@ export type DockerManagerRunContainerOptions
     & {
         appFolder: string;
         os: PlatformOS;
-        configureSslCertificate: boolean;
+        configureAspNetCoreSsl: boolean;
     };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -243,7 +243,7 @@ export class DefaultDockerManager implements DockerManager {
     public async prepareForLaunch(options: LaunchOptions): Promise<LaunchResult> {
         const imageId = await this.buildImage({ appFolder: options.appFolder, ...options.build });
 
-        if (options.run.configureSslCertificate) {
+        if (options.run.configureAspNetCoreSsl) {
             const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
             const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
             await this.aspNetCoreSslManager.trustCertificateIfNecessary();
@@ -392,7 +392,7 @@ export class DefaultDockerManager implements DockerManager {
             nugetFallbackVolume,
         ];
 
-        if (options.configureSslCertificate) {
+        if (options.configureAspNetCoreSsl) {
             const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
             const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(options.os);
 

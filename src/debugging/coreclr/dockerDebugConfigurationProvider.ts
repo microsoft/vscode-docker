@@ -54,7 +54,7 @@ interface DockerDebugConfiguration extends DebugConfiguration {
     appProject?: string;
     dockerBuild?: DockerDebugBuildOptions;
     dockerRun?: DockerDebugRunOptions;
-    configureSslCertificate?: boolean;
+    configureAspNetCoreSsl?: boolean;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -189,7 +189,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             os,
             ports: debugConfiguration.dockerRun.ports,
             volumes: DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration),
-            configureSslCertificate: ssl
+            configureAspNetCoreSsl: ssl
         };
     }
 
@@ -301,8 +301,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferSsl(debugConfiguration: DockerDebugConfiguration, projectFile: string): Promise<boolean> {
-        if (debugConfiguration.configureSslCertificate !== undefined) {
-            return debugConfiguration.configureSslCertificate;
+        if (debugConfiguration.configureAspNetCoreSsl !== undefined) {
+            return debugConfiguration.configureAspNetCoreSsl;
         }
 
         return false;
