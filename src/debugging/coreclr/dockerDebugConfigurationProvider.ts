@@ -305,6 +305,26 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return debugConfiguration.configureAspNetCoreSsl;
         }
 
+        const launchSettingsPath = path.join(path.dirname(projectFile), 'Properties', 'launchSettings.json');
+
+        if (await this.fsProvider.fileExists(launchSettingsPath)) {
+            let launchSettingsString = await this.fsProvider.readFile(launchSettingsPath);
+            if (launchSettingsString.charCodeAt(0) === 0xFEFF) {
+                launchSettingsString = launchSettingsString.slice(1);
+            }
+            const launchSettings = JSON.parse(launchSettingsString);
+
+            //tslint:disable:no-unsafe-any no-any
+            if (launchSettings && launchSettings.profiles) {
+                const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
+
+                if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
+                    return true;
+                }
+            }
+            //tslint:enable:no-unsafe-any no-any
+        }
+
         return false;
     }
 
