@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WebSiteManagementClient } from 'azure-arm-website';
-import { SiteConfig } from 'azure-arm-website/lib/models';
+import { Site, SiteConfig } from 'azure-arm-website/lib/models';
 import { NameValuePair } from 'request';
 import { Progress, window } from "vscode";
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
@@ -22,6 +22,7 @@ import { getRegistryPassword } from '../../../tree/registries/registryPasswords'
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
+import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
 
 export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
@@ -51,7 +52,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
     const siteConfig: SiteConfig = await getNewSiteConfig(node);
     const executeSteps: AzureWizardExecuteStep<IAppServiceWizardContext>[] = [
-        new DockerSiteCreateStep(siteConfig)
+        new DockerSiteCreateStep(siteConfig),
+        new DockerWebhookCreateStep(node)
     ];
 
     const title = 'Create new web app';
@@ -59,7 +61,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     await wizard.prompt();
     await wizard.execute();
 
-    const site = nonNullProp(wizardContext, 'site');
+    const site: Site = nonNullProp(wizardContext, 'site');
     const createdNewWebApp: string = `Successfully created web app "${site.name}": https://${site.defaultHostName}`;
     ext.outputChannel.appendLine(createdNewWebApp);
     // don't wait
