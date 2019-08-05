@@ -32,6 +32,7 @@ export namespace ext {
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;
     export let dockerodeInitError: unknown;
+    export const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
 
     export let imagesTree: AzExtTreeDataProvider;
     export let imagesTreeView: TreeView<AzExtTreeItem>;
