@@ -113,8 +113,8 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
 }
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: number[]): string {
-    return `node_modules
-npm-debug.log
+    return `**/node_modules
+**/npm-debug.log
 **/.dockerignore
 **/.env
 **/.git
@@ -131,8 +131,8 @@ npm-debug.log
 **/docker-compose*
 **/*.dbmdl
 **/*.jfm
-README.md
-LICENSE
+**/README.md
+**/LICENSE
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/.toolstarget`;
