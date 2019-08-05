@@ -128,13 +128,13 @@ function genDockerIgnoreFile(service: string, platformType: string, os: string, 
 **/charts
 **/docker-compose*
 **/Dockerfile*
-**/LICENSE
 **/node_modules
 **/npm-debug.log
 **/obj
-**/README.md
 **/secrets.dev.yaml
-**/values.dev.yaml`;
+**/values.dev.yaml
+LICENSE
+README.md`;
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
