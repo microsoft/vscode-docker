@@ -113,29 +113,28 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
 }
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: number[]): string {
-    return `**/node_modules
-**/npm-debug.log
-**/.dockerignore
+    return `**/.dockerignore
 **/.env
 **/.git
 **/.gitignore
+**/.toolstarget
 **/.vs
 **/.vscode
 **/*.*proj.user
-**/azds.yaml
-**/charts
-**/bin
-**/obj
-**/Dockerfile*
-**/Dockerfile.develop
-**/docker-compose*
 **/*.dbmdl
 **/*.jfm
-**/README.md
+**/azds.yaml
+**/bin
+**/charts
+**/docker-compose*
+**/Dockerfile*
 **/LICENSE
+**/node_modules
+**/npm-debug.log
+**/obj
+**/README.md
 **/secrets.dev.yaml
-**/values.dev.yaml
-**/.toolstarget`;
+**/values.dev.yaml`;
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
