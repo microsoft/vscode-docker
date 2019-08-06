@@ -16,7 +16,7 @@ import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelect
 import { registerCommands } from './commands/registerCommands';
 import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
 import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
-import { COMPOSE_FILE_GLOB_PATTERN, ignoreBundle } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
@@ -241,7 +241,7 @@ function activateLanguageClient(): void {
         context.telemetry.properties.isActivationEvent = 'true';
         let serverModule = ext.context.asAbsolutePath(
             path.join(
-                ignoreBundle ? "node_modules" : "dist",
+                ext.ignoreBundle ? "node_modules" : "dist",
                 "dockerfile-language-server-nodejs",
                 "lib",
                 "server.js"
