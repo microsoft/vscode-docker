@@ -1564,7 +1564,7 @@
         "umd-compat-loader": "^2.1.1",
         "vsce": "^1.59.0",
         "vscode": "^1.1.34",
-        "vscode-azureextensiondev": "^0.1.11",
+        "vscode-azureextensiondev": "^0.2.1",
         "webpack": "^4.29.6",
         "webpack-cli": "^3.3.0"
     },
@@ -1589,8 +1589,8 @@
         "request-promise-native": "^1.0.5",
         "semver": "^6.0.0",
         "tar": "^4.4.6",
-        "vscode-azureextensionui": "^0.26.1",
-        "vscode-azureappservice": "^0.42.5",
+        "vscode-azureextensionui": "^0.26.3",
+        "vscode-azureappservice": "^0.43.0",
         "vscode-languageclient": "^5.1.1",
         "win-ca": "^2.4.1",
         "xml2js": "^0.4.19"

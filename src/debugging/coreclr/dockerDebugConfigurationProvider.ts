@@ -2,6 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
@@ -304,6 +305,25 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (debugConfiguration.configureAspNetCoreSsl !== undefined) {
             return debugConfiguration.configureAspNetCoreSsl;
         }
+
+        try {
+            const launchSettingsPath = path.join(path.dirname(projectFile), 'Properties', 'launchSettings.json');
+
+            if (await this.fsProvider.fileExists(launchSettingsPath)) {
+                const launchSettings = await fse.readJson(launchSettingsPath);
+
+                //tslint:disable:no-unsafe-any no-any
+                if (launchSettings && launchSettings.profiles) {
+                    // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
+                    const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
+
+                    if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
+                        return true;
+                    }
+                }
+                //tslint:enable:no-unsafe-any no-any
+            }
+        } catch { }
 
         return false;
     }

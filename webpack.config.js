@@ -149,7 +149,10 @@ let config = dev.getDefaultWebpackConfig({
         new CopyWebpackPlugin([
             // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
             { from: './out/src/utils/getCoreNodeModule.js', to: 'node_modules' }
-        ])
+        ]),
+
+        // An instance of the StringReplacePlugin plugin must be present for it to work (its use is configured in modules).
+        new StringReplacePlugin()
     ]
 });
 
