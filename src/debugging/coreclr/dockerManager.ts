@@ -9,6 +9,7 @@ import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./CliDockerClient";
+import { UserSecretsRegex } from './CommandLineDotNetClient';
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import { Lazy } from './lazy';
@@ -251,7 +252,7 @@ export class DefaultDockerManager implements DockerManager {
             await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
             options.run.configureDotNetUserSecrets = true;
         } else {
-            options.run.configureDotNetUserSecrets = /UserSecretsId/i.test(await this.fileSystemProvider.readFile(options.appProject));
+            options.run.configureDotNetUserSecrets = UserSecretsRegex.test(await this.fileSystemProvider.readFile(options.appProject));
         }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
