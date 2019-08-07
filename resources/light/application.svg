@@ -1,7 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-    <style>.icon-canvas-transparent{opacity:0;fill:#f6f6f6}.icon-vs-out{fill:#f6f6f6}.icon-vs-bg{fill:#424242}.icon-vs-fg{fill:#f0eff1}</style>
-    <path class="icon-canvas-transparent" d="M16 16H0V0h16v16z" id="canvas"/>
-    <path class="icon-vs-out" d="M16 15H0V1h16v14z" id="outline" style="display: none;"/>
-    <path class="icon-vs-bg" d="M1 2v12h14V2H1zm13 11H2V5h12v8z" id="iconBg"/>
-    <path class="icon-vs-fg" d="M14 13H2V5h12v8z" id="iconFg" style="display: none;"/>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.5 14H1.5L1 13.5V2.5L1.5 2H2H14H14.5L15 2.5V13.5L14.5 14ZM14 3H2V5H14V3ZM14 6V13H2V6H14Z" fill="#424242"/>
 </svg>
