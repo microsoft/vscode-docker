@@ -113,10 +113,13 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
 }
 
 function genDockerIgnoreFile(service: string, platformType: string, os: string, ports: number[]): string {
-    return `**/.dockerignore
+    return `**/.classpath
+**/.dockerignore
 **/.env
 **/.git
 **/.gitignore
+**/.project
+**/.settings
 **/.toolstarget
 **/.vs
 **/.vscode
