@@ -8,6 +8,7 @@ import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, Prov
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './CliDockerClient';
+import { UserSecretsRegex } from './CommandLineDotNetClient';
 import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
@@ -110,9 +111,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         const appOutput = await this.inferAppOutput(debugConfiguration, os, resolvedAppProject);
         const ssl = await this.inferSsl(debugConfiguration, resolvedAppProject);
+        const userSecrets = await this.inferUserSecrets(ssl, resolvedAppProject);
 
         const buildOptions = await this.inferBuildOptions(folder, debugConfiguration, appFolder, resolvedAppFolder, appName);
-        const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os, ssl);
+        const runOptions = DockerDebugConfigurationProvider.inferRunOptions(folder, debugConfiguration, appName, os, ssl, userSecrets);
 
         const launchOptions = {
             appFolder: resolvedAppFolder,
@@ -165,18 +167,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         };
     }
 
-    private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS, ssl: boolean): LaunchRunOptions {
+    private static inferRunOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appName: string, os: PlatformOS, ssl: boolean, userSecrets: boolean): LaunchRunOptions {
         debugConfiguration.dockerRun = debugConfiguration.dockerRun || {};
 
         const envFiles = debugConfiguration.dockerRun.envFiles
             ? debugConfiguration.dockerRun.envFiles.map(file => DockerDebugConfigurationProvider.resolveFolderPath(file, folder))
             : undefined;
 
-        if (ssl) {
+        if (ssl || userSecrets) {
             debugConfiguration.dockerRun.env = debugConfiguration.dockerRun.env || {};
             debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT = debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT || 'Development';
-            //tslint:disable-next-line:no-http-string
-            debugConfiguration.dockerRun.env.ASPNETCORE_URLS = debugConfiguration.dockerRun.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
+
+            if (ssl) {
+                //tslint:disable-next-line:no-http-string
+                debugConfiguration.dockerRun.env.ASPNETCORE_URLS = debugConfiguration.dockerRun.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
+            }
         }
 
         return {
@@ -190,7 +195,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             os,
             ports: debugConfiguration.dockerRun.ports,
             volumes: DockerDebugConfigurationProvider.inferVolumes(folder, debugConfiguration),
-            configureAspNetCoreSsl: ssl
+            configureAspNetCoreSsl: ssl,
+            configureDotNetUserSecrets: userSecrets,
         };
     }
 
@@ -326,6 +332,17 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         } catch { }
 
         return false;
+    }
+
+    private async inferUserSecrets(ssl: boolean, projectFile: string): Promise<boolean> {
+        if (ssl) {
+            return true;
+        }
+
+        if (this.fsProvider.fileExists(projectFile)) {
+            const contents = await this.fsProvider.readFile(projectFile);
+            return UserSecretsRegex.test(contents);
+        }
     }
 
     private createLaunchBrowserConfiguration(result: LaunchResult): DebugConfigurationBrowserOptions {
