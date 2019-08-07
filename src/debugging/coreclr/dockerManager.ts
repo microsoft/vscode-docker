@@ -30,6 +30,7 @@ export type DockerManagerRunContainerOptions
         appFolder: string;
         os: PlatformOS;
         configureAspNetCoreSsl: boolean;
+        configureDotNetUserSecrets: boolean;
     };
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -248,6 +249,9 @@ export class DefaultDockerManager implements DockerManager {
             const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
             await this.aspNetCoreSslManager.trustCertificateIfNecessary();
             await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
+            options.run.configureDotNetUserSecrets = true;
+        } else {
+            options.run.configureDotNetUserSecrets = /UserSecretsId/i.test(await this.fileSystemProvider.readFile(options.appProject));
         }
 
         const containerId = await this.runContainer(imageId, { appFolder: options.appFolder, ...options.run });
@@ -403,15 +407,9 @@ export class DefaultDockerManager implements DockerManager {
             nugetFallbackVolume,
         ];
 
-        if (options.configureAspNetCoreSsl) {
+        if (options.configureAspNetCoreSsl || options.configureDotNetUserSecrets) {
             const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
             const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(options.os);
-
-            const certVolume: DockerContainerVolume = {
-                localPath: hostSecretsFolders.certificateFolder,
-                containerPath: containerSecretsFolders.certificateFolder,
-                permissions: 'ro'
-            };
 
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.userSecretsFolder,
@@ -419,8 +417,17 @@ export class DefaultDockerManager implements DockerManager {
                 permissions: 'ro'
             };
 
-            volumes.push(certVolume);
             volumes.push(userSecretsVolume);
+
+            if (options.configureAspNetCoreSsl) {
+                const certVolume: DockerContainerVolume = {
+                    localPath: hostSecretsFolders.certificateFolder,
+                    containerPath: containerSecretsFolders.certificateFolder,
+                    permissions: 'ro'
+                };
+
+                volumes.push(certVolume);
+            }
         }
 
         return volumes;
