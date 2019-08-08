@@ -58,22 +58,17 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    const treeItem = this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
-                    if (provider.isSingleRegistry) {
-                        this._connectedRegistriesTreeItem.children.push(treeItem);
-                        return undefined;
-                    } else {
-                        return treeItem;
-                    }
+                    return this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
                 },
                 cachedInfo => cachedInfo.id
             );
 
+            this._connectedRegistriesTreeItem.children = children.filter(c => c.parent === this._connectedRegistriesTreeItem);
             if (this._connectedRegistriesTreeItem.children.length > 0) {
                 children.push(this._connectedRegistriesTreeItem);
             }
 
-            return children;
+            return children.filter(c => c.parent !== this._connectedRegistriesTreeItem);
         }
     }
 

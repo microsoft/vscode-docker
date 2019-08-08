@@ -419,6 +419,11 @@
                     "group": "regs_yyy_destructive@1"
                 },
                 {
+                    "command": "vscode-docker.registries.disconnectRegistry",
+                    "when": "view == dockerRegistries && viewItem == invalidRegistryProvider",
+                    "group": "regs_yyy_destructive@1"
+                },
+                {
                     "command": "vscode-docker.registries.azure.openInPortal",
                     "when": "view == dockerRegistries && viewItem =~ /azure(Subscription|;DockerV2;Registry;)/",
                     "group": "regs_zzz_common@1"
