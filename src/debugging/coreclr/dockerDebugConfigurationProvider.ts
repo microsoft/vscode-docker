@@ -339,7 +339,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             return true;
         }
 
-        if (this.fsProvider.fileExists(projectFile)) {
+        if (await this.fsProvider.fileExists(projectFile)) {
             const contents = await this.fsProvider.readFile(projectFile);
             return UserSecretsRegex.test(contents);
         }
