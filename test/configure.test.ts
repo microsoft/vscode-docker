@@ -473,23 +473,27 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('.dockerignore', '.vscode');
         });
 
-        testInEmptyFolder("With start script", async () => {
+        testInEmptyFolder("With start script that explicitly calls node", async () => {
             await writeFile('', 'package.json',
-                `{
-        "name": "vscode-docker",
-        "version": "0.0.28",
-        "main": "./out/dockerExtension",
-        "author": "Azure",
-        "scripts": {
-            "vscode:prepublish": "tsc -p ./",
-            "start": "startMyUp.cmd",
-            "test": "npm run build && node ./node_modules/vscode/bin/test"
-        },
-        "dependencies": {
-            "azure-arm-containerregistry": "^1.0.0-preview"
-        }
-    }
-        `);
+                JSON.stringify({
+                    "name": "myexpressapp",
+                    "version": "1.23.345",
+                    "private": true,
+                    "scripts": {
+                        "vscode:prepublish": "tsc -p ./",
+                        "start": "node ./bin/www",
+                        "test": "npm run build && node ./node_modules/vscode/bin/test"
+                    },
+                    "dependencies": {
+                        "cookie-parser": "~1.4.4",
+                        "debug": "~2.6.9",
+                        "express": "~4.16.1",
+                        "http-errors": "~1.6.3",
+                        "jade": "~1.11.0",
+                        "morgan": "~1.9.1"
+                    }
+                }
+                ));
 
             await testConfigureDocker(
                 'Node.js',
@@ -521,22 +525,55 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('.dockerignore', '.vscode');
         });
 
+        testInEmptyFolder("With start script that implicitly calls node", async () => {
+            await writeFile('', 'package.json',
+                `{
+                    "name": "vscode-docker",
+                    "version": "0.0.28",
+                    "main": "./out/dockerExtension",
+                    "author": "Azure",
+                    "scripts": {
+                        "vscode:prepublish": "tsc -p ./",
+                        "start": "./bin/www",
+                        "test": "npm run build && node ./node_modules/vscode/bin/test"
+                    },
+                    "dependencies": {
+                        "azure-arm-containerregistry": "^1.0.0-preview"
+                    }
+                }
+                `);
+
+            await testConfigureDocker(
+                'Node.js',
+                {
+                    configurePlatform: 'Node.js',
+                    configureOs: undefined,
+                    packageFileType: 'package.json',
+                    packageFileSubfolderDepth: '0'
+                },
+                ['4321'],
+                ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+            );
+
+            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+        });
+
         testInEmptyFolder("Without start script", async () => {
             await writeFile('', 'package.json',
                 `{
-        "name": "vscode-docker",
-        "version": "0.0.28",
-        "main": "./out/dockerExtension",
-        "author": "Azure",
-        "scripts": {
-            "vscode:prepublish": "tsc -p ./",
-            "test": "npm run build && node ./node_modules/vscode/bin/test"
-        },
-        "dependencies": {
-            "azure-arm-containerregistry": "^1.0.0-preview"
-        }
-    }
-        `);
+                    "name": "vscode-docker",
+                    "version": "0.0.28",
+                    "main": "./out/dockerExtension",
+                    "author": "Azure",
+                    "scripts": {
+                        "vscode:prepublish": "tsc -p ./",
+                        "test": "npm run build && node ./node_modules/vscode/bin/test"
+                    },
+                    "dependencies": {
+                        "azure-arm-containerregistry": "^1.0.0-preview"
+                    }
+                }
+            `);
 
             await testConfigureDocker(
                 'Node.js',
