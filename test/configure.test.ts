@@ -514,13 +514,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
-            assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+            assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
 
             assertFileContains('docker-compose.yml', '4321:4321');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
-            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
 
             assertFileContains('.dockerignore', '.vscode');
         });
