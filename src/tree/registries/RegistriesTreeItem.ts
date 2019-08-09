@@ -58,22 +58,17 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    const treeItem = this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
-                    if (provider.isSingleRegistry) {
-                        this._connectedRegistriesTreeItem.children.push(treeItem);
-                        return undefined;
-                    } else {
-                        return treeItem;
-                    }
+                    return this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
                 },
                 cachedInfo => cachedInfo.id
             );
 
+            this._connectedRegistriesTreeItem.children = children.filter(c => c.parent === this._connectedRegistriesTreeItem);
             if (this._connectedRegistriesTreeItem.children.length > 0) {
                 children.push(this._connectedRegistriesTreeItem);
             }
 
-            return children;
+            return children.filter(c => c.parent !== this._connectedRegistriesTreeItem);
         }
     }
 
@@ -141,13 +136,35 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         await this.saveCachedProviders();
     }
 
-    public async disconnectRegistry(context: IActionContext, node: IRegistryProviderTreeItem): Promise<void> {
-        context.telemetry.properties.providerId = node.cachedProvider.id;
-        context.telemetry.properties.providerApi = node.cachedProvider.api;
+    public async disconnectRegistry(context: IActionContext, cachedProvider: ICachedRegistryProvider | undefined): Promise<void> {
+        if (!cachedProvider) {
+            const picks = this._cachedProviders.map(crp => {
+                const provider = getRegistryProviders().find(rp => rp.id === crp.id);
+                let label: string = (provider && provider.label) || crp.id;
+                let descriptions: string[] = [];
+                if (crp.username) {
+                    descriptions.push(`Username: "${crp.username}"`)
+                }
+                if (crp.url) {
+                    descriptions.push(`URL: "${crp.url}"`)
+                }
+                return {
+                    label,
+                    description: descriptions[0],
+                    detail: descriptions[1],
+                    data: crp
+                }
+            });
+            const placeHolder: string = 'Select the registry to disconnect';
+            cachedProvider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
+        }
 
-        await deleteRegistryPassword(node.cachedProvider);
+        context.telemetry.properties.providerId = cachedProvider.id;
+        context.telemetry.properties.providerApi = cachedProvider.api;
 
-        const index = this._cachedProviders.findIndex(n => n === node.cachedProvider);
+        await deleteRegistryPassword(cachedProvider);
+
+        const index = this._cachedProviders.findIndex(n => n === cachedProvider);
         if (index !== -1) {
             this._cachedProviders.splice(index, 1);
         }
