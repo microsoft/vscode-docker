@@ -1,16 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-    <style>.icon-canvas-transparent{opacity:0;fill:#252526}.icon-vs-out{fill:#252526}.icon-vs-bg{fill:#c5c5c5}.icon-vs-fg{fill:#2a292c}.st0{fill:#f1cb95}</style>
-    <g id="canvas">
-        <path id="XMLID_1_" class="icon-canvas-transparent" d="M16 16H0V0h16v16z"/>
-    </g>
-    <g id="outline" style="display: none;">
-        <path id="XMLID_16_" class="icon-vs-out" d="M2.01 16c-.023.021 0-13 0-13H4V2h1.01C5.423.836 6.717 0 8.02 0c1.305 0 2.578.836 2.99 2h1v1H14v13H2.01z" style="display: none;"/>
-    </g>
-    <g id="iconFg" style="display: none;">
-        <path id="XMLID_2_" class="icon-vs-fg" d="M6.969 2.984c0-.552.49-.984 1.041-.984.553 0 1 .447 1 1s-.447 1.031-1 1.031c-.551 0-1.041-.494-1.041-1.047zM12 5v9H4V5h8zm-1 4H5v1h6V9zm0-2H5v1h6V7z" style="display: none;"/>
-    </g>
-    <g id="iconBg">
-        <path class="st0" d="M13 4v11H3V4h2v1H4v9h8V5h-1V4h2z"/>
-        <path class="icon-vs-bg" d="M11 5V3h-.99a2 2 0 0 0-4 0H5v2h6zM8.01 2c.553 0 1 .447 1 1s-.438 1-.99 1c-.551 0-1.01-.447-1.01-1s.449-1 1-1zM11 9v1H5V9h6zM5 7h6v1H5V7z"/>
-    </g>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0)">
+<path d="M13 4V15H3V4H5V5H4V14H12V5H11V4H13Z" fill="#C5C5C5"/>
+<path d="M11 5V3H10.01C10.01 2.46957 9.79929 1.96086 9.42421 1.58579C9.04914 1.21071 8.54043 1 8.01 1C7.47957 1 6.97086 1.21071 6.59579 1.58579C6.22071 1.96086 6.01 2.46957 6.01 3H5V5H11ZM8.01 2C8.563 2 9.01 2.447 9.01 3C9.01 3.553 8.572 4 8.02 4C7.469 4 7.01 3.553 7.01 3C7.01 2.447 7.459 2 8.01 2ZM11 9V10H5V9H11ZM5 7H11V8H5V7Z" fill="#C5C5C5"/>
+</g>
+<defs>
+<clipPath id="clip0">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
 </svg>
