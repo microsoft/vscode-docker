@@ -320,7 +320,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                 //tslint:disable:no-unsafe-any no-any
                 if (launchSettings && launchSettings.profiles) {
-                    // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'.
+                    // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
                     const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
 
                     if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
