@@ -121,6 +121,11 @@ export function compareBuildImageOptions(options1: DockerBuildImageOptions | und
         return false;
     }
 
+    if (options1.pull === false && options2.pull === true) {
+        // If they change from no --pull to yes --pull, we should rebuild, since it may mean a new base image
+        return false;
+    }
+
     return true;
 }
 

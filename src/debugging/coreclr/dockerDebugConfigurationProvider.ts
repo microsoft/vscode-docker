@@ -23,6 +23,7 @@ interface DockerDebugBuildOptions {
     labels?: { [key: string]: string };
     tag?: string;
     target?: string;
+    pull?: boolean;
 }
 
 interface DockerDebugRunOptions {
@@ -78,7 +79,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 type: 'docker-coreclr',
                 request: 'launch',
                 preLaunchTask: 'build',
-                dockerBuild: {},
+                dockerBuild: {
+                    pull: true
+                },
                 dockerRun: {}
             }
         ];
@@ -140,30 +143,20 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async inferBuildOptions(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, appFolder: string, resolvedAppFolder: string, appName: string): Promise<LaunchBuildOptions> {
+        debugConfiguration.dockerBuild = debugConfiguration.dockerBuild || {};
+
         const resolvedContext = await this.inferContext(folder, resolvedAppFolder, debugConfiguration);
 
         const dockerfile = await this.inferDockerfile(folder, resolvedAppFolder, debugConfiguration);
 
-        const args = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.args;
-
-        const labels = (debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.labels)
-            || DockerDebugConfigurationProvider.defaultLabels;
-
-        const tag = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.tag
-            ? debugConfiguration.dockerBuild.tag
-            : `${appName.toLowerCase()}:dev`;
-
-        const target = debugConfiguration && debugConfiguration.dockerBuild && debugConfiguration.dockerBuild.target
-            ? debugConfiguration.dockerBuild.target
-            : 'base'; // CONSIDER: Omit target if not specified, or possibly infer from Dockerfile.
-
         return {
-            args,
+            args: debugConfiguration.dockerBuild.args,
             context: resolvedContext,
             dockerfile,
-            labels,
-            tag,
-            target
+            labels: debugConfiguration.dockerBuild.labels || DockerDebugConfigurationProvider.defaultLabels,
+            tag: debugConfiguration.dockerBuild.tag || `${appName.toLowerCase()}:dev`,
+            target: debugConfiguration.dockerBuild.target || 'base',
+            pull: debugConfiguration.dockerBuild.pull || false,
         };
     }
 

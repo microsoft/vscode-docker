@@ -13,6 +13,7 @@ export type DockerBuildImageOptions = {
     labels?: { [key: string]: string };
     tag?: string;
     target?: string;
+    pull?: boolean;
 };
 
 export type DockerInspectObjectOptions = {
@@ -89,6 +90,7 @@ export class CliDockerClient implements DockerClient {
 
         let command = CommandLineBuilder
             .create('docker', 'build', '--rm')
+            .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
             .withKeyValueArgs('--build-arg', options.args)
             .withKeyValueArgs('--label', options.labels)

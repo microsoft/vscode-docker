@@ -494,7 +494,9 @@
                             "type": "docker-coreclr",
                             "request": "launch",
                             "preLaunchTask": "build",
-                            "dockerBuild": {},
+                            "dockerBuild": {
+                                "pull": true
+                            },
                             "dockerRun": {}
                         }
                     }
@@ -546,6 +548,10 @@
                                     "target": {
                                         "type": "string",
                                         "description": "Docker build target (stage) used for debugging."
+                                    },
+                                    "pull": {
+                                        "type": "boolean",
+                                        "description": "Pull latest base image if needed when building the Docker image."
                                     }
                                 }
                             },
