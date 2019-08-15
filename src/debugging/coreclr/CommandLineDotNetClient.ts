@@ -20,6 +20,8 @@ export enum TrustState {
     NotApplicable
 }
 
+export const UserSecretsRegex = /UserSecretsId/i;
+
 export interface DotNetClient {
     execTarget(projectFile: string, options?: MSBuildExecOptions): Promise<void>;
     getVersion(): Promise<string | undefined>;
@@ -91,7 +93,7 @@ export class CommandLineDotNetClient implements DotNetClient {
     private async addUserSecretsIfNecessary(projectFile: string): Promise<void> {
         const contents = await this.fsProvider.readFile(projectFile);
 
-        if (/UserSecretsId/i.test(contents)) {
+        if (UserSecretsRegex.test(contents)) {
             return;
         }
 
