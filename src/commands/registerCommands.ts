@@ -20,6 +20,7 @@ import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
+import { pullImage } from "./images/pullImage";
 import { pushImage } from "./images/pushImage";
 import { removeImage } from "./images/removeImage";
 import { runAzureCliImage } from "./images/runAzureCliImage";
@@ -48,7 +49,7 @@ import { disconnectRegistry } from "./registries/disconnectRegistry";
 import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
-import { pullImage, pullRepository } from "./registries/pullImages";
+import { pullImageFromRegistry, pullRepository } from "./registries/pullImages";
 import { setRegistryAsDefault } from "./registries/registrySettings";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
@@ -78,6 +79,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.inspect', inspectImage);
     registerCommand('vscode-docker.images.prune', pruneImages);
     registerCommand('vscode-docker.images.push', pushImage);
+    registerCommand('vscode-docker.images.pull', pullImage);
     registerCommand('vscode-docker.images.remove', removeImage);
     registerCommand('vscode-docker.images.run', runImage);
     registerCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
@@ -96,7 +98,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
     registerCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
-    registerCommand('vscode-docker.registries.pullImage', pullImage);
+    registerCommand('vscode-docker.registries.pullImage', pullImageFromRegistry);
     registerCommand('vscode-docker.registries.pullRepository', pullRepository);
     registerCommand('vscode-docker.registries.setAsDefault', setRegistryAsDefault);
 

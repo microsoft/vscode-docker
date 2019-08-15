@@ -49,6 +49,7 @@
         "onCommand:vscode-docker.images.inspect",
         "onCommand:vscode-docker.images.prune",
         "onCommand:vscode-docker.images.push",
+        "onCommand:vscode-docker.images.pull",
         "onCommand:vscode-docker.images.refresh",
         "onCommand:vscode-docker.images.remove",
         "onCommand:vscode-docker.images.run",
@@ -319,9 +320,14 @@
                     "group": "images_2_general@2"
                 },
                 {
-                    "command": "vscode-docker.images.tag",
+                    "command": "vscode-docker.images.pull",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
+                },
+                {
+                    "command": "vscode-docker.images.tag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@4"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -1240,6 +1246,11 @@
             {
                 "command": "vscode-docker.images.push",
                 "title": "Push",
+                "category": "Docker Images"
+            },
+            {
+                "command": "vscode-docker.images.pull",
+                "title": "Pull",
                 "category": "Docker Images"
             },
             {
