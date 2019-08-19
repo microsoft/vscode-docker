@@ -10,8 +10,8 @@ import CliDockerClient from './CliDockerClient';
 import CommandLineDotNetClient from './CommandLineDotNetClient';
 import { DefaultDebuggerClient } from './debuggerClient';
 import { DockerDebugSessionManager } from './debugSessionManager';
-import DockerDebugConfigurationProvider from './dockerDebugConfigurationProvider';
 import { DefaultDockerManager } from './dockerManager';
+import DockerNetCoreDebugConfigurationProvider from './dockerNetCoreDebugConfigurationProvider';
 import { LocalFileSystemProvider } from './fsProvider';
 import LocalAspNetCoreSslManager from './LocalAspNetCoreSslManager';
 import LocalOSProvider from './LocalOSProvider';
@@ -69,7 +69,7 @@ export function registerDebugConfigurationProvider(ctx: vscode.ExtensionContext)
     ctx.subscriptions.push(
         vscode.debug.registerDebugConfigurationProvider(
             'docker-coreclr',
-            new DockerDebugConfigurationProvider(
+            new DockerNetCoreDebugConfigurationProvider(
                 debugSessionManager,
                 dockerManager,
                 fileSystemProvider,
