@@ -1,10 +1,10 @@
 import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
+import { cloneObject } from '../utils/cloneObject';
 import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
-import { cloneObject } from '../utils/cloneObject';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -12,8 +12,8 @@ export interface DockerContainerExtraHost {
 }
 
 export interface DockerContainerPort {
-    hostPort?: string;
-    containerPort: string;
+    hostPort?: number;
+    containerPort: number;
     protocol?: 'tcp' | 'udp';
 }
 

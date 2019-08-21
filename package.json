@@ -767,6 +767,10 @@
                     "dockerRun": {
                         "description": "Options for running the Docker container used for debugging.",
                         "properties": {
+                            "command": {
+                                "type": "string",
+                                "description": "The command to run upon starting the container."
+                            },
                             "containerName": {
                                 "type": "string",
                                 "description": "Name of the container used for debugging."
@@ -807,11 +811,11 @@
                                     "type": "object",
                                     "properties": {
                                         "hostPort": {
-                                            "type": "string",
+                                            "type": "number",
                                             "description": "Port number to be bound on the host."
                                         },
                                         "containerPort": {
-                                            "type": "string",
+                                            "type": "number",
                                             "description": "Port number of the container to be bound."
                                         },
                                         "protocol": {
