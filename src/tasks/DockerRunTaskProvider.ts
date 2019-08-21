@@ -30,6 +30,7 @@ export interface DockerRunOptions {
     env?: { [key: string]: string };
     envFiles?: string[];
     extraHosts?: DockerContainerExtraHost[];
+    image?: string;
     labels?: { [key: string]: string };
     network?: string;
     networkAlias?: string;
@@ -94,7 +95,7 @@ export class DockerRunTaskProvider implements TaskProvider {
             .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
-            .withQuotedArg('foo')
+            .withQuotedArg(runOptions.image)
             .withArg(runOptions.command)
             .build();
     }
