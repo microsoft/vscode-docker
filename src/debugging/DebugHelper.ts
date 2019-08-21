@@ -5,7 +5,7 @@ import { NodeDebugHelper } from './node/NodeDebugHelper';
 
 export interface DebugHelper {
     provideDebugConfigurations(): Promise<DockerDebugConfiguration[]>;
-    resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
+    resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {

@@ -17,14 +17,14 @@ export class NetCoreTaskHelper implements TaskHelper {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
+    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
         definition.dockerBuild.dockerfile = definition.dockerBuild.dockerfile || path.join(path.dirname(definition.netCore.appProject), 'Dockerfile');
         definition.dockerBuild.context = definition.dockerBuild.context || path.dirname(definition.netCore.appProject);
 
         return definition;
     }
 
-    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
+    public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
         throw new Error('Method not implemented.');
     }
 }

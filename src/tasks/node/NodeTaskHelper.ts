@@ -16,11 +16,11 @@ export class NodeTaskHelper implements TaskHelper {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
+    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
+    public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
         throw new Error('Method not implemented.');
     }
 }
