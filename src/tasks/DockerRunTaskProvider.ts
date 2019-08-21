@@ -72,9 +72,9 @@ export class DockerRunTaskProvider implements TaskProvider {
         let runOptions: DockerRunOptions = task.definition.dockerRun ? cloneObject(task.definition.dockerRun) : {};
 
         if (task.definition.netCore) {
-            runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.definition.dockerRun, task.definition.netCore, token);
+            runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(runOptions, task.definition.netCore, token);
         } else if (task.definition.node) {
-            runOptions = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.definition.dockerRun, task.definition.node, token);
+            runOptions = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(runOptions, task.definition.node, token);
         }
 
         return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(runOptions, token)), task.problemMatchers);

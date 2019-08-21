@@ -49,10 +49,14 @@ export class DockerBuildTaskProvider implements TaskProvider {
     private async resolveTaskInternal(task: DockerBuildTask, token?: CancellationToken): Promise<Task> {
         let buildOptions: DockerBuildOptions = task.definition.dockerBuild ? cloneObject(task.definition.dockerBuild) : {};
 
+        if (buildOptions.context === undefined) {
+            buildOptions.context = '.';
+        }
+
         if (task.definition.netCore) {
-            buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.definition.dockerBuild, task.definition.netCore, token);
+            buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(buildOptions, task.definition.netCore, token);
         } else if (task.definition.node) {
-            buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.definition.dockerBuild, task.definition.node, token);
+            buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(buildOptions, task.definition.node, token);
         }
 
         return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(buildOptions, token)), task.problemMatchers);
