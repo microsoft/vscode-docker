@@ -91,6 +91,7 @@
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
+        "onDebugResolve:docker-launch",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
@@ -482,24 +483,28 @@
                     }
                 ],
                 "configurationAttributes": {
-                    "netCore": {
-                        "description": "Options for building .NET Core projects in Docker.",
+                    "launch": {
                         "properties": {
-                            "appProject": {
-                                "type": "string",
-                                "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
-                            }
-                        },
-                        "required": [
-                            "appProject"
-                        ]
-                    },
-                    "node": {
-                        "description": "Options for building Node.js projects in Docker.",
-                        "properties": {
-                            "foo": {
-                                "type": "string",
-                                "description": "bar"
+                            "netCore": {
+                                "description": "Options for building .NET Core projects in Docker.",
+                                "properties": {
+                                    "appProject": {
+                                        "type": "string",
+                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                                    }
+                                },
+                                "required": [
+                                    "appProject"
+                                ]
+                            },
+                            "node": {
+                                "description": "Options for building Node.js projects in Docker.",
+                                "properties": {
+                                    "foo": {
+                                        "type": "string",
+                                        "description": "bar"
+                                    }
+                                }
                             }
                         }
                     }
