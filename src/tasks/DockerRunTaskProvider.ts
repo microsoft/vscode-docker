@@ -70,10 +70,14 @@ export class DockerRunTaskProvider implements TaskProvider {
     private async resolveTaskInternal(task: DockerRunTask, token?: CancellationToken): Promise<Task> {
         task.definition.dockerRun = task.definition.dockerRun || {};
 
-        if (task.definition.netCore) {
-            task.definition = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.definition, token);
-        } else if (task.definition.node) {
-            task.definition = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.definition, token);
+        if (task.scope as WorkspaceFolder !== undefined) {
+            if (task.definition.netCore) {
+                task.definition = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+            } else if (task.definition.node) {
+                task.definition = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+            }
+        } else {
+            throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
         return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(task, token)), task.problemMatchers);

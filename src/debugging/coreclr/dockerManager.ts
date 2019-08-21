@@ -82,7 +82,7 @@ export interface DockerManager {
 }
 
 export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
-const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
+export const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 function compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
     const prop1 = obj1 ? getter(obj1) : undefined;
