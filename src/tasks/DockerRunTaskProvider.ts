@@ -4,6 +4,7 @@ import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
 import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
+import { cloneObject } from '../utils/cloneObject';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -68,7 +69,7 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(task: DockerRunTask, token?: CancellationToken): Promise<Task> {
-        let runOptions: DockerRunOptions;
+        let runOptions: DockerRunOptions = task.definition.dockerRun ? cloneObject(task.definition.dockerRun) : {};
 
         if (task.definition.netCore) {
             runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.definition.dockerRun, task.definition.netCore, token);

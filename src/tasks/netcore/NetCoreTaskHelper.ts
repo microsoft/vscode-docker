@@ -19,7 +19,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions | undefined, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         buildOptions = buildOptions || {};
 
         buildOptions.dockerfile = buildOptions.dockerfile || path.join(path.dirname(helperOptions.appProject), 'Dockerfile');
@@ -28,7 +28,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         return buildOptions;
     }
 
-    public async resolveDockerRunTaskDefinition(runOptions: DockerRunOptions | undefined, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunTaskDefinition(runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         throw new Error('Method not implemented.');
     }
 }

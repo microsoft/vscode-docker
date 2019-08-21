@@ -18,13 +18,13 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         return await Promise.resolve([]);
     }
 
-    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions | undefined, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         buildOptions = buildOptions || {};
 
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunTaskDefinition(runOptions: DockerBuildOptions | undefined, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunTaskDefinition(runOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         runOptions = runOptions || {};
 
         return await Promise.resolve(runOptions);
