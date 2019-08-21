@@ -1,13 +1,15 @@
 import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildOptions } from '../DockerBuildTaskProvider';
-import { DockerRunTask, DockerRunTaskDefinition, DockerRunOptions } from '../DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 export interface NodeTaskOptions {
     foo?: string;
 }
 
-export class NodeTaskHelper implements TaskHelper {
+export type NodeTaskHelperType = TaskHelper<NodeTaskOptions, NodeTaskOptions>;
+
+export class NodeTaskHelper implements NodeTaskHelperType {
     public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
         return await Promise.resolve([]);
     }
@@ -16,14 +18,14 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve([]);
     }
 
-    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions> {
-        const buildOptions = definition.dockerBuild || {};
+    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions | undefined, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+        buildOptions = buildOptions || {};
 
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
-        const runOptions = definition.dockerRun || {};
+    public async resolveDockerRunTaskDefinition(runOptions: DockerBuildOptions | undefined, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+        runOptions = runOptions || {};
 
         return await Promise.resolve(runOptions);
     }

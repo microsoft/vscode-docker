@@ -2,9 +2,8 @@ import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
 import { Platform } from '../utils/platform';
-import { NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskOptions } from './node/NodeTaskHelper';
-import { TaskHelper } from './TaskHelper';
+import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
+import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -28,8 +27,8 @@ export interface DockerBuildTask extends Task {
 
 export class DockerBuildTaskProvider implements TaskProvider {
     constructor(
-        private readonly netCoreTaskHelper: TaskHelper,
-        private readonly nodeTaskHelper: TaskHelper
+        private readonly netCoreTaskHelper: NetCoreTaskHelperType,
+        private readonly nodeTaskHelper: NodeTaskHelperType
     ) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
@@ -50,9 +49,9 @@ export class DockerBuildTaskProvider implements TaskProvider {
         let buildOptions: DockerBuildOptions;
 
         if (task.definition.netCore) {
-            buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
+            buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.definition.dockerBuild, task.definition.netCore, token);
         } else if (task.definition.node) {
-            buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
+            buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.definition.dockerBuild, task.definition.node, token);
         }
 
         return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(buildOptions, token)), task.problemMatchers);

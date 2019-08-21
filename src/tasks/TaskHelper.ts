@@ -4,11 +4,11 @@ import { DockerRunOptions, DockerRunTask, DockerRunTaskDefinition, DockerRunTask
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
-export interface TaskHelper {
+export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
     provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]>;
-    resolveDockerBuildTaskDefinition(buildTask: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunTaskDefinition(runTask: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
+    resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions | undefined, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
+    resolveDockerRunTaskDefinition(runOptions: DockerRunOptions | undefined, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

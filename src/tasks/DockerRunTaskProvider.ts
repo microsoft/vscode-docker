@@ -2,9 +2,8 @@ import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
 import { Platform, PlatformOS } from '../utils/platform';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper, NodeTaskOptions } from './node/NodeTaskHelper';
-import { TaskHelper } from './TaskHelper';
+import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
+import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -50,8 +49,8 @@ export interface DockerRunTask extends Task {
 
 export class DockerRunTaskProvider implements TaskProvider {
     constructor(
-        private readonly netCoreTaskHelper: TaskHelper,
-        private readonly nodeTaskHelper: TaskHelper
+        private readonly netCoreTaskHelper: NetCoreTaskHelperType,
+        private readonly nodeTaskHelper: NodeTaskHelperType
     ) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
@@ -72,9 +71,9 @@ export class DockerRunTaskProvider implements TaskProvider {
         let runOptions: DockerRunOptions;
 
         if (task.definition.netCore) {
-            runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.definition, token);
+            runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.definition.dockerRun, task.definition.netCore, token);
         } else if (task.definition.node) {
-            runOptions = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.definition, token);
+            runOptions = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.definition.dockerRun, task.definition.node, token);
         }
 
         return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(runOptions, token)), task.problemMatchers);

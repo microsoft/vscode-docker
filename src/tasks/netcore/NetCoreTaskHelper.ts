@@ -1,14 +1,16 @@
 import * as path from 'path';
 import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildOptions } from '../DockerBuildTaskProvider';
-import { DockerRunTask, DockerRunTaskDefinition, DockerRunOptions } from '../DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject: string;
 }
 
-export class NetCoreTaskHelper implements TaskHelper {
+export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOptions>;
+
+export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
         throw new Error('Method not implemented.');
     }
@@ -17,16 +19,16 @@ export class NetCoreTaskHelper implements TaskHelper {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions> {
-        const buildOptions = definition.dockerBuild || {};
+    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions | undefined, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+        buildOptions = buildOptions || {};
 
-        buildOptions.dockerfile = definition.dockerBuild.dockerfile || path.join(path.dirname(definition.netCore.appProject), 'Dockerfile');
-        buildOptions.context = definition.dockerBuild.context || path.dirname(definition.netCore.appProject);
+        buildOptions.dockerfile = buildOptions.dockerfile || path.join(path.dirname(helperOptions.appProject), 'Dockerfile');
+        buildOptions.context = buildOptions.context || path.dirname(helperOptions.appProject);
 
         return buildOptions;
     }
 
-    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunTaskDefinition(runOptions: DockerRunOptions | undefined, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         throw new Error('Method not implemented.');
     }
 }
