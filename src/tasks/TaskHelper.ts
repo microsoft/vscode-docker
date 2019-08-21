@@ -1,14 +1,14 @@
 import { CancellationToken, ExtensionContext, tasks, WorkspaceFolder } from 'vscode';
-import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface TaskHelper {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
     provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]>;
-    resolveDockerBuildTaskDefinition(buildTask: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition>;
-    resolveDockerRunTaskDefinition(runTask: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition>;
+    resolveDockerBuildTaskDefinition(buildTask: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
+    resolveDockerRunTaskDefinition(runTask: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

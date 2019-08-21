@@ -1,6 +1,6 @@
 import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { DockerBuildTask, DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
-import { DockerRunTask, DockerRunTaskDefinition } from '../DockerRunTaskProvider';
+import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildOptions } from '../DockerBuildTaskProvider';
+import { DockerRunTask, DockerRunTaskDefinition, DockerRunOptions } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 export interface NodeTaskOptions {
@@ -9,18 +9,22 @@ export interface NodeTaskOptions {
 
 export class NodeTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
-        throw new Error('Method not implemented.');
+        return await Promise.resolve([]);
     }
 
     public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]> {
-        throw new Error('Method not implemented.');
+        return await Promise.resolve([]);
     }
 
-    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
-        throw new Error('Method not implemented.');
+    public async resolveDockerBuildTaskDefinition(definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions> {
+        const buildOptions = definition.dockerBuild || {};
+
+        return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
-        throw new Error('Method not implemented.');
+    public async resolveDockerRunTaskDefinition(definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
+        const runOptions = definition.dockerRun || {};
+
+        return await Promise.resolve(runOptions);
     }
 }

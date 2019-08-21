@@ -2,8 +2,9 @@ import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
 import { Platform } from '../utils/platform';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper, NodeTaskOptions } from './node/NodeTaskHelper';
+import { NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
+import { NodeTaskOptions } from './node/NodeTaskHelper';
+import { TaskHelper } from './TaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -27,8 +28,8 @@ export interface DockerBuildTask extends Task {
 
 export class DockerBuildTaskProvider implements TaskProvider {
     constructor(
-        private readonly netCoreTaskHelper: NetCoreTaskHelper,
-        private readonly nodeTaskHelper: NodeTaskHelper
+        private readonly netCoreTaskHelper: TaskHelper,
+        private readonly nodeTaskHelper: TaskHelper
     ) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
@@ -46,27 +47,27 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(task: DockerBuildTask, token?: CancellationToken): Promise<Task> {
-        task.definition.dockerBuild = task.definition.dockerBuild || {};
+        let buildOptions: DockerBuildOptions;
 
         if (task.definition.netCore) {
-            task.definition = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
+            buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
         } else if (task.definition.node) {
-            task.definition = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
+            buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.definition, token);
         }
 
-        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(task, token)), task.problemMatchers);
+        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(buildOptions, token)), task.problemMatchers);
     }
 
-    private async resolveCommandLine(task: DockerBuildTask, token?: CancellationToken): Promise<string> {
+    private async resolveCommandLine(options: DockerBuildOptions, token?: CancellationToken): Promise<string> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
-            .withFlagArg('--pull', task.definition.dockerBuild.pull)
-            .withNamedArg('-f', task.definition.dockerBuild.dockerfile)
-            .withKeyValueArgs('--build-arg', task.definition.dockerBuild.args)
-            .withKeyValueArgs('--label', task.definition.dockerBuild.labels)
-            .withNamedArg('-t', task.definition.dockerBuild.tag)
-            .withNamedArg('--target', task.definition.dockerBuild.target)
-            .withQuotedArg(task.definition.dockerBuild.context)
+            .withFlagArg('--pull', options.pull)
+            .withNamedArg('-f', options.dockerfile)
+            .withKeyValueArgs('--build-arg', options.args)
+            .withKeyValueArgs('--label', options.labels)
+            .withNamedArg('-t', options.tag)
+            .withNamedArg('--target', options.target)
+            .withQuotedArg(options.context)
             .build();
     }
 }
