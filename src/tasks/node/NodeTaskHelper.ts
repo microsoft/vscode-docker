@@ -19,7 +19,7 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         return await Promise.resolve([]);
     }
 
-    public async resolveDockerBuildTaskDefinition(buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         buildOptions = buildOptions || {};
 
         if (buildOptions.tag === undefined) {
@@ -33,7 +33,7 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunTaskDefinition(runOptions: DockerRunOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         runOptions = runOptions || {};
 
         if (runOptions.image === undefined) {

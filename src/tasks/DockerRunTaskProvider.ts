@@ -74,9 +74,9 @@ export class DockerRunTaskProvider implements TaskProvider {
 
         if (task.scope as WorkspaceFolder !== undefined) {
             if (task.definition.netCore) {
-                task.definition = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.netCore, token);
+                runOptions = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.netCore, token);
             } else if (task.definition.node) {
-                task.definition = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.node, token);
+                runOptions = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.node, token);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);

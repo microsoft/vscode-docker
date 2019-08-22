@@ -15,6 +15,7 @@ export class NodeDebugHelper implements DebugHelper {
     public async resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {
         const resolvedConfiguration = cloneObject(debugConfiguration);
 
+        // tslint:disable-next-line: no-invalid-template-strings
         resolvedConfiguration.localRoot = '${workspaceFolder}';
         resolvedConfiguration.port = 9229;
         resolvedConfiguration.remoteRoot = '/usr/src/app';
