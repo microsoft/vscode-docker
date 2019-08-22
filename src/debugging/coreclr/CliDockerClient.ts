@@ -221,7 +221,7 @@ export class CliDockerClient implements DockerClient {
             .withArrayArgs('--add-host', options.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
-            .withArg(options.command)
+            .withArgs(options.command)
             .build();
 
         const result = await this.processProvider.exec(command, {});

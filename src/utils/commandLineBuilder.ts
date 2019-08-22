@@ -21,14 +21,26 @@ export class CommandLineBuilder {
 
     public withArg(arg: string | ShellQuotedString | undefined): CommandLineBuilder {
         if (typeof (arg) === 'string') {
-            this.args.push(
-                {
-                    value: arg,
-                    quoting: ShellQuoting.Escape
-                }
-            );
+            if (arg) { // Quoted strings can be added as empty, but withArg will not allow an empty string arg
+                this.args.push(
+                    {
+                        value: arg,
+                        quoting: ShellQuoting.Escape
+                    }
+                );
+            }
         } else if (arg !== undefined) {
             this.args.push(arg);
+        }
+
+        return this;
+    }
+
+    public withArgs(args: string | undefined): CommandLineBuilder {
+        if (args) {
+            for (const arg of args.split(' ')) {
+                this.withArg(arg);
+            }
         }
 
         return this;

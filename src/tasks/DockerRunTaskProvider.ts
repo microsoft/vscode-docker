@@ -109,7 +109,7 @@ export class DockerRunTaskProvider implements TaskProvider {
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
             .withQuotedArg(runOptions.image)
-            .withArg(runOptions.command)
+            .withArgs(runOptions.command)
             .buildShellQuotedStrings();
     }
 }
