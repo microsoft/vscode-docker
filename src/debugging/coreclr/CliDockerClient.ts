@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import CommandLineBuilder from "../../utils/commandLineBuilder";
+import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { ProcessProvider } from "./ChildProcessProvider";
 import { LineSplitter } from "./lineSplitter";
 
@@ -221,7 +221,7 @@ export class CliDockerClient implements DockerClient {
             .withArrayArgs('--add-host', options.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
-            .withArg(options.command)
+            .withArgs(options.command)
             .build();
 
         const result = await this.processProvider.exec(command, {});

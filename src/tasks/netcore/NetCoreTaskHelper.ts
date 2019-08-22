@@ -30,24 +30,28 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         if (helperOptions.appProject === undefined ||
-            !await fse.pathExists(helperOptions.appProject)) {
+            !await fse.pathExists((helperOptions.appProject = NetCoreTaskHelper.resolveFolderPath(helperOptions.appProject, folder)))) {
             throw new Error('The \'netCore.appProject\' in the Docker Build definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
         }
 
-        buildOptions.context = buildOptions.context || await this.inferContext(folder, buildOptions);
-        buildOptions.dockerfile = buildOptions.dockerfile || await this.inferDockerfile(folder, buildOptions);
-        buildOptions.tag = buildOptions.tag || `${await this.inferAppName(folder, helperOptions)}:dev`;
+        const appName = await this.inferAppName(folder, helperOptions);
+
+        // tslint:disable: no-invalid-template-strings
+        buildOptions.context = buildOptions.context || '${workspaceFolder}';
+        buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
+        // tslint:enable: no-invalid-template-strings
+        buildOptions.tag = buildOptions.tag || `${appName}:dev`;
         buildOptions.target = buildOptions.target || 'base';
         buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
         return buildOptions;
     }
 
-    public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         if (helperOptions.appProject === undefined ||
-            !await fse.pathExists(helperOptions.appProject)) {
+            !await fse.pathExists((helperOptions.appProject = NetCoreTaskHelper.resolveFolderPath(helperOptions.appProject, folder)))) {
             throw new Error('The \'netCore.appProject\' in the Docker Run definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
         }
 
@@ -56,8 +60,12 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         runOptions.containerName = runOptions.containerName || `${appName}-dev`;
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
+        runOptions.image = runOptions.image || `${appName}:dev`;
 
-        const ssl = helperOptions.configureSsl || await this.inferSsl(folder, helperOptions);
+        runOptions.entrypoint = runOptions.entrypoint || runOptions.os === 'Windows' ? 'ping' : 'tail';
+        runOptions.command = runOptions.command || runOptions.os === 'Windows' ? '-t localhost' : '-f /dev/null';
+
+        const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await this.inferSsl(folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(folder, helperOptions);
 
         if (userSecrets) {
@@ -75,22 +83,22 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         return runOptions;
     }
 
-    private async inferContext(folder: WorkspaceFolder, buildOptions: DockerBuildOptions): Promise<string> {
+    /*private async inferContext(folder: WorkspaceFolder, buildOptions: DockerBuildOptions): Promise<string> {
         return folder.uri.fsPath;
     }
 
     private async inferDockerfile(folder: WorkspaceFolder, buildOptions: DockerBuildOptions): Promise<string> {
         let result = path.join(buildOptions.context, 'Dockerfile');
 
-        if (!await fse.pathExists(result)) {
+        if (!await fse.pathExists(path.normalize(result))) {
             throw new Error(`The Dockerfile '${result}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);
         }
 
         return result;
-    }
+    }*/
 
     private async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<string> {
-        return path.basename(helperOptions.appProject).replace(/\s/i, '').toLowerCase();
+        return path.parse(helperOptions.appProject).name.replace(/\s/i, '').toLowerCase();
     }
 
     private async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
@@ -210,5 +218,9 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
         volumes.push(volume);
         return true;
+    }
+
+    private static resolveFolderPath(folderPath: string, folder: WorkspaceFolder): string {
+        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
     }
 }

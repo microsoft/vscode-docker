@@ -890,6 +890,10 @@
                             "appProject": {
                                 "type": "string",
                                 "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                            },
+                            "configureSsl": {
+                                "type": "boolean",
+                                "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
                             }
                         },
                         "required": [
