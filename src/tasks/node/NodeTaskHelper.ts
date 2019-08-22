@@ -56,6 +56,19 @@ export class NodeTaskHelper implements NodeTaskHelperType {
 
             // TODO: Infer startup script...
             runOptions.command = `node ${inspectArg}=0.0.0.0:${inspectPort} ./bin/www`;
+
+            if (runOptions.ports === undefined) {
+                runOptions.ports = [];
+            }
+
+            // If not already defined, create a mapping for the inspect port between container and host...
+            if (runOptions.ports.find(port => port.containerPort === inspectPort) === undefined) {
+                runOptions.ports.push({
+                    containerPort: inspectPort,
+                    // TODO: Can this mapping be dynamic?
+                    hostPort: inspectPort
+                });
+            }
         }
 
         return await Promise.resolve(runOptions);
