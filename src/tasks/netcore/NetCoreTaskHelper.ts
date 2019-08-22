@@ -86,7 +86,6 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         }
 
         const appName = await this.inferAppName(folder, helperOptions);
-        const appOutput = await this.inferAppOutput(folder, helperOptions);
 
         runOptions.containerName = runOptions.containerName || `${appName}-dev`;
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
@@ -126,10 +125,6 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
     private async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<string> {
         return path.basename(helperOptions.appProject).replace(/\s/i, '').toLowerCase();
-    }
-
-    private async inferAppOutput(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<string> {
-        return await this.netCoreProjectProvider.getTargetPath(helperOptions.appProject);
     }
 
     private async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
