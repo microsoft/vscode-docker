@@ -1,10 +1,13 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, WorkspaceFolder } from 'vscode';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
-import { FileService } from 'azure-storage';
+
+interface NodePackage {
+    name?: string;
+}
 
 export interface NodeTaskBuildOptions {
     package?: string;
@@ -95,9 +98,16 @@ export class NodeTaskHelper implements NodeTaskHelperType {
     }
 
     private static async inferTag(packagePath: string): Promise<string> {
-        const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
+        const packageJson = await fse.readFile(packagePath, 'utf8');
+        const packageContent = <NodePackage>JSON.parse(packageJson);
 
-        return `${packageBaseDirName}:latest`;
+        if (packageContent.name !== undefined) {
+            return packageContent.name;
+        } else {
+            const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
+
+            return `${packageBaseDirName}:latest`;
+        }
     }
 
     private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {
