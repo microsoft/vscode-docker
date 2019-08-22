@@ -13,7 +13,7 @@ import { DockerDebugSessionManager } from './debugSessionManager';
 import { DefaultDockerManager } from './dockerManager';
 import DockerNetCoreDebugConfigurationProvider from './dockerNetCoreDebugConfigurationProvider';
 import { LocalFileSystemProvider } from './fsProvider';
-import LocalAspNetCoreSslManager from './LocalAspNetCoreSslManager';
+import { LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import LocalOSProvider from './LocalOSProvider';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import OpnBrowserClient from './OpnBrowserClient';

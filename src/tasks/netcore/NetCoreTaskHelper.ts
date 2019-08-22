@@ -3,17 +3,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
 import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { ChildProcessProvider } from '../../debugging/coreclr/ChildProcessProvider';
-import { DockerContainerVolume } from '../../debugging/coreclr/CliDockerClient';
-import { CommandLineDotNetClient, UserSecretsRegex } from '../../debugging/coreclr/CommandLineDotNetClient';
-import { LinuxNuGetPackageFallbackFolderPath, MacNuGetPackageFallbackFolderPath } from '../../debugging/coreclr/dockerManager';
-import { LocalFileSystemProvider } from '../../debugging/coreclr/fsProvider';
-import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
-import { LocalOSProvider } from '../../debugging/coreclr/LocalOSProvider';
-import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../../debugging/coreclr/netCoreProjectProvider';
-import { OSTempFileProvider } from '../../debugging/coreclr/tempFileProvider';
+import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
-import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
+import { DockerContainerVolume, DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
@@ -21,40 +13,14 @@ export interface NetCoreTaskOptions {
     configureSsl?: boolean;
 }
 
+const UserSecretsRegex = /UserSecretsId/i;
+const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
+const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
+
 export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOptions>;
 
 export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
-
-    private readonly netCoreProjectProvider: NetCoreProjectProvider;
-    private readonly aspNetCoreSslManager: AspNetCoreSslManager;
-
-    constructor() {
-        const processProvider = new ChildProcessProvider();
-        const fsProvider = new LocalFileSystemProvider();
-        const osProvider = new LocalOSProvider();
-        const dotNetClient = new CommandLineDotNetClient(
-            processProvider,
-            fsProvider,
-            osProvider
-        )
-
-        this.netCoreProjectProvider = new MsBuildNetCoreProjectProvider(
-            fsProvider,
-            dotNetClient,
-            new OSTempFileProvider(
-                osProvider,
-                processProvider
-            )
-        );
-
-        this.aspNetCoreSslManager = new LocalAspNetCoreSslManager(
-            dotNetClient,
-            this.netCoreProjectProvider,
-            processProvider,
-            osProvider
-        );
-    }
 
     public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
         throw new Error('Method not implemented.');
@@ -213,8 +179,8 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
 
         if (userSecrets || ssl) {
-            const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
-            const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(runOptions.os);
+            const hostSecretsFolders = LocalAspNetCoreSslManager.getHostSecretsFolders();
+            const containerSecretsFolders = LocalAspNetCoreSslManager.getContainerSecretsFolders(runOptions.os);
 
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.userSecretsFolder,

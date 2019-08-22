@@ -1,7 +1,7 @@
 import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
-import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
 import { cloneObject } from '../utils/cloneObject';
+import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';

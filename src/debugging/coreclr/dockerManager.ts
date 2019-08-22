@@ -12,7 +12,7 @@ import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRun
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import { Lazy } from './lazy';
-import { AspNetCoreSslManager } from './LocalAspNetCoreSslManager';
+import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';
 
@@ -246,7 +246,7 @@ export class DefaultDockerManager implements DockerManager {
 
         if (options.run.configureAspNetCoreSsl) {
             const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
-            const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
+            const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
             await this.aspNetCoreSslManager.trustCertificateIfNecessary();
             await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
         }
@@ -405,8 +405,8 @@ export class DefaultDockerManager implements DockerManager {
         ];
 
         if (options.configureAspNetCoreSsl || options.configureDotNetUserSecrets) {
-            const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
-            const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(options.os);
+            const hostSecretsFolders = LocalAspNetCoreSslManager.getHostSecretsFolders();
+            const containerSecretsFolders = LocalAspNetCoreSslManager.getContainerSecretsFolders(options.os);
 
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.userSecretsFolder,

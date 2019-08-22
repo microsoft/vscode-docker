@@ -21,7 +21,7 @@ export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './
 export { configPrefix } from './src/constants';
 export { ProcessProvider } from './src/debugging/coreclr/ChildProcessProvider';
 export { DockerBuildImageOptions, DockerClient } from './src/debugging/coreclr/CliDockerClient';
-export { CommandLineBuilder } from './src/debugging/coreclr/commandLineBuilder';
+export { CommandLineBuilder } from './src/utils/commandLineBuilder';
 export { DotNetClient } from './src/debugging/coreclr/CommandLineDotNetClient';
 export { compareBuildImageOptions, LaunchOptions } from './src/debugging/coreclr/dockerManager';
 export { FileSystemProvider } from './src/debugging/coreclr/fsProvider';
