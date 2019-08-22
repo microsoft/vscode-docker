@@ -49,15 +49,13 @@ export class DockerBuildTaskProvider implements TaskProvider {
     private async resolveTaskInternal(task: DockerBuildTask, token?: CancellationToken): Promise<Task> {
         let buildOptions: DockerBuildOptions = task.definition.dockerBuild ? cloneObject(task.definition.dockerBuild) : {};
 
-        if (buildOptions.context === undefined) {
-            buildOptions.context = '.';
-        }
-
         if (task.scope as WorkspaceFolder !== undefined) {
             if (task.definition.netCore) {
-                buildOptions = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, task.definition.netCore, token);
+                const helperOptions = cloneObject(task.definition.netCore);
+                buildOptions = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, helperOptions, token);
             } else if (task.definition.node) {
-                buildOptions = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, task.definition.node, token);
+                const helperOptions = cloneObject(task.definition.node);
+                buildOptions = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, helperOptions, token);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);

@@ -21,6 +21,7 @@ export class NodeTaskHelper implements NodeTaskHelperType {
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         if (buildOptions.tag === undefined) {
+            buildOptions.context = buildOptions.context || '.';
             const rootPath = workspace.workspaceFolders[0].uri.fsPath;
             const contextPath = path.join(rootPath, buildOptions.context);
             const contextBaseName = path.basename(contextPath);
