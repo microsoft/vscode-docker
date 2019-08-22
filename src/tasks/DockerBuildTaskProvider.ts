@@ -4,7 +4,7 @@ import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
+import { NodeTaskBuildOptions, NodeTaskHelperType } from './node/NodeTaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -19,7 +19,7 @@ export interface DockerBuildOptions {
 export interface DockerBuildTaskDefinition extends TaskDefinition {
     dockerBuild?: DockerBuildOptions;
     netCore?: NetCoreTaskOptions;
-    node?: NodeTaskOptions;
+    node?: NodeTaskBuildOptions;
 }
 
 export interface DockerBuildTask extends Task {

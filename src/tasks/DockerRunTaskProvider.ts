@@ -4,7 +4,7 @@ import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
+import { NodeTaskHelperType, NodeTaskRunOptions } from './node/NodeTaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -42,7 +42,7 @@ export interface DockerRunOptions {
 export interface DockerRunTaskDefinition extends TaskDefinition {
     dockerRun?: DockerRunOptions;
     netCore?: NetCoreTaskOptions;
-    node?: NodeTaskOptions;
+    node?: NodeTaskRunOptions;
 }
 
 export interface DockerRunTask extends Task {
