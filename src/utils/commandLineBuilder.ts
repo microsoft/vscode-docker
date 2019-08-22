@@ -1,75 +1,131 @@
+import { ShellQuotedString, ShellQuoting } from "vscode";
+
 /*---------------------------------------------------------
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-export type CommandLineArgFactory = () => (string | undefined);
-
 export class CommandLineBuilder {
-    private readonly args: CommandLineArgFactory[] = [];
+    private readonly args: ShellQuotedString[] = [];
 
-    public static create(...args: (undefined | string | CommandLineArgFactory)[]): CommandLineBuilder {
-        let builder = new CommandLineBuilder();
+    public static create(...args: (string | ShellQuotedString | undefined)[]): CommandLineBuilder {
+        const builder = new CommandLineBuilder();
 
-        for (let arg of args) {
-            if (arg) {
-                if (typeof arg === 'string') {
-                    builder = builder.withArg(arg);
-                } else {
-                    builder = builder.withArgFactory(arg);
-                }
+        if (args !== undefined) {
+            for (const arg of args) {
+                builder.withArg(arg);
             }
         }
 
         return builder;
     }
 
-    public build(): string {
-        return this.args.map(arg => arg()).filter(arg => arg !== undefined).join(' ');
-    }
-
-    public withArg(arg: string | undefined): CommandLineBuilder {
-        return this.withArgFactory(() => arg);
-    }
-
-    public withArrayArgs<T>(name: string, values: T[] | undefined, formatter?: (value: T) => string): CommandLineBuilder {
-        formatter = formatter || ((value: T) => value.toString());
-
-        return this.withArgFactory(() => values ? values.map(value => `${name} "${formatter(value)}"`).join(' ') : undefined);
-    }
-
-    public withArgFactory(factory: CommandLineArgFactory | undefined): CommandLineBuilder {
-        if (factory) {
-            this.args.push(factory);
+    public withArg(arg: string | ShellQuotedString | undefined): CommandLineBuilder {
+        if (typeof (arg) === 'string') {
+            this.args.push(
+                {
+                    value: arg,
+                    quoting: ShellQuoting.Escape
+                }
+            );
+        } else if (arg !== undefined) {
+            this.args.push(arg);
         }
 
         return this;
     }
 
     public withFlagArg(name: string, value: boolean | undefined): CommandLineBuilder {
-        return this.withArgFactory(() => value ? name : undefined);
+        if (value) {
+            this.withArg(name);
+        }
+
+        return this;
     }
 
-    public withKeyValueArgs(name: string, values: { [key: string]: string }): CommandLineBuilder {
-        return this.withArgFactory(() => {
-            if (values) {
-                const keys = Object.keys(values);
+    public withNamedArg(name: string, value: string | ShellQuotedString | undefined): CommandLineBuilder {
+        if (typeof (value) === 'string') {
+            this.withArg(name);
+            this.withArg(
+                {
+                    value: value,
+                    quoting: ShellQuoting.Strong // The prior behavior was to quote
+                }
+            );
+        } else if (value !== undefined) {
+            this.withArg(name);
+            this.withArg(value);
+        }
 
-                if (keys.length > 0) {
-                    return keys.map(key => `${name} "${key}=${values[key]}"`).join(' ');
+        return this;
+    }
+
+    public withQuotedArg(value: string): CommandLineBuilder {
+        if (value !== undefined) {
+            this.withArg(
+                {
+                    value: value,
+                    quoting: ShellQuoting.Strong
+                }
+            );
+        }
+
+        return this;
+    }
+
+    public withKeyValueArgs(name: string, values: { [key: string]: string | ShellQuotedString | undefined } | undefined): CommandLineBuilder {
+        if (values !== undefined) {
+            for (const key of Object.keys(values)) {
+                if (typeof (values[key]) === 'string') {
+                    this.withArg(name);
+                    this.withArg(
+                        {
+                            value: `${key}=${values[key]}`,
+                            quoting: ShellQuoting.Strong // The prior behavior was to quote
+                        }
+                    );
+                } else if (values[key] !== undefined) {
+                    this.withArg(name);
+                    this.withArg(values[key]);
                 }
             }
+        }
 
-            return undefined;
-        });
+        return this;
     }
 
-    public withNamedArg(name: string, value: string | undefined): CommandLineBuilder {
-        return this.withArgFactory(() => value ? `${name} "${value}"` : undefined);
+    public withArrayArgs<T>(name: string, values: T[] | undefined, formatter?: (value: T) => string | ShellQuotedString): CommandLineBuilder {
+        formatter = formatter || ((value: T) => value.toString());
+
+        if (values !== undefined) {
+            for (const value of values) {
+                if (value !== undefined) {
+                    const formatted = formatter(value);
+                    if (typeof (formatted) === 'string') {
+                        this.withArg(name);
+                        this.withArg(
+                            {
+                                value: formatted,
+                                quoting: ShellQuoting.Strong // The prior behavior was to quote
+                            }
+                        );
+                    } else if (formatted !== undefined) {
+                        this.withArg(name);
+                        this.withArg(formatted);
+                    }
+                }
+            }
+        }
+
+        return this;
     }
 
-    public withQuotedArg(value: string | undefined): CommandLineBuilder {
-        return this.withArgFactory(() => value ? `"${value}"` : undefined);
+    public build(): string {
+        return this.args.map(arg => {
+            return arg.quoting === ShellQuoting.Strong ? `"${arg.value}"` : arg.value;
+        }).join(' ');
+    }
+
+    public buildShellQuotedStrings(): ShellQuotedString[] {
+        return this.args;
     }
 }
-
-export default CommandLineBuilder;

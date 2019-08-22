@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import CommandLineBuilder from "../../utils/commandLineBuilder";
+import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { ProcessProvider } from "./ChildProcessProvider";
 import { LineSplitter } from "./lineSplitter";
 

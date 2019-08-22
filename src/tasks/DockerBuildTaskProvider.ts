@@ -1,4 +1,4 @@
-import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
@@ -61,10 +61,17 @@ export class DockerBuildTaskProvider implements TaskProvider {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
         }
 
-        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(buildOptions, token)), task.problemMatchers);
+        const commandLine = await this.resolveCommandLine(buildOptions, token);
+        return new Task(
+            task.definition,
+            task.scope,
+            task.name,
+            task.source,
+            new ShellExecution(commandLine[0], commandLine.slice(1)),
+            task.problemMatchers);
     }
 
-    private async resolveCommandLine(options: DockerBuildOptions, token?: CancellationToken): Promise<string> {
+    private async resolveCommandLine(options: DockerBuildOptions, token?: CancellationToken): Promise<ShellQuotedString[]> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
@@ -74,6 +81,6 @@ export class DockerBuildTaskProvider implements TaskProvider {
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
             .withQuotedArg(options.context)
-            .build();
+            .buildShellQuotedStrings();
     }
 }
