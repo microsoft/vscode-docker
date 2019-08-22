@@ -4,9 +4,12 @@ import { Platform } from '../utils/platform';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
 
+export type DebugPlatform = 'netCore' | 'node';
+
 export interface DockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
     node?: NodeDebugOptions;
+    platform: DebugPlatform;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -30,9 +33,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
-        if (debugConfiguration.netCore) {
+        if (debugConfiguration.platform === 'netCore') {
             return await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
-        } else if (debugConfiguration.node) {
+        } else if (debugConfiguration.platform === 'node') {
             return await this.nodeDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
         }
     }

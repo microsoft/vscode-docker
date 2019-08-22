@@ -505,8 +505,17 @@
                                         "description": "bar"
                                     }
                                 }
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore",
+                                    "node"
+                                ]
                             }
-                        }
+                        },
+                        "required": ["platform"]
                     }
                 }
             },
