@@ -30,7 +30,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerBuildOptions> {
         if (helperOptions.appProject === undefined ||
             !await fse.pathExists(helperOptions.appProject)) {
             throw new Error('The \'netCore.appProject\' in the Docker Build definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
@@ -45,7 +45,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         return buildOptions;
     }
 
-    public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, token?: CancellationToken): Promise<DockerRunOptions> {
         if (helperOptions.appProject === undefined ||
             !await fse.pathExists(helperOptions.appProject)) {
             throw new Error('The \'netCore.appProject\' in the Docker Run definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
@@ -123,7 +123,6 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
     private async inferVolumes(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, ssl: boolean, userSecrets: boolean): Promise<DockerContainerVolume[]> {
         const volumes: DockerContainerVolume[] = [];
-        const ProgramFiles = 'ProgramFiles';
 
         if (runOptions.volumes) {
             for (const volume of runOptions.volumes) {
@@ -143,11 +142,11 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
             permissions: 'rw'
         }
 
-        /*const debuggerVolume: DockerContainerVolume = {
-            localPath: debuggerFolder,
-            containerPath: options.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
+        const debuggerVolume: DockerContainerVolume = {
+            localPath: path.join(os.homedir(), '.vsdbg'),
+            containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
             permissions: 'ro'
-        };*/
+        };
 
         const nugetVolume: DockerContainerVolume = {
             localPath: path.join(os.homedir(), '.nuget', 'packages'),
@@ -158,10 +157,10 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         let programFilesEnvironmentVariable: string | undefined;
 
         if (os.platform() === 'win32') {
-            programFilesEnvironmentVariable = process.env[ProgramFiles];
+            programFilesEnvironmentVariable = process.env.ProgramFiles;
 
             if (programFilesEnvironmentVariable === undefined) {
-                throw new Error(`The environment variable '${ProgramFiles}' is not defined. This variable is used to locate the NuGet fallback folder.`);
+                throw new Error('The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.');
             }
         }
 
@@ -174,7 +173,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
         NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, appVolume);
         NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, srcVolume);
-        //NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, debuggerVolume);
+        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, debuggerVolume);
         NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetVolume);
         NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
 

@@ -7,8 +7,8 @@ import { NodeTaskHelper } from './node/NodeTaskHelper';
 export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
     provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]>;
-    resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunTaskDefinition(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
+    resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

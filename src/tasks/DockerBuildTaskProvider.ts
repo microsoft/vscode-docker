@@ -55,9 +55,9 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
         if (task.scope as WorkspaceFolder !== undefined) {
             if (task.definition.netCore) {
-                buildOptions = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, buildOptions, task.definition.netCore, token);
+                buildOptions = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, task.definition.netCore, token);
             } else if (task.definition.node) {
-                buildOptions = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, buildOptions, task.definition.node, token);
+                buildOptions = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, task.definition.node, token);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);

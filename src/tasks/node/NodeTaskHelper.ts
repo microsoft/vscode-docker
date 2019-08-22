@@ -19,7 +19,7 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         return await Promise.resolve([]);
     }
 
-    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
         if (buildOptions.tag === undefined) {
             const rootPath = workspace.workspaceFolders[0].uri.fsPath;
             const contextPath = path.join(rootPath, buildOptions.context);
@@ -31,7 +31,7 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NodeTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
         if (runOptions.image === undefined) {
             const rootPath = workspace.workspaceFolders[0].uri.fsPath;
             const rootPathBaseName = path.basename(rootPath);
