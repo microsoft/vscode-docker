@@ -758,8 +758,17 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
                     }
-                }
+                },
+                "required": ["platform"]
             },
             {
                 "type": "docker-run",
@@ -920,8 +929,17 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
                     }
-                }
+                },
+                "required": ["platform"]
             }
         ],
         "languages": [

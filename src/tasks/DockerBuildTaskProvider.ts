@@ -5,6 +5,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskBuildOptions, NodeTaskHelperType } from './node/NodeTaskHelper';
+import { TaskPlatform } from './TaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -20,6 +21,7 @@ export interface DockerBuildTaskDefinition extends TaskDefinition {
     dockerBuild?: DockerBuildOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskBuildOptions;
+    platform: TaskPlatform;
 }
 
 export interface DockerBuildTask extends Task {
@@ -36,7 +38,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
         return []; // Intentionally empty, so that resolveTask gets used
     }
 
-    public resolveTask(task: Task, token?: CancellationToken): ProviderResult<Task> {
+    public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
         return callWithTelemetryAndErrorHandling(
             'docker-build',
             async () => await this.resolveTaskInternal(task, token));
@@ -50,12 +52,14 @@ export class DockerBuildTaskProvider implements TaskProvider {
         let buildOptions: DockerBuildOptions = task.definition.dockerBuild ? cloneObject(task.definition.dockerBuild) : {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
-            if (task.definition.netCore) {
+            if (task.definition.platform === 'netCore') {
                 const helperOptions = cloneObject(task.definition.netCore);
                 buildOptions = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, helperOptions, token);
-            } else if (task.definition.node) {
+            } else if (task.definition.platform === 'node') {
                 const helperOptions = cloneObject(task.definition.node);
                 buildOptions = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, buildOptions, helperOptions, token);
+            } else {
+                throw new Error(`Unrecognized platform '${task.definition.platform}'.`)
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);

@@ -5,6 +5,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskRunOptions } from './node/NodeTaskHelper';
+import { TaskPlatform } from './TaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -44,6 +45,7 @@ export interface DockerRunTaskDefinition extends TaskDefinition {
     dockerRun?: DockerRunOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskRunOptions;
+    platform: TaskPlatform;
 }
 
 export interface DockerRunTask extends Task {
@@ -60,7 +62,7 @@ export class DockerRunTaskProvider implements TaskProvider {
         return []; // Intentionally empty, so that resolveTask gets used
     }
 
-    public resolveTask(task: Task, token?: CancellationToken): ProviderResult<Task> {
+    public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
         return callWithTelemetryAndErrorHandling(
             'docker-run',
             async () => await this.resolveTaskInternal(task, token));
@@ -74,12 +76,14 @@ export class DockerRunTaskProvider implements TaskProvider {
         let runOptions: DockerRunOptions = task.definition.dockerRun ? cloneObject(task.definition.dockerRun) : {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
-            if (task.definition.netCore) {
+            if (task.definition.platform === 'netCore') {
                 const helperOptions = cloneObject(task.definition.netCore);
                 runOptions = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, runOptions, helperOptions, token);
-            } else if (task.definition.node) {
+            } else if (task.definition.platform === 'node') {
                 const helperOptions = cloneObject(task.definition.node);
                 runOptions = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, runOptions, helperOptions, token);
+            } else {
+                throw new Error(`Unrecognized platform '${task.definition.platform}'.`)
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
