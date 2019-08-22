@@ -1,9 +1,10 @@
 import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
+import { cloneObject } from '../utils/cloneObject';
 import { Platform } from '../utils/platform';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper, NodeTaskOptions } from './node/NodeTaskHelper';
+import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
+import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -27,8 +28,8 @@ export interface DockerBuildTask extends Task {
 
 export class DockerBuildTaskProvider implements TaskProvider {
     constructor(
-        private readonly netCoreTaskHelper: NetCoreTaskHelper,
-        private readonly nodeTaskHelper: NodeTaskHelper
+        private readonly netCoreTaskHelper: NetCoreTaskHelperType,
+        private readonly nodeTaskHelper: NodeTaskHelperType
     ) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
@@ -46,31 +47,35 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(task: DockerBuildTask, token?: CancellationToken): Promise<Task> {
-        task.definition.dockerBuild = task.definition.dockerBuild || {};
+        let buildOptions: DockerBuildOptions = task.definition.dockerBuild ? cloneObject(task.definition.dockerBuild) : {};
+
+        if (buildOptions.context === undefined) {
+            buildOptions.context = '.';
+        }
 
         if (task.scope as WorkspaceFolder !== undefined) {
             if (task.definition.netCore) {
-                task.definition = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+                task.definition = await this.netCoreTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, buildOptions, task.definition.netCore, token);
             } else if (task.definition.node) {
-                task.definition = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+                task.definition = await this.nodeTaskHelper.resolveDockerBuildTaskDefinition(task.scope as WorkspaceFolder, buildOptions, task.definition.node, token);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
         }
 
-        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(task, token)), task.problemMatchers);
+        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(buildOptions, token)), task.problemMatchers);
     }
 
-    private async resolveCommandLine(task: DockerBuildTask, token?: CancellationToken): Promise<string> {
+    private async resolveCommandLine(options: DockerBuildOptions, token?: CancellationToken): Promise<string> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
-            .withFlagArg('--pull', task.definition.dockerBuild.pull)
-            .withNamedArg('-f', task.definition.dockerBuild.dockerfile)
-            .withKeyValueArgs('--build-arg', task.definition.dockerBuild.args)
-            .withKeyValueArgs('--label', task.definition.dockerBuild.labels)
-            .withNamedArg('-t', task.definition.dockerBuild.tag)
-            .withNamedArg('--target', task.definition.dockerBuild.target)
-            .withQuotedArg(task.definition.dockerBuild.context)
+            .withFlagArg('--pull', options.pull)
+            .withNamedArg('-f', options.dockerfile)
+            .withKeyValueArgs('--build-arg', options.args)
+            .withKeyValueArgs('--label', options.labels)
+            .withNamedArg('-t', options.tag)
+            .withNamedArg('--target', options.target)
+            .withQuotedArg(options.context)
             .build();
     }
 }

@@ -8,7 +8,7 @@ import { DockerContainerVolume } from '../../debugging/coreclr/CliDockerClient';
 import { CommandLineDotNetClient, UserSecretsRegex } from '../../debugging/coreclr/CommandLineDotNetClient';
 import { LinuxNuGetPackageFallbackFolderPath, MacNuGetPackageFallbackFolderPath } from '../../debugging/coreclr/dockerManager';
 import { LocalFileSystemProvider } from '../../debugging/coreclr/fsProvider';
-import LocalAspNetCoreSslManager, { AspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
+import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { LocalOSProvider } from '../../debugging/coreclr/LocalOSProvider';
 import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../../debugging/coreclr/netCoreProjectProvider';
 import { OSTempFileProvider } from '../../debugging/coreclr/tempFileProvider';
@@ -21,7 +21,9 @@ export interface NetCoreTaskOptions {
     configureSsl?: boolean;
 }
 
-export class NetCoreTaskHelper implements TaskHelper {
+export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOptions>;
+
+export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
     private readonly netCoreProjectProvider: NetCoreProjectProvider;
@@ -62,19 +64,19 @@ export class NetCoreTaskHelper implements TaskHelper {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, definition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
-        if (definition.netCore.appProject === undefined ||
-            !await fse.pathExists(definition.netCore.appProject)) {
+    public async resolveDockerBuildTaskDefinition(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildTaskDefinition> {
+        if (helperOptions.appProject === undefined ||
+            !await fse.pathExists(helperOptions.appProject)) {
             throw new Error('The \'netCore.appProject\' in the Docker Build definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
         }
 
-        definition.dockerBuild.context = definition.dockerBuild.context || await this.inferContext(folder, definition);
-        definition.dockerBuild.dockerfile = definition.dockerBuild.dockerfile || await this.inferDockerfile(folder, definition);
-        definition.dockerBuild.tag = definition.dockerBuild.tag || `${await this.inferAppName(folder, definition)}:dev`;
-        definition.dockerBuild.target = definition.dockerBuild.target || 'base';
-        definition.dockerBuild.labels = definition.dockerBuild.labels || NetCoreTaskHelper.defaultLabels;
+        buildOptions.context = buildOptions.context || await this.inferContext(folder, buildOptions);
+        buildOptions.dockerfile = buildOptions.dockerfile || await this.inferDockerfile(folder, buildOptions);
+        buildOptions.tag = buildOptions.tag || `${await this.inferAppName(folder, buildOptions)}:dev`;
+        buildOptions.target = buildOptions.target || 'base';
+        buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
-        return definition;
+        return buildOptions;
     }
 
     public async resolveDockerRunTaskDefinition(folder: WorkspaceFolder, definition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunTaskDefinition> {
@@ -113,7 +115,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     private async inferDockerfile(folder: WorkspaceFolder, definition: DockerBuildTaskDefinition): Promise<string> {
-        let result = path.join(definition.dockerBuild.context, 'Dockerfile');
+        let result = path.join(buildOptions.context, 'Dockerfile');
 
         if (!await fse.pathExists(result)) {
             throw new Error(`The Dockerfile '${result}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);

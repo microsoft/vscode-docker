@@ -1,9 +1,10 @@
 import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { CommandLineBuilder } from '../debugging/coreclr/commandLineBuilder';
+import { cloneObject } from '../utils/cloneObject';
 import { Platform, PlatformOS } from '../utils/platform';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper, NodeTaskOptions } from './node/NodeTaskHelper';
+import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
+import { NodeTaskHelperType, NodeTaskOptions } from './node/NodeTaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -11,8 +12,8 @@ export interface DockerContainerExtraHost {
 }
 
 export interface DockerContainerPort {
-    hostPort?: string;
-    containerPort: string;
+    hostPort?: number;
+    containerPort: number;
     protocol?: 'tcp' | 'udp';
 }
 
@@ -29,6 +30,7 @@ export interface DockerRunOptions {
     env?: { [key: string]: string };
     envFiles?: string[];
     extraHosts?: DockerContainerExtraHost[];
+    image?: string;
     labels?: { [key: string]: string };
     network?: string;
     networkAlias?: string;
@@ -49,8 +51,8 @@ export interface DockerRunTask extends Task {
 
 export class DockerRunTaskProvider implements TaskProvider {
     constructor(
-        private readonly netCoreTaskHelper: NetCoreTaskHelper,
-        private readonly nodeTaskHelper: NodeTaskHelper
+        private readonly netCoreTaskHelper: NetCoreTaskHelperType,
+        private readonly nodeTaskHelper: NodeTaskHelperType
     ) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
@@ -68,37 +70,37 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(task: DockerRunTask, token?: CancellationToken): Promise<Task> {
-        task.definition.dockerRun = task.definition.dockerRun || {};
+        let runOptions: DockerRunOptions = task.definition.dockerRun ? cloneObject(task.definition.dockerRun) : {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
             if (task.definition.netCore) {
-                task.definition = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+                task.definition = await this.netCoreTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.netCore, token);
             } else if (task.definition.node) {
-                task.definition = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, task.definition, token);
+                task.definition = await this.nodeTaskHelper.resolveDockerRunTaskDefinition(task.scope as WorkspaceFolder, runOptions, task.definition.node, token);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
-        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(task, token)), task.problemMatchers);
+        return new Task(task.definition, task.scope, task.name, task.source, new ShellExecution(await this.resolveCommandLine(runOptions, token)), task.problemMatchers);
     }
 
-    private async resolveCommandLine(task: DockerRunTask, token?: CancellationToken): Promise<string> {
+    private async resolveCommandLine(runOptions: DockerRunOptions, token?: CancellationToken): Promise<string> {
         return CommandLineBuilder
             .create('docker', 'run', '-dt')
-            .withFlagArg('-P', task.definition.dockerRun.ports === undefined || task.definition.dockerRun.ports.length < 1)
-            .withNamedArg('--name', task.definition.dockerRun.containerName)
-            .withNamedArg('--network', task.definition.dockerRun.network)
-            .withNamedArg('--network-alias', task.definition.dockerRun.networkAlias)
-            .withKeyValueArgs('-e', task.definition.dockerRun.env)
-            .withArrayArgs('--env-file', task.definition.dockerRun.envFiles)
-            .withKeyValueArgs('--label', task.definition.dockerRun.labels)
-            .withArrayArgs('-v', task.definition.dockerRun.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
-            .withArrayArgs('-p', task.definition.dockerRun.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
-            .withArrayArgs('--add-host', task.definition.dockerRun.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
-            .withNamedArg('--entrypoint', task.definition.dockerRun.entrypoint)
-            .withQuotedArg('foo')
-            .withArg(task.definition.dockerRun.command)
+            .withFlagArg('-P', runOptions.ports === undefined || runOptions.ports.length < 1)
+            .withNamedArg('--name', runOptions.containerName)
+            .withNamedArg('--network', runOptions.network)
+            .withNamedArg('--network-alias', runOptions.networkAlias)
+            .withKeyValueArgs('-e', runOptions.env)
+            .withArrayArgs('--env-file', runOptions.envFiles)
+            .withKeyValueArgs('--label', runOptions.labels)
+            .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
+            .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
+            .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
+            .withNamedArg('--entrypoint', runOptions.entrypoint)
+            .withQuotedArg(runOptions.image)
+            .withArg(runOptions.command)
             .build();
     }
 }
