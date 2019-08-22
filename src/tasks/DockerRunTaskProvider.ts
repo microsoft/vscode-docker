@@ -36,6 +36,7 @@ export interface DockerRunOptions {
     networkAlias?: string;
     os?: PlatformOS;
     ports?: DockerContainerPort[];
+    portsPublishAll?: boolean;
     volumes?: DockerContainerVolume[];
 }
 
@@ -97,7 +98,7 @@ export class DockerRunTaskProvider implements TaskProvider {
     private async resolveCommandLine(runOptions: DockerRunOptions, token?: CancellationToken): Promise<ShellQuotedString[]> {
         return CommandLineBuilder
             .create('docker', 'run', '-dt')
-            .withFlagArg('-P', runOptions.ports === undefined || runOptions.ports.length < 1)
+            .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)
             .withNamedArg('--network', runOptions.network)
             .withNamedArg('--network-alias', runOptions.networkAlias)

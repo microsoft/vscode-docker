@@ -68,6 +68,8 @@ export class NodeTaskHelper implements NodeTaskHelperType {
                 runOptions.ports = [];
             }
 
+            let inspectPortPublished = false;
+
             // If not already defined, create a mapping for the inspect port between container and host...
             if (runOptions.ports.find(port => port.containerPort === inspectPort) === undefined) {
                 runOptions.ports.push({
@@ -75,6 +77,15 @@ export class NodeTaskHelper implements NodeTaskHelperType {
                     // TODO: Can this mapping be dynamic?
                     hostPort: inspectPort
                 });
+
+                inspectPortPublished = true;
+            }
+
+            // NOTE: By default, if no ports are explicitly published and the options do not say otherwise, all ports will be published.
+            //       If we published the inspection port, and it was the only published port, that "publish all" behavior would unintentionally be disabled.
+            //       Hence, in that situation, we force "publish all" in addition to the inspection port.
+            if (runOptions.portsPublishAll === undefined && inspectPortPublished && runOptions.ports.length === 1) {
+                runOptions.portsPublishAll = true;
             }
         }
 
