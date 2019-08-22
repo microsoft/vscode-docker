@@ -1,17 +1,20 @@
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, workspace, WorkspaceFolder } from 'vscode';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
+import { FileService } from 'azure-storage';
 
 export interface NodeTaskBuildOptions {
-    foo?: string;
+    package?: string;
 }
 
 export interface NodeTaskRunOptions {
     enableDebugging?: boolean;
     inspectMode?: 'default' | 'break';
     inspectPort?: number;
+    package?: string;
 }
 
 export type NodeTaskHelperType = TaskHelper<NodeTaskBuildOptions, NodeTaskRunOptions>;
@@ -26,24 +29,24 @@ export class NodeTaskHelper implements NodeTaskHelperType {
     }
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NodeTaskBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
-        if (buildOptions.tag === undefined) {
-            buildOptions.context = buildOptions.context || '.';
-            const rootPath = workspace.workspaceFolders[0].uri.fsPath;
-            const contextPath = path.join(rootPath, buildOptions.context);
-            const contextBaseName = path.basename(contextPath);
+        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, folder);
 
-            buildOptions.tag = `${contextBaseName}:latest`;
+        if (buildOptions.context === undefined) {
+            buildOptions.context = NodeTaskHelper.inferBuildContextPath(buildOptions && buildOptions.context, folder, packagePath);
+        }
+
+        if (buildOptions.tag === undefined) {
+            buildOptions.tag = await NodeTaskHelper.inferTag(packagePath);
         }
 
         return await Promise.resolve(buildOptions);
     }
 
     public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NodeTaskRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
-        if (runOptions.image === undefined) {
-            const rootPath = workspace.workspaceFolders[0].uri.fsPath;
-            const rootPathBaseName = path.basename(rootPath);
+        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, folder);
 
-            runOptions.image = `${rootPathBaseName}:latest`;
+        if (runOptions.image === undefined) {
+            runOptions.image = await NodeTaskHelper.inferTag(packagePath);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -73,5 +76,33 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         }
 
         return await Promise.resolve(runOptions);
+    }
+
+    private static inferPackagePath(packageFile: string | undefined, folder: WorkspaceFolder): string {
+        if (packageFile !== undefined) {
+            return this.resolveFilePath(packageFile, folder);
+        } else {
+            return path.join(folder.uri.fsPath, 'package.json');
+        }
+    }
+
+    private static inferBuildContextPath(buildContext: string | undefined, folder: WorkspaceFolder, packagePath: string): string {
+        if (buildContext !== undefined) {
+            return this.resolveFilePath(buildContext, folder);
+        } else {
+            return path.dirname(packagePath);
+        }
+    }
+
+    private static async inferTag(packagePath: string): Promise<string> {
+        const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
+
+        return `${packageBaseDirName}:latest`;
+    }
+
+    private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {
+        const replacedPath = filePath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
+
+        return path.resolve(folder.uri.fsPath, replacedPath);
     }
 }

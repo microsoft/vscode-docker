@@ -751,11 +751,11 @@
                         ]
                     },
                     "node": {
-                        "description": "Options for building Node.js projects in Docker.",
+                        "description": "Options for building Node.js applications in Docker.",
                         "properties": {
-                            "foo": {
+                            "package": {
                                 "type": "string",
-                                "description": "bar"
+                                "description": "The path to the package.json for the application."
                             }
                         }
                     }
@@ -885,7 +885,7 @@
                         }
                     },
                     "netCore": {
-                        "description": "Options for building .NET Core projects in Docker.",
+                        "description": "Options for running .NET Core projects in Docker.",
                         "properties": {
                             "appProject": {
                                 "type": "string",
@@ -901,7 +901,7 @@
                         ]
                     },
                     "node": {
-                        "description": "Options for building Node.js projects in Docker.",
+                        "description": "Options for running Node.js applications in Docker.",
                         "properties": {
                             "enableDebugging": {
                                 "type": "boolean",
@@ -914,6 +914,10 @@
                             "inspectPort": {
                                 "type": "integer",
                                 "description": "The port on which debugging should occur."
+                            },
+                            "package": {
+                                "type": "string",
+                                "description": "The path to the package.json for the application."
                             }
                         }
                     }
