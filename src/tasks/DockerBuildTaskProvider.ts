@@ -48,24 +48,24 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(task: DockerBuildTask, token?: CancellationToken): Promise<Task> {
-        const originalDefinition = cloneObject(task.definition);
-        task.definition.dockerBuild = task.definition.dockerBuild || {};
+        const definition = cloneObject(task.definition);
+        definition.dockerBuild = definition.dockerBuild || {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
-            if (task.definition.platform === 'netCore' || task.definition.netCore !== undefined) {
-                task.definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, task.definition.dockerBuild, task.definition.netCore, token);
-            } else if (task.definition.platform === 'node' || task.definition.node !== undefined) {
-                task.definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, task.definition.dockerBuild, task.definition.node, token);
+            if (definition.platform === 'netCore' || definition.netCore !== undefined) {
+                definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, definition.dockerBuild, definition.netCore, token);
+            } else if (definition.platform === 'node' || definition.node !== undefined) {
+                definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, definition.dockerBuild, definition.node, token);
             } else {
-                throw new Error(`Unrecognized platform '${task.definition.platform}'.`)
+                throw new Error(`Unrecognized platform '${definition.platform}'.`)
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
         }
 
-        const commandLine = await this.resolveCommandLine(task.definition.dockerBuild, token);
+        const commandLine = await this.resolveCommandLine(definition.dockerBuild, token);
         return new Task(
-            originalDefinition,
+            task.definition,
             task.scope,
             task.name,
             task.source,
