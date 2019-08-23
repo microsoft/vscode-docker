@@ -33,9 +33,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
-        if (debugConfiguration.platform === 'netCore') {
+        if (debugConfiguration.platform === 'netCore' || debugConfiguration.netCore !== undefined) {
             return await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
-        } else if (debugConfiguration.platform === 'node') {
+        } else if (debugConfiguration.platform === 'node' || debugConfiguration.node !== undefined) {
             return await this.nodeDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
         }
     }

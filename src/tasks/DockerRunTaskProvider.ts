@@ -2,7 +2,7 @@ import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, T
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { Platform, PlatformOS } from '../utils/platform';
+import { PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskRunOptions } from './node/NodeTaskHelper';
 import { TaskPlatform } from './TaskHelper';
@@ -68,20 +68,19 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, token));
     }
 
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform): Promise<void> {
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: TaskPlatform): Promise<void> {
         throw new Error('Method not implemented.');
     }
 
     private async resolveTaskInternal(task: DockerRunTask, token?: CancellationToken): Promise<Task> {
-        let runOptions: DockerRunOptions = task.definition.dockerRun ? cloneObject(task.definition.dockerRun) : {};
+        const originalDefinition = cloneObject(task.definition);
+        task.definition.dockerRun = task.definition.dockerRun || {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
-            if (task.definition.platform === 'netCore') {
-                const helperOptions = cloneObject(task.definition.netCore);
-                runOptions = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, runOptions, helperOptions, token);
-            } else if (task.definition.platform === 'node') {
-                const helperOptions = cloneObject(task.definition.node);
-                runOptions = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, runOptions, helperOptions, token);
+            if (task.definition.platform === 'netCore' || task.definition.netCore !== undefined) {
+                task.definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, task.definition.dockerRun, task.definition.netCore, token);
+            } else if (task.definition.platform === 'node' || task.definition.node !== undefined) {
+                task.definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, task.definition.dockerRun, task.definition.node, token);
             } else {
                 throw new Error(`Unrecognized platform '${task.definition.platform}'.`)
             }
@@ -89,9 +88,9 @@ export class DockerRunTaskProvider implements TaskProvider {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
-        const commandLine = await this.resolveCommandLine(runOptions, token);
+        const commandLine = await this.resolveCommandLine(task.definition.dockerRun, token);
         return new Task(
-            task.definition,
+            originalDefinition,
             task.scope,
             task.name,
             task.source,
