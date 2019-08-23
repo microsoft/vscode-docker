@@ -37,3 +37,32 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
         )
     );
 }
+
+// tslint:disable-next-line: no-unnecessary-class
+export class TaskCache {
+    private static readonly cache: { [key: string]: object | undefined } = {};
+
+    public static set(identifier: string, value: object): object {
+        return this.cache[identifier] = value;
+    }
+
+    public static update(identifier: string, value: object): object {
+        const result: object = {};
+        this.cache[identifier] = this.cache[identifier] || {};
+        const keys = [...Object.keys(this.cache[identifier]), ...Object.keys(value)];
+
+        for (const key of keys) {
+            result[key] = value[key] !== undefined ? value[key] : this.cache[identifier][key];
+        }
+
+        return this.cache[identifier] = result;
+    }
+
+    public static unset(identifier: string): void {
+        this.cache[identifier] = undefined;
+    }
+
+    public static get(identifier: string): object | undefined {
+        return this.cache[identifier];
+    }
+}

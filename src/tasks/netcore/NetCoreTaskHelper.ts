@@ -8,7 +8,7 @@ import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper'
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
-import { TaskHelper } from '../TaskHelper';
+import { TaskCache, TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -33,6 +33,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     }
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
+        helperOptions = helperOptions || {};
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(folder, helperOptions); // This method internally checks the user-defined input first
 
         const appName = await NetCoreTaskHelper.inferAppName(folder, helperOptions);
@@ -45,18 +46,24 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         buildOptions.target = buildOptions.target || 'base';
         buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
+        TaskCache.set(helperOptions.appProject, { image: buildOptions.tag });
+
         return buildOptions;
     }
 
     public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions> {
+        helperOptions = helperOptions || {};
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(folder, helperOptions); // This method internally checks the user-defined input first
+
+        const cache = TaskCache.get(helperOptions.appProject);
 
         const appName = await NetCoreTaskHelper.inferAppName(folder, helperOptions);
 
         runOptions.containerName = runOptions.containerName || `${appName}-dev`;
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = runOptions.image || `${appName}:dev`;
+        // tslint:disable-next-line: no-string-literal no-unsafe-any
+        runOptions.image = runOptions.image || (cache && cache['image']) || `${appName}:dev`;
 
         runOptions.entrypoint = runOptions.entrypoint || runOptions.os === 'Windows' ? 'ping' : 'tail';
         runOptions.command = runOptions.command || runOptions.os === 'Windows' ? '-t localhost' : '-f /dev/null';
@@ -69,12 +76,20 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
             runOptions.env.ASPNETCORE_ENVIRONMENT = runOptions.env.ASPNETCORE_ENVIRONMENT || 'Development';
 
             if (ssl) {
-                //tslint:disable-next-line:no-http-string
+                // tslint:disable-next-line: no-http-string
                 runOptions.env.ASPNETCORE_URLS = runOptions.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
             }
         }
 
         runOptions.volumes = await this.inferVolumes(folder, runOptions, helperOptions, ssl, userSecrets); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
+
+        TaskCache.update(
+            helperOptions.appProject,
+            {
+                configureSsl: ssl,
+                containerName: runOptions.containerName,
+                os: runOptions.os,
+            });
 
         return runOptions;
     }
