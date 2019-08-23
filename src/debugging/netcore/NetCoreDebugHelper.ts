@@ -85,39 +85,29 @@ export class NetCoreDebugHelper implements DebugHelper {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {
+    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore);  // This method internally checks the user-defined input first
 
-        const cache = TaskCache.get(debugConfiguration.netCore.appProject);
-
-        const appName = await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore);
+        const { configureSsl, containerName, os } = await this.loadInfoFromCache(folder, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
-
-        // tslint:disable: no-string-literal no-unsafe-any
-        const configureSsl = <boolean>(cache && cache['configureSsl']) || false;
-        const containerName = <string>(cache && cache['containerName']) || `${appName}-dev`;
-        const os = <PlatformOS>(cache && cache['os']) || 'Linux';
-        // tslint:enable: no-string-literal no-unsafe-any
-
-        const debuggerPath = await this.debuggerClient.getDebugger(os, containerName);
-        if (configureSsl) {
-            const appOutputName = path.parse(appOutput).name;
-            const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
-            await this.aspNetCoreSslManager.trustCertificateIfNecessary();
-            await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
+        if (token.isCancellationRequested) {
+            return undefined;
         }
 
-        const additionalProbingPaths = os === 'Windows'
-            ? [
-                'C:\\.nuget\\packages',
-                'C:\\.nuget\\fallbackpackages'
-            ]
-            : [
-                '/root/.nuget/packages',
-                '/root/.nuget/fallbackpackages'
-            ];
-        const additionalProbingPathsArgs = additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
+        const debuggerPath = await this.debuggerClient.getDebugger(os, containerName);
+        if (token.isCancellationRequested) {
+            return undefined;
+        }
+
+        if (configureSsl) {
+            await this.configureSsl(debugConfiguration, appOutput);
+            if (token.isCancellationRequested) {
+                return undefined;
+            }
+        }
+
+        const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(os);
 
         const containerAppOutput = os === 'Windows'
             ? path.win32.join('C:\\app', appOutput)
@@ -135,7 +125,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             args: debugConfiguration.args || [additionalProbingPathsArgs, containerAppOutput].join(' '),
             cwd: debugConfiguration.cwd || os === 'Windows' ? 'C:\\app' : '/app',
             env: debugConfiguration.env || programEnv,
-            launchBrowser: debugConfiguration.launchBrowser || await this.inferLaunchBrowser(browserUrl),
+            launchBrowser: debugConfiguration.launchBrowser || NetCoreDebugHelper.inferLaunchBrowser(browserUrl),
             pipeTransport: {
                 pipeProgram: 'docker',
                 // tslint:disable: no-invalid-template-strings
@@ -159,7 +149,43 @@ export class NetCoreDebugHelper implements DebugHelper {
         return await this.netCoreProjectProvider.getTargetPath(helperOptions.appProject);
     }
 
-    private async inferLaunchBrowser(browserUrl: string): Promise<OsBrowserOptions> {
+    private async loadInfoFromCache(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, os: PlatformOS }> {
+        const cache = TaskCache.get(debugConfiguration.netCore.appProject);
+
+        // tslint:disable: no-string-literal no-unsafe-any
+        const configureSsl = <boolean>(cache && cache['configureSsl']) || false;
+        const containerName = <string>(cache && cache['containerName']) || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`;
+        const os = <PlatformOS>(cache && cache['os']) || 'Linux';
+        // tslint:enable: no-string-literal no-unsafe-any
+
+        return {
+            configureSsl,
+            containerName,
+            os
+        }
+    }
+
+    private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
+        const appOutputName = path.parse(appOutput).name;
+        const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
+        await this.aspNetCoreSslManager.trustCertificateIfNecessary();
+        await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
+    }
+
+    private static getAdditionalProbingPathsArgs(os: PlatformOS): string {
+        const additionalProbingPaths = os === 'Windows'
+            ? [
+                'C:\\.nuget\\packages',
+                'C:\\.nuget\\fallbackpackages'
+            ]
+            : [
+                '/root/.nuget/packages',
+                '/root/.nuget/fallbackpackages'
+            ];
+        return additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
+    }
+
+    private static inferLaunchBrowser(browserUrl: string): OsBrowserOptions {
         return browserUrl
             ? {
                 enabled: true,
