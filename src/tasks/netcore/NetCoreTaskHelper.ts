@@ -83,20 +83,6 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         return runOptions;
     }
 
-    /*private async inferContext(folder: WorkspaceFolder, buildOptions: DockerBuildOptions): Promise<string> {
-        return folder.uri.fsPath;
-    }
-
-    private async inferDockerfile(folder: WorkspaceFolder, buildOptions: DockerBuildOptions): Promise<string> {
-        let result = path.join(buildOptions.context, 'Dockerfile');
-
-        if (!await fse.pathExists(path.normalize(result))) {
-            throw new Error(`The Dockerfile '${result}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);
-        }
-
-        return result;
-    }*/
-
     private async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<string> {
         return path.parse(helperOptions.appProject).name.replace(/\s/i, '').toLowerCase();
     }
