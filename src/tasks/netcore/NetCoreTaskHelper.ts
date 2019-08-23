@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { CancellationToken, WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
-import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
@@ -68,7 +68,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         runOptions.entrypoint = runOptions.entrypoint || runOptions.os === 'Windows' ? 'ping' : 'tail';
         runOptions.command = runOptions.command || runOptions.os === 'Windows' ? '-t localhost' : '-f /dev/null';
 
-        const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await this.inferSsl(folder, helperOptions);
+        const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(folder, helperOptions);
 
         if (userSecrets) {
@@ -120,11 +120,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         return result;
     }
 
-    public static resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
-        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
-    }
-
-    private async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
+    public static async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
         try {
             const launchSettingsPath = path.join(path.dirname(helperOptions.appProject), 'Properties', 'launchSettings.json');
 
@@ -145,6 +141,10 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         } catch { }
 
         return false;
+    }
+
+    public static resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
+        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
@@ -174,7 +174,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
         }
 
         const debuggerVolume: DockerContainerVolume = {
-            localPath: path.join(os.homedir(), '.vsdbg'),
+            localPath: NetCoreDebugHelper.getHostDebuggerPathBase(),
             containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
             permissions: 'ro'
         };

@@ -1,20 +1,20 @@
+import * as os from 'os';
 import * as path from 'path';
-import { CancellationToken, Memento, WorkspaceFolder } from 'vscode';
+import { CancellationToken, Memento, tasks, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
+import { DockerRunTask, DockerRunTaskDefinition } from '../../tasks/DockerRunTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
-import { TaskCache } from '../../tasks/TaskHelper';
 import { PlatformOS } from '../../utils/platform';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
 import { CliDockerClient, DockerClient } from '../coreclr/CliDockerClient';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
-import { DebuggerClient, DefaultDebuggerClient } from '../coreclr/debuggerClient';
 import { LocalFileSystemProvider } from '../coreclr/fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
 import { LocalOSProvider } from '../coreclr/LocalOSProvider';
 import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../coreclr/netCoreProjectProvider';
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
-import { RemoteVsDbgClient } from '../coreclr/vsdbgClient';
+import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper } from '../DebugHelper';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -32,13 +32,15 @@ interface OsBrowserOptions extends LaunchBrowserOptions {
 
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
+    vsdbgRuntime?: 'linux-x64' | 'linux-musl-x64' | 'win7-x64';
+    vsdbgVersion?: 'latest' | 'vs2019' | 'vs2017u5';
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
     private readonly netCoreProjectProvider: NetCoreProjectProvider;
     private readonly aspNetCoreSslManager: AspNetCoreSslManager;
     private readonly dockerClient: DockerClient;
-    private readonly debuggerClient: DebuggerClient;
+    private readonly vsDbgClient: VsDbgClient;
 
     constructor(globalState: Memento) {
         const processProvider = new ChildProcessProvider();
@@ -68,16 +70,12 @@ export class NetCoreDebugHelper implements DebugHelper {
             processProvider
         );
 
-        this.debuggerClient = new DefaultDebuggerClient(
-            this.dockerClient,
+        this.vsDbgClient = new RemoteVsDbgClient(
+            new DefaultOutputManager(ext.outputChannel),
+            fsProvider,
+            globalState,
             osProvider,
-            new RemoteVsDbgClient(
-                new DefaultOutputManager(ext.outputChannel),
-                fsProvider,
-                globalState,
-                osProvider,
-                processProvider
-            )
+            processProvider
         );
     }
 
@@ -89,13 +87,13 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore);  // This method internally checks the user-defined input first
 
-        const { configureSsl, containerName, os } = await this.loadInfoFromCache(folder, debugConfiguration);
+        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(folder, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
         if (token.isCancellationRequested) {
             return undefined;
         }
 
-        const debuggerPath = await this.debuggerClient.getDebugger(os, containerName);
+        const debuggerPath = await this.acquireDebugger(debugConfiguration, platformOS);
         if (token.isCancellationRequested) {
             return undefined;
         }
@@ -107,13 +105,13 @@ export class NetCoreDebugHelper implements DebugHelper {
             }
         }
 
-        const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(os);
+        const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = os === 'Windows'
-            ? path.win32.join('C:\\app', appOutput)
-            : path.posix.join('/app', appOutput);
+        const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        const { browserUrl, httpsPort } = await this.dockerClient.getContainerWebEndpoint(containerName);
+        // TODO The container isn't running...how can we get the launch target?
+        //const { browserUrl, httpsPort } = await this.dockerClient.getContainerWebEndpoint(containerName);
+        const { browserUrl, httpsPort } = { browserUrl: 'http://localhost', httpsPort: undefined };
 
         const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
 
@@ -123,7 +121,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             request: 'launch',
             program: debugConfiguration.program || 'dotnet',
             args: debugConfiguration.args || [additionalProbingPathsArgs, containerAppOutput].join(' '),
-            cwd: debugConfiguration.cwd || os === 'Windows' ? 'C:\\app' : '/app',
+            cwd: debugConfiguration.cwd || platformOS === 'Windows' ? 'C:\\app' : '/app',
             env: debugConfiguration.env || programEnv,
             launchBrowser: debugConfiguration.launchBrowser || NetCoreDebugHelper.inferLaunchBrowser(browserUrl),
             pipeTransport: {
@@ -132,7 +130,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 pipeArgs: ['exec', '-i', containerName, '${debuggerCommand}'],
                 pipeCwd: '${workspaceFolder}',
                 // tslint:enable: no-invalid-template-strings
-                debuggerPath: os === 'Windows' ?
+                debuggerPath: platformOS === 'Windows' ?
                     path.win32.join('C:\\remote_debugger', debuggerPath, 'vsdbg') :
                     path.posix.join('/remote_debugger', debuggerPath, 'vsdbg'),
                 quoteArgs: false,
@@ -145,24 +143,51 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
+    public static getHostDebuggerPathBase(): string {
+        return path.join(os.homedir(), '.vsdbg');
+    }
+
     private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
         return await this.netCoreProjectProvider.getTargetPath(helperOptions.appProject);
     }
 
-    private async loadInfoFromCache(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, os: PlatformOS }> {
-        const cache = TaskCache.get(debugConfiguration.netCore.appProject);
+    private async loadExternalInfo(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+        let associatedTask: DockerRunTask;
+        const dockerRunTasks = (await tasks.fetchTasks({ "type": "docker-run" })).map(t => t as DockerRunTask);
 
-        // tslint:disable: no-string-literal no-unsafe-any
-        const configureSsl = <boolean>(cache && cache['configureSsl']) || false;
-        const containerName = <string>(cache && cache['containerName']) || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`;
-        const os = <PlatformOS>(cache && cache['os']) || 'Linux';
-        // tslint:enable: no-string-literal no-unsafe-any
+        if (dockerRunTasks.length === 1) {
+            associatedTask = dockerRunTasks[0];
+        } else if (dockerRunTasks.length > 1) {
+            associatedTask = dockerRunTasks.find(task => {
+                let taskAppProject: string = task.definition && task.definition.netCore && task.definition.netCore.appProject || undefined;
+                if (!taskAppProject) {
+                    return false;
+                }
+
+                taskAppProject = NetCoreTaskHelper.resolveWorkspaceFolderPath(folder, taskAppProject);
+
+                return taskAppProject === debugConfiguration.netCore.appProject;
+            });
+        }
+
+        if (!associatedTask) {
+            throw new Error('Unable to find docker-run task associated with this project. Please make sure a docker-run task is defined for this project.');
+        }
+
+        const definition = (associatedTask.definition || {}) as DockerRunTaskDefinition;
 
         return {
-            configureSsl,
-            containerName,
-            os
+            configureSsl: definition.netCore && definition.netCore.configureSsl || await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
+            containerName: definition.dockerRun && definition.dockerRun.containerName || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`,
+            platformOS: definition.dockerRun && definition.dockerRun.os || 'Linux',
         }
+    }
+
+    private async acquireDebugger(debugConfiguration: DockerDebugConfiguration, platformOS: PlatformOS): Promise<string> {
+        const debuggerPath = await this.vsDbgClient.getVsDbgVersion(
+            debugConfiguration.netCore.vsdbgVersion || 'latest',
+            debugConfiguration.netCore.vsdbgRuntime || 'linux-x64');
+        return NetCoreDebugHelper.fullNormalize(debuggerPath, platformOS);
     }
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
@@ -172,8 +197,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
     }
 
-    private static getAdditionalProbingPathsArgs(os: PlatformOS): string {
-        const additionalProbingPaths = os === 'Windows'
+    private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {
+        const additionalProbingPaths = platformOS === 'Windows'
             ? [
                 'C:\\.nuget\\packages',
                 'C:\\.nuget\\fallbackpackages'
@@ -183,6 +208,14 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/root/.nuget/fallbackpackages'
             ];
         return additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
+    }
+
+    private static getContainerAppOutput(debugConfiguration: DockerDebugConfiguration, appOutput: string, platformOS: PlatformOS): string {
+        const relativePath = path.relative(path.dirname(debugConfiguration.netCore.appProject), appOutput);
+
+        return platformOS === 'Windows'
+            ? NetCoreDebugHelper.fullNormalize(path.win32.join('C:\\app', relativePath), platformOS)
+            : NetCoreDebugHelper.fullNormalize(path.posix.join('/app', relativePath), platformOS);
     }
 
     private static inferLaunchBrowser(browserUrl: string): OsBrowserOptions {
@@ -204,5 +237,18 @@ export class NetCoreDebugHelper implements DebugHelper {
             : {
                 enabled: false
             };
+    }
+
+    private static fullNormalize(oldPath: string, platformOS?: PlatformOS): string {
+        if (!platformOS) {
+            return path.normalize(oldPath);
+        } else {
+            oldPath = oldPath.replace(
+                platformOS === 'Windows' ? /\//g : /\\/g,
+                platformOS === 'Windows' ? '\\' : '/'
+            );
+
+            return platformOS === 'Windows' ? path.win32.normalize(oldPath) : path.posix.normalize(oldPath);
+        }
     }
 }
