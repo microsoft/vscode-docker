@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, debug, ExtensionContext, WorkspaceFolder } from 'vscode';
-import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTrackerFactory';
+import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTracker';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';

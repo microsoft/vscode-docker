@@ -82,7 +82,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
             if (ssl) {
                 // tslint:disable-next-line: no-http-string
-                runOptions.env.ASPNETCORE_URLS = runOptions.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
+                runOptions.env.ASPNETCORE_URLS = runOptions.env.ASPNETCORE_URLS || 'https://+:443;http://+:80';
             }
         }
 

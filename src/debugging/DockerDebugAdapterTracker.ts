@@ -10,20 +10,7 @@ import { DockerServerReadyAction } from './DockerDebugConfigurationProvider';
 
 const portRegex = /:([\d]+)(?![\]:\da-f])/i; // Matches :1234 etc., as long as the next character is not a :, ], another digit, or letter (keeps from confusing on IPv6 addresses)
 
-export class DockerDebugAdapterTrackerFactory implements DebugAdapterTrackerFactory {
-    public async createDebugAdapterTracker(session: DebugSession): Promise<DebugAdapterTracker | undefined> {
-        // tslint:disable-next-line: no-unsafe-any
-        const dockerServerReadyAction: DockerServerReadyAction = session.configuration && session.configuration.dockerServerReadyAction || undefined;
-
-        if (dockerServerReadyAction && dockerServerReadyAction.containerName && dockerServerReadyAction.pattern) {
-            return new DockerDebugAdapterTracker(dockerServerReadyAction);
-        }
-
-        return undefined;
-    }
-}
-
-class DockerDebugAdapterTracker implements DebugAdapterTracker {
+export class DockerDebugAdapterTracker implements DebugAdapterTracker {
     private readonly dockerClient: DockerClient;
     private readonly patternRegex: RegExp;
     private readonly containerName: string;
@@ -70,5 +57,18 @@ class DockerDebugAdapterTracker implements DebugAdapterTracker {
         // TODO: This does not account for things like http://+:1234, etc.
         // TODO: Need more advanced logic
         return url.replace(/\[::\]|0.0.0.0/g, 'localhost')
+    }
+}
+
+export class DockerDebugAdapterTrackerFactory implements DebugAdapterTrackerFactory {
+    public async createDebugAdapterTracker(session: DebugSession): Promise<DebugAdapterTracker | undefined> {
+        // tslint:disable-next-line: no-unsafe-any
+        const dockerServerReadyAction: DockerServerReadyAction = session.configuration && session.configuration.dockerServerReadyAction || undefined;
+
+        if (dockerServerReadyAction && dockerServerReadyAction.containerName && dockerServerReadyAction.pattern) {
+            return new DockerDebugAdapterTracker(dockerServerReadyAction);
+        }
+
+        return undefined;
     }
 }
