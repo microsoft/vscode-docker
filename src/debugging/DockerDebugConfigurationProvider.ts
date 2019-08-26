@@ -6,10 +6,16 @@ import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
 
 export type DebugPlatform = 'netCore' | 'node';
 
+export interface DockerServerReadyAction {
+    pattern: string;
+    containerName: string;
+}
+
 export interface DockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
     node?: NodeDebugOptions;
     platform: DebugPlatform;
+    dockerServerReadyAction?: DockerServerReadyAction;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {

@@ -1,4 +1,5 @@
 import { CancellationToken, debug, ExtensionContext, WorkspaceFolder } from 'vscode';
+import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTrackerFactory';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';
@@ -16,6 +17,13 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
                 new NetCoreDebugHelper(ctx.globalState),
                 new NodeDebugHelper()
             )
+        )
+    );
+
+    ctx.subscriptions.push(
+        debug.registerDebugAdapterTrackerFactory(
+            '*',
+            new DockerDebugAdapterTrackerFactory()
         )
     );
 }

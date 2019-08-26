@@ -533,6 +533,23 @@
                                     "netCore",
                                     "node"
                                 ]
+                            },
+                            "dockerServerReadyAction": {
+                                "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
+                                "properties": {
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "The regex pattern to look for in Debug console output."
+                                    },
+                                    "containerName": {
+                                        "type": "string",
+                                        "description": "The container name to match the host port."
+                                    }
+                                },
+                                "required": [
+                                    "pattern",
+                                    "containerName"
+                                ]
                             }
                         },
                         "required": [

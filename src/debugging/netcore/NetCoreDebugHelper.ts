@@ -6,7 +6,6 @@ import { DockerRunTask, DockerRunTaskDefinition } from '../../tasks/DockerRunTas
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { PlatformOS } from '../../utils/platform';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
-import { CliDockerClient, DockerClient } from '../coreclr/CliDockerClient';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
 import { LocalFileSystemProvider } from '../coreclr/fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
@@ -18,28 +17,15 @@ import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper } from '../DebugHelper';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
-interface LaunchBrowserOptions {
-    enabled?: boolean;
-    command?: string;
-    args?: string;
-}
-
-interface OsBrowserOptions extends LaunchBrowserOptions {
-    windows?: LaunchBrowserOptions;
-    osx?: LaunchBrowserOptions;
-    linux?: LaunchBrowserOptions;
-}
-
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
-    vsdbgRuntime?: 'linux-x64' | 'linux-musl-x64' | 'win7-x64';
-    vsdbgVersion?: 'latest' | 'vs2019' | 'vs2017u5';
+    vsdbgRuntime?: 'linux-x64' | 'linux-musl-x64' | 'win7-x64'; // TODO: Can we get rid of this and replace with a script?
+    vsdbgVersion?: 'latest' | 'vs2019' | 'vs2017u5'; // TODO: Can we get rid of this and replace with a script?
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
     private readonly netCoreProjectProvider: NetCoreProjectProvider;
     private readonly aspNetCoreSslManager: AspNetCoreSslManager;
-    private readonly dockerClient: DockerClient;
     private readonly vsDbgClient: VsDbgClient;
 
     constructor(globalState: Memento) {
@@ -64,10 +50,6 @@ export class NetCoreDebugHelper implements DebugHelper {
             this.netCoreProjectProvider,
             processProvider,
             osProvider
-        );
-
-        this.dockerClient = new CliDockerClient(
-            processProvider
         );
 
         this.vsDbgClient = new RemoteVsDbgClient(
@@ -109,11 +91,8 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        // TODO The container isn't running...how can we get the launch target?
-        //const { browserUrl, httpsPort } = await this.dockerClient.getContainerWebEndpoint(containerName);
-        const { browserUrl, httpsPort } = { browserUrl: 'http://localhost', httpsPort: undefined };
-
-        const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
+        // TODO: This is not currently possible to determine
+        // const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
 
         return {
             name: debugConfiguration.name,
@@ -122,8 +101,12 @@ export class NetCoreDebugHelper implements DebugHelper {
             program: debugConfiguration.program || 'dotnet',
             args: debugConfiguration.args || [additionalProbingPathsArgs, containerAppOutput].join(' '),
             cwd: debugConfiguration.cwd || platformOS === 'Windows' ? 'C:\\app' : '/app',
-            env: debugConfiguration.env || programEnv,
-            launchBrowser: debugConfiguration.launchBrowser || NetCoreDebugHelper.inferLaunchBrowser(browserUrl),
+            env: debugConfiguration.env,
+            launchBrowser: debugConfiguration.launchBrowser,
+            serverReadyAction: debugConfiguration.serverReadyAction,
+            dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
+                undefined :
+                debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
             pipeTransport: {
                 pipeProgram: 'docker',
                 // tslint:disable: no-invalid-template-strings
@@ -216,27 +199,6 @@ export class NetCoreDebugHelper implements DebugHelper {
         return platformOS === 'Windows'
             ? NetCoreDebugHelper.fullNormalize(path.win32.join('C:\\app', relativePath), platformOS)
             : NetCoreDebugHelper.fullNormalize(path.posix.join('/app', relativePath), platformOS);
-    }
-
-    private static inferLaunchBrowser(browserUrl: string): OsBrowserOptions {
-        return browserUrl
-            ? {
-                enabled: true,
-                args: browserUrl,
-                windows: {
-                    command: 'cmd.exe',
-                    args: `/C start ${browserUrl}`
-                },
-                osx: {
-                    command: 'open'
-                },
-                linux: {
-                    command: 'xdg-open'
-                }
-            }
-            : {
-                enabled: false
-            };
     }
 
     private static fullNormalize(oldPath: string, platformOS?: PlatformOS): string {

@@ -87,6 +87,7 @@ export interface DockerClient {
     trimId(id: string): string;
     exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
     getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }>;
+    getHostPort(containerNameOrId: string, port: string): Promise<string>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -302,6 +303,10 @@ export class CliDockerClient implements DockerClient {
             browserUrl: undefined,
             httpsPort: undefined
         };
+    }
+
+    public async getHostPort(containerNameOrId: string, containerPort: string): Promise<string> {
+        return (await this.inspectObject(containerNameOrId, { format: `{{(index (index .NetworkSettings.Ports \\"${containerPort}/tcp\\") 0).HostPort}}` })).trim();
     }
 }
 
