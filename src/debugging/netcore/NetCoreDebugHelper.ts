@@ -94,6 +94,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         // TODO: This is not currently possible to determine
         // const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
 
+        // TODO: Shut down and remove the container on session end? Maybe not needed if we have CustomExecution available
+
         return {
             name: debugConfiguration.name,
             type: 'coreclr',
