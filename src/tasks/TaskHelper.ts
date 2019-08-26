@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { CancellationToken, ExtensionContext, tasks, WorkspaceFolder } from 'vscode';
 import { DockerBuildOptions, DockerBuildTask, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask, DockerRunTaskProvider } from './DockerRunTaskProvider';

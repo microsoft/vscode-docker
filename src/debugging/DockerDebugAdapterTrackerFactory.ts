@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, env, Uri } from 'vscode';
 import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
 import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
