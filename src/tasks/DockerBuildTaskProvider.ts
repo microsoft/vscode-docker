@@ -5,11 +5,11 @@
 
 import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskBuildOptions, NodeTaskHelperType } from './node/NodeTaskHelper';
-import { TaskPlatform } from './TaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -25,7 +25,7 @@ export interface DockerBuildTaskDefinition extends TaskDefinition {
     dockerBuild?: DockerBuildOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskBuildOptions;
-    platform: TaskPlatform;
+    platform?: DockerPlatform;
 }
 
 export interface DockerBuildTask extends Task {
@@ -43,17 +43,17 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
-        const taskPlatform = DockerBuildTaskProvider.determineTaskPlatform(task);
+        const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-build/${taskPlatform}`,
+            `docker-build/${taskPlatform || 'unknown'}`,
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: TaskPlatform): Promise<void> {
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    private async resolveTaskInternal(task: DockerBuildTask, taskPlatform: TaskPlatform, token?: CancellationToken): Promise<Task> {
+    private async resolveTaskInternal(task: DockerBuildTask, taskPlatform: DockerPlatform, token?: CancellationToken): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
@@ -93,15 +93,5 @@ export class DockerBuildTaskProvider implements TaskProvider {
             .withNamedArg('--target', options.target)
             .withQuotedArg(options.context)
             .buildShellQuotedStrings();
-    }
-
-    private static determineTaskPlatform(task: DockerBuildTask): TaskPlatform {
-        if (task.definition.platform === 'netCore' || task.definition.netCore !== undefined) {
-            return 'netCore'
-        } else if (task.definition.platform === 'node' || task.definition.node !== undefined) {
-            return 'node';
-        }
-
-        return 'unknown';
     }
 }

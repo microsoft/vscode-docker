@@ -9,8 +9,6 @@ import { DockerRunOptions, DockerRunTask, DockerRunTaskProvider } from './Docker
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
-export type TaskPlatform = 'netCore' | 'node' | 'unknown';
-
 export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
     provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]>;

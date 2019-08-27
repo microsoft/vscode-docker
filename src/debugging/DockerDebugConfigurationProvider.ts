@@ -6,10 +6,9 @@
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { Platform } from '../utils/platform';
+import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
-
-export type DebugPlatform = 'netCore' | 'node' | 'unknown';
 
 export interface DockerServerReadyAction {
     pattern: string;
@@ -20,7 +19,7 @@ export interface DockerServerReadyAction {
 export interface DockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
     node?: NodeDebugOptions;
-    platform: DebugPlatform;
+    platform: DockerPlatform;
     dockerServerReadyAction?: DockerServerReadyAction;
 }
 
@@ -35,9 +34,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-        const debugPlatform = DockerDebugConfigurationProvider.determineDebugPlatform(debugConfiguration);
+        const debugPlatform = getPlatform(debugConfiguration);
         return callWithTelemetryAndErrorHandling(
-            `docker-launch/${debugPlatform}`,
+            `docker-launch/${debugPlatform || 'unknown'}`,
             async () => await this.resolveDebugConfigurationInternal(folder, debugConfiguration, debugPlatform, token));
     }
 
@@ -45,7 +44,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         throw new Error('Method not implemented');
     }
 
-    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DebugPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         switch (debugPlatform) {
             case 'netCore':
                 return await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
@@ -54,15 +53,5 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             default:
                 throw new Error(`Unrecognized platform '${debugConfiguration.platform}'.`);
         }
-    }
-
-    private static determineDebugPlatform(debugConfiguration: DockerDebugConfiguration): DebugPlatform {
-        if (debugConfiguration.platform === 'netCore' || debugConfiguration.netCore !== undefined) {
-            return 'netCore'
-        } else if (debugConfiguration.platform === 'node' || debugConfiguration.node !== undefined) {
-            return 'node';
-        }
-
-        return 'unknown';
     }
 }
