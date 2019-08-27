@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, tasks, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerBuildOptions, DockerBuildTask, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
-export type TaskPlatform = 'netCore' | 'node';
+export type TaskPlatform = 'netCore' | 'node' | 'unknown';
 
 export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
@@ -41,6 +41,14 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
             )
         )
     );
+}
+
+export async function addTask(task: Task): Promise<void> {
+    const workspaceTasks = workspace.getConfiguration('tasks');
+
+    (workspaceTasks.tasks as object[]).push(task);
+
+    workspaceTasks.update('tasks', workspaceTasks.tasks);
 }
 
 // tslint:disable-next-line: no-unnecessary-class

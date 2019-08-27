@@ -68,26 +68,30 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
+        const taskPlatform = DockerRunTaskProvider.determineTaskPlatform(task);
         return callWithTelemetryAndErrorHandling(
-            'docker-run',
-            async () => await this.resolveTaskInternal(task, token));
+            `docker-run/${taskPlatform}`,
+            async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
     public async initializeRunTasks(folder: WorkspaceFolder, platform: TaskPlatform): Promise<void> {
         throw new Error('Method not implemented.');
     }
 
-    private async resolveTaskInternal(task: DockerRunTask, token?: CancellationToken): Promise<Task> {
+    private async resolveTaskInternal(task: DockerRunTask, taskPlatform: TaskPlatform, token?: CancellationToken): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
         if (task.scope as WorkspaceFolder !== undefined) {
-            if (definition.platform === 'netCore' || definition.netCore !== undefined) {
-                definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, definition.netCore, token);
-            } else if (definition.platform === 'node' || definition.node !== undefined) {
-                definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, definition.node, token);
-            } else {
-                throw new Error(`Unrecognized platform '${definition.platform}'.`)
+            switch (taskPlatform) {
+                case 'netCore':
+                    definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, definition.netCore, token);
+                    break;
+                case 'node':
+                    definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, definition.node, token);
+                    break;
+                default:
+                    throw new Error(`Unrecognized platform '${definition.platform}'.`);
             }
         } else {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
@@ -120,5 +124,15 @@ export class DockerRunTaskProvider implements TaskProvider {
             .withQuotedArg(runOptions.image)
             .withArgs(runOptions.command)
             .buildShellQuotedStrings();
+    }
+
+    private static determineTaskPlatform(task: DockerRunTask): TaskPlatform {
+        if (task.definition.platform === 'netCore' || task.definition.netCore !== undefined) {
+            return 'netCore'
+        } else if (task.definition.platform === 'node' || task.definition.node !== undefined) {
+            return 'node';
+        }
+
+        return 'unknown';
     }
 }
