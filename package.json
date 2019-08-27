@@ -524,6 +524,11 @@
                                     "containerName": {
                                         "type": "string",
                                         "description": "The container name to match the host port."
+                                    },
+                                    "uriFormat": {
+                                        "type": "string",
+                                        "description": "The URI format to launch.",
+                                        "default": "%s://localhost%s"
                                     }
                                 },
                                 "required": [

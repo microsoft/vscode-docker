@@ -14,6 +14,7 @@ export type DebugPlatform = 'netCore' | 'node';
 export interface DockerServerReadyAction {
     pattern: string;
     containerName: string;
+    uriFormat?: string;
 }
 
 export interface DockerDebugConfiguration extends DebugConfiguration {
