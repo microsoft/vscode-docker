@@ -19,7 +19,7 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
         debug.registerDebugConfigurationProvider(
             'docker-launch',
             new DockerDebugConfigurationProvider(
-                new NetCoreDebugHelper(ctx.globalState),
+                new NetCoreDebugHelper(),
                 new NodeDebugHelper()
             )
         )

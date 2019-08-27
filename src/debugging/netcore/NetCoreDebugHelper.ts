@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CancellationToken, Memento, tasks, WorkspaceFolder } from 'vscode';
+import { CancellationToken, tasks, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { DockerRunTask, DockerRunTaskDefinition } from '../../tasks/DockerRunTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
@@ -24,8 +25,6 @@ import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
-    vsdbgRuntime?: 'linux-x64' | 'linux-musl-x64' | 'win7-x64'; // TODO: Can we get rid of this and replace with a script?
-    vsdbgVersion?: 'latest' | 'vs2019' | 'vs2017u5'; // TODO: Can we get rid of this and replace with a script?
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
@@ -33,7 +32,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     private readonly aspNetCoreSslManager: AspNetCoreSslManager;
     private readonly vsDbgClient: VsDbgClient;
 
-    constructor(globalState: Memento) {
+    constructor() {
         const processProvider = new ChildProcessProvider();
         const fsProvider = new LocalFileSystemProvider();
         const osProvider = new LocalOSProvider();
@@ -60,7 +59,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         this.vsDbgClient = new RemoteVsDbgClient(
             new DefaultOutputManager(ext.outputChannel),
             fsProvider,
-            globalState,
+            ext.context.globalState,
             osProvider,
             processProvider
         );
@@ -80,7 +79,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             return undefined;
         }
 
-        const debuggerPath = await this.acquireDebugger(debugConfiguration, platformOS);
+        await this.acquireDebuggers();
         if (token.isCancellationRequested) {
             return undefined;
         }
@@ -121,8 +120,8 @@ export class NetCoreDebugHelper implements DebugHelper {
                 pipeCwd: '${workspaceFolder}',
                 // tslint:enable: no-invalid-template-strings
                 debuggerPath: platformOS === 'Windows' ?
-                    path.win32.join('C:\\remote_debugger', debuggerPath, 'vsdbg') :
-                    path.posix.join('/remote_debugger', debuggerPath, 'vsdbg'),
+                    'C:\\remote_debugger\\win7-x64\\latest\\vsdbg' :
+                    '/remote_debugger/vsdbg',
                 quoteArgs: false,
             },
             preLaunchTask: debugConfiguration.preLaunchTask,
@@ -173,11 +172,12 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
     }
 
-    private async acquireDebugger(debugConfiguration: DockerDebugConfiguration, platformOS: PlatformOS): Promise<string> {
-        const debuggerPath = await this.vsDbgClient.getVsDbgVersion(
-            debugConfiguration.netCore.vsdbgVersion || 'latest',
-            debugConfiguration.netCore.vsdbgRuntime || 'linux-x64');
-        return NetCoreDebugHelper.fullNormalize(debuggerPath, platformOS);
+    private async acquireDebuggers(): Promise<void> {
+        await this.vsDbgClient.getVsDbgVersion('latest', 'linux-x64');
+        await this.vsDbgClient.getVsDbgVersion('latest', 'linux-musl-x64');
+
+        const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
+        await fse.copyFile(debuggerScriptPath, path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg'));
     }
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {

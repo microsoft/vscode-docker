@@ -491,26 +491,6 @@
                                     "appProject": {
                                         "type": "string",
                                         "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
-                                    },
-                                    "vsdbgRuntime": {
-                                        "type": "string",
-                                        "description": "The VSDBG runtime to use. linux-x64 for most Linux flavors, linux-musl-x64 for Alpine, win7-x64 for Windows",
-                                        "enum": [
-                                            "linux-x64",
-                                            "linux-musl-x64",
-                                            "win7-x64"
-                                        ],
-                                        "default": "linux-x64"
-                                    },
-                                    "vsdbgVersion": {
-                                        "type": "string",
-                                        "description": "The VSDBG version to use.",
-                                        "enum": [
-                                            "latest",
-                                            "vs2019",
-                                            "vs2017u5"
-                                        ],
-                                        "default": "latest"
                                     }
                                 },
                                 "required": [
