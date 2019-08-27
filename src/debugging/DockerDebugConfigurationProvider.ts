@@ -67,12 +67,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 throw new Error(`Unrecognized platform '${debugConfiguration.platform}'.`);
         }
 
-        await this.killContainerAfterDebugging(result);
+        await this.registerRemoveContainerAfterDebugging(result);
 
         return result;
     }
 
-    private async killContainerAfterDebugging(debugConfiguration: DockerDebugConfiguration): Promise<void> {
+    private async registerRemoveContainerAfterDebugging(debugConfiguration: DockerDebugConfiguration): Promise<void> {
         if (!debugConfiguration) { // Could be undefined if debugging was cancelled
             return;
         }
