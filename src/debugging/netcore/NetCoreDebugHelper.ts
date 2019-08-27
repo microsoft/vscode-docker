@@ -203,22 +203,8 @@ export class NetCoreDebugHelper implements DebugHelper {
     private static getContainerAppOutput(debugConfiguration: DockerDebugConfiguration, appOutput: string, platformOS: PlatformOS): string {
         const relativePath = path.relative(path.dirname(debugConfiguration.netCore.appProject), appOutput);
 
-        return platformOS === 'Windows'
-            ? NetCoreDebugHelper.fullNormalize(path.win32.join('C:\\app', relativePath), platformOS)
-            : NetCoreDebugHelper.fullNormalize(path.posix.join('/app', relativePath), platformOS);
-    }
-
-    // TODO: Move this
-    private static fullNormalize(oldPath: string, platformOS?: PlatformOS): string {
-        if (!platformOS) {
-            return path.normalize(oldPath);
-        } else {
-            oldPath = oldPath.replace(
-                platformOS === 'Windows' ? /\//g : /\\/g,
-                platformOS === 'Windows' ? '\\' : '/'
-            );
-
-            return platformOS === 'Windows' ? path.win32.normalize(oldPath) : path.posix.normalize(oldPath);
-        }
+        return platformOS === 'Windows' ?
+            path.win32.normalize(path.win32.join('C:\\app', relativePath)).replace(/\//g, '\\') :
+            path.posix.normalize(path.posix.join('/app', relativePath)).replace(/\\/g, '/');
     }
 }
