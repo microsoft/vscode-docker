@@ -128,7 +128,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             sourceFileMap: debugConfiguration.sourceFileMap || {
                 '/app/Views': path.join(path.dirname(debugConfiguration.netCore.appProject), 'Views'),
             },
-            platform: debugConfiguration.platform
+            platform: debugConfiguration.platform,
+            _containerNameToKill: containerName
         };
     }
 
@@ -141,6 +142,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async loadExternalInfo(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+        // TODO: Do this via preLaunchTask + dependsOn chain
         let associatedTask: DockerRunTask;
         const dockerRunTasks = (await tasks.fetchTasks({ "type": "docker-run" })).map(t => t as DockerRunTask);
 
