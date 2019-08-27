@@ -24,6 +24,7 @@ export class DockerDebugAdapterTracker implements DebugAdapterTracker {
 
     // tslint:disable: no-unsafe-any no-any
     public async onDidSendMessage(message: any): Promise<void> {
+        // TODO: Still getting two browser launches for some reason, so this.launched isn't working
         if (!this.launched && message.type === 'event' && message.event === 'output' && message.body) {
             await this.detectMatch(message.body.output as string);
         }
