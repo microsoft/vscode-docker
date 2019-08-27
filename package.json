@@ -536,10 +536,7 @@
                                     "containerName"
                                 ]
                             }
-                        },
-                        "required": [
-                            "platform"
-                        ]
+                        }
                     }
                 }
             },
@@ -800,10 +797,7 @@
                             "node"
                         ]
                     }
-                },
-                "required": [
-                    "platform"
-                ]
+                }
             },
             {
                 "type": "docker-run",
@@ -973,10 +967,7 @@
                             "node"
                         ]
                     }
-                },
-                "required": [
-                    "platform"
-                ]
+                }
             }
         ],
         "languages": [
