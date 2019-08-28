@@ -6,18 +6,18 @@
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../extensionVariables';
-import { DockerBuildOptions, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunOptions, DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTaskContext, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTaskContext, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
-export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
+export interface TaskHelper {
     // tslint:disable-next-line: no-any
     provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTaskDefinition[]>;
     // tslint:disable-next-line: no-any
     provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTaskDefinition[]>;
-    resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
+    resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, context: DockerRunTaskContext, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
@@ -46,8 +46,9 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
 }
 
 export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<boolean> {
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
-    const allTasks = workspaceTasks.tasks as TaskDefinition[] || [];
+    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
 
     if (allTasks.some(t => t.label === task.label)) {
         return false;
@@ -58,32 +59,24 @@ export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDef
     return true;
 }
 
-export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<object | undefined> {
+export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<DockerRunTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
-    const tasksConfig = workspace.getConfiguration('tasks');
-    const allTasks: ITask[] = tasksConfig && tasksConfig.tasks as ITask[] || [];
+    const workspaceTasks = workspace.getConfiguration('tasks');
+    const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
+
     return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration);
 }
 
-export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<object | undefined> {
+export async function getAssociatedDockerBuildTask(runTask: DockerRunTaskDefinition): Promise<DockerBuildTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
-    const tasksConfig = workspace.getConfiguration('tasks');
-    const allTasks: ITask[] = tasksConfig && tasksConfig.tasks as ITask[] || [];
+    const workspaceTasks = workspace.getConfiguration('tasks');
+    const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
+
     return await recursiveFindTaskByType(allTasks, 'docker-build', runTask);
 }
 
-interface IDependsOn {
-    type?: string;
-}
-
-interface ITask {
-    label?: string,
-    type?: string,
-    dependsOn?: string[] | IDependsOn
-}
-
 // tslint:disable-next-line: no-any
-async function recursiveFindTaskByType(allTasks: ITask[], type: string, node: any): Promise<object | undefined> {
+async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string, node: any): Promise<TaskDefinition | undefined> {
     if (!node) {
         return undefined;
     }
@@ -117,39 +110,10 @@ async function recursiveFindTaskByType(allTasks: ITask[], type: string, node: an
     return undefined;
 }
 
-async function findTaskByLabel(allTasks: ITask[], label: string): Promise<object | undefined> {
+async function findTaskByLabel(allTasks: TaskDefinition[], label: string): Promise<TaskDefinition | undefined> {
     return allTasks.find(t => t.label === label);
 }
 
-async function findTaskByType(allTasks: ITask[], type: string): Promise<object | undefined> {
+async function findTaskByType(allTasks: TaskDefinition[], type: string): Promise<TaskDefinition | undefined> {
     return allTasks.find(t => t.type === type);
-}
-
-// tslint:disable-next-line: no-unnecessary-class
-export class TaskCache {
-    private static readonly cache: { [key: string]: object | undefined } = {};
-
-    public static set(identifier: string, value: object): object {
-        return this.cache[identifier] = value;
-    }
-
-    public static update(identifier: string, value: object): object {
-        const result: object = {};
-        this.cache[identifier] = this.cache[identifier] || {};
-        const keys = [...Object.keys(this.cache[identifier]), ...Object.keys(value)];
-
-        for (const key of keys) {
-            result[key] = value[key] !== undefined ? value[key] : this.cache[identifier][key];
-        }
-
-        return this.cache[identifier] = result;
-    }
-
-    public static unset(identifier: string): void {
-        this.cache[identifier] = undefined;
-    }
-
-    public static get(identifier: string): object | undefined {
-        return this.cache[identifier];
-    }
 }
