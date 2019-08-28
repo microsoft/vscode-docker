@@ -7,7 +7,7 @@ import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibi
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
-import { isLinux } from "../utils/osUtils";
+import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
@@ -107,7 +107,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this._currentItems = undefined;
             this._failedToConnect = true;
             context.telemetry.properties.failedToConnect = 'true';
-            return this.getDockerErrorTreeItems(error);
+            return this.getDockerErrorTreeItems(context, error);
         }
 
         if (this._currentItems.length === 0) {
@@ -281,20 +281,19 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         }
     }
 
-    private getDockerErrorTreeItems(error: unknown): AzExtTreeItem[] {
+    private getDockerErrorTreeItems(context: IActionContext, error: unknown): AzExtTreeItem[] {
         const connectionMessage = 'Failed to connect. Is Docker installed and running?';
-        const installDockerUrl = 'https://aka.ms/AA37qtj';
-        const linuxPostInstallUrl = 'https://aka.ms/AA37yk6';
-        const troubleshootingUrl = 'https://aka.ms/AA37qt2';
 
         const result: AzExtTreeItem[] = [
             new InvalidTreeItem(this, error, { label: connectionMessage, contextValue: 'dockerConnectionError', description: '' }),
-            new OpenUrlTreeItem(this, 'Install Docker...', installDockerUrl),
-            new OpenUrlTreeItem(this, 'Additional Troubleshooting...', troubleshootingUrl),
+            new OpenUrlTreeItem(this, 'Install Docker...', 'https://aka.ms/AA37qtj'),
+            new OpenUrlTreeItem(this, 'Additional Troubleshooting...', 'https://aka.ms/AA37qt2'),
         ];
 
-        if (isLinux()) {
-            result.push(new OpenUrlTreeItem(this, 'Manage Docker as a non-root user on Linux...', linuxPostInstallUrl))
+        const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
+        if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
+            const ti = new OpenUrlTreeItem(this, 'Running Docker in a dev container...', 'https://aka.ms/AA5xva6');
+            result.push(ti);
         }
 
         return result;
