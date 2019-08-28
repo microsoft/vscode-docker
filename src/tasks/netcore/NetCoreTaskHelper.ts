@@ -33,6 +33,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             {
                 type: 'docker-build',
                 label: 'docker-build',
+                dependsOn: ['build'],
                 dockerBuild: {},
                 platform: 'netCore',
                 netCore: {
@@ -48,7 +49,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             {
                 type: 'docker-run',
                 label: 'docker-run',
-                dependsOn: ['docker-build', 'build'],
+                dependsOn: ['docker-build'],
                 dockerRun: {},
                 platform: 'netCore',
                 netCore: {

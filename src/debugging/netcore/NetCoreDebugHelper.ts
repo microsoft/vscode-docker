@@ -121,6 +121,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             env: debugConfiguration.env,
             launchBrowser: debugConfiguration.launchBrowser,
             serverReadyAction: debugConfiguration.serverReadyAction,
+            // TODO: Do nothing for console apps for website
             dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
                 undefined :
                 debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
