@@ -38,6 +38,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             {
                 type: 'docker-build',
                 label: 'docker-build',
+                dependsOn: ['build'],
                 dockerBuild: {},
                 platform: 'netCore',
                 netCore: {
@@ -54,7 +55,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             {
                 type: 'docker-run',
                 label: 'docker-run',
-                dependsOn: ['docker-build', 'build'],
+                dependsOn: ['docker-build'],
                 dockerRun: {},
                 platform: 'netCore',
                 netCore: {
@@ -114,6 +115,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     public static async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
+        // TODO: No more unicode snowman in container name :(
         return path.parse(helperOptions.appProject).name.replace(/\s/i, '').toLowerCase();
     }
 

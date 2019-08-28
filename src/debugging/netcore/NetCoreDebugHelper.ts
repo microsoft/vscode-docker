@@ -121,6 +121,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             env: debugConfiguration.env,
             launchBrowser: debugConfiguration.launchBrowser,
             serverReadyAction: debugConfiguration.serverReadyAction,
+            // TODO: Do nothing for console apps for website
             dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
                 undefined :
                 debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
@@ -175,7 +176,9 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
-        await fse.copyFile(debuggerScriptPath, path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg'));
+        const destPath = path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg');
+        await fse.copyFile(debuggerScriptPath, destPath);
+        await fse.chmod(destPath, 755); // Give all read and execute permissions
     }
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
