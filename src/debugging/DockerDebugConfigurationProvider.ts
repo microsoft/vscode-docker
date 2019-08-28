@@ -55,6 +55,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     // tslint:disable-next-line: no-any
     public async initializeForDebugging(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        options = options || {};
         let debugConfigurations: DockerDebugConfiguration[];
 
         switch (platform) {

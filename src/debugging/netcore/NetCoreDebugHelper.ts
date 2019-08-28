@@ -67,7 +67,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreDebugOptions): Promise<DockerDebugConfiguration[]> {
-        options = options || {};
+        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
 
         return [
             {
@@ -77,7 +77,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 preLaunchTask: 'docker-run',
                 platform: 'netCore',
                 netCore: {
-                    appProject: await NetCoreTaskHelper.inferAppProject(folder, options) // This method internally checks the user-defined input first
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             }
         ];

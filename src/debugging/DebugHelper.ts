@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
 import { ext } from '../extensionVariables';
 import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTracker';
@@ -43,11 +43,15 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
     );
 }
 
-export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<void> {
+export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
     const workspaceLaunch = workspace.getConfiguration('launch');
-    const allConfigs = workspaceLaunch.configurations as object[] || [];
+    const allConfigs = workspaceLaunch.configurations as DebugConfiguration[] || [];
+
+    if (allConfigs.some(c => c.name === debugConfiguration.name)) {
+        return false;
+    }
 
     allConfigs.push(debugConfiguration);
-
     workspaceLaunch.update('configurations', allConfigs);
+    return true;
 }

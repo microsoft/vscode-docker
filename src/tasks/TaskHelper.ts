@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../extensionVariables';
 import { DockerBuildOptions, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
@@ -47,13 +47,17 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
-export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<void> {
+export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<boolean> {
     const workspaceTasks = workspace.getConfiguration('tasks');
-    const allTasks = workspaceTasks.tasks as object[] || [];
+    const allTasks = workspaceTasks.tasks as TaskDefinition[] || [];
+
+    if (allTasks.some(t => t.label === task.label)) {
+        return false;
+    }
 
     allTasks.push(task);
-
     workspaceTasks.update('tasks', allTasks);
+    return true;
 }
 
 export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<object | undefined> {

@@ -30,7 +30,6 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
     public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTaskDefinition[]> {
-        options = options || {};
         options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
         return [
             {
@@ -39,14 +38,14 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
                 dockerBuild: {},
                 platform: 'netCore',
                 netCore: {
-                    appProject: options.appProject
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             }
         ];
     }
 
     public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTaskDefinition[]> {
-        options = options || {};
+        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
         return [
             {
                 type: 'docker-run',
@@ -55,7 +54,7 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
                 dockerRun: {},
                 platform: 'netCore',
                 netCore: {
-                    appProject: await NetCoreTaskHelper.inferAppProject(folder, options) // This method internally checks the user-defined input first
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             }
         ];
@@ -174,6 +173,11 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
     public static resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
         return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
+    }
+
+    public static unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
+        // tslint:disable-next-line: no-invalid-template-strings
+        return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {

@@ -54,6 +54,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
     // tslint:disable-next-line: no-any
     public async initializeBuildTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        options = options || {};
         let buildTasks: DockerBuildTaskDefinition[];
 
         switch (platform) {

@@ -78,6 +78,7 @@ export class DockerRunTaskProvider implements TaskProvider {
 
     // tslint:disable-next-line: no-any
     public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        options = options || {};
         let runTasks: DockerRunTaskDefinition[];
 
         switch (platform) {

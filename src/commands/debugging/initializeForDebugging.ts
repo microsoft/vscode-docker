@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WorkspaceFolder } from 'vscode';
+import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { quickPickPlatform } from '../../configureWorkspace/configUtils';
+import { DebugPlatform } from '../../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../../extensionVariables';
 import { Platform } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
@@ -14,5 +16,21 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
     folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
     platform = platform || await quickPickPlatform();
 
-    return await ext.debugConfigProvider.initializeForDebugging(folder, platform, options);
+    let debugPlatform: DebugPlatform;
+    switch (platform) {
+        case '.NET Core Console':
+        case 'ASP.NET Core':
+            debugPlatform = 'netCore';
+            break;
+        case 'Node.js':
+            debugPlatform = 'node';
+            break;
+        default:
+            debugPlatform = 'unknown';
+    }
+
+    return await callWithTelemetryAndErrorHandling(
+        `docker-debug-initialize/${debugPlatform}`,
+        async () => await ext.debugConfigProvider.initializeForDebugging(folder, platform, options)
+    );
 }
