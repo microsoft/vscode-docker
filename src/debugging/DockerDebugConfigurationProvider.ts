@@ -7,12 +7,11 @@ import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvide
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
-import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
+import { DockerClient } from './coreclr/CliDockerClient';
 import { addDebugConfiguration, DebugHelper } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
-import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
-import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
+import { NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
+import { NodeDebugOptions } from './node/NodeDebugHelper';
 
 export interface DockerServerReadyAction {
     pattern: string;
@@ -31,18 +30,10 @@ export interface DockerDebugConfiguration extends DebugConfiguration {
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
-    private readonly dockerClient: DockerClient;
-    private readonly helpers: { [key in DockerPlatform]: DebugHelper };
-
     constructor(
-        netCoreDebugHelper: NetCoreDebugHelper,
-        nodeDebugHelper: NodeDebugHelper
+        private readonly dockerClient: DockerClient,
+        private readonly helpers: { [key in DockerPlatform]: DebugHelper }
     ) {
-        this.dockerClient = new CliDockerClient(new ChildProcessProvider());
-        this.helpers = {
-            netCore: netCoreDebugHelper,
-            node: nodeDebugHelper
-        };
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
@@ -60,11 +51,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
         options = options || {};
 
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker debugging.`);
-        }
+        const helper = this.getHelper(platform);
 
         const debugConfigurations = await helper.provideDebugConfigurations(folder, options);
 
@@ -76,14 +63,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, platform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         folder = folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
 
-        const helper = this.helpers[debugPlatform];
-
-        if (!helper) {
-            throw new Error(`Unsupported platform '${debugPlatform}'.`);
-        }
+        const helper = this.getHelper(platform);
 
         const result = await helper.resolveDebugConfiguration(folder, debugConfiguration, token);
 
@@ -116,5 +99,15 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
             });
         }
+    }
+
+    private getHelper(platform: DockerPlatform): DebugHelper {
+        const helper = this.helpers[platform];
+
+        if (!helper) {
+            throw new Error(`The platform '${platform}' is not currently supported for Docker debugging.`);
+        }
+
+        return helper;
     }
 }
