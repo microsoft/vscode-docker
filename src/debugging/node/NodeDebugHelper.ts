@@ -14,7 +14,15 @@ export interface NodeDebugOptions {
 
 export class NodeDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NodeDebugOptions): Promise<DockerDebugConfiguration[]> {
-        throw new Error('Method not implemented.');
+        return [
+            {
+                name: 'Docker Node.js Launch',
+                type: 'docker-launch',
+                request: 'launch',
+                preLaunchTask: 'docker-run',
+                platform: 'node'
+            }
+        ];
     }
 
     public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {

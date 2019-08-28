@@ -30,11 +30,26 @@ export interface NodeTaskRunOptions extends DockerRunHelperOptions {
 
 export class NodeTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NodeTaskBuildOptions): Promise<DockerBuildTaskDefinition[]> {
-        return await Promise.resolve([]);
+        return [
+            {
+                type: 'docker-build',
+                label: 'docker-build',
+                platform: 'node',
+            }
+        ];
     }
 
     public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NodeTaskRunOptions): Promise<DockerRunTaskDefinition[]> {
-        return await Promise.resolve([]);
+        return [
+            {
+                type: 'docker-run',
+                label: 'docker-run',
+                dependsOn: ['docker-build'],
+                node: {
+                    enableDebugging: true
+                }
+            }
+        ];
     }
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions> {

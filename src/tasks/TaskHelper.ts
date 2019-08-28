@@ -55,7 +55,7 @@ export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDef
     }
 
     allTasks.push(task);
-    workspaceTasks.update('tasks', allTasks);
+    await workspaceTasks.update('tasks', allTasks);
     return true;
 }
 
