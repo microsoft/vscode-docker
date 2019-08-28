@@ -3,14 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, debug, ExtensionContext, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
+import { ext } from '../extensionVariables';
 import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTracker';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';
 
 export interface DebugHelper {
-    provideDebugConfigurations(): Promise<DockerDebugConfiguration[]>;
+    // tslint:disable-next-line: no-any
+    provideDebugConfigurations(folder: WorkspaceFolder, options?: any): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
 }
 
@@ -18,7 +21,7 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         debug.registerDebugConfigurationProvider(
             'docker-launch',
-            new DockerDebugConfigurationProvider(
+            ext.debugConfigProvider = new DockerDebugConfigurationProvider(
                 new NetCoreDebugHelper(),
                 new NodeDebugHelper()
             )
@@ -31,4 +34,24 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
             new DockerDebugAdapterTrackerFactory()
         )
     );
+
+    ctx.subscriptions.push(
+        commands.registerCommand(
+            'vscode-docker.debugging.initializeForDebugging',
+            async () => await initializeForDebugging()
+        )
+    );
+}
+
+export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
+    const workspaceLaunch = workspace.getConfiguration('launch');
+    const allConfigs = workspaceLaunch.configurations as DebugConfiguration[] || [];
+
+    if (allConfigs.some(c => c.name === debugConfiguration.name)) {
+        return false;
+    }
+
+    allConfigs.push(debugConfiguration);
+    workspaceLaunch.update('configurations', allConfigs);
+    return true;
 }

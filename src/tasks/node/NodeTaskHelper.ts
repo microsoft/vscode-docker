@@ -5,10 +5,10 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, WorkspaceFolder, ShellQuotedString } from 'vscode';
-import { CommandLineBuilder } from '../../utils/commandLineBuilder';
-import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
-import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
+import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
+import { CommandLineBuilder } from '../../../extension.bundle';
+import { DockerBuildOptions, DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
@@ -31,11 +31,11 @@ export interface NodeTaskRunOptions {
 export type NodeTaskHelperType = TaskHelper<NodeTaskBuildOptions, NodeTaskRunOptions>;
 
 export class NodeTaskHelper implements NodeTaskHelperType {
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NodeTaskBuildOptions): Promise<DockerBuildTaskDefinition[]> {
         return await Promise.resolve([]);
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NodeTaskRunOptions): Promise<DockerRunTaskDefinition[]> {
         return await Promise.resolve([]);
     }
 

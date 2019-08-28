@@ -8,9 +8,10 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { PlatformOS } from '../utils/platform';
+import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskRunOptions } from './node/NodeTaskHelper';
+import { addTask } from './TaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -47,6 +48,8 @@ export interface DockerRunOptions {
 }
 
 export interface DockerRunTaskDefinition extends TaskDefinition {
+    label?: string;
+    dependsOn?: string[];
     dockerRun?: DockerRunOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskRunOptions;
@@ -74,8 +77,26 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
-        throw new Error('Method not implemented.');
+    // tslint:disable-next-line: no-any
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        options = options || {};
+        let runTasks: DockerRunTaskDefinition[];
+
+        switch (platform) {
+            case '.NET Core Console':
+            case 'ASP.NET Core':
+                runTasks = await this.netCoreTaskHelper.provideDockerRunTasks(folder, options);
+                break;
+            case 'Node.js':
+                runTasks = await this.nodeTaskHelper.provideDockerRunTasks(folder, options);
+                break;
+            default:
+                throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);
+        }
+
+        for (const runTask of runTasks) {
+            await addTask(runTask);
+        }
     }
 
     private async resolveTaskInternal(task: DockerRunTask, taskPlatform: DockerPlatform, token?: CancellationToken): Promise<Task> {

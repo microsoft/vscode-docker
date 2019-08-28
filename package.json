@@ -44,6 +44,7 @@
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
+        "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -485,35 +486,6 @@
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
-                            "netCore": {
-                                "description": "Options for building .NET Core projects in Docker.",
-                                "properties": {
-                                    "appProject": {
-                                        "type": "string",
-                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
-                                    }
-                                },
-                                "required": [
-                                    "appProject"
-                                ]
-                            },
-                            "node": {
-                                "description": "Options for building Node.js projects in Docker.",
-                                "properties": {
-                                    "foo": {
-                                        "type": "string",
-                                        "description": "bar"
-                                    }
-                                }
-                            },
-                            "platform": {
-                                "type": "string",
-                                "description": "The target plaform for the application.",
-                                "enum": [
-                                    "netCore",
-                                    "node"
-                                ]
-                            },
                             "dockerServerReadyAction": {
                                 "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
                                 "properties": {
@@ -535,6 +507,40 @@
                                     "pattern",
                                     "containerName"
                                 ]
+                            },
+                            "removeContainerAfterDebug": {
+                                "type": "boolean",
+                                "description": "Whether to remove the debug container after debugging.",
+                                "default": "true"
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore",
+                                    "node"
+                                ]
+                            },
+                            "netCore": {
+                                "description": "Options for building .NET Core projects in Docker.",
+                                "properties": {
+                                    "appProject": {
+                                        "type": "string",
+                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                                    }
+                                },
+                                "required": [
+                                    "appProject"
+                                ]
+                            },
+                            "node": {
+                                "description": "Options for building Node.js projects in Docker.",
+                                "properties": {
+                                    "foo": {
+                                        "type": "string",
+                                        "description": "bar"
+                                    }
+                                }
                             }
                         }
                     }
@@ -768,6 +774,14 @@
                             }
                         }
                     },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
+                    },
                     "netCore": {
                         "description": "Options for building .NET Core projects in Docker.",
                         "properties": {
@@ -788,14 +802,6 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
-                    },
-                    "platform": {
-                        "type": "string",
-                        "description": "The target plaform for the application.",
-                        "enum": [
-                            "netCore",
-                            "node"
-                        ]
                     }
                 }
             },
@@ -922,6 +928,14 @@
                             }
                         }
                     },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
+                    },
                     "netCore": {
                         "description": "Options for running .NET Core projects in Docker.",
                         "properties": {
@@ -958,14 +972,6 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
-                    },
-                    "platform": {
-                        "type": "string",
-                        "description": "The target plaform for the application.",
-                        "enum": [
-                            "netCore",
-                            "node"
-                        ]
                     }
                 }
             }
@@ -1503,6 +1509,11 @@
                 "command": "vscode-docker.containers.viewLogs",
                 "title": "View Logs",
                 "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.debugging.initializeForDebugging",
+                "title": "Initialize for Docker debugging",
+                "category": "Docker"
             },
             {
                 "command": "vscode-docker.images.build",

@@ -11,8 +11,8 @@ import { CancellationToken, WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
-import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
-import { DockerContainerVolume, DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
+import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { TaskCache, TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
@@ -29,12 +29,35 @@ export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOp
 export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
-        throw new Error('Method not implemented.');
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTaskDefinition[]> {
+        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
+        return [
+            {
+                type: 'docker-build',
+                label: 'docker-build',
+                dockerBuild: {},
+                platform: 'netCore',
+                netCore: {
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
+                }
+            }
+        ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]> {
-        throw new Error('Method not implemented.');
+    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTaskDefinition[]> {
+        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
+        return [
+            {
+                type: 'docker-run',
+                label: 'docker-run',
+                dependsOn: ['docker-build', 'build'],
+                dockerRun: {},
+                platform: 'netCore',
+                netCore: {
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
+                }
+            }
+        ];
     }
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {
@@ -150,6 +173,11 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
 
     public static resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
         return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
+    }
+
+    public static unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
+        // tslint:disable-next-line: no-invalid-template-strings
+        return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
