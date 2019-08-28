@@ -6,11 +6,10 @@
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { Platform } from '../utils/platform';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
 import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
-import { addDebugConfiguration } from './DebugHelper';
+import { addDebugConfiguration, DebugHelper } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
@@ -33,12 +32,17 @@ export interface DockerDebugConfiguration extends DebugConfiguration {
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     private readonly dockerClient: DockerClient;
+    private readonly helpers: { [key in DockerPlatform]: DebugHelper };
 
     constructor(
-        private readonly netCoreDebugHelper: NetCoreDebugHelper,
-        private readonly nodeDebugHelper: NodeDebugHelper
+        netCoreDebugHelper: NetCoreDebugHelper,
+        nodeDebugHelper: NodeDebugHelper
     ) {
         this.dockerClient = new CliDockerClient(new ChildProcessProvider());
+        this.helpers = {
+            netCore: netCoreDebugHelper,
+            node: nodeDebugHelper
+        };
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
@@ -53,23 +57,16 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     // tslint:disable-next-line: no-any
-    public async initializeForDebugging(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
         options = options || {};
-        let debugConfigurations: DockerDebugConfiguration[];
 
-        switch (platform) {
-            case '.NET Core Console':
-            case 'ASP.NET Core':
-                // tslint:disable-next-line: no-unsafe-any
-                debugConfigurations = await this.netCoreDebugHelper.provideDebugConfigurations(folder, options);
-                break;
-            case 'Node.js':
-                // tslint:disable-next-line: no-unsafe-any
-                debugConfigurations = await this.nodeDebugHelper.provideDebugConfigurations(folder, options);
-                break;
-            default:
-                throw new Error(`The platform '${platform}' is not currently supported for Docker debugging.`);
+        const helper = this.helpers[platform];
+
+        if (!helper) {
+            throw new Error(`The platform '${platform}' is not currently supported for Docker debugging.`);
         }
+
+        const debugConfigurations = await helper.provideDebugConfigurations(folder, options);
 
         await ext.buildTaskProvider.initializeBuildTasks(folder, platform, options);
         await ext.runTaskProvider.initializeRunTasks(folder, platform, options);
@@ -81,18 +78,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         folder = folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
-        let result: DockerDebugConfiguration | undefined;
 
-        switch (debugPlatform) {
-            case 'netCore':
-                result = await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
-                break;
-            case 'node':
-                result = await this.nodeDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
-                break;
-            default:
-                throw new Error(`Unrecognized platform '${debugConfiguration.platform}'.`);
+        const helper = this.helpers[debugPlatform];
+
+        if (!helper) {
+            throw new Error(`Unsupported platform '${debugPlatform}'.`);
         }
+
+        const result = await helper.resolveDebugConfiguration(folder, debugConfiguration, token);
 
         await this.registerRemoveContainerAfterDebugging(result);
 

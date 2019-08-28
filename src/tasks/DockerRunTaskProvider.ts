@@ -8,7 +8,7 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { Platform, PlatformOS } from '../utils/platform';
+import { PlatformOS } from '../utils/platform';
 import { DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper, NodeTaskRunOptions } from './node/NodeTaskHelper';
@@ -88,17 +88,16 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     // tslint:disable-next-line: no-any
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
         options = options || {};
         let runTasks: DockerRunTaskDefinition[];
 
         switch (platform) {
-            case '.NET Core Console':
-            case 'ASP.NET Core':
+            case 'netCore':
                 // tslint:disable-next-line: no-unsafe-any
                 runTasks = await this.netCoreTaskHelper.provideDockerRunTasks(folder, options);
                 break;
-            case 'Node.js':
+            case 'node':
                 // tslint:disable-next-line: no-unsafe-any
                 runTasks = await this.nodeTaskHelper.provideDockerRunTasks(folder, options);
                 break;

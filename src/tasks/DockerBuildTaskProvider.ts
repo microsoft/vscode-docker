@@ -8,7 +8,6 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { Platform } from '../utils/platform';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskBuildOptions, NodeTaskHelper } from './node/NodeTaskHelper';
 import { addTask } from './TaskHelper';
@@ -62,17 +61,16 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     // tslint:disable-next-line: no-any
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
         options = options || {};
         let buildTasks: DockerBuildTaskDefinition[];
 
         switch (platform) {
-            case '.NET Core Console':
-            case 'ASP.NET Core':
+            case 'netCore':
                 // tslint:disable-next-line: no-unsafe-any
                 buildTasks = await this.netCoreTaskHelper.provideDockerBuildTasks(folder, options);
                 break;
-            case 'Node.js':
+            case 'node':
                 // tslint:disable-next-line: no-unsafe-any
                 buildTasks = await this.nodeTaskHelper.provideDockerBuildTasks(folder, options);
                 break;

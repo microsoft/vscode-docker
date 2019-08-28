@@ -30,6 +30,6 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => await ext.debugConfigProvider.initializeForDebugging(folder, platform, options)
+        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform, options)
     );
 }
