@@ -115,23 +115,24 @@ export class DockerRunTaskProvider implements TaskProvider {
         definition.dockerRun = definition.dockerRun || {};
 
         const context: DockerRunTaskContext = {};
+        const folder = task.scope as WorkspaceFolder;
 
-        if (task.scope as WorkspaceFolder !== undefined) {
-            switch (taskPlatform) {
-                case 'netCore':
-                    context.helperOptions = definition.netCore;
-                    context.associatedBuildTask = await getAssociatedDockerBuildTask(definition);
-                    definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, context, token);
-                    break;
-                case 'node':
-                    context.helperOptions = definition.node;
-                    definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(task.scope as WorkspaceFolder, definition.dockerRun, context, token);
-                    break;
-                default:
-                    throw new Error(`Unrecognized platform '${definition.platform}'.`);
-            }
-        } else {
+        if (!folder) {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
+        }
+
+        switch (taskPlatform) {
+            case 'netCore':
+                context.helperOptions = definition.netCore;
+                context.associatedBuildTask = await getAssociatedDockerBuildTask(definition);
+                definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(folder, definition.dockerRun, context, token);
+                break;
+            case 'node':
+                context.helperOptions = definition.node;
+                definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(folder, definition.dockerRun, context, token);
+                break;
+            default:
+                throw new Error(`Unrecognized platform '${definition.platform}'.`);
         }
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun, token);

@@ -89,22 +89,23 @@ export class DockerBuildTaskProvider implements TaskProvider {
         definition.dockerBuild = definition.dockerBuild || {};
 
         const context: DockerBuildTaskContext = {};
+        const folder = task.scope as WorkspaceFolder;
 
-        if (task.scope as WorkspaceFolder !== undefined) {
-            switch (taskPlatform) {
-                case 'netCore':
-                    context.helperOptions = definition.netCore;
-                    definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, definition.dockerBuild, context, token);
-                    break;
-                case 'node':
-                    context.helperOptions = definition.node;
-                    definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(task.scope as WorkspaceFolder, definition.dockerBuild, context, token);
-                    break;
-                default:
-                    throw new Error(`Unrecognized platform '${definition.platform}'.`);
-            }
-        } else {
+        if (!folder) {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
+        }
+
+        switch (taskPlatform) {
+            case 'netCore':
+                context.helperOptions = definition.netCore;
+                definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(folder, definition.dockerBuild, context, token);
+                break;
+            case 'node':
+                context.helperOptions = definition.node;
+                definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(folder, definition.dockerBuild, context, token);
+                break;
+            default:
+                throw new Error(`Unrecognized platform '${definition.platform}'.`);
         }
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild, token);
