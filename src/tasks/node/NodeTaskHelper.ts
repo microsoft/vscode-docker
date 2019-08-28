@@ -55,13 +55,14 @@ export class NodeTaskHelper implements TaskHelper {
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions> {
         const helperOptions: NodeTaskBuildOptions = context.helperOptions || {};
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, folder);
+        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         if (buildOptions.context === undefined) {
             buildOptions.context = NodeTaskHelper.inferBuildContextPath(buildOptions && buildOptions.context, folder, packagePath);
         }
 
         if (buildOptions.tag === undefined) {
-            buildOptions.tag = await NodeTaskHelper.inferTag(packagePath);
+            buildOptions.tag = NodeTaskHelper.inferTag(packageName);
         }
 
         return await Promise.resolve(buildOptions);
@@ -70,9 +71,14 @@ export class NodeTaskHelper implements TaskHelper {
     public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, context: DockerRunTaskContext, token?: CancellationToken): Promise<DockerRunOptions> {
         const helperOptions: NodeTaskRunOptions = context.helperOptions || {};
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, folder);
+        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
+
+        if (runOptions.containerName === undefined) {
+            runOptions.containerName = NodeTaskHelper.inferContainerName(packageName);
+        }
 
         if (runOptions.image === undefined) {
-            runOptions.image = await NodeTaskHelper.inferTag(packagePath);
+            runOptions.image = NodeTaskHelper.inferTag(packageName);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -127,7 +133,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
     }
 
-    private static async inferTag(packagePath: string): Promise<string> {
+    private static async inferPackageName(packagePath: string): Promise<string> {
         const packageJson = await fse.readFile(packagePath, 'utf8');
         const packageContent = <NodePackage>JSON.parse(packageJson);
 
@@ -136,8 +142,16 @@ export class NodeTaskHelper implements TaskHelper {
         } else {
             const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
 
-            return `${packageBaseDirName}:latest`;
+            return packageBaseDirName;
         }
+    }
+
+    private static inferContainerName(packageName: string): string {
+        return `${packageName}-dev`;
+    }
+
+    private static inferTag(packageName: string): string {
+        return `${packageName}:latest`;
     }
 
     private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<ShellQuotedString[]> {
