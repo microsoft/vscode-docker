@@ -44,6 +44,7 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
 }
 
 export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceLaunch = workspace.getConfiguration('launch');
     const allConfigs = workspaceLaunch.configurations as DebugConfiguration[] || [];
 
