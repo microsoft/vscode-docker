@@ -47,10 +47,11 @@ export interface DockerRunOptions {
 }
 
 export interface DockerRunTaskDefinition extends TaskDefinition {
+    label?: string;
     dockerRun?: DockerRunOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskRunOptions;
-    platform: TaskPlatform;
+    platform?: TaskPlatform;
 }
 
 export interface DockerRunTask extends Task {
@@ -76,7 +77,7 @@ export class DockerRunTaskProvider implements TaskProvider {
 
     // tslint:disable-next-line: no-any
     public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
-        let runTasks: DockerRunTask[];
+        let runTasks: DockerRunTaskDefinition[];
 
         switch (platform) {
             case '.NET Core Console':

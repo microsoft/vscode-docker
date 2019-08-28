@@ -11,8 +11,8 @@ import { CancellationToken, WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
-import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
-import { DockerContainerVolume, DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
+import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { TaskCache, TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
@@ -29,11 +29,11 @@ export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOp
 export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTask[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTaskDefinition[]> {
         throw new Error('Method not implemented.');
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTask[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTaskDefinition[]> {
         throw new Error('Method not implemented.');
     }
 

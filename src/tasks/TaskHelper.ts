@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../extensionVariables';
-import { DockerBuildOptions, DockerBuildTask, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunOptions, DockerRunTask, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
@@ -15,9 +15,9 @@ export type TaskPlatform = 'netCore' | 'node' | 'unknown';
 
 export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
     // tslint:disable-next-line: no-any
-    provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTask[]>;
+    provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTaskDefinition[]>;
     // tslint:disable-next-line: no-any
-    provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTask[]>;
+    provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
 }
@@ -47,7 +47,7 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
-export async function addTask(task: Task): Promise<void> {
+export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<void> {
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks = workspaceTasks.tasks as object[] || [];
 

@@ -23,10 +23,11 @@ export interface DockerBuildOptions {
 }
 
 export interface DockerBuildTaskDefinition extends TaskDefinition {
+    label?: string;
     dockerBuild?: DockerBuildOptions;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskBuildOptions;
-    platform: TaskPlatform;
+    platform?: TaskPlatform;
 }
 
 export interface DockerBuildTask extends Task {
@@ -52,7 +53,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
     // tslint:disable-next-line: no-any
     public async initializeBuildTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
-        let buildTasks: DockerBuildTask[];
+        let buildTasks: DockerBuildTaskDefinition[];
 
         switch (platform) {
             case '.NET Core Console':
