@@ -5,13 +5,14 @@
 
 import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { Platform, PlatformOS } from '../utils/platform';
 import { DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper, NodeTaskRunOptions } from './node/NodeTaskHelper';
-import { addTask, getAssociatedDockerBuildTask, TaskPlatform } from './TaskHelper';
+import { addTask, getAssociatedDockerBuildTask } from './TaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -31,7 +32,7 @@ export interface DockerContainerVolume {
 }
 
 export interface DockerRunOptions {
-    command?: string;
+    command?: string | ShellQuotedString[];
     containerName?: string;
     entrypoint?: string;
     env?: { [key: string]: string };
@@ -51,9 +52,9 @@ export interface DockerRunTaskDefinition extends TaskDefinition {
     label?: string;
     dependsOn?: string[];
     dockerRun?: DockerRunOptions;
-    platform?: TaskPlatform;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskRunOptions;
+    platform?: DockerPlatform;
 }
 
 export interface DockerRunTask extends Task {
@@ -80,9 +81,9 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
-        const taskPlatform = DockerRunTaskProvider.determineTaskPlatform(task);
+        const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-run/${taskPlatform}`,
+            `docker-run/${taskPlatform || 'unknown'}`,
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
@@ -110,7 +111,7 @@ export class DockerRunTaskProvider implements TaskProvider {
         }
     }
 
-    private async resolveTaskInternal(task: DockerRunTask, taskPlatform: TaskPlatform, token?: CancellationToken): Promise<Task> {
+    private async resolveTaskInternal(task: DockerRunTask, taskPlatform: DockerPlatform, token?: CancellationToken): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
@@ -162,15 +163,5 @@ export class DockerRunTaskProvider implements TaskProvider {
             .withQuotedArg(runOptions.image)
             .withArgs(runOptions.command)
             .buildShellQuotedStrings();
-    }
-
-    private static determineTaskPlatform(task: DockerRunTask): TaskPlatform {
-        if (task.definition.platform === 'netCore' || task.definition.netCore !== undefined) {
-            return 'netCore'
-        } else if (task.definition.platform === 'node' || task.definition.node !== undefined) {
-            return 'node';
-        }
-
-        return 'unknown';
     }
 }

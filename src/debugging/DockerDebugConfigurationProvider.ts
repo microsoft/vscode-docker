@@ -11,10 +11,9 @@ import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
 import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
 import { addDebugConfiguration } from './DebugHelper';
+import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
-
-export type DebugPlatform = 'netCore' | 'node' | 'unknown';
 
 export interface DockerServerReadyAction {
     pattern: string;
@@ -26,9 +25,9 @@ export interface DockerDebugConfiguration extends DebugConfiguration {
     preLaunchTask?: string;
     dockerServerReadyAction?: DockerServerReadyAction;
     removeContainerAfterDebug?: boolean;
-    platform?: DebugPlatform;
     netCore?: NetCoreDebugOptions;
     node?: NodeDebugOptions;
+    platform: DockerPlatform;
     _containerNameToKill?: string;
 }
 
@@ -47,9 +46,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-        const debugPlatform = DockerDebugConfigurationProvider.determineDebugPlatform(debugConfiguration);
+        const debugPlatform = getPlatform(debugConfiguration);
         return callWithTelemetryAndErrorHandling(
-            `docker-launch/${debugPlatform}`,
+            `docker-launch/${debugPlatform || 'unknown'}`,
             async () => await this.resolveDebugConfigurationInternal(folder, debugConfiguration, debugPlatform, token));
     }
 
@@ -80,7 +79,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DebugPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         folder = folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
         let result: DockerDebugConfiguration | undefined;
 
@@ -124,15 +123,5 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
             });
         }
-    }
-
-    private static determineDebugPlatform(debugConfiguration: DockerDebugConfiguration): DebugPlatform {
-        if (debugConfiguration.platform === 'netCore' || debugConfiguration.netCore !== undefined) {
-            return 'netCore'
-        } else if (debugConfiguration.platform === 'node' || debugConfiguration.node !== undefined) {
-            return 'node';
-        }
-
-        return 'unknown';
     }
 }

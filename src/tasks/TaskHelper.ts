@@ -11,8 +11,6 @@ import { DockerRunOptions, DockerRunTaskContext, DockerRunTaskDefinition, Docker
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
-export type TaskPlatform = 'netCore' | 'node' | 'unknown';
-
 export interface TaskHelper {
     // tslint:disable-next-line: no-any
     provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTaskDefinition[]>;

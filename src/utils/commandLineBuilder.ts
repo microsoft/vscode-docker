@@ -36,9 +36,13 @@ export class CommandLineBuilder {
         return this;
     }
 
-    public withArgs(args: string | undefined): CommandLineBuilder {
-        if (args) {
+    public withArgs(args: string | ShellQuotedString[] | undefined): CommandLineBuilder {
+        if (typeof (args) === 'string') {
             for (const arg of args.split(' ')) {
+                this.withArg(arg);
+            }
+        } else if (args) {
+            for (const arg of args) {
                 this.withArg(arg);
             }
         }
@@ -54,15 +58,24 @@ export class CommandLineBuilder {
         return this;
     }
 
-    public withNamedArg(name: string, value: string | ShellQuotedString | undefined): CommandLineBuilder {
+    public withNamedArg(name: string, value: string | ShellQuotedString | undefined, options?: { assignValue?: boolean }): CommandLineBuilder {
         if (typeof (value) === 'string') {
-            this.withArg(name);
-            this.withArg(
-                {
-                    value: value,
-                    quoting: ShellQuoting.Strong // The prior behavior was to quote
-                }
-            );
+            if (options && options.assignValue) {
+                this.withArg(
+                    {
+                        value: `${name}=${value}`,
+                        quoting: ShellQuoting.Strong
+                    }
+                );
+            } else {
+                this.withArg(name);
+                this.withArg(
+                    {
+                        value: value,
+                        quoting: ShellQuoting.Strong // The prior behavior was to quote
+                    }
+                );
+            }
         } else if (value !== undefined) {
             this.withArg(name);
             this.withArg(value);

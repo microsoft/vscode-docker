@@ -542,10 +542,7 @@
                                     }
                                 }
                             }
-                        },
-                        "required": [
-                            "platform"
-                        ]
+                        }
                     }
                 }
             },
@@ -806,10 +803,7 @@
                             }
                         }
                     }
-                },
-                "required": [
-                    "platform"
-                ]
+                }
             },
             {
                 "type": "docker-run",
@@ -979,10 +973,7 @@
                             }
                         }
                     }
-                },
-                "required": [
-                    "platform"
-                ]
+                }
             }
         ],
         "languages": [
