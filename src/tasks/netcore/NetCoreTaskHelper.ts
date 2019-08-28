@@ -29,11 +29,11 @@ export type NetCoreTaskHelperType = TaskHelper<NetCoreTaskOptions, NetCoreTaskOp
 export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTask[]> {
         throw new Error('Method not implemented.');
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTask[]> {
         throw new Error('Method not implemented.');
     }
 

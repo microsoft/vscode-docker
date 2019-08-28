@@ -44,6 +44,7 @@
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
+        "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -1517,6 +1518,11 @@
                 "command": "vscode-docker.containers.viewLogs",
                 "title": "View Logs",
                 "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.debugging.initializeForDebugging",
+                "title": "Initialize for Docker debugging",
+                "category": "Docker"
             },
             {
                 "command": "vscode-docker.images.build",

@@ -7,9 +7,10 @@ import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, T
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { Platform } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskBuildOptions, NodeTaskHelperType } from './node/NodeTaskHelper';
-import { TaskPlatform } from './TaskHelper';
+import { addTask, TaskPlatform } from './TaskHelper';
 
 export interface DockerBuildOptions {
     args?: { [key: string]: string };
@@ -49,8 +50,25 @@ export class DockerBuildTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: TaskPlatform): Promise<void> {
-        throw new Error("Method not implemented.");
+    // tslint:disable-next-line: no-any
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        let buildTasks: DockerBuildTask[];
+
+        switch (platform) {
+            case '.NET Core Console':
+            case 'ASP.NET Core':
+                buildTasks = await this.netCoreTaskHelper.provideDockerBuildTasks(folder, options);
+                break;
+            case 'Node.js':
+                buildTasks = await this.nodeTaskHelper.provideDockerBuildTasks(folder, options);
+                break;
+            default:
+                throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
+        }
+
+        for (const buildTask of buildTasks) {
+            await addTask(buildTask);
+        }
     }
 
     private async resolveTaskInternal(task: DockerBuildTask, taskPlatform: TaskPlatform, token?: CancellationToken): Promise<Task> {

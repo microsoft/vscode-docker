@@ -13,11 +13,11 @@ export interface NodeDebugOptions {
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(options?: NodeDebugOptions): Promise<DockerDebugConfiguration[]> {
         throw new Error('Method not implemented.');
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {
+    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {
         const resolvedConfiguration = cloneObject(debugConfiguration);
 
         // tslint:disable-next-line: no-invalid-template-strings

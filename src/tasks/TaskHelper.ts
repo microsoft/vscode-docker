@@ -14,8 +14,10 @@ import { NodeTaskHelper } from './node/NodeTaskHelper';
 export type TaskPlatform = 'netCore' | 'node' | 'unknown';
 
 export interface TaskHelper<THelperBuildOptions, THelperRunOptions> {
-    provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]>;
-    provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]>;
+    // tslint:disable-next-line: no-any
+    provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTask[]>;
+    // tslint:disable-next-line: no-any
+    provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTask[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: THelperBuildOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: THelperRunOptions | undefined, token?: CancellationToken): Promise<DockerRunOptions>;
 }
@@ -47,10 +49,11 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
 
 export async function addTask(task: Task): Promise<void> {
     const workspaceTasks = workspace.getConfiguration('tasks');
+    const allTasks = workspaceTasks.tasks as object[] || [];
 
-    (workspaceTasks.tasks as object[]).push(task);
+    allTasks.push(task);
 
-    workspaceTasks.update('tasks', workspaceTasks.tasks);
+    workspaceTasks.update('tasks', allTasks);
 }
 
 export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<object | undefined> {

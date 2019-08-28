@@ -7,10 +7,10 @@ import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, T
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { PlatformOS } from '../utils/platform';
+import { Platform, PlatformOS } from '../utils/platform';
 import { NetCoreTaskHelperType, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelperType, NodeTaskRunOptions } from './node/NodeTaskHelper';
-import { TaskPlatform } from './TaskHelper';
+import { addTask, TaskPlatform } from './TaskHelper';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -74,8 +74,25 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: TaskPlatform): Promise<void> {
-        throw new Error('Method not implemented.');
+    // tslint:disable-next-line: no-any
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: Platform, options?: any): Promise<void> {
+        let runTasks: DockerRunTask[];
+
+        switch (platform) {
+            case '.NET Core Console':
+            case 'ASP.NET Core':
+                runTasks = await this.netCoreTaskHelper.provideDockerRunTasks(folder, options);
+                break;
+            case 'Node.js':
+                runTasks = await this.nodeTaskHelper.provideDockerRunTasks(folder, options);
+                break;
+            default:
+                throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);
+        }
+
+        for (const runTask of runTasks) {
+            await addTask(runTask);
+        }
     }
 
     private async resolveTaskInternal(task: DockerRunTask, taskPlatform: TaskPlatform, token?: CancellationToken): Promise<Task> {

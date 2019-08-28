@@ -28,11 +28,11 @@ export interface NodeTaskRunOptions {
 export type NodeTaskHelperType = TaskHelper<NodeTaskBuildOptions, NodeTaskRunOptions>;
 
 export class NodeTaskHelper implements NodeTaskHelperType {
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTask[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NodeTaskBuildOptions): Promise<DockerBuildTask[]> {
         return await Promise.resolve([]);
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTask[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NodeTaskRunOptions): Promise<DockerRunTask[]> {
         return await Promise.resolve([]);
     }
 

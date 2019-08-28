@@ -66,7 +66,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         );
     }
 
-    public async provideDebugConfigurations(): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(options?: NetCoreDebugOptions): Promise<DockerDebugConfiguration[]> {
         throw new Error('Method not implemented.');
     }
 
