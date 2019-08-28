@@ -8,8 +8,8 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskBuildOptions, NodeTaskHelper } from './node/NodeTaskHelper';
+import { NetCoreTaskDefinition, NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { NodeBuildTaskDefinition, NodeTaskHelper } from './node/NodeTaskHelper';
 import { addTask } from './TaskHelper';
 
 export interface DockerBuildOptions {
@@ -22,12 +22,10 @@ export interface DockerBuildOptions {
     pull?: boolean;
 }
 
-export interface DockerBuildTaskDefinition extends TaskDefinition {
+export interface DockerBuildTaskDefinition extends TaskDefinition, NetCoreTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
     dependsOn?: string[];
     dockerBuild?: DockerBuildOptions;
-    netCore?: NetCoreTaskOptions;
-    node?: NodeTaskBuildOptions;
     platform?: DockerPlatform;
 }
 
@@ -60,19 +58,15 @@ export class DockerBuildTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    // tslint:disable-next-line: no-any
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
-        options = options || {};
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
         let buildTasks: DockerBuildTaskDefinition[];
 
         switch (platform) {
             case 'netCore':
-                // tslint:disable-next-line: no-unsafe-any
-                buildTasks = await this.netCoreTaskHelper.provideDockerBuildTasks(folder, options);
+                buildTasks = await this.netCoreTaskHelper.provideDockerBuildTasks(folder);
                 break;
             case 'node':
-                // tslint:disable-next-line: no-unsafe-any
-                buildTasks = await this.nodeTaskHelper.provideDockerBuildTasks(folder, options);
+                buildTasks = await this.nodeTaskHelper.provideDockerBuildTasks(folder);
                 break;
             default:
                 throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);

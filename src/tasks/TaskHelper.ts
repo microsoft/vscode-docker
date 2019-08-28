@@ -12,10 +12,8 @@ import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface TaskHelper {
-    // tslint:disable-next-line: no-any
-    provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTaskDefinition[]>;
-    // tslint:disable-next-line: no-any
-    provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTaskDefinition[]>;
+    provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
+    provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, context: DockerRunTaskContext, token?: CancellationToken): Promise<DockerRunOptions>;
 }

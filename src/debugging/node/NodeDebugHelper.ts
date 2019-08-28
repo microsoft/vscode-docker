@@ -19,7 +19,7 @@ export interface NodeDebugOptions {
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NodeDebugOptions): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]> {
         return [
             {
                 name: 'Docker Node.js Launch',

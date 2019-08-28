@@ -87,19 +87,15 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    // tslint:disable-next-line: no-any
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform, options?: any): Promise<void> {
-        options = options || {};
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
         let runTasks: DockerRunTaskDefinition[];
 
         switch (platform) {
             case 'netCore':
-                // tslint:disable-next-line: no-unsafe-any
-                runTasks = await this.netCoreTaskHelper.provideDockerRunTasks(folder, options);
+                runTasks = await this.netCoreTaskHelper.provideDockerRunTasks(folder);
                 break;
             case 'node':
-                // tslint:disable-next-line: no-unsafe-any
-                runTasks = await this.nodeTaskHelper.provideDockerRunTasks(folder, options);
+                runTasks = await this.nodeTaskHelper.provideDockerRunTasks(folder);
                 break;
             default:
                 throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);

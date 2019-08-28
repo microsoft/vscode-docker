@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
-import { CancellationToken, WorkspaceFolder } from 'vscode';
+import { CancellationToken, TaskDefinition, WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
@@ -20,6 +20,10 @@ export interface NetCoreTaskOptions extends DockerBuildHelperOptions, DockerRunH
     configureSsl?: boolean;
 }
 
+export interface NetCoreTaskDefinition extends TaskDefinition {
+    netCore?: NetCoreTaskOptions;
+}
+
 const UserSecretsRegex = /UserSecretsId/i;
 const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
 const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
@@ -27,8 +31,9 @@ const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallback
 export class NetCoreTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTaskDefinition[]> {
-        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
+    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
+        const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+
         return [
             {
                 type: 'docker-build',
@@ -36,14 +41,15 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerBuild: {},
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }
             }
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTaskDefinition[]> {
-        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
+    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]> {
+        const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+
         return [
             {
                 type: 'docker-run',
@@ -52,7 +58,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerRun: {},
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }
             }
         ];
@@ -119,10 +125,10 @@ export class NetCoreTaskHelper implements TaskHelper {
         return folder.uri.fsPath;
     }
 
-    public static async inferAppProject(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
+    public static async inferAppProject(folder: WorkspaceFolder, helperOptions?: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
         let result: string;
 
-        if (helperOptions.appProject) {
+        if (helperOptions && helperOptions.appProject) {
             result = NetCoreTaskHelper.resolveWorkspaceFolderPath(folder, helperOptions.appProject);
         } else {
             // Find a .csproj or .fsproj in the folder

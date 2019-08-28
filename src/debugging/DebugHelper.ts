@@ -14,8 +14,7 @@ import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';
 
 export interface DebugHelper {
-    // tslint:disable-next-line: no-any
-    provideDebugConfigurations(folder: WorkspaceFolder, options?: any): Promise<DockerDebugConfiguration[]>;
+    provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
 }
 
