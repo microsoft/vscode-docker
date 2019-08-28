@@ -23,11 +23,12 @@ export interface DockerServerReadyAction {
 }
 
 export interface DockerDebugConfiguration extends DebugConfiguration {
-    netCore?: NetCoreDebugOptions;
-    node?: NodeDebugOptions;
-    platform: DebugPlatform;
+    preLaunchTask?: string;
     dockerServerReadyAction?: DockerServerReadyAction;
     removeContainerAfterDebug?: boolean;
+    platform?: DebugPlatform;
+    netCore?: NetCoreDebugOptions;
+    node?: NodeDebugOptions;
     _containerNameToKill?: string;
 }
 
@@ -60,11 +61,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             case '.NET Core Console':
             case 'ASP.NET Core':
                 // tslint:disable-next-line: no-unsafe-any
-                debugConfigurations = await this.netCoreDebugHelper.provideDebugConfigurations(options);
+                debugConfigurations = await this.netCoreDebugHelper.provideDebugConfigurations(folder, options);
                 break;
             case 'Node.js':
                 // tslint:disable-next-line: no-unsafe-any
-                debugConfigurations = await this.nodeDebugHelper.provideDebugConfigurations(options);
+                debugConfigurations = await this.nodeDebugHelper.provideDebugConfigurations(folder, options);
                 break;
             default:
                 throw new Error(`The platform '${platform}' is not currently supported for Docker debugging.`);

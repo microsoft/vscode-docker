@@ -24,10 +24,11 @@ export interface DockerBuildOptions {
 
 export interface DockerBuildTaskDefinition extends TaskDefinition {
     label?: string;
+    dependsOn?: string[];
     dockerBuild?: DockerBuildOptions;
+    platform?: TaskPlatform;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskBuildOptions;
-    platform?: TaskPlatform;
 }
 
 export interface DockerBuildTask extends Task {

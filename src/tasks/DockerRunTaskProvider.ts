@@ -48,10 +48,11 @@ export interface DockerRunOptions {
 
 export interface DockerRunTaskDefinition extends TaskDefinition {
     label?: string;
+    dependsOn?: string[];
     dockerRun?: DockerRunOptions;
+    platform?: TaskPlatform;
     netCore?: NetCoreTaskOptions;
     node?: NodeTaskRunOptions;
-    platform?: TaskPlatform;
 }
 
 export interface DockerRunTask extends Task {

@@ -13,7 +13,7 @@ import { NodeDebugHelper } from './node/NodeDebugHelper';
 
 export interface DebugHelper {
     // tslint:disable-next-line: no-any
-    provideDebugConfigurations(options?: any): Promise<DockerDebugConfiguration[]>;
+    provideDebugConfigurations(folder: WorkspaceFolder, options?: any): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
 }
 

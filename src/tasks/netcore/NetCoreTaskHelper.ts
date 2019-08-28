@@ -30,11 +30,35 @@ export class NetCoreTaskHelper implements NetCoreTaskHelperType {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
     public async provideDockerBuildTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerBuildTaskDefinition[]> {
-        throw new Error('Method not implemented.');
+        options = options || {};
+        options.appProject = await NetCoreTaskHelper.inferAppProject(folder, options); // This method internally checks the user-defined input first
+        return [
+            {
+                type: 'docker-build',
+                label: 'docker-build',
+                dockerBuild: {},
+                platform: 'netCore',
+                netCore: {
+                    appProject: options.appProject
+                }
+            }
+        ];
     }
 
     public async provideDockerRunTasks(folder: WorkspaceFolder, options?: NetCoreTaskOptions): Promise<DockerRunTaskDefinition[]> {
-        throw new Error('Method not implemented.');
+        options = options || {};
+        return [
+            {
+                type: 'docker-run',
+                label: 'docker-run',
+                dependsOn: ['docker-build', 'build'],
+                dockerRun: {},
+                platform: 'netCore',
+                netCore: {
+                    appProject: await NetCoreTaskHelper.inferAppProject(folder, options) // This method internally checks the user-defined input first
+                }
+            }
+        ];
     }
 
     public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, helperOptions: NetCoreTaskOptions | undefined, token?: CancellationToken): Promise<DockerBuildOptions> {

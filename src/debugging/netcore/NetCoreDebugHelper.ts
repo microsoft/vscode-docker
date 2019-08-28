@@ -66,13 +66,26 @@ export class NetCoreDebugHelper implements DebugHelper {
         );
     }
 
-    public async provideDebugConfigurations(options?: NetCoreDebugOptions): Promise<DockerDebugConfiguration[]> {
-        throw new Error('Method not implemented.');
+    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreDebugOptions): Promise<DockerDebugConfiguration[]> {
+        options = options || {};
+
+        return [
+            {
+                name: 'Docker .NET Core Launch',
+                type: 'docker-launch',
+                request: 'launch',
+                preLaunchTask: 'docker-run',
+                platform: 'netCore',
+                netCore: {
+                    appProject: await NetCoreTaskHelper.inferAppProject(folder, options) // This method internally checks the user-defined input first
+                }
+            }
+        ];
     }
 
     public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
-        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore);  // This method internally checks the user-defined input first
+        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(folder, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);

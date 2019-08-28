@@ -13,7 +13,7 @@ export interface NodeDebugOptions {
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(options?: NodeDebugOptions): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NodeDebugOptions): Promise<DockerDebugConfiguration[]> {
         throw new Error('Method not implemented.');
     }
 
