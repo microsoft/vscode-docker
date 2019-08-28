@@ -535,6 +535,11 @@
                                     "pattern",
                                     "containerName"
                                 ]
+                            },
+                            "removeContainerAfterDebug": {
+                                "type": "boolean",
+                                "description": "Whether to remove the debug container after debugging.",
+                                "default": "true"
                             }
                         },
                         "required": [

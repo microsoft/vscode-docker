@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { Platform } from '../utils/platform';
+import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
+import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper, NodeDebugOptions } from './node/NodeDebugHelper';
 
@@ -22,13 +24,19 @@ export interface DockerDebugConfiguration extends DebugConfiguration {
     node?: NodeDebugOptions;
     platform: DebugPlatform;
     dockerServerReadyAction?: DockerServerReadyAction;
+    removeContainerAfterDebug?: boolean;
+    _containerNameToKill?: string;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
+    private readonly dockerClient: DockerClient;
+
     constructor(
         private readonly netCoreDebugHelper: NetCoreDebugHelper,
         private readonly nodeDebugHelper: NodeDebugHelper
-    ) { }
+    ) {
+        this.dockerClient = new CliDockerClient(new ChildProcessProvider());
+    }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         return undefined;
@@ -46,13 +54,47 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, debugPlatform: DebugPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+        let result: DockerDebugConfiguration | undefined;
+
         switch (debugPlatform) {
             case 'netCore':
-                return await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
+                result = await this.netCoreDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
+                break;
             case 'node':
-                return await this.nodeDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
+                result = await this.nodeDebugHelper.resolveDebugConfiguration(folder, debugConfiguration, token);
+                break;
             default:
                 throw new Error(`Unrecognized platform '${debugConfiguration.platform}'.`);
+        }
+
+        await this.registerRemoveContainerAfterDebugging(result);
+
+        return result;
+    }
+
+    private async registerRemoveContainerAfterDebugging(debugConfiguration: DockerDebugConfiguration): Promise<void> {
+        if (!debugConfiguration) { // Could be undefined if debugging was cancelled
+            return;
+        }
+
+        if ((debugConfiguration.removeContainerAfterDebug === undefined || debugConfiguration.removeContainerAfterDebug) &&
+            debugConfiguration._containerNameToKill) {
+
+            debugConfiguration.removeContainerAfterDebug = true;
+            const disposable = debug.onDidTerminateDebugSession(async session => {
+                try {
+                    if (session.configuration.removeContainerAfterDebug &&
+                        session.configuration._containerNameToKill &&
+                        session.configuration._containerNameToKill === debugConfiguration._containerNameToKill) {
+                        await this.dockerClient.removeContainer(debugConfiguration._containerNameToKill, { force: true });
+                        disposable.dispose();
+                    } else {
+                        return; // Return without disposing--this isn't our debug session
+                    }
+                } catch {
+                    disposable.dispose();
+                }
+            });
         }
     }
 
