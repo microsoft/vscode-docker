@@ -109,6 +109,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     public static async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
+        // TODO: No more unicode snowman in container name :(
         return path.parse(helperOptions.appProject).name.replace(/\s/i, '').toLowerCase();
     }
 
