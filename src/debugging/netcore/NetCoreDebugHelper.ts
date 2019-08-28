@@ -178,7 +178,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
         const destPath = path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg');
         await fse.copyFile(debuggerScriptPath, destPath);
-        await fse.chmod(destPath, 'a+rx'); // Give all read and execute permissions
+        await fse.chmod(destPath, 755); // Give all read and execute permissions
     }
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
