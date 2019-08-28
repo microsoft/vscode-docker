@@ -5,6 +5,7 @@
 
 import { CancellationToken, ExtensionContext, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
+import { ext } from '../extensionVariables';
 import { DockerBuildOptions, DockerBuildTask, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
@@ -26,7 +27,7 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            new DockerBuildTaskProvider(
+            ext.buildTaskProvider = new DockerBuildTaskProvider(
                 netCoreTaskHelper,
                 nodeTaskHelper
             )
@@ -36,7 +37,7 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-run',
-            new DockerRunTaskProvider(
+            ext.runTaskProvider = new DockerRunTaskProvider(
                 netCoreTaskHelper,
                 nodeTaskHelper
             )
