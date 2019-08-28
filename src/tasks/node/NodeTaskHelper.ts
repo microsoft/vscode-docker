@@ -5,7 +5,8 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, WorkspaceFolder } from 'vscode';
+import { CancellationToken, WorkspaceFolder, ShellQuotedString } from 'vscode';
+import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { DockerBuildOptions, DockerBuildTask } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTask } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
@@ -18,9 +19,11 @@ export interface NodeTaskBuildOptions {
     package?: string;
 }
 
+export type InspectMode = 'default' | 'break';
+
 export interface NodeTaskRunOptions {
     enableDebugging?: boolean;
-    inspectMode?: 'default' | 'break';
+    inspectMode?: InspectMode;
     inspectPort?: number;
     package?: string;
 }
@@ -58,16 +61,12 @@ export class NodeTaskHelper implements NodeTaskHelperType {
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
-            if (runOptions.command !== undefined) {
-                throw new Error('Debugging cannot be enabled when the Docker run command has been overridden.');
-            }
-
             const inspectMode = helperOptions.inspectMode || 'default';
-            const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
             const inspectPort = helperOptions.inspectPort !== undefined ? helperOptions.inspectPort : 9229;
 
-            // TODO: Infer startup script...
-            runOptions.command = `node ${inspectArg}=0.0.0.0:${inspectPort} ./bin/www`;
+            if (runOptions.command === undefined) {
+                runOptions.command = await NodeTaskHelper.inferCommand(packagePath, inspectMode, inspectPort);
+            }
 
             if (runOptions.ports === undefined) {
                 runOptions.ports = [];
@@ -124,6 +123,19 @@ export class NodeTaskHelper implements NodeTaskHelperType {
 
             return `${packageBaseDirName}:latest`;
         }
+    }
+
+    private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<ShellQuotedString[]> {
+        const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
+
+        // TODO: Infer startup script...
+        const command = CommandLineBuilder
+                .create('node')
+                .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
+                .withQuotedArg(`./bin/www`)
+                .buildShellQuotedStrings();
+
+        return await Promise.resolve(command);
     }
 
     private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {

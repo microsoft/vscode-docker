@@ -30,7 +30,7 @@ export interface DockerContainerVolume {
 }
 
 export interface DockerRunOptions {
-    command?: string;
+    command?: string | ShellQuotedString[];
     containerName?: string;
     entrypoint?: string;
     env?: { [key: string]: string };

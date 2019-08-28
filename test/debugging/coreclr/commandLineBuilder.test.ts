@@ -4,6 +4,7 @@
 
 import * as assert from 'assert';
 import { CommandLineBuilder } from '../../../extension.bundle';
+import { ShellQuoting } from 'vscode';
 
 suite('debugging/coreclr/CommandLineBuilder', () => {
     function testBuilder(name: string, builderInitializer: (CommandLineBuilder) => CommandLineBuilder, expected: string, message: string) {
@@ -25,6 +26,11 @@ suite('debugging/coreclr/CommandLineBuilder', () => {
     suite('withArg', () => {
         testBuilder('With value', builder => builder.withArg('value'), 'value', 'The command line should contain the value.');
         testBuilder('With undefined', builder => builder.withArg(undefined), '', 'The command line should not contain the value.');
+    });
+
+    suite('withArgs', () => {
+        testBuilder('With string', builder => builder.withArgs('value1 value2 value3'), 'value1 value2 value3', 'The command line should contain the values, unquoted, as the default is to escape.');
+        testBuilder('With string', builder => builder.withArgs([{ value: 'value1', quoting: ShellQuoting.Strong }, { value: 'value2', quoting: ShellQuoting.Strong }, { value: 'value3', quoting: ShellQuoting.Strong }]), '"value1" "value2" "value3"', 'The command line should contain the values individually quoted.');
     });
 
     suite('withArrayArgs', () => {
@@ -49,6 +55,7 @@ suite('debugging/coreclr/CommandLineBuilder', () => {
 
     suite('withNamedArg', () => {
         testBuilder('With value', builder => builder.withNamedArg('--arg', 'value'), '--arg "value"', 'The command line should contain the value.');
+        testBuilder('With assigned value', builder => builder.withNamedArg('--arg', 'value', { assignValue: true }), '"--arg=value"', 'The command line should contain the value assigned to the argument.');
         testBuilder('With undefined', builder => builder.withNamedArg('--arg', undefined), '', 'The command line should not contain the value.');
     });
 
