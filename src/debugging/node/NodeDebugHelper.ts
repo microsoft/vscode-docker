@@ -6,8 +6,8 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { cloneObject } from '../../utils/cloneObject';
-import { DebugHelper } from '../DebugHelper';
+import { DebugHelper, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
+import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 interface NodePackage {
@@ -15,7 +15,26 @@ interface NodePackage {
 }
 
 export interface NodeDebugOptions {
-    foo?: string;
+    protocol?: string;
+    port?: number;
+    address?: string;
+    sourceMaps?: boolean;
+    outFiles?: string[];
+    autoAttachChildProcesses?: boolean;
+    timeout?: number;
+    stopOnEntry?: boolean;
+    localRoot?: string;
+    remoteRoot?: string;
+    smartStep?: boolean;
+    skipFiles?: string[];
+    trace?: boolean;
+}
+
+export interface NodeDebugConfiguration extends DebugConfigurationBase, NodeDebugOptions {
+}
+
+export interface NodeDockerDebugConfiguration extends DockerDebugConfigurationBase {
+    node?: NodeDebugOptions;
 }
 
 export class NodeDebugHelper implements DebugHelper {
@@ -31,22 +50,29 @@ export class NodeDebugHelper implements DebugHelper {
         ];
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration> {
-        const resolvedConfiguration = cloneObject(debugConfiguration);
+    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: NodeDockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
+        const packagePath = NodeDebugHelper.inferPackagePath(undefined /* TODO: Support package file */, folder);
+        const packageName = await NodeDebugHelper.inferPackageName(packagePath);
+
+        const dockerOptions: ResolvedDebugConfigurationOptions = {
+            containerNameToKill: NodeDebugHelper.inferContainerName(packageName),
+            dockerServerReadyAction: debugConfiguration.dockerServerReadyAction,
+            removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
+        };
+
+        const resolvedConfiguration: NodeDebugConfiguration = {
+            ...debugConfiguration.node,
+            name:  debugConfiguration.name,
+            dockerOptions,
+            preLaunchTask: debugConfiguration.preLaunchTask,
+            request: 'attach',
+            type: 'node2'
+        };
 
         // tslint:disable-next-line: no-invalid-template-strings
         resolvedConfiguration.localRoot = '${workspaceFolder}';
         resolvedConfiguration.port = 9229;
         resolvedConfiguration.remoteRoot = '/usr/src/app';
-        resolvedConfiguration.request = 'attach';
-        resolvedConfiguration.type = 'node2';
-
-        const packagePath = NodeDebugHelper.inferPackagePath(undefined /* TODO: Support package file */, folder);
-        const packageName = await NodeDebugHelper.inferPackageName(packagePath);
-
-        if (resolvedConfiguration._containerNameToKill === undefined) {
-            resolvedConfiguration._containerNameToKill = NodeDebugHelper.inferContainerName(packageName);
-        }
 
         return await Promise.resolve(resolvedConfiguration);
     }

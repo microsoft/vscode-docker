@@ -8,25 +8,13 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
-import { addDebugConfiguration, DebugHelper } from './DebugHelper';
+import { addDebugConfiguration, DebugHelper, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
-import { NetCoreDebugOptions } from './netcore/NetCoreDebugHelper';
-import { NodeDebugOptions } from './node/NodeDebugHelper';
+import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
+import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
 
-export interface DockerServerReadyAction {
-    pattern: string;
-    containerName: string;
-    uriFormat?: string;
-}
-
-export interface DockerDebugConfiguration extends DebugConfiguration {
-    preLaunchTask?: string;
-    dockerServerReadyAction?: DockerServerReadyAction;
-    removeContainerAfterDebug?: boolean;
-    netCore?: NetCoreDebugOptions;
-    node?: NodeDebugOptions;
-    platform: DockerPlatform;
-    _containerNameToKill?: string;
+export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
+    platform?: DockerPlatform;
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
@@ -60,33 +48,32 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, platform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, originalConfiguration: DockerDebugConfiguration, platform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
         folder = folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
 
         const helper = this.getHelper(platform);
 
-        const result = await helper.resolveDebugConfiguration(folder, debugConfiguration, token);
+        const resolvedConfiguration = await helper.resolveDebugConfiguration(folder, originalConfiguration, token);
 
-        await this.registerRemoveContainerAfterDebugging(result);
-
-        return result;
-    }
-
-    private async registerRemoveContainerAfterDebugging(debugConfiguration: DockerDebugConfiguration): Promise<void> {
-        if (!debugConfiguration) { // Could be undefined if debugging was cancelled
-            return;
+        if (resolvedConfiguration) {
+            await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
         }
 
-        if ((debugConfiguration.removeContainerAfterDebug === undefined || debugConfiguration.removeContainerAfterDebug) &&
-            debugConfiguration._containerNameToKill) {
+        return resolvedConfiguration;
+    }
 
-            debugConfiguration.removeContainerAfterDebug = true;
+    private async registerRemoveContainerAfterDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
+        if (resolvedConfiguration.dockerOptions !== undefined
+            && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
+            && resolvedConfiguration.dockerOptions.containerNameToKill !== undefined) {
             const disposable = debug.onDidTerminateDebugSession(async session => {
+                const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
+
                 try {
-                    if (session.configuration.removeContainerAfterDebug &&
-                        session.configuration._containerNameToKill &&
-                        session.configuration._containerNameToKill === debugConfiguration._containerNameToKill) {
-                        await this.dockerClient.removeContainer(debugConfiguration._containerNameToKill, { force: true });
+                    if (sessionConfiguration
+                        && sessionConfiguration.dockerOptions
+                        && sessionConfiguration.dockerOptions.containerNameToKill === resolvedConfiguration.dockerOptions.containerNameToKill) {
+                        await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
                         disposable.dispose();
                     } else {
                         return; // Return without disposing--this isn't our debug session

@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CancellationToken, WorkspaceFolder } from 'vscode';
+import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { getAssociatedDockerRunTask } from '../../tasks/TaskHelper';
@@ -20,11 +20,15 @@ import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../corecl
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
-import { DebugHelper } from '../DebugHelper';
+import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
+}
+
+export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
+    netCore?: NetCoreDebugOptions;
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
@@ -82,7 +86,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         ];
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
+    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
@@ -121,10 +125,14 @@ export class NetCoreDebugHelper implements DebugHelper {
             env: debugConfiguration.env,
             launchBrowser: debugConfiguration.launchBrowser,
             serverReadyAction: debugConfiguration.serverReadyAction,
-            // TODO: Do nothing for console apps for website
-            dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
-                undefined :
-                debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
+            dockerOptions: {
+                containerNameToKill: containerName,
+                // TODO: Do nothing for console apps for website
+                dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
+                    undefined :
+                    debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
+                removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
+            },
             pipeTransport: {
                 pipeProgram: 'docker',
                 // tslint:disable: no-invalid-template-strings
@@ -139,9 +147,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             preLaunchTask: debugConfiguration.preLaunchTask,
             sourceFileMap: debugConfiguration.sourceFileMap || {
                 '/app/Views': path.join(path.dirname(debugConfiguration.netCore.appProject), 'Views'),
-            },
-            platform: debugConfiguration.platform,
-            _containerNameToKill: containerName
+            }
         };
     }
 
@@ -178,7 +184,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
         const destPath = path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg');
         await fse.copyFile(debuggerScriptPath, destPath);
-        await fse.chmod(destPath, 755); // Give all read and execute permissions
+        await fse.chmod(destPath, 0o755); // Give all read and execute permissions
     }
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {

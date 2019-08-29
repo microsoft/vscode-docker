@@ -9,13 +9,24 @@ import { ext } from '../extensionVariables';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTracker';
+import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';
 
+export interface ResolvedDebugConfigurationOptions {
+    containerNameToKill?: string;
+    dockerServerReadyAction?: DockerServerReadyAction;
+    removeContainerAfterDebug?: boolean;
+}
+
+export interface ResolvedDebugConfiguration extends DebugConfiguration {
+    dockerOptions?: ResolvedDebugConfigurationOptions;
+}
+
 export interface DebugHelper {
     provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]>;
-    resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<DockerDebugConfiguration>;
+    resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {
