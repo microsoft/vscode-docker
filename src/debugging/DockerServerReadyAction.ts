@@ -9,6 +9,8 @@
 
 import * as util from 'util';
 import * as vscode from 'vscode';
+import ChildProcessProvider from './coreclr/ChildProcessProvider';
+import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
 // tslint:disable-next-line: no-any
@@ -75,6 +77,7 @@ export class ServerReadyDetector extends vscode.Disposable {
         if (!this.hasFired) {
             const matches = this.regexp.exec(s);
             if (matches && matches.length >= 1) {
+                // tslint:disable-next-line: no-floating-promises
                 this.openExternalWithString(this.session, matches.length > 1 ? matches[1] : '');
                 this.hasFired = true;
                 this.internalDispose();
@@ -82,7 +85,7 @@ export class ServerReadyDetector extends vscode.Disposable {
         }
     }
 
-    private openExternalWithString(session: vscode.DebugSession, captureString: string): void {
+    private async openExternalWithString(session: vscode.DebugSession, captureString: string): Promise<void> {
         const configuration = <ResolvedDebugConfiguration>session.configuration;
         const args = configuration.dockerOptions.dockerServerReadyAction;
         const format = args.uriFormat || URI_FORMAT;
@@ -105,7 +108,11 @@ export class ServerReadyDetector extends vscode.Disposable {
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
-            captureString = util.format(format, captureString);
+
+            const dockerClient = new CliDockerClient(new ChildProcessProvider());
+            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, captureString);
+
+            captureString = util.format(format, hostPort);
         } else {
             // use the string as is
         }
