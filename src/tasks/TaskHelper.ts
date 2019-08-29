@@ -21,26 +21,22 @@ export interface TaskHelper {
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
-    const netCoreTaskHelper = new NetCoreTaskHelper();
-    const nodeTaskHelper = new NodeTaskHelper();
+    const helpers = {
+        netCore: new NetCoreTaskHelper(),
+        node: new NodeTaskHelper()
+    };
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            ext.buildTaskProvider = new DockerBuildTaskProvider({
-                netCore: netCoreTaskHelper,
-                node: nodeTaskHelper
-            })
+            ext.buildTaskProvider = new DockerBuildTaskProvider(helpers)
         )
     );
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-run',
-            ext.runTaskProvider = new DockerRunTaskProvider(
-                netCoreTaskHelper,
-                nodeTaskHelper
-            )
+            ext.runTaskProvider = new DockerRunTaskProvider(helpers)
         )
     );
 }
