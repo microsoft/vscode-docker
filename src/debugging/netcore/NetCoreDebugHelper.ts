@@ -22,6 +22,7 @@ import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
@@ -115,7 +116,30 @@ export class NetCoreDebugHelper implements DebugHelper {
         // TODO: This is not currently possible to determine
         // const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
 
-        return {
+        let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
+
+        if (numBrowserOptions > 1) {
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at any given time.`);
+        }
+
+        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions > 1
+            ? debugConfiguration.dockerServerReadyAction
+            : {
+                containerName,
+                pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
+            };
+
+        if (dockerServerReadyAction) {
+            if (dockerServerReadyAction.containerName === undefined) {
+                dockerServerReadyAction.containerName = containerName;
+            }
+
+            if (dockerServerReadyAction.uriFormat === undefined) {
+                dockerServerReadyAction.uriFormat = '%s://localhost:%s';
+            }
+        }
+
+        const resolvedConfiguration = {
             name: debugConfiguration.name,
             type: 'coreclr',
             request: 'launch',
@@ -128,9 +152,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             dockerOptions: {
                 containerNameToKill: containerName,
                 // TODO: Do nothing for console apps for website
-                dockerServerReadyAction: debugConfiguration.launchBrowser || debugConfiguration.serverReadyAction ?
-                    undefined :
-                    debugConfiguration.dockerServerReadyAction || { pattern: '^\\s*Now listening on:\\s+(https?://\\S+)', containerName: containerName },
+                dockerServerReadyAction,
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
@@ -149,6 +171,8 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/app/Views': path.join(path.dirname(debugConfiguration.netCore.appProject), 'Views'),
             }
         };
+
+        return resolvedConfiguration;
     }
 
     public static getHostDebuggerPathBase(): string {

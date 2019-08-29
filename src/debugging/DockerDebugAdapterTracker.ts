@@ -54,7 +54,7 @@ export class DockerDebugAdapterTracker implements DebugAdapterTracker {
         const result = containerUrl.match(portRegex);
 
         if (result && result.length > 1) {
-            const hostPort = await this.dockerClient.getHostPort(this.containerName, result[1]);
+            const hostPort = await this.dockerClient.getHostPort(this.containerName, Number.parseInt(result[1], 10));
             if (hostPort) {
                 return `:${hostPort}`;
             }

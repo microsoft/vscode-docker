@@ -110,14 +110,43 @@ export class ServerReadyDetector extends vscode.Disposable {
             }
 
             const dockerClient = new CliDockerClient(new ChildProcessProvider());
-            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, captureString);
+            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, Number.parseInt(captureString, 10));
 
             captureString = util.format(format, hostPort);
         } else {
-            // use the string as is
+            const containerPort = this.getContainerPort(captureString);
+
+            if (containerPort === undefined) {
+                const errMsg = localize('server.ready.port.error', "Captured string ('{0}') must contain a port number.", captureString);
+                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                return;
+            }
+
+            const containerProtocol = this.getContainerProtocol(captureString);
+            const dockerClient = new CliDockerClient(new ChildProcessProvider());
+            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, containerPort);
+
+            captureString = util.format(format, containerProtocol, hostPort);
         }
 
         this.openExternalWithUri(session, captureString);
+    }
+
+    private getContainerProtocol(containerUrl: string): string {
+        const httpsRegex = /https:\/\//i; // Matches https://
+
+        return httpsRegex.test(containerUrl) ? 'https' : 'http'
+    }
+
+    private getContainerPort(containerUrl: string): number | undefined {
+        const portRegex = /:([\d]+)(?![\]:\da-f])/i;
+        const result = containerUrl.match(portRegex);
+
+        if (result && result.length > 1) {
+            return Number.parseInt(result[1], 10);
+        }
+
+        return undefined;
     }
 
     private openExternalWithUri(session: vscode.DebugSession, uri: string): void {
