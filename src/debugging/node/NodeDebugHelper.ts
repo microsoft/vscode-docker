@@ -30,11 +30,15 @@ export interface NodeDebugOptions {
     trace?: boolean;
 }
 
+export interface NodeDockerDebugOptions extends NodeDebugOptions {
+    package?: string;
+}
+
 export interface NodeDebugConfiguration extends DebugConfigurationBase, NodeDebugOptions {
 }
 
 export interface NodeDockerDebugConfiguration extends DockerDebugConfigurationBase {
-    node?: NodeDebugOptions;
+    node?: NodeDockerDebugOptions;
 }
 
 export class NodeDebugHelper implements DebugHelper {
@@ -51,7 +55,9 @@ export class NodeDebugHelper implements DebugHelper {
     }
 
     public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: NodeDockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
-        const packagePath = NodeDebugHelper.inferPackagePath(undefined /* TODO: Support package file */, folder);
+        const options = debugConfiguration.node || {};
+
+        const packagePath = NodeDebugHelper.inferPackagePath(options.package, folder);
         const packageName = await NodeDebugHelper.inferPackageName(packagePath);
 
         const dockerOptions: ResolvedDebugConfigurationOptions = {
@@ -61,7 +67,7 @@ export class NodeDebugHelper implements DebugHelper {
         };
 
         const resolvedConfiguration: NodeDebugConfiguration = {
-            ...debugConfiguration.node,
+            ...options,
             name:  debugConfiguration.name,
             dockerOptions,
             preLaunchTask: debugConfiguration.preLaunchTask,
@@ -69,10 +75,18 @@ export class NodeDebugHelper implements DebugHelper {
             type: 'node2'
         };
 
-        // tslint:disable-next-line: no-invalid-template-strings
-        resolvedConfiguration.localRoot = '${workspaceFolder}';
-        resolvedConfiguration.port = 9229;
-        resolvedConfiguration.remoteRoot = '/usr/src/app';
+        if (resolvedConfiguration.localRoot === undefined) {
+            // tslint:disable-next-line: no-invalid-template-strings
+            resolvedConfiguration.localRoot = '${workspaceFolder}';
+        }
+
+        if (resolvedConfiguration.port === undefined) {
+            resolvedConfiguration.port = 9229;
+        }
+
+        if (resolvedConfiguration.remoteRoot === undefined) {
+            resolvedConfiguration.remoteRoot = '/usr/src/app';
+        }
 
         return await Promise.resolve(resolvedConfiguration);
     }
