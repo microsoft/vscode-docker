@@ -17,7 +17,7 @@ export interface TaskHelper {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
     provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
+    resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
@@ -27,10 +27,10 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            ext.buildTaskProvider = new DockerBuildTaskProvider(
-                netCoreTaskHelper,
-                nodeTaskHelper
-            )
+            ext.buildTaskProvider = new DockerBuildTaskProvider({
+                netCore: netCoreTaskHelper,
+                node: nodeTaskHelper
+            })
         )
     );
 

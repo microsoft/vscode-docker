@@ -9,9 +9,9 @@ import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
-import { NetCoreBuildTaskDefinition, NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { NodeBuildTaskDefinition, NodeTaskHelper } from './node/NodeTaskHelper';
-import { addTask } from './TaskHelper';
+import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
+import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
+import { addTask, TaskHelper } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -24,10 +24,8 @@ export interface DockerBuildTask extends Task {
 }
 
 export class DockerBuildTaskProvider implements TaskProvider {
-    constructor(
-        private readonly netCoreTaskHelper: NetCoreTaskHelper,
-        private readonly nodeTaskHelper: NodeTaskHelper
-    ) { }
+    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) {
+    }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
         return []; // Intentionally empty, so that resolveTask gets used
@@ -41,18 +39,9 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
-        let buildTasks: DockerBuildTaskDefinition[];
+        const helper = this.getHelper(platform);
 
-        switch (platform) {
-            case 'netCore':
-                buildTasks = await this.netCoreTaskHelper.provideDockerBuildTasks(folder);
-                break;
-            case 'node':
-                buildTasks = await this.nodeTaskHelper.provideDockerBuildTasks(folder);
-                break;
-            default:
-                throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
-        }
+        const buildTasks = await helper.provideDockerBuildTasks(folder);
 
         for (const buildTask of buildTasks) {
             await addTask(buildTask);
@@ -69,16 +58,9 @@ export class DockerBuildTaskProvider implements TaskProvider {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
         }
 
-        switch (taskPlatform) {
-            case 'netCore':
-                definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(folder, definition, token);
-                break;
-            case 'node':
-                definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(folder, definition, token);
-                break;
-            default:
-                throw new Error(`Unrecognized platform '${definition.platform}'.`);
-        }
+        const helper = this.getHelper(taskPlatform);
+
+        definition.dockerBuild = await helper.resolveDockerBuildOptions(folder, definition, token);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild, token);
         return new Task(
@@ -101,5 +83,15 @@ export class DockerBuildTaskProvider implements TaskProvider {
             .withNamedArg('--target', options.target)
             .withQuotedArg(options.context)
             .buildShellQuotedStrings();
+    }
+
+    private getHelper(platform: DockerPlatform): TaskHelper {
+        const helper = this.helpers[platform];
+
+        if (!helper) {
+            throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
+        }
+
+        return helper;
     }
 }

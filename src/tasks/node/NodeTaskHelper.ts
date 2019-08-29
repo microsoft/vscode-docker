@@ -80,7 +80,7 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition, runDefinition: NodeRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition | undefined, runDefinition: NodeRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
         const helperOptions = runDefinition.node || {};
         const runOptions = runDefinition.dockerRun;
 
