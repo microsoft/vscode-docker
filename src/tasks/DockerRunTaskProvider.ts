@@ -3,71 +3,25 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { PlatformOS } from '../utils/platform';
-import { DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
-import { NetCoreTaskHelper, NetCoreTaskOptions } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper, NodeTaskRunOptions } from './node/NodeTaskHelper';
+import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { NetCoreRunTaskDefinition, NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { NodeRunTaskDefinition, NodeTaskHelper } from './node/NodeTaskHelper';
 import { addTask, getAssociatedDockerBuildTask } from './TaskHelper';
 
-export interface DockerContainerExtraHost {
-    hostname: string;
-    ip: string;
-}
-
-export interface DockerContainerPort {
-    hostPort?: number;
-    containerPort: number;
-    protocol?: 'tcp' | 'udp';
-}
-
-export interface DockerContainerVolume {
-    localPath: string;
-    containerPath: string;
-    permissions?: 'ro' | 'rw';
-}
-
-export interface DockerRunOptions {
-    command?: string | ShellQuotedString[];
-    containerName?: string;
-    entrypoint?: string;
-    env?: { [key: string]: string };
-    envFiles?: string[];
-    extraHosts?: DockerContainerExtraHost[];
-    image?: string;
-    labels?: { [key: string]: string };
-    network?: string;
-    networkAlias?: string;
-    os?: PlatformOS;
-    ports?: DockerContainerPort[];
-    portsPublishAll?: boolean;
-    volumes?: DockerContainerVolume[];
-}
-
-export interface DockerRunTaskDefinition extends TaskDefinition {
+export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
     dependsOn?: string[];
     dockerRun?: DockerRunOptions;
-    netCore?: NetCoreTaskOptions;
-    node?: NodeTaskRunOptions;
     platform?: DockerPlatform;
 }
 
 export interface DockerRunTask extends Task {
     definition: DockerRunTaskDefinition;
-}
-
-// tslint:disable-next-line: no-empty-interface
-export interface DockerRunHelperOptions {
-}
-
-export interface DockerRunTaskContext {
-    helperOptions?: DockerRunHelperOptions;
-    associatedBuildTask?: DockerBuildTaskDefinition;
 }
 
 export class DockerRunTaskProvider implements TaskProvider {
@@ -110,22 +64,20 @@ export class DockerRunTaskProvider implements TaskProvider {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
-        const context: DockerRunTaskContext = {};
         const folder = task.scope as WorkspaceFolder;
 
         if (!folder) {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
+        const associatedBuildTask = await getAssociatedDockerBuildTask(definition);
+
         switch (taskPlatform) {
             case 'netCore':
-                context.helperOptions = definition.netCore;
-                context.associatedBuildTask = await getAssociatedDockerBuildTask(definition);
-                definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(folder, definition.dockerRun, context, token);
+                definition.dockerRun = await this.netCoreTaskHelper.resolveDockerRunOptions(folder, associatedBuildTask, definition, token);
                 break;
             case 'node':
-                context.helperOptions = definition.node;
-                definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(folder, definition.dockerRun, context, token);
+                definition.dockerRun = await this.nodeTaskHelper.resolveDockerRunOptions(folder, associatedBuildTask, definition, token);
                 break;
             default:
                 throw new Error(`Unrecognized platform '${definition.platform}'.`);

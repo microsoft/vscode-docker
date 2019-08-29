@@ -3,42 +3,24 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskDefinition, TaskProvider, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { NetCoreTaskDefinition, NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
+import { NetCoreBuildTaskDefinition, NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition, NodeTaskHelper } from './node/NodeTaskHelper';
 import { addTask } from './TaskHelper';
 
-export interface DockerBuildOptions {
-    args?: { [key: string]: string };
-    context?: string;
-    dockerfile?: string;
-    labels?: { [key: string]: string };
-    tag?: string;
-    target?: string;
-    pull?: boolean;
-}
-
-export interface DockerBuildTaskDefinition extends TaskDefinition, NetCoreTaskDefinition, NodeBuildTaskDefinition {
+export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
     dependsOn?: string[];
-    dockerBuild?: DockerBuildOptions;
     platform?: DockerPlatform;
 }
 
 export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
-}
-
-// tslint:disable-next-line: no-empty-interface
-export interface DockerBuildHelperOptions {
-}
-
-export interface DockerBuildTaskContext {
-    helperOptions?: DockerBuildHelperOptions;
 }
 
 export class DockerBuildTaskProvider implements TaskProvider {
@@ -81,7 +63,6 @@ export class DockerBuildTaskProvider implements TaskProvider {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
-        const context: DockerBuildTaskContext = {};
         const folder = task.scope as WorkspaceFolder;
 
         if (!folder) {
@@ -90,12 +71,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
         switch (taskPlatform) {
             case 'netCore':
-                context.helperOptions = definition.netCore;
-                definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(folder, definition.dockerBuild, context, token);
+                definition.dockerBuild = await this.netCoreTaskHelper.resolveDockerBuildOptions(folder, definition, token);
                 break;
             case 'node':
-                context.helperOptions = definition.node;
-                definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(folder, definition.dockerBuild, context, token);
+                definition.dockerBuild = await this.nodeTaskHelper.resolveDockerBuildOptions(folder, definition, token);
                 break;
             default:
                 throw new Error(`Unrecognized platform '${definition.platform}'.`);

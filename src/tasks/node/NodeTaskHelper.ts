@@ -5,31 +5,37 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, ShellQuotedString, TaskDefinition, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../../../extension.bundle';
-import { DockerBuildHelperOptions, DockerBuildOptions, DockerBuildTaskContext, DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
-import { DockerRunHelperOptions, DockerRunOptions, DockerRunTaskContext, DockerRunTaskDefinition } from '../DockerRunTaskProvider';
+import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
+import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
+import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
+import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
     name?: string;
 }
 
-export interface NodeTaskBuildOptions extends DockerBuildHelperOptions {
+export interface NodeTaskBuildOptions {
     package?: string;
 }
 
-export interface NodeBuildTaskDefinition extends TaskDefinition {
+export interface NodeBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
     node?: NodeTaskBuildOptions;
 }
 
 export type InspectMode = 'default' | 'break';
 
-export interface NodeTaskRunOptions extends DockerRunHelperOptions {
+export interface NodeTaskRunOptions {
     enableDebugging?: boolean;
     inspectMode?: InspectMode;
     inspectPort?: number;
     package?: string;
+}
+
+export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
+    node?: NodeTaskRunOptions;
 }
 
 export class NodeTaskHelper implements TaskHelper {
@@ -56,8 +62,10 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions> {
-        const helperOptions: NodeTaskBuildOptions = context.helperOptions || {};
+    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions> {
+        const helperOptions = buildDefinition.node || {};
+        const buildOptions = buildDefinition.dockerBuild;
+
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, folder);
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
@@ -72,8 +80,10 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, context: DockerRunTaskContext, token?: CancellationToken): Promise<DockerRunOptions> {
-        const helperOptions: NodeTaskRunOptions = context.helperOptions || {};
+    public async resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition, runDefinition: NodeRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
+        const helperOptions = runDefinition.node || {};
+        const runOptions = runDefinition.dockerRun;
+
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, folder);
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
