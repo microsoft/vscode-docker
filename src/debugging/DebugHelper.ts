@@ -8,9 +8,9 @@ import { initializeForDebugging } from '../commands/debugging/initializeForDebug
 import { ext } from '../extensionVariables';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
-import { DockerDebugAdapterTrackerFactory } from './DockerDebugAdapterTracker';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
+import { activate } from './DockerServerReadyAction';
 import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { NodeDebugHelper } from './node/NodeDebugHelper';
 
@@ -43,12 +43,16 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
         )
     );
 
+    /*
     ctx.subscriptions.push(
         debug.registerDebugAdapterTrackerFactory(
             '*',
             new DockerDebugAdapterTrackerFactory()
         )
     );
+    */
+
+    activate(ctx);
 
     ctx.subscriptions.push(
         commands.registerCommand(
