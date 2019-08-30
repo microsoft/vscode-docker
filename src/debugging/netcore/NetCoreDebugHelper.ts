@@ -116,7 +116,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
 
         if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at any given time.`);
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
         }
 
         const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1

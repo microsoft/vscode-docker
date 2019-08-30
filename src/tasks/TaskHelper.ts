@@ -79,12 +79,12 @@ async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string,
     }
 
     // tslint:disable: no-unsafe-any
-    if (node.preLaunchTask) { // Node is a debug configuration
+    if (node.preLaunchTask) { // node is a debug configuration
         const next = await findTaskByLabel(allTasks, node.preLaunchTask);
         return await recursiveFindTaskByType(allTasks, type, next);
-    } else if (node.type === type) { // Node is the task we want
+    } else if (node.type === type) { // node is the task we want
         return node;
-    } else if (node.dependsOn) { // Node is another task
+    } else if (node.dependsOn) { // node is another task
         if (Array.isArray(node.dependsOn)) {
             for (const label of node.dependsOn as string[]) {
                 let next = await findTaskByLabel(allTasks, label);
