@@ -24,7 +24,7 @@ import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
-export type NetCoreDebugOptions = NetCoreTaskOptions & {
+export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
 }
 
