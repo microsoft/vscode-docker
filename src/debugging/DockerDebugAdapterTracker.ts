@@ -7,7 +7,8 @@ import * as util from 'util';
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, env, Uri } from 'vscode';
 import { ChildProcessProvider } from './coreclr/ChildProcessProvider';
 import { CliDockerClient, DockerClient } from './coreclr/CliDockerClient';
-import { DockerServerReadyAction } from './DockerDebugConfigurationProvider';
+import { ResolvedDebugConfiguration } from './DebugHelper';
+import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 
 const portRegex = /:([\d]+)(?![\]:\da-f])/i; // Matches :1234 etc., as long as the next character is not a :, ], another digit, or letter (keeps from confusing on IPv6 addresses)
 const httpsRegex = /https:\/\//i; // Matches https://
@@ -53,7 +54,7 @@ export class DockerDebugAdapterTracker implements DebugAdapterTracker {
         const result = containerUrl.match(portRegex);
 
         if (result && result.length > 1) {
-            const hostPort = await this.dockerClient.getHostPort(this.containerName, result[1]);
+            const hostPort = await this.dockerClient.getHostPort(this.containerName, Number.parseInt(result[1], 10));
             if (hostPort) {
                 return `:${hostPort}`;
             }
@@ -69,8 +70,8 @@ export class DockerDebugAdapterTracker implements DebugAdapterTracker {
 
 export class DockerDebugAdapterTrackerFactory implements DebugAdapterTrackerFactory {
     public async createDebugAdapterTracker(session: DebugSession): Promise<DebugAdapterTracker | undefined> {
-        // tslint:disable-next-line: no-unsafe-any
-        const dockerServerReadyAction: DockerServerReadyAction = session.configuration && session.configuration.dockerServerReadyAction || undefined;
+        const configuration = <ResolvedDebugConfiguration>session.configuration;
+        const dockerServerReadyAction = configuration && configuration.dockerOptions && configuration.dockerOptions.dockerServerReadyAction || undefined;
 
         if (dockerServerReadyAction && dockerServerReadyAction.containerName && dockerServerReadyAction.pattern) {
             return new DockerDebugAdapterTracker(dockerServerReadyAction);

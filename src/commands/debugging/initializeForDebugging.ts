@@ -11,8 +11,7 @@ import { ext } from '../../extensionVariables';
 import { Platform } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-// tslint:disable-next-line: no-any
-export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, options?: any): Promise<void> {
+export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform): Promise<void> {
     folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
     platform = platform || await quickPickPlatform();
 
@@ -30,6 +29,6 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => await ext.debugConfigProvider.initializeForDebugging(folder, platform, options)
+        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform)
     );
 }

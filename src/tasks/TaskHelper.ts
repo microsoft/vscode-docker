@@ -6,41 +6,37 @@
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../extensionVariables';
-import { DockerBuildOptions, DockerBuildTaskContext, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunOptions, DockerRunTaskContext, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
+import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface TaskHelper {
-    // tslint:disable-next-line: no-any
-    provideDockerBuildTasks(folder: WorkspaceFolder, options?: any): Promise<DockerBuildTaskDefinition[]>;
-    // tslint:disable-next-line: no-any
-    provideDockerRunTasks(folder: WorkspaceFolder, options?: any): Promise<DockerRunTaskDefinition[]>;
-    resolveDockerBuildOptions(folder: WorkspaceFolder, buildOptions: DockerBuildOptions, context: DockerBuildTaskContext, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(folder: WorkspaceFolder, runOptions: DockerRunOptions, context: DockerRunTaskContext, token?: CancellationToken): Promise<DockerRunOptions>;
+    provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
+    provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]>;
+    resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
-    const netCoreTaskHelper = new NetCoreTaskHelper();
-    const nodeTaskHelper = new NodeTaskHelper();
+    const helpers = {
+        netCore: new NetCoreTaskHelper(),
+        node: new NodeTaskHelper()
+    };
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            ext.buildTaskProvider = new DockerBuildTaskProvider(
-                netCoreTaskHelper,
-                nodeTaskHelper
-            )
+            ext.buildTaskProvider = new DockerBuildTaskProvider(helpers)
         )
     );
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-run',
-            ext.runTaskProvider = new DockerRunTaskProvider(
-                netCoreTaskHelper,
-                nodeTaskHelper
-            )
+            ext.runTaskProvider = new DockerRunTaskProvider(helpers)
         )
     );
 }
@@ -55,7 +51,7 @@ export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDef
     }
 
     allTasks.push(task);
-    workspaceTasks.update('tasks', allTasks);
+    await workspaceTasks.update('tasks', allTasks);
     return true;
 }
 
