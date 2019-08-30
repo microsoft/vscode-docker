@@ -11,10 +11,11 @@ import { ext } from '../../extensionVariables';
 import { Platform, PlatformOS } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, platformOS?: PlatformOS): Promise<void> {
+export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, platformOS?: PlatformOS, options?: { [key: string]: string }): Promise<void> {
     folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
     platform = platform || await quickPickPlatform();
     platformOS = platformOS || await quickPickOS();
+    options = options || {};
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
@@ -30,6 +31,6 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform, platformOS)
+        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform, platformOS, options)
     );
 }

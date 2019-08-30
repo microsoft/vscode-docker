@@ -36,13 +36,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             async () => await this.resolveDebugConfigurationInternal(folder, debugConfiguration, debugPlatform, token));
     }
 
-    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
+    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS, options: { [key: string]: string }): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const debugConfigurations = await helper.provideDebugConfigurations(folder, platformOS);
+        const debugConfigurations = await helper.provideDebugConfigurations(folder, platformOS, options);
 
-        await ext.buildTaskProvider.initializeBuildTasks(folder, platform, platformOS);
-        await ext.runTaskProvider.initializeRunTasks(folder, platform, platformOS);
+        await ext.buildTaskProvider.initializeBuildTasks(folder, platform, platformOS, options);
+        await ext.runTaskProvider.initializeRunTasks(folder, platform, platformOS, options);
 
         for (const debugConfiguration of debugConfigurations) {
             await addDebugConfiguration(debugConfiguration);

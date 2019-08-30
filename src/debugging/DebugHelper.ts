@@ -26,7 +26,7 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerDebugConfiguration[]>;
+    provideDebugConfigurations(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined>;
 }
 

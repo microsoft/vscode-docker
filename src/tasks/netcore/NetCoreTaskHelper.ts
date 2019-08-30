@@ -38,9 +38,9 @@ const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallback
 export class NetCoreTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]> {
-        const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
-        const appName = await NetCoreTaskHelper.inferAppName(folder, { appProject: appProject });
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]> {
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+        const appName = await NetCoreTaskHelper.inferAppName(folder, { appProject: options.appProject });
 
         return [
             {
@@ -53,7 +53,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 },
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             },
             {
@@ -65,14 +65,14 @@ export class NetCoreTaskHelper implements TaskHelper {
                 },
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             }
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]> {
-        const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]> {
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
 
         return [
             {
@@ -85,7 +85,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 },
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
                 }
             }
         ];

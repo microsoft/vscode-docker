@@ -40,7 +40,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
                 type: 'docker-build',
@@ -50,7 +50,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]> {
         return [
             {
                 type: 'docker-run',

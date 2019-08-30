@@ -15,8 +15,8 @@ import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface TaskHelper {
-    provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]>;
-    provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]>;
+    provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]>;
+    provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }

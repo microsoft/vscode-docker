@@ -39,10 +39,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS, options: { [key: string]: string }): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const buildTasks = await helper.provideDockerBuildTasks(folder, platformOS);
+        const buildTasks = await helper.provideDockerBuildTasks(folder, platformOS, options);
 
         for (const buildTask of buildTasks) {
             await addTask(buildTask);

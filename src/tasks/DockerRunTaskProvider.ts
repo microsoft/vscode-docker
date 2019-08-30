@@ -39,10 +39,10 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS, options: { [key: string]: string }): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const runTasks = await helper.provideDockerRunTasks(folder, platformOS);
+        const runTasks = await helper.provideDockerRunTasks(folder, platformOS, options);
 
         for (const runTask of runTasks) {
             await addTask(runTask);
