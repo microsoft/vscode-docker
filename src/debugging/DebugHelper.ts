@@ -6,6 +6,7 @@
 import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
 import { ext } from '../extensionVariables';
+import { PlatformOS } from '../utils/platform';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
@@ -25,7 +26,7 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]>;
+    provideDebugConfigurations(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined>;
 }
 

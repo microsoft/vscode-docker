@@ -6,6 +6,7 @@
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { ext } from '../extensionVariables';
+import { PlatformOS } from '../utils/platform';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -14,8 +15,8 @@ import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface TaskHelper {
-    provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
-    provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]>;
+    provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]>;
+    provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }

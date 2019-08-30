@@ -6,6 +6,7 @@
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
+import { PlatformOS } from '../utils/platform';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { addDebugConfiguration, DebugHelper, ResolvedDebugConfiguration } from './DebugHelper';
@@ -35,13 +36,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             async () => await this.resolveDebugConfigurationInternal(folder, debugConfiguration, debugPlatform, token));
     }
 
-    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
+    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const debugConfigurations = await helper.provideDebugConfigurations(folder);
+        const debugConfigurations = await helper.provideDebugConfigurations(folder, platformOS);
 
-        await ext.buildTaskProvider.initializeBuildTasks(folder, platform);
-        await ext.runTaskProvider.initializeRunTasks(folder, platform);
+        await ext.buildTaskProvider.initializeBuildTasks(folder, platform, platformOS);
+        await ext.runTaskProvider.initializeRunTasks(folder, platform, platformOS);
 
         for (const debugConfiguration of debugConfigurations) {
             await addDebugConfiguration(debugConfiguration);

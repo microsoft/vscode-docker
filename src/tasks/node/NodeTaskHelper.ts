@@ -6,7 +6,8 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
-import { CommandLineBuilder } from '../../../extension.bundle';
+import { CommandLineBuilder } from '../../utils/commandLineBuilder';
+import { PlatformOS } from '../../utils/platform';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
@@ -39,7 +40,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
                 type: 'docker-build',
@@ -49,7 +50,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]> {
         return [
             {
                 type: 'docker-run',
@@ -173,10 +174,10 @@ export class NodeTaskHelper implements TaskHelper {
 
         // TODO: Infer startup script...
         const command = CommandLineBuilder
-                .create('node')
-                .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
-                .withQuotedArg(`./bin/www`)
-                .buildShellQuotedStrings();
+            .create('node')
+            .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
+            .withQuotedArg(`./bin/www`)
+            .buildShellQuotedStrings();
 
         return await Promise.resolve(command);
     }

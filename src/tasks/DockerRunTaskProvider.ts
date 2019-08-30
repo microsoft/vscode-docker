@@ -8,6 +8,7 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { PlatformOS } from '../utils/platform';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
@@ -38,10 +39,10 @@ export class DockerRunTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
+    public async initializeRunTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const runTasks = await helper.provideDockerRunTasks(folder);
+        const runTasks = await helper.provideDockerRunTasks(folder, platformOS);
 
         for (const runTask of runTasks) {
             await addTask(runTask);

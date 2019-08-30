@@ -10,6 +10,7 @@ import * as process from 'process';
 import { CancellationToken, WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
@@ -37,7 +38,7 @@ const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallback
 export class NetCoreTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerBuildTaskDefinition[]> {
         const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
         const appName = await NetCoreTaskHelper.inferAppName(folder, { appProject: appProject });
 
@@ -70,7 +71,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS): Promise<DockerRunTaskDefinition[]> {
         const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
 
         return [
@@ -79,8 +80,8 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-run: debug',
                 dependsOn: ['docker-build: debug'],
                 dockerRun: {
-                    entrypoint: 'tail', // TODO: support Windows
-                    command: '-f /dev/null'
+                    entrypoint: platformOS === 'Windows' ? 'ping' : 'tail',
+                    command: platformOS === 'Windows' ? '-t localhost' : '-f /dev/null'
                 },
                 platform: 'netCore',
                 netCore: {

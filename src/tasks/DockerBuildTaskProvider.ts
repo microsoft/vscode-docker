@@ -8,6 +8,7 @@ import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { PlatformOS } from '../utils/platform';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
@@ -38,10 +39,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
             async () => await this.resolveTaskInternal(task, taskPlatform, token));
     }
 
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform): Promise<void> {
+    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS): Promise<void> {
         const helper = this.getHelper(platform);
 
-        const buildTasks = await helper.provideDockerBuildTasks(folder);
+        const buildTasks = await helper.provideDockerBuildTasks(folder, platformOS);
 
         for (const buildTask of buildTasks) {
             await addTask(buildTask);
