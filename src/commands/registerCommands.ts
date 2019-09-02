@@ -13,6 +13,7 @@ import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
 import { restartContainer } from "./containers/restartContainer";
+import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
@@ -69,6 +70,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);
+    registerCommand('vscode-docker.containers.select', selectContainer);
     registerCommand('vscode-docker.containers.start', startContainer);
     registerCommand('vscode-docker.containers.stop', stopContainer);
     registerCommand('vscode-docker.containers.viewLogs', viewContainerLogs);

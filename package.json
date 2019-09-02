@@ -41,6 +41,7 @@
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
         "onCommand:vscode-docker.containers.restart",
+        "onCommand:vscode-docker.containers.select",
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
@@ -1192,6 +1193,11 @@
             {
                 "command": "vscode-docker.containers.restart",
                 "title": "Restart",
+                "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.containers.select",
+                "title": "Select container",
                 "category": "Docker Containers"
             },
             {
