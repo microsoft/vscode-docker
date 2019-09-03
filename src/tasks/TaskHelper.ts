@@ -10,8 +10,8 @@ import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
-import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper } from './node/NodeTaskHelper';
+import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
+import nodeTaskHelper from './node/NodeTaskHelper';
 
 export interface TaskHelper {
     provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
@@ -22,8 +22,8 @@ export interface TaskHelper {
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
     const helpers = {
-        netCore: new NetCoreTaskHelper(),
-        node: new NodeTaskHelper()
+        netCore: netCoreTaskHelper,
+        node: nodeTaskHelper
     };
 
     ctx.subscriptions.push(

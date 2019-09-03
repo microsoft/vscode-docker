@@ -11,8 +11,8 @@ import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { activate } from './DockerServerReadyAction';
-import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
-import { NodeDebugHelper } from './node/NodeDebugHelper';
+import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
+import nodeDebugHelper from './node/NodeDebugHelper';
 
 export interface ResolvedDebugConfigurationOptions {
     containerNameToKill?: string;
@@ -36,21 +36,12 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
             ext.debugConfigProvider = new DockerDebugConfigurationProvider(
                 new CliDockerClient(new ChildProcessProvider()),
                 {
-                    netCore: new NetCoreDebugHelper(),
-                    node: new NodeDebugHelper()
+                    netCore: netCoreDebugHelper,
+                    node: nodeDebugHelper
                 }
             )
         )
     );
-
-    /*
-    ctx.subscriptions.push(
-        debug.registerDebugAdapterTrackerFactory(
-            '*',
-            new DockerDebugAdapterTrackerFactory()
-        )
-    );
-    */
 
     activate(ctx);
 

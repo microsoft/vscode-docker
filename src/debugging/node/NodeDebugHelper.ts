@@ -122,3 +122,7 @@ export class NodeDebugHelper implements DebugHelper {
         return path.resolve(folder.uri.fsPath, replacedPath);
     }
 }
+
+const nodeDebugHelper = new NodeDebugHelper();
+
+export default nodeDebugHelper;

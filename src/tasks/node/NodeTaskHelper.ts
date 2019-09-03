@@ -187,3 +187,7 @@ export class NodeTaskHelper implements TaskHelper {
         return path.resolve(folder.uri.fsPath, replacedPath);
     }
 }
+
+const nodeTaskHelper = new NodeTaskHelper();
+
+export default nodeTaskHelper;

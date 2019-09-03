@@ -282,3 +282,8 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
 }
+
+const netCoreTaskHelper = new NetCoreTaskHelper();
+
+export default netCoreTaskHelper;
+

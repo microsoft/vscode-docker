@@ -242,3 +242,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             path.posix.normalize(path.posix.join('/app', relativePath)).replace(/\\/g, '/');
     }
 }
+
+const netCoreDebugHelper = new NetCoreDebugHelper();
+
+export default netCoreDebugHelper;
