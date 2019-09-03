@@ -113,23 +113,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
-
-        if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
-        }
-
-        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
-            ? debugConfiguration.dockerServerReadyAction
-            : {
-                containerName,
-                pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
-            };
-
-        if (dockerServerReadyAction) {
-            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
-            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
-        }
+        const dockerServerReadyAction = await this.inferServerReadyAction(debugConfiguration, containerName, configureSsl);
 
         return {
             name: debugConfiguration.name,
@@ -143,8 +127,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             serverReadyAction: debugConfiguration.serverReadyAction,
             dockerOptions: {
                 containerNameToKill: containerName,
-                // TODO: Do nothing for console apps for website
-                dockerServerReadyAction,
+                dockerServerReadyAction: dockerServerReadyAction,
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
@@ -181,7 +164,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         return {
-            configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl || await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
+            configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
             containerName: associatedTask.dockerRun && associatedTask.dockerRun.containerName || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`,
             platformOS: associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
@@ -206,6 +189,36 @@ export class NetCoreDebugHelper implements DebugHelper {
         const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
         await this.aspNetCoreSslManager.trustCertificateIfNecessary();
         await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
+    }
+
+    private async inferServerReadyAction(debugConfiguration: DockerDebugConfiguration, containerName: string, configureSsl: boolean): Promise<DockerServerReadyAction> {
+        const numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
+
+        if (numBrowserOptions > 1) {
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
+        }
+
+        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
+            ? debugConfiguration.dockerServerReadyAction // If they specified any browser option, take their input as the result
+            : configureSsl || (await this.isWebApp(debugConfiguration)) ? // If this is indeed a web app, and they didn't specify, infer a default one
+                {
+                    containerName: containerName,
+                    pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
+                }
+                : undefined; // If this is not a web app, infer nothing
+
+        if (dockerServerReadyAction) { // If we have something for dockerServerReadyAction, resolve the container name and URI format if needed
+            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
+            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
+        }
+
+        return dockerServerReadyAction;
+    }
+
+    private async isWebApp(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
+        const projectContents = await fse.readFile(debugConfiguration.netCore.appProject);
+
+        return /Microsoft\.NET\.Sdk\.Web/i.test(projectContents.toString());
     }
 
     private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {
