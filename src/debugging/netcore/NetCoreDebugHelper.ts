@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
+import { DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { getAssociatedDockerRunTask } from '../../tasks/TaskHelper';
@@ -20,7 +20,7 @@ import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../corecl
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
-import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
+import { DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -70,8 +70,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         );
     }
 
-    public async provideDebugConfigurations(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerDebugConfiguration[]> {
-        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+    public async provideDebugConfigurations(context: InitializeDebugContext, options: { [key: string]: string }): Promise<DockerDebugConfiguration[]> {
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
 
         return [
             {
@@ -81,30 +81,30 @@ export class NetCoreDebugHelper implements DebugHelper {
                 preLaunchTask: 'docker-run: debug',
                 platform: 'netCore',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, options.appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             }
         ];
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
+    public async resolveDebugConfiguration(context: DebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
-        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
+        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
-        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(folder, debugConfiguration);
+        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context.folder, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
-        if (token.isCancellationRequested) {
+        if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             return undefined;
         }
 
         await this.acquireDebuggers(platformOS);
-        if (token.isCancellationRequested) {
+        if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             return undefined;
         }
 
         if (configureSsl) {
             await this.configureSsl(debugConfiguration, appOutput);
-            if (token.isCancellationRequested) {
+            if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
                 return undefined;
             }
         }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { ext } from '../../extensionVariables';
@@ -33,6 +33,13 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform, platformOS, options)
+        async (actionContext: IActionContext) => await ext.debugConfigProvider.initializeForDebugging(
+            {
+                folder: folder,
+                platform: debugPlatform,
+                platformOS: platformOS,
+                actionContext: actionContext,
+            },
+            options)
     );
 }

@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { PlatformOS } from '../utils/platform';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
-import { addDebugConfiguration, DebugHelper, ResolvedDebugConfiguration } from './DebugHelper';
+import { addDebugConfiguration, DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
@@ -18,13 +17,11 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
     platform?: DockerPlatform;
 }
 
-// TODO: Convert to use IActionContext
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     constructor(
         private readonly dockerClient: DockerClient,
         private readonly helpers: { [key in DockerPlatform]: DebugHelper }
-    ) {
-    }
+    ) { }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         return undefined;
@@ -34,28 +31,32 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const debugPlatform = getPlatform(debugConfiguration);
         return callWithTelemetryAndErrorHandling(
             `docker-launch/${debugPlatform || 'unknown'}`,
-            async () => await this.resolveDebugConfigurationInternal(folder, debugConfiguration, debugPlatform, token));
+            async (actionContext: IActionContext) => await this.resolveDebugConfigurationInternal(
+                {
+                    folder: folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.'),
+                    platform: debugPlatform,
+                    actionContext: actionContext
+                },
+                debugConfiguration));
     }
 
-    public async initializeForDebugging(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS, options: { [key: string]: string }): Promise<void> {
-        const helper = this.getHelper(platform);
+    public async initializeForDebugging(context: InitializeDebugContext, options: { [key: string]: string }): Promise<void> {
+        const helper = this.getHelper(context.platform);
 
-        const debugConfigurations = await helper.provideDebugConfigurations(folder, platformOS, options);
+        const debugConfigurations = await helper.provideDebugConfigurations(context, options);
 
-        await ext.buildTaskProvider.initializeBuildTasks(folder, platform, platformOS, options);
-        await ext.runTaskProvider.initializeRunTasks(folder, platform, platformOS, options);
+        await ext.buildTaskProvider.initializeBuildTasks(context, options);
+        await ext.runTaskProvider.initializeRunTasks(context, options);
 
         for (const debugConfiguration of debugConfigurations) {
             await addDebugConfiguration(debugConfiguration);
         }
     }
 
-    private async resolveDebugConfigurationInternal(folder: WorkspaceFolder | undefined, originalConfiguration: DockerDebugConfiguration, platform: DockerPlatform, token?: CancellationToken): Promise<DockerDebugConfiguration | undefined> {
-        folder = folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
+    private async resolveDebugConfigurationInternal(context: DebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
+        const helper = this.getHelper(context.platform);
 
-        const helper = this.getHelper(platform);
-
-        const resolvedConfiguration = await helper.resolveDebugConfiguration(folder, originalConfiguration, token);
+        const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);
 
         if (resolvedConfiguration) {
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);

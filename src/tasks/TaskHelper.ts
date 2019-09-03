@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { PlatformOS } from '../utils/platform';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
@@ -14,11 +16,30 @@ import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskP
 import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { NodeTaskHelper } from './node/NodeTaskHelper';
 
+export interface TaskContext {
+    folder: WorkspaceFolder;
+    platform: DockerPlatform;
+    actionContext?: IActionContext;
+    cancellationToken?: CancellationToken;
+}
+
+export interface InitializeTaskContext extends TaskContext {
+    platformOS: PlatformOS;
+}
+
+// tslint:disable-next-line: no-empty-interface
+export interface BuildTaskContext extends TaskContext {
+}
+
+export interface RunTaskContext extends TaskContext {
+    buildDefinition?: DockerBuildTaskDefinition;
+}
+
 export interface TaskHelper {
-    provideDockerBuildTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]>;
-    provideDockerRunTasks(folder: WorkspaceFolder, platformOS: PlatformOS, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]>;
-    resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
+    provideDockerBuildTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]>;
+    provideDockerRunTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]>;
+    resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(context: RunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

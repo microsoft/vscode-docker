@@ -4,15 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { PlatformOS } from '../utils/platform';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { addTask, TaskHelper } from './TaskHelper';
+import { addTask, BuildTaskContext, InitializeTaskContext, TaskHelper } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -24,10 +23,8 @@ export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
 }
 
-// TODO: Convert to use IActionContext
 export class DockerBuildTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) {
-    }
+    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
         return []; // Intentionally empty, so that resolveTask gets used
@@ -36,35 +33,39 @@ export class DockerBuildTaskProvider implements TaskProvider {
     public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
         const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-build/${taskPlatform || 'unknown'}`,
-            async () => await this.resolveTaskInternal(task, taskPlatform, token));
+            `docker-build-resolve/${taskPlatform || 'unknown'}`,
+            async (actionContext: IActionContext) => await this.resolveTaskInternal(
+                {
+                    folder: task.scope as WorkspaceFolder,
+                    platform: taskPlatform,
+                    actionContext: actionContext,
+                },
+                task));
     }
 
-    public async initializeBuildTasks(folder: WorkspaceFolder, platform: DockerPlatform, platformOS: PlatformOS, options: { [key: string]: string }): Promise<void> {
-        const helper = this.getHelper(platform);
+    public async initializeBuildTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<void> {
+        const helper = this.getHelper(context.platform);
 
-        const buildTasks = await helper.provideDockerBuildTasks(folder, platformOS, options);
+        const buildTasks = await helper.provideDockerBuildTasks(context, options);
 
         for (const buildTask of buildTasks) {
             await addTask(buildTask);
         }
     }
 
-    private async resolveTaskInternal(task: DockerBuildTask, taskPlatform: DockerPlatform, token?: CancellationToken): Promise<Task> {
+    private async resolveTaskInternal(context: BuildTaskContext, task: DockerBuildTask): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
-        const folder = task.scope as WorkspaceFolder;
-
-        if (!folder) {
+        if (!context.folder) {
             throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
         }
 
-        const helper = this.getHelper(taskPlatform);
+        const helper = this.getHelper(context.platform);
 
-        definition.dockerBuild = await helper.resolveDockerBuildOptions(folder, definition, token);
+        definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
 
-        const commandLine = await this.resolveCommandLine(definition.dockerBuild, token);
+        const commandLine = await this.resolveCommandLine(definition.dockerBuild);
         return new Task(
             task.definition,
             task.scope,
@@ -74,7 +75,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
             task.problemMatchers);
     }
 
-    private async resolveCommandLine(options: DockerBuildOptions, token?: CancellationToken): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(options: DockerBuildOptions): Promise<ShellQuotedString[]> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
