@@ -24,6 +24,7 @@ export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
 }
 
+// TODO: Convert to use IActionContext
 export class DockerBuildTaskProvider implements TaskProvider {
     constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) {
     }

@@ -18,6 +18,7 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
     platform?: DockerPlatform;
 }
 
+// TODO: Convert to use IActionContext
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     constructor(
         private readonly dockerClient: DockerClient,
