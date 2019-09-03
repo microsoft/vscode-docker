@@ -200,7 +200,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
             ? debugConfiguration.dockerServerReadyAction // If they specified any browser option, take their input as the result
-            : configureSsl || (await this.isWebApp(debugConfiguration)) ? // If this is indeed a web app, and they didn't specify, infer a default one
+            : configureSsl || (await this.isWebApp(debugConfiguration)) ? // If this is indeed a web app, and they didn't specify a browser option, infer a default one
                 {
                     containerName: containerName,
                     pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
