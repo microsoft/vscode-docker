@@ -53,7 +53,13 @@ export class NodeTaskHelper implements TaskHelper {
         return [
             {
                 type: 'docker-run',
-                label: 'docker-run',
+                label: 'docker-run: release',
+                dependsOn: ['docker-build'],
+                platform: 'node'
+            },
+            {
+                type: 'docker-run',
+                label: 'docker-run: debug',
                 dependsOn: ['docker-build'],
                 node: {
                     enableDebugging: true

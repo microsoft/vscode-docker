@@ -489,24 +489,32 @@
                             "dockerServerReadyAction": {
                                 "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
                                 "properties": {
-                                    "pattern": {
+                                    "action": {
                                         "type": "string",
-                                        "description": "The regex pattern to look for in Debug console output."
+                                        "description": "The action to take when the pattern is found.",
+                                        "enum": [
+                                            "debugWithChrome",
+                                            "openExternally"
+                                        ]
                                     },
                                     "containerName": {
                                         "type": "string",
                                         "description": "The container name to match the host port."
                                     },
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "The regex pattern to look for in Debug console output."
+                                    },
                                     "uriFormat": {
                                         "type": "string",
                                         "description": "The URI format to launch.",
                                         "default": "%s://localhost%s"
+                                    },
+                                    "webRoot": {
+                                        "type": "string",
+                                        "description": "The root folder from which web pages are served."
                                     }
-                                },
-                                "required": [
-                                    "pattern",
-                                    "containerName"
-                                ]
+                                }
                             },
                             "removeContainerAfterDebug": {
                                 "type": "boolean",
