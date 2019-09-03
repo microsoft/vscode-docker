@@ -6,8 +6,8 @@
 import { WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { quickPickPlatform } from '../../configureWorkspace/configUtils';
+import { DockerDebugScaffoldingProvider } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
-import { ext } from '../../extensionVariables';
 import { Platform } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
@@ -29,6 +29,16 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => await ext.debugConfigProvider.initializeForDebugging(folder, debugPlatform)
-    );
+        async () => {
+            const scaffolder = new DockerDebugScaffoldingProvider();
+            switch (debugPlatform) {
+                case 'netCore':
+                    await scaffolder.initializeForDebuggingNetCore(folder);
+                    break;
+                case 'node':
+                    await scaffolder.initializeForDebuggingNode(folder);
+                    break;
+                default:
+            }
+        });
 }

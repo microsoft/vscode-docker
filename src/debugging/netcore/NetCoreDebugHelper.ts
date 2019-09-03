@@ -21,8 +21,8 @@ import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
-import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
+import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export type NetCoreDebugOptions = NetCoreTaskOptions & {
     appOutput?: string;
@@ -30,6 +30,10 @@ export type NetCoreDebugOptions = NetCoreTaskOptions & {
 
 export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
+}
+
+export interface NetCoreScaffoldingOptions {
+    appProject: string;
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
@@ -70,8 +74,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         );
     }
 
-    public async provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]> {
-        const appProject = await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
+        const appProject = (options && options.appProject) || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
 
         return [
             {
