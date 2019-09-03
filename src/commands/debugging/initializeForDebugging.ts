@@ -12,7 +12,6 @@ import { Platform, PlatformOS } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 // TODO: Call this from scaffolding as well
-// TODO: Convert to use IActionContext
 export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, platformOS?: PlatformOS, options?: { [key: string]: string }): Promise<void> {
     folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
     platform = platform || await quickPickPlatform();
