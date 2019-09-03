@@ -83,7 +83,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 type: 'docker-launch',
                 request: 'launch',
                 preLaunchTask: 'docker-run',
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }

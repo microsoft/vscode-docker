@@ -46,7 +46,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build',
                 dependsOn: ['build'],
                 dockerBuild: {},
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }
@@ -63,7 +62,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-run',
                 dependsOn: ['docker-build'],
                 dockerRun: {},
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }
