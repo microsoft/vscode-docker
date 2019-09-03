@@ -108,6 +108,10 @@
                     "when": "never"
                 },
                 {
+                    "command": "vscode-docker.containers.select",
+                    "when": "never"
+                },
+                {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
                     "when": "never"
                 }
