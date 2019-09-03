@@ -5,7 +5,6 @@
 
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
-import { ext } from '../extensionVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -14,8 +13,6 @@ import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
 import nodeTaskHelper from './node/NodeTaskHelper';
 
 export interface TaskHelper {
-    provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]>;
-    provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
 }
@@ -29,14 +26,14 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            ext.buildTaskProvider = new DockerBuildTaskProvider(helpers)
+            new DockerBuildTaskProvider(helpers)
         )
     );
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-run',
-            ext.runTaskProvider = new DockerRunTaskProvider(helpers)
+            new DockerRunTaskProvider(helpers)
         )
     );
 }
@@ -78,12 +75,12 @@ async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string,
     }
 
     // tslint:disable: no-unsafe-any
-    if (node.preLaunchTask) { // Node is a debug configuration
+    if (node.preLaunchTask) { // node is a debug configuration
         const next = await findTaskByLabel(allTasks, node.preLaunchTask);
         return await recursiveFindTaskByType(allTasks, type, next);
-    } else if (node.type === type) { // Node is the task we want
+    } else if (node.type === type) { // node is the task we want
         return node;
-    } else if (node.dependsOn) { // Node is another task
+    } else if (node.dependsOn) { // node is another task
         if (Array.isArray(node.dependsOn)) {
             for (const label of node.dependsOn as string[]) {
                 let next = await findTaskByLabel(allTasks, label);

@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
-import { CommandLineBuilder } from '../../../extension.bundle';
+import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
@@ -173,10 +173,10 @@ export class NodeTaskHelper implements TaskHelper {
 
         // TODO: Infer startup script...
         const command = CommandLineBuilder
-                .create('node')
-                .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
-                .withQuotedArg(`./bin/www`)
-                .buildShellQuotedStrings();
+            .create('node')
+            .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
+            .withQuotedArg(`./bin/www`)
+            .buildShellQuotedStrings();
 
         return await Promise.resolve(command);
     }

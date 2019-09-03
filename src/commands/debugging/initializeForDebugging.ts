@@ -5,7 +5,7 @@
 
 import { WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
-import { quickPickPlatform } from '../../configureWorkspace/configUtils';
+import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import dockerDebugScaffoldingProvider from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { Platform } from '../../utils/platform';
@@ -18,26 +18,27 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
     let debugPlatform: DockerPlatform;
     switch (platform) {
         case '.NET Core Console':
-        case 'ASP.NET Core':
-            debugPlatform = 'netCore';
-            break;
-        case 'Node.js':
-            debugPlatform = 'node';
-            break;
-        default:
-    }
+            case 'ASP.NET Core':
+                debugPlatform = 'netCore';
+                break;
+                case 'Node.js':
+                    debugPlatform = 'node';
+                    break;
+                    default:
+                    }
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
         async () => {
             switch (debugPlatform) {
                 case 'netCore':
-                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(folder);
+                    const platformOS = await quickPickOS();
+                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(folder, { platformOS });
                     break;
                 case 'node':
                     await dockerDebugScaffoldingProvider.initializeNodeForDebugging(folder);
                     break;
                 default:
-            }
-        });
+                }
+            });
 }

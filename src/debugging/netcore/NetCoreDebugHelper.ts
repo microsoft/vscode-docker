@@ -24,7 +24,7 @@ import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
-export type NetCoreDebugOptions = NetCoreTaskOptions & {
+export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
 }
 
@@ -32,14 +32,15 @@ export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
 }
 
-export interface NetCoreScaffoldingOptions {
-    appProject: string;
+export interface NetCoreDebugScaffoldingOptions {
+    appProject?: string;
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
     private readonly netCoreProjectProvider: NetCoreProjectProvider;
     private readonly aspNetCoreSslManager: AspNetCoreSslManager;
-    private readonly vsDbgClient: VsDbgClient;
+    private readonly vsDbgClientFactory: () => VsDbgClient;
+    private vsDbgClient: VsDbgClient;
 
     constructor() {
         const processProvider = new ChildProcessProvider();
@@ -65,16 +66,22 @@ export class NetCoreDebugHelper implements DebugHelper {
             osProvider
         );
 
-        this.vsDbgClient = new RemoteVsDbgClient(
-            new DefaultOutputManager(ext.outputChannel),
-            fsProvider,
-            ext.context.globalState,
-            osProvider,
-            processProvider
-        );
+        this.vsDbgClientFactory = () => {
+            if (this.vsDbgClient === undefined) {
+                this.vsDbgClient = new RemoteVsDbgClient(
+                    new DefaultOutputManager(ext.outputChannel),
+                    fsProvider,
+                    ext.context.globalState,
+                    osProvider,
+                    processProvider
+                );
+            }
+
+            return this.vsDbgClient;
+        };
     }
 
-    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         const appProject = (options && options.appProject) || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
 
         return [
@@ -82,7 +89,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 name: 'Docker .NET Core Launch',
                 type: 'docker-launch',
                 request: 'launch',
-                preLaunchTask: 'docker-run',
+                preLaunchTask: 'docker-run: debug',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
                 }
@@ -116,16 +123,13 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        // TODO: This is not currently possible to determine
-        // const programEnv = httpsPort ? { "ASPNETCORE_HTTPS_PORT": httpsPort } : {};
-
         let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
 
         if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at any given time.`);
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
         }
 
-        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions > 1
+        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
             ? debugConfiguration.dockerServerReadyAction
             : {
                 containerName,
@@ -133,16 +137,11 @@ export class NetCoreDebugHelper implements DebugHelper {
             };
 
         if (dockerServerReadyAction) {
-            if (dockerServerReadyAction.containerName === undefined) {
-                dockerServerReadyAction.containerName = containerName;
-            }
-
-            if (dockerServerReadyAction.uriFormat === undefined) {
-                dockerServerReadyAction.uriFormat = '%s://localhost:%s';
-            }
+            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
+            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
         }
 
-        const resolvedConfiguration = {
+        return {
             name: debugConfiguration.name,
             type: 'coreclr',
             request: 'launch',
@@ -174,8 +173,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/app/Views': path.join(path.dirname(debugConfiguration.netCore.appProject), 'Views'),
             }
         };
-
-        return resolvedConfiguration;
     }
 
     public static getHostDebuggerPathBase(): string {
@@ -202,10 +199,10 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
         if (platformOS === 'Windows') {
-            await this.vsDbgClient.getVsDbgVersion('latest', 'win7-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'win7-x64');
         } else {
-            await this.vsDbgClient.getVsDbgVersion('latest', 'linux-x64');
-            await this.vsDbgClient.getVsDbgVersion('latest', 'linux-musl-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'linux-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'linux-musl-x64');
         }
 
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
