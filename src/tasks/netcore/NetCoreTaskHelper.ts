@@ -87,7 +87,8 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dependsOn: ['docker-build: debug'],
                 dockerRun: {
                     entrypoint: options.platformOS === 'Windows' ? 'ping' : 'tail',
-                    command: options.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null'
+                    command: options.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null',
+                    os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)

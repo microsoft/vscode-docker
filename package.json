@@ -856,6 +856,15 @@
                                 "type": "string",
                                 "description": "The network-scoped alias to assign to the container."
                             },
+                            "os": {
+                                "type": "string",
+                                "description": "The container operating system.",
+                                "default": "Linux",
+                                "enum": [
+                                    "Linux",
+                                    "Windows"
+                                ]
+                            },
                             "ports": {
                                 "type": "array",
                                 "description": "Ports that are going to be mapped on the host.",
