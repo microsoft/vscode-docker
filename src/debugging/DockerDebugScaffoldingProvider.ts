@@ -25,31 +25,34 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
 
     public async initializeNetCoreForDebugging(context: InitializeDebugContext, options?: NetCoreScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
-            () => this._netCoreDebugHelper.provideDebugConfigurations(context, options),
-            () => this._netCoreTaskHelper.provideDockerBuildTasks(context, options),
-            () => this._netCoreTaskHelper.provideDockerRunTasks(context, options));
+            context,
+            (_context: InitializeDebugContext) => this._netCoreDebugHelper.provideDebugConfigurations(_context, options),
+            (_context: InitializeDebugContext) => this._netCoreTaskHelper.provideDockerBuildTasks(_context, options),
+            (_context: InitializeDebugContext) => this._netCoreTaskHelper.provideDockerRunTasks(_context, options));
     }
 
     public async initializeNodeForDebugging(context: InitializeDebugContext): Promise<void> {
         await this.initializeForDebugging(
-            () => this._nodeDebugHelper.provideDebugConfigurations(context),
-            () => this._nodeTaskHelper.provideDockerBuildTasks(context),
-            () => this._nodeTaskHelper.provideDockerRunTasks(context));
+            context,
+            (_context: InitializeDebugContext) => this._nodeDebugHelper.provideDebugConfigurations(_context),
+            (_context: InitializeDebugContext) => this._nodeTaskHelper.provideDockerBuildTasks(_context),
+            (_context: InitializeDebugContext) => this._nodeTaskHelper.provideDockerRunTasks(_context));
     }
 
     private async initializeForDebugging(
-        provideDebugConfigurations: () => Promise<DockerDebugConfiguration[]>,
-        provideDockerBuildTasks: () => Promise<DockerBuildTaskDefinition[]>,
-        provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>): Promise<void> {
-        const debugConfigurations = await provideDebugConfigurations();
+        context: InitializeDebugContext,
+        provideDebugConfigurations: (_context: InitializeDebugContext) => Promise<DockerDebugConfiguration[]>,
+        provideDockerBuildTasks: (_context: InitializeDebugContext) => Promise<DockerBuildTaskDefinition[]>,
+        provideDockerRunTasks: (_context: InitializeDebugContext) => Promise<DockerRunTaskDefinition[]>): Promise<void> {
+        const debugConfigurations = await provideDebugConfigurations(context);
 
-        const buildTasks = await provideDockerBuildTasks();
+        const buildTasks = await provideDockerBuildTasks(context);
 
         for (const buildTask of buildTasks) {
             await addTask(buildTask);
         }
 
-        const runTasks = await provideDockerRunTasks();
+        const runTasks = await provideDockerRunTasks(context);
 
         for (const runTask of runTasks) {
             await addTask(runTask);
