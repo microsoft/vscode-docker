@@ -6,7 +6,6 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
-import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
@@ -14,7 +13,9 @@ import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
+    main?: string;
     name?: string;
+    scripts?: { [key: string]: string };
 }
 
 export interface NodeTaskBuildOptions {
@@ -39,6 +40,8 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
+    private static readonly StartScriptName: string = 'start';
+
     public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
@@ -174,17 +177,28 @@ export class NodeTaskHelper implements TaskHelper {
         return `${packageName}:latest`;
     }
 
-    private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<ShellQuotedString[]> {
+    private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<string | ShellQuotedString[]> {
         const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
+        const inspectArgWithPort = `${inspectArg}=0.0.0.0:${inspectPort}`;
 
-        // TODO: Infer startup script...
-        const command = CommandLineBuilder
-            .create('node')
-            .withNamedArg(inspectArg, `0.0.0.0:${inspectPort}`, { assignValue: true })
-            .withQuotedArg(`./bin/www`)
-            .buildShellQuotedStrings();
+        const packageJson = await fse.readFile(packagePath, 'utf8');
+        const packageContent = <NodePackage>JSON.parse(packageJson);
 
-        return await Promise.resolve(command);
+        if (packageContent.scripts) {
+            const startScript = packageContent.scripts[NodeTaskHelper.StartScriptName];
+
+            if (startScript && startScript.startsWith('node ')) {
+                const updatedStartScript = `node ${inspectArgWithPort} ${startScript.substring(5)}`;
+
+                return updatedStartScript;
+            }
+        }
+
+        if (packageContent.main) {
+            return `node ${inspectArgWithPort} ${packageContent.main}`;
+        }
+
+        throw new Error(`Unable to infer the command to run the application within the container. Set the 'dockerRun.command' property and include the Node.js '${inspectArgWithPort}' argument.`);
     }
 
     private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {
