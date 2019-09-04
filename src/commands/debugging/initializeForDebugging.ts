@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { InitializeDebugContext } from '../../debugging/DebugHelper';
-import dockerDebugScaffoldingProvider from '../../debugging/DockerDebugScaffoldingProvider';
+import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
-import { Platform, PlatformOS } from '../../utils/platform';
+import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, platformOS?: PlatformOS): Promise<void> {
-    folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
-    platform = platform || await quickPickPlatform();
+export async function initializeForDebugging(): Promise<void> {
+    const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
+    const platform = await quickPickPlatform();
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
@@ -37,10 +36,13 @@ export async function initializeForDebugging(folder?: WorkspaceFolder, platform?
                 actionContext: actionContext,
             }
 
-            switch (debugPlatform) {
+            switch (context.platform) {
                 case 'netCore':
-                    platformOS = platformOS || await quickPickOS();
-                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, { platformOS });
+                    const options: NetCoreScaffoldingOptions = {
+                        appProject: (await quickPickProjectFileItem(undefined, context.folder, 'You must choose a project file to set up for Docker debugging.')).absoluteFilePath,
+                        platformOS: await quickPickOS(),
+                    }
+                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, options);
                     break;
                 case 'node':
                     await dockerDebugScaffoldingProvider.initializeNodeForDebugging(context);
