@@ -66,16 +66,17 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
     );
 }
 
+// TODO: This is stripping out a level of indentation, but the tasks one isn't
 export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceLaunch = workspace.getConfiguration('launch');
-    const allConfigs = workspaceLaunch.configurations as DebugConfiguration[] || [];
+    const allConfigs = workspaceLaunch && workspaceLaunch.configurations as DebugConfiguration[] || [];
 
     if (allConfigs.some(c => c.name === debugConfiguration.name)) {
         return false;
     }
 
     allConfigs.push(debugConfiguration);
-    workspaceLaunch.update('configurations', allConfigs);
+    await workspaceLaunch.update('configurations', allConfigs);
     return true;
 }
