@@ -1844,7 +1844,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.31.0"
+        "vscode": "^1.37.0"
     },
     "scripts": {
         "vscode:prepublish": "npm run webpack-prod",
