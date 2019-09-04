@@ -6,6 +6,10 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as semver from 'semver';
+import { WorkspaceFolder } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
+import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
+import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
@@ -17,14 +21,16 @@ export const configureAspDotNetCore: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
     genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: [80, 443]
+    defaultPorts: [80, 443],
+    initializeForDebugging,
 };
 
 export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
     genDockerFile,
     genDockerCompose: undefined, // We don't generate compose files for .net core
     genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: undefined
+    defaultPorts: undefined,
+    initializeForDebugging,
 };
 
 // .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
@@ -259,4 +265,19 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     }
 
     return contents;
+}
+
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, { artifactName }: Partial<PackageInfo>): Promise<void> {
+    const scaffoldContext: DockerDebugScaffoldContext = {
+        folder: folder,
+        platform: 'netCore',
+        actionContext: context,
+    }
+
+    const options: NetCoreScaffoldingOptions = {
+        appProject: `\${workspaceFolder}/${artifactName}`,
+        platformOS: platformOS,
+    }
+
+    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
 }

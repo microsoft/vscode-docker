@@ -59,7 +59,8 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
-    defaultPorts: number[] | undefined // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
+    defaultPorts: number[] | undefined, // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
+    initializeForDebugging: DebugScaffoldFunction | undefined,
 }
 
 export function getExposeStatements(ports: number[]): string {
@@ -281,6 +282,7 @@ async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
 }
 
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
+type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, packageInfo: PackageInfo) => Promise<void>;
 
 const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
     'docker-compose.yml': genDockerCompose,
@@ -331,11 +333,22 @@ export interface ConfigureApiOptions {
      * Open the Dockerfile that was generated
      */
     openDockerFile?: boolean;
+
+    /**
+     * Whether to configure launch and tasks config for debugging
+     */
+    configureForDebugging?: boolean;
+
+    /**
+     * The workspace folder for configuring
+     */
+    folder?: vscode.WorkspaceFolder;
 }
 
 export async function configure(context: IActionContext, rootFolderPath: string | undefined): Promise<void> {
+    let folder: vscode.WorkspaceFolder;
     if (!rootFolderPath) {
-        let folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
+        folder = await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
         rootFolderPath = folder.uri.fsPath;
     }
 
@@ -344,7 +357,9 @@ export async function configure(context: IActionContext, rootFolderPath: string 
         {
             rootPath: rootFolderPath,
             outputFolder: rootFolderPath,
-            openDockerFile: true
+            openDockerFile: true,
+            configureForDebugging: true,
+            folder: folder,
         });
 
     // Open the dockerfile (if written)
@@ -435,6 +450,11 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
         return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
     }));
+
+    // Can only configure for debugging if the option to do so is true, and there's a workspace folder, and there's a scaffold function
+    if (options.configureForDebugging && options.folder && generatorInfo.initializeForDebugging) {
+        await generatorInfo.initializeForDebugging(context, options.folder, os, packageInfo);
+    }
 
     return filesWritten;
 

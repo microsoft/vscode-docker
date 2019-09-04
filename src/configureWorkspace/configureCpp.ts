@@ -9,7 +9,8 @@ export let configureCpp: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose: undefined, // We don't generate compose files for Cpp
   genDockerComposeDebug: undefined, // We don't generate compose files for Cpp
-  defaultPorts: undefined // We don't open a port for Cpp
+  defaultPorts: undefined, // We don't open a port for Cpp
+  initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
