@@ -39,7 +39,7 @@ export async function initializeForDebugging(): Promise<void> {
             switch (context.platform) {
                 case 'netCore':
                     const options: NetCoreScaffoldingOptions = {
-                        appProject: (await quickPickProjectFileItem(undefined, context.folder, 'You must choose a project file to set up for Docker debugging.')).absoluteFilePath,
+                        appProject: (await quickPickProjectFileItem(undefined, context.folder, 'You must choose a .NET Core project file to set up for Docker debugging.')).absoluteFilePath,
                         platformOS: await quickPickOS(),
                     }
                     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, options);
@@ -49,5 +49,6 @@ export async function initializeForDebugging(): Promise<void> {
                     break;
                 default:
             }
-        });
+        }
+    );
 }
