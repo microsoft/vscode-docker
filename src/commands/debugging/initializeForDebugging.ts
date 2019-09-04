@@ -5,7 +5,7 @@
 
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
-import { InitializeDebugContext } from '../../debugging/DebugHelper';
+import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
@@ -30,7 +30,7 @@ export async function initializeForDebugging(): Promise<void> {
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
         async (actionContext: IActionContext) => {
-            const context: InitializeDebugContext = {
+            const context: DockerDebugScaffoldContext = {
                 folder: folder,
                 platform: debugPlatform,
                 actionContext: actionContext,

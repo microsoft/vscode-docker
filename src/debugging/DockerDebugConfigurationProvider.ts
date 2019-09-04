@@ -7,7 +7,7 @@ import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvide
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
-import { DebugContext, DebugHelper, ResolvedDebugConfiguration } from './DebugHelper';
+import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
@@ -39,7 +39,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 debugConfiguration));
     }
 
-    private async resolveDebugConfigurationInternal(context: DebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
+    private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
         context.folder = context.folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
 
         const helper = this.getHelper(context.platform);

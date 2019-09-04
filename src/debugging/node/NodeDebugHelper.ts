@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
-import { DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -42,7 +42,7 @@ export interface NodeDockerDebugConfiguration extends DockerDebugConfigurationBa
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(context: InitializeDebugContext): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]> {
         return [
             {
                 name: 'Docker Node.js Launch',
@@ -54,7 +54,7 @@ export class NodeDebugHelper implements DebugHelper {
         ];
     }
 
-    public async resolveDebugConfiguration(context: DebugContext, debugConfiguration: NodeDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+    public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: NodeDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         const options = debugConfiguration.node || {};
 
         const packagePath = NodeDebugHelper.inferPackagePath(options.package, context.folder);

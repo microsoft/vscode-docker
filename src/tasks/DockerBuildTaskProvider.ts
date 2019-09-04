@@ -11,7 +11,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { BuildTaskContext, TaskHelper } from './TaskHelper';
+import { DockerBuildTaskContext, TaskHelper } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -43,7 +43,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
                 task));
     }
 
-    private async resolveTaskInternal(context: BuildTaskContext, task: DockerBuildTask): Promise<Task> {
+    private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 

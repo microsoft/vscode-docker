@@ -14,7 +14,7 @@ import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskP
 import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
 import nodeTaskHelper from './node/NodeTaskHelper';
 
-export interface TaskContext {
+export interface DockerTaskContext {
     folder: WorkspaceFolder;
     platform: DockerPlatform;
     actionContext?: IActionContext;
@@ -22,20 +22,20 @@ export interface TaskContext {
 }
 
 // tslint:disable-next-line: no-empty-interface
-export interface InitializeTaskContext extends TaskContext {
+export interface DockerTaskScaffoldContext extends DockerTaskContext {
 }
 
 // tslint:disable-next-line: no-empty-interface
-export interface BuildTaskContext extends TaskContext {
+export interface DockerBuildTaskContext extends DockerTaskContext {
 }
 
-export interface RunTaskContext extends TaskContext {
+export interface DockerRunTaskContext extends DockerTaskContext {
     buildDefinition?: DockerBuildTaskDefinition;
 }
 
 export interface TaskHelper {
-    resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(context: RunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
+    resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

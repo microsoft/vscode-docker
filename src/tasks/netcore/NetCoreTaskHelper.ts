@@ -16,7 +16,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { BuildTaskContext, InitializeTaskContext, RunTaskContext, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -43,7 +43,7 @@ const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallback
 export class NetCoreTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(context: InitializeTaskContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
         const appName = await NetCoreTaskHelper.inferAppName(context.folder, { appProject: options.appProject });
@@ -75,7 +75,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(context: InitializeTaskContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
         options.platformOS = options.platformOS || 'Linux';
@@ -96,7 +96,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         ];
     }
 
-    public async resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: NetCoreBuildTaskDefinition): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NetCoreBuildTaskDefinition): Promise<DockerBuildOptions> {
         const buildOptions = buildDefinition.dockerBuild;
         const helperOptions = buildDefinition.netCore || {};
 
@@ -114,7 +114,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         return buildOptions;
     }
 
-    public async resolveDockerRunOptions(context: RunTaskContext, runDefinition: NetCoreRunTaskDefinition): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: NetCoreRunTaskDefinition): Promise<DockerRunOptions> {
         const runOptions = runDefinition.dockerRun;
         const helperOptions = runDefinition.netCore || {};
 

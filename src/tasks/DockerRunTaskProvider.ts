@@ -11,7 +11,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
-import { getAssociatedDockerBuildTask, RunTaskContext, TaskHelper } from './TaskHelper';
+import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -43,7 +43,7 @@ export class DockerRunTaskProvider implements TaskProvider {
                 task));
     }
 
-    private async resolveTaskInternal(context: RunTaskContext, task: DockerRunTask): Promise<Task> {
+    private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 

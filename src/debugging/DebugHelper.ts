@@ -5,7 +5,7 @@
 
 import { commands, debug, DebugConfiguration, ExtensionContext, workspace } from 'vscode';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
-import { InitializeTaskContext, TaskContext } from '../tasks/TaskHelper';
+import { DockerTaskContext, DockerTaskScaffoldContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
@@ -15,11 +15,11 @@ import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper from './node/NodeDebugHelper';
 
 // tslint:disable-next-line: no-empty-interface
-export interface DebugContext extends TaskContext {
+export interface DockerDebugContext extends DockerTaskContext {
 }
 
 // tslint:disable-next-line: no-empty-interface
-export interface InitializeDebugContext extends InitializeTaskContext {
+export interface DockerDebugScaffoldContext extends DockerTaskScaffoldContext {
 }
 
 export interface ResolvedDebugConfigurationOptions {
@@ -33,8 +33,8 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(context: InitializeDebugContext): Promise<DockerDebugConfiguration[]>;
-    resolveDebugConfiguration(context: DebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
+    provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]>;
+    resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {

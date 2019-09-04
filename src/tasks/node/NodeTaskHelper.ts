@@ -11,7 +11,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { BuildTaskContext, InitializeTaskContext, RunTaskContext, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
     name?: string;
@@ -39,7 +39,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    public async provideDockerBuildTasks(context: InitializeTaskContext): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
                 type: 'docker-build',
@@ -49,7 +49,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(context: InitializeTaskContext): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(context: DockerTaskScaffoldContext): Promise<DockerRunTaskDefinition[]> {
         return [
             {
                 type: 'docker-run',
@@ -68,7 +68,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
         const helperOptions = buildDefinition.node || {};
         const buildOptions = buildDefinition.dockerBuild;
 
@@ -86,7 +86,7 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunOptions(context: RunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
         const helperOptions = runDefinition.node || {};
         const runOptions = runDefinition.dockerRun;
 
