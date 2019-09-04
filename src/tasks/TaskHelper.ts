@@ -17,7 +17,7 @@ import nodeTaskHelper from './node/NodeTaskHelper';
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
     platform: DockerPlatform;
-    actionContext?: IActionContext;
+    actionContext: IActionContext;
     cancellationToken?: CancellationToken;
 }
 

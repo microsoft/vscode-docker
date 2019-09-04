@@ -175,12 +175,12 @@ export class ServerReadyDetector extends vscode.Disposable {
                 }
                 break;
             default:
-                // not supported
+            // not supported
         }
     }
 }
 
-export function activate(context: vscode.ExtensionContext): void {
+export function registerServerReadyAction(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         ServerReadyDetector.stop(session);

@@ -44,6 +44,8 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
+        context.actionContext.telemetry.properties.platform = context.platform;
+
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 

@@ -44,6 +44,8 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
+        context.actionContext.telemetry.properties.platform = context.platform;
+
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 

@@ -40,6 +40,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
+        context.actionContext.telemetry.properties.platform = context.platform;
+
         context.folder = context.folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
 
         const helper = this.getHelper(context.platform);
