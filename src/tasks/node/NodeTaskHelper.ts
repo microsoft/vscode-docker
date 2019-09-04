@@ -11,7 +11,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { BuildTaskContext, InitializeTaskContext, RunTaskContext, TaskHelper } from '../TaskHelper';
+import { BuildTaskContext, RunTaskContext, TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
     name?: string;
@@ -39,7 +39,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    public async provideDockerBuildTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
                 type: 'docker-build',
@@ -49,11 +49,17 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]> {
         return [
             {
                 type: 'docker-run',
-                label: 'docker-run',
+                label: 'docker-run: release',
+                dependsOn: ['docker-build'],
+                platform: 'node'
+            },
+            {
+                type: 'docker-run',
+                label: 'docker-run: debug',
                 dependsOn: ['docker-build'],
                 node: {
                     enableDebugging: true
@@ -187,3 +193,7 @@ export class NodeTaskHelper implements TaskHelper {
         return path.resolve(folder.uri.fsPath, replacedPath);
     }
 }
+
+const nodeTaskHelper = new NodeTaskHelper();
+
+export default nodeTaskHelper;

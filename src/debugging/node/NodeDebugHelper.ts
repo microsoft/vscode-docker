@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
 import { DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
-import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
+import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 interface NodePackage {
@@ -48,7 +48,7 @@ export class NodeDebugHelper implements DebugHelper {
                 name: 'Docker Node.js Launch',
                 type: 'docker-launch',
                 request: 'launch',
-                preLaunchTask: 'docker-run',
+                preLaunchTask: 'docker-run: debug',
                 platform: 'node'
             }
         ];
@@ -60,9 +60,23 @@ export class NodeDebugHelper implements DebugHelper {
         const packagePath = NodeDebugHelper.inferPackagePath(options.package, context.folder);
         const packageName = await NodeDebugHelper.inferPackageName(packagePath);
 
+        let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
+
+        if (numBrowserOptions > 1) {
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
+        }
+
+        const containerName = NodeDebugHelper.inferContainerName(packageName);
+
+        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
+            ? debugConfiguration.dockerServerReadyAction
+            : {
+                containerName
+            };
+
         const dockerOptions: ResolvedDebugConfigurationOptions = {
-            containerNameToKill: NodeDebugHelper.inferContainerName(packageName),
-            dockerServerReadyAction: debugConfiguration.dockerServerReadyAction,
+            containerNameToKill: containerName,
+            dockerServerReadyAction,
             removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
         };
 
@@ -122,3 +136,7 @@ export class NodeDebugHelper implements DebugHelper {
         return path.resolve(folder.uri.fsPath, replacedPath);
     }
 }
+
+const nodeDebugHelper = new NodeDebugHelper();
+
+export default nodeDebugHelper;

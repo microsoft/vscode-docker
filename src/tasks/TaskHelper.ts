@@ -7,14 +7,12 @@ import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, 
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { ext } from '../extensionVariables';
-import { PlatformOS } from '../utils/platform';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
-import { NetCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { NodeTaskHelper } from './node/NodeTaskHelper';
+import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
+import nodeTaskHelper from './node/NodeTaskHelper';
 
 export interface TaskContext {
     folder: WorkspaceFolder;
@@ -23,8 +21,8 @@ export interface TaskContext {
     cancellationToken?: CancellationToken;
 }
 
+// tslint:disable-next-line: no-empty-interface
 export interface InitializeTaskContext extends TaskContext {
-    platformOS: PlatformOS;
 }
 
 // tslint:disable-next-line: no-empty-interface
@@ -36,29 +34,27 @@ export interface RunTaskContext extends TaskContext {
 }
 
 export interface TaskHelper {
-    provideDockerBuildTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]>;
-    provideDockerRunTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]>;
     resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(context: RunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
     const helpers = {
-        netCore: new NetCoreTaskHelper(),
-        node: new NodeTaskHelper()
+        netCore: netCoreTaskHelper,
+        node: nodeTaskHelper
     };
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-build',
-            ext.buildTaskProvider = new DockerBuildTaskProvider(helpers)
+            new DockerBuildTaskProvider(helpers)
         )
     );
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'docker-run',
-            ext.runTaskProvider = new DockerRunTaskProvider(helpers)
+            new DockerRunTaskProvider(helpers)
         )
     );
 }

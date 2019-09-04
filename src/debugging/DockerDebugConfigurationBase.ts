@@ -6,7 +6,7 @@
 import { DebugConfiguration } from 'vscode';
 
 export interface ServerReadyAction {
-    pattern: string;
+    pattern?: string;
     action?: 'openExternally' | 'debugWithChrome';
     uriFormat?: string;
     webRoot?: string;

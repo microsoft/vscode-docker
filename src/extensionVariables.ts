@@ -9,9 +9,6 @@ import { RequestAPI, RequiredUriUrl } from 'request';
 import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
-import { DockerDebugConfigurationProvider } from './debugging/DockerDebugConfigurationProvider';
-import { DockerBuildTaskProvider } from './tasks/DockerBuildTaskProvider';
-import { DockerRunTaskProvider } from './tasks/DockerRunTaskProvider';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
@@ -36,10 +33,6 @@ export namespace ext {
     export let dockerode: Dockerode;
     export let dockerodeInitError: unknown;
     export const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
-
-    export let debugConfigProvider: DockerDebugConfigurationProvider;
-    export let buildTaskProvider: DockerBuildTaskProvider;
-    export let runTaskProvider: DockerRunTaskProvider;
 
     export let imagesTree: AzExtTreeDataProvider;
     export let imagesTreeView: TreeView<AzExtTreeItem>;

@@ -32,10 +32,15 @@ export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
     netCore?: NetCoreDebugOptions;
 }
 
+export interface NetCoreDebugScaffoldingOptions {
+    appProject?: string;
+}
+
 export class NetCoreDebugHelper implements DebugHelper {
     private readonly netCoreProjectProvider: NetCoreProjectProvider;
     private readonly aspNetCoreSslManager: AspNetCoreSslManager;
-    private readonly vsDbgClient: VsDbgClient;
+    private readonly vsDbgClientFactory: () => VsDbgClient;
+    private vsDbgClient: VsDbgClient;
 
     constructor() {
         const processProvider = new ChildProcessProvider();
@@ -61,16 +66,23 @@ export class NetCoreDebugHelper implements DebugHelper {
             osProvider
         );
 
-        this.vsDbgClient = new RemoteVsDbgClient(
-            new DefaultOutputManager(ext.outputChannel),
-            fsProvider,
-            ext.context.globalState,
-            osProvider,
-            processProvider
-        );
+        this.vsDbgClientFactory = () => {
+            if (this.vsDbgClient === undefined) {
+                this.vsDbgClient = new RemoteVsDbgClient(
+                    new DefaultOutputManager(ext.outputChannel),
+                    fsProvider,
+                    ext.context.globalState,
+                    osProvider,
+                    processProvider
+                );
+            }
+
+            return this.vsDbgClient;
+        };
     }
 
-    public async provideDebugConfigurations(context: InitializeDebugContext, options: { [key: string]: string }): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(context: InitializeDebugContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
+        options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
 
         return [
@@ -79,7 +91,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 type: 'docker-launch',
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
@@ -172,10 +183,10 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
         if (platformOS === 'Windows') {
-            await this.vsDbgClient.getVsDbgVersion('latest', 'win7-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'win7-x64');
         } else {
-            await this.vsDbgClient.getVsDbgVersion('latest', 'linux-x64');
-            await this.vsDbgClient.getVsDbgVersion('latest', 'linux-musl-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'linux-x64');
+            await this.vsDbgClientFactory().getVsDbgVersion('latest', 'linux-musl-x64');
         }
 
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
@@ -242,3 +253,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             path.posix.normalize(path.posix.join('/app', relativePath)).replace(/\\/g, '/');
     }
 }
+
+const netCoreDebugHelper = new NetCoreDebugHelper();
+
+export default netCoreDebugHelper;

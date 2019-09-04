@@ -10,6 +10,7 @@ import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
@@ -30,6 +31,11 @@ export interface NetCoreRunTaskDefinition extends DockerRunTaskDefinitionBase {
     netCore?: NetCoreTaskOptions;
 }
 
+export interface NetCoreTaskScaffoldingOptions {
+    appProject?: string;
+    platformOS?: PlatformOS;
+}
+
 const UserSecretsRegex = /UserSecretsId/i;
 const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
 const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
@@ -37,7 +43,8 @@ const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallback
 export class NetCoreTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    public async provideDockerBuildTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(context: InitializeTaskContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
+        options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
         const appName = await NetCoreTaskHelper.inferAppName(context.folder, { appProject: options.appProject });
 
@@ -50,7 +57,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                     tag: `${appName}:dev`,
                     target: 'base',
                 },
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
@@ -62,7 +68,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerBuild: {
                     tag: `${appName}:latest`,
                 },
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
@@ -70,8 +75,10 @@ export class NetCoreTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(context: InitializeTaskContext, options: { [key: string]: string }): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(context: InitializeTaskContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
+        options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
+        options.platformOS = options.platformOS || 'Linux';
 
         return [
             {
@@ -79,10 +86,9 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-run: debug',
                 dependsOn: ['docker-build: debug'],
                 dockerRun: {
-                    entrypoint: context.platformOS === 'Windows' ? 'ping' : 'tail',
-                    command: context.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null'
+                    entrypoint: options.platformOS === 'Windows' ? 'ping' : 'tail',
+                    command: options.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null'
                 },
-                platform: 'netCore',
                 netCore: {
                     appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
@@ -304,3 +310,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
 }
+
+const netCoreTaskHelper = new NetCoreTaskHelper();
+
+export default netCoreTaskHelper;

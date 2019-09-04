@@ -5,15 +5,14 @@
 
 import { commands, debug, DebugConfiguration, ExtensionContext, workspace } from 'vscode';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
-import { ext } from '../extensionVariables';
 import { InitializeTaskContext, TaskContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { activate } from './DockerServerReadyAction';
-import { NetCoreDebugHelper } from './netcore/NetCoreDebugHelper';
-import { NodeDebugHelper } from './node/NodeDebugHelper';
+import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
+import nodeDebugHelper from './node/NodeDebugHelper';
 
 // tslint:disable-next-line: no-empty-interface
 export interface DebugContext extends TaskContext {
@@ -34,7 +33,7 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(context: InitializeDebugContext, options: { [key: string]: string }): Promise<DockerDebugConfiguration[]>;
+    provideDebugConfigurations(context: InitializeDebugContext): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(context: DebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
 }
 
@@ -42,24 +41,15 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         debug.registerDebugConfigurationProvider(
             'docker-launch',
-            ext.debugConfigProvider = new DockerDebugConfigurationProvider(
+            new DockerDebugConfigurationProvider(
                 new CliDockerClient(new ChildProcessProvider()),
                 {
-                    netCore: new NetCoreDebugHelper(),
-                    node: new NodeDebugHelper()
+                    netCore: netCoreDebugHelper,
+                    node: nodeDebugHelper
                 }
             )
         )
     );
-
-    /*
-    ctx.subscriptions.push(
-        debug.registerDebugAdapterTrackerFactory(
-            '*',
-            new DockerDebugAdapterTrackerFactory()
-        )
-    );
-    */
 
     activate(ctx);
 

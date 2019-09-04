@@ -5,10 +5,9 @@
 
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
-import { addDebugConfiguration, DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
+import { DebugContext, DebugHelper, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
@@ -40,20 +39,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 debugConfiguration));
     }
 
-    public async initializeForDebugging(context: InitializeDebugContext, options: { [key: string]: string }): Promise<void> {
-        const helper = this.getHelper(context.platform);
-
-        const debugConfigurations = await helper.provideDebugConfigurations(context, options);
-
-        await ext.buildTaskProvider.initializeBuildTasks(context, options);
-        await ext.runTaskProvider.initializeRunTasks(context, options);
-
-        for (const debugConfiguration of debugConfigurations) {
-            await addDebugConfiguration(debugConfiguration);
-        }
-    }
-
     private async resolveDebugConfigurationInternal(context: DebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
+        context.folder = context.folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
+
         const helper = this.getHelper(context.platform);
 
         const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);
