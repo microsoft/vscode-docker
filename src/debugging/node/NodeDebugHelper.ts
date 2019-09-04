@@ -5,8 +5,8 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, WorkspaceFolder } from 'vscode';
-import { DebugHelper, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
+import { WorkspaceFolder } from 'vscode';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -42,7 +42,7 @@ export interface NodeDockerDebugConfiguration extends DockerDebugConfigurationBa
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]> {
         return [
             {
                 name: 'Docker Node.js Launch',
@@ -54,10 +54,10 @@ export class NodeDebugHelper implements DebugHelper {
         ];
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: NodeDockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
+    public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: NodeDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         const options = debugConfiguration.node || {};
 
-        const packagePath = NodeDebugHelper.inferPackagePath(options.package, folder);
+        const packagePath = NodeDebugHelper.inferPackagePath(options.package, context.folder);
         const packageName = await NodeDebugHelper.inferPackageName(packagePath);
 
         let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
@@ -82,7 +82,7 @@ export class NodeDebugHelper implements DebugHelper {
 
         const resolvedConfiguration: NodeDebugConfiguration = {
             ...options,
-            name:  debugConfiguration.name,
+            name: debugConfiguration.name,
             dockerOptions,
             preLaunchTask: debugConfiguration.preLaunchTask,
             request: 'attach',

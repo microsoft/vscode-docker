@@ -3,15 +3,29 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { IActionContext, registerCommand } from 'vscode-azureextensionui';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
+import { DockerTaskScaffoldContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
-import { activate } from './DockerServerReadyAction';
+import { DockerPlatform } from './DockerPlatformHelper';
+import { registerServerReadyAction } from './DockerServerReadyAction';
 import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper from './node/NodeDebugHelper';
+
+export interface DockerDebugContext { // Same as DockerTaskContext but intentionally does not extend it, since we never need to pass a DockerDebugContext to tasks
+    folder: WorkspaceFolder;
+    platform: DockerPlatform;
+    actionContext: IActionContext;
+    cancellationToken?: CancellationToken;
+}
+
+// tslint:disable-next-line: no-empty-interface
+export interface DockerDebugScaffoldContext extends DockerTaskScaffoldContext {
+}
 
 export interface ResolvedDebugConfigurationOptions {
     containerNameToKill?: string;
@@ -24,8 +38,8 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]>;
-    resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined>;
+    provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]>;
+    resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {
@@ -42,26 +56,22 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
         )
     );
 
-    activate(ctx);
+    registerServerReadyAction(ctx);
 
-    ctx.subscriptions.push(
-        commands.registerCommand(
-            'vscode-docker.debugging.initializeForDebugging',
-            async () => await initializeForDebugging()
-        )
-    );
+    registerCommand('vscode-docker.debugging.initializeForDebugging', initializeForDebugging);
 }
 
+// TODO: This is stripping out a level of indentation, but the tasks one isn't
 export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceLaunch = workspace.getConfiguration('launch');
-    const allConfigs = workspaceLaunch.configurations as DebugConfiguration[] || [];
+    const allConfigs = workspaceLaunch && workspaceLaunch.configurations as DebugConfiguration[] || [];
 
     if (allConfigs.some(c => c.name === debugConfiguration.name)) {
         return false;
     }
 
     allConfigs.push(debugConfiguration);
-    workspaceLaunch.update('configurations', allConfigs);
+    await workspaceLaunch.update('configurations', allConfigs);
     return true;
 }

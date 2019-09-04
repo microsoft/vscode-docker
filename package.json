@@ -546,7 +546,7 @@
                                 "properties": {
                                     "foo": {
                                         "type": "string",
-                                        "description": "bar"
+                                        "description": "TODO"
                                     }
                                 }
                             }
@@ -855,6 +855,15 @@
                             "networkAlias": {
                                 "type": "string",
                                 "description": "The network-scoped alias to assign to the container."
+                            },
+                            "os": {
+                                "type": "string",
+                                "description": "The container operating system.",
+                                "default": "Linux",
+                                "enum": [
+                                    "Linux",
+                                    "Windows"
+                                ]
                             },
                             "ports": {
                                 "type": "array",
