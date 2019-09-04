@@ -546,7 +546,7 @@
                                 "properties": {
                                     "foo": {
                                         "type": "string",
-                                        "description": "bar"
+                                        "description": "TODO"
                                     }
                                 }
                             }
