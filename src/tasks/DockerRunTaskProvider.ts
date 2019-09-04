@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
-import { getAssociatedDockerBuildTask, TaskHelper } from './TaskHelper';
+import { getAssociatedDockerBuildTask, RunTaskContext, TaskHelper } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -24,8 +24,7 @@ export interface DockerRunTask extends Task {
 }
 
 export class DockerRunTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) {
-    }
+    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
         return []; // Intentionally empty, so that resolveTask gets used
@@ -34,27 +33,31 @@ export class DockerRunTaskProvider implements TaskProvider {
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
         const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-run/${taskPlatform || 'unknown'}`,
-            async () => await this.resolveTaskInternal(task, taskPlatform, token));
+            `docker-run-resolve/${taskPlatform || 'unknown'}`,
+            async (actionContext: IActionContext) => await this.resolveTaskInternal(
+                {
+                    folder: task.scope as WorkspaceFolder,
+                    platform: taskPlatform,
+                    actionContext: actionContext,
+                },
+                task));
     }
 
-    private async resolveTaskInternal(task: DockerRunTask, taskPlatform: DockerPlatform, token?: CancellationToken): Promise<Task> {
+    private async resolveTaskInternal(context: RunTaskContext, task: DockerRunTask): Promise<Task> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
-        const folder = task.scope as WorkspaceFolder;
-
-        if (!folder) {
+        if (!context.folder) {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
-        const associatedBuildTask = await getAssociatedDockerBuildTask(definition);
+        context.buildDefinition = await getAssociatedDockerBuildTask(definition);
 
-        const helper = this.getHelper(taskPlatform);
+        const helper = this.getHelper(context.platform);
 
-        definition.dockerRun = await helper.resolveDockerRunOptions(folder, associatedBuildTask, definition, token);
+        definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
 
-        const commandLine = await this.resolveCommandLine(definition.dockerRun, token);
+        const commandLine = await this.resolveCommandLine(definition.dockerRun);
         return new Task(
             task.definition,
             task.scope,
@@ -64,7 +67,7 @@ export class DockerRunTaskProvider implements TaskProvider {
             task.problemMatchers);
     }
 
-    private async resolveCommandLine(runOptions: DockerRunOptions, token?: CancellationToken): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<ShellQuotedString[]> {
         return CommandLineBuilder
             .create('docker', 'run', '-dt')
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))

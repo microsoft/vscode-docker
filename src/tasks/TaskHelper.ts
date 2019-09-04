@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -12,9 +14,28 @@ import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskP
 import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
 import nodeTaskHelper from './node/NodeTaskHelper';
 
+export interface TaskContext {
+    folder: WorkspaceFolder;
+    platform: DockerPlatform;
+    actionContext?: IActionContext;
+    cancellationToken?: CancellationToken;
+}
+
+// tslint:disable-next-line: no-empty-interface
+export interface InitializeTaskContext extends TaskContext {
+}
+
+// tslint:disable-next-line: no-empty-interface
+export interface BuildTaskContext extends TaskContext {
+}
+
+export interface RunTaskContext extends TaskContext {
+    buildDefinition?: DockerBuildTaskDefinition;
+}
+
 export interface TaskHelper {
-    resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: DockerBuildTaskDefinition | undefined, runDefinition: DockerRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions>;
+    resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+    resolveDockerRunOptions(context: RunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

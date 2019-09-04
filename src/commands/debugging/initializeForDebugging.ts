@@ -4,41 +4,48 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
+import { InitializeDebugContext } from '../../debugging/DebugHelper';
 import dockerDebugScaffoldingProvider from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
-import { Platform } from '../../utils/platform';
+import { Platform, PlatformOS } from '../../utils/platform';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform): Promise<void> {
+export async function initializeForDebugging(folder?: WorkspaceFolder, platform?: Platform, platformOS?: PlatformOS): Promise<void> {
     folder = folder || await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
     platform = platform || await quickPickPlatform();
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
         case '.NET Core Console':
-            case 'ASP.NET Core':
-                debugPlatform = 'netCore';
-                break;
-                case 'Node.js':
-                    debugPlatform = 'node';
-                    break;
-                    default:
-                    }
+        case 'ASP.NET Core':
+            debugPlatform = 'netCore';
+            break;
+        case 'Node.js':
+            debugPlatform = 'node';
+            break;
+        default:
+    }
 
     return await callWithTelemetryAndErrorHandling(
         `docker-debug-initialize/${debugPlatform || 'unknown'}`,
-        async () => {
+        async (actionContext: IActionContext) => {
+            const context: InitializeDebugContext = {
+                folder: folder,
+                platform: debugPlatform,
+                actionContext: actionContext,
+            }
+
             switch (debugPlatform) {
                 case 'netCore':
-                    const platformOS = await quickPickOS();
-                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(folder, { platformOS });
+                    platformOS = platformOS || await quickPickOS();
+                    await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, { platformOS });
                     break;
                 case 'node':
-                    await dockerDebugScaffoldingProvider.initializeNodeForDebugging(folder);
+                    await dockerDebugScaffoldingProvider.initializeNodeForDebugging(context);
                     break;
                 default:
-                }
-            });
+            }
+        });
 }

@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { commands, debug, DebugConfiguration, ExtensionContext, workspace } from 'vscode';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
+import { InitializeTaskContext, TaskContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
@@ -12,6 +13,14 @@ import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './Do
 import { activate } from './DockerServerReadyAction';
 import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper from './node/NodeDebugHelper';
+
+// tslint:disable-next-line: no-empty-interface
+export interface DebugContext extends TaskContext {
+}
+
+// tslint:disable-next-line: no-empty-interface
+export interface InitializeDebugContext extends InitializeTaskContext {
+}
 
 export interface ResolvedDebugConfigurationOptions {
     containerNameToKill?: string;
@@ -24,8 +33,8 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 }
 
 export interface DebugHelper {
-    provideDebugConfigurations(folder: WorkspaceFolder): Promise<DockerDebugConfiguration[]>;
-    resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined>;
+    provideDebugConfigurations(context: InitializeDebugContext): Promise<DockerDebugConfiguration[]>;
+    resolveDebugConfiguration(context: DebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {

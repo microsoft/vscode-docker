@@ -5,13 +5,13 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, ShellQuotedString, WorkspaceFolder } from 'vscode';
+import { ShellQuotedString, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { TaskHelper } from '../TaskHelper';
+import { BuildTaskContext, InitializeTaskContext, RunTaskContext, TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
     name?: string;
@@ -39,7 +39,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    public async provideDockerBuildTasks(folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition[]> {
+    public async provideDockerBuildTasks(context: InitializeTaskContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
                 type: 'docker-build',
@@ -49,7 +49,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async provideDockerRunTasks(folder: WorkspaceFolder): Promise<DockerRunTaskDefinition[]> {
+    public async provideDockerRunTasks(context: InitializeTaskContext): Promise<DockerRunTaskDefinition[]> {
         return [
             {
                 type: 'docker-run',
@@ -68,15 +68,15 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async resolveDockerBuildOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition, token?: CancellationToken): Promise<DockerBuildOptions> {
+    public async resolveDockerBuildOptions(context: BuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
         const helperOptions = buildDefinition.node || {};
         const buildOptions = buildDefinition.dockerBuild;
 
-        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, folder);
+        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, context.folder);
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         if (buildOptions.context === undefined) {
-            buildOptions.context = NodeTaskHelper.inferBuildContextPath(buildOptions && buildOptions.context, folder, packagePath);
+            buildOptions.context = NodeTaskHelper.inferBuildContextPath(buildOptions && buildOptions.context, context.folder, packagePath);
         }
 
         if (buildOptions.tag === undefined) {
@@ -86,11 +86,11 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve(buildOptions);
     }
 
-    public async resolveDockerRunOptions(folder: WorkspaceFolder, buildDefinition: NodeBuildTaskDefinition | undefined, runDefinition: NodeRunTaskDefinition, token?: CancellationToken): Promise<DockerRunOptions> {
+    public async resolveDockerRunOptions(context: RunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
         const helperOptions = runDefinition.node || {};
         const runOptions = runDefinition.dockerRun;
 
-        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, folder);
+        const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, context.folder);
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         if (runOptions.containerName === undefined) {

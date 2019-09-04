@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
+import { DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { getAssociatedDockerRunTask } from '../../tasks/TaskHelper';
@@ -20,7 +20,7 @@ import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../corecl
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
-import { DebugHelper, ResolvedDebugConfiguration } from '../DebugHelper';
+import { DebugContext, DebugHelper, InitializeDebugContext, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -81,8 +81,9 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    public async provideDebugConfigurations(folder: WorkspaceFolder, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
-        const appProject = (options && options.appProject) || await NetCoreTaskHelper.inferAppProject(folder); // This method internally checks the user-defined input first
+    public async provideDebugConfigurations(context: InitializeDebugContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
+        options = options || {};
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
 
         return [
             {
@@ -91,30 +92,30 @@ export class NetCoreDebugHelper implements DebugHelper {
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(folder, appProject)
+                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             }
         ];
     }
 
-    public async resolveDebugConfiguration(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): Promise<ResolvedDebugConfiguration | undefined> {
+    public async resolveDebugConfiguration(context: DebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
-        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
+        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
-        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(folder, debugConfiguration);
+        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context.folder, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
-        if (token.isCancellationRequested) {
+        if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             return undefined;
         }
 
         await this.acquireDebuggers(platformOS);
-        if (token.isCancellationRequested) {
+        if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             return undefined;
         }
 
         if (configureSsl) {
             await this.configureSsl(debugConfiguration, appOutput);
-            if (token.isCancellationRequested) {
+            if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
                 return undefined;
             }
         }
@@ -123,23 +124,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
-
-        if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
-        }
-
-        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
-            ? debugConfiguration.dockerServerReadyAction
-            : {
-                containerName,
-                pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
-            };
-
-        if (dockerServerReadyAction) {
-            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
-            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
-        }
+        const dockerServerReadyAction = await this.inferServerReadyAction(debugConfiguration, containerName, configureSsl);
 
         return {
             name: debugConfiguration.name,
@@ -153,8 +138,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             serverReadyAction: debugConfiguration.serverReadyAction,
             dockerOptions: {
                 containerNameToKill: containerName,
-                // TODO: Do nothing for console apps for website
-                dockerServerReadyAction,
+                dockerServerReadyAction: dockerServerReadyAction,
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
@@ -191,7 +175,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         return {
-            configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl || await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
+            configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
             containerName: associatedTask.dockerRun && associatedTask.dockerRun.containerName || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`,
             platformOS: associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
@@ -216,6 +200,36 @@ export class NetCoreDebugHelper implements DebugHelper {
         const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
         await this.aspNetCoreSslManager.trustCertificateIfNecessary();
         await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
+    }
+
+    private async inferServerReadyAction(debugConfiguration: DockerDebugConfiguration, containerName: string, configureSsl: boolean): Promise<DockerServerReadyAction> {
+        const numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
+
+        if (numBrowserOptions > 1) {
+            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
+        }
+
+        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
+            ? debugConfiguration.dockerServerReadyAction // If they specified any browser option, take their input as the result
+            : configureSsl || (await this.isWebApp(debugConfiguration)) ? // If this is indeed a web app, and they didn't specify a browser option, infer a default one
+                {
+                    containerName: containerName,
+                    pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
+                }
+                : undefined; // If this is not a web app, infer nothing
+
+        if (dockerServerReadyAction) { // If we have something for dockerServerReadyAction, resolve the container name and URI format if needed
+            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
+            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
+        }
+
+        return dockerServerReadyAction;
+    }
+
+    private async isWebApp(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
+        const projectContents = await fse.readFile(debugConfiguration.netCore.appProject);
+
+        return /Microsoft\.NET\.Sdk\.Web/i.test(projectContents.toString());
     }
 
     private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {
