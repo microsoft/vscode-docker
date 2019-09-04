@@ -2,8 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { ProcessProvider } from "./ChildProcessProvider";
-import CommandLineBuilder from "./commandLineBuilder";
 import { LineSplitter } from "./lineSplitter";
 
 export type DockerBuildImageOptions = {
@@ -67,6 +67,15 @@ export type DockerExecOptions = {
     tty?: boolean;
 }
 
+export interface IHostPort {
+    HostIp: string,
+    HostPort: string,
+}
+
+export interface IPortMappings {
+    [key: string]: IHostPort[];
+}
+
 export interface DockerClient {
     buildImage(options: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string>;
     getVersion(options?: DockerVersionOptions): Promise<string>;
@@ -77,6 +86,8 @@ export interface DockerClient {
     runContainer(imageTagOrId: string, options?: DockerRunContainerOptions): Promise<string>;
     trimId(id: string): string;
     exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
+    getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }>;
+    getHostPort(containerNameOrId: string, port: number): Promise<string>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -221,7 +232,7 @@ export class CliDockerClient implements DockerClient {
             .withArrayArgs('--add-host', options.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', options.entrypoint)
             .withQuotedArg(imageTagOrId)
-            .withArg(options.command)
+            .withArgs(options.command)
             .build();
 
         const result = await this.processProvider.exec(command, {});
@@ -264,6 +275,38 @@ export class CliDockerClient implements DockerClient {
         const result = await this.processProvider.exec(command, {});
 
         return result.stdout;
+    }
+
+    public async getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }> {
+        let portMappingsString = await this.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
+        let portMappings = <IPortMappings>JSON.parse(portMappingsString);
+
+        if (portMappings) {
+            let httpsPort = portMappings["443/tcp"] && portMappings["443/tcp"][0] && portMappings["443/tcp"][0].HostPort || null;
+            let httpPort = portMappings["80/tcp"] && portMappings["80/tcp"][0] && portMappings["80/tcp"][0].HostPort || null;
+
+            if (httpsPort) {
+                return {
+                    browserUrl: `https://localhost:${httpsPort}`,
+                    httpsPort: httpsPort
+                };
+            } else if (httpPort) {
+                return {
+                    // tslint:disable-next-line:no-http-string
+                    browserUrl: `http://localhost:${httpPort}`,
+                    httpsPort: undefined
+                };
+            }
+        }
+
+        return {
+            browserUrl: undefined,
+            httpsPort: undefined
+        };
+    }
+
+    public async getHostPort(containerNameOrId: string, containerPort: number): Promise<string> {
+        return (await this.inspectObject(containerNameOrId, { format: `{{(index (index .NetworkSettings.Ports \\"${containerPort}/tcp\\") 0).HostPort}}` })).trim();
     }
 }
 

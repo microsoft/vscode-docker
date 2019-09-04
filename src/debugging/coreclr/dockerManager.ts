@@ -12,7 +12,7 @@ import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRun
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import { Lazy } from './lazy';
-import { AspNetCoreSslManager } from './LocalAspNetCoreSslManager';
+import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';
 
@@ -65,15 +65,6 @@ type LastImageBuildMetadata = {
     options: DockerBuildImageOptions;
 };
 
-interface IHostPort {
-    HostIp: string,
-    HostPort: string,
-}
-
-interface IPortMappings {
-    [key: string]: IHostPort[];
-}
-
 export interface DockerManager {
     buildImage(options: DockerManagerBuildImageOptions): Promise<string>;
     runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string>;
@@ -82,7 +73,7 @@ export interface DockerManager {
 }
 
 export const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
-const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
+export const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 function compareProperty<T, U>(obj1: T | undefined, obj2: T | undefined, getter: (obj: T) => (U | undefined)): boolean {
     const prop1 = obj1 ? getter(obj1) : undefined;
@@ -246,7 +237,7 @@ export class DefaultDockerManager implements DockerManager {
 
         if (options.run.configureAspNetCoreSsl) {
             const appOutputName = this.osProvider.pathParse(options.run.os, options.appOutput).name;
-            const certificateExportPath = path.join(this.aspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
+            const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
             await this.aspNetCoreSslManager.trustCertificateIfNecessary();
             await this.aspNetCoreSslManager.exportCertificateIfNecessary(options.appProject, certificateExportPath);
         }
@@ -257,7 +248,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const debuggerPath = await this.debuggerClient.getDebugger(options.run.os, containerId);
 
-        const { browserUrl, httpsPort } = await this.getContainerWebEndpoint(containerId);
+        const { browserUrl, httpsPort } = await this.dockerClient.getContainerWebEndpoint(containerId);
 
         const additionalProbingPaths = options.run.os === 'Windows'
             ? [
@@ -331,34 +322,6 @@ export class DefaultDockerManager implements DockerManager {
         await this.workspaceState.update(DefaultDockerManager.DebugContainersKey, runningContainers);
     }
 
-    private async getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }> {
-        let portMappingsString = await this.dockerClient.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
-        let portMappings = <IPortMappings>JSON.parse(portMappingsString);
-
-        if (portMappings) {
-            let httpsPort = portMappings["443/tcp"] && portMappings["443/tcp"][0] && portMappings["443/tcp"][0].HostPort || null;
-            let httpPort = portMappings["80/tcp"] && portMappings["80/tcp"][0] && portMappings["80/tcp"][0].HostPort || null;
-
-            if (httpsPort) {
-                return {
-                    browserUrl: `https://localhost:${httpsPort}`,
-                    httpsPort: httpsPort
-                };
-            } else if (httpPort) {
-                return {
-                    // tslint:disable-next-line:no-http-string
-                    browserUrl: `http://localhost:${httpPort}`,
-                    httpsPort: undefined
-                };
-            }
-        }
-
-        return {
-            browserUrl: undefined,
-            httpsPort: undefined
-        };
-    }
-
     private static readonly ProgramFilesEnvironmentVariable: string = 'ProgramFiles';
 
     private getVolumes(debuggerFolder: string, options: DockerManagerRunContainerOptions): DockerContainerVolume[] {
@@ -405,8 +368,8 @@ export class DefaultDockerManager implements DockerManager {
         ];
 
         if (options.configureAspNetCoreSsl || options.configureDotNetUserSecrets) {
-            const hostSecretsFolders = this.aspNetCoreSslManager.getHostSecretsFolders();
-            const containerSecretsFolders = this.aspNetCoreSslManager.getContainerSecretsFolders(options.os);
+            const hostSecretsFolders = LocalAspNetCoreSslManager.getHostSecretsFolders();
+            const containerSecretsFolders = LocalAspNetCoreSslManager.getContainerSecretsFolders(options.os);
 
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.userSecretsFolder,

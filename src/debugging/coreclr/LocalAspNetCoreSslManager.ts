@@ -2,7 +2,9 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import * as os from 'os';
 import * as path from 'path';
+import * as process from 'process';
 import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { PlatformOS } from '../../utils/platform';
@@ -21,8 +23,6 @@ export type SecretsFolders = {
 export interface AspNetCoreSslManager {
     trustCertificateIfNecessary(): Promise<void>;
     exportCertificateIfNecessary(projectFile: string | undefined, certificateExportPath: string | undefined): Promise<void>;
-    getHostSecretsFolders(): SecretsFolders;
-    getContainerSecretsFolders(platform: PlatformOS): SecretsFolders;
 }
 
 export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
@@ -91,11 +91,11 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         LocalAspNetCoreSslManager._KnownConfiguredProjects.add(projectFile)
     }
 
-    public getHostSecretsFolders(): SecretsFolders {
+    public static getHostSecretsFolders(): SecretsFolders {
         let appDataEnvironmentVariable: string | undefined;
 
-        if (this.osProvider.os === 'Windows') {
-            appDataEnvironmentVariable = this.processProvider.env.AppData;
+        if (os.platform() === 'win32') {
+            appDataEnvironmentVariable = process.env.AppData;
 
             if (appDataEnvironmentVariable === undefined) {
                 throw new Error(`The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.`);
@@ -103,16 +103,16 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         }
 
         return {
-            certificateFolder: this.osProvider.os === 'Windows' ?
+            certificateFolder: os.platform() === 'win32' ?
                 path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
-                path.join(this.osProvider.homedir, '.aspnet', 'https'),
-            userSecretsFolder: this.osProvider.os === 'Windows' ?
+                path.join(os.homedir(), '.aspnet', 'https'),
+            userSecretsFolder: os.platform() === 'win32' ?
                 path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
-                path.join(this.osProvider.homedir, '.microsoft', 'usersecrets'),
+                path.join(os.homedir(), '.microsoft', 'usersecrets'),
         };
     }
 
-    public getContainerSecretsFolders(platform: PlatformOS): SecretsFolders {
+    public static getContainerSecretsFolders(platform: PlatformOS): SecretsFolders {
         return {
             certificateFolder: platform === 'Windows' ?
                 'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
@@ -132,8 +132,6 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
 
     private async getCertificateExportPath(projectFile: string): Promise<string> {
         const assemblyName = path.parse(await this.netCoreProjectProvider.getTargetPath(projectFile)).name;
-        return path.join(this.getHostSecretsFolders().certificateFolder, `${assemblyName}.pfx`);
+        return path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${assemblyName}.pfx`);
     }
 }
-
-export default LocalAspNetCoreSslManager;

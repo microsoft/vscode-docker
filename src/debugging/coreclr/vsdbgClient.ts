@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { Memento } from 'vscode';
 import { ext } from '../../extensionVariables';
+import { NetCoreDebugHelper } from '../netcore/NetCoreDebugHelper';
 import { ProcessProvider } from './ChildProcessProvider';
 import { FileSystemProvider } from './fsProvider';
 import { OSProvider } from './LocalOSProvider';
@@ -36,7 +37,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
         private readonly globalState: Memento,
         osProvider: OSProvider,
         private readonly processProvider: ProcessProvider) {
-        this.vsdbgPath = path.join(osProvider.homedir, '.vsdbg');
+        this.vsdbgPath = NetCoreDebugHelper.getHostDebuggerPathBase();
         this.options = osProvider.os === 'Windows'
             ? {
                 name: 'GetVsDbg.ps1',
