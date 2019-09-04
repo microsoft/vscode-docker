@@ -56,6 +56,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
         definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
+        // TODO : addDockerSettingsToEnv
         return new Task(
             task.definition,
             task.scope,

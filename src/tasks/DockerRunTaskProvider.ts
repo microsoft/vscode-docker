@@ -58,6 +58,7 @@ export class DockerRunTaskProvider implements TaskProvider {
         definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
+        // TODO : addDockerSettingsToEnv
         return new Task(
             task.definition,
             task.scope,

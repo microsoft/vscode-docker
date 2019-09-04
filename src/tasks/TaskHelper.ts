@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, Task, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
@@ -87,6 +87,39 @@ export async function getAssociatedDockerBuildTask(runTask: DockerRunTaskDefinit
     const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
 
     return await recursiveFindTaskByType(allTasks, 'docker-build', runTask);
+}
+
+export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
+    let buildTasks = await tasks.fetchTasks({ type: 'docker-build' });
+    buildTasks =
+        buildTasks.filter(t => t.execution.args.some(a => { // Find all build tasks where an argument to 'docker build' is this Dockerfile
+            let arg: string;
+            if (typeof a === 'string') {
+                arg = a;
+            } else {
+                arg = a.value;
+            }
+
+            arg = resolveWorkspaceFolderPath(folder, arg);
+            return arg === dockerfile;
+        }));
+
+    if (buildTasks.length === 1) {
+        return buildTasks[0]; // If there's only one build task, take it
+    } else if (buildTasks.length > 1) {
+        return buildTasks.find(t => t.name === 'docker-build: release') || buildTasks[0]; // If there's multiple try finding one with the name 'docker-build: release', else take first
+    }
+
+    return undefined;
+}
+
+export function resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
+    return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
+}
+
+export function unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
+    // tslint:disable-next-line: no-invalid-template-strings
+    return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
 }
 
 // tslint:disable-next-line: no-any

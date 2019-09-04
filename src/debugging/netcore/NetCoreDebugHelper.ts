@@ -9,7 +9,7 @@ import * as path from 'path';
 import { DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
-import { getAssociatedDockerRunTask } from '../../tasks/TaskHelper';
+import { getAssociatedDockerRunTask, unresolveWorkspaceFolderPath } from '../../tasks/TaskHelper';
 import { PlatformOS } from '../../utils/platform';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
@@ -92,7 +92,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             }
         ];

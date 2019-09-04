@@ -16,7 +16,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, resolveWorkspaceFolderPath, TaskHelper, unresolveWorkspaceFolderPath } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -58,7 +58,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     target: 'base',
                 },
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             },
             {
@@ -69,7 +69,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     tag: `${appName}:latest`,
                 },
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             }
         ];
@@ -91,7 +91,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
-                    appProject: NetCoreTaskHelper.unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
                 }
             }
         ];
@@ -168,7 +168,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         let result: string;
 
         if (helperOptions && helperOptions.appProject) {
-            result = NetCoreTaskHelper.resolveWorkspaceFolderPath(folder, helperOptions.appProject);
+            result = resolveWorkspaceFolderPath(folder, helperOptions.appProject);
         } else {
             // Find a .csproj or .fsproj in the folder
             const item = await quickPickProjectFileItem(undefined, folder, 'The \'netCore.appProject\' in the Docker task definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
@@ -199,15 +199,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         } catch { }
 
         return false;
-    }
-
-    public static resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
-        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
-    }
-
-    public static unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
-        // tslint:disable-next-line: no-invalid-template-strings
-        return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
     }
 
     private async inferImage(appName: string, buildDefinition: NetCoreBuildTaskDefinition): Promise<string> {
