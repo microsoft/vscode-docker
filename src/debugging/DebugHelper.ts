@@ -3,19 +3,24 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, debug, DebugConfiguration, ExtensionContext, workspace } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
-import { DockerTaskContext, DockerTaskScaffoldContext } from '../tasks/TaskHelper';
+import { DockerTaskScaffoldContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
+import { DockerPlatform } from './DockerPlatformHelper';
 import { activate } from './DockerServerReadyAction';
 import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper from './node/NodeDebugHelper';
 
-// tslint:disable-next-line: no-empty-interface
-export interface DockerDebugContext extends DockerTaskContext {
+export interface DockerDebugContext { // Same as DockerTaskContext but intentionally does not extend it, since we never need to pass a DockerDebugContext to tasks
+    folder: WorkspaceFolder;
+    platform: DockerPlatform;
+    actionContext?: IActionContext;
+    cancellationToken?: CancellationToken;
 }
 
 // tslint:disable-next-line: no-empty-interface
