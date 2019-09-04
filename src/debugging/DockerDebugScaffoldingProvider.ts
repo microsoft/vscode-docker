@@ -1,10 +1,9 @@
-import { WorkspaceFolder } from 'vscode';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import netCoreTaskHelper, { NetCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
 import nodeTaskHelper, { NodeTaskHelper } from '../tasks/node/NodeTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
-import { addDebugConfiguration } from './DebugHelper';
+import { addDebugConfiguration, InitializeDebugContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import netCoreDebugHelper, { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper, { NodeDebugHelper } from './node/NodeDebugHelper';
@@ -12,8 +11,8 @@ import nodeDebugHelper, { NodeDebugHelper } from './node/NodeDebugHelper';
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 
 export interface IDockerDebugScaffoldingProvider {
-    initializeNetCoreForDebugging(folder: WorkspaceFolder, options?: NetCoreScaffoldingOptions): Promise<void>;
-    initializeNodeForDebugging(folder: WorkspaceFolder): Promise<void>;
+    initializeNetCoreForDebugging(context: InitializeDebugContext, options?: NetCoreScaffoldingOptions): Promise<void>;
+    initializeNodeForDebugging(context: InitializeDebugContext): Promise<void>;
 }
 
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
@@ -24,24 +23,24 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
         private readonly _nodeTaskHelper: NodeTaskHelper) {
     }
 
-    public async initializeNetCoreForDebugging(folder: WorkspaceFolder, options?: NetCoreScaffoldingOptions): Promise<void> {
+    public async initializeNetCoreForDebugging(context: InitializeDebugContext, options?: NetCoreScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
-            () => this._netCoreDebugHelper.provideDebugConfigurations(folder, options),
-            () => this._netCoreTaskHelper.provideDockerBuildTasks(folder, options),
-            () => this._netCoreTaskHelper.provideDockerRunTasks(folder, options));
+            () => this._netCoreDebugHelper.provideDebugConfigurations(context, options),
+            () => this._netCoreTaskHelper.provideDockerBuildTasks(context, options),
+            () => this._netCoreTaskHelper.provideDockerRunTasks(context, options));
     }
 
-    public async initializeNodeForDebugging(folder: WorkspaceFolder): Promise<void> {
+    public async initializeNodeForDebugging(context: InitializeDebugContext): Promise<void> {
         await this.initializeForDebugging(
-            () => this._nodeDebugHelper.provideDebugConfigurations(folder),
-            () => this._nodeTaskHelper.provideDockerBuildTasks(folder),
-            () => this._nodeTaskHelper.provideDockerRunTasks(folder));
+            () => this._nodeDebugHelper.provideDebugConfigurations(context),
+            () => this._nodeTaskHelper.provideDockerBuildTasks(context),
+            () => this._nodeTaskHelper.provideDockerRunTasks(context));
     }
 
     private async initializeForDebugging(
         provideDebugConfigurations: () => Promise<DockerDebugConfiguration[]>,
         provideDockerBuildTasks: () => Promise<DockerBuildTaskDefinition[]>,
-        provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>) : Promise<void> {
+        provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>): Promise<void> {
         const debugConfigurations = await provideDebugConfigurations();
 
         const buildTasks = await provideDockerBuildTasks();
