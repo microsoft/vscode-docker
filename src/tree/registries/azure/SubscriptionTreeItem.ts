@@ -53,13 +53,15 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
     public async createChildImpl(context: ICreateChildImplContext): Promise<AzExtTreeItem> {
         const wizardContext: IAzureRegistryWizardContext = { ...context, ...this.root };
 
+        const promptSteps = [
+            new AzureRegistryNameStep(),
+            new AzureRegistrySkuStep(),
+            new ResourceGroupListStep(),
+        ];
+        LocationListStep.addStep(wizardContext, promptSteps);
+
         const wizard = new AzureWizard(wizardContext, {
-            promptSteps: [
-                new AzureRegistryNameStep(),
-                new AzureRegistrySkuStep(),
-                new ResourceGroupListStep(),
-                new LocationListStep()
-            ],
+            promptSteps,
             executeSteps: [
                 new AzureRegistryCreateStep()
             ],
