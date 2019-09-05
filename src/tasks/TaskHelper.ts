@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, Task, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, QuickPickItem, Task, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { ext } from '../extensionVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -107,7 +108,18 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     if (buildTasks.length === 1) {
         return buildTasks[0]; // If there's only one build task, take it
     } else if (buildTasks.length > 1) {
-        return buildTasks.find(t => t.name === 'docker-build: release') || buildTasks[0]; // If there's multiple try finding one with the name 'docker-build: release', else take first
+        const releaseTask = buildTasks.find(t => t.name === 'docker-build: release');
+
+        if (releaseTask) {
+            return releaseTask;
+        }
+
+        const items: QuickPickItem[] = buildTasks.map(t => {
+            return { label: t.name }
+        });
+
+        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the official Docker Build definition.' });
+        return buildTasks.find(t => t.name === item.label);
     }
 
     return undefined;
