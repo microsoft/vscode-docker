@@ -10,6 +10,7 @@ import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { getValidImageName } from '../../utils/getValidImageName';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
@@ -142,11 +143,11 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     public static async getImageName(appProject: string, tag?: string): Promise<string> {
-        return `${NetCoreTaskHelper.getValidImageName(appProject)}:${tag || 'dev'}`;
+        return getValidImageName(appProject, tag || 'dev');
     }
 
     public static async getContainerName(appProject: string, tag?: string): Promise<string> {
-        return `${NetCoreTaskHelper.getValidImageName(appProject)}-${tag || 'dev'}`;
+        return `${getValidImageName(appProject)}-${tag || 'dev'} `;
     }
 
     public static async inferAppFolder(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
@@ -279,16 +280,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         }
 
         return volumes;
-    }
-
-    private static getValidImageName(appProject: string): string {
-        let result = path.parse(appProject).name.replace(/[^a-z0-9]/gi, '').toLowerCase();
-
-        if (result.length === 0) {
-            result = 'image'
-        }
-
-        return result;
     }
 
     private static addVolumeWithoutConflicts(volumes: DockerContainerVolume[], volume: DockerContainerVolume): boolean {
