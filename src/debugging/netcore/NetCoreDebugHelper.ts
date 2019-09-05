@@ -8,6 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { ext } from '../../extensionVariables';
+import { DockerRunTaskDefinition } from '../../tasks/DockerRunTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { getAssociatedDockerRunTask, unresolveWorkspaceFolderPath } from '../../tasks/TaskHelper';
 import { PlatformOS } from '../../utils/platform';
@@ -168,15 +169,11 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async loadExternalInfo(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
-        const associatedTask = await getAssociatedDockerRunTask(debugConfiguration);
-
-        if (!associatedTask) {
-            throw new Error('Unable to find docker-run task associated with this project. Please make sure a docker-run task is defined for this project.');
-        }
+        const associatedTask: DockerRunTaskDefinition = await getAssociatedDockerRunTask(debugConfiguration) || { type: 'docker-run' };
 
         return {
             configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
-            containerName: associatedTask.dockerRun && associatedTask.dockerRun.containerName || `${await NetCoreTaskHelper.inferAppName(folder, debugConfiguration.netCore)}-dev`,
+            containerName: associatedTask.dockerRun && associatedTask.dockerRun.containerName || await NetCoreTaskHelper.getContainerName(debugConfiguration.netCore.appProject),
             platformOS: associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
     }

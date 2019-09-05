@@ -39,10 +39,12 @@ export class DockerRunTaskProvider implements TaskProvider {
                     folder: task.scope as WorkspaceFolder,
                     platform: taskPlatform,
                     actionContext: actionContext,
+                    cancellationToken: token,
                 },
                 task));
     }
 
+    // TODO: Can we skip if a recently-started image exists?
     private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
         context.actionContext.telemetry.properties.platform = context.platform;
 
@@ -58,9 +60,10 @@ export class DockerRunTaskProvider implements TaskProvider {
         const helper = this.getHelper(context.platform);
 
         definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        await this.validateResolvedDefinition(context, definition.dockerRun);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
-        // TODO : addDockerSettingsToEnv
+        // TODO : addDockerSettingsToEnv?
         return new Task(
             task.definition,
             task.scope,
@@ -68,6 +71,12 @@ export class DockerRunTaskProvider implements TaskProvider {
             task.source,
             new ShellExecution(commandLine[0], commandLine.slice(1)),
             task.problemMatchers);
+    }
+
+    private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
+        if (!dockerRun.image) {
+            throw new Error('No Docker image name was resolved.');
+        }
     }
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<ShellQuotedString[]> {

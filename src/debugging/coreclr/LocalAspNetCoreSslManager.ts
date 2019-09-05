@@ -125,7 +125,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
 
     private async pickProjectFile(): Promise<string> {
         const workspaceFolder = await quickPickWorkspaceFolder("To configure SSL for an ASP.NET Core project you must first open a folder or workspace in VSCode.");
-        const projectItem = await quickPickProjectFileItem(undefined, workspaceFolder, "No project files were found.");
+        const projectItem = await quickPickProjectFileItem(undefined, workspaceFolder, "No .NET Core project file (.csproj or .fsproj) could be found.");
 
         return projectItem.absoluteFilePath;
     }

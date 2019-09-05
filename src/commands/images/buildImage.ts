@@ -9,6 +9,7 @@ import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
 import { delay } from "../../utils/delay";
+import { getValidImageName } from "../../utils/getValidImageName";
 import { quickPickDockerFileItem } from "../../utils/quick-pick-file";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
@@ -32,19 +33,8 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
         let dockerFileKey = `buildTag_${absFilePath}`;
         let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
-        let suggestedImageName: string;
-
-        if (!prevImageName) {
-            // Get imageName based on name of subfolder containing the Dockerfile, or else workspacefolder
-            suggestedImageName = path.basename(dockerFileItem.relativeFolderPath).toLowerCase();
-            if (suggestedImageName === '.') {
-                suggestedImageName = path.basename(rootFolder.uri.fsPath).toLowerCase();
-            }
-
-            suggestedImageName += ":latest"
-        } else {
-            suggestedImageName = prevImageName;
-        }
+        // Get imageName based previous entries, else on name of subfolder containing the Dockerfile
+        let suggestedImageName = prevImageName || getValidImageName(dockerFileItem.absoluteFolderPath, 'latest');
 
         // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
         await delay(500);

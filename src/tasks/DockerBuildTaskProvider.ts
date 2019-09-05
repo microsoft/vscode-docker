@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
@@ -11,7 +12,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { DockerBuildTaskContext, TaskHelper } from './TaskHelper';
+import { DockerBuildTaskContext, resolveWorkspaceFolderPath, TaskHelper } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -39,10 +40,12 @@ export class DockerBuildTaskProvider implements TaskProvider {
                     folder: task.scope as WorkspaceFolder,
                     platform: taskPlatform,
                     actionContext: actionContext,
+                    cancellationToken: token,
                 },
                 task));
     }
 
+    // TODO: Skip if image is freshly built
     private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
         context.actionContext.telemetry.properties.platform = context.platform;
 
@@ -56,9 +59,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
         const helper = this.getHelper(context.platform);
 
         definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
-        // TODO : addDockerSettingsToEnv
+        // TODO : addDockerSettingsToEnv?
         return new Task(
             task.definition,
             task.scope,
@@ -66,6 +70,24 @@ export class DockerBuildTaskProvider implements TaskProvider {
             task.source,
             new ShellExecution(commandLine[0], commandLine.slice(1)),
             task.problemMatchers);
+    }
+
+    private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
+        if (!dockerBuild.tag) {
+            throw new Error('No Docker image name was resolved.');
+        }
+
+        if (!dockerBuild.context) {
+            throw new Error('No Docker build context was resolved.');
+        } else if (!await fse.pathExists(resolveWorkspaceFolderPath(context.folder, dockerBuild.context))) {
+            throw new Error(`The Docker build context \'${dockerBuild.context}\' does not exist or could not be accessed.`);
+        }
+
+        if (!dockerBuild.dockerfile) {
+            throw new Error('No Dockerfile was resolved.');
+        } else if (!await fse.pathExists(resolveWorkspaceFolderPath(context.folder, dockerBuild.dockerfile))) {
+            throw new Error(`The Dockerfile \'${dockerBuild.dockerfile}\' does not exist or could not be accessed.`);
+        }
     }
 
     private async resolveCommandLine(options: DockerBuildOptions): Promise<ShellQuotedString[]> {

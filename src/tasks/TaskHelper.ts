@@ -101,7 +101,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
             }
 
             arg = resolveWorkspaceFolderPath(folder, arg);
-            return arg === dockerfile;
+            return arg.toLowerCase() === dockerfile.toLowerCase();
         }));
 
     if (buildTasks.length === 1) {

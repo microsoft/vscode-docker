@@ -1,8 +1,9 @@
-import { ShellQuotedString, ShellQuoting } from "vscode";
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+import { ShellQuotedString, ShellQuoting } from "vscode";
 
 export class CommandLineBuilder {
     private readonly args: ShellQuotedString[] = [];

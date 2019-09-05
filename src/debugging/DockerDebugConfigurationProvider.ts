@@ -34,7 +34,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 {
                     folder: folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.'),
                     platform: debugPlatform,
-                    actionContext: actionContext
+                    actionContext: actionContext,
+                    cancellationToken: token,
                 },
                 debugConfiguration));
     }
@@ -42,18 +43,25 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
         context.actionContext.telemetry.properties.platform = context.platform;
 
-        context.folder = context.folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.');
-
         const helper = this.getHelper(context.platform);
 
         const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);
+        await this.validateResolvedConfiguration(context, resolvedConfiguration);
 
         if (resolvedConfiguration) {
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
         }
 
-        // TODO: addDockerSettingsToEnv
+        // TODO: addDockerSettingsToEnv?
         return resolvedConfiguration;
+    }
+
+    private async validateResolvedConfiguration(context: DockerDebugContext, resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
+        if (!resolvedConfiguration.type) {
+            throw new Error('No debug type was resolved.');
+        } else if (!resolvedConfiguration.request) {
+            throw new Error('No debug request was resolved.');
+        }
     }
 
     private async registerRemoveContainerAfterDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
