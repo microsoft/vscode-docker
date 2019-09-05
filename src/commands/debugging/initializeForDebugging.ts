@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
@@ -38,8 +39,8 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
     switch (context.platform) {
         case 'netCore':
             const options: NetCoreScaffoldingOptions = {
-                appProject: (await quickPickProjectFileItem(undefined, context.folder, 'You must choose a .NET Core project file to set up for Docker debugging.')).absoluteFilePath,
-                platformOS: await quickPickOS(),
+                appProject: (await quickPickProjectFileItem(undefined, context.folder, 'No .NET Core project file (.csproj or .fsproj) could be found.')).absoluteFilePath,
+                platformOS: os.platform() === 'win32' ? await quickPickOS() : 'Linux',
             }
             await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, options);
             break;

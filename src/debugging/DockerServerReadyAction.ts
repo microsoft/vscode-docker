@@ -110,7 +110,12 @@ export class ServerReadyDetector extends vscode.Disposable {
             }
 
             const dockerClient = new CliDockerClient(new ChildProcessProvider());
-            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, Number.parseInt(captureString, 10));
+            const containerPort = Number.parseInt(captureString, 10);
+            const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, containerPort);
+
+            if (!hostPort) {
+                throw new Error(`Could not determine host port mapped to container port ${containerPort} in container \'${configuration.dockerOptions.dockerServerReadyAction.containerName}\'.`);
+            }
 
             captureString = util.format(format, hostPort);
         } else {
@@ -125,6 +130,10 @@ export class ServerReadyDetector extends vscode.Disposable {
             const containerProtocol = this.getContainerProtocol(captureString);
             const dockerClient = new CliDockerClient(new ChildProcessProvider());
             const hostPort = await dockerClient.getHostPort(configuration.dockerOptions.dockerServerReadyAction.containerName, containerPort);
+
+            if (!hostPort) {
+                throw new Error(`Could not determine host port mapped to container port ${containerPort} in container \'${configuration.dockerOptions.dockerServerReadyAction.containerName}\'.`);
+            }
 
             captureString = util.format(format, containerProtocol, hostPort);
         }

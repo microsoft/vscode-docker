@@ -87,7 +87,7 @@ export interface DockerClient {
     trimId(id: string): string;
     exec(containerNameOrId: string, command: string, options?: DockerExecOptions): Promise<string>;
     getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }>;
-    getHostPort(containerNameOrId: string, port: number): Promise<string>;
+    getHostPort(containerNameOrId: string, port: number): Promise<string | undefined>;
 }
 
 export class CliDockerClient implements DockerClient {
@@ -279,6 +279,14 @@ export class CliDockerClient implements DockerClient {
 
     public async getContainerWebEndpoint(containerNameOrId: string): Promise<{ browserUrl: string | undefined, httpsPort: string | undefined }> {
         let portMappingsString = await this.inspectObject(containerNameOrId, { format: '{{json .NetworkSettings.Ports}}' });
+
+        if (!portMappingsString) {
+            return {
+                browserUrl: undefined,
+                httpsPort: undefined,
+            }
+        }
+
         let portMappings = <IPortMappings>JSON.parse(portMappingsString);
 
         if (portMappings) {
@@ -305,8 +313,9 @@ export class CliDockerClient implements DockerClient {
         };
     }
 
-    public async getHostPort(containerNameOrId: string, containerPort: number): Promise<string> {
-        return (await this.inspectObject(containerNameOrId, { format: `{{(index (index .NetworkSettings.Ports \\"${containerPort}/tcp\\") 0).HostPort}}` })).trim();
+    public async getHostPort(containerNameOrId: string, containerPort: number): Promise<string | undefined> {
+        const hostPort = await this.inspectObject(containerNameOrId, { format: `{{(index (index .NetworkSettings.Ports \\"${containerPort}/tcp\\") 0).HostPort}}` });
+        return hostPort ? hostPort.trim() : undefined;
     }
 }
 

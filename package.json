@@ -472,17 +472,6 @@
             {
                 "type": "docker-launch",
                 "label": "Docker: Launch",
-                "configurationSnippets": [
-                    {
-                        "label": "Docker: Launch",
-                        "description": "Docker: Launch",
-                        "body": {
-                            "type": "docker-launch",
-                            "request": "launch",
-                            "preLaunchTask": "docker-build"
-                        }
-                    }
-                ],
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
@@ -555,9 +544,20 @@
                 }
             },
             {
-                "type": "docker-node",
+                "type": "docker",
                 "label": "Docker: Node.js",
-                "configurationSnippets": []
+                "configurationSnippets": [
+                    {
+                        "label": "Docker: Attach to Node",
+                        "description": "Docker: Attach to Node",
+                        "body": {
+                            "type": "node",
+                            "request": "attach",
+                            "name": "Docker: Attach to Node",
+                            "remoteRoot": "/usr/src/app"
+                        }
+                    }
+                ]
             },
             {
                 "type": "docker-coreclr",

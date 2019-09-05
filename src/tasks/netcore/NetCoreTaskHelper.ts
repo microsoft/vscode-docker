@@ -46,7 +46,6 @@ export class NetCoreTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
-        const appName = await NetCoreTaskHelper.inferAppName(context.folder, { appProject: options.appProject });
 
         return [
             {
@@ -54,7 +53,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: debug',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: `${appName}:dev`,
+                    tag: await NetCoreTaskHelper.getImageName(options.appProject, 'dev'), // The 'dev' here is redundant but added to differentiate from below's 'latest'
                     target: 'base',
                 },
                 netCore: {
@@ -66,7 +65,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: release',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: `${appName}:latest`,
+                    tag: await NetCoreTaskHelper.getImageName(options.appProject, 'latest'),
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
@@ -103,13 +102,11 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
-        const appName = await NetCoreTaskHelper.inferAppName(context.folder, helperOptions);
-
         // tslint:disable: no-invalid-template-strings
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
         // tslint:enable: no-invalid-template-strings
-        buildOptions.tag = buildOptions.tag || await this.inferImage(appName, buildDefinition);
+        buildOptions.tag = buildOptions.tag || await NetCoreTaskHelper.getImageName(helperOptions.appProject);
         buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
         return buildOptions;
@@ -121,12 +118,10 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
-        const appName = await NetCoreTaskHelper.inferAppName(context.folder, helperOptions);
-
-        runOptions.containerName = runOptions.containerName || `${appName}-dev`;
+        runOptions.containerName = runOptions.containerName || await NetCoreTaskHelper.getContainerName(helperOptions.appProject);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = runOptions.image || await this.inferImage(appName, context.buildDefinition);
+        runOptions.image = runOptions.image || await NetCoreTaskHelper.getImageName(helperOptions.appProject);
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(context.folder, helperOptions);
@@ -146,14 +141,12 @@ export class NetCoreTaskHelper implements TaskHelper {
         return runOptions;
     }
 
-    public static async inferAppName(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
-        let result = path.parse(helperOptions.appProject).name.replace(/[^a-z0-9]/gi, '').toLowerCase();
+    public static async getImageName(appProject: string, tag?: string): Promise<string> {
+        return `${NetCoreTaskHelper.getValidImageName(appProject)}:${tag || 'dev'}`;
+    }
 
-        if (result.length === 0) {
-            result = 'image'
-        }
-
-        return result;
+    public static async getContainerName(appProject: string, tag?: string): Promise<string> {
+        return `${NetCoreTaskHelper.getValidImageName(appProject)}-${tag || 'dev'}`;
     }
 
     public static async inferAppFolder(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
@@ -171,7 +164,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             result = resolveWorkspaceFolderPath(folder, helperOptions.appProject);
         } else {
             // Find a .csproj or .fsproj in the folder
-            const item = await quickPickProjectFileItem(undefined, folder, 'The \'netCore.appProject\' in the Docker task definition is undefined or does not exist. Ensure that the property is set to the appropriate .NET Core project.');
+            const item = await quickPickProjectFileItem(undefined, folder, 'No .NET Core project file (.csproj or .fsproj) could be found.');
             result = item.absoluteFilePath;
         }
 
@@ -199,10 +192,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         } catch { }
 
         return false;
-    }
-
-    private async inferImage(appName: string, buildDefinition: NetCoreBuildTaskDefinition): Promise<string> {
-        return buildDefinition && buildDefinition.dockerBuild && buildDefinition.dockerBuild.tag || `${appName}:dev`;
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
@@ -290,6 +279,16 @@ export class NetCoreTaskHelper implements TaskHelper {
         }
 
         return volumes;
+    }
+
+    private static getValidImageName(appProject: string): string {
+        let result = path.parse(appProject).name.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+        if (result.length === 0) {
+            result = 'image'
+        }
+
+        return result;
     }
 
     private static addVolumeWithoutConflicts(volumes: DockerContainerVolume[], volume: DockerContainerVolume): boolean {
