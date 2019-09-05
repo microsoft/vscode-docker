@@ -79,7 +79,11 @@ export class NodeTaskHelper implements TaskHelper {
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         if (buildOptions.context === undefined) {
-            buildOptions.context = NodeTaskHelper.inferBuildContextPath(buildOptions && buildOptions.context, context.folder, packagePath);
+            buildOptions.context = NodeTaskHelper.inferBuildContextPath(packagePath);
+        }
+
+        if (buildOptions.dockerfile === undefined) {
+            buildOptions.dockerfile = NodeTaskHelper.inferDockerfilePath(packagePath);
         }
 
         if (buildOptions.tag === undefined) {
@@ -148,12 +152,12 @@ export class NodeTaskHelper implements TaskHelper {
         }
     }
 
-    private static inferBuildContextPath(buildContext: string | undefined, folder: WorkspaceFolder, packagePath: string): string {
-        if (buildContext !== undefined) {
-            return this.resolveFilePath(buildContext, folder);
-        } else {
-            return path.dirname(packagePath);
-        }
+    private static inferBuildContextPath(packagePath: string): string {
+        return path.dirname(packagePath);
+    }
+
+    private static inferDockerfilePath(packagePath: string): string {
+        return path.join(path.dirname(packagePath), 'Dockerfile');
     }
 
     private static async inferPackageName(packagePath: string): Promise<string> {

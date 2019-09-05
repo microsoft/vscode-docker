@@ -15,19 +15,18 @@ interface NodePackage {
 }
 
 export interface NodeDebugOptions {
-    protocol?: string;
-    port?: number;
     address?: string;
-    sourceMaps?: boolean;
-    outFiles?: string[];
     autoAttachChildProcesses?: boolean;
-    timeout?: number;
-    stopOnEntry?: boolean;
     localRoot?: string;
+    outFiles?: string[];
+    port?: number;
     remoteRoot?: string;
-    smartStep?: boolean;
     skipFiles?: string[];
-    trace?: boolean;
+    smartStep?: boolean;
+    sourceMaps?: boolean;
+    stopOnEntry?: boolean;
+    timeout?: number;
+    trace?: boolean | 'verbose';
 }
 
 export interface NodeDockerDebugOptions extends NodeDebugOptions {

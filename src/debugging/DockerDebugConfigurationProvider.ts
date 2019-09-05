@@ -44,11 +44,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         context.actionContext.telemetry.properties.platform = context.platform;
 
         const helper = this.getHelper(context.platform);
-
         const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);
-        await this.validateResolvedConfiguration(context, resolvedConfiguration);
 
         if (resolvedConfiguration) {
+            await this.validateResolvedConfiguration(resolvedConfiguration);
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
         }
 
@@ -56,7 +55,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return resolvedConfiguration;
     }
 
-    private async validateResolvedConfiguration(context: DockerDebugContext, resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
+    private async validateResolvedConfiguration(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
         if (!resolvedConfiguration.type) {
             throw new Error('No debug type was resolved.');
         } else if (!resolvedConfiguration.request) {
@@ -68,6 +67,15 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration.dockerOptions !== undefined
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
             && resolvedConfiguration.dockerOptions.containerNameToKill !== undefined) {
+            const runningContainerName =
+                (await this.dockerClient.listContainers({ format: '{{.Names}}' }))
+                    .split('\n')
+                    .find(name => name.toLowerCase() === resolvedConfiguration.dockerOptions.containerNameToKill.toLowerCase());
+
+            if (runningContainerName) {
+                await this.dockerClient.removeContainer(runningContainerName, { force: true });
+            }
+
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 

@@ -533,9 +533,66 @@
                             "node": {
                                 "description": "Options for building Node.js projects in Docker.",
                                 "properties": {
-                                    "foo": {
+                                    "port": {
+                                        "type": "integer",
+                                        "description": "The debug port to use."
+                                    },
+                                    "address": {
                                         "type": "string",
-                                        "description": "TODO"
+                                        "description": "TCP/IP address of the debug port."
+                                    },
+                                    "sourceMaps": {
+                                        "type": "boolean",
+                                        "description": "Enable source maps by setting this to `true`."
+                                    },
+                                    "outFiles": {
+                                        "type": "array",
+                                        "description": "Array of glob patterns for locating generated JavaScript files.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "autoAttachChildProcesses": {
+                                        "type": "boolean",
+                                        "description": "Track all subprocesses of debuggee and automatically attach to those that are launched in debug mode."
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "When restarting a session, give up after this number of milliseconds."
+                                    },
+                                    "stopOnEntry": {
+                                        "type": "boolean",
+                                        "description": "Break immediately when the program launches."
+                                    },
+                                    "localRoot": {
+                                        "type": "string",
+                                        "description": "VS Code's root directory."
+                                    },
+                                    "remoteRoot": {
+                                        "type": "string",
+                                        "description": "Node's root directory within the Docker container."
+                                    },
+                                    "smartStep": {
+                                        "type": "boolean",
+                                        "description": "Try to automatically step over code that doesn't map to source files."
+                                    },
+                                    "skipFiles": {
+                                        "type": "array",
+                                        "description": "Automatically skip files covered by these glob patterns.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "trace": {
+                                        "type": [
+                                            "boolean",
+                                            "string"
+                                        ],
+                                        "description": "Enable diagnostic output.",
+                                        "enum": [
+                                            "verbose",
+                                            true
+                                        ]
                                     }
                                 }
                             }
