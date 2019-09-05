@@ -44,12 +44,21 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
             const dockerhubPrompt: string = "Copy & Open";
             const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`;
-            let response: string = await vscode.window.showInformationMessage(`To set up a CI/CD webhook, open the page "${dockerhubUri}" and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt);
-            if (response) {
-                vscode.env.clipboard.writeText(appUri);
-                // tslint:disable-next-line: no-floating-promises
-                openExternal(dockerhubUri);
-            }
+
+            // NOTE: The response to the information message is not awaited but handled independently of the wizard steps.
+            //       VS Code will hide such messages in the notifications pane after a period of time; awaiting them risks
+            //       the user never noticing them in the first place, which means the wizard would never complete, and the
+            //       user left with the impression that the action is hung.
+
+            vscode.window
+                .showInformationMessage(`To set up a CI/CD webhook, open the page "${dockerhubUri}" and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt)
+                .then(response => {
+                    if (response) {
+                        vscode.env.clipboard.writeText(appUri);
+                        // tslint:disable-next-line: no-floating-promises
+                        openExternal(dockerhubUri);
+                    }
+                });
         }
     }
 
