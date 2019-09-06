@@ -11,7 +11,7 @@ import { ext } from '../extensionVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
-import { DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
 import nodeTaskHelper from './node/NodeTaskHelper';
 
@@ -82,12 +82,16 @@ export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebug
     return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration);
 }
 
-export async function getAssociatedDockerBuildTask(runTask: DockerRunTaskDefinition): Promise<DockerBuildTaskDefinition | undefined> {
+export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
 
-    return await recursiveFindTaskByType(allTasks, 'docker-build', runTask);
+    // Due to inconsistencies in the Task API, DockerRunTask does not have its dependsOn, so we need to re-find it by label
+    // Due to more inconsistencies in the Task API, DockerRunTask.name is equal to the Tasks.json 'label'
+    const runTaskDefinition: DockerRunTaskDefinition = await findTaskByLabel(allTasks, runTask.name);
+
+    return await recursiveFindTaskByType(allTasks, 'docker-build', runTaskDefinition);
 }
 
 export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {

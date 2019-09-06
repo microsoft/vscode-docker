@@ -178,11 +178,7 @@ export class NodeTaskHelper implements TaskHelper {
     }
 
     private static inferTag(context: DockerRunTaskContext, packageName: string): string {
-        if (context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag) {
-            return context.buildDefinition.dockerBuild.tag;
-        }
-
-        return `${packageName}:latest`;
+        return context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag || `${packageName}:latest`;
     }
 
     private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<string | ShellQuotedString[]> {

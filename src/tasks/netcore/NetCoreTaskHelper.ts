@@ -147,7 +147,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     public static async getContainerName(appProject: string, tag?: string): Promise<string> {
-        return `${getValidImageName(appProject)}-${tag || 'dev'} `;
+        return `${getValidImageName(appProject)}-${tag || 'dev'}`;
     }
 
     public static async inferAppFolder(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
@@ -196,11 +196,8 @@ export class NetCoreTaskHelper implements TaskHelper {
     }
 
     private async inferImageToRun(context: DockerRunTaskContext, helperOptions: NetCoreTaskOptions): Promise<string> {
-        if (context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag) {
-            return context.buildDefinition.dockerBuild.tag;
-        }
-
-        return await NetCoreTaskHelper.getImageName(helperOptions.appProject);
+        return context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag ||
+            await NetCoreTaskHelper.getImageName(helperOptions.appProject);
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {

@@ -55,7 +55,7 @@ export class DockerRunTaskProvider implements TaskProvider {
             throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
         }
 
-        context.buildDefinition = await getAssociatedDockerBuildTask(definition);
+        context.buildDefinition = await getAssociatedDockerBuildTask(task);
 
         const helper = this.getHelper(context.platform);
 
