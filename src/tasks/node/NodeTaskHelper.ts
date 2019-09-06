@@ -87,7 +87,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (buildOptions.tag === undefined) {
-            buildOptions.tag = NodeTaskHelper.inferTag(packageName);
+            buildOptions.tag = NodeTaskHelper.inferTag(context, packageName);
         }
 
         return await Promise.resolve(buildOptions);
@@ -105,7 +105,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (runOptions.image === undefined) {
-            runOptions.image = NodeTaskHelper.inferTag(packageName);
+            runOptions.image = NodeTaskHelper.inferTag(context, packageName);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -177,7 +177,11 @@ export class NodeTaskHelper implements TaskHelper {
         return `${packageName}-dev`;
     }
 
-    private static inferTag(packageName: string): string {
+    private static inferTag(context: DockerRunTaskContext, packageName: string): string {
+        if (context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag) {
+            return context.buildDefinition.dockerBuild.tag;
+        }
+
         return `${packageName}:latest`;
     }
 

@@ -64,18 +64,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     private async registerRemoveContainerAfterDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
-        if (resolvedConfiguration.dockerOptions !== undefined
+        if (resolvedConfiguration.dockerOptions
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
-            && resolvedConfiguration.dockerOptions.containerNameToKill !== undefined) {
+            && resolvedConfiguration.dockerOptions.containerNameToKill) {
+
+            // First, try to remove any existing containers of that name in case they got left behind previously
             const runningContainerName =
                 (await this.dockerClient.listContainers({ format: '{{.Names}}' }))
                     .split('\n')
-                    .find(name => name.toLowerCase() === resolvedConfiguration.dockerOptions.containerNameToKill.toLowerCase());
+                    .find(name => name.toLowerCase().trim() === resolvedConfiguration.dockerOptions.containerNameToKill.toLowerCase().trim());
 
             if (runningContainerName) {
                 await this.dockerClient.removeContainer(runningContainerName, { force: true });
             }
 
+            // Now register the container for removal after the debug session ends
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 

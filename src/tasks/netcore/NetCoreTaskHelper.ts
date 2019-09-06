@@ -122,7 +122,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.containerName = runOptions.containerName || await NetCoreTaskHelper.getContainerName(helperOptions.appProject);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = runOptions.image || await NetCoreTaskHelper.getImageName(helperOptions.appProject);
+        runOptions.image = runOptions.image || await this.inferImageToRun(context, helperOptions);
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(context.folder, helperOptions);
@@ -193,6 +193,14 @@ export class NetCoreTaskHelper implements TaskHelper {
         } catch { }
 
         return false;
+    }
+
+    private async inferImageToRun(context: DockerRunTaskContext, helperOptions: NetCoreTaskOptions): Promise<string> {
+        if (context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag) {
+            return context.buildDefinition.dockerBuild.tag;
+        }
+
+        return await NetCoreTaskHelper.getImageName(helperOptions.appProject);
     }
 
     private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
