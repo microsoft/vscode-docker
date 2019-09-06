@@ -93,7 +93,7 @@ function updateExtensionKind(newKind: string): void {
     } else { // otherwise update the global setting
         target = ConfigurationTarget.Global;
         if (typeof values.globalValue === 'object' && values.globalValue !== null) {
-            value = values.globalValue || {};
+            value = values.globalValue;
         } else {
             value = {};
         }
