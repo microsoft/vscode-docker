@@ -19,6 +19,7 @@ export class OpenUrlTreeItem extends GenericTreeItem {
             label
         });
         this._url = url;
+        this.commandArgs = [this];
     }
 
     public async openUrl(): Promise<void> {
