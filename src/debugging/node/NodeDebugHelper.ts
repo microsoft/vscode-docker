@@ -46,7 +46,7 @@ export class NodeDebugHelper implements DebugHelper {
             {
                 name: 'Docker Node.js Launch and Attach',
                 type: 'docker',
-                request: 'attach',
+                request: 'launch',
                 preLaunchTask: 'docker-run: debug',
                 platform: 'node'
             }
