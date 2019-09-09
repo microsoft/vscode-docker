@@ -160,9 +160,7 @@ export class NodeTaskHelper implements TaskHelper {
         if (packageContent.name !== undefined) {
             return packageContent.name;
         } else {
-            const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
-
-            return packageBaseDirName;
+            return path.basename(path.dirname(packagePath));
         }
     }
 
