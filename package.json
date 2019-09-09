@@ -470,8 +470,8 @@
         },
         "debuggers": [
             {
-                "type": "docker-launch",
-                "label": "Docker: Launch",
+                "type": "docker",
+                "label": "Docker: Debug in Container",
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
@@ -598,11 +598,7 @@
                             }
                         }
                     }
-                }
-            },
-            {
-                "type": "docker",
-                "label": "Docker: Node.js",
+                },
                 "configurationSnippets": [
                     {
                         "label": "Docker: Attach to Node",

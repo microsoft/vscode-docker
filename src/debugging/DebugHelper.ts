@@ -45,7 +45,7 @@ export interface DebugHelper {
 export function registerDebugProvider(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         debug.registerDebugConfigurationProvider(
-            'docker-launch',
+            'docker',
             new DockerDebugConfigurationProvider(
                 new CliDockerClient(new ChildProcessProvider()),
                 {
