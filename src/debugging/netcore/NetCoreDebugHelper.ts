@@ -105,17 +105,20 @@ export class NetCoreDebugHelper implements DebugHelper {
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
+            // inferAppOutput is slow, give a chance to cancel
             return undefined;
         }
 
         await this.acquireDebuggers(platformOS);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
+            // acquireDebuggers is slow, give a chance to cancel
             return undefined;
         }
 
         if (configureSsl) {
             await this.configureSsl(debugConfiguration, appOutput);
             if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
+                // configureSsl is slow, give a chance to cancel
                 return undefined;
             }
         }
