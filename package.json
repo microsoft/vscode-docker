@@ -8,6 +8,7 @@
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+    "extensionKind": "workspace",
     "galleryBanner": {
         "color": "#1289B9",
         "theme": "dark"
@@ -1118,6 +1119,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Run docker-compose with the --d (detached) argument, defaults to true"
+                },
+                "docker.showRemoteWorkspaceWarning": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show a prompt to switch from \"UI\" extension to \"Workspace\" extension if an operation is not supported."
                 }
             }
         },
@@ -1521,7 +1527,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.31.0"
+        "vscode": "^1.36.0"
     },
     "scripts": {
         "vscode:prepublish": "npm run webpack-prod",

@@ -39,3 +39,5 @@ export const FSPROJ_GLOB_PATTERN = '**/*.{[fF][sS][pP][rR][oO][jJ]}';
 export const FILE_SEARCH_MAX_RESULT = 1000;
 
 export const dockerHubUrl: string = 'https://hub.docker.com/';
+
+export const extensionId: string = 'ms-azuretools.vscode-docker';
