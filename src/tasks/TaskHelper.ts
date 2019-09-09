@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
+import { resolveFilePath } from '../utils/resolveFilePath';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -105,7 +106,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
                 arg = a.value;
             }
 
-            arg = resolveWorkspaceFolderPath(folder, arg);
+            arg = resolveFilePath(arg, folder);
             return arg.toLowerCase() === dockerfile.toLowerCase();
         }));
 

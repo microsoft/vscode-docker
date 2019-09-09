@@ -12,11 +12,12 @@ import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCo
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, inferImageName, resolveWorkspaceFolderPath, TaskHelper, unresolveWorkspaceFolderPath } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -57,7 +58,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     target: 'base',
                 },
                 netCore: {
-                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveFilePath(options.appProject, context.folder)
                 }
             },
             {
@@ -68,7 +69,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     tag: getDefaultImageName(context.folder.name, 'latest'), // The 'latest' here is redundant but added to differentiate from above's 'dev'
                 },
                 netCore: {
-                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveFilePath(options.appProject, context.folder)
                 }
             }
         ];
@@ -90,7 +91,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
-                    appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
+                    appProject: unresolveFilePath(options.appProject, context.folder)
                 }
             }
         ];
@@ -150,7 +151,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         let result: string;
 
         if (helperOptions && helperOptions.appProject) {
-            result = resolveWorkspaceFolderPath(folder, helperOptions.appProject);
+            result = resolveFilePath(helperOptions.appProject, folder);
         } else {
             // Find a .csproj or .fsproj in the folder
             const item = await quickPickProjectFileItem(undefined, folder, 'No .NET Core project file (.csproj or .fsproj) could be found.');

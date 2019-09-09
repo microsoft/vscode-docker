@@ -7,6 +7,7 @@ import * as path from 'path';
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
+import { resolveFilePath } from '../../utils/resolveFilePath';
 import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './CliDockerClient';
 import { UserSecretsRegex } from './CommandLineDotNetClient';
 import { DebugSessionManager } from './debugSessionManager';
@@ -79,10 +80,6 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         return callWithTelemetryAndErrorHandling(
             'debugCoreClr',
             async () => await this.resolveDockerDebugConfiguration(folder, debugConfiguration));
-    }
-
-    private static resolveFolderPath(folderPath: string, folder: WorkspaceFolder): string {
-        return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
     }
 
     private async resolveDockerDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration | undefined> {
@@ -162,7 +159,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         debugConfiguration.dockerRun = debugConfiguration.dockerRun || {};
 
         const envFiles = debugConfiguration.dockerRun.envFiles
-            ? debugConfiguration.dockerRun.envFiles.map(file => DockerNetCoreDebugConfigurationProvider.resolveFolderPath(file, folder))
+            ? debugConfiguration.dockerRun.envFiles.map(file => resolveFilePath(file, folder))
             : undefined;
 
         if (ssl || userSecrets) {
@@ -193,7 +190,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
     private static inferVolumes(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): DockerContainerVolume[] {
         return debugConfiguration && debugConfiguration.dockerRun && debugConfiguration.dockerRun.volumes
-            ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: DockerNetCoreDebugConfigurationProvider.resolveFolderPath(volume.localPath, folder) }))
+            ? debugConfiguration.dockerRun.volumes.map(volume => ({ ...volume, localPath: resolveFilePath(volume.localPath, folder) }))
             : [];
     }
 
@@ -214,7 +211,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
         const folders = {
             appFolder,
-            resolvedAppFolder: DockerNetCoreDebugConfigurationProvider.resolveFolderPath(appFolder, folder)
+            resolvedAppFolder: resolveFilePath(appFolder, folder)
         };
 
         if (!await this.fsProvider.dirExists(folders.resolvedAppFolder)) {
@@ -258,7 +255,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
         const projects = {
             appProject,
-            resolvedAppProject: DockerNetCoreDebugConfigurationProvider.resolveFolderPath(appProject, folder)
+            resolvedAppProject: resolveFilePath(appProject, folder)
         };
 
         if (!await this.fsProvider.fileExists(projects.resolvedAppProject)) {
@@ -275,7 +272,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
                 ? resolvedAppFolder                 // The context defaults to the application folder if it's the same as the workspace folder (i.e. there's no solution folder).
                 : path.dirname(resolvedAppFolder);  // The context defaults to the application's parent (i.e. solution) folder.
 
-        const resolvedContext = DockerNetCoreDebugConfigurationProvider.resolveFolderPath(context, folder);
+        const resolvedContext = resolveFilePath(context, folder);
 
         if (!await this.fsProvider.dirExists(resolvedContext)) {
             throw new Error(`The context folder '${resolvedContext}' does not exist. Ensure that the 'context' property is set correctly in the Docker debug configuration.`);
@@ -289,7 +286,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
             ? configuration.dockerBuild.dockerfile
             : path.join(resolvedAppFolder, 'Dockerfile'); // CONSIDER: Omit dockerfile argument if not specified or possibly infer from context.
 
-        dockerfile = DockerNetCoreDebugConfigurationProvider.resolveFolderPath(dockerfile, folder);
+        dockerfile = resolveFilePath(dockerfile, folder);
 
         if (!await this.fsProvider.fileExists(dockerfile)) {
             throw new Error(`The Dockerfile '${dockerfile}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);
