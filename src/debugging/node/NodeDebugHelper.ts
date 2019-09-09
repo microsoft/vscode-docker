@@ -3,16 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
-import * as path from 'path';
-import { WorkspaceFolder } from 'vscode';
+import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
-
-interface NodePackage {
-    name?: string;
-}
 
 export interface NodeDebugOptions {
     address?: string;
@@ -56,8 +50,8 @@ export class NodeDebugHelper implements DebugHelper {
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: NodeDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         const options = debugConfiguration.node || {};
 
-        const packagePath = NodeDebugHelper.inferPackagePath(options.package, context.folder);
-        const packageName = await NodeDebugHelper.inferPackageName(packagePath);
+        const packagePath = NodeTaskHelper.inferPackagePath(options.package, context.folder);
+        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
 
@@ -101,34 +95,7 @@ export class NodeDebugHelper implements DebugHelper {
             resolvedConfiguration.remoteRoot = '/usr/src/app';
         }
 
-        return await Promise.resolve(resolvedConfiguration);
-    }
-
-    private static inferPackagePath(packageFile: string | undefined, folder: WorkspaceFolder): string {
-        if (packageFile !== undefined) {
-            return this.resolveFilePath(packageFile, folder);
-        } else {
-            return path.join(folder.uri.fsPath, 'package.json');
-        }
-    }
-
-    private static async inferPackageName(packagePath: string): Promise<string> {
-        const packageJson = await fse.readFile(packagePath, 'utf8');
-        const packageContent = <NodePackage>JSON.parse(packageJson);
-
-        if (packageContent.name !== undefined) {
-            return packageContent.name;
-        } else {
-            const packageBaseDirName = await Promise.resolve(path.basename(path.dirname(packagePath)));
-
-            return packageBaseDirName;
-        }
-    }
-
-    private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {
-        const replacedPath = filePath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
-
-        return path.resolve(folder.uri.fsPath, replacedPath);
+        return resolvedConfiguration;
     }
 }
 
