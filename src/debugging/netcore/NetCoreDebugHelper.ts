@@ -127,15 +127,12 @@ export class NetCoreDebugHelper implements DebugHelper {
         const dockerServerReadyAction = await this.inferServerReadyAction(debugConfiguration, containerName, configureSsl);
 
         return {
-            name: debugConfiguration.name,
+            ...debugConfiguration,
             type: 'coreclr',
             request: 'launch',
             program: debugConfiguration.program || 'dotnet',
             args: debugConfiguration.args || [additionalProbingPathsArgs, containerAppOutput].join(' '),
             cwd: debugConfiguration.cwd || platformOS === 'Windows' ? 'C:\\app' : '/app',
-            env: debugConfiguration.env,
-            launchBrowser: debugConfiguration.launchBrowser,
-            serverReadyAction: debugConfiguration.serverReadyAction,
             dockerOptions: {
                 containerNameToKill: containerName,
                 dockerServerReadyAction: dockerServerReadyAction,
@@ -152,7 +149,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                     '/remote_debugger/vsdbg',
                 quoteArgs: false,
             },
-            preLaunchTask: debugConfiguration.preLaunchTask,
             sourceFileMap: debugConfiguration.sourceFileMap || {
                 '/app/Views': path.join(path.dirname(debugConfiguration.netCore.appProject), 'Views'),
             }
