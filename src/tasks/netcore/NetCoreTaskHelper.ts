@@ -17,7 +17,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, resolveWorkspaceFolderPath, TaskHelper, unresolveWorkspaceFolderPath } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, inferImageName, resolveWorkspaceFolderPath, TaskHelper, unresolveWorkspaceFolderPath } from '../TaskHelper';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -54,7 +54,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: debug',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: await NetCoreTaskHelper.getImageName(options.appProject, 'dev'), // The 'dev' here is redundant but added to differentiate from below's 'latest'
+                    tag: NetCoreTaskHelper.getDefaultImageName(options.appProject, 'dev'), // The 'dev' here is redundant but added to differentiate from below's 'latest'
                     target: 'base',
                 },
                 netCore: {
@@ -66,7 +66,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: release',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: await NetCoreTaskHelper.getImageName(options.appProject, 'latest'),
+                    tag: NetCoreTaskHelper.getDefaultImageName(options.appProject, 'latest'),
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
@@ -107,7 +107,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
         // tslint:enable: no-invalid-template-strings
-        buildOptions.tag = buildOptions.tag || await NetCoreTaskHelper.getImageName(helperOptions.appProject);
+        buildOptions.tag = buildOptions.tag || NetCoreTaskHelper.getDefaultImageName(helperOptions.appProject);
         buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
         return buildOptions;
@@ -119,13 +119,13 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
-        runOptions.containerName = runOptions.containerName || await NetCoreTaskHelper.getContainerName(helperOptions.appProject);
+        runOptions.containerName = runOptions.containerName || NetCoreTaskHelper.getDefaultContainerName(helperOptions.appProject);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = runOptions.image || await this.inferImageToRun(context, helperOptions);
+        runOptions.image = inferImageName(runDefinition, context, NetCoreTaskHelper.getDefaultImageName(helperOptions.appProject));
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
-        const userSecrets = ssl === true ? true : await this.inferUserSecrets(context.folder, helperOptions);
+        const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
 
         if (userSecrets) {
             runOptions.env = runOptions.env || {};
@@ -142,11 +142,11 @@ export class NetCoreTaskHelper implements TaskHelper {
         return runOptions;
     }
 
-    public static async getImageName(appProject: string, tag?: string): Promise<string> {
+    public static getDefaultImageName(appProject: string, tag?: string): string {
         return getValidImageName(appProject, tag || 'dev');
     }
 
-    public static async getContainerName(appProject: string, tag?: string): Promise<string> {
+    public static getDefaultContainerName(appProject: string, tag?: string): string {
         return `${getValidImageName(appProject)}-${tag || 'dev'}`;
     }
 
@@ -195,12 +195,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         return false;
     }
 
-    private async inferImageToRun(context: DockerRunTaskContext, helperOptions: NetCoreTaskOptions): Promise<string> {
-        return context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag ||
-            await NetCoreTaskHelper.getImageName(helperOptions.appProject);
-    }
-
-    private async inferUserSecrets(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
+    private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
         const contents = await fse.readFile(helperOptions.appProject);
         return UserSecretsRegex.test(contents.toString());
     }

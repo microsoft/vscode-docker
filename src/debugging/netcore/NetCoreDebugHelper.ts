@@ -6,11 +6,10 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { DebugConfiguration, WorkspaceFolder } from 'vscode';
+import { DebugConfiguration } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { DockerRunTaskDefinition } from '../../tasks/DockerRunTaskProvider';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
-import { getAssociatedDockerRunTask, unresolveWorkspaceFolderPath } from '../../tasks/TaskHelper';
+import { unresolveWorkspaceFolderPath } from '../../tasks/TaskHelper';
 import { PlatformOS } from '../../utils/platform';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
@@ -21,7 +20,7 @@ import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../corecl
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration } from '../DebugHelper';
 import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -103,7 +102,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
-        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context.folder, debugConfiguration);
+        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             return undefined;
@@ -168,13 +167,13 @@ export class NetCoreDebugHelper implements DebugHelper {
         return await this.netCoreProjectProvider.getTargetPath(helperOptions.appProject);
     }
 
-    private async loadExternalInfo(folder: WorkspaceFolder, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
-        const associatedTask: DockerRunTaskDefinition = await getAssociatedDockerRunTask(debugConfiguration) || { type: 'docker-run' };
+    private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+        const associatedTask = context.runDefinition;
 
         return {
-            configureSsl: associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(folder, debugConfiguration.netCore),
-            containerName: associatedTask.dockerRun && associatedTask.dockerRun.containerName || await NetCoreTaskHelper.getContainerName(debugConfiguration.netCore.appProject),
-            platformOS: associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
+            configureSsl: associatedTask && associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, debugConfiguration.netCore),
+            containerName: inferContainerName(debugConfiguration, context, NetCoreTaskHelper.getDefaultContainerName(debugConfiguration.netCore.appProject)),
+            platformOS: associatedTask && associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
     }
 

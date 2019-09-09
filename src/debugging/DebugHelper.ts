@@ -6,6 +6,7 @@
 import { CancellationToken, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, registerCommand } from 'vscode-azureextensionui';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
+import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
@@ -21,6 +22,7 @@ export interface DockerDebugContext { // Same as DockerTaskContext but intention
     platform: DockerPlatform;
     actionContext: IActionContext;
     cancellationToken?: CancellationToken;
+    runDefinition?: DockerRunTaskDefinition;
 }
 
 // tslint:disable-next-line: no-empty-interface
@@ -74,4 +76,10 @@ export async function addDebugConfiguration(debugConfiguration: DockerDebugConfi
     allConfigs.push(debugConfiguration);
     await workspaceLaunch.update('configurations', allConfigs);
     return true;
+}
+
+export function inferContainerName(debugConfiguration: DockerDebugConfiguration, context: DockerDebugContext, defaultContainerName: string): string {
+    return (debugConfiguration && debugConfiguration.containerName)
+        || (context && context.runDefinition && context.runDefinition.dockerRun && context.runDefinition.dockerRun.containerName)
+        || defaultContainerName;
 }

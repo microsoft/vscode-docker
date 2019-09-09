@@ -475,6 +475,10 @@
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "Name of the container used for debugging."
+                            },
                             "dockerServerReadyAction": {
                                 "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
                                 "properties": {

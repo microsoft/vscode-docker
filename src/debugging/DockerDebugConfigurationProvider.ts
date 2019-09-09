@@ -5,6 +5,7 @@
 
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
@@ -42,6 +43,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
         context.actionContext.telemetry.properties.platform = context.platform;
+
+        context.runDefinition = await getAssociatedDockerRunTask(originalConfiguration);
 
         const helper = this.getHelper(context.platform);
         const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);

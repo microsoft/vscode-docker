@@ -6,7 +6,8 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
+import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
@@ -65,7 +66,7 @@ export class NodeDebugHelper implements DebugHelper {
             throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
         }
 
-        const containerName = NodeDebugHelper.inferContainerName(packageName);
+        const containerName = inferContainerName(debugConfiguration, context, NodeTaskHelper.getDefaultContainerName(packageName));
 
         const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
             ? debugConfiguration.dockerServerReadyAction
@@ -123,10 +124,6 @@ export class NodeDebugHelper implements DebugHelper {
 
             return packageBaseDirName;
         }
-    }
-
-    private static inferContainerName(packageName: string): string {
-        return `${packageName}-dev`;
     }
 
     private static resolveFilePath(filePath: string, folder: WorkspaceFolder): string {

@@ -10,7 +10,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, inferImageName, TaskHelper } from '../TaskHelper';
 
 interface NodePackage {
     main?: string;
@@ -87,7 +87,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (buildOptions.tag === undefined) {
-            buildOptions.tag = NodeTaskHelper.inferTag(context, packageName);
+            buildOptions.tag = NodeTaskHelper.getDefaultImageName(packageName);
         }
 
         return await Promise.resolve(buildOptions);
@@ -101,11 +101,11 @@ export class NodeTaskHelper implements TaskHelper {
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
         if (runOptions.containerName === undefined) {
-            runOptions.containerName = NodeTaskHelper.inferContainerName(packageName);
+            runOptions.containerName = NodeTaskHelper.getDefaultContainerName(packageName);
         }
 
         if (runOptions.image === undefined) {
-            runOptions.image = NodeTaskHelper.inferTag(context, packageName);
+            runOptions.image = inferImageName(runDefinition, context, NodeTaskHelper.getDefaultImageName(packageName));
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -144,6 +144,14 @@ export class NodeTaskHelper implements TaskHelper {
         return await Promise.resolve(runOptions);
     }
 
+    public static getDefaultImageName(packageName: string): string {
+        return `${packageName}:latest`;
+    }
+
+    public static getDefaultContainerName(packageName: string): string {
+        return `${packageName}-dev`;
+    }
+
     private static inferPackagePath(packageFile: string | undefined, folder: WorkspaceFolder): string {
         if (packageFile !== undefined) {
             return this.resolveFilePath(packageFile, folder);
@@ -171,14 +179,6 @@ export class NodeTaskHelper implements TaskHelper {
 
             return packageBaseDirName;
         }
-    }
-
-    private static inferContainerName(packageName: string): string {
-        return `${packageName}-dev`;
-    }
-
-    private static inferTag(context: DockerRunTaskContext, packageName: string): string {
-        return context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag || `${packageName}:latest`;
     }
 
     private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<string | ShellQuotedString[]> {

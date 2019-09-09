@@ -138,6 +138,12 @@ export function unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath
     return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
 }
 
+export function inferImageName(runOptions: DockerRunTaskDefinition, context: DockerRunTaskContext, defaultImageName: string): string {
+    return (runOptions && runOptions.dockerRun && runOptions.dockerRun.image)
+        || (context && context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag)
+        || defaultImageName;
+}
+
 // tslint:disable-next-line: no-any
 async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string, node: any): Promise<TaskDefinition | undefined> {
     if (!node) {
