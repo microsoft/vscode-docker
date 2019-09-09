@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
-import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions, resolveDockerServerReadyAction } from '../DebugHelper';
+import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export interface NodeDebugOptions {
@@ -53,19 +53,16 @@ export class NodeDebugHelper implements DebugHelper {
         const packagePath = NodeTaskHelper.inferPackagePath(options.package, context.folder);
         const packageName = await NodeTaskHelper.inferPackageName(packagePath);
 
-        let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
-
-        if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
-        }
-
         const containerName = inferContainerName(debugConfiguration, context, packageName);
 
-        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
-            ? debugConfiguration.dockerServerReadyAction
-            : {
-                containerName
-            };
+        const dockerServerReadyAction = resolveDockerServerReadyAction(
+            debugConfiguration,
+            {
+                containerName,
+                // Remainder are defaults of DockerServerReadyAction
+            },
+            true
+        );
 
         const dockerOptions: ResolvedDebugConfigurationOptions = {
             containerNameToKill: containerName,

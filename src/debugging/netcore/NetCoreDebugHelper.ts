@@ -20,8 +20,7 @@ import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../corecl
 import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration } from '../DebugHelper';
-import { DockerServerReadyAction } from '../DockerDebugConfigurationBase';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
@@ -127,10 +126,19 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
-        const dockerServerReadyAction = await this.inferServerReadyAction(debugConfiguration, containerName, configureSsl);
+        const dockerServerReadyAction = resolveDockerServerReadyAction(
+            debugConfiguration,
+            {
+                containerName: containerName,
+                pattern: '^\\s*Now listening on:\\s+(https?://\\S+)',
+                action: 'openExternally',
+                uriFormat: '%s://localhost:%s',
+            },
+            configureSsl || await this.isWebApp(debugConfiguration) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
+        );
 
         return {
-            ...debugConfiguration,
+            ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.
             type: 'coreclr',
             request: 'launch',
             program: debugConfiguration.program || 'dotnet',
@@ -195,30 +203,6 @@ export class NetCoreDebugHelper implements DebugHelper {
         const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
         await this.aspNetCoreSslManager.trustCertificateIfNecessary();
         await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
-    }
-
-    private async inferServerReadyAction(debugConfiguration: DockerDebugConfiguration, containerName: string, configureSsl: boolean): Promise<DockerServerReadyAction> {
-        const numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(property => property !== undefined).length;
-
-        if (numBrowserOptions > 1) {
-            throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
-        }
-
-        const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
-            ? debugConfiguration.dockerServerReadyAction // If they specified any browser option, take their input as the result
-            : configureSsl || (await this.isWebApp(debugConfiguration)) ? // If this is indeed a web app, and they didn't specify a browser option, infer a default one
-                {
-                    containerName: containerName,
-                    pattern: '^\\s*Now listening on:\\s+(https?://\\S+)'
-                }
-                : undefined; // If this is not a web app, infer nothing
-
-        if (dockerServerReadyAction) { // If we have something for dockerServerReadyAction, resolve the container name and URI format if needed
-            dockerServerReadyAction.containerName = dockerServerReadyAction.containerName || containerName;
-            dockerServerReadyAction.uriFormat = dockerServerReadyAction.uriFormat || '%s://localhost:%s';
-        }
-
-        return dockerServerReadyAction;
     }
 
     private async isWebApp(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {

@@ -83,3 +83,29 @@ export function inferContainerName(debugConfiguration: DockerDebugConfiguration,
         || (context && context.runDefinition && context.runDefinition.dockerRun && context.runDefinition.dockerRun.containerName)
         || getDefaultContainerName(defaultNameHint, defaultTag);
 }
+
+export function resolveDockerServerReadyAction(debugConfiguration: DockerDebugConfiguration, defaultDockerSRA: DockerServerReadyAction, createIfUserUndefined: boolean): DockerServerReadyAction | undefined {
+    let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(item => item !== undefined).length;
+
+    if (numBrowserOptions > 1) {
+        // Multiple user-provided options is not valid
+        throw new Error(`Only at most one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
+    } else if (numBrowserOptions === 1 && !debugConfiguration.dockerServerReadyAction) {
+        // One user-provided option that is not DockerServerReadyAction--return nothing
+        return undefined;
+    } else if (numBrowserOptions === 0 && !createIfUserUndefined) {
+        // No user-provided option, and not creating if nothing user-defined--return nothing
+        return undefined
+    }
+
+    // Otherwise create one based on user-defined and default options
+    const providedDockerSRA = debugConfiguration.dockerServerReadyAction || {};
+
+    return {
+        containerName: providedDockerSRA.containerName || defaultDockerSRA.containerName,
+        pattern: providedDockerSRA.pattern || defaultDockerSRA.pattern,
+        action: providedDockerSRA.action || defaultDockerSRA.action,
+        uriFormat: providedDockerSRA.uriFormat || defaultDockerSRA.uriFormat,
+        webRoot: providedDockerSRA.webRoot || defaultDockerSRA.webRoot,
+    };
+}

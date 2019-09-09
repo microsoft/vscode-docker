@@ -13,7 +13,7 @@ export interface ServerReadyAction {
 }
 
 export interface DockerServerReadyAction extends ServerReadyAction {
-    containerName: string;
+    containerName?: string;
 }
 
 export interface DebugConfigurationBase extends DebugConfiguration {

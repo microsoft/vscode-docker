@@ -501,7 +501,7 @@
                                     "uriFormat": {
                                         "type": "string",
                                         "description": "The URI format to launch.",
-                                        "default": "%s://localhost%s"
+                                        "default": "http://localhost:%s"
                                     },
                                     "webRoot": {
                                         "type": "string",
