@@ -129,19 +129,20 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     return undefined;
 }
 
-export function resolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
-    return folderPath.replace(/\$\{workspaceFolder\}/gi, folder.uri.fsPath);
-}
-
-export function unresolveWorkspaceFolderPath(folder: WorkspaceFolder, folderPath: string): string {
-    // tslint:disable-next-line: no-invalid-template-strings
-    return folderPath.replace(folder.uri.fsPath, '${workspaceFolder}').replace(/\\/g, '/');
-}
-
-export function inferImageName(runOptions: DockerRunTaskDefinition, context: DockerRunTaskContext, defaultImageName: string): string {
+export function inferImageName(runOptions: DockerRunTaskDefinition, context: DockerRunTaskContext, defaultNameHint: string, defaultTag?: 'dev' | 'latest'): string {
     return (runOptions && runOptions.dockerRun && runOptions.dockerRun.image)
         || (context && context.buildDefinition && context.buildDefinition.dockerBuild && context.buildDefinition.dockerBuild.tag)
-        || defaultImageName;
+        || getDefaultImageName(defaultNameHint, defaultTag);
+}
+
+export function getDefaultImageName(nameHint: string, tag?: 'dev' | 'latest'): string {
+    tag = tag || 'latest';
+    return getValidImageNameWithTag(nameHint, tag);
+}
+
+export function getDefaultContainerName(nameHint: string, tag?: 'dev' | 'latest'): string {
+    tag = tag || 'dev';
+    return `${getValidImageName(nameHint)}-${tag}`;
 }
 
 // tslint:disable-next-line: no-any
@@ -185,4 +186,18 @@ async function findTaskByLabel(allTasks: TaskDefinition[], label: string): Promi
 
 async function findTaskByType(allTasks: TaskDefinition[], type: string): Promise<TaskDefinition | undefined> {
     return allTasks.find(t => t.type === type);
+}
+
+function getValidImageName(nameHint: string): string {
+    let result = nameHint.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+    if (result.length === 0) {
+        result = 'image'
+    }
+
+    return result;
+}
+
+function getValidImageNameWithTag(nameHint: string, tag: 'dev' | 'latest'): string {
+    return `${getValidImageName(nameHint)}:${tag}`
 }

@@ -172,7 +172,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         return {
             configureSsl: associatedTask && associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, debugConfiguration.netCore),
-            containerName: inferContainerName(debugConfiguration, context, NetCoreTaskHelper.getDefaultContainerName(debugConfiguration.netCore.appProject)),
+            containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask && associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
     }

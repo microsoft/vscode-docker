@@ -10,7 +10,6 @@ import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
-import { getValidImageName } from '../../utils/getValidImageName';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
@@ -54,7 +53,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: debug',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: NetCoreTaskHelper.getDefaultImageName(options.appProject, 'dev'), // The 'dev' here is redundant but added to differentiate from below's 'latest'
+                    tag: getDefaultImageName(context.folder.name, 'dev'),
                     target: 'base',
                 },
                 netCore: {
@@ -66,7 +65,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-build: release',
                 dependsOn: ['build'],
                 dockerBuild: {
-                    tag: NetCoreTaskHelper.getDefaultImageName(options.appProject, 'latest'),
+                    tag: getDefaultImageName(context.folder.name, 'latest'), // The 'latest' here is redundant but added to differentiate from above's 'dev'
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolderPath(context.folder, options.appProject)
@@ -99,15 +98,12 @@ export class NetCoreTaskHelper implements TaskHelper {
 
     public async resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NetCoreBuildTaskDefinition): Promise<DockerBuildOptions> {
         const buildOptions = buildDefinition.dockerBuild;
-        const helperOptions = buildDefinition.netCore || {};
-
-        helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
         // tslint:disable: no-invalid-template-strings
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
         // tslint:enable: no-invalid-template-strings
-        buildOptions.tag = buildOptions.tag || NetCoreTaskHelper.getDefaultImageName(helperOptions.appProject);
+        buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
         buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
         return buildOptions;
@@ -119,10 +115,10 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
-        runOptions.containerName = runOptions.containerName || NetCoreTaskHelper.getDefaultContainerName(helperOptions.appProject);
+        runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = inferImageName(runDefinition, context, NetCoreTaskHelper.getDefaultImageName(helperOptions.appProject));
+        runOptions.image = inferImageName(runDefinition, context, context.folder.name, 'dev');
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
@@ -140,14 +136,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.volumes = await this.inferVolumes(context.folder, runOptions, helperOptions, ssl, userSecrets); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
 
         return runOptions;
-    }
-
-    public static getDefaultImageName(appProject: string, tag?: string): string {
-        return getValidImageName(appProject, tag || 'dev');
-    }
-
-    public static getDefaultContainerName(appProject: string, tag?: string): string {
-        return `${getValidImageName(appProject)}-${tag || 'dev'}`;
     }
 
     public static async inferAppFolder(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {

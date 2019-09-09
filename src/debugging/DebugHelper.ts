@@ -7,7 +7,7 @@ import { CancellationToken, debug, DebugConfiguration, ExtensionContext, workspa
 import { IActionContext, registerCommand } from 'vscode-azureextensionui';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
-import { DockerTaskScaffoldContext } from '../tasks/TaskHelper';
+import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
@@ -78,8 +78,8 @@ export async function addDebugConfiguration(debugConfiguration: DockerDebugConfi
     return true;
 }
 
-export function inferContainerName(debugConfiguration: DockerDebugConfiguration, context: DockerDebugContext, defaultContainerName: string): string {
+export function inferContainerName(debugConfiguration: DockerDebugConfiguration, context: DockerDebugContext, defaultNameHint: string, defaultTag?: 'dev' | 'latest'): string {
     return (debugConfiguration && debugConfiguration.containerName)
         || (context && context.runDefinition && context.runDefinition.dockerRun && context.runDefinition.dockerRun.containerName)
-        || defaultContainerName;
+        || getDefaultContainerName(defaultNameHint, defaultTag);
 }

@@ -75,7 +75,11 @@ export class DockerRunTaskProvider implements TaskProvider {
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
         if (!dockerRun.image) {
-            throw new Error('No Docker image name was resolved.');
+            throw new Error('No Docker image name was provided or resolved.');
+        }
+
+        if (!dockerRun.containerName) {
+            throw new Error('No Docker container name was provided or resolved.')
         }
     }
 

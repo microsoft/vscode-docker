@@ -6,7 +6,6 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
-import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase, DockerServerReadyAction } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
@@ -66,7 +65,7 @@ export class NodeDebugHelper implements DebugHelper {
             throw new Error(`Only one of the 'launchBrowser', 'serverReadyAction', and 'dockerServerReadyAction' properties may be set at a time.`);
         }
 
-        const containerName = inferContainerName(debugConfiguration, context, NodeTaskHelper.getDefaultContainerName(packageName));
+        const containerName = inferContainerName(debugConfiguration, context, packageName);
 
         const dockerServerReadyAction: DockerServerReadyAction = numBrowserOptions === 1
             ? debugConfiguration.dockerServerReadyAction
