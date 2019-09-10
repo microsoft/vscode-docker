@@ -8,6 +8,7 @@
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+    "extensionKind": "workspace",
     "galleryBanner": {
         "color": "#1289B9",
         "theme": "dark"
@@ -1493,6 +1494,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Run docker-compose with the --d (detached) argument, defaults to true"
+                },
+                "docker.showRemoteWorkspaceWarning": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show a prompt to switch from \"UI\" extension to \"Workspace\" extension if an operation is not supported."
                 }
             }
         },
@@ -1974,8 +1980,8 @@
         "request-promise-native": "^1.0.5",
         "semver": "^6.0.0",
         "tar": "^4.4.6",
-        "vscode-azureextensionui": "^0.26.5",
-        "vscode-azureappservice": "^0.43.0",
+        "vscode-azureextensionui": "^0.27.1",
+        "vscode-azureappservice": "^0.44.0",
         "vscode-languageclient": "^5.1.1",
         "win-ca": "^2.4.1",
         "xml2js": "^0.4.19"

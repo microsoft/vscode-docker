@@ -45,9 +45,9 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     promptSteps.push(...[
         new SiteNameStep(),
         new ResourceGroupListStep(),
-        new AppServicePlanListStep(),
-        new LocationListStep()
+        new AppServicePlanListStep()
     ]);
+    LocationListStep.addStep(wizardContext, promptSteps);
 
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
     const siteConfig: SiteConfig = await getNewSiteConfig(node);
