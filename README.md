@@ -72,15 +72,6 @@ After the container is started, you will be prompted to sign in to your Azure ac
 
 The default behavior of the extension is to connect to the local Docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the [Docker environment variables](https://docs.docker.com/machine/reference/env/) set in your environment or through the following VS Code settings: `docker.host`, `docker.certPath`, `docker.tlsVerify`, and `docker.machineName`.
 
-### VS Code remote development
-
-By default, the Docker extension will run against your local VS Code instance. You can change this behavior to run against your remote VS Code instance with the following VS Code setting:
-```json
-"remote.extensionKind": {
-    "ms-azuretools.vscode-docker": "workspace"
-}
-```
-
 ## Contributing
 
 There are a couple of ways you can contribute to this repo:

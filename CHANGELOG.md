@@ -1,3 +1,13 @@
+## 0.8.0 - 12 August 2019
+### Added
+* Changed default behavior in VS Code remote environments to run as a "workspace" extension instead of a "UI" extension. See [#954](https://github.com/Microsoft/vscode-docker/issues/954) for more information
+* Added support to debug ASP.NET Core web apps with SSL enabled
+* Updated icons to match latest VS Code guidelines
+* Automatically create a webhook when deploying an image to Azure App Service
+
+### Fixed
+* [Bugs fixed](https://github.com/Microsoft/vscode-docker/issues?q=is%3Aissue+milestone%3A%220.8.0%22+is%3Aclosed)
+
 ## 0.7.0 - 9 July 2019
 ### Added
 * Revamped Docker Explorer
