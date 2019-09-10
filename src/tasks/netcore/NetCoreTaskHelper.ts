@@ -56,6 +56,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name, 'dev'),
                     target: 'base',
+                    pull: true
                 },
                 netCore: {
                     appProject: unresolveFilePath(options.appProject, context.folder)
@@ -67,6 +68,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dependsOn: ['build'],
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name, 'latest'), // The 'latest' here is redundant but added to differentiate from above's 'dev'
+                    pull: true
                 },
                 netCore: {
                     appProject: unresolveFilePath(options.appProject, context.folder)

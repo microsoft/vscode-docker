@@ -49,6 +49,9 @@ export class NodeTaskHelper implements TaskHelper {
                 type: 'docker-build',
                 label: 'docker-build',
                 platform: 'node',
+                dockerBuild: {
+                    pull: true
+                }
             }
         ];
     }
