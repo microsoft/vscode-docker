@@ -68,6 +68,11 @@ export class NodeTaskHelper implements TaskHelper {
                 type: 'docker-run',
                 label: 'docker-run: debug',
                 dependsOn: ['docker-build'],
+                dockerRun: {
+                    env: {
+                        "DEBUG": "*"
+                    }
+                },
                 node: {
                     enableDebugging: true
                 }
