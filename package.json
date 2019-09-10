@@ -512,7 +512,7 @@
                             "removeContainerAfterDebug": {
                                 "type": "boolean",
                                 "description": "Whether to remove the debug container after debugging.",
-                                "default": "true"
+                                "default": true
                             },
                             "platform": {
                                 "type": "string",
