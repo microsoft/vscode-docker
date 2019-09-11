@@ -95,3 +95,20 @@ export async function quickPickOS(): Promise<PlatformOS> {
     let response = await ext.ui.showQuickPick(items, opt);
     return response.data;
 }
+
+export async function quickPickGenerateComposeFiles(): Promise<boolean> {
+    let opt: vscode.QuickPickOptions = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Add Docker Compose files'
+    }
+
+    let response = await ext.ui.showQuickPick(
+        [
+            { label: 'No', data: false },
+            { label: 'Yes', data: true }
+        ],
+        opt);
+
+    return response.data;
+}

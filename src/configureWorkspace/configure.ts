@@ -23,7 +23,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { promptForPorts, quickPickOS, quickPickPlatform } from './configUtils';
+import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
     npmStart: boolean; //has npm start
@@ -284,11 +284,11 @@ async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
 type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, packageInfo: PackageInfo) => Promise<void>;
 
-const DOCKER_FILE_TYPES: { [key: string]: GeneratorFunction } = {
-    'docker-compose.yml': genDockerCompose,
-    'docker-compose.debug.yml': genDockerComposeDebug,
-    'Dockerfile': genDockerFile,
-    '.dockerignore': genDockerIgnoreFile
+const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComposeGenerator?: boolean } } = {
+    'docker-compose.yml': { generator: genDockerCompose, isComposeGenerator: true },
+    'docker-compose.debug.yml': { generator: genDockerComposeDebug, isComposeGenerator: true },
+    'Dockerfile': { generator: genDockerFile },
+    '.dockerignore': { generator: genDockerIgnoreFile }
 };
 
 const YES_PROMPT: vscode.MessageItem = {
@@ -393,6 +393,12 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     }
     properties.configureOs = os;
 
+    let generateComposeFiles = true;
+
+    if (platformType === 'Node.js') {
+        generateComposeFiles = await quickPickGenerateComposeFiles();
+    }
+
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
         ports = await promptForPorts(generatorInfo.defaultPorts);
@@ -448,7 +454,10 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
 
     let filesWritten: string[] = [];
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
-        return createWorkspaceFileIfNotExists(fileName, DOCKER_FILE_TYPES[fileName]);
+        const dockerFileType = DOCKER_FILE_TYPES[fileName];
+        return dockerFileType.isComposeGenerator !== true || generateComposeFiles
+            ? createWorkspaceFileIfNotExists(fileName, dockerFileType.generator)
+            : Promise.resolve();
     }));
 
     // Can only configure for debugging if the option to do so is true, and there's a workspace folder, and there's a scaffold function
