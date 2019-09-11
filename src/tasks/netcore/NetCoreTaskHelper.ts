@@ -141,14 +141,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         return runOptions;
     }
 
-    public static async inferAppFolder(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
-        if (helperOptions.appProject) {
-            return path.dirname(helperOptions.appProject);
-        }
-
-        return folder.uri.fsPath;
-    }
-
     public static async inferAppProject(folder: WorkspaceFolder, helperOptions?: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
         let result: string;
 
