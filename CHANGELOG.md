@@ -2,6 +2,7 @@
 ### Added
 * Changed default behavior in VS Code remote environments to run as a "workspace" extension instead of a "UI" extension. See [#954](https://github.com/Microsoft/vscode-docker/issues/954) for more information
 * Added support to debug ASP.NET Core web apps with SSL enabled
+* Added support to debug .NET Core apps with user secrets
 * Updated icons to match latest VS Code guidelines
 * Automatically create a webhook when deploying an image to Azure App Service
 
