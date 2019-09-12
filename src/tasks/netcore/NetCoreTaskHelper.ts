@@ -59,7 +59,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                     dockerfile: unresolveFilePath(context.dockerfile, context.folder),
                     // tslint:disable-next-line: no-invalid-template-strings
                     context: '${workspaceFolder}',
-                    pull: true
                 },
                 netCore: {
                     appProject: unresolveFilePath(options.appProject, context.folder)
@@ -74,7 +73,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                     dockerfile: unresolveFilePath(context.dockerfile, context.folder),
                     // tslint:disable-next-line: no-invalid-template-strings
                     context: '${workspaceFolder}',
-                    pull: true
                 },
                 netCore: {
                     appProject: unresolveFilePath(options.appProject, context.folder)
