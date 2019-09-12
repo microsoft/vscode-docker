@@ -1,4 +1,4 @@
-## 0.8.0 - 12 August 2019
+## 0.8.0 - 12 September 2019
 ### Added
 * Changed default behavior in VS Code remote environments to run as a "workspace" extension instead of a "UI" extension. See [#954](https://github.com/Microsoft/vscode-docker/issues/954) for more information
 * Added support to debug ASP.NET Core web apps with SSL enabled
