@@ -65,11 +65,12 @@ ${getComposePorts(ports.concat(9229))}
     ${cmd}`;
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, packageInfo: PackageInfo): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'node',
         actionContext: context,
+        dockerfile: dockerfile,
     }
 
     await dockerDebugScaffoldingProvider.initializeNodeForDebugging(scaffoldContext);

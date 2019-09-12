@@ -9,7 +9,7 @@ import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configU
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
-import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
@@ -34,6 +34,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
         folder: folder,
         platform: debugPlatform,
         actionContext: actionContext,
+        dockerfile: (await quickPickDockerFileItem(actionContext, undefined, folder)).absoluteFilePath
     }
 
     switch (context.platform) {

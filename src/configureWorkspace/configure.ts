@@ -282,7 +282,7 @@ async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
 }
 
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
-type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, packageInfo: PackageInfo) => Promise<void>;
+type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo) => Promise<void>;
 
 const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComposeGenerator?: boolean } } = {
     'docker-compose.yml': { generator: genDockerCompose, isComposeGenerator: true },
@@ -462,7 +462,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
 
     // Can only configure for debugging if the option to do so is true, and there's a workspace folder, and there's a scaffold function
     if (options.configureForDebugging && options.folder && generatorInfo.initializeForDebugging) {
-        await generatorInfo.initializeForDebugging(context, options.folder, os, packageInfo);
+        await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo);
     }
 
     return filesWritten;

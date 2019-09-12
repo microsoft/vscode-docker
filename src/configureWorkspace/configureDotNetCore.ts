@@ -267,11 +267,12 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     return contents;
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, { artifactName }: Partial<PackageInfo>): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, { artifactName }: Partial<PackageInfo>): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'netCore',
         actionContext: context,
+        dockerfile: dockerfile,
     }
 
     const options: NetCoreScaffoldingOptions = {

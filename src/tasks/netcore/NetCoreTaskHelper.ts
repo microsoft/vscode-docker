@@ -56,6 +56,9 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name, 'dev'),
                     target: 'base',
+                    dockerfile: unresolveFilePath(context.dockerfile, context.folder),
+                    // tslint:disable-next-line: no-invalid-template-strings
+                    context: '${workspaceFolder}',
                     pull: true
                 },
                 netCore: {
@@ -68,6 +71,9 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dependsOn: ['build'],
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name, 'latest'), // The 'latest' here is redundant but added to differentiate from above's 'dev'
+                    dockerfile: unresolveFilePath(context.dockerfile, context.folder),
+                    // tslint:disable-next-line: no-invalid-template-strings
+                    context: '${workspaceFolder}',
                     pull: true
                 },
                 netCore: {

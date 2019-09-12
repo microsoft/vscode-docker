@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { ShellQuotedString, WorkspaceFolder } from 'vscode';
-import { resolveFilePath } from '../../utils/resolveFilePath';
+import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
@@ -50,6 +50,9 @@ export class NodeTaskHelper implements TaskHelper {
                 label: 'docker-build',
                 platform: 'node',
                 dockerBuild: {
+                    dockerfile: unresolveFilePath(context.dockerfile, context.folder),
+                    // tslint:disable-next-line: no-invalid-template-strings
+                    context: '${workspaceFolder}',
                     pull: true
                 }
             }
