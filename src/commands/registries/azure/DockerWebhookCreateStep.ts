@@ -43,7 +43,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
             const dockerhubPrompt: string = "Copy & Open";
-            const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.parent.username}/${this._treeItem.parent.repoName}/webHooks`;
+            const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.namespace}/${this._treeItem.parent.repoName}/webHooks`;
 
             // NOTE: The response to the information message is not awaited but handled independently of the wizard steps.
             //       VS Code will hide such messages in the notifications pane after a period of time; awaiting them risks
