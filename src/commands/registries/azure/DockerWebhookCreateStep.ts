@@ -68,13 +68,16 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
     }
 
     private async createWebhookForApp(node: RemoteTagTreeItem, site: Site, appUri: string): Promise<Webhook | undefined> {
+        const maxLength: number = 50;
+        const numRandomChars: number = 6;
+
         let webhookName: string = site.name;
         // remove disallowed characters
         webhookName = webhookName.replace(/[^a-zA-Z0-9]/g, '');
-        // add random chars for uniqueness and to ensure min length is met
-        webhookName += randomUtils.getRandomHexString(6);
         // trim to max length
-        webhookName = webhookName.substr(0, 50);
+        webhookName = webhookName.substr(0, maxLength - numRandomChars);
+        // add random chars for uniqueness and to ensure min length is met
+        webhookName += randomUtils.getRandomHexString(numRandomChars);
 
         // variables derived from the container registry
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
