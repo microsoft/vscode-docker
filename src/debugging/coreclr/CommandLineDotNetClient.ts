@@ -2,9 +2,9 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as crypto from 'crypto';
 import * as semver from 'semver';
 import { parseError } from 'vscode-azureextensionui';
+import { randomUtils } from '../../utils/randomUtils';
 import { ProcessProvider } from "./ChildProcessProvider";
 import { FileSystemProvider } from "./fsProvider";
 import { OSProvider } from "./LocalOSProvider";
@@ -100,7 +100,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         const dotNetVer = await this.getVersion();
         if (semver.gte(dotNetVer, '3.0.0')) {
             // The dotnet 3.0 CLI has `dotnet user-secrets init`, let's use that if possible
-            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${this.getRandomHexString(32)}`;
+            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${randomUtils.getRandomHexString(32)}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
         } else {
             // Otherwise try to manually edit the project file by adding a property group immediately after the <Project> tag
@@ -112,7 +112,7 @@ export class CommandLineDotNetClient implements DotNetClient {
                 // If found, add the new property group immediately after
                 const propertyGroup = `
   <PropertyGroup>
-    <UserSecretsId>${this.getRandomHexString(32)}</UserSecretsId>
+    <UserSecretsId>${randomUtils.getRandomHexString(32)}</UserSecretsId>
   </PropertyGroup>`;
                 const newContents = contents.replace(matches[0], matches[0] + propertyGroup);
                 await this.fsProvider.writeFile(projectFile, newContents);
@@ -121,7 +121,7 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     private async exportCertificateAndSetPassword(projectFile: string, certificateExportPath: string): Promise<void> {
-        const password = this.getRandomHexString(32);
+        const password = randomUtils.getRandomHexString(32);
 
         // Export the certificate
         const exportCommand = `dotnet dev-certs https -ep "${certificateExportPath}" -p "${password}"`;
@@ -130,11 +130,6 @@ export class CommandLineDotNetClient implements DotNetClient {
         // Set the password to dotnet user-secrets
         const userSecretsPasswordCommand = `dotnet user-secrets --project "${projectFile}" set Kestrel:Certificates:Development:Password "${password}"`;
         await this.processProvider.exec(userSecretsPasswordCommand, {});
-    }
-
-    private getRandomHexString(length: number): string {
-        const buffer: Buffer = crypto.randomBytes(Math.ceil(length / 2));
-        return buffer.toString('hex').slice(0, length);
     }
 }
 
