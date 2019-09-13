@@ -17,6 +17,7 @@ import { DockerHubRepositoryTreeItem } from '../../../tree/registries/dockerHub/
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp } from "../../../utils/nonNull";
 import { openExternal } from '../../../utils/openExternal';
+import { randomUtils } from '../../../utils/randomUtils';
 
 export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreate
@@ -67,19 +68,17 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
     }
 
     private async createWebhookForApp(node: RemoteTagTreeItem, site: Site, appUri: string): Promise<Webhook | undefined> {
-        // fields derived from the app service wizard
-        let siteName: string = site.name;
-        let baseName = `webapp${siteName}`;
-        let webhookName: string = baseName;
+        let webhookName: string = site.name;
+        // remove disallowed characters
+        webhookName = webhookName.replace(/[^a-zA-Z0-9]/g, '');
+        // add random chars for uniqueness and to ensure min length is met
+        webhookName += randomUtils.getRandomHexString(6);
+        // trim to max length
+        webhookName = webhookName.substr(0, 50);
+
         // variables derived from the container registry
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
         const crmClient = createAzureClient(registryTreeItem.parent.root, ContainerRegistryManagementClient);
-        const existingWebhooks = await crmClient.webhooks.list(registryTreeItem.resourceGroup, registryTreeItem.registryName);
-        let dedupeCount: number = 0;
-        while (existingWebhooks.find((hook) => hook.name === webhookName)) {
-            webhookName = `${baseName}_${dedupeCount}`;
-            dedupeCount++;
-        }
         let webhookCreateParameters: WebhookCreateParameters = {
             location: registryTreeItem.registryLocation,
             serviceUri: appUri,
