@@ -1942,6 +1942,7 @@
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/xml2js": "^0.4.5",
         "adm-zip": "^0.4.11",
+        "ajv": "^6.10.2",
         "copy-webpack-plugin": "^4.5.4",
         "gulp": "^4.0.2",
         "mocha": "^5.2.0",
