@@ -45,6 +45,7 @@
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
+        "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -89,8 +90,10 @@
         "onCommand:vscode-docker.volumes.prune",
         "onCommand:vscode-docker.volumes.refresh",
         "onCommand:vscode-docker.volumes.remove",
+        "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
+        "onDebugResolve:docker-launch",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
@@ -469,7 +472,138 @@
         "debuggers": [
             {
                 "type": "docker",
-                "label": "Docker: Node.js",
+                "label": "Docker: Debug in Container",
+                "configurationAttributes": {
+                    "launch": {
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "Name of the container used for debugging."
+                            },
+                            "dockerServerReadyAction": {
+                                "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
+                                "properties": {
+                                    "action": {
+                                        "type": "string",
+                                        "description": "The action to take when the pattern is found.",
+                                        "enum": [
+                                            "debugWithChrome",
+                                            "openExternally"
+                                        ]
+                                    },
+                                    "containerName": {
+                                        "type": "string",
+                                        "description": "The container name to match the host port."
+                                    },
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "The regex pattern to look for in Debug console output."
+                                    },
+                                    "uriFormat": {
+                                        "type": "string",
+                                        "description": "The URI format to launch.",
+                                        "default": "http://localhost:%s"
+                                    },
+                                    "webRoot": {
+                                        "type": "string",
+                                        "description": "The root folder from which web pages are served."
+                                    }
+                                }
+                            },
+                            "removeContainerAfterDebug": {
+                                "type": "boolean",
+                                "description": "Whether to remove the debug container after debugging.",
+                                "default": true
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore",
+                                    "node"
+                                ]
+                            },
+                            "netCore": {
+                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "properties": {
+                                    "appProject": {
+                                        "type": "string",
+                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to debug."
+                                    }
+                                },
+                                "required": [
+                                    "appProject"
+                                ]
+                            },
+                            "node": {
+                                "description": "Options for debugging Node.js projects in Docker.",
+                                "properties": {
+                                    "port": {
+                                        "type": "integer",
+                                        "description": "The debug port to use."
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "description": "TCP/IP address of the debug port."
+                                    },
+                                    "sourceMaps": {
+                                        "type": "boolean",
+                                        "description": "Enable source maps by setting this to `true`."
+                                    },
+                                    "outFiles": {
+                                        "type": "array",
+                                        "description": "Array of glob patterns for locating generated JavaScript files.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "autoAttachChildProcesses": {
+                                        "type": "boolean",
+                                        "description": "Track all subprocesses of debuggee and automatically attach to those that are launched in debug mode."
+                                    },
+                                    "timeout": {
+                                        "type": "integer",
+                                        "description": "When restarting a session, give up after this number of milliseconds."
+                                    },
+                                    "stopOnEntry": {
+                                        "type": "boolean",
+                                        "description": "Break immediately when the program launches."
+                                    },
+                                    "localRoot": {
+                                        "type": "string",
+                                        "description": "VS Code's root directory."
+                                    },
+                                    "remoteRoot": {
+                                        "type": "string",
+                                        "description": "Node's root directory within the Docker container."
+                                    },
+                                    "smartStep": {
+                                        "type": "boolean",
+                                        "description": "Try to automatically step over code that doesn't map to source files."
+                                    },
+                                    "skipFiles": {
+                                        "type": "array",
+                                        "description": "Automatically skip files covered by these glob patterns.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "trace": {
+                                        "type": [
+                                            "boolean",
+                                            "string"
+                                        ],
+                                        "description": "Enable diagnostic output.",
+                                        "enum": [
+                                            "verbose",
+                                            true
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "configurationSnippets": [
                     {
                         "label": "Docker: Attach to Node",
@@ -486,20 +620,7 @@
             {
                 "type": "docker-coreclr",
                 "label": "Docker: Launch .NET Core (Preview)",
-                "configurationSnippets": [
-                    {
-                        "label": "Docker: Launch .NET Core (Preview)",
-                        "description": "Docker: Launch .NET Core (Preview)",
-                        "body": {
-                            "name": "Docker: Launch .NET Core (Preview)",
-                            "type": "docker-coreclr",
-                            "request": "launch",
-                            "preLaunchTask": "build",
-                            "dockerBuild": {},
-                            "dockerRun": {}
-                        }
-                    }
-                ],
+                "configurationSnippets": [],
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
@@ -670,6 +791,260 @@
                                 "type": "boolean",
                                 "default": true,
                                 "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "taskDefinitions": [
+            {
+                "type": "docker-build",
+                "properties": {
+                    "dockerBuild": {
+                        "description": "Options for building the Docker image used for debugging.",
+                        "properties": {
+                            "args": {
+                                "type": "object",
+                                "description": "Build arguments applied to the Docker image used for debugging.",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "context": {
+                                "type": "string",
+                                "description": "Path to the Docker build context."
+                            },
+                            "dockerfile": {
+                                "type": "string",
+                                "description": "Path to the Dockerfile used for the build."
+                            },
+                            "labels": {
+                                "type": "object",
+                                "description": "Labels applied to the Docker image used for debugging.",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "tag": {
+                                "type": "string",
+                                "description": "Tag applied to the Docker image used for debugging."
+                            },
+                            "target": {
+                                "type": "string",
+                                "description": "Docker build target (stage) used for debugging."
+                            },
+                            "pull": {
+                                "type": "boolean",
+                                "description": "Whether or not to pull new base images before building."
+                            }
+                        }
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
+                    },
+                    "netCore": {
+                        "description": "Options for building .NET Core projects in Docker.",
+                        "properties": {
+                            "appProject": {
+                                "type": "string",
+                                "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                            }
+                        },
+                        "required": [
+                            "appProject"
+                        ]
+                    },
+                    "node": {
+                        "description": "Options for building Node.js applications in Docker.",
+                        "properties": {
+                            "package": {
+                                "type": "string",
+                                "description": "The path to the package.json for the application."
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "docker-run",
+                "properties": {
+                    "dockerRun": {
+                        "description": "Options for running the Docker container used for debugging.",
+                        "properties": {
+                            "command": {
+                                "type": "string",
+                                "description": "The command to run upon starting the container."
+                            },
+                            "containerName": {
+                                "type": "string",
+                                "description": "Name of the container used for debugging."
+                            },
+                            "env": {
+                                "type": "object",
+                                "description": "Environment variables applied to the Docker container used for debugging.",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "envFiles": {
+                                "type": "array",
+                                "description": "Files of environment variables read in and applied to the Docker container used for debugging.",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "labels": {
+                                "type": "object",
+                                "description": "Labels applied to the Docker container used for debugging.",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "network": {
+                                "type": "string",
+                                "description": "The network to which the container will be connected."
+                            },
+                            "networkAlias": {
+                                "type": "string",
+                                "description": "The network-scoped alias to assign to the container."
+                            },
+                            "os": {
+                                "type": "string",
+                                "description": "The container operating system.",
+                                "default": "Linux",
+                                "enum": [
+                                    "Linux",
+                                    "Windows"
+                                ]
+                            },
+                            "ports": {
+                                "type": "array",
+                                "description": "Ports that are going to be mapped on the host.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "hostPort": {
+                                            "type": "integer",
+                                            "description": "Port number to be bound on the host."
+                                        },
+                                        "containerPort": {
+                                            "type": "integer",
+                                            "description": "Port number of the container to be bound."
+                                        },
+                                        "protocol": {
+                                            "type": "string",
+                                            "description": "Specific protocol for the binding (`tcp | udp`).",
+                                            "enum": [
+                                                "tcp",
+                                                "udp"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "containerPort"
+                                    ]
+                                }
+                            },
+                            "extraHosts": {
+                                "type": "array",
+                                "description": "Hosts to be added to the container's `hosts` file for DNS resolution.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "hostname": {
+                                            "type": "string",
+                                            "description": "Hostname for dns resolution."
+                                        },
+                                        "ip": {
+                                            "type": "string",
+                                            "description": "IP associated to the hostname."
+                                        }
+                                    },
+                                    "required": [
+                                        "hostname",
+                                        "ip"
+                                    ]
+                                }
+                            },
+                            "volumes": {
+                                "type": "array",
+                                "description": "Volumes that are going to be mapped to the container.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "localPath": {
+                                            "type": "string",
+                                            "description": "Path on local machine that will be mapped. The folder will be created if it does not exist."
+                                        },
+                                        "containerPath": {
+                                            "type": "string",
+                                            "description": "Path where the volume will be mapped within the container. The folder will be created if it does not exist."
+                                        },
+                                        "permissions": {
+                                            "type": "string",
+                                            "description": "Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only.",
+                                            "enum": [
+                                                "rw",
+                                                "ro"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "localPath",
+                                        "containerPath"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "The target plaform for the application.",
+                        "enum": [
+                            "netCore",
+                            "node"
+                        ]
+                    },
+                    "netCore": {
+                        "description": "Options for running .NET Core projects in Docker.",
+                        "properties": {
+                            "appProject": {
+                                "type": "string",
+                                "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                            },
+                            "configureSsl": {
+                                "type": "boolean",
+                                "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
+                            }
+                        },
+                        "required": [
+                            "appProject"
+                        ]
+                    },
+                    "node": {
+                        "description": "Options for running Node.js applications in Docker.",
+                        "properties": {
+                            "enableDebugging": {
+                                "type": "boolean",
+                                "description": "Whether to enable debugging within the container."
+                            },
+                            "inspectMode": {
+                                "type": "string",
+                                "description": "Whether debugging should break immediately upon application start."
+                            },
+                            "inspectPort": {
+                                "type": "integer",
+                                "description": "The port on which debugging should occur."
+                            },
+                            "package": {
+                                "type": "string",
+                                "description": "The path to the package.json for the application."
                             }
                         }
                     }
@@ -1216,6 +1591,11 @@
                 "category": "Docker Containers"
             },
             {
+                "command": "vscode-docker.debugging.initializeForDebugging",
+                "title": "Initialize for Docker debugging",
+                "category": "Docker"
+            },
+            {
                 "command": "vscode-docker.images.build",
                 "title": "Build Image...",
                 "category": "Docker Images"
@@ -1527,7 +1907,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.36.0"
+        "vscode": "^1.37.0"
     },
     "scripts": {
         "vscode:prepublish": "npm run webpack-prod",

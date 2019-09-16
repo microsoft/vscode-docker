@@ -28,7 +28,7 @@ Press `F1` and search for `Docker: Add Docker Files to Workspace` to generate `D
 
 ![dockerfile](resources/readme/generateFiles.gif)
 
-> Note: The `docker-compose.yml` and `docker-compose.debug.yml` files are not generated for .NET Core applications.
+> Note: The `docker-compose.yml` and `docker-compose.debug.yml` files are not generated for all platforms, such as .NET Core applications, and are optional for Node.js applications.
 
 ### Editing
 

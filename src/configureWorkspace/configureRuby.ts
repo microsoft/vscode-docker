@@ -9,7 +9,8 @@ export let configureRuby: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPorts: [3000]
+  defaultPorts: [3000],
+  initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {

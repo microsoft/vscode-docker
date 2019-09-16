@@ -18,12 +18,14 @@ import { consolidateDefaultRegistrySettings } from './commands/registries/regist
 import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
+import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
@@ -112,11 +114,14 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         ctx.subscriptions.push(
             vscode.debug.registerDebugConfigurationProvider(
-                'docker',
+                'docker-node',
                 new DockerDebugConfigProvider()
             )
         );
         registerDebugConfigurationProvider(ctx);
+
+        registerDebugProvider(ctx);
+        registerTaskProviders(ctx);
 
         refreshDockerode();
 

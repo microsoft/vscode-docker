@@ -451,7 +451,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                ['1234'],
+                ['Yes', '1234'],
                 ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -469,6 +469,25 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
             assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+
+            assertFileContains('.dockerignore', '.vscode');
+        });
+
+        testInEmptyFolder("No Docker Compose", async () => {
+            await testConfigureDocker(
+                'Node.js',
+                {
+                    configurePlatform: 'Node.js',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                ['No', '1234'],
+                ['Dockerfile', '.dockerignore']
+            );
+
+            assertFileContains('Dockerfile', 'EXPOSE 1234');
+            assertFileContains('Dockerfile', 'CMD npm start');
 
             assertFileContains('.dockerignore', '.vscode');
         });
@@ -503,7 +522,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'package.json',
                     packageFileSubfolderDepth: '0'
                 },
-                ['4321'],
+                ['Yes', '4321'],
                 ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -551,7 +570,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'package.json',
                     packageFileSubfolderDepth: '0'
                 },
-                ['4321'],
+                ['Yes', '4321'],
                 ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
@@ -583,7 +602,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: 'package.json',
                     packageFileSubfolderDepth: '0',
                 },
-                ['4321'],
+                ['Yes', '4321'],
                 ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
