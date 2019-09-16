@@ -1,3 +1,8 @@
+
+## 0.8.1 - 13 September 2019
+### Fixed
+* Creating and deploying to a webapp with name containing hyphen (for eg. "abc-xyz") breaks webhook creation. [#1270](https://github.com/Microsoft/vscode-docker/issues/1270)
+
 ## 0.8.0 - 12 September 2019
 ### Added
 * Changed default behavior in VS Code remote environments to run as a "workspace" extension instead of a "UI" extension. See [#954](https://github.com/Microsoft/vscode-docker/issues/954) for more information
