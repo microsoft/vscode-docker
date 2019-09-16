@@ -50,7 +50,7 @@ export class DockerRunTaskProvider implements TaskProvider {
         );
     }
 
-    // TODO: Can we skip if a recently-started image exists?
+    // TODO: Can we skip if a recently-started container exists?
     private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
 
         const definition = cloneObject(task.definition);
