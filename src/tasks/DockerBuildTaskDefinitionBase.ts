@@ -6,7 +6,7 @@
 import { TaskDefinition } from 'vscode';
 
 export interface DockerBuildOptions {
-    args?: { [key: string]: string };
+    buildArgs?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
     labels?: { [key: string]: string };

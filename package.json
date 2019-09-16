@@ -804,7 +804,7 @@
                     "dockerBuild": {
                         "description": "Options for building the Docker image used for debugging.",
                         "properties": {
-                            "args": {
+                            "buildArgs": {
                                 "type": "object",
                                 "description": "Build arguments applied to the Docker image used for debugging.",
                                 "additionalProperties": {

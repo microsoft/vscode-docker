@@ -100,7 +100,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
-            .withKeyValueArgs('--build-arg', options.args)
+            .withKeyValueArgs('--build-arg', options.buildArgs)
             .withKeyValueArgs('--label', options.labels)
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
