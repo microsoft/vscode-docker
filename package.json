@@ -524,11 +524,11 @@
                                 ]
                             },
                             "netCore": {
-                                "description": "Options for building .NET Core projects in Docker.",
+                                "description": "Options for debugging .NET Core projects in Docker.",
                                 "properties": {
                                     "appProject": {
                                         "type": "string",
-                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to debug."
                                     }
                                 },
                                 "required": [
@@ -536,7 +536,7 @@
                                 ]
                             },
                             "node": {
-                                "description": "Options for building Node.js projects in Docker.",
+                                "description": "Options for debugging Node.js projects in Docker.",
                                 "properties": {
                                     "port": {
                                         "type": "integer",
