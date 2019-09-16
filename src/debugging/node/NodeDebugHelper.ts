@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
+import { inferPackageName, readPackage } from '../../utils/nodeUtils';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
@@ -51,7 +52,8 @@ export class NodeDebugHelper implements DebugHelper {
         const options = debugConfiguration.node || {};
 
         const packagePath = NodeTaskHelper.inferPackagePath(options.package, context.folder);
-        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
+        const nodePackage = await readPackage(packagePath);
+        const packageName = await inferPackageName(nodePackage, packagePath);
 
         const containerName = inferContainerName(debugConfiguration, context, packageName);
 
