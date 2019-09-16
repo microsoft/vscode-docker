@@ -14,8 +14,8 @@ import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { DockerPlatform } from './DockerPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
-import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
-import nodeDebugHelper from './node/NodeDebugHelper';
+import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
+import { nodeDebugHelper } from './node/NodeDebugHelper';
 
 export interface DockerDebugContext { // Same as DockerTaskContext but intentionally does not extend it, since we never need to pass a DockerDebugContext to tasks
     folder: WorkspaceFolder;

@@ -13,8 +13,8 @@ import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
-import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
-import nodeTaskHelper from './node/NodeTaskHelper';
+import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { nodeTaskHelper } from './node/NodeTaskHelper';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
@@ -123,7 +123,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
             return { label: t.name }
         });
 
-        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the official Docker Build definition.' });
+        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the Docker Build definition.' });
         return buildTasks.find(t => t.name === item.label);
     }
 

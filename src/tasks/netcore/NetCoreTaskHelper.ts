@@ -280,6 +280,4 @@ export class NetCoreTaskHelper implements TaskHelper {
 
 }
 
-const netCoreTaskHelper = new NetCoreTaskHelper();
-
-export default netCoreTaskHelper;
+export const netCoreTaskHelper = new NetCoreTaskHelper();

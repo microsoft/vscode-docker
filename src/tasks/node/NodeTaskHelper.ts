@@ -164,14 +164,15 @@ export class NodeTaskHelper implements TaskHelper {
     }
 
     public static async inferPackageName(packagePath: string): Promise<string> {
-        const packageJson = await fse.readFile(packagePath, 'utf8');
-        const packageContent = <NodePackage>JSON.parse(packageJson);
+        const packageContent = await fse.readJSON(packagePath);
 
-        if (packageContent.name !== undefined) {
+        // tslint:disable: no-unsafe-any
+        if (packageContent && packageContent.name !== undefined) {
             return packageContent.name;
         } else {
             return path.basename(path.dirname(packagePath));
         }
+        // tslint:enable: no-unsafe-any
     }
 
     private static inferBuildContextPath(packagePath: string): string {
@@ -207,6 +208,4 @@ export class NodeTaskHelper implements TaskHelper {
     }
 }
 
-const nodeTaskHelper = new NodeTaskHelper();
-
-export default nodeTaskHelper;
+export const nodeTaskHelper = new NodeTaskHelper();

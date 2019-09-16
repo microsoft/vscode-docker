@@ -7,7 +7,7 @@ import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
-import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
@@ -26,6 +26,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             debugPlatform = 'node';
             break;
         default:
+            throw new Error('The selected platform is not yet supported for debugging.');
     }
 
     actionContext.telemetry.properties.platform = debugPlatform;
