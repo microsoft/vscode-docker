@@ -72,7 +72,8 @@ export class NodeTaskHelper implements TaskHelper {
                 dependsOn: ['docker-build'],
                 dockerRun: {
                     env: {
-                        "DEBUG": "*"
+                        "DEBUG": "*",
+                        "NODE_ENV": "development"
                     }
                 },
                 node: {
