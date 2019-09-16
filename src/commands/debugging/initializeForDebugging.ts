@@ -14,7 +14,7 @@ import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
-    const platform = await quickPickPlatform();
+    const platform = await quickPickPlatform(['Node.js', 'ASP.NET Core', '.NET Core Console']);
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
