@@ -4,13 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveFilePath } from '../utils/resolveFilePath';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
+import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
 import { DockerBuildTaskContext, TaskHelper } from './TaskHelper';
@@ -25,12 +26,8 @@ export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
 }
 
-export class DockerBuildTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
-
-    public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
-        return []; // Intentionally empty, so that resolveTask gets used
-    }
+export class DockerBuildTaskProvider extends DockerTaskProviderBase {
+    constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers) }
 
     public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
         const taskPlatform = getPlatform(task.definition);
@@ -47,7 +44,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     // TODO: Skip if image is freshly built
-    private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
+    protected async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
         context.actionContext.telemetry.properties.platform = context.platform;
 
         const definition = cloneObject(task.definition);

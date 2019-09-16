@@ -35,6 +35,10 @@ export interface DockerRunTaskContext extends DockerTaskContext {
     buildDefinition?: DockerBuildTaskDefinition;
 }
 
+// tslint:disable-next-line: no-empty-interface
+export interface DockerTaskExecutionContext extends DockerTaskContext {
+}
+
 export interface TaskHelper {
     resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
     resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;

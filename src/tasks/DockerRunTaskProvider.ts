@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
 import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper } from './TaskHelper';
@@ -23,12 +24,8 @@ export interface DockerRunTask extends Task {
     definition: DockerRunTaskDefinition;
 }
 
-export class DockerRunTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
-
-    public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
-        return []; // Intentionally empty, so that resolveTask gets used
-    }
+export class DockerRunTaskProvider extends DockerTaskProviderBase {
+    constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
         const taskPlatform = getPlatform(task.definition);
@@ -45,7 +42,7 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     // TODO: Can we skip if a recently-started image exists?
-    private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
+    protected async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
         context.actionContext.telemetry.properties.platform = context.platform;
 
         const definition = cloneObject(task.definition);
