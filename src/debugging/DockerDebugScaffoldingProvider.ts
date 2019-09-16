@@ -7,17 +7,20 @@ import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import netCoreTaskHelper, { NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
 import nodeTaskHelper from '../tasks/node/NodeTaskHelper';
+import pythonTaskHelper from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
 import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import netCoreDebugHelper, { NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import nodeDebugHelper from './node/NodeDebugHelper';
+import pythonDebugHelper from './python/PythonDebugHelper';
 
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 
 export interface IDockerDebugScaffoldingProvider {
     initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void>;
     initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void>;
+    initializePythonForDebugging(context: DockerDebugScaffoldContext): Promise<void>;
 }
 
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
@@ -26,7 +29,8 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
             context,
             (_context: DockerDebugScaffoldContext) => netCoreDebugHelper.provideDebugConfigurations(_context, options),
             (_context: DockerDebugScaffoldContext) => netCoreTaskHelper.provideDockerBuildTasks(_context, options),
-            (_context: DockerDebugScaffoldContext) => netCoreTaskHelper.provideDockerRunTasks(_context, options));
+            (_context: DockerDebugScaffoldContext) => netCoreTaskHelper.provideDockerRunTasks(_context, options)
+        );
     }
 
     public async initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void> {
@@ -34,7 +38,17 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
             context,
             (_context: DockerDebugScaffoldContext) => nodeDebugHelper.provideDebugConfigurations(_context),
             (_context: DockerDebugScaffoldContext) => nodeTaskHelper.provideDockerBuildTasks(_context),
-            (_context: DockerDebugScaffoldContext) => nodeTaskHelper.provideDockerRunTasks(_context));
+            (_context: DockerDebugScaffoldContext) => nodeTaskHelper.provideDockerRunTasks(_context)
+        );
+    }
+
+    public async initializePythonForDebugging(context: DockerDebugScaffoldContext): Promise<void> {
+        await this.initializeForDebugging(
+            context,
+            (_context: DockerDebugScaffoldContext) => pythonDebugHelper.provideDebugConfigurations(_context),
+            (_context: DockerDebugScaffoldContext) => pythonTaskHelper.provideDockerBuildTasks(_context),
+            (_context: DockerDebugScaffoldContext) => pythonTaskHelper.provideDockerRunTasks(_context)
+        );
     }
 
     private async initializeForDebugging(

@@ -12,8 +12,9 @@ import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './D
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
+import { PythonDockerDebugConfiguration } from './python/PythonDebugHelper';
 
-export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
+export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration, PythonDockerDebugConfiguration {
     platform?: DockerPlatform;
 }
 

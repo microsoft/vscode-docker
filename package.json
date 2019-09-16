@@ -520,7 +520,8 @@
                                 "description": "The target plaform for the application.",
                                 "enum": [
                                     "netCore",
-                                    "node"
+                                    "node",
+                                    "python"
                                 ]
                             },
                             "netCore": {
@@ -598,6 +599,41 @@
                                             "verbose",
                                             true
                                         ]
+                                    }
+                                }
+                            },
+                            "python": {
+                                "description": "Options for building Python applications in Docker.",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "The host for remote debugging.",
+                                        "default": "localhost"
+                                    },
+                                    "port": {
+                                        "type": "number",
+                                        "description": "The port for remote debugging.",
+                                        "default": 5678
+                                    },
+                                    "pathMappings": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "localRoot": {
+                                                    "type": "string",
+                                                    "description": "The host path."
+                                                },
+                                                "remoteRoot": {
+                                                    "type": "string",
+                                                    "description": "The container path."
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "justMyCode": {
+                                        "type": "boolean",
+                                        "description": "Debug only user-written code."
                                     }
                                 }
                             }
@@ -845,7 +881,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -868,6 +905,10 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "description": "Options for building Python applications in Docker.",
+                        "type": "object"
                     }
                 }
             },
@@ -1008,7 +1049,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -1047,6 +1089,57 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "Options for building Python applications in Docker.",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "description": "The Python file to run.",
+                                        "default": "${file}"
+                                    },
+                                    "args": {
+                                        "type": "array",
+                                        "description": "Arguments passed to the Python app.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "wait": {
+                                        "type": "boolean",
+                                        "description": "Whether to wait for debugger to attach.",
+                                        "default": true
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "Options for building Python applications in Docker.",
+                                "properties": {
+                                    "module": {
+                                        "type": "string",
+                                        "description": "The Python module to run."
+                                    },
+                                    "args": {
+                                        "type": "array",
+                                        "description": "Arguments passed to the Python app.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "wait": {
+                                        "type": "boolean",
+                                        "description": "Whether to wait for debugger to attach.",
+                                        "default": true
+                                    }
+                                }
+                            }
+                        ]
                     }
                 }
             }

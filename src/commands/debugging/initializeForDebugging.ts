@@ -25,6 +25,9 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
         case 'Node.js':
             debugPlatform = 'node';
             break;
+        case 'Python':
+            debugPlatform = 'python';
+            break;
         default:
     }
 
@@ -47,6 +50,9 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             break;
         case 'node':
             await dockerDebugScaffoldingProvider.initializeNodeForDebugging(context);
+            break;
+        case 'python':
+            await dockerDebugScaffoldingProvider.initializePythonForDebugging(context);
             break;
         default:
     }

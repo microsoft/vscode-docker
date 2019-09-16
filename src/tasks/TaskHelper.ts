@@ -11,10 +11,11 @@ import { ext } from '../extensionVariables';
 import { resolveFilePath } from '../utils/resolveFilePath';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerContainerPort, DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
 import nodeTaskHelper from './node/NodeTaskHelper';
+import pythonTaskHelper from './python/PythonTaskHelper';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
@@ -43,7 +44,8 @@ export interface TaskHelper {
 export function registerTaskProviders(ctx: ExtensionContext): void {
     const helpers = {
         netCore: netCoreTaskHelper,
-        node: nodeTaskHelper
+        node: nodeTaskHelper,
+        python: pythonTaskHelper,
     };
 
     ctx.subscriptions.push(
@@ -187,6 +189,28 @@ async function findTaskByLabel(allTasks: TaskDefinition[], label: string): Promi
 
 async function findTaskByType(allTasks: TaskDefinition[], type: string): Promise<TaskDefinition | undefined> {
     return allTasks.find(t => t.type === type);
+}
+
+export function addVolumeWithoutConflicts(volumes: DockerContainerVolume[], volume: DockerContainerVolume): boolean {
+    // Two host volumes cannot map to one container volume:
+    // 1 hostVolume: n containerVolumes
+    if (volumes.find(v => v.containerPath === volume.containerPath)) {
+        return false;
+    }
+
+    volumes.push(volume);
+    return true;
+}
+
+export function addPortWithoutConflicts(ports: DockerContainerPort[], port: DockerContainerPort): boolean {
+    // One host port cannot map to two container ports
+    // n hostPorts: 1 containerPort
+    if (ports.find(p => p.hostPort === port.hostPort)) {
+        return false;
+    }
+
+    ports.push(port);
+    return true;
 }
 
 function getValidImageName(nameHint: string): string {
