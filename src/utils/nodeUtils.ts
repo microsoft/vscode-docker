@@ -16,8 +16,8 @@ export async function readPackage(packagePath: string): Promise<NodePackage> {
     return <NodePackage> await fse.readJson(packagePath);
 }
 
-export async function inferPackageName(nodePackage: NodePackage, packagePath: string): Promise<string> {
-    if (nodePackage.name !== undefined) {
+export async function inferPackageName(nodePackage: NodePackage | undefined, packagePath: string): Promise<string> {
+    if (nodePackage && nodePackage.name !== undefined) {
         return nodePackage.name;
     } else {
         return path.basename(path.dirname(packagePath));
