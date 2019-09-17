@@ -164,15 +164,13 @@ export class NodeTaskHelper implements TaskHelper {
     }
 
     public static async inferPackageName(packagePath: string): Promise<string> {
-        const packageContent = await fse.readJSON(packagePath);
+        const packageContent = <NodePackage>await fse.readJSON(packagePath);
 
-        // tslint:disable: no-unsafe-any
         if (packageContent && packageContent.name !== undefined) {
             return packageContent.name;
         } else {
             return path.basename(path.dirname(packagePath));
         }
-        // tslint:enable: no-unsafe-any
     }
 
     private static inferBuildContextPath(packagePath: string): string {
