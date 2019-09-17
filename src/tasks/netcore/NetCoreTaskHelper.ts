@@ -123,7 +123,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = inferImageName(runDefinition, context, context.folder.name, 'dev');
+        runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);

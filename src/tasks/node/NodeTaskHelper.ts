@@ -116,7 +116,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (runOptions.image === undefined) {
-            runOptions.image = inferImageName(runDefinition, context, packageName);
+            runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, packageName);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
