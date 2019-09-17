@@ -37,11 +37,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Properties equal', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = 'value';
+                    options1[property] = <any>'value';
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = 'value';
+                    options2[property] = <any>'value';
 
                     assert.equal(compareBuildImageOptions(options1, options2), true, 'Equal properties should be equal.');
                 });
@@ -49,11 +49,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Properties different', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = 'value1';
+                    options1[property] = <any>'value1';
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = 'value2';
+                    options2[property] = <any>'value2';
 
                     assert.equal(compareBuildImageOptions(options1, options2), !included, 'Different properties should be unequal.');
                 });
@@ -85,11 +85,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Dictionary empty', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = {};
+                    options1[property] = <any>{};
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = {};
+                    options2[property] = <any>{};
 
                     assert.equal(compareBuildImageOptions(options1, options2), true, 'Empty dictionaries should be equal.');
                 });
@@ -97,11 +97,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Dictionary equal', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = { arg1: 'value1', arg2: 'value2' };
+                    options1[property] = <any>{ arg1: 'value1', arg2: 'value2' };
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = { arg1: 'value1', arg2: 'value2' };
+                    options2[property] = <any>{ arg1: 'value1', arg2: 'value2' };
 
                     assert.equal(compareBuildImageOptions(options1, options2), true, 'Equal dictionaries should be equal.');
                 });
@@ -109,11 +109,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Dictionary different keys', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = { arg1: 'value1', arg2: 'value2' };
+                    options1[property] = <any>{ arg1: 'value1', arg2: 'value2' };
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = { arg2: 'value2', arg3: 'value3' };
+                    options2[property] = <any>{ arg2: 'value2', arg3: 'value3' };
 
                     assert.equal(compareBuildImageOptions(options1, options2), !included, 'Different properties should be unequal.');
                 });
@@ -121,11 +121,11 @@ suite('debugging/coreclr/dockerManager', () => {
                 test('Dictionary different values', () => {
                     const options1: DockerBuildImageOptions = {};
 
-                    options1[property] = { arg1: 'value1', arg2: 'value2' };
+                    options1[property] = <any>{ arg1: 'value1', arg2: 'value2' };
 
                     const options2: DockerBuildImageOptions = {};
 
-                    options2[property] = { arg1: 'value1', arg2: 'value3' };
+                    options2[property] = <any>{ arg1: 'value1', arg2: 'value3' };
 
                     assert.equal(compareBuildImageOptions(options1, options2), !included, 'Different properties should be unequal.');
                 });
