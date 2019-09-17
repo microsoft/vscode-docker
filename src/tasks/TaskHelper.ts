@@ -61,16 +61,25 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
-export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<boolean> {
+export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, overwrite: boolean | undefined): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
 
-    if (allTasks.some(t => t.label === task.label)) {
-        return false;
+    const existingTaskIndex = allTasks.findIndex(t => t.label === newTask.label);
+    if (existingTaskIndex >= 0) {
+        // If a task of the same label exists already
+        if (overwrite) {
+            // If overwriting, do so
+            allTasks[existingTaskIndex] = newTask;
+        } else {
+            // If not overwriting, return false
+            return false;
+        }
+    } else {
+        allTasks.push(newTask);
     }
 
-    allTasks.push(task);
     await workspaceTasks.update('tasks', allTasks);
     return true;
 }

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MessageItem, window } from 'vscode';
+import { DialogResponses } from 'vscode-azureextensionui';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
@@ -39,23 +41,43 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
         provideDebugConfigurations: () => Promise<DockerDebugConfiguration[]>,
         provideDockerBuildTasks: () => Promise<DockerBuildTaskDefinition[]>,
         provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>): Promise<void> {
-        const debugConfigurations = await provideDebugConfigurations();
+        let overwrite: boolean | undefined;
 
         const buildTasks = await provideDockerBuildTasks();
+        const runTasks = await provideDockerRunTasks();
+        const debugConfigurations = await provideDebugConfigurations();
 
         for (const buildTask of buildTasks) {
-            await addTask(buildTask);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(buildTask, _overwrite), overwrite);
         }
 
-        const runTasks = await provideDockerRunTasks();
-
         for (const runTask of runTasks) {
-            await addTask(runTask);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(runTask, _overwrite), overwrite);
         }
 
         for (const debugConfiguration of debugConfigurations) {
-            await addDebugConfiguration(debugConfiguration);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addDebugConfiguration(debugConfiguration, _overwrite), overwrite);
         }
+    }
+
+    private static async addObjectWithOverwritePrompt(addMethod: (_overwrite: boolean | undefined) => Promise<boolean>, overwrite: boolean | undefined): Promise<boolean | undefined> {
+        const added = await addMethod(overwrite);
+
+        if (!added && overwrite === undefined) {
+            // If it did not get added due to duplicate, and we haven't prompted yet, prompt now
+            const overwriteMessageItem: MessageItem = {
+                title: 'Overwrite'
+            };
+
+            overwrite = (overwriteMessageItem === await window.showErrorMessage("Docker launch configurations and/or tasks already exist. Do you want to overwrite them?", ...[overwriteMessageItem, DialogResponses.no]));
+
+            if (overwrite) {
+                // Try again if needed
+                await addMethod(overwrite);
+            }
+        }
+
+        return overwrite;
     }
 }
 
