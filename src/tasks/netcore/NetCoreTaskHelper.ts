@@ -92,8 +92,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-run: debug',
                 dependsOn: ['docker-build: debug'],
                 dockerRun: {
-                    entrypoint: options.platformOS === 'Windows' ? 'ping' : 'tail',
-                    command: options.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null',
                     os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
