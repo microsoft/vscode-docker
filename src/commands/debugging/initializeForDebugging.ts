@@ -7,14 +7,14 @@ import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
-import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quick-pick-file';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
-    const platform = await quickPickPlatform();
+    const platform = await quickPickPlatform(['Node.js', 'ASP.NET Core', '.NET Core Console']);
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
@@ -26,6 +26,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             debugPlatform = 'node';
             break;
         default:
+            throw new Error('The selected platform is not yet supported for debugging.');
     }
 
     actionContext.telemetry.properties.platform = debugPlatform;

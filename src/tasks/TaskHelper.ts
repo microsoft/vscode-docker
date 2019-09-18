@@ -3,18 +3,20 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, QuickPickItem, Task, TaskDefinition, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { resolveFilePath } from '../utils/resolveFilePath';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
-import netCoreTaskHelper from './netcore/NetCoreTaskHelper';
-import nodeTaskHelper from './node/NodeTaskHelper';
+import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { nodeTaskHelper } from './node/NodeTaskHelper';
+import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
@@ -61,16 +63,25 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
-export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDefinition): Promise<boolean> {
+export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, overwrite: boolean | undefined): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
-    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
+    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
-    if (allTasks.some(t => t.label === task.label)) {
-        return false;
+    const existingTaskIndex = allTasks.findIndex(t => t.label === newTask.label);
+    if (existingTaskIndex >= 0) {
+        // If a task of the same label exists already
+        if (overwrite) {
+            // If overwriting, do so
+            allTasks[existingTaskIndex] = newTask;
+        } else {
+            // If not overwriting, return false
+            return false;
+        }
+    } else {
+        allTasks.push(newTask);
     }
 
-    allTasks.push(task);
     await workspaceTasks.update('tasks', allTasks);
     return true;
 }
@@ -78,21 +89,21 @@ export async function addTask(task: DockerBuildTaskDefinition | DockerRunTaskDef
 export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<DockerRunTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
-    const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
+    const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
-    return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration);
+    return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration) as DockerRunTaskDefinition;
 }
 
 export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
-    const allTasks: TaskDefinition[] = workspaceTasks && workspaceTasks.tasks as TaskDefinition[] || [];
+    const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
-    // Due to inconsistencies in the Task API, DockerRunTask does not have its dependsOn, so we need to re-find it by label
+    // Due to inconsistencies in the Task API, runTask does not have its dependsOn, so we need to re-find it by label
     // Due to more inconsistencies in the Task API, DockerRunTask.name is equal to the Tasks.json 'label'
-    const runTaskDefinition: DockerRunTaskDefinition = await findTaskByLabel(allTasks, runTask.name);
+    const runTaskDefinition: DockerRunTaskDefinitionBase = await findTaskByLabel(allTasks, runTask.name);
 
-    return await recursiveFindTaskByType(allTasks, 'docker-build', runTaskDefinition);
+    return await recursiveFindTaskByType(allTasks, 'docker-build', runTaskDefinition) as DockerBuildTaskDefinition;
 }
 
 export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
@@ -123,7 +134,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
             return { label: t.name }
         });
 
-        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the official Docker Build definition.' });
+        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the Docker Build definition.' });
         return buildTasks.find(t => t.name === item.label);
     }
 
@@ -146,8 +157,7 @@ export function getDefaultContainerName(nameHint: string, tag?: 'dev' | 'latest'
     return `${getValidImageName(nameHint)}-${tag}`;
 }
 
-// tslint:disable-next-line: no-any
-async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string, node: any): Promise<TaskDefinition | undefined> {
+export async function recursiveFindTaskByType(allTasks: TaskDefinitionBase[], type: string, node: DebugConfigurationBase | TaskDefinitionBase): Promise<TaskDefinitionBase | undefined> {
     if (!node) {
         return undefined;
     }
@@ -181,11 +191,11 @@ async function recursiveFindTaskByType(allTasks: TaskDefinition[], type: string,
     return undefined;
 }
 
-async function findTaskByLabel(allTasks: TaskDefinition[], label: string): Promise<TaskDefinition | undefined> {
+async function findTaskByLabel(allTasks: TaskDefinitionBase[], label: string): Promise<TaskDefinitionBase | undefined> {
     return allTasks.find(t => t.label === label);
 }
 
-async function findTaskByType(allTasks: TaskDefinition[], type: string): Promise<TaskDefinition | undefined> {
+async function findTaskByType(allTasks: TaskDefinitionBase[], type: string): Promise<TaskDefinitionBase | undefined> {
     return allTasks.find(t => t.type === type);
 }
 

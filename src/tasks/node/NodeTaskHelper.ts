@@ -116,7 +116,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (runOptions.image === undefined) {
-            runOptions.image = inferImageName(runDefinition, context, packageName);
+            runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, packageName);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -164,10 +164,9 @@ export class NodeTaskHelper implements TaskHelper {
     }
 
     public static async inferPackageName(packagePath: string): Promise<string> {
-        const packageJson = await fse.readFile(packagePath, 'utf8');
-        const packageContent = <NodePackage>JSON.parse(packageJson);
+        const packageContent = <NodePackage>await fse.readJSON(packagePath);
 
-        if (packageContent.name !== undefined) {
+        if (packageContent && packageContent.name !== undefined) {
             return packageContent.name;
         } else {
             return path.basename(path.dirname(packagePath));
@@ -207,6 +206,4 @@ export class NodeTaskHelper implements TaskHelper {
     }
 }
 
-const nodeTaskHelper = new NodeTaskHelper();
-
-export default nodeTaskHelper;
+export const nodeTaskHelper = new NodeTaskHelper();

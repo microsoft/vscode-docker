@@ -233,6 +233,4 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 }
 
-const netCoreDebugHelper = new NetCoreDebugHelper();
-
-export default netCoreDebugHelper;
+export const netCoreDebugHelper = new NetCoreDebugHelper();
