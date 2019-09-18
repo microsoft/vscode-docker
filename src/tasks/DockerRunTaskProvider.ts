@@ -28,22 +28,27 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
-        const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-run-resolve/${taskPlatform || 'unknown'}`,
-            async (actionContext: IActionContext) => await this.resolveTaskInternal(
-                {
-                    folder: task.scope as WorkspaceFolder,
-                    platform: taskPlatform,
-                    actionContext: actionContext,
-                    cancellationToken: token,
-                },
-                task));
+            'docker-run-resolve',
+            async (actionContext: IActionContext) => {
+                const taskPlatform = getPlatform(task.definition);
+                actionContext.telemetry.properties.platform = taskPlatform;
+
+                return await this.resolveTaskInternal(
+                    {
+                        folder: task.scope as WorkspaceFolder,
+                        platform: taskPlatform,
+                        actionContext: actionContext,
+                        cancellationToken: token,
+                    },
+                    task
+                );
+            }
+        );
     }
 
-    // TODO: Can we skip if a recently-started image exists?
+    // TODO: Can we skip if a recently-started container exists?
     protected async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
-        context.actionContext.telemetry.properties.platform = context.platform;
 
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};

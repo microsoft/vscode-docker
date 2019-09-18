@@ -9,7 +9,7 @@ import * as semver from 'semver';
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
-import dockerDebugScaffoldingProvider, { NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
@@ -276,7 +276,9 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
     }
 
     const options: NetCoreScaffoldingOptions = {
-        appProject: `\${workspaceFolder}/${artifactName}`,
+        // always use posix for debug config because it's committed to source control and works on all OS's
+        // tslint:disable-next-line: no-invalid-template-strings
+        appProject: path.posix.join('${workspaceFolder}', artifactName),
         platformOS: platformOS,
     }
 

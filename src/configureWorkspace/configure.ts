@@ -335,11 +335,6 @@ export interface ConfigureApiOptions {
     openDockerFile?: boolean;
 
     /**
-     * Whether to configure launch and tasks config for debugging
-     */
-    configureForDebugging?: boolean;
-
-    /**
      * The workspace folder for configuring
      */
     folder?: vscode.WorkspaceFolder;
@@ -358,7 +353,6 @@ export async function configure(context: IActionContext, rootFolderPath: string 
             rootPath: rootFolderPath,
             outputFolder: rootFolderPath,
             openDockerFile: true,
-            configureForDebugging: true,
             folder: folder,
         });
 
@@ -460,8 +454,8 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
             : Promise.resolve();
     }));
 
-    // Can only configure for debugging if the option to do so is true, and there's a workspace folder, and there's a scaffold function
-    if (options.configureForDebugging && options.folder && generatorInfo.initializeForDebugging) {
+    // Can only configure for debugging if there's a workspace folder, and there's a scaffold function
+    if (options.folder && generatorInfo.initializeForDebugging) {
         await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo);
     }
 
