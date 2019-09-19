@@ -21,7 +21,7 @@ interface IDockerContext {
     Endpoints: { [key: string]: IDockerEndpoint }
 }
 
-export async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {
+export async function tryGetDefaultDockerContext(): Promise<DockerOptions | undefined> {
     try {
         const { stdout, stderr } = await exec('docker context inspect');
 

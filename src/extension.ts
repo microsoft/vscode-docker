@@ -29,10 +29,10 @@ import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
-import { getDefaultDockerContext } from './utils/getDefaultDockerContext';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
+import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -311,7 +311,7 @@ async function refreshDockerode(): Promise<void> {
 
         // If DOCKER_HOST is unspecified in VSCode config or environment, get the default Docker context
         let dockerodeOptions: Dockerode.DockerOptions =
-            process.env.DOCKER_HOST ? undefined : await getDefaultDockerContext();
+            process.env.DOCKER_HOST ? undefined : await tryGetDefaultDockerContext();
 
         ext.dockerodeInitError = undefined;
         ext.dockerode = new Dockerode(dockerodeOptions);
