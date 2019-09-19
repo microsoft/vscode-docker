@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { ShellQuotedString, WorkspaceFolder } from 'vscode';
-import { inferPackageName, NodePackage, readPackage } from '../../utils/nodeUtils';
+import { WorkspaceFolder } from 'vscode';
+import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
 import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
@@ -21,8 +21,6 @@ export interface NodeBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
     node?: NodeTaskBuildOptions;
 }
 
-export type InspectMode = 'default' | 'break';
-
 export interface NodeTaskRunOptions {
     enableDebugging?: boolean;
     inspectMode?: InspectMode;
@@ -35,8 +33,6 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    private static readonly StartScriptName: string = 'start';
-
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
@@ -132,7 +128,7 @@ export class NodeTaskHelper implements TaskHelper {
             const inspectPort = helperOptions.inspectPort !== undefined ? helperOptions.inspectPort : 9229;
 
             if (runOptions.command === undefined) {
-                runOptions.command = await NodeTaskHelper.inferCommand(await getNodePackage(), inspectMode, inspectPort);
+                runOptions.command = await inferCommand(await getNodePackage(), inspectMode, inspectPort);
             }
 
             if (runOptions.ports === undefined) {
@@ -177,27 +173,6 @@ export class NodeTaskHelper implements TaskHelper {
 
     private static inferDockerfilePath(packagePath: string): string {
         return path.join(path.dirname(packagePath), 'Dockerfile');
-    }
-
-    private static async inferCommand(nodePackage: NodePackage, inspectMode: InspectMode, inspectPort: number): Promise<string | ShellQuotedString[]> {
-        const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
-        const inspectArgWithPort = `${inspectArg}=0.0.0.0:${inspectPort}`;
-
-        if (nodePackage.scripts) {
-            const startScript = nodePackage.scripts[NodeTaskHelper.StartScriptName];
-
-            if (startScript && startScript.startsWith('node ')) {
-                const updatedStartScript = `node ${inspectArgWithPort} ${startScript.substring(5)}`;
-
-                return updatedStartScript;
-            }
-        }
-
-        if (nodePackage.main) {
-            return `node ${inspectArgWithPort} ${nodePackage.main}`;
-        }
-
-        throw new Error(`Unable to infer the command to run the application within the container. Set the 'dockerRun.command' property and include the Node.js '${inspectArgWithPort}' argument.`);
     }
 }
 
