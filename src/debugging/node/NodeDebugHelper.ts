@@ -98,6 +98,4 @@ export class NodeDebugHelper implements DebugHelper {
     }
 }
 
-const nodeDebugHelper = new NodeDebugHelper();
-
-export default nodeDebugHelper;
+export const nodeDebugHelper = new NodeDebugHelper();

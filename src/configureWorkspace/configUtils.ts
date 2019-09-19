@@ -54,14 +54,14 @@ function splitPorts(value: string): number[] | undefined {
  * Prompts for a platform
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function quickPickPlatform(): Promise<Platform> {
+export async function quickPickPlatform(platforms?: Platform[]): Promise<Platform> {
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Application Platform'
     }
 
-    const platforms: Platform[] = [
+    platforms = platforms || [
         'Go',
         'Java',
         '.NET Core Console',

@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TaskDefinition } from 'vscode';
+import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerBuildOptions {
-    args?: { [key: string]: string };
+    buildArgs?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
     labels?: { [key: string]: string };
@@ -15,6 +15,6 @@ export interface DockerBuildOptions {
     pull?: boolean;
 }
 
-export interface DockerBuildTaskDefinitionBase extends TaskDefinition {
+export interface DockerBuildTaskDefinitionBase extends TaskDefinitionBase {
     dockerBuild?: DockerBuildOptions;
 }

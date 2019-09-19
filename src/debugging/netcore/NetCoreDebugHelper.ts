@@ -192,7 +192,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             await this.vsDbgClientFactory().getVsDbgVersion('latest', 'linux-musl-x64');
         }
 
-        const debuggerScriptPath = path.join(ext.context.asAbsolutePath('src/debugging/netcore'), 'vsdbg');
+        const debuggerScriptPath = path.join(ext.context.asAbsolutePath('resources'), 'vsdbg');
         const destPath = path.join(NetCoreDebugHelper.getHostDebuggerPathBase(), 'vsdbg');
         await fse.copyFile(debuggerScriptPath, destPath);
         await fse.chmod(destPath, 0o755); // Give all read and execute permissions
@@ -233,6 +233,4 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 }
 
-const netCoreDebugHelper = new NetCoreDebugHelper();
-
-export default netCoreDebugHelper;
+export const netCoreDebugHelper = new NetCoreDebugHelper();

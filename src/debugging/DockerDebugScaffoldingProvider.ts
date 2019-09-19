@@ -3,15 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MessageItem, window } from 'vscode';
+import { DialogResponses } from 'vscode-azureextensionui';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
-import netCoreTaskHelper, { NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
-import nodeTaskHelper from '../tasks/node/NodeTaskHelper';
+import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
+import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
 import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
-import netCoreDebugHelper, { NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
-import nodeDebugHelper from './node/NodeDebugHelper';
+import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
+import { nodeDebugHelper } from './node/NodeDebugHelper';
 
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 
@@ -23,45 +25,60 @@ export interface IDockerDebugScaffoldingProvider {
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
     public async initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
-            context,
-            (_context: DockerDebugScaffoldContext) => netCoreDebugHelper.provideDebugConfigurations(_context, options),
-            (_context: DockerDebugScaffoldContext) => netCoreTaskHelper.provideDockerBuildTasks(_context, options),
-            (_context: DockerDebugScaffoldContext) => netCoreTaskHelper.provideDockerRunTasks(_context, options));
+            () => netCoreDebugHelper.provideDebugConfigurations(context, options),
+            () => netCoreTaskHelper.provideDockerBuildTasks(context, options),
+            () => netCoreTaskHelper.provideDockerRunTasks(context, options));
     }
 
     public async initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void> {
         await this.initializeForDebugging(
-            context,
-            (_context: DockerDebugScaffoldContext) => nodeDebugHelper.provideDebugConfigurations(_context),
-            (_context: DockerDebugScaffoldContext) => nodeTaskHelper.provideDockerBuildTasks(_context),
-            (_context: DockerDebugScaffoldContext) => nodeTaskHelper.provideDockerRunTasks(_context));
+            () => nodeDebugHelper.provideDebugConfigurations(context),
+            () => nodeTaskHelper.provideDockerBuildTasks(context),
+            () => nodeTaskHelper.provideDockerRunTasks(context));
     }
 
     private async initializeForDebugging(
-        context: DockerDebugScaffoldContext,
-        provideDebugConfigurations: (_context: DockerDebugScaffoldContext) => Promise<DockerDebugConfiguration[]>,
-        provideDockerBuildTasks: (_context: DockerDebugScaffoldContext) => Promise<DockerBuildTaskDefinition[]>,
-        provideDockerRunTasks: (_context: DockerDebugScaffoldContext) => Promise<DockerRunTaskDefinition[]>): Promise<void> {
-        const debugConfigurations = await provideDebugConfigurations(context);
+        provideDebugConfigurations: () => Promise<DockerDebugConfiguration[]>,
+        provideDockerBuildTasks: () => Promise<DockerBuildTaskDefinition[]>,
+        provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>): Promise<void> {
+        let overwrite: boolean | undefined;
 
-        const buildTasks = await provideDockerBuildTasks(context);
+        const buildTasks = await provideDockerBuildTasks();
+        const runTasks = await provideDockerRunTasks();
+        const debugConfigurations = await provideDebugConfigurations();
 
         for (const buildTask of buildTasks) {
-            await addTask(buildTask);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(buildTask, _overwrite), overwrite);
         }
 
-        const runTasks = await provideDockerRunTasks(context);
-
         for (const runTask of runTasks) {
-            await addTask(runTask);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(runTask, _overwrite), overwrite);
         }
 
         for (const debugConfiguration of debugConfigurations) {
-            await addDebugConfiguration(debugConfiguration);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addDebugConfiguration(debugConfiguration, _overwrite), overwrite);
         }
+    }
+
+    private static async addObjectWithOverwritePrompt(addMethod: (_overwrite: boolean | undefined) => Promise<boolean>, overwrite: boolean | undefined): Promise<boolean | undefined> {
+        const added = await addMethod(overwrite);
+
+        if (!added && overwrite === undefined) {
+            // If it did not get added due to duplicate, and we haven't prompted yet, prompt now
+            const overwriteMessageItem: MessageItem = {
+                title: 'Overwrite'
+            };
+
+            overwrite = (overwriteMessageItem === await window.showErrorMessage("Docker launch configurations and/or tasks already exist. Do you want to overwrite them?", ...[overwriteMessageItem, DialogResponses.no]));
+
+            if (overwrite) {
+                // Try again if needed
+                await addMethod(overwrite);
+            }
+        }
+
+        return overwrite;
     }
 }
 
-const dockerDebugScaffoldingProvider: IDockerDebugScaffoldingProvider = new DockerDebugScaffoldingProvider();
-
-export default dockerDebugScaffoldingProvider;
+export const dockerDebugScaffoldingProvider: IDockerDebugScaffoldingProvider = new DockerDebugScaffoldingProvider();

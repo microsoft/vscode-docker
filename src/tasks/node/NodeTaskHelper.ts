@@ -120,7 +120,7 @@ export class NodeTaskHelper implements TaskHelper {
         }
 
         if (runOptions.image === undefined) {
-            runOptions.image = inferImageName(runDefinition, context, packageName);
+            runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, packageName);
         }
 
         if (helperOptions && helperOptions.enableDebugging) {
@@ -176,6 +176,4 @@ export class NodeTaskHelper implements TaskHelper {
     }
 }
 
-const nodeTaskHelper = new NodeTaskHelper();
-
-export default nodeTaskHelper;
+export const nodeTaskHelper = new NodeTaskHelper();
