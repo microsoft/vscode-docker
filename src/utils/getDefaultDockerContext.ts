@@ -8,6 +8,18 @@ import { DockerOptions } from 'dockerode';
 import * as util from 'util';
 
 const exec = util.promisify(cp.exec);
+const unix = 'unix://';
+const npipe = 'npipe://';
+
+// Not exhaustive--only the properties we're interested in
+interface IDockerEndpoint {
+    Host?: string;
+}
+
+// Not exhaustive--only the properties we're interested in
+interface IDockerContext {
+    Endpoints: { [key: string]: IDockerEndpoint }
+}
 
 export async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {
     try {
@@ -21,22 +33,21 @@ export async function getDefaultDockerContext(): Promise<DockerOptions | undefin
             return undefined;
         }
 
-        const dockerContext = JSON.parse(stdout);
-        // tslint:disable: no-unsafe-any
-        const host: string =
-            Array.isArray(dockerContext) && dockerContext.length > 0 &&
-            dockerContext[0].Endpoints &&
-            dockerContext[0].Endpoints.docker &&
-            dockerContext[0].Endpoints.docker.Host;
-        // tslint:enable: no-unsafe-any
+        const dockerContexts = <IDockerContext[]>JSON.parse(stdout);
+        const defaultHost: string =
+            dockerContexts &&
+            dockerContexts.length > 0 &&
+            dockerContexts[0].Endpoints &&
+            dockerContexts[0].Endpoints.docker &&
+            dockerContexts[0].Endpoints.docker.Host;
 
-        if (host.indexOf('unix://') === 0) {
+        if (defaultHost.indexOf(unix) === 0) {
             return {
-                socketPath: host.substring(7), // Everything after the unix:// (expecting unix:///var/run/docker.sock)
+                socketPath: defaultHost.substring(unix.length), // Everything after the unix:// (expecting unix:///var/run/docker.sock)
             }
-        } else if (host.indexOf('npipe://') === 0) {
+        } else if (defaultHost.indexOf(npipe) === 0) {
             return {
-                socketPath: host.substring(8), // Everything after the npipe:// (expecting npipe:////./pipe/docker_engine or npipe:////./pipe/docker_wsl)
+                socketPath: defaultHost.substring(npipe.length), // Everything after the npipe:// (expecting npipe:////./pipe/docker_engine or npipe:////./pipe/docker_wsl)
             }
         }
 
