@@ -310,7 +310,7 @@ async function refreshDockerode(): Promise<void> {
         addDockerSettingsToEnv(process.env, oldEnv);
 
         // If DOCKER_HOST is unspecified in VSCode config or environment, get the default Docker context
-        let dockerodeOptions: Dockerode.DockerOptions =
+        let dockerodeOptions: Dockerode.DockerOptions | undefined =
             process.env.DOCKER_HOST ? undefined : await tryGetDefaultDockerContext();
 
         ext.dockerodeInitError = undefined;
