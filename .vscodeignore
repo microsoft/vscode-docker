@@ -23,3 +23,6 @@ tsconfig.json
 tslint.json
 typings/**
 webpack.config*
+
+# Include the vsdbg script for Linux
+!src/debugging/netcore/vsdbg
