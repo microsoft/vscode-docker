@@ -22,8 +22,13 @@ export async function getDefaultDockerContext(): Promise<DockerOptions | undefin
         }
 
         const dockerContext = JSON.parse(stdout);
-        // tslint:disable-next-line: no-unsafe-any
-        const host: string = dockerContext && dockerContext.Endpoints && dockerContext.Endpoints.docker && dockerContext.Endpoints.docker.Host;
+        // tslint:disable: no-unsafe-any
+        const host: string =
+            Array.isArray(dockerContext) && dockerContext.length > 0 &&
+            dockerContext[0].Endpoints &&
+            dockerContext[0].Endpoints.docker &&
+            dockerContext[0].Endpoints.docker.Host;
+        // tslint:enable: no-unsafe-any
 
         if (host.indexOf('unix://') === 0) {
             return {
