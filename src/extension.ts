@@ -42,6 +42,9 @@ export interface ComposeVersionKeys {
     v2: KeyInfo;
 }
 
+const stableExtensionId = 'vscode-docker';
+const nightlyExtensionId = 'vscode-docker-nightly';
+
 let client: LanguageClient;
 
 const DOCUMENT_SELECTOR: DocumentSelector = [
@@ -72,6 +75,11 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
     perfStats.loadEndTime = Date.now();
+
+    if (isNightly(ctx) && isStableInstalled()) {
+        vscode.window.showErrorMessage('It is not supported to have both the Stable and Nightly versions of the Docker extension installed. Please uninstall one of them. The Nightly version will not be activated.');
+        return;
+    }
 
     initializeExtensionVariables(ctx);
     await setRequestDefaults();
@@ -184,7 +192,11 @@ async function setRequestDefaults(): Promise<void> {
     ext.request = requestWithDefaults;
 }
 
-export async function deactivateInternal(): Promise<void> {
+export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
+    if (isNightly(ctx) && isStableInstalled()) {
+        return;
+    }
+
     if (!client) {
         return undefined;
     }
@@ -315,4 +327,12 @@ function refreshDockerode(): void {
     } finally {
         process.env = oldEnv;
     }
+}
+
+function isNightly(ctx: vscode.ExtensionContext): boolean {
+    return ctx.extensionPath.indexOf(nightlyExtensionId) >= 0;
+}
+
+function isStableInstalled(): boolean {
+    return vscode.extensions.all.some(e => e.id === stableExtensionId);
 }
