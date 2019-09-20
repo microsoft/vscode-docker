@@ -16,7 +16,7 @@ interface IDockerEndpoint {
     Host?: string;
 }
 
-// Not exhaustive--only the properties we're interested in
+// Also not exhaustive--only the properties we're interested in
 interface IDockerContext {
     Endpoints: { [key: string]: IDockerEndpoint }
 }
