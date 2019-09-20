@@ -45,16 +45,8 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
 
         await ext.context.globalState.update(dockerFileKey, imageName);
 
-        let relativeFilePath: string = dockerFileItem.relativeFilePath;
-
-        // NOTE: Prefer forward-slashes even on Windows, as they work both in CMD as well as bash-based shells.
-        if (process.platform === 'win32') {
-            contextPath = contextPath.replace(/\\/g, '/');
-            relativeFilePath = relativeFilePath.replace(/\\/g, '/');
-        }
-
         const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-        terminal.sendText(`docker build --rm -f "${relativeFilePath}" -t ${imageName} "${contextPath}"`);
+        terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageName} "${contextPath}"`);
         terminal.show();
     }
 }
