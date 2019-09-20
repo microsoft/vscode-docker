@@ -21,7 +21,7 @@ interface IDockerContext {
 
 export async function tryGetDefaultDockerContext(): Promise<DockerOptions> {
     return await new Promise<DockerOptions>((resolve, reject) => {
-        cp.exec('docker context inspect', (error, stdout, stderr) => {
+        cp.exec('docker context inspect', { timeout: 5000 }, (error, stdout, stderr) => {
             if (error || stderr || !stdout) {
                 resolve(undefined);
             }
