@@ -26,23 +26,25 @@ export async function tryGetDefaultDockerContext(): Promise<DockerOptions> {
                 resolve(undefined);
             }
 
-            const dockerContexts = <IDockerContext[]>JSON.parse(stdout);
-            const defaultHost: string =
-                dockerContexts &&
-                dockerContexts.length > 0 &&
-                dockerContexts[0].Endpoints &&
-                dockerContexts[0].Endpoints.docker &&
-                dockerContexts[0].Endpoints.docker.Host;
+            try {
+                const dockerContexts = <IDockerContext[]>JSON.parse(stdout);
+                const defaultHost: string =
+                    dockerContexts &&
+                    dockerContexts.length > 0 &&
+                    dockerContexts[0].Endpoints &&
+                    dockerContexts[0].Endpoints.docker &&
+                    dockerContexts[0].Endpoints.docker.Host;
 
-            if (defaultHost.indexOf(unix) === 0) {
-                resolve({
-                    socketPath: defaultHost.substring(unix.length), // Everything after the unix:// (expecting unix:///var/run/docker.sock)
-                });
-            } else if (defaultHost.indexOf(npipe) === 0) {
-                resolve({
-                    socketPath: defaultHost.substring(npipe.length), // Everything after the npipe:// (expecting npipe:////./pipe/docker_engine or npipe:////./pipe/docker_wsl)
-                });
-            }
+                if (defaultHost.indexOf(unix) === 0) {
+                    resolve({
+                        socketPath: defaultHost.substring(unix.length), // Everything after the unix:// (expecting unix:///var/run/docker.sock)
+                    });
+                } else if (defaultHost.indexOf(npipe) === 0) {
+                    resolve({
+                        socketPath: defaultHost.substring(npipe.length), // Everything after the npipe:// (expecting npipe:////./pipe/docker_engine or npipe:////./pipe/docker_wsl)
+                    });
+                }
+            } catch { } // Best effort
 
             // We won't try harder than that; for more complicated scenarios user will need to set DOCKER_HOST etc. in environment or VSCode options
             resolve(undefined);
