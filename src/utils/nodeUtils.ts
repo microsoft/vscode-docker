@@ -19,11 +19,9 @@ export async function readPackage(packagePath: string): Promise<NodePackage> {
 }
 
 export async function inferPackageName(nodePackage: NodePackage | undefined, packagePath: string): Promise<string> {
-    if (nodePackage && nodePackage.name !== undefined) {
-        return nodePackage.name;
-    } else {
-        return path.basename(path.dirname(packagePath));
-    }
+    return nodePackage && nodePackage.name
+        ? nodePackage.name
+        : path.basename(path.dirname(packagePath));
 }
 
 const StartScriptName: string = 'start';

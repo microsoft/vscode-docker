@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
+import Lazy from '../../utils/lazy';
 import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
 import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
@@ -102,18 +103,12 @@ export class NodeTaskHelper implements TaskHelper {
 
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, context.folder);
 
-        let nodePackage: NodePackage;
-
-        const getNodePackage: () => Promise<NodePackage> =
+        const nodePackage = new Lazy<Promise<NodePackage>>(
             async () => {
-                if (nodePackage === undefined) {
-                    return await readPackage(packagePath);
-                }
+                return await readPackage(packagePath);
+            });
 
-                return nodePackage;
-            };
-
-        const packageName = await inferPackageName(await getNodePackage(), packagePath);
+        const packageName = await inferPackageName(await nodePackage.value, packagePath);
 
         if (runOptions.containerName === undefined) {
             runOptions.containerName = getDefaultContainerName(packageName);
@@ -128,7 +123,7 @@ export class NodeTaskHelper implements TaskHelper {
             const inspectPort = helperOptions.inspectPort !== undefined ? helperOptions.inspectPort : 9229;
 
             if (runOptions.command === undefined) {
-                runOptions.command = await inferCommand(await getNodePackage(), inspectMode, inspectPort);
+                runOptions.command = await inferCommand(await nodePackage.value, inspectMode, inspectPort);
             }
 
             if (runOptions.ports === undefined) {

@@ -20,6 +20,12 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
             assert.equal(packageName, 'app', 'The inferred package name should be the parent folder name if no name is specified in the package');
         });
 
+        test('Empty package name', async () => {
+            const packageName = await inferPackageName({ name: '' }, '/Users/user/app/package.json');
+
+            assert.equal(packageName, 'app', 'The inferred package name should be the parent folder name if an empty name is specified in the package');
+        });
+
         test('With package name', async () => {
             const packageName = await inferPackageName({ name: 'appname' }, '/Users/user/app/package.json');
 
