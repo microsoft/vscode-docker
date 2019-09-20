@@ -9,7 +9,7 @@ steps:
 
 - script: |
     echo "NIGHTLY enabled"
-    node .azure-pipelines/nightlyVersionBump.js
+    node .azure-pipelines/common/nightlyVersionBump.js
     cat README.md >> README.nightly.md
     mv README.nightly.md README.md
   displayName: 'Tweak version for nightly'
