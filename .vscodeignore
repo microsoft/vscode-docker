@@ -13,6 +13,8 @@ docs/**
 gulp*
 node_modules/**
 out/**
+package.nightly.json
+README.nightly.md
 resources/readme/**
 src/**
 stats.json

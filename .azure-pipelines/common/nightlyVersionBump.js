@@ -5,17 +5,17 @@
 
 // Adapted from Remote SSH - Nightly extension
 
-const fs = require('fs');
+const fse = require('fs-extra');
 
 // update name, publisher, and description
-const json = JSON.parse(fs.readFileSync('./package.json').toString());
+const json = fse.readJsonSync('./package.json');
 
 // calculate version
 const date = new Date();
 const monthMinutes = (date.getDate() - 1) * 24 * 60 + date.getHours() * 60 + date.getMinutes();
 const version = `${date.getFullYear()}.${date.getMonth() + 1}.${monthMinutes}`;
 
-const jsonMixin = JSON.parse(fs.readFileSync('./package.nightly.json').toString());
+const jsonMixin = fse.readJsonSync('./package.nightly.json');
 
 const nightlyPackageJson = {
     ...json,
@@ -31,4 +31,4 @@ console.log('  version: ' + nightlyPackageJson.version);
 console.log('  displayName: ' + nightlyPackageJson.displayName);
 console.log('  description: ' + nightlyPackageJson.description);
 
-fs.writeFileSync('./package.json', JSON.stringify(nightlyPackageJson));
+fse.writeFileSync('./package.json', JSON.stringify(nightlyPackageJson));

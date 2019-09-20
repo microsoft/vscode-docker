@@ -7,6 +7,14 @@ steps:
 - task: Npm@1
   displayName: 'npm install'
 
+- script: |
+    echo "NIGHTLY enabled"
+    node .azure-pipelines/nightlyVersionBump.js
+    cat README.md >> README.nightly.md
+    mv README.nightly.md README.md
+  displayName: 'Tweak version for nightly'
+  condition: eq(${{ parameters.nightly }}, true)
+
 - task: Npm@1
   displayName: 'Build'
   inputs:
