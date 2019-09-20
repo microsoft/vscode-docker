@@ -23,7 +23,7 @@ interface IDockerContext {
 
 export async function tryGetDefaultDockerContext(): Promise<DockerOptions | undefined> {
     try {
-        const { stdout, stderr } = await exec('docker context inspect');
+        const { stdout, stderr } = await exec('docker context inspect', { timeout: 5000 });
 
         if (stderr) {
             throw new Error(stderr);
