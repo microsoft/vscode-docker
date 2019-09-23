@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { Task } from 'vscode';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveFilePath } from '../utils/resolveFilePath';
@@ -29,49 +28,20 @@ export interface DockerBuildTask extends Task {
 export class DockerBuildTaskProvider extends DockerTaskProviderBase {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers) }
 
-    public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
-        return callWithTelemetryAndErrorHandling(
-            'docker-build-resolve',
-            async (actionContext: IActionContext) => {
-                const taskPlatform = getPlatform(task.definition);
-                actionContext.telemetry.properties.platform = taskPlatform;
-
-                return await this.resolveTaskInternal(
-                    {
-                        folder: task.scope as WorkspaceFolder,
-                        platform: taskPlatform,
-                        actionContext: actionContext,
-                        cancellationToken: token,
-                    },
-                    task
-                );
-            }
-        );
-    }
-
     // TODO: Skip if image is freshly built
-    protected async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
+    protected async executeTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<void> {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
-        if (!context.folder) {
-            throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
-        }
-
         const helper = this.getHelper(context.platform);
 
-        definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
-        // TODO : addDockerSettingsToEnv?
-        return new Task(
-            task.definition,
-            task.scope,
-            task.name,
-            task.source,
-            new ShellExecution(commandLine[0], commandLine.slice(1)),
-            task.problemMatchers);
+
+        // TODO: process errors from docker build so that warnings aren't fatal
+        await context.shell.executeCommandInTerminal(commandLine, true);
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
@@ -92,7 +62,7 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
         }
     }
 
-    private async resolveCommandLine(options: DockerBuildOptions): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(options: DockerBuildOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
@@ -101,17 +71,6 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
             .withKeyValueArgs('--label', options.labels)
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
-            .withQuotedArg(options.context)
-            .buildShellQuotedStrings();
-    }
-
-    private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
-        }
-
-        return helper;
+            .withQuotedArg(options.context);
     }
 }

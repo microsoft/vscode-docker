@@ -1907,8 +1907,9 @@
         }
     },
     "engines": {
-        "vscode": "^1.37.0"
+        "vscode": "^1.39.0"
     },
+    "enableProposedApi": true,
     "scripts": {
         "vscode:prepublish": "npm run webpack-prod",
         "build": "tsc -p ./",

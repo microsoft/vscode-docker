@@ -82,7 +82,7 @@ export class NodeTaskHelper implements TaskHelper {
         ];
     }
 
-    public async resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
+    public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
         const helperOptions = buildDefinition.node || {};
         const buildOptions = buildDefinition.dockerBuild;
 
@@ -104,7 +104,7 @@ export class NodeTaskHelper implements TaskHelper {
         return buildOptions;
     }
 
-    public async resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
+    public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
         const helperOptions = runDefinition.node || {};
         const runOptions = runDefinition.dockerRun;
 

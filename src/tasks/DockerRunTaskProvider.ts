@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { Task } from 'vscode';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
@@ -27,28 +26,8 @@ export interface DockerRunTask extends Task {
 export class DockerRunTaskProvider extends DockerTaskProviderBase {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
-    public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
-        return callWithTelemetryAndErrorHandling(
-            'docker-run-resolve',
-            async (actionContext: IActionContext) => {
-                const taskPlatform = getPlatform(task.definition);
-                actionContext.telemetry.properties.platform = taskPlatform;
-
-                return await this.resolveTaskInternal(
-                    {
-                        folder: task.scope as WorkspaceFolder,
-                        platform: taskPlatform,
-                        actionContext: actionContext,
-                        cancellationToken: token,
-                    },
-                    task
-                );
-            }
-        );
-    }
-
     // TODO: Can we skip if a recently-started container exists?
-    protected async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
+    protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
 
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
@@ -61,18 +40,14 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         const helper = this.getHelper(context.platform);
 
-        definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        definition.dockerRun = await helper.getDockerRunOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
-        // TODO : addDockerSettingsToEnv?
-        return new Task(
-            task.definition,
-            task.scope,
-            task.name,
-            task.source,
-            new ShellExecution(commandLine[0], commandLine.slice(1)),
-            task.problemMatchers);
+
+        // TODO: get container ID from output?
+        // TODO: process errors from docker run so that warnings aren't fatal
+        await context.shell.executeCommandInTerminal(commandLine, true);
     }
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
@@ -85,7 +60,7 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
         }
     }
 
-    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
             .create('docker', 'run', '-dt')
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
@@ -100,17 +75,6 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
             .withQuotedArg(runOptions.image)
-            .withArgs(runOptions.command)
-            .buildShellQuotedStrings();
-    }
-
-    private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);
-        }
-
-        return helper;
+            .withArgs(runOptions.command);
     }
 }

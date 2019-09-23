@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as cp from 'child_process';
-import { CancellationTokenSource, Event, EventEmitter, PseudoTerminal, Task, TerminalDimensions } from 'vscode';
+import { CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
 import { DockerTaskProviderBase } from './DockerTaskProviderBase';
-import { DockerTaskContext, DockerTaskExecutionContext } from './TaskHelper';
+import { DockerTaskExecutionContext } from './TaskHelper';
 
-export class DockerPseudoShell implements PseudoTerminal {
+export class DockerPseudoShell implements Pseudoterminal {
     private readonly closeEmitter: EventEmitter<number> = new EventEmitter<number>();
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
@@ -19,17 +19,17 @@ export class DockerPseudoShell implements PseudoTerminal {
     public onDidWrite: Event<string> = this.writeEmitter.event;
     public onDidClose: Event<number> = this.closeEmitter.event;
 
-    constructor(private readonly taskProvider: DockerTaskProviderBase, private readonly task: DockerBuildTask | DockerRunTask, private readonly context: DockerTaskContext) { }
+    constructor(private readonly taskProvider: DockerTaskProviderBase, private readonly task: DockerBuildTask | DockerRunTask) { }
 
     public async open(initialDimensions: TerminalDimensions | undefined): Promise<void> {
         const executeContext: DockerTaskExecutionContext = {
-            folder: this.context.folder,
-            platform: this.context.platform,
-            actionContext: this.context.actionContext,
+            folder: this.task.scope as WorkspaceFolder,
             cancellationToken: this.cts.token,
+            shell: this,
         }
 
-        await this.taskProvider.executeTask(executeContext, this.task);
+        const result = await this.taskProvider.executeTask(executeContext, this.task);
+        this.close(result);
     }
 
     public close(code?: number): void {
@@ -37,14 +37,16 @@ export class DockerPseudoShell implements PseudoTerminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeInTerminal(command: CommandLineBuilder): Promise<{ stdout: string, stderr: string }> {
+    public async executeCommandInTerminal(command: CommandLineBuilder, rejectOnStdError?: boolean): Promise<{ stdout: string, stderr: string }> {
         const commandLine = command.build();
         this.writeOutputLine(commandLine);
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
             const process = cp.exec(commandLine, (error, stdout, stderr) => {
                 if (error) {
                     reject(error);
-                } else if (stderr) {
+                }
+
+                if (stderr && rejectOnStdError) {
                     reject(stderr);
                 }
 

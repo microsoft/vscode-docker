@@ -12,16 +12,19 @@ import { ext } from '../extensionVariables';
 import { resolveFilePath } from '../utils/resolveFilePath';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerPseudoShell } from './DockerPseudoShell';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 
+export type DockerTaskProviderName = 'docker-build' | 'docker-run';
+
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
-    platform: DockerPlatform;
-    actionContext: IActionContext;
+    platform?: DockerPlatform;
+    actionContext?: IActionContext;
     cancellationToken?: CancellationToken;
 }
 
@@ -29,21 +32,28 @@ export interface DockerTaskScaffoldContext extends DockerTaskContext {
     dockerfile: string;
 }
 
-// tslint:disable-next-line: no-empty-interface
-export interface DockerBuildTaskContext extends DockerTaskContext {
+export interface DockerTaskExecutionContext extends DockerTaskContext {
+    shell: DockerPseudoShell;
 }
 
-export interface DockerRunTaskContext extends DockerTaskContext {
+// tslint:disable-next-line: no-empty-interface
+export interface DockerBuildTaskContext extends DockerTaskExecutionContext {
+    buildTaskResult?: string;
+}
+
+export interface DockerRunTaskContext extends DockerTaskExecutionContext {
+    runTaskResult?: string;
     buildDefinition?: DockerBuildTaskDefinition;
 }
 
-// tslint:disable-next-line: no-empty-interface
-export interface DockerTaskExecutionContext extends DockerTaskContext {
-}
-
 export interface TaskHelper {
-    resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
+    preBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
+    getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+    postBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
+
+    preRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
+    getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
+    postRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

@@ -42,6 +42,8 @@ class TestTerminal implements vscode.Terminal {
     private _suffix: number;
     private _disposed: boolean = false;
 
+    readonly dimensions = undefined;
+
     constructor(private _terminal: vscode.Terminal) {
         let root = vscode.workspace.rootPath || os.tmpdir();
         this._suffix = TestTerminal._lastSuffix++;
