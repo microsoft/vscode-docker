@@ -46,7 +46,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         await ext.context.globalState.update(dockerFileKey, imageName);
 
         const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-        terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageName} ${contextPath}`);
+        terminal.sendText(`docker build --rm -f "${dockerFileItem.relativeFilePath}" -t ${imageName} "${contextPath}"`);
         terminal.show();
     }
 }
