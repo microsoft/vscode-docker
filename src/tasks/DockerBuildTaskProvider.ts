@@ -13,7 +13,7 @@ import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { DockerBuildTaskContext, TaskHelper } from './TaskHelper';
+import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -37,15 +37,18 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         if (helper.preBuild) {
             await helper.preBuild(context, definition);
+            throwIfCancellationRequested(context);
         }
 
         definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerBuild);
+        throwIfCancellationRequested(context);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
         // TODO: process errors from docker build so that warnings aren't fatal
         await context.shell.executeCommandInTerminal(commandLine, true);
+        throwIfCancellationRequested(context);
 
         if (helper.postBuild) {
             // TODO: attach results to context

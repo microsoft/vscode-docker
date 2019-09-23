@@ -11,7 +11,7 @@ import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
-import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper } from './TaskHelper';
+import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -38,16 +38,19 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         if (helper.preRun) {
             await helper.preRun(context, definition);
+            throwIfCancellationRequested(context);
         }
 
         definition.dockerRun = await helper.getDockerRunOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerRun);
+        throwIfCancellationRequested(context);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
 
         // TODO: get container ID from output?
         // TODO: process errors from docker run so that warnings aren't fatal
         await context.shell.executeCommandInTerminal(commandLine, true);
+        throwIfCancellationRequested(context);
 
         if (helper.preRun) {
             // TODO: attach results to context

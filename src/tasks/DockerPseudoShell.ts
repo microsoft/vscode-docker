@@ -55,6 +55,8 @@ export class DockerPseudoShell implements Pseudoterminal {
 
             process.stderr.on('data', (chunk: Buffer) => this.writeError(chunk.toString()));
             process.stdout.on('data', (chunk: Buffer) => this.writeOutput(chunk.toString()));
+
+            // TODO: implement kill on cancel?
         });
     }
 

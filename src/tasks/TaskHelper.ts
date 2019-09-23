@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
@@ -26,6 +26,14 @@ export interface DockerTaskContext {
     platform?: DockerPlatform;
     actionContext?: IActionContext;
     cancellationToken?: CancellationToken;
+}
+
+export function throwIfCancellationRequested(context: DockerTaskContext): void {
+    if (context &&
+        context.cancellationToken &&
+        context.cancellationToken.isCancellationRequested) {
+        throw new UserCancelledError();
+    }
 }
 
 export interface DockerTaskScaffoldContext extends DockerTaskContext {
