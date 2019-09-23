@@ -35,6 +35,10 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         const helper = this.getHelper(context.platform);
 
+        if (helper.preBuild) {
+            await helper.preBuild(context, definition);
+        }
+
         definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
@@ -42,6 +46,11 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         // TODO: process errors from docker build so that warnings aren't fatal
         await context.shell.executeCommandInTerminal(commandLine, true);
+
+        if (helper.postBuild) {
+            // TODO: attach results to context
+            await helper.postBuild(context, definition);
+        }
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {

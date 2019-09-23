@@ -32,13 +32,13 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
-        if (!context.folder) {
-            throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
-        }
-
         context.buildDefinition = await getAssociatedDockerBuildTask(task);
 
         const helper = this.getHelper(context.platform);
+
+        if (helper.preRun) {
+            await helper.preRun(context, definition);
+        }
 
         definition.dockerRun = await helper.getDockerRunOptions(context, definition);
         await this.validateResolvedDefinition(context, definition.dockerRun);
@@ -48,6 +48,11 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
         // TODO: get container ID from output?
         // TODO: process errors from docker run so that warnings aren't fatal
         await context.shell.executeCommandInTerminal(commandLine, true);
+
+        if (helper.preRun) {
+            // TODO: attach results to context
+            await helper.preRun(context, definition);
+        }
     }
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
