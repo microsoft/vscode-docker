@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as cp from 'child_process';
-import { CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
+import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
@@ -37,7 +37,7 @@ export class DockerPseudoShell implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeCommandInTerminal(command: CommandLineBuilder, rejectOnStdError?: boolean): Promise<{ stdout: string, stderr: string }> {
+    public async executeCommandInTerminal(command: CommandLineBuilder, rejectOnStdError?: boolean, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
         const commandLine = command.build();
         this.writeOutputLine(commandLine);
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
@@ -53,10 +53,17 @@ export class DockerPseudoShell implements Pseudoterminal {
                 resolve({ stdout, stderr });
             });
 
+            if (token) {
+                const cancelHandler = token.onCancellationRequested(() => {
+                    process.kill();
+                });
+                process.on('exit', () => {
+                    cancelHandler.dispose();
+                });
+            }
+
             process.stderr.on('data', (chunk: Buffer) => this.writeError(chunk.toString()));
             process.stdout.on('data', (chunk: Buffer) => this.writeOutput(chunk.toString()));
-
-            // TODO: implement kill on cancel?
         });
     }
 
@@ -65,10 +72,12 @@ export class DockerPseudoShell implements Pseudoterminal {
     }
 
     public writeWarning(message: string): void {
+        // 33m writes in yellow by default
         this.writeEmitter.fire(`\x1b[33m${message}\x1b[0m`)
     }
 
     public writeError(message: string): void {
+        // 31m writes in red by default
         this.writeEmitter.fire(`\x1b[31m${message}\x1b[0m`);
     }
 

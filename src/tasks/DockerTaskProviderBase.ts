@@ -32,7 +32,7 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
 
     public async executeTask(context: DockerTaskExecutionContext, task: DockerBuildTask | DockerRunTask): Promise<number> {
         try {
-            await callWithTelemetryAndErrorHandling(this.telemetryName, async (actionContext: IActionContext) => {
+            await callWithTelemetryAndErrorHandling(`${this.telemetryName}-execute`, async (actionContext: IActionContext) => {
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block
 
                 if (!context.folder) {
