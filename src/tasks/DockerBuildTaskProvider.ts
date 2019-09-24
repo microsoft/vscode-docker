@@ -8,7 +8,7 @@ import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { resolveFilePath } from '../utils/resolveFilePath';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
@@ -47,7 +47,7 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
         // TODO: process errors from docker build so that warnings aren't fatal
-        await context.shell.executeCommandInTerminal(commandLine, true, context.cancellationToken);
+        await context.shell.executeCommandInTerminal(commandLine, context.folder, true, context.cancellationToken);
         throwIfCancellationRequested(context);
 
         if (helper.postBuild) {
@@ -63,13 +63,13 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         if (!dockerBuild.context) {
             throw new Error('No Docker build context was provided or resolved.');
-        } else if (!await fse.pathExists(resolveFilePath(dockerBuild.context, context.folder))) {
+        } else if (!await fse.pathExists(resolveVariables(dockerBuild.context, context.folder))) {
             throw new Error(`The Docker build context \'${dockerBuild.context}\' does not exist or could not be accessed.`);
         }
 
         if (!dockerBuild.dockerfile) {
             throw new Error('No Dockerfile was provided or resolved.');
-        } else if (!await fse.pathExists(resolveFilePath(dockerBuild.dockerfile, context.folder))) {
+        } else if (!await fse.pathExists(resolveVariables(dockerBuild.dockerfile, context.folder))) {
             throw new Error(`The Dockerfile \'${dockerBuild.dockerfile}\' does not exist or could not be accessed.`);
         }
     }

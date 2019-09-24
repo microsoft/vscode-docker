@@ -9,7 +9,7 @@ import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBas
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { resolveFilePath } from '../utils/resolveFilePath';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerPseudoShell } from './DockerPseudoShell';
@@ -139,7 +139,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
                 arg = a.value;
             }
 
-            arg = resolveFilePath(arg, folder);
+            arg = resolveVariables(arg, folder);
             return arg.toLowerCase() === dockerfile.toLowerCase();
         }));
 

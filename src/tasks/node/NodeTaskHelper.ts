@@ -7,7 +7,7 @@ import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
 import Lazy from '../../utils/lazy';
 import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
-import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
+import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
@@ -41,7 +41,7 @@ export class NodeTaskHelper implements TaskHelper {
                 label: 'docker-build',
                 platform: 'node',
                 dockerBuild: {
-                    dockerfile: unresolveFilePath(context.dockerfile, context.folder),
+                    dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     // tslint:disable-next-line: no-invalid-template-strings
                     context: '${workspaceFolder}',
                 }
@@ -156,7 +156,7 @@ export class NodeTaskHelper implements TaskHelper {
 
     public static inferPackagePath(packageFile: string | undefined, folder: WorkspaceFolder): string {
         if (packageFile !== undefined) {
-            return resolveFilePath(packageFile, folder);
+            return resolveVariables(packageFile, folder);
         } else {
             return path.join(folder.uri.fsPath, 'package.json');
         }

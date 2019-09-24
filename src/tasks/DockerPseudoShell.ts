@@ -6,10 +6,16 @@
 import * as cp from 'child_process';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
 import { DockerTaskProviderBase } from './DockerTaskProviderBase';
 import { DockerTaskExecutionContext } from './TaskHelper';
+
+const DEFAULT = '0m';
+const DEFAULTBOLD = '0;1m';
+const RED = '31m';
+const YELLOW = '33m';
 
 export class DockerPseudoShell implements Pseudoterminal {
     private readonly closeEmitter: EventEmitter<number> = new EventEmitter<number>();
@@ -38,9 +44,9 @@ export class DockerPseudoShell implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeCommandInTerminal(command: CommandLineBuilder, rejectOnStdError?: boolean, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
-        const commandLine = command.build();
-        this.writeOutputLine(commandLine);
+    public async executeCommandInTerminal(command: CommandLineBuilder, folder: WorkspaceFolder, rejectOnStdError?: boolean, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
+        const commandLine = resolveVariables(command.build(), folder);
+        this.write(`> ${commandLine} <\r\n`, DEFAULTBOLD);
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
             const process = cp.exec(commandLine, (error, stdout, stderr) => {
                 if (error) {
@@ -69,17 +75,15 @@ export class DockerPseudoShell implements Pseudoterminal {
     }
 
     public writeOutput(message: string): void {
-        this.writeEmitter.fire(message)
+        this.write(message, DEFAULT);
     }
 
     public writeWarning(message: string): void {
-        // 33m writes in yellow by default
-        this.writeEmitter.fire(`\x1b[33m${message}\x1b[0m`)
+        this.write(message, YELLOW);
     }
 
     public writeError(message: string): void {
-        // 31m writes in red by default
-        this.writeEmitter.fire(`\x1b[31m${message}\x1b[0m`);
+        this.write(message, RED);
     }
 
     public writeOutputLine(message: string): void {
@@ -92,5 +96,10 @@ export class DockerPseudoShell implements Pseudoterminal {
 
     public writeErrorLine(message: string): void {
         this.writeError(`${message}\r\n`); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
+    }
+
+    private write(message: string, color: string): void {
+        message = message.replace(/\r?\n/g, '\r\n'); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
+        this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
 }
