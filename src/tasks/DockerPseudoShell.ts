@@ -21,15 +21,16 @@ export class DockerPseudoShell implements Pseudoterminal {
 
     constructor(private readonly taskProvider: DockerTaskProviderBase, private readonly task: DockerBuildTask | DockerRunTask) { }
 
-    public async open(initialDimensions: TerminalDimensions | undefined): Promise<void> {
+    public open(initialDimensions: TerminalDimensions | undefined): void {
         const executeContext: DockerTaskExecutionContext = {
             folder: this.task.scope as WorkspaceFolder,
             cancellationToken: this.cts.token,
             shell: this,
         }
 
-        const result = await this.taskProvider.executeTask(executeContext, this.task);
-        this.close(result);
+        // Can't wait here
+        // tslint:disable-next-line: no-floating-promises
+        this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
     }
 
     public close(code?: number): void {

@@ -36,7 +36,7 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block
 
                 if (!context.folder) {
-                    throw new Error(`Unable to determine task scope to execute ${this.telemetryName} task '${task.name}'.`);
+                    throw new Error(`Unable to determine task scope to execute ${this.telemetryName} task '${task.name}'. Please open a workspace folder.`);
                 }
 
                 context.actionContext = actionContext;
