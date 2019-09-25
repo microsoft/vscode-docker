@@ -42,8 +42,8 @@ export interface ComposeVersionKeys {
     v2: KeyInfo;
 }
 
-const stableExtensionId = 'vscode-docker';
-const nightlyExtensionId = 'vscode-docker-nightly';
+const stableExtensionId = 'ms-azuretools.vscode-docker';
+const nightlyExtensionId = 'ms-azuretools.vscode-docker-nightly';
 
 let client: LanguageClient;
 
@@ -330,7 +330,7 @@ function refreshDockerode(): void {
 }
 
 function isNightly(ctx: vscode.ExtensionContext): boolean {
-    return ctx.extensionPath.indexOf(nightlyExtensionId) >= 0;
+    return ctx.extensionPath.indexOf(nightlyExtensionId) >= 0 || ctx.storagePath.indexOf(nightlyExtensionId) >= 0;
 }
 
 function isStableInstalled(): boolean {
