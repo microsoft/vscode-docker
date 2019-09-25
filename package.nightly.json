@@ -1,4 +1,5 @@
 {
     "name": "vscode-docker-nightly",
-    "displayName": "Docker (Nightly)"
+    "displayName": "Docker (Nightly)",
+    "bugs": "https://github.com/Microsoft/vscode-docker/issues"
 }
