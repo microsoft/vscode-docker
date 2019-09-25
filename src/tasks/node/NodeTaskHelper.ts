@@ -3,21 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
 import * as path from 'path';
-import { ShellQuotedString, WorkspaceFolder } from 'vscode';
+import { WorkspaceFolder } from 'vscode';
+import Lazy from '../../utils/lazy';
+import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
 import { resolveFilePath, unresolveFilePath } from '../../utils/resolveFilePath';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
-
-interface NodePackage {
-    main?: string;
-    name?: string;
-    scripts?: { [key: string]: string };
-}
 
 export interface NodeTaskBuildOptions {
     package?: string;
@@ -26,8 +21,6 @@ export interface NodeTaskBuildOptions {
 export interface NodeBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
     node?: NodeTaskBuildOptions;
 }
-
-export type InspectMode = 'default' | 'break';
 
 export interface NodeTaskRunOptions {
     enableDebugging?: boolean;
@@ -41,8 +34,6 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class NodeTaskHelper implements TaskHelper {
-    private static readonly StartScriptName: string = 'start';
-
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
@@ -72,7 +63,8 @@ export class NodeTaskHelper implements TaskHelper {
                 dependsOn: ['docker-build'],
                 dockerRun: {
                     env: {
-                        "DEBUG": "*"
+                        "DEBUG": "*",
+                        "NODE_ENV": "development"
                     }
                 },
                 node: {
@@ -87,7 +79,8 @@ export class NodeTaskHelper implements TaskHelper {
         const buildOptions = buildDefinition.dockerBuild;
 
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, context.folder);
-        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
+        const nodePackage = await readPackage(packagePath);
+        const packageName = await inferPackageName(nodePackage, packagePath);
 
         if (buildOptions.context === undefined) {
             buildOptions.context = NodeTaskHelper.inferBuildContextPath(packagePath);
@@ -109,7 +102,13 @@ export class NodeTaskHelper implements TaskHelper {
         const runOptions = runDefinition.dockerRun;
 
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, context.folder);
-        const packageName = await NodeTaskHelper.inferPackageName(packagePath);
+
+        const nodePackage = new Lazy<Promise<NodePackage>>(
+            async () => {
+                return await readPackage(packagePath);
+            });
+
+        const packageName = await inferPackageName(await nodePackage.value, packagePath);
 
         if (runOptions.containerName === undefined) {
             runOptions.containerName = getDefaultContainerName(packageName);
@@ -124,7 +123,7 @@ export class NodeTaskHelper implements TaskHelper {
             const inspectPort = helperOptions.inspectPort !== undefined ? helperOptions.inspectPort : 9229;
 
             if (runOptions.command === undefined) {
-                runOptions.command = await NodeTaskHelper.inferCommand(packagePath, inspectMode, inspectPort);
+                runOptions.command = await inferCommand(await nodePackage.value, inspectMode, inspectPort);
             }
 
             if (runOptions.ports === undefined) {
@@ -163,46 +162,12 @@ export class NodeTaskHelper implements TaskHelper {
         }
     }
 
-    public static async inferPackageName(packagePath: string): Promise<string> {
-        const packageContent = <NodePackage>await fse.readJSON(packagePath);
-
-        if (packageContent && packageContent.name !== undefined) {
-            return packageContent.name;
-        } else {
-            return path.basename(path.dirname(packagePath));
-        }
-    }
-
     private static inferBuildContextPath(packagePath: string): string {
         return path.dirname(packagePath);
     }
 
     private static inferDockerfilePath(packagePath: string): string {
         return path.join(path.dirname(packagePath), 'Dockerfile');
-    }
-
-    private static async inferCommand(packagePath: string, inspectMode: InspectMode, inspectPort: number): Promise<string | ShellQuotedString[]> {
-        const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
-        const inspectArgWithPort = `${inspectArg}=0.0.0.0:${inspectPort}`;
-
-        const packageJson = await fse.readFile(packagePath, 'utf8');
-        const packageContent = <NodePackage>JSON.parse(packageJson);
-
-        if (packageContent.scripts) {
-            const startScript = packageContent.scripts[NodeTaskHelper.StartScriptName];
-
-            if (startScript && startScript.startsWith('node ')) {
-                const updatedStartScript = `node ${inspectArgWithPort} ${startScript.substring(5)}`;
-
-                return updatedStartScript;
-            }
-        }
-
-        if (packageContent.main) {
-            return `node ${inspectArgWithPort} ${packageContent.main}`;
-        }
-
-        throw new Error(`Unable to infer the command to run the application within the container. Set the 'dockerRun.command' property and include the Node.js '${inspectArgWithPort}' argument.`);
     }
 }
 
