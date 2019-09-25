@@ -1502,6 +1502,15 @@
                 }
             }
         },
+        "configurationDefaults": {
+            "[yaml]": {
+                "editor.quickSuggestions": {
+                    "other": true,
+                    "comments": false,
+                    "strings": true
+                }
+            }
+        },
         "commands": [
             {
                 "command": "vscode-docker.api.configure",
