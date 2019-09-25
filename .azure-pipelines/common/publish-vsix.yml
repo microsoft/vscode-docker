@@ -29,4 +29,4 @@ steps:
   displayName: 'Publish vscode-docker-nightly to marketplace'
   env:
     ARTIFACTS_DIR: $(build.artifactstagingdirectory)
-  condition: and(eq(variables['nightly'], 'true'), eq(variables['build.sourcebranch'], 'refs/heads/master')) # Only if nightly is true, and it's master branch
+  condition: and(succeeded(), eq(variables['publishnightly'], 'true'), eq(variables['nightly'], 'true'), eq(variables['build.sourcebranch'], 'refs/heads/master')) # Only if publishnightly and nightly are true, and it's master branch
