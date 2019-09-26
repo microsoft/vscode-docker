@@ -128,8 +128,10 @@ export class NetCoreTaskHelper implements TaskHelper {
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
 
+        runOptions.env = runOptions.env || {};
+        runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER = runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER || '1';
+
         if (userSecrets) {
-            runOptions.env = runOptions.env || {};
             runOptions.env.ASPNETCORE_ENVIRONMENT = runOptions.env.ASPNETCORE_ENVIRONMENT || 'Development';
 
             if (ssl) {
