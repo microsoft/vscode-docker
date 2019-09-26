@@ -93,7 +93,7 @@
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
-        "onDebugResolve:docker-launch",
+        "onDebugResolve:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
