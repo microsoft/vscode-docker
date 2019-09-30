@@ -21,9 +21,9 @@ export function wrapError(innerError: any, outerMessage: string): Error {
     return new Error(mergedMessage);
 }
 
-export async function wrapDockerodeENOENT<T>(callback: () => Promise<T>): Promise<T> {
+export async function wrapDockerodeENOENT<T>(dockerodeCallback: () => Promise<T>): Promise<T> {
     try {
-        return await callback();
+        return await dockerodeCallback();
     } catch (err) {
         const error = parseError(err);
 
