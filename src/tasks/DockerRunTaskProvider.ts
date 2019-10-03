@@ -28,9 +28,10 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
     // TODO: Can we skip if a recently-started container exists?
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
-
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
+
+        context.actionContext.telemetry.properties.containerOS = definition.dockerRun.os || 'Linux';
 
         context.buildDefinition = await getAssociatedDockerBuildTask(task);
 
