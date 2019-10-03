@@ -45,7 +45,7 @@ class TestTerminal implements vscode.Terminal {
     readonly dimensions = undefined;
 
     constructor(private _terminal: vscode.Terminal) {
-        let root = vscode.workspace.rootPath || os.tmpdir();
+        let root = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0 && vscode.workspace.workspaceFolders[0].uri.fsPath) || os.tmpdir();
         this._suffix = TestTerminal._lastSuffix++;
 
         this._outputFilePath = path.join(root, `.out${this._suffix}`);

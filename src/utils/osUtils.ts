@@ -5,6 +5,7 @@
 
 import * as semver from 'semver';
 import { ext } from '../extensionVariables';
+import { wrapDockerodeENOENT } from './wrapError';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';
@@ -70,7 +71,7 @@ export async function getDockerOSType(): Promise<DockerOSType> {
         // so short-circuit the Docker call entirely.
         return "linux";
     } else {
-        const info = <{ OSType: DockerOSType }>await ext.dockerode.info();
+        const info = <{ OSType: DockerOSType }>await wrapDockerodeENOENT(() => ext.dockerode.info());
         return info.OSType;
     }
 }
