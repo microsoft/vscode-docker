@@ -8,7 +8,7 @@ import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azuree
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
-import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
+import { DockerOrchestration, DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
 
@@ -36,6 +36,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                 const debugPlatform = getPlatform(debugConfiguration);
                 actionContext.telemetry.properties.platform = debugPlatform;
+                actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 
                 return await this.resolveDebugConfigurationInternal(
                     {

@@ -5,6 +5,8 @@
 
 export type DockerPlatform = 'netCore' | 'node';
 
+export type DockerOrchestration = 'single' | 'docker-compose';
+
 interface DockerPlatformConfiguration {
     platform?: DockerPlatform;
     netCore?: {};

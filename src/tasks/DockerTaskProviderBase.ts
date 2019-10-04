@@ -5,7 +5,7 @@
 
 import { CancellationToken, CustomExecution2, ProviderResult, Task, Task2, TaskProvider } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerOrchestration, DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoShell } from './DockerPseudoShell';
 import { DockerRunTask } from './DockerRunTaskProvider';
@@ -43,6 +43,7 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
                 context.platform = getPlatform(task.definition);
 
                 context.actionContext.telemetry.properties.platform = context.platform;
+                context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 return await this.executeTaskInternal(context, task);
             });
         } catch (err) {
