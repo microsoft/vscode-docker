@@ -53,6 +53,7 @@ export class DockerPseudoShell implements Pseudoterminal {
                     reject(error);
                 }
 
+                // TODO : validate what happens when using Docker buildkit, which puts everything into STDERR
                 if (stderr && rejectOnStdError) {
                     reject(stderr);
                 }
