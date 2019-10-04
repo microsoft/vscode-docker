@@ -5,7 +5,8 @@
 
 import { CancellationToken, CustomExecution2, ProviderResult, Task, Task2, TaskProvider } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
-import { DockerOrchestration, DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerOrchestration } from '../constants';
+import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoShell } from './DockerPseudoShell';
 import { DockerRunTask } from './DockerRunTaskProvider';

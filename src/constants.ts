@@ -41,3 +41,5 @@ export const FILE_SEARCH_MAX_RESULT = 1000;
 export const dockerHubUrl: string = 'https://hub.docker.com/';
 
 export const extensionId: string = 'ms-azuretools.vscode-docker';
+
+export type DockerOrchestration = 'single' | 'docker-compose';

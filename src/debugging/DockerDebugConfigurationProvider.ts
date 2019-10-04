@@ -5,10 +5,11 @@
 
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
-import { DockerOrchestration, DockerPlatform, getPlatform } from './DockerPlatformHelper';
+import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
 
