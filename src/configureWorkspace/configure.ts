@@ -10,6 +10,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
+import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { globAsync } from '../utils/globAsync';
@@ -386,6 +387,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
         os = await quickPickOS();
     }
     properties.configureOs = os;
+    properties.orchestration = 'single' as DockerOrchestration;
 
     let generateComposeFiles = true;
 
@@ -449,6 +451,11 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     let filesWritten: string[] = [];
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
         const dockerFileType = DOCKER_FILE_TYPES[fileName];
+
+        if (dockerFileType.isComposeGenerator && generateComposeFiles) {
+            properties.orchestration = 'docker-compose' as DockerOrchestration;
+        }
+
         return dockerFileType.isComposeGenerator !== true || generateComposeFiles
             ? createWorkspaceFileIfNotExists(fileName, dockerFileType.generator)
             : Promise.resolve();
