@@ -194,7 +194,7 @@ export async function deactivateInternal(): Promise<void> {
     return await client.stop();
 }
 
-namespace Configuration {
+export namespace Configuration {
     let configurationListener: vscode.Disposable;
 
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
@@ -237,6 +237,7 @@ namespace Configuration {
         if (configurationListener) {
             // remove this listener when disposed
             configurationListener.dispose();
+            configurationListener = undefined;
         }
     }
 }
