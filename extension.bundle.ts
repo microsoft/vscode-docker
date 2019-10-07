@@ -10,7 +10,7 @@
  */
 
 // Export activate/deactivate for main.js
-export { activateInternal, deactivateInternal, Configuration } from './src/extension';
+export { activateInternal, deactivateInternal } from './src/extension';
 
 // Exports for tests
 // The tests are not packaged with the webpack bundle and therefore only have access to code exported from this file.

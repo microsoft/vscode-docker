@@ -124,7 +124,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
 
-        await refreshDockerode();
+        refreshDockerode();
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient();
@@ -194,7 +194,7 @@ export async function deactivateInternal(): Promise<void> {
     return await client.stop();
 }
 
-export namespace Configuration {
+namespace Configuration {
     let configurationListener: vscode.Disposable;
 
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
@@ -225,7 +225,7 @@ export namespace Configuration {
 
                 // Update endpoint and refresh explorer if needed
                 if (e.affectsConfiguration('docker')) {
-                    await refreshDockerode();
+                    refreshDockerode();
                     // tslint:disable-next-line: no-floating-promises
                     setRequestDefaults();
                 }
@@ -237,7 +237,6 @@ export namespace Configuration {
         if (configurationListener) {
             // remove this listener when disposed
             configurationListener.dispose();
-            configurationListener = undefined;
         }
     }
 }
@@ -304,13 +303,13 @@ function activateLanguageClient(): void {
  * Dockerode parses and handles the well-known `DOCKER_*` environment variables, but it doesn't let us pass those values as-is to the constructor
  * Thus we will temporarily update `process.env` and pass nothing to the constructor
  */
-async function refreshDockerode(): Promise<void> {
+function refreshDockerode(): void {
     const oldEnv = process.env;
     try {
         process.env = { ...process.env }; // make a clone before we change anything
         addDockerSettingsToEnv(process.env, oldEnv);
         ext.dockerodeInitError = undefined;
-        ext.dockerode = new Dockerode(process.env.DOCKER_HOST ? undefined : await tryGetDefaultDockerContext());
+        ext.dockerode = new Dockerode(process.env.DOCKER_HOST ? undefined : tryGetDefaultDockerContext());
     } catch (error) {
         // This will be displayed in the tree
         ext.dockerodeInitError = error;
