@@ -19,8 +19,16 @@ interface IDockerContext {
     Endpoints: { [key: string]: IDockerEndpoint }
 }
 
+let cachedDockerContext: DockerOptions;
+let cachedDockerContextTimestamp: number;
+
 export async function tryGetDefaultDockerContext(): Promise<DockerOptions> {
-    return await new Promise<DockerOptions>((resolve, reject) => {
+    // First check the cached value--we will keep result from last 10 seconds
+    if (cachedDockerContextTimestamp && cachedDockerContextTimestamp + 10000 > Date.now()) {
+        return cachedDockerContext;
+    }
+
+    cachedDockerContext = await new Promise<DockerOptions>((resolve, reject) => {
         cp.exec('docker context inspect', { timeout: 5000 }, (error, stdout, stderr) => {
             if (error || stderr || !stdout) {
                 resolve(undefined);
@@ -50,4 +58,7 @@ export async function tryGetDefaultDockerContext(): Promise<DockerOptions> {
             resolve(undefined);
         });
     });
+
+    cachedDockerContextTimestamp = Date.now();
+    return cachedDockerContext;
 }
