@@ -223,9 +223,16 @@ namespace Configuration {
                     settings: null
                 });
 
-                // Update endpoint and refresh explorer if needed
-                if (e.affectsConfiguration('docker')) {
+                // Refresh explorer if needed
+                if (e.affectsConfiguration('docker.host') ||
+                    e.affectsConfiguration('docker.certPath') ||
+                    e.affectsConfiguration('docker.tlsVerify') ||
+                    e.affectsConfiguration('docker.machineName')) {
                     refreshDockerode();
+                }
+
+                // Update endpoint if needed
+                if (e.affectsConfiguration('docker')) {
                     // tslint:disable-next-line: no-floating-promises
                     setRequestDefaults();
                 }

@@ -19,21 +19,7 @@ interface IDockerContext {
     Endpoints: { [key: string]: IDockerEndpoint }
 }
 
-let cachedDockerContext: DockerOptions;
-let cachedDockerContextTimestamp: number;
-
 export function tryGetDefaultDockerContext(): DockerOptions {
-    // First check the cached value--we will keep result from last 10 seconds
-    if (cachedDockerContextTimestamp && cachedDockerContextTimestamp + 10000 > Date.now()) {
-        return cachedDockerContext;
-    }
-
-    cachedDockerContext = getDockerContextFromCli();
-    cachedDockerContextTimestamp = Date.now();
-    return cachedDockerContext;
-}
-
-function getDockerContextFromCli(): DockerOptions {
     try {
         const stdout = cp.execSync('docker context inspect', { timeout: 5000 }).toString();
         const dockerContexts = <IDockerContext[]>JSON.parse(stdout);
