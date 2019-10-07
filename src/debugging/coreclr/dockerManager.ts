@@ -5,13 +5,13 @@
 import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
+import { Lazy } from '../../utils/lazy';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRunContainerOptions } from "./CliDockerClient";
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
-import { Lazy } from './lazy';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';

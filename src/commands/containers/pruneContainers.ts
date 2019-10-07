@@ -7,13 +7,14 @@ import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { convertToMB } from '../../utils/convertToMB';
+import { wrapDockerodeENOENT } from '../../utils/wrapError';
 
 export async function pruneContainers(_context: IActionContext): Promise<void> {
     const confirmPrune: string = "Are you sure you want to remove all stopped containers?";
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
-    const result = await ext.dockerode.pruneContainers();
+    const result = await wrapDockerodeENOENT(() => ext.dockerode.pruneContainers());
 
     const numDeleted = (result.ContainersDeleted || []).length;
     const mbReclaimed = convertToMB(result.SpaceReclaimed);

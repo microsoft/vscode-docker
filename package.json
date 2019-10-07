@@ -93,7 +93,7 @@
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
-        "onDebugResolve:docker-launch",
+        "onDebugResolve:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
@@ -1499,6 +1499,15 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Show a prompt to switch from \"UI\" extension to \"Workspace\" extension if an operation is not supported."
+                }
+            }
+        },
+        "configurationDefaults": {
+            "[yaml]": {
+                "editor.quickSuggestions": {
+                    "other": true,
+                    "comments": false,
+                    "strings": true
                 }
             }
         },
