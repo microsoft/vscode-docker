@@ -85,10 +85,6 @@ export class DockerRunTaskProvider implements TaskProvider {
         if (!dockerRun.image) {
             throw new Error('No Docker image name was provided or resolved.');
         }
-
-        if (!dockerRun.containerName) {
-            throw new Error('No Docker container name was provided or resolved.')
-        }
     }
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<ShellQuotedString[]> {
