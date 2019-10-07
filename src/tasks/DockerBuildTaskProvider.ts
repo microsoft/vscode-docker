@@ -63,7 +63,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
         const helper = this.getHelper(context.platform);
 
-        definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        if (helper) {
+            definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        }
+
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
@@ -109,12 +112,6 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
-        }
-
-        return helper;
+        return this.helpers[platform];
     }
 }

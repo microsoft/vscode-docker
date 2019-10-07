@@ -64,7 +64,10 @@ export class DockerRunTaskProvider implements TaskProvider {
 
         const helper = this.getHelper(context.platform);
 
-        definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        if (helper) {
+            definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        }
+
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
@@ -108,12 +111,6 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);
-        }
-
-        return helper;
+        return this.helpers[platform];
     }
 }
