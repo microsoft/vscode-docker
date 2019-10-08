@@ -25,7 +25,7 @@ async function activate(ctx) {
 }
 
 async function deactivate(ctx) {
-    return await extension.deactivateInternal(ctx);
+    // No-op
 }
 
 exports.activate = activate;
