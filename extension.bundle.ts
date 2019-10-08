@@ -9,8 +9,8 @@
  * everything else will be in private modules in extension.bundle.js.
  */
 
-// Export activate/deactivate for main.js
-export { activateInternal, deactivateInternal } from './src/extension';
+// Export activate for main.js
+export { activateInternal } from './src/extension';
 
 // Exports for tests
 // The tests are not packaged with the webpack bundle and therefore only have access to code exported from this file.

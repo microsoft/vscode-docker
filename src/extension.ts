@@ -185,11 +185,6 @@ async function setRequestDefaults(): Promise<void> {
     ext.request = requestWithDefaults;
 }
 
-export async function deactivateInternal(): Promise<void> {
-    // No-op
-    return;
-}
-
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         let result: vscode.WorkspaceConfiguration[] = [];
