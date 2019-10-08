@@ -32,6 +32,7 @@ import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
+import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -222,9 +223,16 @@ namespace Configuration {
                     settings: null
                 });
 
-                // Update endpoint and refresh explorer if needed
-                if (e.affectsConfiguration('docker')) {
+                // Refresh explorer if needed
+                if (e.affectsConfiguration('docker.host') ||
+                    e.affectsConfiguration('docker.certPath') ||
+                    e.affectsConfiguration('docker.tlsVerify') ||
+                    e.affectsConfiguration('docker.machineName')) {
                     refreshDockerode();
+                }
+
+                // Update endpoint if needed
+                if (e.affectsConfiguration('docker')) {
                     // tslint:disable-next-line: no-floating-promises
                     setRequestDefaults();
                 }
@@ -308,7 +316,7 @@ function refreshDockerode(): void {
         process.env = { ...process.env }; // make a clone before we change anything
         addDockerSettingsToEnv(process.env, oldEnv);
         ext.dockerodeInitError = undefined;
-        ext.dockerode = new Dockerode();
+        ext.dockerode = new Dockerode(process.env.DOCKER_HOST ? undefined : tryGetDefaultDockerContext());
     } catch (error) {
         // This will be displayed in the tree
         ext.dockerodeInitError = error;
