@@ -127,7 +127,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         refreshDockerode();
 
         await consolidateDefaultRegistrySettings();
-        activateLanguageClient();
+        activateLanguageClient(ctx);
     });
 }
 
@@ -185,18 +185,7 @@ async function setRequestDefaults(): Promise<void> {
     ext.request = requestWithDefaults;
 }
 
-export async function deactivateInternal(): Promise<void> {
-    if (!client) {
-        return undefined;
-    }
-    // perform cleanup
-    Configuration.dispose();
-    return await client.stop();
-}
-
 namespace Configuration {
-    let configurationListener: vscode.Disposable;
-
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         let result: vscode.WorkspaceConfiguration[] = [];
         for (let item of params.items) {
@@ -215,8 +204,8 @@ namespace Configuration {
         return result;
     }
 
-    export function initialize(): void {
-        configurationListener = vscode.workspace.onDidChangeConfiguration(
+    export function initialize(ctx: vscode.ExtensionContext): void {
+        ctx.subscriptions.push(vscode.workspace.onDidChangeConfiguration(
             async (e: vscode.ConfigurationChangeEvent) => {
                 // notify the language server that settings have change
                 client.sendNotification(DidChangeConfigurationNotification.type, {
@@ -237,18 +226,11 @@ namespace Configuration {
                     setRequestDefaults();
                 }
             }
-        );
-    }
-
-    export function dispose(): void {
-        if (configurationListener) {
-            // remove this listener when disposed
-            configurationListener.dispose();
-        }
+        ));
     }
 }
 
-function activateLanguageClient(): void {
+function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
     callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
@@ -300,9 +282,10 @@ function activateLanguageClient(): void {
         // tslint:disable-next-line:no-floating-promises
         client.onReady().then(() => {
             // attach the VS Code settings listener
-            Configuration.initialize();
+            Configuration.initialize(ctx);
         });
-        client.start();
+
+        ctx.subscriptions.push(client.start());
     });
 }
 
