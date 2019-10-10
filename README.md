@@ -52,7 +52,19 @@ The Docker extension contributes explorers to view and manage containers, images
 
 ![hideView](resources/readme/hideView.png) ![hideExplorer](resources/readme/hideExplorer.png)
 
-#### Registries
+### Debugging in Containers
+
+The Docker extension facilitates easily debugging .NET Core and Node.js apps within a container. For already-dockerized apps, press `F1` and search for `Docker: Initialize for Docker debugging`, otherwise debugging configuration is added automatically for Node.js and .NET Core apps when doing `Docker: Add Docker Files to Workspace`.
+
+![debugging](resources/readme/debugging.gif)
+
+### Tasks
+
+Use Visual Studio Code's tasks to build and launch Docker containers with custom settings like ports, volumes, networks, etc.
+
+![tasks](resources/readme/tasks.gif)
+
+### Registries
 
 The first time you expand the registries explorer you'll be prompted to connect a registry. This will prompt you for credentials based on your provider (Azure, Docker Hub, etc.). These credentials will be stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to sign in every time. You can right click on a registry provider to disconnect it and remove credentials from the OS store.
 
@@ -64,7 +76,7 @@ With the Docker Explorer you can deploy images from Docker Hub Registries or Azu
 
 ### Azure CLI
 
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press F1 and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
+Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press `F1` and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
 
 After the container is started, you will be prompted to sign in to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to sign in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
