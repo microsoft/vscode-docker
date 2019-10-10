@@ -6,7 +6,7 @@
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
-import dockerDebugScaffoldingProvider from '../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider } from '../debugging/DockerDebugScaffoldingProvider';
 import { PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 

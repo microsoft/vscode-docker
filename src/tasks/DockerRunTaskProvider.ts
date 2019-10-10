@@ -31,22 +31,27 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
-        const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-run-resolve/${taskPlatform || 'unknown'}`,
-            async (actionContext: IActionContext) => await this.resolveTaskInternal(
-                {
-                    folder: task.scope as WorkspaceFolder,
-                    platform: taskPlatform,
-                    actionContext: actionContext,
-                    cancellationToken: token,
-                },
-                task));
+            'docker-run-resolve',
+            async (actionContext: IActionContext) => {
+                const taskPlatform = getPlatform(task.definition);
+                actionContext.telemetry.properties.platform = taskPlatform;
+
+                return await this.resolveTaskInternal(
+                    {
+                        folder: task.scope as WorkspaceFolder,
+                        platform: taskPlatform,
+                        actionContext: actionContext,
+                        cancellationToken: token,
+                    },
+                    task
+                );
+            }
+        );
     }
 
-    // TODO: Can we skip if a recently-started image exists?
+    // TODO: Can we skip if a recently-started container exists?
     private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
-        context.actionContext.telemetry.properties.platform = context.platform;
 
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
@@ -59,7 +64,10 @@ export class DockerRunTaskProvider implements TaskProvider {
 
         const helper = this.getHelper(context.platform);
 
-        definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        if (helper) {
+            definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+        }
+
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
@@ -76,10 +84,6 @@ export class DockerRunTaskProvider implements TaskProvider {
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
         if (!dockerRun.image) {
             throw new Error('No Docker image name was provided or resolved.');
-        }
-
-        if (!dockerRun.containerName) {
-            throw new Error('No Docker container name was provided or resolved.')
         }
     }
 
@@ -103,12 +107,6 @@ export class DockerRunTaskProvider implements TaskProvider {
     }
 
     private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker run tasks.`);
-        }
-
-        return helper;
+        return this.helpers[platform];
     }
 }

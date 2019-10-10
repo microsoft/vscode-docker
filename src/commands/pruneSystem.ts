@@ -7,16 +7,17 @@ import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { convertToMB } from '../utils/convertToMB';
+import { wrapDockerodeENOENT } from '../utils/wrapError';
 
 export async function pruneSystem(context: IActionContext): Promise<void> {
     const confirmPrune: string = "Are you sure you want to remove all stopped containers, dangling images, unused networks, and unused volumes?";
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
-    const containersResult = await ext.dockerode.pruneContainers();
-    const imagesResult = await ext.dockerode.pruneImages();
-    const networksResult = await ext.dockerode.pruneNetworks();
-    const volumesResult = await ext.dockerode.pruneVolumes();
+    const containersResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneContainers());
+    const imagesResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneImages());
+    const networksResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneNetworks());
+    const volumesResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneVolumes());
 
     const numContainers = (containersResult.ContainersDeleted || []).length;
     const numImages = (imagesResult.ImagesDeleted || []).length;

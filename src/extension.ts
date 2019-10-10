@@ -15,7 +15,7 @@ import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryRepor
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
-import { DockerDebugConfigProvider } from './configureWorkspace/DockerDebugConfigProvider';
+import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { registerDebugProvider } from './debugging/DebugHelper';
@@ -32,6 +32,7 @@ import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
+import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -115,7 +116,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ctx.subscriptions.push(
             vscode.debug.registerDebugConfigurationProvider(
                 'docker-node',
-                new DockerDebugConfigProvider()
+                new LegacyDockerDebugConfigProvider()
             )
         );
         registerDebugConfigurationProvider(ctx);
@@ -126,7 +127,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         refreshDockerode();
 
         await consolidateDefaultRegistrySettings();
-        activateLanguageClient();
+        activateLanguageClient(ctx);
     });
 }
 
@@ -184,18 +185,7 @@ async function setRequestDefaults(): Promise<void> {
     ext.request = requestWithDefaults;
 }
 
-export async function deactivateInternal(): Promise<void> {
-    if (!client) {
-        return undefined;
-    }
-    // perform cleanup
-    Configuration.dispose();
-    return await client.stop();
-}
-
 namespace Configuration {
-    let configurationListener: vscode.Disposable;
-
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         let result: vscode.WorkspaceConfiguration[] = [];
         for (let item of params.items) {
@@ -214,33 +204,33 @@ namespace Configuration {
         return result;
     }
 
-    export function initialize(): void {
-        configurationListener = vscode.workspace.onDidChangeConfiguration(
+    export function initialize(ctx: vscode.ExtensionContext): void {
+        ctx.subscriptions.push(vscode.workspace.onDidChangeConfiguration(
             async (e: vscode.ConfigurationChangeEvent) => {
                 // notify the language server that settings have change
                 client.sendNotification(DidChangeConfigurationNotification.type, {
                     settings: null
                 });
 
-                // Update endpoint and refresh explorer if needed
-                if (e.affectsConfiguration('docker')) {
+                // Refresh explorer if needed
+                if (e.affectsConfiguration('docker.host') ||
+                    e.affectsConfiguration('docker.certPath') ||
+                    e.affectsConfiguration('docker.tlsVerify') ||
+                    e.affectsConfiguration('docker.machineName')) {
                     refreshDockerode();
+                }
+
+                // Update endpoint if needed
+                if (e.affectsConfiguration('docker')) {
                     // tslint:disable-next-line: no-floating-promises
                     setRequestDefaults();
                 }
             }
-        );
-    }
-
-    export function dispose(): void {
-        if (configurationListener) {
-            // remove this listener when disposed
-            configurationListener.dispose();
-        }
+        ));
     }
 }
 
-function activateLanguageClient(): void {
+function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
     callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
@@ -292,9 +282,10 @@ function activateLanguageClient(): void {
         // tslint:disable-next-line:no-floating-promises
         client.onReady().then(() => {
             // attach the VS Code settings listener
-            Configuration.initialize();
+            Configuration.initialize(ctx);
         });
-        client.start();
+
+        ctx.subscriptions.push(client.start());
     });
 }
 
@@ -308,7 +299,7 @@ function refreshDockerode(): void {
         process.env = { ...process.env }; // make a clone before we change anything
         addDockerSettingsToEnv(process.env, oldEnv);
         ext.dockerodeInitError = undefined;
-        ext.dockerode = new Dockerode();
+        ext.dockerode = new Dockerode(process.env.DOCKER_HOST ? undefined : tryGetDefaultDockerContext());
     } catch (error) {
         // This will be displayed in the tree
         ext.dockerodeInitError = error;

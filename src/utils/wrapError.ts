@@ -20,3 +20,17 @@ export function wrapError(innerError: any, outerMessage: string): Error {
     // We could consider attaching the inner error but right now telemetry doesn't do anything with it
     return new Error(mergedMessage);
 }
+
+export async function wrapDockerodeENOENT<T>(dockerodeCallback: () => Promise<T>): Promise<T> {
+    try {
+        return await dockerodeCallback();
+    } catch (err) {
+        const error = parseError(err);
+
+        if (error && error.errorType === 'ENOENT') {
+            throw new Error(`Failed to connect. Is Docker installed and running? Error: ${error.message}`);
+        }
+
+        throw err;
+    }
+}

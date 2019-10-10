@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ShellQuotedString, TaskDefinition } from 'vscode';
+import { ShellQuotedString } from 'vscode';
 import { PlatformOS } from '../utils/platform';
+import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -40,6 +41,6 @@ export interface DockerRunOptions {
     volumes?: DockerContainerVolume[];
 }
 
-export interface DockerRunTaskDefinitionBase extends TaskDefinition {
+export interface DockerRunTaskDefinitionBase extends TaskDefinitionBase {
     dockerRun?: DockerRunOptions;
 }

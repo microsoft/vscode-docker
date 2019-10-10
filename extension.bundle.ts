@@ -9,8 +9,8 @@
  * everything else will be in private modules in extension.bundle.js.
  */
 
-// Export activate/deactivate for main.js
-export { activateInternal, deactivateInternal } from './src/extension';
+// Export activate for main.js
+export { activateInternal } from './src/extension';
 
 // Exports for tests
 // The tests are not packaged with the webpack bundle and therefore only have access to code exported from this file.
@@ -32,10 +32,14 @@ export { ext } from './src/extensionVariables';
 export { globAsync } from './src/utils/globAsync';
 export { httpsRequestBinary } from './src/utils/httpRequest';
 export { IKeytar } from './src/utils/keytar';
+export { inferCommand, inferPackageName, InspectMode, NodePackage } from './src/utils/nodeUtils';
 export { nonNullProp } from './src/utils/nonNull';
 export { getDockerOSType, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer, isWindows1019H1OrNewer } from "./src/utils/osUtils";
 export { Platform, PlatformOS } from './src/utils/platform';
 export { DefaultTerminalProvider } from './src/utils/TerminalProvider';
 export { trimWithElipsis } from './src/utils/trimWithElipsis';
 export { wrapError } from './src/utils/wrapError';
+export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
+export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
+export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
 export * from 'vscode-azureextensionui';

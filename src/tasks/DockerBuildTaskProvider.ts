@@ -33,23 +33,27 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
-        const taskPlatform = getPlatform(task.definition);
         return callWithTelemetryAndErrorHandling(
-            `docker-build-resolve/${taskPlatform || 'unknown'}`,
-            async (actionContext: IActionContext) => await this.resolveTaskInternal(
-                {
-                    folder: task.scope as WorkspaceFolder,
-                    platform: taskPlatform,
-                    actionContext: actionContext,
-                    cancellationToken: token,
-                },
-                task));
+            'docker-build-resolve',
+            async (actionContext: IActionContext) => {
+                const taskPlatform = getPlatform(task.definition);
+                actionContext.telemetry.properties.platform = taskPlatform;
+
+                return await this.resolveTaskInternal(
+                    {
+                        folder: task.scope as WorkspaceFolder,
+                        platform: taskPlatform,
+                        actionContext: actionContext,
+                        cancellationToken: token,
+                    },
+                    task
+                );
+            }
+        );
     }
 
     // TODO: Skip if image is freshly built
     private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
-        context.actionContext.telemetry.properties.platform = context.platform;
-
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
@@ -59,7 +63,10 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
         const helper = this.getHelper(context.platform);
 
-        definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        if (helper) {
+            definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+        }
+
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
@@ -96,7 +103,7 @@ export class DockerBuildTaskProvider implements TaskProvider {
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
-            .withKeyValueArgs('--build-arg', options.args)
+            .withKeyValueArgs('--build-arg', options.buildArgs)
             .withKeyValueArgs('--label', options.labels)
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
@@ -105,12 +112,6 @@ export class DockerBuildTaskProvider implements TaskProvider {
     }
 
     private getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for Docker build tasks.`);
-        }
-
-        return helper;
+        return this.helpers[platform];
     }
 }

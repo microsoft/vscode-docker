@@ -92,8 +92,6 @@ export class NetCoreTaskHelper implements TaskHelper {
                 label: 'docker-run: debug',
                 dependsOn: ['docker-build: debug'],
                 dockerRun: {
-                    entrypoint: options.platformOS === 'Windows' ? 'ping' : 'tail',
-                    command: options.platformOS === 'Windows' ? '-t localhost' : '-f /dev/null',
                     os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
@@ -125,13 +123,15 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
         runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
-        runOptions.image = inferImageName(runDefinition, context, context.folder.name, 'dev');
+        runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 
         const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
 
+        runOptions.env = runOptions.env || {};
+        runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER = runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER || '1';
+
         if (userSecrets) {
-            runOptions.env = runOptions.env || {};
             runOptions.env.ASPNETCORE_ENVIRONMENT = runOptions.env.ASPNETCORE_ENVIRONMENT || 'Development';
 
             if (ssl) {
@@ -280,6 +280,4 @@ export class NetCoreTaskHelper implements TaskHelper {
 
 }
 
-const netCoreTaskHelper = new NetCoreTaskHelper();
-
-export default netCoreTaskHelper;
+export const netCoreTaskHelper = new NetCoreTaskHelper();

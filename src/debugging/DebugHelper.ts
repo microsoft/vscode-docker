@@ -14,9 +14,9 @@ import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { DockerPlatform } from './DockerPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
-import netCoreDebugHelper from './netcore/NetCoreDebugHelper';
-import nodeDebugHelper from './node/NodeDebugHelper';
-import pythonDebugHelper from './python/PythonDebugHelper';
+import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
+import { nodeDebugHelper } from './node/NodeDebugHelper';
+import { pythonDebugHelper } from './python/PythonDebugHelper';
 
 export interface DockerDebugContext { // Same as DockerTaskContext but intentionally does not extend it, since we never need to pass a DockerDebugContext to tasks
     folder: WorkspaceFolder;
@@ -66,16 +66,25 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
 }
 
 // TODO: This is stripping out a level of indentation, but the tasks one isn't
-export async function addDebugConfiguration(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
+export async function addDebugConfiguration(newConfig: DockerDebugConfiguration, overwrite: boolean | undefined): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceLaunch = workspace.getConfiguration('launch');
     const allConfigs = workspaceLaunch && workspaceLaunch.configurations as DebugConfiguration[] || [];
 
-    if (allConfigs.some(c => c.name === debugConfiguration.name)) {
-        return false;
+    const existingConfigIndex = allConfigs.findIndex(c => c.name === newConfig.name);
+    if (existingConfigIndex >= 0) {
+        // If a task of the same label exists already
+        if (overwrite) {
+            // If overwriting, do so
+            allConfigs[existingConfigIndex] = newConfig;
+        } else {
+            // If not overwriting, return false
+            return false;
+        }
+    } else {
+        allConfigs.push(newConfig);
     }
 
-    allConfigs.push(debugConfiguration);
     await workspaceLaunch.update('configurations', allConfigs);
     return true;
 }

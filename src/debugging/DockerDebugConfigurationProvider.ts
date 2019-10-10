@@ -6,7 +6,6 @@
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
-import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
@@ -29,22 +28,30 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-        const debugPlatform = getPlatform(debugConfiguration);
         return callWithTelemetryAndErrorHandling(
-            `docker-launch/${debugPlatform || 'unknown'}`,
-            async (actionContext: IActionContext) => await this.resolveDebugConfigurationInternal(
-                {
-                    folder: folder || await quickPickWorkspaceFolder('To debug with Docker you must first open a folder or workspace in VS Code.'),
-                    platform: debugPlatform,
-                    actionContext: actionContext,
-                    cancellationToken: token,
-                },
-                debugConfiguration));
+            'docker-launch',
+            async (actionContext: IActionContext) => {
+                if (!folder) {
+                    throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                }
+
+                const debugPlatform = getPlatform(debugConfiguration);
+                actionContext.telemetry.properties.platform = debugPlatform;
+
+                return await this.resolveDebugConfigurationInternal(
+                    {
+                        folder: folder,
+                        platform: debugPlatform,
+                        actionContext: actionContext,
+                        cancellationToken: token,
+                    },
+                    debugConfiguration
+                );
+            }
+        );
     }
 
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
-        context.actionContext.telemetry.properties.platform = context.platform;
-
         context.runDefinition = await getAssociatedDockerRunTask(originalConfiguration);
 
         const helper = this.getHelper(context.platform);
@@ -79,17 +86,16 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
-                try {
-                    if (sessionConfiguration
-                        && sessionConfiguration.dockerOptions
-                        && sessionConfiguration.dockerOptions.containerNameToKill === resolvedConfiguration.dockerOptions.containerNameToKill) {
+                if (sessionConfiguration
+                    && sessionConfiguration.dockerOptions
+                    && sessionConfiguration.dockerOptions.containerNameToKill === resolvedConfiguration.dockerOptions.containerNameToKill) {
+                    try {
                         await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
+                    } finally {
                         disposable.dispose();
-                    } else {
-                        return; // Return without disposing--this isn't our debug session
                     }
-                } catch {
-                    disposable.dispose();
+                } else {
+                    return; // Return without disposing--this isn't our debug session
                 }
             });
         }

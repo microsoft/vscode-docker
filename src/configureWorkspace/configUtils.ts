@@ -54,14 +54,14 @@ function splitPorts(value: string): number[] | undefined {
  * Prompts for a platform
  * @throws `UserCancelledError` if the user cancels.
  */
-export async function quickPickPlatform(): Promise<Platform> {
+export async function quickPickPlatform(platforms?: Platform[]): Promise<Platform> {
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Application Platform'
     }
 
-    const platforms: Platform[] = [
+    platforms = platforms || [
         'Go',
         'Java',
         '.NET Core Console',
@@ -98,9 +98,7 @@ export async function quickPickOS(): Promise<PlatformOS> {
 
 export async function quickPickGenerateComposeFiles(): Promise<boolean> {
     let opt: vscode.QuickPickOptions = {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: 'Add Docker Compose files'
+        placeHolder: 'Include Docker Compose files'
     }
 
     let response = await ext.ui.showQuickPick(
