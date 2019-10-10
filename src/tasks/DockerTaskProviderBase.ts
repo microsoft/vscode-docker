@@ -58,12 +58,6 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
     protected abstract async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void>;
 
     protected getHelper(platform: DockerPlatform): TaskHelper {
-        const helper = this.helpers[platform];
-
-        if (!helper) {
-            throw new Error(`The platform '${platform}' is not currently supported for ${this.telemetryName} tasks.`);
-        }
-
-        return helper;
+        return this.helpers[platform];
     }
 }

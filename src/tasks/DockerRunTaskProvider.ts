@@ -37,14 +37,16 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         const helper = this.getHelper(context.platform);
 
-        if (helper.preRun) {
+        if (helper && helper.preRun) {
             await helper.preRun(context, definition);
             throwIfCancellationRequested(context);
         }
 
-        definition.dockerRun = await helper.getDockerRunOptions(context, definition);
-        await this.validateResolvedDefinition(context, definition.dockerRun);
-        throwIfCancellationRequested(context);
+        if (helper) {
+            definition.dockerRun = await helper.getDockerRunOptions(context, definition);
+            await this.validateResolvedDefinition(context, definition.dockerRun);
+            throwIfCancellationRequested(context);
+        }
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
 
@@ -53,7 +55,7 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
         await context.shell.executeCommandInTerminal(commandLine, context.folder, true, context.cancellationToken);
         throwIfCancellationRequested(context);
 
-        if (helper.preRun) {
+        if (helper && helper.preRun) {
             // TODO: attach results to context
             await helper.preRun(context, definition);
         }
@@ -62,10 +64,6 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
         if (!dockerRun.image) {
             throw new Error('No Docker image name was provided or resolved.');
-        }
-
-        if (!dockerRun.containerName) {
-            throw new Error('No Docker container name was provided or resolved.')
         }
     }
 

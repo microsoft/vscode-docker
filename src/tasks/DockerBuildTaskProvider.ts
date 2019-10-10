@@ -35,14 +35,16 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         const helper = this.getHelper(context.platform);
 
-        if (helper.preBuild) {
+        if (helper && helper.preBuild) {
             await helper.preBuild(context, definition);
             throwIfCancellationRequested(context);
         }
 
-        definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
-        await this.validateResolvedDefinition(context, definition.dockerBuild);
-        throwIfCancellationRequested(context);
+        if (helper) {
+            definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
+            await this.validateResolvedDefinition(context, definition.dockerBuild);
+            throwIfCancellationRequested(context);
+        }
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
@@ -50,7 +52,7 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
         await context.shell.executeCommandInTerminal(commandLine, context.folder, true, context.cancellationToken);
         throwIfCancellationRequested(context);
 
-        if (helper.postBuild) {
+        if (helper && helper.postBuild) {
             // TODO: attach results to context
             await helper.postBuild(context, definition);
         }

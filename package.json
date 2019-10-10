@@ -899,6 +899,10 @@
                                     "type": "string"
                                 }
                             },
+                            "image": {
+                                "type": "string",
+                                "description": "The image to run."
+                            },
                             "labels": {
                                 "type": "object",
                                 "description": "Labels applied to the Docker container used for debugging.",
