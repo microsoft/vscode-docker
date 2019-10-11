@@ -98,7 +98,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             context.telemetry.properties.cancelStep = 'learnHowToContribute';
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
-            throw new Error(`Only one provider with id "${provider.id}" is allowed at a time.`);
+            throw new Error(`The "${provider.id}" registry is already connected.`);
         }
 
         context.telemetry.properties.providerId = provider.id;
