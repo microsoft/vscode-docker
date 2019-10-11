@@ -98,8 +98,8 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             context.telemetry.properties.cancelStep = 'learnHowToContribute';
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
-            await ext.ui.showWarningMessage(`The "${provider.id}" registry is already connected.`);
-            context.telemetry.properties.cancelStep = 'registryAlreadyAdded';
+            await ext.ui.showWarningMessage(`The "${provider.id}" registry provider is already connected.`);
+            context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
             throw new UserCancelledError();
         }
 
