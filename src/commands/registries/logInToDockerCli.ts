@@ -42,8 +42,6 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                     reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \nOpen your Docker config file and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
                 } else if (err) {
                     reject(err);
-                } else if (stderr) {
-                    reject(stderr);
                 } else {
                     resolve();
                 }
