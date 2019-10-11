@@ -49,7 +49,7 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
         // TODO: process errors from docker build so that warnings aren't fatal
-        await context.shell.executeCommandInTerminal(commandLine, context.folder, true, context.cancellationToken);
+        await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
         throwIfCancellationRequested(context);
 
         if (helper && helper.postBuild) {

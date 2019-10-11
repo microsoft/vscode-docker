@@ -52,7 +52,7 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         // TODO: get container ID from output?
         // TODO: process errors from docker run so that warnings aren't fatal
-        await context.shell.executeCommandInTerminal(commandLine, context.folder, true, context.cancellationToken);
+        await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
         throwIfCancellationRequested(context);
 
         if (helper && helper.preRun) {
