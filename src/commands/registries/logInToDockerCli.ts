@@ -43,6 +43,9 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                 } else if (err) {
                     reject(err);
                 } else {
+                    // Docker emits some non-error warning messages to stderr, so we cannot reject on all stderr without failing unnecessarily
+                    // Consequently, as long as exit code is 0, we will resolve
+                    // Note that both stdout and stderr are logged unconditionally above
                     resolve();
                 }
             });
