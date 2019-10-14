@@ -7,12 +7,13 @@ import { getThemedIconPath, IconPath } from "../IconPath";
 import { imageProperties, ImageProperty } from "../images/ImageProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
-export type ContainerProperty = ImageProperty | 'ContainerId' | 'ContainerName' | 'Ports' | 'State' | 'Status';
+export type ContainerProperty = ImageProperty | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
 
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     ...imageProperties,
     { property: 'ContainerId', exampleValue: 'fdeab20e859d' },
     { property: 'ContainerName', exampleValue: 'amazing_hoover' },
+    { property: 'Networks', exampleValue: 'mybridge_network' },
     { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' }
