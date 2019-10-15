@@ -1068,7 +1068,11 @@
                 ],
                 "filenamePatterns": [
                     "*.dockerfile",
-                    "Dockerfile"
+                    "Dockerfile",
+                    "Dockerfile.debug",
+                    "Dockerfile.dev",
+                    "Dockerfile.develop",
+                    "Dockerfile.prod"
                 ]
             },
             {
