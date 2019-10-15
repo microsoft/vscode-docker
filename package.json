@@ -42,6 +42,7 @@
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
         "onCommand:vscode-docker.containers.restart",
+        "onCommand:vscode-docker.containers.select",
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
@@ -108,6 +109,10 @@
             "commandPalette": [
                 {
                     "command": "vscode-docker.api.configure",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.select",
                     "when": "never"
                 },
                 {
@@ -1096,6 +1101,7 @@
                         "CreatedTime",
                         "FullTag",
                         "ImageId",
+                        "Networks",
                         "None",
                         "Ports",
                         "Registry",
@@ -1122,6 +1128,7 @@
                             "CreatedTime",
                             "FullTag",
                             "ImageId",
+                            "Networks",
                             "Ports",
                             "Registry",
                             "Repository",
@@ -1143,6 +1150,7 @@
                         "CreatedTime",
                         "FullTag",
                         "ImageId",
+                        "Networks",
                         "Ports",
                         "Registry",
                         "Repository",
@@ -1586,6 +1594,11 @@
             {
                 "command": "vscode-docker.containers.restart",
                 "title": "Restart",
+                "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.containers.select",
+                "title": "Select container",
                 "category": "Docker Containers"
             },
             {
