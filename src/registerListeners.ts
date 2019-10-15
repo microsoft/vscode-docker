@@ -7,20 +7,18 @@ import { ExtensionContext, TextDocument, workspace } from 'vscode';
 import { ext } from './extensionVariables';
 
 let lastUploadTime: number = 0;
-const hourInMilliseconds = 60 * 60 * 1000;
+const hourInMilliseconds = 1000 * 60 * 60;
 
 export function registerListeners(ctx: ExtensionContext): void {
-    ctx.subscriptions.push(
-        workspace.onDidSaveTextDocument(
-            (doc: TextDocument) => {
-                // If it's not a Dockerfile, or last upload time is within an hour, skip
-                if (doc.languageId !== 'dockerfile' || lastUploadTime + hourInMilliseconds > Date.now()) {
-                    return;
-                }
+    ctx.subscriptions.push(workspace.onDidSaveTextDocument(onDidSaveTextDocument));
+}
 
-                lastUploadTime = Date.now();
-                ext.reporter.sendTelemetryEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
-            }
-        )
-    );
+function onDidSaveTextDocument(doc: TextDocument): void {
+    // If it's not a Dockerfile, or last upload time is within an hour, skip
+    if (doc.languageId !== 'dockerfile' || lastUploadTime + hourInMilliseconds > Date.now()) {
+        return;
+    }
+
+    lastUploadTime = Date.now();
+    ext.reporter.sendTelemetryEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
 }
