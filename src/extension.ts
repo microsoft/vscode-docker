@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as Dockerode from 'dockerode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CoreOptions } from 'request';
@@ -28,12 +27,11 @@ import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
-import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
+import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
-import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -290,23 +288,4 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
 
         ctx.subscriptions.push(client.start());
     });
-}
-
-/**
- * Dockerode parses and handles the well-known `DOCKER_*` environment variables, but it doesn't let us pass those values as-is to the constructor
- * Thus we will temporarily update `process.env` and pass nothing to the constructor
- */
-function refreshDockerode(): void {
-    const oldEnv = process.env;
-    try {
-        process.env = { ...process.env }; // make a clone before we change anything
-        addDockerSettingsToEnv(process.env, oldEnv);
-        ext.dockerodeInitError = undefined;
-        ext.dockerode = new Dockerode(process.env.DOCKER_HOST ? undefined : tryGetDefaultDockerContext());
-    } catch (error) {
-        // This will be displayed in the tree
-        ext.dockerodeInitError = error;
-    } finally {
-        process.env = oldEnv;
-    }
 }
