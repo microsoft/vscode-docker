@@ -123,7 +123,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
 
-        refreshDockerode();
+        await refreshDockerode();
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient(ctx);
@@ -218,7 +218,7 @@ namespace Configuration {
                     e.affectsConfiguration('docker.certPath') ||
                     e.affectsConfiguration('docker.tlsVerify') ||
                     e.affectsConfiguration('docker.machineName')) {
-                    refreshDockerode();
+                    await refreshDockerode();
                 }
 
                 // Update endpoint if needed
