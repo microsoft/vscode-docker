@@ -239,7 +239,7 @@
                 {
                     "command": "vscode-docker.images.prune",
                     "when": "view == dockerImages",
-                    "group": "navigation@3"
+                    "group": "navigation@2"
                 },
                 {
                     "command": "vscode-docker.images.configureExplorer",
@@ -1708,8 +1708,8 @@
                 "title": "Create...",
                 "category": "Docker Networks",
                 "icon": {
-                    "light": "resources/light/connect.svg",
-                    "dark": "resources/dark/connect.svg"
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
                 }
             },
             {
