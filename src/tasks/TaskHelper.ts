@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, /*QuickPickItem,*/ Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { ext } from '../extensionVariables';
-import { resolveVariables } from '../utils/resolveVariables';
+//import { ext } from '../extensionVariables';
+//import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerPseudoShell } from './DockerPseudoShell';
@@ -129,6 +129,9 @@ export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Prom
 }
 
 export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
+    // TODO
+    return undefined;
+    /*
     let buildTasks = await tasks.fetchTasks({ type: 'docker-build' });
     buildTasks =
         buildTasks.filter(t => t.execution.args.some(a => { // Find all build tasks where an argument to 'docker build' is this Dockerfile
@@ -161,6 +164,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     }
 
     return undefined;
+    */
 }
 
 export function inferImageName(runOptions: DockerRunTaskDefinition, context: DockerRunTaskContext, defaultNameHint: string, defaultTag?: 'dev' | 'latest'): string {
