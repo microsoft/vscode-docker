@@ -74,7 +74,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
             if (e.visible) {
                 const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-                const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
+                const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 2000);
                 intervalId = setInterval(
                     async () => {
                         if (window.state.focused && await this.hasChanged()) {
