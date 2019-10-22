@@ -25,6 +25,7 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
@@ -128,6 +129,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient(ctx);
+
+        registerListeners(ctx);
     });
 }
 
