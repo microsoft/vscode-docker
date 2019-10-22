@@ -14,7 +14,6 @@ const unix = 'unix://';
 const npipe = 'npipe://';
 
 const SSH_URL_REGEX = /ssh:\/\//i;
-const SSH_AUTH_SOCK_REGEX = /SSH_AUTH_SOCK\s*=\s*([^;]+)/gim;
 
 // Not exhaustive--only the properties we're interested in
 interface IDockerEndpoint {
@@ -70,10 +69,9 @@ async function getSshAuthSock(): Promise<string | undefined> {
     if (isWindows()) {
         return '\\\\.\\pipe\\openssh-ssh-agent';
     } else {
-        const { stdout } = await exec('ssh-agent -s', { timeout: 1000 });
-        const matches = SSH_AUTH_SOCK_REGEX.exec(stdout);
-
-        return matches && matches.length > 1 && matches[1] || undefined;
+        // On Mac and Linux, if it isn't set there's nothing we can do
+        // Running ssh-agent will yield a new agent that doesn't have the needed keys
+        throw new Error('In order to use an SSH DOCKER_HOST on OS X and Linux, you must configure an ssh-agent.');
     }
 }
 
