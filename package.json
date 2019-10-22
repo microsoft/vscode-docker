@@ -59,6 +59,7 @@
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
         "onCommand:vscode-docker.networks.configureExplorer",
+        "onCommand:vscode-docker.networks.create",
         "onCommand:vscode-docker.networks.inspect",
         "onCommand:vscode-docker.networks.prune",
         "onCommand:vscode-docker.networks.refresh",
@@ -221,9 +222,14 @@
                     "group": "navigation@9"
                 },
                 {
-                    "command": "vscode-docker.networks.prune",
+                    "command": "vscode-docker.networks.create",
                     "when": "view == dockerNetworks",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-docker.networks.prune",
+                    "when": "view == dockerNetworks",
+                    "group": "navigation@2"
                 },
                 {
                     "command": "vscode-docker.networks.refresh",
@@ -1699,6 +1705,15 @@
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
+                }
+            },
+            {
+                "command": "vscode-docker.networks.create",
+                "title": "Create...",
+                "category": "Docker Networks",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
                 }
             },
             {
