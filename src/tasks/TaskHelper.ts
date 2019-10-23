@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, /*QuickPickItem,*/ Task, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-//import { ext } from '../extensionVariables';
-//import { resolveVariables } from '../utils/resolveVariables';
+import { ext } from '../extensionVariables';
+import { pathNormalize } from '../utils/pathNormalize';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
-import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerPseudoShell } from './DockerPseudoShell';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
@@ -110,7 +111,7 @@ export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTask
 }
 
 export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<DockerRunTaskDefinition | undefined> {
-    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
@@ -118,7 +119,7 @@ export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebug
 }
 
 export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
-    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
@@ -130,22 +131,13 @@ export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Prom
 }
 
 export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
-    // TODO
-    return undefined;
-    /*
-    let buildTasks = await tasks.fetchTasks({ type: 'docker-build' });
-    buildTasks =
-        buildTasks.filter(t => t.execution.args.some(a => { // Find all build tasks where an argument to 'docker build' is this Dockerfile
-            let arg: string;
-            if (typeof a === 'string') {
-                arg = a;
-            } else {
-                arg = a.value;
-            }
+    const resolvedDockerfile = pathNormalize(resolveVariables(dockerfile, folder));
 
-            arg = resolveVariables(arg, folder);
-            return arg.toLowerCase() === dockerfile.toLowerCase();
-        }));
+    let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
+    buildTasks =
+        buildTasks.filter(buildTask => {
+            return buildTask.definition && buildTask.definition.dockerBuild && (pathNormalize(resolveVariables(buildTask.definition.dockerBuild.dockerfile, folder)) === resolvedDockerfile)
+        });
 
     if (buildTasks.length === 1) {
         return buildTasks[0]; // If there's only one build task, take it
@@ -165,7 +157,6 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     }
 
     return undefined;
-    */
 }
 
 export function inferImageName(runOptions: DockerRunTaskDefinition, context: DockerRunTaskContext, defaultNameHint: string, defaultTag?: 'dev' | 'latest'): string {

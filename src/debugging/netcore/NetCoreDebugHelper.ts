@@ -9,6 +9,7 @@ import * as path from 'path';
 import { DebugConfiguration } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
+import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
@@ -228,8 +229,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         const relativePath = path.relative(path.dirname(debugConfiguration.netCore.appProject), appOutput);
 
         return platformOS === 'Windows' ?
-            path.win32.normalize(path.win32.join('C:\\app', relativePath)).replace(/\//g, '\\') :
-            path.posix.normalize(path.posix.join('/app', relativePath)).replace(/\\/g, '/');
+            pathNormalize(path.win32.join('C:\\app', relativePath)) :
+            pathNormalize(path.posix.join('/app', relativePath));
     }
 }
 

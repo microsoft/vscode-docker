@@ -4,6 +4,7 @@
 
 import * as os from 'os';
 import * as path from 'path';
+import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 
 export interface OSProvider {
@@ -38,9 +39,7 @@ export class LocalOSProvider implements OSProvider {
     }
 
     public pathNormalize(pathOS: PlatformOS, rawPath: string): string {
-        return rawPath.replace(
-            pathOS === 'Windows' ? /\//g : /\\/g,
-            pathOS === 'Windows' ? '\\' : '/');
+        return pathNormalize(rawPath, pathOS);
     }
 
     public pathParse(pathOS: PlatformOS, rawPath: string): path.ParsedPath {
