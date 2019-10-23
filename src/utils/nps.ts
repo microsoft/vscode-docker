@@ -32,17 +32,18 @@ export async function nps(globalState: Memento): Promise<void> {
             return;
         }
 
-        const sessionCount = globalState.get(SESSION_COUNT_KEY, 0) + 1;
-        const sessionDate = new Date().toDateString();
+        const date = new Date().toDateString();
+        const lastSessionDate = globalState.get(LAST_SESSION_DATE_KEY, new Date(0).toDateString());
 
         // If this session is on same date as last session, don't count it
-        if (sessionDate === globalState.get(LAST_SESSION_DATE_KEY, new Date(0).toDateString())) {
+        if (date === lastSessionDate) {
             return;
         }
 
         // Count this session
+        const sessionCount = globalState.get(SESSION_COUNT_KEY, 0) + 1;
+        await globalState.update(LAST_SESSION_DATE_KEY, date);
         await globalState.update(SESSION_COUNT_KEY, sessionCount);
-        await globalState.update(LAST_SESSION_DATE_KEY, sessionDate);
 
         // If under the MIN_SESSION_COUNT, don't ask
         if (sessionCount < MIN_SESSION_COUNT) {
@@ -50,6 +51,7 @@ export async function nps(globalState: Memento): Promise<void> {
         }
 
         // Decide if they are a candidate (if we previously decided they are and they did Remind Me Later, we will not do probability again)
+        // i.e. Probability only comes into play if isCandidate is undefined
         // tslint:disable-next-line: insecure-random
         isCandidate = isCandidate || Math.random() < PROBABILITY;
         await globalState.update(IS_CANDIDATE_KEY, isCandidate);
@@ -63,21 +65,21 @@ export async function nps(globalState: Memento): Promise<void> {
         const remind: MessageItem = { title: 'Remind Me Later' };
         const never: MessageItem = { title: 'Don\'t Show Again' };
 
-        const result = await window.showInformationMessage('Do you mind taking a quick feedback survey about the Docker Extension for VS Code?', take, remind, never);
+        // Prompt, treating hitting X as Remind Me Later
+        const result = (await window.showInformationMessage('Do you mind taking a quick feedback survey about the Docker Extension for VS Code?', take, remind, never)) || remind;
 
-        if (!result || result === remind) {
+        ext.reporter.sendTelemetryEvent('nps', { survey: SURVEY_NAME, response: result.title });
+
+        if (result === take) {
+            // If they hit Take, don't ask again (for this survey name), and open the survey
+            await globalState.update(IS_CANDIDATE_KEY, false);
+            await env.openExternal(Uri.parse(`${SURVEY_URL}?o=${encodeURIComponent(process.platform)}&m=${encodeURIComponent(env.machineId)}`));
+        } else if (result === remind) {
             // If they hit the X or Remind Me Later, ask again in 3 sessions
-            ext.reporter.sendTelemetryEvent('nps', { survey: SURVEY_NAME, response: 'remind' });
             await globalState.update(SESSION_COUNT_KEY, sessionCount - 3);
         } else if (result === never) {
             // If they hit Never, don't ask again (for this survey name)
-            ext.reporter.sendTelemetryEvent('nps', { survey: SURVEY_NAME, response: 'never' });
             await globalState.update(IS_CANDIDATE_KEY, false);
-        } else if (result === take) {
-            // If they hit Take, don't ask again (for this survey name), and open the survey
-            ext.reporter.sendTelemetryEvent('nps', { survey: SURVEY_NAME, response: 'take' });
-            await globalState.update(IS_CANDIDATE_KEY, false);
-            await env.openExternal(Uri.parse(`${SURVEY_URL}?o=${encodeURIComponent(process.platform)}&m=${encodeURIComponent(env.machineId)}`));
         }
     } catch { } // Best effort
 }
