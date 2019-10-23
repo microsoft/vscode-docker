@@ -48,12 +48,13 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
-        // TODO: process errors from docker build so that warnings aren't fatal
+        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
         await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
         throwIfCancellationRequested(context);
 
+        context.imageName = definition.dockerBuild.tag;
+
         if (helper && helper.postBuild) {
-            // TODO: attach results to context
             await helper.postBuild(context, definition);
         }
     }

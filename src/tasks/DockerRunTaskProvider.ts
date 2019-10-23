@@ -26,7 +26,7 @@ export interface DockerRunTask extends Task {
 export class DockerRunTaskProvider extends DockerTaskProviderBase {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
-    // TODO: Can we skip if a recently-started container exists?
+    // TODO: Skip if container is freshly started, but probably depends on language
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
@@ -50,13 +50,12 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
 
-        // TODO: get container ID from output?
-        // TODO: process errors from docker run so that warnings aren't fatal
-        await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
+        const { stdout } = await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ true, context.cancellationToken);
         throwIfCancellationRequested(context);
 
+        context.containerId = stdout;
+
         if (helper && helper.preRun) {
-            // TODO: attach results to context
             await helper.preRun(context, definition);
         }
     }

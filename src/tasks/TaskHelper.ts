@@ -46,11 +46,12 @@ export interface DockerTaskExecutionContext extends DockerTaskContext {
 
 // tslint:disable-next-line: no-empty-interface
 export interface DockerBuildTaskContext extends DockerTaskExecutionContext {
+    imageName?: string;
     buildTaskResult?: string;
 }
 
 export interface DockerRunTaskContext extends DockerTaskExecutionContext {
-    runTaskResult?: string;
+    containerId?: string;
     buildDefinition?: DockerBuildTaskDefinition;
 }
 

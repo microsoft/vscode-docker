@@ -46,14 +46,17 @@ export class DockerPseudoShell implements Pseudoterminal {
 
     public async executeCommandInTerminal(command: CommandLineBuilder, folder: WorkspaceFolder, rejectOnStdError?: boolean, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
         const commandLine = resolveVariables(command.build(), folder);
-        this.write(`> ${commandLine} <\r\n`, DEFAULTBOLD);
+
+        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
+        this.write(`> Executing task: ${commandLine} <\r\n`, DEFAULTBOLD);
+
+        // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
             const process = cp.exec(commandLine, (error, stdout, stderr) => {
                 if (error) {
                     reject(error);
                 }
 
-                // TODO : validate what happens when using Docker buildkit, which puts everything into STDERR
                 if (stderr && rejectOnStdError) {
                     reject(stderr);
                 }

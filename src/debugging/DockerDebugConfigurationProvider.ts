@@ -63,7 +63,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
         }
 
-        // TODO: addDockerSettingsToEnv?
         return resolvedConfiguration;
     }
 
