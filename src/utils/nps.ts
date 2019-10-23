@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// Loosely adapted from https://github.com/microsoft/vscode-azure-account/blob/2f497562cab5f3db09f983ab5101040f27dceb70/src/nps.ts
+
 import { env, Memento, MessageItem, Uri, window } from "vscode";
 import { ext } from "vscode-azureappservice/out/src/extensionVariables";
 
