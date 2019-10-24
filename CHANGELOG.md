@@ -1,3 +1,10 @@
+## 0.8.2 - 24 October 2019
+### Added
+* More pattern matches for Dockerfiles (Dockerfile.debug, Dockerfile.dev, Dockerfile.develop, Dockerfile.prod)
+* Button to create simple networks [#1322](https://github.com/microsoft/vscode-docker/issues/1322)
+* Survey prompt
+### Fixed
+* Will not refresh Explorer window if VSCode is not in focus [#1351](https://github.com/microsoft/vscode-docker/issues/1351)
 
 ## 0.8.1 - 13 September 2019
 ### Fixed
