@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, workspace, WorkspaceConfiguration } from "vscode";
+import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
@@ -74,10 +74,10 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
             if (e.visible) {
                 const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-                const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 1000);
+                const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 2000);
                 intervalId = setInterval(
                     async () => {
-                        if (await this.hasChanged()) {
+                        if (window.state.focused && await this.hasChanged()) {
                             await this.refresh();
                         }
                     },

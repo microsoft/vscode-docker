@@ -708,8 +708,8 @@
                 },
                 "docker.explorerRefreshInterval": {
                     "type": "number",
-                    "default": 1000,
-                    "description": "Explorer refresh interval, default is 1000ms"
+                    "default": 2000,
+                    "description": "Explorer refresh interval, default is 2000ms"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
