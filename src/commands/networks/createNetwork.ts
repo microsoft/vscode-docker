@@ -6,7 +6,6 @@
 import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { wrapDockerodeENOENT } from '../../utils/wrapError';
 
 export async function createNetwork(_context: IActionContext): Promise<void> {
 
@@ -28,7 +27,7 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
         }
     );
 
-    const result = <{ id: string }>await wrapDockerodeENOENT(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }));
+    const result = <{ id: string }>await ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label });
 
     window.showInformationMessage(`Network Created with ID ${result.id.substr(0, 12)}`);
 }
