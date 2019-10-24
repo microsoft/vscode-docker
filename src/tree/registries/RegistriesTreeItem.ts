@@ -98,7 +98,11 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             context.telemetry.properties.cancelStep = 'learnHowToContribute';
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
-            throw new Error(`Only one provider with id "${provider.id}" is allowed at a time.`);
+            // Don't wait, no input to wait for anyway
+            // tslint:disable-next-line: no-floating-promises
+            ext.ui.showWarningMessage(`The "${provider.label}" registry provider is already connected.`);
+            context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
+            throw new UserCancelledError();
         }
 
         context.telemetry.properties.providerId = provider.id;
