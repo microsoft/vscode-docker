@@ -38,7 +38,6 @@ export { getDockerOSType, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindow
 export { Platform, PlatformOS } from './src/utils/platform';
 export { DefaultTerminalProvider } from './src/utils/TerminalProvider';
 export { trimWithElipsis } from './src/utils/trimWithElipsis';
-export { wrapError } from './src/utils/wrapError';
 export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
 export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
 export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
