@@ -2,7 +2,8 @@
 ### Added
 * More pattern matches for Dockerfiles (Dockerfile.debug, Dockerfile.dev, Dockerfile.develop, Dockerfile.prod)
 * Button to create simple networks [#1322](https://github.com/microsoft/vscode-docker/issues/1322)
-* Survey prompt
+* Survey prompt for some active users
+* Telemetry event for when Dockerfiles are edited using Docker extension features
 ### Fixed
 * Will not refresh Explorer window if VSCode is not in focus [#1351](https://github.com/microsoft/vscode-docker/issues/1351)
 
