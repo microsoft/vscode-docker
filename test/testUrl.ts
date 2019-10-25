@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as request from 'request-promise-native';
 import { ITestCallbackContext } from "mocha";
-import { ext, wrapError } from "../extension.bundle";
+import { wrapError } from "../extension.bundle";
 import { Uri } from "vscode";
 
 export async function testUrl(url: string): Promise<void> {
@@ -23,7 +24,7 @@ export async function testUrl(url: string): Promise<void> {
                 url
             };
 
-            contents = <string>await ext.request(options);
+            contents = <string>await request(options);
         } catch (error) {
             throw wrapError(error, `Could not connect to ${url}`);
         }

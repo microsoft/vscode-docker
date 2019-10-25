@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Response } from "request";
+import * as request from 'request-promise-native';
 import { RequestPromiseOptions } from "request-promise-native";
 import { URL } from "url";
 import { workspace } from "vscode";
-import { ext } from "../extensionVariables";
 
 export function getNextLinkFromHeaders(response: Response): string | undefined {
     const linkHeader: string | undefined = response.headers && <string>response.headers.link;
@@ -43,7 +43,7 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         fullUrl = parsed.toString();
     }
 
-    return <IResponse<T>>await ext.request(fullUrl, options);
+    return <IResponse<T>>await request(fullUrl, options);
 }
 
 interface IResponse<T> extends Response {

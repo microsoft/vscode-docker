@@ -5,8 +5,6 @@
 
 import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
-import { RequestAPI, RequiredUriUrl } from 'request';
-import { RequestPromise, RequestPromiseOptions } from 'request-promise-native';
 import { ExtensionContext, OutputChannel, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
@@ -16,8 +14,6 @@ import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { IKeytar } from './utils/keytar';
 import { ITerminalProvider } from "./utils/TerminalProvider";
-
-type requestPromise = RequestAPI<RequestPromise, RequestPromiseOptions, RequiredUriUrl>;
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -53,11 +49,6 @@ export namespace ext {
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;
     export let volumesRoot: VolumesTreeItem;
-
-    /**
-     * A version of 'request-promise' which should be used for all direct request calls (it has the user agent set up properly)
-     */
-    export let request: requestPromise;
 
     /**
      * A test-injectable structure defining the current operating system and version
