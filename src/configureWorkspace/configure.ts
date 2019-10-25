@@ -138,7 +138,6 @@ function genDockerIgnoreFile(service: string, platformType: Platform, os: string
         '**/obj',
         '**/secrets.dev.yaml',
         '**/values.dev.yaml',
-        'LICENSE',
         'README.md'
     ];
 
