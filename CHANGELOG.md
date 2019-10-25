@@ -1,4 +1,4 @@
-## 0.8.2 - 24 October 2019
+## 0.8.2 - 25 October 2019
 ### Added
 * More pattern matches for Dockerfiles (Dockerfile.debug, Dockerfile.dev, Dockerfile.develop, Dockerfile.prod)
 * Button to create simple networks [#1322](https://github.com/microsoft/vscode-docker/issues/1322)
