@@ -25,12 +25,14 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
+import { nps } from './utils/nps';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
@@ -128,6 +130,12 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient(ctx);
+
+        registerListeners(ctx);
+
+        // Don't wait
+        // tslint:disable-next-line: no-floating-promises
+        nps(ctx.globalState);
     });
 }
 

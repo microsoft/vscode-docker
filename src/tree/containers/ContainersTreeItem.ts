@@ -57,6 +57,8 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo
                 return item.containerId.slice(0, 12);
             case 'ContainerName':
                 return item.containerName;
+            case 'Networks':
+                return item.networks.length > 0 ? item.networks.join(',') : '<none>';
             case 'Ports':
                 return item.ports.length > 0 ? item.ports.join(',') : '<none>';
             case 'State':

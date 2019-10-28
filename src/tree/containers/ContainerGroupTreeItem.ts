@@ -19,6 +19,9 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContaine
         switch (this.parent.groupBySetting) {
             case 'ContainerId':
             case 'ContainerName':
+            case 'Networks':
+                icon = 'network';
+                break;
             case 'Ports':
             case 'Status':
                 icon = 'applicationGroup';

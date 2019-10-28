@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "0.8.2-alpha",
+    "version": "0.8.3-alpha",
     "preview": true,
     "publisher": "ms-azuretools",
     "displayName": "Docker",
@@ -42,6 +42,7 @@
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
         "onCommand:vscode-docker.containers.restart",
+        "onCommand:vscode-docker.containers.select",
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
@@ -58,6 +59,7 @@
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
         "onCommand:vscode-docker.networks.configureExplorer",
+        "onCommand:vscode-docker.networks.create",
         "onCommand:vscode-docker.networks.inspect",
         "onCommand:vscode-docker.networks.prune",
         "onCommand:vscode-docker.networks.refresh",
@@ -108,6 +110,10 @@
             "commandPalette": [
                 {
                     "command": "vscode-docker.api.configure",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.select",
                     "when": "never"
                 },
                 {
@@ -216,9 +222,14 @@
                     "group": "navigation@9"
                 },
                 {
-                    "command": "vscode-docker.networks.prune",
+                    "command": "vscode-docker.networks.create",
                     "when": "view == dockerNetworks",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-docker.networks.prune",
+                    "when": "view == dockerNetworks",
+                    "group": "navigation@2"
                 },
                 {
                     "command": "vscode-docker.networks.refresh",
@@ -1063,7 +1074,11 @@
                 ],
                 "filenamePatterns": [
                     "*.dockerfile",
-                    "Dockerfile"
+                    "Dockerfile",
+                    "Dockerfile.debug",
+                    "Dockerfile.dev",
+                    "Dockerfile.develop",
+                    "Dockerfile.prod"
                 ]
             },
             {
@@ -1083,8 +1098,8 @@
                 },
                 "docker.explorerRefreshInterval": {
                     "type": "number",
-                    "default": 1000,
-                    "description": "Explorer refresh interval, default is 1000ms"
+                    "default": 2000,
+                    "description": "Explorer refresh interval, default is 2000ms"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
@@ -1096,6 +1111,7 @@
                         "CreatedTime",
                         "FullTag",
                         "ImageId",
+                        "Networks",
                         "None",
                         "Ports",
                         "Registry",
@@ -1122,6 +1138,7 @@
                             "CreatedTime",
                             "FullTag",
                             "ImageId",
+                            "Networks",
                             "Ports",
                             "Registry",
                             "Repository",
@@ -1143,6 +1160,7 @@
                         "CreatedTime",
                         "FullTag",
                         "ImageId",
+                        "Networks",
                         "Ports",
                         "Registry",
                         "Repository",
@@ -1589,6 +1607,11 @@
                 "category": "Docker Containers"
             },
             {
+                "command": "vscode-docker.containers.select",
+                "title": "Select container",
+                "category": "Docker Containers"
+            },
+            {
                 "command": "vscode-docker.containers.start",
                 "title": "Start",
                 "category": "Docker Containers"
@@ -1682,6 +1705,15 @@
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
+                }
+            },
+            {
+                "command": "vscode-docker.networks.create",
+                "title": "Create...",
+                "category": "Docker Networks",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
                 }
             },
             {
@@ -1955,7 +1987,6 @@
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/xml2js": "^0.4.5",
         "adm-zip": "^0.4.11",
-        "ajv": "^6.10.2",
         "copy-webpack-plugin": "^4.5.4",
         "gulp": "^4.0.2",
         "mocha": "^5.2.0",
@@ -1976,7 +2007,6 @@
     "dependencies": {
         "adal-node": "^0.1.28",
         "azure-arm-containerregistry": "^3.0.0",
-        "azure-arm-resource": "^2.0.0-preview",
         "azure-arm-website": "^5.3.0",
         "azure-storage": "^2.10.3",
         "deep-equal": "^1.1.0",
@@ -1989,7 +2019,6 @@
         "moment": "^2.24.0",
         "ms-rest": "^2.5.3",
         "ms-rest-azure": "^2.6.0",
-        "opn": "^6.0.0",
         "request": "^2.88.0",
         "request-promise-native": "^1.0.7",
         "semver": "^6.3.0",

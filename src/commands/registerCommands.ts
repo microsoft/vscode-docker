@@ -13,6 +13,7 @@ import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
 import { restartContainer } from "./containers/restartContainer";
+import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
@@ -26,6 +27,7 @@ import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { tagImage } from "./images/tagImage";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
+import { createNetwork } from "./networks/createNetwork";
 import { inspectNetwork } from "./networks/inspectNetwork";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
@@ -70,6 +72,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);
+    registerCommand('vscode-docker.containers.select', selectContainer);
     registerCommand('vscode-docker.containers.start', startContainer);
     registerCommand('vscode-docker.containers.stop', stopContainer);
     registerWorkspaceCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
@@ -86,6 +89,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.tag', tagImage);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
+    registerCommand('vscode-docker.networks.create', createNetwork);
     registerCommand('vscode-docker.networks.inspect', inspectNetwork);
     registerCommand('vscode-docker.networks.remove', removeNetwork);
     registerCommand('vscode-docker.networks.prune', pruneNetworks);

@@ -35,6 +35,10 @@ export class LocalContainerInfo implements ILocalImageInfo {
         return this.data.ImageID;
     }
 
+    public get networks(): string[] {
+        return Object.keys(this.data.NetworkSettings.Networks);
+    }
+
     public get ports(): number[] {
         return this.data.Ports.map(p => p.PublicPort);
     }
