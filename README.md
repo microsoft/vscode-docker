@@ -54,7 +54,7 @@ The Docker extension contributes explorers to view and manage containers, images
 
 ### Debugging in Containers
 
-The Docker extension facilitates easily debugging .NET Core and Node.js apps within a container. For already-dockerized apps, press `F1` and search for `Docker: Initialize for Docker debugging`, otherwise debugging configuration is added automatically for Node.js and .NET Core apps when doing `Docker: Add Docker Files to Workspace`.
+With the Docker extension installed, you can easily debug .NET Core and Node.js apps within a container. Debugging support is enabled automatically when you dockerize your code with `Docker: Add Docker Files to Workspace`. To enable debugging for code that's already dockerized, press `F1` and do `Docker: Initialize for Docker Debugging`.
 
 ![debugging](resources/readme/debugging.gif)
 
