@@ -5,7 +5,6 @@
 
 import { Response } from "request";
 import * as request from 'request-promise-native';
-import { RequestPromiseOptions } from "request-promise-native";
 import { URL } from "url";
 import { workspace } from "vscode";
 
@@ -19,7 +18,7 @@ export function getNextLinkFromHeaders(response: Response): string | undefined {
     }
 }
 
-export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestPromiseOptions): Promise<IResponse<T>> {
+export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: request.RequestPromiseOptions): Promise<IResponse<T>> {
     let httpSettings = workspace.getConfiguration('http');
     let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
     const options = {
@@ -51,7 +50,7 @@ interface IResponse<T> extends Response {
 }
 
 export interface IRegistryAuthTreeItem {
-    addAuth(options: RequestPromiseOptions): Promise<void>;
+    addAuth(options: request.RequestPromiseOptions): Promise<void>;
     baseUrl: string;
 }
 
