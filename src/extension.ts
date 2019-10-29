@@ -32,6 +32,7 @@ import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
 import { addUserAgent } from './utils/addUserAgent';
 import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
+import { nps } from './utils/nps';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
 import { wrapError } from './utils/wrapError';
@@ -131,6 +132,10 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateLanguageClient(ctx);
 
         registerListeners(ctx);
+
+        // Don't wait
+        // tslint:disable-next-line: no-floating-promises
+        nps(ctx.globalState);
     });
 }
 
