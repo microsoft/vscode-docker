@@ -9,7 +9,7 @@ import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
-import { DockerTaskProviderBase } from './DockerTaskProviderBase';
+import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
 
 const DEFAULT = '0m';
@@ -17,23 +17,24 @@ const DEFAULTBOLD = '0;1m';
 const RED = '31m';
 const YELLOW = '33m';
 
-export class DockerPseudoShell implements Pseudoterminal {
+export class DockerPseudoterminal implements Pseudoterminal {
     private readonly closeEmitter: EventEmitter<number> = new EventEmitter<number>();
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
 
-    public onDidWrite: Event<string> = this.writeEmitter.event;
-    public onDidClose: Event<number> = this.closeEmitter.event;
+    public readonly onDidWrite: Event<string> = this.writeEmitter.event;
+    public readonly onDidClose: Event<number> = this.closeEmitter.event;
 
-    constructor(private readonly taskProvider: DockerTaskProviderBase, private readonly task: DockerBuildTask | DockerRunTask) { }
+    constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
 
     public open(initialDimensions: TerminalDimensions | undefined): void {
         const executeContext: DockerTaskExecutionContext = {
             folder: this.task.scope as WorkspaceFolder,
             cancellationToken: this.cts.token,
-            shell: this,
+            terminal: this,
         }
 
+        // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here
         // tslint:disable-next-line: no-floating-promises
         this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
@@ -54,14 +55,14 @@ export class DockerPseudoShell implements Pseudoterminal {
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
             const process = cp.exec(commandLine, (error, stdout, stderr) => {
                 if (error) {
-                    reject(error);
+                    return reject(error);
                 }
 
                 if (stderr && rejectOnStdError) {
-                    reject(stderr);
+                    return reject(stderr);
                 }
 
-                resolve({ stdout, stderr });
+                return resolve({ stdout, stderr });
             });
 
             if (token) {

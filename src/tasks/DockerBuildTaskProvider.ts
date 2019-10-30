@@ -10,7 +10,7 @@ import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
-import { DockerTaskProviderBase } from './DockerTaskProviderBase';
+import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
 import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
@@ -25,7 +25,7 @@ export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
 }
 
-export class DockerBuildTaskProvider extends DockerTaskProviderBase {
+export class DockerBuildTaskProvider extends DockerTaskProvider {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers) }
 
     // TODO: Skip if image is freshly built
@@ -42,14 +42,15 @@ export class DockerBuildTaskProvider extends DockerTaskProviderBase {
 
         if (helper) {
             definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
-            await this.validateResolvedDefinition(context, definition.dockerBuild);
             throwIfCancellationRequested(context);
         }
+
+        await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
         // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
-        await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
+        await context.terminal.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ false, context.cancellationToken);
         throwIfCancellationRequested(context);
 
         context.imageName = definition.dockerBuild.tag;

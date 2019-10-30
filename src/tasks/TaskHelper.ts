@@ -13,7 +13,7 @@ import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerPseudoShell } from './DockerPseudoShell';
+import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
@@ -42,7 +42,7 @@ export interface DockerTaskScaffoldContext extends DockerTaskContext {
 }
 
 export interface DockerTaskExecutionContext extends DockerTaskContext {
-    shell: DockerPseudoShell;
+    terminal: DockerPseudoterminal;
 }
 
 // tslint:disable-next-line: no-empty-interface

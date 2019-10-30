@@ -8,7 +8,7 @@ import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
-import { DockerTaskProviderBase } from './DockerTaskProviderBase';
+import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
 import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
@@ -23,7 +23,7 @@ export interface DockerRunTask extends Task {
     definition: DockerRunTaskDefinition;
 }
 
-export class DockerRunTaskProvider extends DockerTaskProviderBase {
+export class DockerRunTaskProvider extends DockerTaskProvider {
     constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
     // TODO: Skip if container is freshly started, but probably depends on language
@@ -44,13 +44,14 @@ export class DockerRunTaskProvider extends DockerTaskProviderBase {
 
         if (helper) {
             definition.dockerRun = await helper.getDockerRunOptions(context, definition);
-            await this.validateResolvedDefinition(context, definition.dockerRun);
             throwIfCancellationRequested(context);
         }
 
+        await this.validateResolvedDefinition(context, definition.dockerRun);
+
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
 
-        const { stdout } = await context.shell.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ true, context.cancellationToken);
+        const { stdout } = await context.terminal.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ true, context.cancellationToken);
         throwIfCancellationRequested(context);
 
         context.containerId = stdout;

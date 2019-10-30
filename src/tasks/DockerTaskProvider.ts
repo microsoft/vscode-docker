@@ -8,11 +8,11 @@ import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'v
 import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
-import { DockerPseudoShell } from './DockerPseudoShell';
+import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
 import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 
-export abstract class DockerTaskProviderBase implements TaskProvider {
+export abstract class DockerTaskProvider implements TaskProvider {
 
     protected constructor(private readonly telemetryName: DockerTaskProviderName, protected readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
 
@@ -26,7 +26,7 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
             task.scope,
             task.name,
             task.source,
-            new CustomExecution(() => Promise.resolve(new DockerPseudoShell(this, task))),
+            new CustomExecution(() => Promise.resolve(new DockerPseudoterminal(this, task))),
             task.problemMatchers
         );
     }
@@ -45,9 +45,10 @@ export abstract class DockerTaskProviderBase implements TaskProvider {
 
                 context.actionContext.telemetry.properties.platform = context.platform;
                 context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
-                return await this.executeTaskInternal(context, task);
+                await this.executeTaskInternal(context, task);
             });
         } catch (err) {
+            // Errors will not be rethrown, rather it will simply return an error code or 1
             const error = parseError(err);
             return parseInt(error.errorType, 10) || 1;
         }
