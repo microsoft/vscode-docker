@@ -34,7 +34,8 @@ export abstract class DockerTaskProvider implements TaskProvider {
     public async executeTask(context: DockerTaskExecutionContext, task: DockerBuildTask | DockerRunTask): Promise<number> {
         try {
             await callWithTelemetryAndErrorHandling(`${this.telemetryName}-execute`, async (actionContext: IActionContext) => {
-                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block
+                actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
+                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
                 if (!context.folder) {
                     throw new Error(`Unable to determine task scope to execute ${this.telemetryName} task '${task.name}'. Please open a workspace folder.`);
