@@ -49,7 +49,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
         const commandLine = resolveVariables(command.build(), folder);
 
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> Executing task: ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
+        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
         // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
         return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
