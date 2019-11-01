@@ -33,10 +33,14 @@ interface IDockerContext {
 export async function refreshDockerode(): Promise<void> {
     const oldEnv = process.env;
     try {
-        process.env = { ...process.env }; // make a clone before we change anything
-        addDockerSettingsToEnv(process.env, oldEnv);
+        const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
+        addDockerSettingsToEnv(newEnv, oldEnv);
+
+        const dockerodeOptions = await getDockerodeOptions(newEnv);
+
         ext.dockerodeInitError = undefined;
-        ext.dockerode = new Dockerode(await getDockerodeOptions());
+        process.env = newEnv;
+        ext.dockerode = new Dockerode(dockerodeOptions);
     } catch (error) {
         // This will be displayed in the tree
         ext.dockerodeInitError = error;
@@ -45,18 +49,18 @@ export async function refreshDockerode(): Promise<void> {
     }
 }
 
-async function getDockerodeOptions(): Promise<DockerOptions | undefined> {
+async function getDockerodeOptions(newEnv: NodeJS.ProcessEnv): Promise<DockerOptions | undefined> {
     // By this point any DOCKER_HOST from VSCode settings is already copied to process.env, so we can use it directly
 
     try {
-        if (process.env.DOCKER_HOST &&
-            SSH_URL_REGEX.test(process.env.DOCKER_HOST) &&
-            !process.env.SSH_AUTH_SOCK) {
+        if (newEnv.DOCKER_HOST &&
+            SSH_URL_REGEX.test(newEnv.DOCKER_HOST) &&
+            !newEnv.SSH_AUTH_SOCK) {
             // If DOCKER_HOST is an SSH URL, we need to configure SSH_AUTH_SOCK for Dockerode
             // Other than that, we use default settings, so return undefined
-            process.env.SSH_AUTH_SOCK = await getSshAuthSock();
+            newEnv.SSH_AUTH_SOCK = await getSshAuthSock();
             return undefined;
-        } else if (!process.env.DOCKER_HOST) {
+        } else if (!newEnv.DOCKER_HOST) {
             // If DOCKER_HOST is unset, try to get default Docker context--this helps support WSL
             return await getDefaultDockerContext();
         }
