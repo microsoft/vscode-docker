@@ -4,7 +4,7 @@
 
 import * as cp from 'child_process';
 import * as process from 'process';
-import { exec } from '../../utils/exec';
+import { execAsync } from '../../utils/execAsync';
 
 export type ProcessProviderExecOptions = cp.ExecOptions & { progress?(content: string, process: cp.ChildProcess): void };
 
@@ -26,7 +26,7 @@ export class ChildProcessProvider implements ProcessProvider {
     }
 
     public async exec(command: string, options: ProcessProviderExecOptions): Promise<{ stdout: string, stderr: string }> {
-        return await exec(command, options, options && options.progress);
+        return await execAsync(command, options, options && options.progress);
     }
 }
 

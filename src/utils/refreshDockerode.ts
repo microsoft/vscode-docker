@@ -7,7 +7,8 @@ import { DockerOptions } from 'dockerode';
 import Dockerode = require('dockerode');
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
-import { exec } from './exec';
+import { cloneObject } from './cloneObject';
+import { execAsync } from './execAsync';
 import { isWindows } from './osUtils';
 
 const unix = 'unix://';
@@ -71,12 +72,12 @@ async function getSshAuthSock(): Promise<string | undefined> {
     } else {
         // On Mac and Linux, if it isn't set there's nothing we can do
         // Running ssh-agent will yield a new agent that doesn't have the needed keys
-        throw new Error('In order to use an SSH DOCKER_HOST on OS X and Linux, you must configure an ssh-agent.');
+        await ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST on OS X and Linux, you must configure an ssh-agent.');
     }
 }
 
 async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {
-    const { stdout } = await exec('docker context inspect', { timeout: 5000 });
+    const { stdout } = await execAsync('docker context inspect', { timeout: 5000 });
     const dockerContexts = <IDockerContext[]>JSON.parse(stdout);
     const defaultHost: string =
         dockerContexts &&
