@@ -5,7 +5,7 @@
 
 import * as semver from 'semver';
 import { ext } from '../extensionVariables';
-import { wrapDockerodeENOENT } from './wrapError';
+import { wrapDockerodeENOENT } from './wrapDockerodeENOENT';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';

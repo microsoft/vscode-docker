@@ -7,8 +7,6 @@ import * as assert from 'assert';
 import * as Dockerode from 'dockerode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CoreOptions } from 'request';
-import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
@@ -29,13 +27,10 @@ import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { addDockerSettingsToEnv } from './utils/addDockerSettingsToEnv';
-import { addUserAgent } from './utils/addUserAgent';
-import { getTrustedCertificates } from './utils/getTrustedCertificates';
 import { Keytar } from './utils/keytar';
 import { nps } from './utils/nps';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 import { tryGetDefaultDockerContext } from './utils/tryGetDefaultDockerContext';
-import { wrapError } from './utils/wrapError';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -77,7 +72,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     perfStats.loadEndTime = Date.now();
 
     initializeExtensionVariables(ctx);
-    await setRequestDefaults();
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
@@ -160,39 +154,6 @@ function validateOldPublisher(activateContext: IActionContext): void {
     }
 }
 
-async function setRequestDefaults(): Promise<void> {
-    // Set up the user agent for all direct 'request' calls in the extension (as long as they use ext.request)
-    // ...  Trusted root certificate authorities
-    let caList = await getTrustedCertificates();
-    let defaultRequestOptions: CoreOptions = { agentOptions: { ca: caList } };
-    // ... User agent
-    addUserAgent(defaultRequestOptions);
-    let requestWithDefaults = request.defaults(defaultRequestOptions);
-
-    // Wrap 'get' to provide better error message for self-signed certificates
-    let originalGet = <(...args: unknown[]) => request.RequestPromise>requestWithDefaults.get;
-    // tslint:disable-next-line:no-any
-    async function wrappedGet(this: unknown, ...args: unknown[]): Promise<any> {
-        try {
-            // tslint:disable-next-line: no-unsafe-any
-            return await originalGet.call(this, ...args);
-        } catch (err) {
-            let error = <{ cause?: { code?: string } }>err;
-
-            if (error && error.cause && error.cause.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
-                err = wrapError(err, `There was a problem verifying a certificate. This could be caused by a self-signed or corporate certificate. You may need to set the 'docker.importCertificates' setting to true.`)
-            }
-
-            throw err;
-        }
-    }
-
-    // tslint:disable-next-line:no-any
-    requestWithDefaults.get = <any>wrappedGet;
-
-    ext.request = requestWithDefaults;
-}
-
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         let result: vscode.WorkspaceConfiguration[] = [];
@@ -226,12 +187,6 @@ namespace Configuration {
                     e.affectsConfiguration('docker.tlsVerify') ||
                     e.affectsConfiguration('docker.machineName')) {
                     refreshDockerode();
-                }
-
-                // Update endpoint if needed
-                if (e.affectsConfiguration('docker')) {
-                    // tslint:disable-next-line: no-floating-promises
-                    setRequestDefaults();
                 }
             }
         ));
