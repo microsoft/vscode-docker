@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { wrapDockerodeENOENT } from '../../utils/wrapError';
+import { wrapDockerodeENOENT } from '../../utils/wrapDockerodeENOENT';
 
 export async function pruneNetworks(_context: IActionContext): Promise<void> {
     const confirmPrune: string = "Are you sure you want to remove all unused networks?";

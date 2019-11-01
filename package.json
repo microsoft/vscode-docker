@@ -1366,38 +1366,6 @@
                     "default": "",
                     "description": "Equivalent to setting the DOCKER_MACHINE_NAME environment variable."
                 },
-                "docker.importCertificates": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "useCertificateStore": {
-                                    "type": "boolean",
-                                    "default": true,
-                                    "description": "On Mac and Windows, indicates whether to automatically import certificates from the system certificate store. Ignored on Linux."
-                                },
-                                "certificatePaths": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    },
-                                    "default": [
-                                        "/etc/ssl/certs/ca-certificates",
-                                        "/etc/openssl/certs",
-                                        "/etc/pki/tls/certs",
-                                        "/usr/local/share/certs"
-                                    ],
-                                    "description": "Paths to files or folders containing certificates to import. For Linux, the correct path to pick up system-wide certificates will depend on the distribution."
-                                }
-                            }
-                        }
-                    ],
-                    "default": false,
-                    "description": "True causes the extension to attempt to find system-wide certificates, false indicates that the default Node.js trusted certificates list will be used. Use an object to get more fine-grained control."
-                },
                 "docker.languageserver.diagnostics.deprecatedMaintainer": {
                     "scope": "resource",
                     "type": "string",
@@ -2015,7 +1983,6 @@
         "fs-extra": "^6.0.1",
         "glob": "7.1.2",
         "gradle-to-js": "^2.0.0",
-        "mac-ca": "^1.0.4",
         "moment": "^2.24.0",
         "ms-rest": "^2.5.3",
         "ms-rest-azure": "^2.6.0",
@@ -2026,7 +1993,6 @@
         "vscode-azureappservice": "^0.44.3",
         "vscode-azureextensionui": "^0.27.1",
         "vscode-languageclient": "^5.2.1",
-        "win-ca": "^2.4.1",
         "xml2js": "^0.4.22"
     }
 }
