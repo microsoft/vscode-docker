@@ -27,6 +27,7 @@ import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { tagImage } from "./images/tagImage";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
+import { createNetwork } from "./networks/createNetwork";
 import { inspectNetwork } from "./networks/inspectNetwork";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
@@ -88,6 +89,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.tag', tagImage);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
+    registerCommand('vscode-docker.networks.create', createNetwork);
     registerCommand('vscode-docker.networks.inspect', inspectNetwork);
     registerCommand('vscode-docker.networks.remove', removeNetwork);
     registerCommand('vscode-docker.networks.prune', pruneNetworks);

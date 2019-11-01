@@ -25,9 +25,6 @@ let config = dev.getDefaultWebpackConfig({
         // Modules that we can't easily webpack for some reason.
         // These and their dependencies will be copied into node_modules rather than placed in the bundle
         // Keep this list small, because all the subdependencies will also be excluded
-
-        // has binary
-        'win-ca'
     ],
     entries: {
         // Note: Each entry is a completely separate Node.js application that cannot interact with any
@@ -42,8 +39,6 @@ let config = dev.getDefaultWebpackConfig({
     {
         // ./getCoreNodeModule.js (path from keytar.ts) uses a dynamic require which can't be webpacked
         './getCoreNodeModule': 'commonjs getCoreNodeModule',
-
-        'win-ca/fallback': 'commonjs win-ca/fallback',
     }, // end of externals
 
     loaderRules: [
@@ -96,46 +91,8 @@ let config = dev.getDefaultWebpackConfig({
             // handle them.
             test: /dockerfile-language-service|vscode-languageserver-types/,
             use: { loader: 'umd-compat-loader' }
-        },
-
-        {
-            // Fix error in win-ca: Module parse failed: 'return' outside of function (5:2)
-            //
-            // if (process.platform !== 'win32') {
-            //    return;  <<<<<<<<<<
-            // }
-            test: /win-ca[/\\]lib[/\\]index.js$/,
-            loader: StringReplacePlugin.replace({
-                replacements: [
-                    {
-                        pattern: /return;/ig,
-                        replacement: function (match, offset, string) {
-                            return `// Don't need platform check - we do that before calling the module`;
-                        }
-                    }
-                ]
-            })
-        },
-        {
-            // Fix error in mac-ca: Module parse failed: 'return' outside of function (7:2)
-            //
-            // if (process.platform !== 'darwin') {
-            //     module.exports.all = () => [];
-            //     module.exports.each = () => {};
-            //     return;  <<<<<<<<<
-            //   }
-            test: /mac-ca[/\\]index.js$/,
-            loader: StringReplacePlugin.replace({
-                replacements: [
-                    {
-                        pattern: /return;/ig,
-                        replacement: function (match, offset, string) {
-                            return `// Don't need platform check - we do that before calling the module`;
-                        }
-                    }
-                ]
-            })
         }
+
     ], // end of loaderRules
 
     plugins: [
