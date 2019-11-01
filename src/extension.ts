@@ -26,9 +26,9 @@ import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { Keytar } from './utils/keytar';
+import { nps } from './utils/nps';
 import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
-import { nps } from './utils/nps';
 
 export type KeyInfo = { [keyName: string]: string };
 
