@@ -74,8 +74,8 @@ async function getSshAuthSock(): Promise<string | undefined> {
     if (isWindows()) {
         return '\\\\.\\pipe\\openssh-ssh-agent';
     } else {
-        // On Mac and Linux, if it isn't set there's nothing we can do
-        // Running ssh-agent will yield a new agent that doesn't have the needed keys
+        // On Mac and Linux, if SSH_AUTH_SOCK isn't set there's nothing we can do
+        // Running ssh-agent would yield a new agent that doesn't have the needed keys
         await ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST on OS X and Linux, you must configure an ssh-agent.');
     }
 }
