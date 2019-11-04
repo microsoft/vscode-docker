@@ -1,9 +1,17 @@
+## 0.9.0 - 29 October 2019
+### Added
+* Task-based debugging for .NET Core and Node.js: [#1242](https://github.com/microsoft/vscode-docker/issues/1242)
+
+### Removed
+* `docker.importCertificates` has been removed; the functionality to trust system certificates is now built in to VS Code itself (enabled by default): https://github.com/microsoft/vscode/issues/52880
+
 ## 0.8.2 - 25 October 2019
 ### Added
 * More pattern matches for Dockerfiles (Dockerfile.debug, Dockerfile.dev, Dockerfile.develop, Dockerfile.prod)
 * Button to create simple networks [#1322](https://github.com/microsoft/vscode-docker/issues/1322)
 * Survey prompt for some active users
 * Telemetry event for when Dockerfiles are edited using Docker extension features
+
 ### Fixed
 * Will not refresh Explorer window if VSCode is not in focus [#1351](https://github.com/microsoft/vscode-docker/issues/1351)
 

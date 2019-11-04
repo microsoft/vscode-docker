@@ -8,6 +8,7 @@ import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-contai
 import { BlobService, createBlobServiceWithSas } from "azure-storage";
 import { ServiceClientCredentials } from 'ms-rest';
 import { TokenResponse } from 'ms-rest-azure';
+import * as request from 'request-promise-native';
 import { ISubscriptionContext, parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { AzureRegistryTreeItem } from '../tree/registries/azure/AzureRegistryTreeItem';
@@ -27,7 +28,7 @@ export function getResourceGroupFromId(id: string): string {
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
     const acrRefreshToken = await acquireAcrRefreshToken(registryHost, subContext);
 
-    const response = <{ access_token: string }>await ext.request.post(`https://${registryHost}/oauth2/token`, {
+    const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, {
         form: {
             grant_type: "refresh_token",
             service: registryHost,
@@ -43,7 +44,7 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
     const aadTokenResponse = await acquireAadTokens(subContext);
 
-    const response = <{ refresh_token: string }>await ext.request.post(`https://${registryHost}/oauth2/exchange`, {
+    const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
         form: {
             grant_type: "refresh_token",
             service: registryHost,
