@@ -14,17 +14,17 @@ On Linux, you must also follow the steps in â€œManage Docker as a non-root userâ
 
 ## Features
 
-* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press `F1` and search for `Docker: Add Docker files to Workspace`)
+* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Press <kbd>F1</kbd> and search for `Docker: Add Docker files to Workspace`)
 * Syntax highlighting, hover tips, IntelliSense (completions) for `docker-compose.yml` and `Dockerfile` files
 * Linting (errors and warnings) for `Dockerfile` files
-* Command Palette (`F1`) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
+* Command Palette (<kbd>F1</kbd>) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing images, containers, registries, and more
 * Deploy images from a registry directly to Azure App Service
 * [Debug .NET Core applications](https://github.com/microsoft/vscode-docker/wiki/Debug-.NET-Core-(Preview)) running in Linux Docker containers
 
 ### Generating Docker Files
 
-Press `F1` and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
+Press <kbd>F1</kbd> and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
 
 ![dockerfile](resources/readme/generateFiles.gif)
 
@@ -38,13 +38,13 @@ Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
 
 ### Docker Commands
 
-Many of the most common Docker commands are built right into the Command Palette (`F1`):
+Many of the most common Docker commands are built right into the Command Palette (<kbd>F1</kbd>):
 
 ![commands](resources/readme/commands.png)
 
 ### Docker View
 
-The Docker extension contributes explorers to view and manage containers, images, registries, volumes, and networks. The right click context menus provide quick access to the same rich set of commands found in the Command Palette (`F1`).
+The Docker extension contributes explorers to view and manage containers, images, registries, volumes, and networks. The right click context menus provide quick access to the same rich set of commands found in the Command Palette (<kbd>F1</kbd>).
 
 ![explorers](resources/readme/explorers.png)
 
@@ -54,7 +54,7 @@ The Docker extension contributes explorers to view and manage containers, images
 
 ### Debugging in Containers
 
-With the Docker extension installed, you can easily debug .NET Core and Node.js apps within a container. Debugging support is enabled automatically when you dockerize your code with `Docker: Add Docker Files to Workspace`. To enable debugging for code that's already dockerized, press `F1` and do `Docker: Initialize for Docker Debugging`.
+With the Docker extension installed, you can easily debug .NET Core and Node.js apps within a container. Debugging support is enabled automatically when you dockerize your code with `Docker: Add Docker Files to Workspace`. To enable debugging for code that's already dockerized, press <kbd>F1</kbd> and do `Docker: Initialize for Docker Debugging`.
 
 ![debugging](resources/readme/debugging.gif)
 
@@ -76,7 +76,7 @@ With the Docker Explorer you can deploy images from Docker Hub Registries or Azu
 
 ### Azure CLI
 
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press `F1` and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
+Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press <kbd>F1</kbd> and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
 
 After the container is started, you will be prompted to sign in to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to sign in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
 
@@ -93,9 +93,9 @@ There are a couple of ways you can contribute to this repo:
 * **Code**: Contribute bug fixes, features, or design changes:
   * Clone the repository locally and open in VS Code.
   * Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
-  * Open the terminal (press `CTRL+`\`) and run `npm install`.
-  * To build, press `F1` and type in `Tasks: Run Build Task`.
-  * Debug: press `F5` to start debugging the extension.
+  * Open the terminal (press <kbd>CTRL</kbd>+ <kbd>\`</kbd>) and run `npm install`.
+  * To build, press <kbd>F1</kbd> and type in `Tasks: Run Build Task`.
+  * Debug: press <kbd>F5</kbd> to start debugging the extension.
 
 ### Legal
 
