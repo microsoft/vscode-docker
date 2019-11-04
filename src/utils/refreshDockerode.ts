@@ -31,8 +31,8 @@ interface IDockerContext {
  * Thus we will temporarily update `process.env` and pass nothing to the constructor
  */
 export async function refreshDockerode(): Promise<void> {
-    const oldEnv = process.env;
     try {
+        const oldEnv = process.env;
         const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
         addDockerSettingsToEnv(newEnv, oldEnv);
 
@@ -40,12 +40,14 @@ export async function refreshDockerode(): Promise<void> {
 
         ext.dockerodeInitError = undefined;
         process.env = newEnv;
-        ext.dockerode = new Dockerode(dockerodeOptions);
+        try {
+            ext.dockerode = new Dockerode(dockerodeOptions);
+        } finally {
+            process.env = oldEnv;
+        }
     } catch (error) {
         // This will be displayed in the tree
         ext.dockerodeInitError = error;
-    } finally {
-        process.env = oldEnv;
     }
 }
 
