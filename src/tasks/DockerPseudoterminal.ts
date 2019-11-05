@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as cp from 'child_process';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
+import { spawnAsync } from '../utils/spawnAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -45,38 +45,36 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeCommandInTerminal(command: CommandLineBuilder, folder: WorkspaceFolder, rejectOnStdError?: boolean, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
+    public async executeCommandInTerminal(
+        command: CommandLineBuilder,
+        folder: WorkspaceFolder,
+        rejectOnStderr?: boolean,
+        stdoutBuffer?: Buffer,
+        stderrBuffer?: Buffer,
+        token?: CancellationToken): Promise<void> {
         const commandLine = resolveVariables(command.build(), folder);
 
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
         this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
         // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
-        return new Promise<{ stdout: string, stderr: string }>((resolve, reject) => {
-            const process = cp.exec(commandLine, (error, stdout, stderr) => {
-                if (error) {
-                    return reject(error);
+        await spawnAsync(
+            commandLine,
+            {},
+            (stdout: string) => {
+                this.writeOutput(stdout);
+            },
+            stdoutBuffer,
+            (stderr: string) => {
+                this.writeError(stderr);
+
+                if (rejectOnStderr) {
+                    throw new Error(stderr);
                 }
-
-                if (stderr && rejectOnStdError) {
-                    return reject(stderr);
-                }
-
-                return resolve({ stdout, stderr });
-            });
-
-            if (token) {
-                const cancelHandler = token.onCancellationRequested(() => {
-                    process.kill();
-                });
-                process.on('exit', () => {
-                    cancelHandler.dispose();
-                });
-            }
-
-            process.stderr.on('data', (chunk: Buffer) => this.writeError(chunk.toString()));
-            process.stdout.on('data', (chunk: Buffer) => this.writeOutput(chunk.toString()));
-        });
+            },
+            stderrBuffer,
+            token
+        );
     }
 
     public writeOutput(message: string): void {

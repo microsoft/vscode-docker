@@ -51,10 +51,18 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
 
-        const { stdout } = await context.terminal.executeCommandInTerminal(commandLine, context.folder, /* rejectOnStdError: */ true, context.cancellationToken);
+        const stdoutBuffer = Buffer.alloc(4 * 1024); // Any output beyond 4K is not a container ID and we won't deal with it
+        await context.terminal.executeCommandInTerminal(
+            commandLine,
+            context.folder,
+            true, // rejectOnStderr
+            stdoutBuffer,
+            undefined, // stderrBuffer
+            context.cancellationToken
+        );
         throwIfCancellationRequested(context);
 
-        context.containerId = stdout;
+        context.containerId = stdoutBuffer.toString();
 
         if (helper && helper.preRun) {
             await helper.preRun(context, definition);
