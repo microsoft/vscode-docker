@@ -13,3 +13,5 @@ export interface TaskDefinitionBase extends TaskDefinition {
     label?: string;
     dependsOn?: string[] | DependsOn;
 }
+
+export type DockerLabels = { includeDefaults?: boolean; } & { [key: string]: string; };

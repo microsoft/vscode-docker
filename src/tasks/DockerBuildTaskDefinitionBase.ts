@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TaskDefinitionBase } from './TaskDefinitionBase';
+import { DockerLabels, TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerBuildOptions {
     buildArgs?: { [key: string]: string };
     context?: string;
     dockerfile?: string;
-    labels?: { [key: string]: string };
+    labels?: DockerLabels;
     tag?: string;
     target?: string;
     pull?: boolean;
