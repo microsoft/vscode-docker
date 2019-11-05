@@ -92,11 +92,11 @@ export async function spawnAsync(
     });
 }
 
-export async function execAsync(command: string, options?: cp.CommonOptions, progress?: (content: string, process: cp.ChildProcess) => void): Promise<{ stdout: string, stderr: string }> {
-    const stdoutBuffer = Buffer.alloc(DEFAULT_BUFFER_SIZE);
-    const stderrBuffer = Buffer.alloc(DEFAULT_BUFFER_SIZE);
+export async function execAsync(command: string, options?: cp.ExecOptions, progress?: (content: string, process: cp.ChildProcess) => void): Promise<{ stdout: string, stderr: string }> {
+    const stdoutBuffer = Buffer.alloc(options && options.maxBuffer || DEFAULT_BUFFER_SIZE);
+    const stderrBuffer = Buffer.alloc(options && options.maxBuffer || DEFAULT_BUFFER_SIZE);
 
-    await spawnAsync(command, options, progress, stdoutBuffer, progress, stderrBuffer);
+    await spawnAsync(command, options as cp.CommonOptions, progress, stdoutBuffer, progress, stderrBuffer);
 
     return {
         stdout: stdoutBuffer.toString(),
