@@ -13,7 +13,7 @@ import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { DockerLabels } from './TaskDefinitionBase';
+import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
 import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
@@ -24,18 +24,6 @@ export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, N
 
 export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
-}
-
-const defaultBuildLabels: { [key: string]: string } = {
-    'com.microsoft.created-by': 'visual-studio-code'
-};
-
-function getAggregateLabels(labels: DockerLabels | undefined, defaultLabels: { [key: string]: string }): { [key: string]: string } {
-    const { includeDefaults, ...explicitLabels } = labels || {};
-
-    return (includeDefaults !== false)
-        ? { ...defaultLabels, ...explicitLabels }
-        : explicitLabels;
 }
 
 export class DockerBuildTaskProvider extends DockerTaskProvider {
@@ -97,7 +85,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
             .withKeyValueArgs('--build-arg', options.buildArgs)
-            .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultBuildLabels))
+            .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultVsCodeLabels))
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
             .withQuotedArg(options.context);
