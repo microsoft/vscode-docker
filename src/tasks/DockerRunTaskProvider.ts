@@ -64,8 +64,8 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         context.containerId = stdoutBuffer.toString();
 
-        if (helper && helper.preRun) {
-            await helper.preRun(context, definition);
+        if (helper && helper.postRun) {
+            await helper.postRun(context, definition);
         }
     }
 

@@ -3,7 +3,7 @@
     <Target Name="GetBlazorManifestLocations">
         <PropertyGroup>
             <BlazorManifestInputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(_GeneratedStaticWebAssetsDevelopmentManifest)))</BlazorManifestInputLocation>
-            <BlazorManifestOutputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutputPath), staticwebassets, $(TargetName).StaticWebAssets.xml))</BlazorManifestOutputLocation>
+            <BlazorManifestOutputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutputPath), $(TargetName).StaticWebAssets.xml))</BlazorManifestOutputLocation>
         </PropertyGroup>
 
         <WriteLinesToFile

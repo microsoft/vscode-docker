@@ -17,13 +17,21 @@ import { execAsync } from '../../utils/spawnAsync';
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { DockerRunTaskContext } from "../TaskHelper";
 
-interface ContentRoot {
+interface ContentRootAttributes {
     BasePath: string;
     Path: string;
 }
 
+interface ContentRoot {
+    $: ContentRootAttributes;
+}
+
 interface StaticWebAssets {
     ContentRoot: ContentRoot[];
+}
+
+interface Manifest {
+    StaticWebAssets: StaticWebAssets;
 }
 
 export async function updateBlazorManifest(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
@@ -71,19 +79,21 @@ async function updateBlazorManifestInternal(context: DockerRunTaskContext, input
     context.terminal.writeOutputLine('Attempting to containerize Blazor static web assets manifest...');
 
     const contents = (await fse.readFile(inputManifest)).toString();
-    const manifest: StaticWebAssets = <StaticWebAssets>await xml2js.parseStringPromise(contents);
+    const manifest: Manifest = <Manifest>await xml2js.parseStringPromise(contents);
 
-    if (!manifest) {
+    if (!manifest || !manifest.StaticWebAssets) {
         throw new Error('Failed to parse Blazor static web assets manifest.');
     }
 
-    for (const contentRoot of manifest.ContentRoot) {
-        contentRoot.Path = containerizePath(contentRoot.Path, volumes, os);
+    for (const contentRoot of manifest.StaticWebAssets.ContentRoot) {
+        if (contentRoot && contentRoot.$) {
+            contentRoot.$.Path = containerizePath(contentRoot.$.Path, volumes, os);
+        }
     }
 
     const outputContents = (new xml2js.Builder()).buildObject(manifest);
 
-    await fse.writeFile(outputManifest, outputContents, {})
+    await fse.writeFile(outputManifest, outputContents)
 }
 
 function containerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {
