@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { Task } from 'vscode';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
-import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper } from './TaskHelper';
+import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
+import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -23,62 +24,50 @@ export interface DockerRunTask extends Task {
     definition: DockerRunTaskDefinition;
 }
 
-export class DockerRunTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
+export class DockerRunTaskProvider extends DockerTaskProvider {
+    constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
-    public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
-        return []; // Intentionally empty, so that resolveTask gets used
-    }
-
-    public resolveTask(task: DockerRunTask, token?: CancellationToken): ProviderResult<Task> {
-        return callWithTelemetryAndErrorHandling(
-            'docker-run-resolve',
-            async (actionContext: IActionContext) => {
-                const taskPlatform = getPlatform(task.definition);
-                actionContext.telemetry.properties.platform = taskPlatform;
-
-                return await this.resolveTaskInternal(
-                    {
-                        folder: task.scope as WorkspaceFolder,
-                        platform: taskPlatform,
-                        actionContext: actionContext,
-                        cancellationToken: token,
-                    },
-                    task
-                );
-            }
-        );
-    }
-
-    // TODO: Can we skip if a recently-started container exists?
-    private async resolveTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<Task> {
-
+    // TODO: Skip if container is freshly started, but probably depends on language
+    protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
         const definition = cloneObject(task.definition);
         definition.dockerRun = definition.dockerRun || {};
 
-        if (!context.folder) {
-            throw new Error(`Unable to determine task scope to execute docker-run task '${task.name}'.`);
-        }
+        context.actionContext.telemetry.properties.containerOS = definition.dockerRun.os || 'Linux';
 
         context.buildDefinition = await getAssociatedDockerBuildTask(task);
 
         const helper = this.getHelper(context.platform);
 
+        if (helper && helper.preRun) {
+            await helper.preRun(context, definition);
+            throwIfCancellationRequested(context);
+        }
+
         if (helper) {
-            definition.dockerRun = await helper.resolveDockerRunOptions(context, definition);
+            definition.dockerRun = await helper.getDockerRunOptions(context, definition);
+            throwIfCancellationRequested(context);
         }
 
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
         const commandLine = await this.resolveCommandLine(definition.dockerRun);
-        // TODO : addDockerSettingsToEnv?
-        return new Task(
-            task.definition,
-            task.scope,
-            task.name,
-            task.source,
-            new ShellExecution(commandLine[0], commandLine.slice(1)),
-            task.problemMatchers);
+
+        const stdoutBuffer = Buffer.alloc(4 * 1024); // Any output beyond 4K is not a container ID and we won't deal with it
+        await context.terminal.executeCommandInTerminal(
+            commandLine,
+            context.folder,
+            true, // rejectOnStderr
+            stdoutBuffer,
+            undefined, // stderrBuffer
+            context.cancellationToken
+        );
+        throwIfCancellationRequested(context);
+
+        context.containerId = stdoutBuffer.toString();
+
+        if (helper && helper.postRun) {
+            await helper.postRun(context, definition);
+        }
     }
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
@@ -87,7 +76,7 @@ export class DockerRunTaskProvider implements TaskProvider {
         }
     }
 
-    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
             .create('docker', 'run', '-dt')
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
@@ -96,17 +85,12 @@ export class DockerRunTaskProvider implements TaskProvider {
             .withNamedArg('--network-alias', runOptions.networkAlias)
             .withKeyValueArgs('-e', runOptions.env)
             .withArrayArgs('--env-file', runOptions.envFiles)
-            .withKeyValueArgs('--label', runOptions.labels)
+            .withKeyValueArgs('--label', getAggregateLabels(runOptions.labels, defaultVsCodeLabels))
             .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
             .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
             .withQuotedArg(runOptions.image)
-            .withArgs(runOptions.command)
-            .buildShellQuotedStrings();
-    }
-
-    private getHelper(platform: DockerPlatform): TaskHelper {
-        return this.helpers[platform];
+            .withArgs(runOptions.command);
     }
 }

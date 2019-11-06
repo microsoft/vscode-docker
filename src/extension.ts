@@ -104,6 +104,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
+        await refreshDockerode();
+
         registerTrees();
         registerCommands();
 
@@ -117,8 +119,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
-
-        await refreshDockerode();
 
         await consolidateDefaultRegistrySettings();
         activateLanguageClient(ctx);

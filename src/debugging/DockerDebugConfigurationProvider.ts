@@ -5,6 +5,7 @@
 
 import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
@@ -36,6 +37,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                 const debugPlatform = getPlatform(debugConfiguration);
                 actionContext.telemetry.properties.platform = debugPlatform;
+                actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 
                 return await this.resolveDebugConfigurationInternal(
                     {
@@ -61,7 +63,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
         }
 
-        // TODO: addDockerSettingsToEnv?
         return resolvedConfiguration;
     }
 

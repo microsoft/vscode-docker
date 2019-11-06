@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import { CommandLineBuilder } from "../../utils/commandLineBuilder";
+import { spawnAsync } from "../../utils/spawnAsync";
 import { ProcessProvider } from "./ChildProcessProvider";
 import { LineSplitter } from "./lineSplitter";
 
@@ -131,7 +132,9 @@ export class CliDockerClient implements DockerClient {
                 lineSplitter.write(content);
             };
 
-        await this.processProvider.exec(command, { progress: buildProgress });
+        // Use spawnAsync instead of the usual childProcessProvider, since build output can be long
+        // This unfortunately precludes effectively unit testing this method
+        await spawnAsync(command, {}, buildProgress);
 
         lineSplitter.close();
 

@@ -8,8 +8,8 @@ import Dockerode = require('dockerode');
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
-import { execAsync } from './execAsync';
 import { isWindows } from './osUtils';
+import { execAsync } from './spawnAsync';
 
 const unix = 'unix://';
 const npipe = 'npipe://';

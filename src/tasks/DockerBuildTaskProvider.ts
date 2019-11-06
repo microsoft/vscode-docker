@@ -4,16 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { CancellationToken, ProviderResult, ShellExecution, ShellQuotedString, Task, TaskProvider, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { Task } from 'vscode';
+import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { resolveFilePath } from '../utils/resolveFilePath';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
+import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { DockerBuildTaskContext, TaskHelper } from './TaskHelper';
+import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
+import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -25,59 +26,46 @@ export interface DockerBuildTask extends Task {
     definition: DockerBuildTaskDefinition;
 }
 
-export class DockerBuildTaskProvider implements TaskProvider {
-    constructor(private readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
-
-    public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
-        return []; // Intentionally empty, so that resolveTask gets used
-    }
-
-    public resolveTask(task: DockerBuildTask, token?: CancellationToken): ProviderResult<Task> {
-        return callWithTelemetryAndErrorHandling(
-            'docker-build-resolve',
-            async (actionContext: IActionContext) => {
-                const taskPlatform = getPlatform(task.definition);
-                actionContext.telemetry.properties.platform = taskPlatform;
-
-                return await this.resolveTaskInternal(
-                    {
-                        folder: task.scope as WorkspaceFolder,
-                        platform: taskPlatform,
-                        actionContext: actionContext,
-                        cancellationToken: token,
-                    },
-                    task
-                );
-            }
-        );
-    }
+export class DockerBuildTaskProvider extends DockerTaskProvider {
+    constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers) }
 
     // TODO: Skip if image is freshly built
-    private async resolveTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<Task> {
+    protected async executeTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<void> {
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
-        if (!context.folder) {
-            throw new Error(`Unable to determine task scope to execute docker-build task '${task.name}'.`);
-        }
-
         const helper = this.getHelper(context.platform);
 
+        if (helper && helper.preBuild) {
+            await helper.preBuild(context, definition);
+            throwIfCancellationRequested(context);
+        }
+
         if (helper) {
-            definition.dockerBuild = await helper.resolveDockerBuildOptions(context, definition);
+            definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
+            throwIfCancellationRequested(context);
         }
 
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
-        // TODO : addDockerSettingsToEnv?
-        return new Task(
-            task.definition,
-            task.scope,
-            task.name,
-            task.source,
-            new ShellExecution(commandLine[0], commandLine.slice(1)),
-            task.problemMatchers);
+
+        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
+        await context.terminal.executeCommandInTerminal(
+            commandLine,
+            context.folder,
+            false, // rejectOnStderr
+            undefined, // stdoutBuffer
+            undefined, // stderrBuffer
+            context.cancellationToken
+        );
+        throwIfCancellationRequested(context);
+
+        context.imageName = definition.dockerBuild.tag;
+
+        if (helper && helper.postBuild) {
+            await helper.postBuild(context, definition);
+        }
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
@@ -87,31 +75,26 @@ export class DockerBuildTaskProvider implements TaskProvider {
 
         if (!dockerBuild.context) {
             throw new Error('No Docker build context was provided or resolved.');
-        } else if (!await fse.pathExists(resolveFilePath(dockerBuild.context, context.folder))) {
+        } else if (!await fse.pathExists(resolveVariables(dockerBuild.context, context.folder))) {
             throw new Error(`The Docker build context \'${dockerBuild.context}\' does not exist or could not be accessed.`);
         }
 
         if (!dockerBuild.dockerfile) {
             throw new Error('No Dockerfile was provided or resolved.');
-        } else if (!await fse.pathExists(resolveFilePath(dockerBuild.dockerfile, context.folder))) {
+        } else if (!await fse.pathExists(resolveVariables(dockerBuild.dockerfile, context.folder))) {
             throw new Error(`The Dockerfile \'${dockerBuild.dockerfile}\' does not exist or could not be accessed.`);
         }
     }
 
-    private async resolveCommandLine(options: DockerBuildOptions): Promise<ShellQuotedString[]> {
+    private async resolveCommandLine(options: DockerBuildOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
             .withKeyValueArgs('--build-arg', options.buildArgs)
-            .withKeyValueArgs('--label', options.labels)
+            .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultVsCodeLabels))
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
-            .withQuotedArg(options.context)
-            .buildShellQuotedStrings();
-    }
-
-    private getHelper(platform: DockerPlatform): TaskHelper {
-        return this.helpers[platform];
+            .withQuotedArg(options.context);
     }
 }

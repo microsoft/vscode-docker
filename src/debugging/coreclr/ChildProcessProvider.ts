@@ -4,7 +4,7 @@
 
 import * as cp from 'child_process';
 import * as process from 'process';
-import { execAsync } from '../../utils/execAsync';
+import { execAsync } from '../../utils/spawnAsync';
 
 export type ProcessProviderExecOptions = cp.ExecOptions & { progress?(content: string, process: cp.ChildProcess): void };
 

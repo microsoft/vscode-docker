@@ -4,42 +4,66 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { resolveFilePath } from '../utils/resolveFilePath';
+import { pathNormalize } from '../utils/pathNormalize';
+import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
-import { DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 
+export type DockerTaskProviderName = 'docker-build' | 'docker-run';
+
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
-    platform: DockerPlatform;
-    actionContext: IActionContext;
+    platform?: DockerPlatform;
+    actionContext?: IActionContext;
     cancellationToken?: CancellationToken;
+}
+
+export function throwIfCancellationRequested(context: DockerTaskContext): void {
+    if (context &&
+        context.cancellationToken &&
+        context.cancellationToken.isCancellationRequested) {
+        throw new UserCancelledError();
+    }
 }
 
 export interface DockerTaskScaffoldContext extends DockerTaskContext {
     dockerfile: string;
 }
 
-// tslint:disable-next-line: no-empty-interface
-export interface DockerBuildTaskContext extends DockerTaskContext {
+export interface DockerTaskExecutionContext extends DockerTaskContext {
+    terminal: DockerPseudoterminal;
 }
 
-export interface DockerRunTaskContext extends DockerTaskContext {
+// tslint:disable-next-line: no-empty-interface
+export interface DockerBuildTaskContext extends DockerTaskExecutionContext {
+    imageName?: string;
+    buildTaskResult?: string;
+}
+
+export interface DockerRunTaskContext extends DockerTaskExecutionContext {
+    containerId?: string;
     buildDefinition?: DockerBuildTaskDefinition;
 }
 
 export interface TaskHelper {
-    resolveDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
-    resolveDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
+    preBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
+    getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+    postBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
+
+    preRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
+    getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
+    postRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
 }
 
 export function registerTaskProviders(ctx: ExtensionContext): void {
@@ -87,7 +111,7 @@ export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTask
 }
 
 export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<DockerRunTaskDefinition | undefined> {
-    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
@@ -95,7 +119,7 @@ export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebug
 }
 
 export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
-    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
+    // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
@@ -107,19 +131,13 @@ export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Prom
 }
 
 export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
-    let buildTasks = await tasks.fetchTasks({ type: 'docker-build' });
-    buildTasks =
-        buildTasks.filter(t => t.execution.args.some(a => { // Find all build tasks where an argument to 'docker build' is this Dockerfile
-            let arg: string;
-            if (typeof a === 'string') {
-                arg = a;
-            } else {
-                arg = a.value;
-            }
+    const resolvedDockerfile = pathNormalize(resolveVariables(dockerfile, folder));
 
-            arg = resolveFilePath(arg, folder);
-            return arg.toLowerCase() === dockerfile.toLowerCase();
-        }));
+    let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
+    buildTasks =
+        buildTasks.filter(buildTask => {
+            return buildTask.definition && buildTask.definition.dockerBuild && (pathNormalize(resolveVariables(buildTask.definition.dockerBuild.dockerfile, folder)) === resolvedDockerfile)
+        });
 
     if (buildTasks.length === 1) {
         return buildTasks[0]; // If there's only one build task, take it
