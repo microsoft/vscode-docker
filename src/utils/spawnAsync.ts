@@ -7,7 +7,7 @@ import * as cp from 'child_process';
 import { CancellationToken, Disposable } from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
 
-const DEFAULT_BUFFER_SIZE = 200 * 1024; // The default Node.js `exec` buffer size is 200KB
+const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size is 1 MB, our actual usage is far less
 
 export type Progress = (content: string, process: cp.ChildProcess) => void;
 
@@ -99,7 +99,13 @@ export async function execAsync(command: string, options?: cp.ExecOptions, progr
     await spawnAsync(command, options as cp.CommonOptions, progress, stdoutBuffer, progress, stderrBuffer);
 
     return {
-        stdout: stdoutBuffer.toString(),
-        stderr: stderrBuffer.toString(),
+        stdout: bufferToString(stdoutBuffer),
+        stderr: bufferToString(stderrBuffer),
     }
+}
+
+function bufferToString(buffer: Buffer): string {
+    // Node.js treats null bytes as part of the length, which makes everything mad
+    // There's also a trailing newline everything hates, so we'll remove
+    return buffer.toString().replace(/\0/g, '').replace(/\r?\n$/g, '');
 }
