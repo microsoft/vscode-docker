@@ -5,7 +5,7 @@
 
 import { ShellQuotedString } from 'vscode';
 import { PlatformOS } from '../utils/platform';
-import { TaskDefinitionBase } from './TaskDefinitionBase';
+import { DockerLabels, TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerContainerExtraHost {
     hostname: string;
@@ -32,7 +32,7 @@ export interface DockerRunOptions {
     envFiles?: string[];
     extraHosts?: DockerContainerExtraHost[];
     image?: string;
-    labels?: { [key: string]: string };
+    labels?: DockerLabels;
     network?: string;
     networkAlias?: string;
     os?: PlatformOS;

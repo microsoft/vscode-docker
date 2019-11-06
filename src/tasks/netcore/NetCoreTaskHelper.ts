@@ -42,8 +42,6 @@ const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFall
 const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 export class NetCoreTaskHelper implements TaskHelper {
-    private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
-
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
@@ -109,7 +107,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
         // tslint:enable: no-invalid-template-strings
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
-        buildOptions.labels = buildOptions.labels || NetCoreTaskHelper.defaultLabels;
 
         return buildOptions;
     }
@@ -121,7 +118,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, helperOptions); // This method internally checks the user-defined input first
 
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
-        runOptions.labels = runOptions.labels || NetCoreTaskHelper.defaultLabels;
         runOptions.os = runOptions.os || 'Linux';
         runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 

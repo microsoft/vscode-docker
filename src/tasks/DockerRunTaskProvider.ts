@@ -11,6 +11,7 @@ import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
+import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
 import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
@@ -84,7 +85,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withNamedArg('--network-alias', runOptions.networkAlias)
             .withKeyValueArgs('-e', runOptions.env)
             .withArrayArgs('--env-file', runOptions.envFiles)
-            .withKeyValueArgs('--label', runOptions.labels)
+            .withKeyValueArgs('--label', getAggregateLabels(runOptions.labels, defaultVsCodeLabels))
             .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
             .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)

@@ -13,6 +13,7 @@ import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
+import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
 import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
@@ -91,7 +92,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
             .withKeyValueArgs('--build-arg', options.buildArgs)
-            .withKeyValueArgs('--label', options.labels)
+            .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultVsCodeLabels))
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
             .withQuotedArg(options.context);
