@@ -18,6 +18,7 @@ import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -143,6 +144,15 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.volumes = await this.inferVolumes(context.folder, runOptions, helperOptions, ssl, userSecrets); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
 
         return runOptions;
+    }
+
+    public async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
+        try {
+            await updateBlazorManifest(context, runDefinition);
+        } catch (err) {
+            context.terminal.writeWarningLine('Failed to update Blazor static web assets manifest. Static web assets may not work.');
+            context.terminal.writeWarningLine(`The error was: ${err}`);
+        }
     }
 
     public static async inferAppProject(folder: WorkspaceFolder, helperOptions?: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
