@@ -62,6 +62,7 @@ async function updateBlazorManifestInternal(context: DockerRunTaskContext, input
         !(await fse.pathExists(inputManifest)) || // Input manifest must exist
         !volumes || // Volumes can't be undefined
         volumes.length === 0) { // Volumes can't be empty
+        // This isn't considered an error case, we'll just return without doing anything
         return;
     }
 
