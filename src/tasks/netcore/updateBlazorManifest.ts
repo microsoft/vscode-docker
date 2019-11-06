@@ -46,6 +46,8 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
             }
 
             await updateBlazorManifestInternal(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
+        } else {
+            throw new Error('Unable to determine Blazor manifest locations from output file.')
         }
     } finally {
         if (await fse.pathExists(locationsFile)) {
