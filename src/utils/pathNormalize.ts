@@ -8,7 +8,7 @@ import * as path from 'path';
 import { PlatformOS } from "./platform";
 
 export function pathNormalize(targetPath: string, platformOS?: PlatformOS): string {
-    platformOS = platformOS || os.platform() === 'win32' ? 'Windows' : 'Linux';
+    platformOS = platformOS || (os.platform() === 'win32' ? 'Windows' : 'Linux');
 
     return platformOS === 'Windows' ?
         path.win32.normalize(targetPath).replace(/\//g, '\\') :
