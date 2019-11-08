@@ -144,7 +144,9 @@ export class NetCoreTaskHelper implements TaskHelper {
 
     public async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
         try {
-            await updateBlazorManifest(context, runDefinition);
+            if (await NetCoreTaskHelper.isWebApp(runDefinition.netCore.appProject)) {
+                await updateBlazorManifest(context, runDefinition);
+            }
         } catch (err) {
             context.terminal.writeWarningLine('Failed to update Blazor static web assets manifest. Static web assets may not work.');
             context.terminal.writeWarningLine(`The error was: ${err}`);
@@ -186,6 +188,12 @@ export class NetCoreTaskHelper implements TaskHelper {
         } catch { }
 
         return false;
+    }
+
+    public static async isWebApp(appProject: string): Promise<boolean> {
+        const projectContents = await fse.readFile(appProject);
+
+        return /Microsoft\.NET\.Sdk\.Web/i.test(projectContents.toString());
     }
 
     private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
