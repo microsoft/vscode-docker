@@ -135,7 +135,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 action: 'openExternally',
                 uriFormat: '%s://localhost:%s',
             },
-            configureSsl || await this.isWebApp(debugConfiguration) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
+            configureSsl || await NetCoreTaskHelper.isWebApp(debugConfiguration.netCore.appProject) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
         );
 
         return {
@@ -204,12 +204,6 @@ export class NetCoreDebugHelper implements DebugHelper {
         const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
         await this.aspNetCoreSslManager.trustCertificateIfNecessary();
         await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
-    }
-
-    private async isWebApp(debugConfiguration: DockerDebugConfiguration): Promise<boolean> {
-        const projectContents = await fse.readFile(debugConfiguration.netCore.appProject);
-
-        return /Microsoft\.NET\.Sdk\.Web/i.test(projectContents.toString());
     }
 
     private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {

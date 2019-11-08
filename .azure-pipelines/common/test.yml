@@ -18,7 +18,6 @@ steps:
     SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
     DISPLAY: :10 # Only necessary for linux tests
     DOCKER_UNAVAILABLE: ${{ parameters.dockerUnavailable }}
-    CODE_VERSION: insiders # TODO : remove this line
 
 - task: PublishTestResults@2
   displayName: 'Publish Test Results'

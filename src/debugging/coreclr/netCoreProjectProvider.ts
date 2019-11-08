@@ -2,26 +2,11 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import * as path from 'path';
+import { ext } from "../../extensionVariables";
 import { DotNetClient } from "./CommandLineDotNetClient";
 import { FileSystemProvider } from "./fsProvider";
 import { TempFileProvider } from './tempFileProvider';
-
-const getTargetPathProjectFileContent =
-    `<Project>
-    <Target Name="GetTargetPath">
-        <MSBuild
-            Projects="$(ProjectFilename)"
-            Targets="GetTargetPath">
-        <Output
-            TaskParameter="TargetOutputs"
-            ItemName="TargetOutput" />
-        </MSBuild>
-        <WriteLinesToFile
-            File="$(TargetOutputFilename)"
-            Lines="@(TargetOutput)"
-            Overwrite="True" />
-    </Target>
-</Project>`;
 
 export interface NetCoreProjectProvider {
     getTargetPath(projectFile: string): Promise<string>;
@@ -35,9 +20,8 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
     }
 
     public async getTargetPath(projectFile: string): Promise<string> {
-        const getTargetPathProjectFile = this.tempFileProvider.getTempFilename();
+        const getTargetPathProjectFile = path.join(ext.context.asAbsolutePath('resources'), 'GetTargetPath.proj');
         const targetOutputFilename = this.tempFileProvider.getTempFilename();
-        await this.fsProvider.writeFile(getTargetPathProjectFile, getTargetPathProjectFileContent);
         try {
             await this.dotNetClient.execTarget(
                 getTargetPathProjectFile,
@@ -54,8 +38,6 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
             return targetOutputContent.split(/\r?\n/)[0];
         }
         finally {
-            await this.fsProvider.unlinkFile(getTargetPathProjectFile);
-
             if (await this.fsProvider.fileExists(targetOutputFilename)) {
                 await this.fsProvider.unlinkFile(targetOutputFilename);
             }

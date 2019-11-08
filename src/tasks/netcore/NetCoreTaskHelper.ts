@@ -18,6 +18,7 @@ import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
 import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
@@ -141,6 +142,17 @@ export class NetCoreTaskHelper implements TaskHelper {
         return runOptions;
     }
 
+    public async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
+        try {
+            if (await NetCoreTaskHelper.isWebApp(runDefinition.netCore.appProject)) {
+                await updateBlazorManifest(context, runDefinition);
+            }
+        } catch (err) {
+            context.terminal.writeWarningLine('Failed to update Blazor static web assets manifest. Static web assets may not work.');
+            context.terminal.writeWarningLine(`The error was: ${err}`);
+        }
+    }
+
     public static async inferAppProject(folder: WorkspaceFolder, helperOptions?: NetCoreTaskOptions | NetCoreDebugOptions): Promise<string> {
         let result: string;
 
@@ -176,6 +188,12 @@ export class NetCoreTaskHelper implements TaskHelper {
         } catch { }
 
         return false;
+    }
+
+    public static async isWebApp(appProject: string): Promise<boolean> {
+        const projectContents = await fse.readFile(appProject);
+
+        return /Sdk\s*=\s*\"Microsoft\.NET\.Sdk\.Web\"/ig.test(projectContents.toString());
     }
 
     private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
