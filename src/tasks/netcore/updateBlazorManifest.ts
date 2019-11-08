@@ -53,7 +53,7 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
                 throw new Error('Unable to determine Blazor manifest locations from output file.');
             }
 
-            await updateBlazorManifestInternal(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
+            await transformBlazorManifest(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
         } else {
             throw new Error('Unable to determine Blazor manifest locations from output file.')
         }
@@ -64,7 +64,7 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
     }
 }
 
-async function updateBlazorManifestInternal(context: DockerRunTaskContext, inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {
+async function transformBlazorManifest(context: DockerRunTaskContext, inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {
     if (!inputManifest || // Input manifest can't be empty/undefined
         !outputManifest || // Output manifest can't be empty/undefined
         !(await fse.pathExists(inputManifest)) || // Input manifest must exist
