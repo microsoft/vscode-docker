@@ -193,7 +193,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     public static async isWebApp(appProject: string): Promise<boolean> {
         const projectContents = await fse.readFile(appProject);
 
-        return /Microsoft\.NET\.Sdk\.Web/i.test(projectContents.toString());
+        return /Sdk\s*=\s*\"Microsoft\.NET\.Sdk\.Web\"/ig.test(projectContents.toString());
     }
 
     private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
