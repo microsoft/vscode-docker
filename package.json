@@ -980,6 +980,11 @@
                                     ]
                                 }
                             },
+                            "portsPublishAll": {
+                                "type": "boolean",
+                                "description": "Whether to publish all exposed container ports to random ports on the host.",
+                                "default": true
+                            },
                             "extraHosts": {
                                 "type": "array",
                                 "description": "Hosts to be added to the container's `hosts` file for DNS resolution.",
