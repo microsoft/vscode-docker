@@ -1052,6 +1052,10 @@
                                 "type": "string",
                                 "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
                             },
+                            "enableDebugging": {
+                                "type": "boolean",
+                                "description": "Whether to enable debugging within the container."
+                            },
                             "configureSsl": {
                                 "type": "boolean",
                                 "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."

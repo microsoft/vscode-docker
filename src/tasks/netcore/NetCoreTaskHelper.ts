@@ -23,6 +23,7 @@ import { updateBlazorManifest } from './updateBlazorManifest';
 export interface NetCoreTaskOptions {
     appProject?: string;
     configureSsl?: boolean;
+    enableDebugging?: boolean;
 }
 
 export interface NetCoreBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
@@ -94,6 +95,18 @@ export class NetCoreTaskHelper implements TaskHelper {
                     os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
                 },
                 netCore: {
+                    appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
+                    enableDebugging: true
+                }
+            },
+            {
+                type: 'docker-run',
+                label: 'docker-run: release',
+                dependsOn: ['docker-build: release'],
+                dockerRun: {
+                    os: options.platformOS === 'Windows' ? 'Windows' : undefined, // Default is Linux so we'll leave it undefined for brevity
+                },
+                netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
                 }
             }
@@ -144,7 +157,8 @@ export class NetCoreTaskHelper implements TaskHelper {
 
     public async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
         try {
-            if (await NetCoreTaskHelper.isWebApp(runDefinition.netCore.appProject)) {
+            if (runDefinition.netCore.enableDebugging &&
+                await NetCoreTaskHelper.isWebApp(runDefinition.netCore.appProject)) {
                 await updateBlazorManifest(context, runDefinition);
             }
         } catch (err) {
@@ -210,52 +224,54 @@ export class NetCoreTaskHelper implements TaskHelper {
             }
         }
 
-        const appVolume: DockerContainerVolume = {
-            localPath: path.dirname(helperOptions.appProject),
-            containerPath: runOptions.os === 'Windows' ? 'C:\\app' : '/app',
-            permissions: 'rw'
-        };
+        if (helperOptions.enableDebugging) {
+            const appVolume: DockerContainerVolume = {
+                localPath: path.dirname(helperOptions.appProject),
+                containerPath: runOptions.os === 'Windows' ? 'C:\\app' : '/app',
+                permissions: 'rw'
+            };
 
-        const srcVolume: DockerContainerVolume = {
-            localPath: folder.uri.fsPath,
-            containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
-            permissions: 'rw'
-        }
-
-        const debuggerVolume: DockerContainerVolume = {
-            localPath: NetCoreDebugHelper.getHostDebuggerPathBase(),
-            containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
-            permissions: 'ro'
-        };
-
-        const nugetVolume: DockerContainerVolume = {
-            localPath: path.join(os.homedir(), '.nuget', 'packages'),
-            containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
-            permissions: 'ro'
-        };
-
-        let programFilesEnvironmentVariable: string | undefined;
-
-        if (os.platform() === 'win32') {
-            programFilesEnvironmentVariable = process.env.ProgramFiles;
-
-            if (programFilesEnvironmentVariable === undefined) {
-                throw new Error('The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.');
+            const srcVolume: DockerContainerVolume = {
+                localPath: folder.uri.fsPath,
+                containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
+                permissions: 'rw'
             }
+
+            const debuggerVolume: DockerContainerVolume = {
+                localPath: NetCoreDebugHelper.getHostDebuggerPathBase(),
+                containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
+                permissions: 'ro'
+            };
+
+            const nugetVolume: DockerContainerVolume = {
+                localPath: path.join(os.homedir(), '.nuget', 'packages'),
+                containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
+                permissions: 'ro'
+            };
+
+            let programFilesEnvironmentVariable: string | undefined;
+
+            if (os.platform() === 'win32') {
+                programFilesEnvironmentVariable = process.env.ProgramFiles;
+
+                if (programFilesEnvironmentVariable === undefined) {
+                    throw new Error('The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.');
+                }
+            }
+
+            const nugetFallbackVolume: DockerContainerVolume = {
+                localPath: os.platform() === 'win32' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
+                    (os.platform() === 'darwin' ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
+                containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
+                permissions: 'ro'
+            };
+
+            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, appVolume);
+            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, srcVolume);
+            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, debuggerVolume);
+            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetVolume);
+            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
         }
-
-        const nugetFallbackVolume: DockerContainerVolume = {
-            localPath: os.platform() === 'win32' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
-                (os.platform() === 'darwin' ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
-            containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
-            permissions: 'ro'
-        };
-
-        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, appVolume);
-        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, srcVolume);
-        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, debuggerVolume);
-        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetVolume);
-        NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
 
         if (userSecrets || ssl) {
             const hostSecretsFolders = LocalAspNetCoreSslManager.getHostSecretsFolders();
