@@ -20,7 +20,7 @@ On Linux, you must also follow the steps in â€œManage Docker as a non-root userâ
 * Command Palette (<kbd>F1</kbd> by default) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
 * Explorer integration for managing images, containers, registries, and more
 * Deploy images from a registry directly to Azure App Service
-* [Debug .NET Core applications](https://github.com/microsoft/vscode-docker/wiki/Debug-.NET-Core-(Preview)) running in Linux Docker containers
+* [Debug .NET Core applications](https://aka.ms/AA6jdzn) running in Linux Docker containers
 
 ### Generating Docker Files
 
