@@ -77,7 +77,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
         // Prompt them to add Docker files since they probably haven't
         window.showErrorMessage(
-            'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click the button below.',
+            'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
             ...[add]).then((result) => {
                 if (result === add) {
                     commands.executeCommand('vscode-docker.configure');
