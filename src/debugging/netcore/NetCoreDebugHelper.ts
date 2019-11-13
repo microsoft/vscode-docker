@@ -222,9 +222,11 @@ export class NetCoreDebugHelper implements DebugHelper {
     private static getContainerAppOutput(debugConfiguration: DockerDebugConfiguration, appOutput: string, platformOS: PlatformOS): string {
         const relativePath = path.relative(path.dirname(debugConfiguration.netCore.appProject), appOutput);
 
-        return platformOS === 'Windows' ?
-            pathNormalize(path.win32.join('C:\\app', relativePath)) :
-            pathNormalize(path.posix.join('/app', relativePath));
+        let result = platformOS === 'Windows' ?
+            path.win32.join('C:\\app', relativePath) :
+            path.posix.join('/app', relativePath);
+
+        return pathNormalize(result, platformOS);
     }
 }
 
