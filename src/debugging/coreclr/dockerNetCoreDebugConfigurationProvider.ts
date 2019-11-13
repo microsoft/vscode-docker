@@ -4,7 +4,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, window, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { resolveVariables } from '../../utils/resolveVariables';
@@ -73,7 +73,17 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        window.showErrorMessage("To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\".");
+        const add: MessageItem = { title: 'Add Docker Files' };
+
+        // Prompt them to add Docker files since they probably haven't
+        window.showErrorMessage(
+            'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click the button below.',
+            ...[add]).then((result) => {
+                if (result === add) {
+                    commands.executeCommand('vscode-docker.configure');
+                }
+            });
+
         return [];
     }
 

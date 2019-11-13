@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, window, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
@@ -24,7 +24,17 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     ) { }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        window.showErrorMessage("To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\".");
+        const add: MessageItem = { title: 'Add Docker Files' };
+
+        // Prompt them to add Docker files since they probably haven't
+        window.showErrorMessage(
+            'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click the button below.',
+            ...[add]).then((result) => {
+                if (result === add) {
+                    commands.executeCommand('vscode-docker.configure');
+                }
+            });
+
         return [];
     }
 
