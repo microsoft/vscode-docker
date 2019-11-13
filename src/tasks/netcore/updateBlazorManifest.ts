@@ -41,7 +41,7 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
 
     const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'GetBlazorManifestLocations.targets');
 
-    const command = `dotnet build /r:false /t:GetBlazorManifestLocations /p:CustomAfterMicrosoftCommonTargets=${targetsFile} /p:BlazorManifestLocationsOutput=${locationsFile} ${runDefinition.netCore.appProject}`;
+    const command = `dotnet build /r:false /t:GetBlazorManifestLocations /p:CustomAfterMicrosoftCommonTargets="${targetsFile}" /p:BlazorManifestLocationsOutput="${locationsFile}" "${runDefinition.netCore.appProject}"`;
 
     try {
         await execAsync(command, { timeout: 5000 });
