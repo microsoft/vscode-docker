@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { CancellationToken, debug, DebugConfiguration, DebugConfigurationProvider, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
@@ -24,7 +24,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     ) { }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        return undefined;
+        window.showErrorMessage("To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\".");
+        return [];
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
@@ -33,6 +34,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             async (actionContext: IActionContext) => {
                 if (!folder) {
                     throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                }
+
+                if (debugConfiguration.type === undefined) {
+                    // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
+                    // VSCode subsequently will call provideDebugConfigurations which will show an error message
+                    return null;
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);

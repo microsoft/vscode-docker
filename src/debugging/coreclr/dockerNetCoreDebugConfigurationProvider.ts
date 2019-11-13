@@ -4,7 +4,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { PlatformOS } from '../../utils/platform';
 import { resolveVariables } from '../../utils/resolveVariables';
@@ -73,6 +73,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+        window.showErrorMessage("To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\".");
         return [];
     }
 
@@ -85,6 +86,12 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
     private async resolveDockerDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration | undefined> {
         if (!folder) {
             throw new Error('No workspace folder is associated with debugging.');
+        }
+
+        if (debugConfiguration.type === undefined) {
+            // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
+            // VSCode subsequently will call provideDebugConfigurations which will show an error message
+            return null;
         }
 
         const { appFolder, resolvedAppFolder } = await this.inferAppFolder(folder, debugConfiguration);
