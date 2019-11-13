@@ -11,6 +11,8 @@ const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size
 
 export type Progress = (content: string, process: cp.ChildProcess) => void;
 
+type ExecError = Error & { code, signal };
+
 export async function spawnAsync(
     command: string,
     options?: cp.SpawnOptions,
@@ -50,7 +52,11 @@ export async function spawnAsync(
                 // If cancellation is requested we'll assume that's why it exited
                 return reject(new UserCancelledError('Canceled by user'));
             } else if (code) {
-                return reject(new Error(`Process exited with code ${code}`));
+                // Replicate the error object of child_process.exec().
+                const error = <ExecError>new Error(`Process exited with code ${code}`);
+                error.code = code;
+                error.signal = signal;
+                return reject(error);
             }
 
             return resolve();
