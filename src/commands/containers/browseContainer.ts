@@ -8,6 +8,16 @@ import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 
+// NOTE: These ports are ordered in order of preference.
+const commonWebPorts = [
+    443,    // SSL
+    80,     // HTTP
+    3000,   // (Node.js) Express.js
+    3001,   // (Node.js) Sails.js
+    5000,   // (.NET Core) ASP.NET
+    8080,   // (Node.js)
+    8081];  // (Node.js)
+
 function parsePortAndProtocol(portAndProtocol: string): { port: number, protocol: string | undefined } | undefined {
     const splitPortAndProtocol = portAndProtocol.split('/');
 
@@ -32,7 +42,6 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     const inspectInfo = await node.getContainer().inspect();
 
-    // Find exposed ports
     const ports = inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
         Object.keys(ports)
@@ -50,21 +59,29 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         return;
     }
 
-    // Prefer exposed port 443 (SSL) followed by port 80 (HTTP)...
-    let webPort = possiblePorts.find(port => port.containerPort.port === 443 || port.containerPort.port === 80);
+    // Prefer common port (in order of preference)...
+    let webPort = possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
 
     // Otherwise, if there's just a single port, assume that one...
     if (webPort === undefined && possiblePorts.length === 1) {
         webPort = possiblePorts[0];
     }
 
-    // Otherwise, ask the user which port to use?
+    // Otherwise, ask the user which port to use...
     if (webPort === undefined) {
         const items = possiblePorts.map(port => ({ label: port.containerPort.port.toString(), port }));
-        const item  = await ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to:' });
+        const item  = await ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' });
+
+        // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 
         webPort = item.port;
     }
 
-    vscode.env.openExternal(vscode.Uri.parse(`http://localhost:${webPort.mappings[0].HostPort}`));
+    const mappedPort = webPort.mappings[0];
+
+    const protocol = mappedPort.HostPort === '443' ? 'https' : 'http';
+    const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;
+    const url = `${protocol}://${host}:${mappedPort.HostPort}`;
+
+    vscode.env.openExternal(vscode.Uri.parse(url));
 }

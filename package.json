@@ -291,7 +291,7 @@
                 },
                 {
                     "command": "vscode-docker.containers.browse",
-                    "when": "view == dockerContainers && viewItem =~ /container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /runningContainer$/i",
                     "group": "containers_1_general@3"
                 },
                 {
@@ -1563,7 +1563,7 @@
             },
             {
                 "command": "vscode-docker.containers.browse",
-                "title": "Browse",
+                "title": "Open in Browser",
                 "category": "Docker Containers"
             },
             {
