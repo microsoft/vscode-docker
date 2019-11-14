@@ -85,7 +85,9 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
             // If there's just a single port, assume that one...
             ? possiblePorts[0]
             // Otherwise, prefer a common port (in order of preference)...
-            : possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
+            : commonWebPorts
+                .map(port => possiblePorts.find(possiblePort => port === possiblePort.containerPort.port))
+                .filter(possiblePort => possiblePort !== undefined)[0];
 
     // Otherwise, ask the user which port to use...
     if (selectedPort === undefined) {
