@@ -4,9 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext } from "vscode-azureextensionui";
+import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
+import { captureCancelStep } from '../../utils/captureCancelStep';
+
+type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[], selectedPort?: number };
+
+type ConfigureBrowseCancelStep = 'node' | 'port';
+
+async function captureBrowseCancelStep<T>(cancelStep: ConfigureBrowseCancelStep, properties: BrowseTelemetryProperties, prompt: () => Promise<T>): Promise<T> {
+    return await captureCancelStep(cancelStep, properties, prompt)
+}
 
 // NOTE: These ports are ordered in order of preference.
 const commonWebPorts = [
@@ -15,6 +24,7 @@ const commonWebPorts = [
     3000,   // (Node.js) Express.js
     3001,   // (Node.js) Sails.js
     5000,   // (.NET Core) ASP.NET
+    5001,   // (.NET Core) ASP.NET
     8080,   // (Node.js)
     8081];  // (Node.js)
 
@@ -36,8 +46,10 @@ function parsePortAndProtocol(portAndProtocol: string): { port: number, protocol
 }
 
 export async function browseContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
+    const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
+
     if (!node) {
-        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
+        node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context));
     }
 
     const inspectInfo = await node.getContainer().inspect();
@@ -53,6 +65,8 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
               // Exclude ports not mapped to the host...
               .filter(port => port.mappings && port.mappings.length > 0);
 
+    telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
+
     if (possiblePorts.length === 0) {
         await ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
 
@@ -60,24 +74,30 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     }
 
     // Prefer common port (in order of preference)...
-    let webPort = possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
+    let selectedPort = possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
 
     // Otherwise, if there's just a single port, assume that one...
-    if (webPort === undefined && possiblePorts.length === 1) {
-        webPort = possiblePorts[0];
+    if (selectedPort === undefined && possiblePorts.length === 1) {
+        selectedPort = possiblePorts[0];
     }
 
     // Otherwise, ask the user which port to use...
-    if (webPort === undefined) {
+    if (selectedPort === undefined) {
         const items = possiblePorts.map(port => ({ label: port.containerPort.port.toString(), port }));
-        const item  = await ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' });
+
+        // Sort ports in ascending order...
+        items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
+
+        const item  = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 
-        webPort = item.port;
+        selectedPort = item.port;
     }
 
-    const mappedPort = webPort.mappings[0];
+    telemetryProperties.selectedPort = selectedPort.containerPort.port;
+
+    const mappedPort = selectedPort.mappings[0];
 
     const protocol = mappedPort.HostPort === '443' ? 'https' : 'http';
     const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;

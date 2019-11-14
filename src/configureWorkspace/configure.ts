@@ -8,10 +8,11 @@ import * as fse from 'fs-extra';
 import * as gradleParser from "gradle-to-js/lib/parser";
 import * as path from "path";
 import * as vscode from "vscode";
-import { IActionContext, TelemetryProperties, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
 import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
+import { captureCancelStep } from '../utils/captureCancelStep';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { globAsync } from '../utils/globAsync';
 import { Platform, PlatformOS } from '../utils/platform';
@@ -49,7 +50,11 @@ interface PomXmlContents {
     };
 }
 
-export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port';
+type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port';
+
+async function captureConfigureCancelStep<T>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: () => Promise<T>): Promise<T> {
+    return await captureCancelStep(cancelStep, properties, prompt)
+}
 
 export type ConfigureTelemetryProperties = {
     configurePlatform?: Platform;
@@ -57,18 +62,6 @@ export type ConfigureTelemetryProperties = {
     packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
-
-async function captureCancelStep<T>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    try {
-        return await prompt();
-    } catch (error) {
-        if (error instanceof UserCancelledError) {
-            properties.cancelStep = cancelStep;
-        }
-
-        throw error;
-    }
-}
 
 export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
@@ -358,7 +351,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     let folder: vscode.WorkspaceFolder;
     if (!rootFolderPath) {
-        folder = await captureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
+        folder = await captureConfigureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
         rootFolderPath = folder.uri.fsPath;
     }
 
@@ -392,13 +385,13 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     const rootFolderPath: string = options.rootPath;
     const outputFolder = options.outputFolder;
 
-    const platformType: Platform = options.platform || await captureCancelStep('platform', properties, quickPickPlatform);
+    const platformType: Platform = options.platform || await captureConfigureCancelStep('platform', properties, quickPickPlatform);
     properties.configurePlatform = platformType;
     let generatorInfo = generatorsByPlatform.get(platformType);
 
     let os: PlatformOS | undefined = options.os;
     if (!os && platformType.toLowerCase().includes('.net')) {
-        os = await captureCancelStep('os', properties, quickPickOS);
+        os = await captureConfigureCancelStep('os', properties, quickPickOS);
     }
     properties.configureOs = os;
     properties.orchestration = 'single' as DockerOrchestration;
@@ -406,12 +399,12 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     let generateComposeFiles = true;
 
     if (platformType === 'Node.js') {
-        generateComposeFiles = await captureCancelStep('compose', properties, quickPickGenerateComposeFiles);
+        generateComposeFiles = await captureConfigureCancelStep('compose', properties, quickPickGenerateComposeFiles);
     }
 
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
-        ports = await captureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
+        ports = await captureConfigureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
     }
 
     let targetFramework: string;
