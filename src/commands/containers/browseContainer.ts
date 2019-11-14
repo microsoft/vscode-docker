@@ -55,12 +55,12 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
-        node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context));
+        node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, context));
     }
 
     const inspectInfo = await node.getContainer().inspect();
 
-    const ports = inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
+    const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
         Object.keys(ports)
               .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
@@ -80,13 +80,12 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         return;
     }
 
-    // Prefer common port (in order of preference)...
-    let selectedPort = possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
-
-    // Otherwise, if there's just a single port, assume that one...
-    if (selectedPort === undefined && possiblePorts.length === 1) {
-        selectedPort = possiblePorts[0];
-    }
+    let selectedPort =
+        possiblePorts.length === 1
+            // If there's just a single port, assume that one...
+            ? possiblePorts[0]
+            // Otherwise, prefer a common port (in order of preference)...
+            : possiblePorts.find(port => commonWebPorts.find(commonPort => commonPort === port.containerPort.port) !== undefined);
 
     // Otherwise, ask the user which port to use...
     if (selectedPort === undefined) {
@@ -95,7 +94,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         // Sort ports in ascending order...
         items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
 
-        const item  = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
+        const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 
