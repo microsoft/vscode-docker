@@ -290,13 +290,13 @@
                     "group": "containers_1_general@2"
                 },
                 {
-                    "command": "vscode-docker.containers.browse",
-                    "when": "view == dockerContainers && viewItem =~ /runningContainer$/i",
+                    "command": "vscode-docker.containers.inspect",
+                    "when": "view == dockerContainers && viewItem =~ /container$/i",
                     "group": "containers_1_general@3"
                 },
                 {
-                    "command": "vscode-docker.containers.inspect",
-                    "when": "view == dockerContainers && viewItem =~ /container$/i",
+                    "command": "vscode-docker.containers.browse",
+                    "when": "view == dockerContainers && viewItem =~ /runningContainer$/i",
                     "group": "containers_1_general@4"
                 },
                 {

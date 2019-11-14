@@ -68,7 +68,8 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
 
     if (possiblePorts.length === 0) {
-        await ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
+        // tslint:disable-next-line: no-floating-promises
+        ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
 
         return;
     }
