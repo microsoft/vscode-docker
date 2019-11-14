@@ -19,6 +19,7 @@ import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
+import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pushImage } from "./images/pushImage";
@@ -87,6 +88,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
     registerWorkspaceCommand('vscode-docker.images.runInteractive', runImageInteractive);
     registerCommand('vscode-docker.images.tag', tagImage);
+    registerCommand('vscode-docker.images.copyFullTag', copyFullTag);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
     registerCommand('vscode-docker.networks.create', createNetwork);
