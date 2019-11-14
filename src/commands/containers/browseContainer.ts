@@ -23,10 +23,16 @@ const commonWebPorts = [
     80,     // HTTP
     3000,   // (Node.js) Express.js
     3001,   // (Node.js) Sails.js
-    5000,   // (.NET Core) ASP.NET
-    5001,   // (.NET Core) ASP.NET
+    5001,   // (.NET Core) ASP.NET SSL
+    5000,   // (.NET Core) ASP.NET HTTP
     8080,   // (Node.js)
-    8081];  // (Node.js)
+    8081    // (Node.js)
+];
+
+const commonSslPorts = [
+    443,    // SSL
+    5001    // (.NET Core) ASP.NET SSL
+];
 
 function parsePortAndProtocol(portAndProtocol: string): { port: number, protocol: string | undefined } | undefined {
     const splitPortAndProtocol = portAndProtocol.split('/');
@@ -100,7 +106,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     const mappedPort = selectedPort.mappings[0];
 
-    const protocol = mappedPort.HostPort === '443' ? 'https' : 'http';
+    const protocol = commonSslPorts.find(port => port === selectedPort.containerPort.port) !== undefined ? 'https' : 'http';
     const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;
     const url = `${protocol}://${host}:${mappedPort.HostPort}`;
 
