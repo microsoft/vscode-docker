@@ -36,6 +36,7 @@
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.containers.attachShell",
+        "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
         "onCommand:vscode-docker.containers.inspect",
         "onCommand:vscode-docker.containers.prune",
@@ -294,19 +295,24 @@
                     "group": "containers_1_general@3"
                 },
                 {
+                    "command": "vscode-docker.containers.browse",
+                    "when": "view == dockerContainers && viewItem =~ /runningContainer$/i",
+                    "group": "containers_1_general@4"
+                },
+                {
                     "command": "vscode-docker.containers.start",
                     "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused)Container$/i",
-                    "group": "containers_1_general@4"
+                    "group": "containers_1_general@5"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
                     "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i",
-                    "group": "containers_1_general@5"
+                    "group": "containers_1_general@6"
                 },
                 {
                     "command": "vscode-docker.containers.restart",
                     "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i",
-                    "group": "containers_1_general@6"
+                    "group": "containers_1_general@7"
                 },
                 {
                     "command": "vscode-docker.containers.remove",
@@ -1553,6 +1559,11 @@
             {
                 "command": "vscode-docker.containers.attachShell",
                 "title": "Attach Shell",
+                "category": "Docker Containers"
+            },
+            {
+                "command": "vscode-docker.containers.browse",
+                "title": "Open in Browser",
                 "category": "Docker Containers"
             },
             {

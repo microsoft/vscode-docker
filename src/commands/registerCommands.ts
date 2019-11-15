@@ -8,6 +8,7 @@ import { registerCommand } from "vscode-azureextensionui";
 import { configure, configureApi } from "../configureWorkspace/configure";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
+import { browseContainer } from "./containers/browseContainer";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
@@ -67,6 +68,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.pruneSystem', pruneSystem);
 
     registerWorkspaceCommand('vscode-docker.containers.attachShell', attachShellContainer);
+    registerCommand('vscode-docker.containers.browse', browseContainer);
     registerCommand('vscode-docker.containers.inspect', inspectContainer);
     registerCommand('vscode-docker.containers.configureExplorer', configureContainersExplorer);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
