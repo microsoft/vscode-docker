@@ -636,7 +636,7 @@
             },
             {
                 "type": "docker-coreclr",
-                "label": "Docker: Launch .NET Core (Preview)",
+                "label": "Docker: Launch .NET Core (Deprecated)",
                 "configurationSnippets": [],
                 "configurationAttributes": {
                     "launch": {
