@@ -1,9 +1,10 @@
-## 0.9.0 - 8 November 2019
+## 0.9.0 - 15 November 2019
 ### Added
 * Task-based debugging for .NET Core and Node.js: [#1242](https://github.com/microsoft/vscode-docker/issues/1242)
   * These tasks can also be used for generic `docker build` and `docker run` scenarios
 * Support for connecting to remote Docker daemons over SSH: [#646](https://github.com/microsoft/vscode-docker/issues/646)
 * When using Docker Desktop WSL 2, the WSL daemon or local daemon will be selected automatically, based on `docker context` [#1199](https://github.com/microsoft/vscode-docker/issues/1199)
+* `Open in Browser` command added to container context menus [#1429](https://github.com/microsoft/vscode-docker/pull/1429)
 
 ### Removed
 * `docker.importCertificates` has been removed; the functionality to trust system certificates is now built in to VS Code itself (enabled by default): https://github.com/microsoft/vscode/issues/52880
