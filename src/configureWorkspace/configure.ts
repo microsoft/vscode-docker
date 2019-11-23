@@ -23,9 +23,9 @@ import { configureGo } from './configureGo';
 import { configureJava } from './configureJava';
 import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
+import { configurePhp } from './configurePhp';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { configurePhp } from './configurePhp';
 import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
