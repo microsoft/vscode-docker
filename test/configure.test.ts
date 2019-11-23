@@ -1256,9 +1256,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
-                },
-                [TestInput.UseDefaultValue /*port*/],
-                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']);
+                });
 
             assertFileContains('Dockerfile', 'FROM php:apache');
             assertFileContains('Dockerfile', 'COPY . /var/www/html');
