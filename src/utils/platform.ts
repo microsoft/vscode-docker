@@ -13,4 +13,5 @@ export type Platform =
     'Python' |
     'Ruby' |
     'C++' |
+    'PHP' |
     'Other';

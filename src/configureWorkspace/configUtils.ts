@@ -70,6 +70,7 @@ export async function quickPickPlatform(platforms?: Platform[]): Promise<Platfor
         'Python',
         'Ruby',
         'C++',
+        'PHP',
         'Other'
     ];
 

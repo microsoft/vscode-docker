@@ -1245,6 +1245,27 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
     });
 
+    // PHP
+
+    suite("PHP", () => {
+        testInEmptyFolder("PHP", async () => {
+            await testConfigureDocker(
+                'PHP',
+                {
+                    configurePlatform: 'PHP',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                [TestInput.UseDefaultValue /*port*/],
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']);
+
+            assertFileContains('Dockerfile', 'FROM php:apache');
+            assertFileContains('Dockerfile', 'COPY . /var/www/html');
+            assertNotFileContains('Dockerfile', 'EXPOSE');
+        });
+    });
+
     suite("'Other'", () => {
         testInEmptyFolder("with package.json", async () => {
             await writeFile('', 'package.json', JSON.stringify({

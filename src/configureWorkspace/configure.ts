@@ -25,6 +25,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
+import { configurePhp } from './configurePhp';
 import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
@@ -88,6 +89,7 @@ generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
 generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
+generatorsByPlatform.set('PHP', configurePhp);
 generatorsByPlatform.set('Other', configureOther);
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[] | undefined, { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
