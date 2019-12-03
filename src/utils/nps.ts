@@ -9,7 +9,7 @@ import { env, Memento, Uri, window } from "vscode";
 import { ext } from "vscode-azureappservice/out/src/extensionVariables";
 
 const PROBABILITY = 0.15;
-const MIN_SESSION_COUNT = 5;
+const MIN_SESSION_COUNT = 10;
 
 const SURVEY_NAME = 'nps1';
 const SURVEY_URL = 'https://aka.ms/vscodedockernpsinproduct';
