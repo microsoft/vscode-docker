@@ -32,6 +32,10 @@ export class ContainerTreeItem extends AzExtTreeItem {
         return this._item.containerId;
     }
 
+    public get containerName(): string {
+        return this._item.containerName;
+    }
+
     public get fullTag(): string {
         return this._item.fullTag;
     }
