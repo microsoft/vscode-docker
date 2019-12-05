@@ -14,8 +14,9 @@ import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
 // tslint:disable-next-line: no-any
-const localize = (message: string, ...param: any[]): string => {
-    return util.format(message, param);
+const localize = (message: string, formatString: string, ...param: any[]): string => {
+    // NOTE: This is a mock of the VS Code localize() method so its implementation may be subtly different.
+    return util.format(formatString.replace(/\{[0-9]+\}/g, '%s'), ...param);
 }
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
@@ -139,7 +140,19 @@ export class ServerReadyDetector extends vscode.Disposable {
                 throw new Error(`Could not determine host port mapped to container port ${containerPort} in container \'${args.containerName}\'.`);
             }
 
-            captureString = util.format(format, containerProtocol, hostPort);
+            const s = format.split('%s');
+
+            if (s.length === 1) {
+                // Format string has no substitutions, so use as-is...
+                captureString = format;
+            } else if (s.length === 3) {
+                // There are exactly two substitutions (which is expected)...
+                captureString = util.format(format, containerProtocol, hostPort);
+            } else {
+                const errMsg = localize('server.ready.placeholder.error', "Format uri ('{0}') must contain exactly two substitution placeholders.", format);
+                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                return;
+            }
         }
 
         this.openExternalWithUri(session, captureString);
