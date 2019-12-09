@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder } from 'vscode';
+import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TerminalDimensions, WorkspaceFolder, TaskScope, workspace } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { spawnAsync } from '../utils/spawnAsync';
@@ -28,8 +28,12 @@ export class DockerPseudoterminal implements Pseudoterminal {
     constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
 
     public open(initialDimensions: TerminalDimensions | undefined): void {
+        const folder = this.task.scope === TaskScope.Workspace
+            ? workspace.workspaceFolders[0]
+            : this.task.scope as WorkspaceFolder;
+
         const executeContext: DockerTaskExecutionContext = {
-            folder: this.task.scope as WorkspaceFolder,
+            folder,
             cancellationToken: this.cts.token,
             terminal: this,
         }

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder, workspace } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
@@ -43,7 +43,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             'docker-launch',
             async (actionContext: IActionContext) => {
                 if (!folder) {
-                    throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                    folder = workspace.workspaceFolders[0];
+
+                    if (!folder) {
+                        throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                    }
                 }
 
                 if (debugConfiguration.type === undefined) {
