@@ -9,9 +9,8 @@ import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import { Context, Suite } from 'mocha';
 import * as path from 'path';
-import * as vscode from 'vscode';
 import { commands, Uri } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, createAzExtOutputChannel, IAzExtOutputChannel } from 'vscode-azureextensionui';
 import { configure, ext, httpsRequestBinary, Platform } from '../extension.bundle';
 import * as assertEx from './assertEx';
 import { shouldSkipDockerTest } from './dockerInfo';
@@ -63,7 +62,7 @@ async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFol
 suite("Build Image", function (this: Suite): void {
     this.timeout(2 * 60 * 1000);
 
-    const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
+    const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
     ext.outputChannel = outputChannel;
 
     async function testConfigureAndBuildImage(
@@ -78,7 +77,7 @@ suite("Build Image", function (this: Suite): void {
 
         let context: IActionContext = {
             telemetry: { properties: {}, measurements: {} },
-            errorHandling: {}
+            errorHandling: { issueProperties: {} }
         };
 
         await testUserInput.runWithInputs(configureInputs, async () => {

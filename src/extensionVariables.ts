@@ -5,8 +5,8 @@
 
 import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
-import { ExtensionContext, OutputChannel, TreeView } from "vscode";
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
+import { ExtensionContext, TreeView } from "vscode";
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
@@ -21,7 +21,7 @@ import { ITerminalProvider } from "./utils/TerminalProvider";
 // tslint:disable-next-line: export-name
 export namespace ext {
     export let context: ExtensionContext;
-    export let outputChannel: OutputChannel;
+    export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
     export let reporter: ITelemetryReporter;
     export let terminalProvider: ITerminalProvider;
@@ -41,6 +41,8 @@ export namespace ext {
     export let networksTree: AzExtTreeDataProvider;
     export let networksTreeView: TreeView<AzExtTreeItem>;
     export let networksRoot: NetworksTreeItem;
+
+    export const prefix: string = 'docker';
 
     export let registriesTree: AzExtTreeDataProvider;
     export let registriesTreeView: TreeView<AzExtTreeItem>;
