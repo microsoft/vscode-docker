@@ -166,7 +166,15 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         context.telemetry.properties.providerId = cachedProvider.id;
         context.telemetry.properties.providerApi = cachedProvider.api;
 
-        await deleteRegistryPassword(cachedProvider);
+        // NOTE: Do not let failure prevent removal of the tree item.
+
+        try {
+            await deleteRegistryPassword(cachedProvider);
+        } catch (err) {
+            // Don't wait, no input to wait for anyway
+            // tslint:disable-next-line: no-floating-promises
+            ext.ui.showWarningMessage(`The registry password could not be removed from the cache: ${err}`);
+        }
 
         const index = this._cachedProviders.findIndex(n => n === cachedProvider);
         if (index !== -1) {

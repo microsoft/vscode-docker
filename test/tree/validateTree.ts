@@ -40,7 +40,7 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
                     await runWithDockerode(dockerodeOptions, async () => {
                         await rootTreeItem.refresh();
 
-                        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: {} };
+                        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
 
                         actualNodes = await rootTreeItem.getCachedChildren(context);
 

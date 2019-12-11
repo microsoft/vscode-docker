@@ -10,7 +10,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Suite } from 'mocha';
 import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension.bundle';
-import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { IActionContext, TelemetryProperties, IAzExtOutputChannel, createAzExtOutputChannel } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
 import { TestInput } from 'vscode-azureextensiondev';
 
@@ -121,7 +121,7 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
     inputs.unshift(platform);
     let context: IActionContext = {
         telemetry: { properties: {}, measurements: {} },
-        errorHandling: {}
+        errorHandling: { issueProperties: {} }
     };
 
     await testUserInput.runWithInputs(inputs, async () => {
@@ -373,7 +373,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
 
     test('add tests for compose files');
 
-    const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
+    const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
     ext.outputChannel = outputChannel;
 
     async function testDotNetCoreConsole(os: PlatformOS, hostOs: PlatformOS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
