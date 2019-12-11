@@ -16,12 +16,15 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
     }
 
+    const defaultRegistryPath = vscode.workspace.getConfiguration('docker').get(configurationKeys.defaultRegistryPath);
+
     let fullTag: string = node.fullTag;
     if (fullTag.includes('/')) {
-        await askToSaveRegistryPath(fullTag);
+        if (!defaultRegistryPath) {
+            await askToSaveRegistryPath(fullTag);
+        }
     } else {
         let askToPushPrefix: boolean = true;
-        let defaultRegistryPath = vscode.workspace.getConfiguration('docker').get(configurationKeys.defaultRegistryPath);
         if (askToPushPrefix && defaultRegistryPath) {
             context.telemetry.properties.pushWithoutRepositoryAnswer = 'Cancel';
 
