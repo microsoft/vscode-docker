@@ -27,5 +27,6 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     const mbReclaimed = convertToMB(containersResult.SpaceReclaimed + imagesResult.SpaceReclaimed + volumesResult.SpaceReclaimed);
     let message = `Removed ${numContainers} container(s), ${numImages} image(s), ${numNetworks} network(s), ${numVolumes} volume(s) and reclaimed ${mbReclaimed}MB of space.`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(message);
 }

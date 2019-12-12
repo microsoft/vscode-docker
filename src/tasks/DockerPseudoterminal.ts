@@ -38,7 +38,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
     }
 

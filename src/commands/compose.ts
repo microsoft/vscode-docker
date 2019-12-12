@@ -55,6 +55,7 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         // prompt for compose file
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length === 0) {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
             return;
         }

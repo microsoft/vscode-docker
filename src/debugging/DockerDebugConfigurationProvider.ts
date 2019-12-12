@@ -27,10 +27,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const add: MessageItem = { title: 'Add Docker Files' };
 
         // Prompt them to add Docker files since they probably haven't
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
             'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
             ...[add]).then((result) => {
             if (result === add) {
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 commands.executeCommand('vscode-docker.configure');
             }
         });

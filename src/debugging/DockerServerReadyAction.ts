@@ -78,7 +78,7 @@ export class ServerReadyDetector extends vscode.Disposable {
         if (!this.hasFired) {
             const matches = this.regexp.exec(s);
             if (matches && matches.length >= 1) {
-                // tslint:disable-next-line: no-floating-promises
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 this.openExternalWithString(this.session, matches.length > 1 ? matches[1] : '');
                 this.hasFired = true;
                 this.internalDispose();
@@ -100,6 +100,7 @@ export class ServerReadyDetector extends vscode.Disposable {
             // verify that format does not contain '%s'
             if (format.indexOf('%s') >= 0) {
                 const errMsg = localize('server.ready.nocapture.error', "Format uri ('{0}') uses a substitution placeholder but pattern did not capture anything.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -110,6 +111,7 @@ export class ServerReadyDetector extends vscode.Disposable {
             const s = format.split('%s');
             if (s.length !== 2) {
                 const errMsg = localize('server.ready.placeholder.error', "Format uri ('{0}') must contain exactly one substitution placeholder.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -128,6 +130,7 @@ export class ServerReadyDetector extends vscode.Disposable {
 
             if (containerPort === undefined) {
                 const errMsg = localize('server.ready.port.error', "Captured string ('{0}') must contain a port number.", captureString);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -150,6 +153,7 @@ export class ServerReadyDetector extends vscode.Disposable {
                 captureString = util.format(format, containerProtocol, hostPort);
             } else {
                 const errMsg = localize('server.ready.placeholder.error', "Format uri ('{0}') must contain exactly two substitution placeholders.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -181,11 +185,13 @@ export class ServerReadyDetector extends vscode.Disposable {
         const args = configuration.dockerOptions.dockerServerReadyAction;
         switch (args.action || 'openExternally') {
             case 'openExternally':
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.env.openExternal(vscode.Uri.parse(uri));
                 break;
             case 'debugWithChrome':
                 const remoteName = 'remoteName';
                 if (vscode.env[remoteName] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                     vscode.debug.startDebugging(
                         session.workspaceFolder,
                         {
@@ -197,6 +203,7 @@ export class ServerReadyDetector extends vscode.Disposable {
                         });
                 } else {
                     const errMsg = localize('server.ready.chrome.not.installed', "The action '{0}' requires the '{1}' extension.", 'debugWithChrome', 'Debugger for Chrome');
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                     vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 }
                 break;
