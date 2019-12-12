@@ -30,10 +30,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         window.showErrorMessage(
             'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
             ...[add]).then((result) => {
-                if (result === add) {
-                    commands.executeCommand('vscode-docker.configure');
-                }
-            });
+            if (result === add) {
+                commands.executeCommand('vscode-docker.configure');
+            }
+        });
 
         return [];
     }

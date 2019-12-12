@@ -6,15 +6,15 @@
 import { IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureCpp: IPlatformGeneratorInfo = {
-  genDockerFile,
-  genDockerCompose: undefined, // We don't generate compose files for Cpp
-  genDockerComposeDebug: undefined, // We don't generate compose files for Cpp
-  defaultPorts: undefined, // We don't open a port for Cpp
-  initializeForDebugging: undefined,
+    genDockerFile,
+    genDockerCompose: undefined, // We don't generate compose files for Cpp
+    genDockerComposeDebug: undefined, // We don't generate compose files for Cpp
+    defaultPorts: undefined, // We don't open a port for Cpp
+    initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  return `# GCC support can be specified at major, minor, or micro version
+    return `# GCC support can be specified at major, minor, or micro version
 # (e.g. 8, 8.2 or 8.2.0).
 # See https://hub.docker.com/r/library/gcc/ for all supported GCC
 # tags from Docker Hub.

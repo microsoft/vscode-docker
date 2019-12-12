@@ -25,7 +25,10 @@ module.exports = {
         "@typescript-eslint/explicit-member-accessibility": [
             "error",
             {
-                "accessibility": "explicit"
+                "accessibility": "explicit",
+                "overrides": {
+                    "constructors": "no-public"
+                }
             }
         ],
         "@typescript-eslint/indent": [
@@ -122,7 +125,6 @@ module.exports = {
         "id-blacklist": [
             "error",
             "any",
-            "Number",
             "number",
             "String",
             "string",
@@ -147,7 +149,7 @@ module.exports = {
                 "code": 140
             }
         ],
-        "max-lines": "error",
+        "max-lines": "off",
         "new-parens": "error",
         "newline-per-chained-call": "off",
         "no-bitwise": "error",

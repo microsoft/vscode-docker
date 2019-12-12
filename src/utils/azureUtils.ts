@@ -28,11 +28,14 @@ export function getResourceGroupFromId(id: string): string {
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
     const acrRefreshToken = await acquireAcrRefreshToken(registryHost, subContext);
 
+    /* eslint-disable-next-line camelcase */
     const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, {
         form: {
+            /* eslint-disable-next-line camelcase */
             grant_type: "refresh_token",
             service: registryHost,
             scope,
+            /* eslint-disable-next-line camelcase */
             refresh_token: acrRefreshToken,
         },
         json: true
@@ -44,12 +47,16 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
     const aadTokenResponse = await acquireAadTokens(subContext);
 
+    /* eslint-disable-next-line camelcase */
     const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
         form: {
+            /* eslint-disable-next-line camelcase */
             grant_type: "refresh_token",
             service: registryHost,
             tenant: subContext.tenantId,
+            /* eslint-disable-next-line camelcase */
             refresh_token: aadTokenResponse.refreshToken,
+            /* eslint-disable-next-line camelcase */
             access_token: aadTokenResponse.accessToken,
         },
         json: true
@@ -126,12 +133,12 @@ export async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run
                 metadata = props.metadata;
             } catch (err) {
                 const error = parseError(err);
-                //Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
+                // Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
                 if (error.errorType === "NotFound") { return; } else { throw error; }
             }
             available = +props.contentLength;
             let text: string;
-            //Makes sure that if item fails it does so due to network/azure errors not lack of new content
+            // Makes sure that if item fails it does so due to network/azure errors not lack of new content
             if (available > start) {
                 text = await getBlobToText(blobInfo, blob, start);
                 let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');

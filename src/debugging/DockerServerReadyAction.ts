@@ -13,7 +13,7 @@ import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
-// tslint:disable-next-line: no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const localize = (message: string, formatString: string, ...param: any[]): string => {
     // NOTE: This is a mock of the VS Code localize() method so its implementation may be subtly different.
     return util.format(formatString.replace(/\{[0-9]+\}/g, '%s'), ...param);
@@ -21,7 +21,7 @@ const localize = (message: string, formatString: string, ...param: any[]): strin
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
 const URI_FORMAT = 'http://localhost:%s';
-// tslint:disable-next-line: no-invalid-template-strings
+/* eslint-disable-next-line no-template-curly-in-string */
 const WEB_ROOT = '${workspaceFolder}';
 
 export class ServerReadyDetector extends vscode.Disposable {

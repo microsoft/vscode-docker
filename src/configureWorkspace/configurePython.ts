@@ -6,17 +6,17 @@
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configurePython: IPlatformGeneratorInfo = {
-  genDockerFile,
-  genDockerCompose,
-  genDockerComposeDebug,
-  defaultPorts: [3000],
-  initializeForDebugging: undefined,
+    genDockerFile,
+    genDockerCompose,
+    genDockerComposeDebug,
+    defaultPorts: [3000],
+    initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(ports);
+    let exposeStatements = getExposeStatements(ports);
 
-  return `# Python support can be specified down to the minor or micro version
+    return `# Python support can be specified down to the minor or micro version
 # (e.g. 3.6 or 3.6.3).
 # OS Support also exists for jessie & stretch (slim and full).
 # See https://hub.docker.com/r/library/python/ for all supported Python
@@ -48,7 +48,7 @@ CMD ["python3", "-m", "${serviceNameAndRelativePath}"]
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-  return `version: '2.1'
+    return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -58,7 +58,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-  return `version: '2.1'
+    return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:
