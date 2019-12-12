@@ -9,7 +9,7 @@ import vscode = require('vscode');
 import { IToken, Parser, TokenType } from '../parser';
 
 export class DockerComposeParser extends Parser {
-    constructor() {
+    public constructor() {
         let parseRegex = /\:+$/g;
         super(parseRegex);
     }

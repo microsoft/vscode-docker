@@ -18,7 +18,7 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
 }
 
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
-    constructor(
+    public constructor(
         private readonly dockerClient: DockerClient,
         private readonly helpers: { [key in DockerPlatform]: DebugHelper }
     ) { }

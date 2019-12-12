@@ -42,7 +42,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     private readonly vsDbgClientFactory: () => VsDbgClient;
     private vsDbgClient: VsDbgClient;
 
-    constructor() {
+    public constructor() {
         const processProvider = new ChildProcessProvider();
         const fsProvider = new LocalFileSystemProvider();
         const osProvider = new LocalOSProvider();
@@ -152,10 +152,10 @@ export class NetCoreDebugHelper implements DebugHelper {
             },
             pipeTransport: {
                 pipeProgram: 'docker',
-                // tslint:disable: no-invalid-template-strings
+                /* eslint-disable no-template-curly-in-string */
                 pipeArgs: ['exec', '-i', containerName, '${debuggerCommand}'],
                 pipeCwd: '${workspaceFolder}',
-                // tslint:enable: no-invalid-template-strings
+                /* eslint-enable no-template-curly-in-string */
                 debuggerPath: platformOS === 'Windows' ?
                     'C:\\remote_debugger\\win7-x64\\latest\\vsdbg' :
                     '/remote_debugger/vsdbg',

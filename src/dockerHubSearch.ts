@@ -91,23 +91,30 @@ function invokeHubSearch(imageName: string, count: number, cache: boolean): Prom
         cache);
 }
 export interface IHubSearchResponse {
+    /* eslint-disable-next-line camelcase */
     num_pages: number;
+    /* eslint-disable-next-line camelcase */
     num_results: number;
     results: [IHubSearchResponseResult];
+    /* eslint-disable-next-line camelcase */
     page_size: number;
     query: string;
     page: number;
 }
 export interface IHubSearchResponseResult {
+    /* eslint-disable-next-line camelcase */
     is_automated: boolean;
     name: string;
+    /* eslint-disable-next-line camelcase */
     is_trusted: boolean;
+    /* eslint-disable-next-line camelcase */
     is_official: boolean;
+    /* eslint-disable-next-line camelcase */
     star_count: number;
     description: string;
 }
 
-// tslint:disable-next-line:no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 let JSON_CACHE: { [key: string]: Promise<any> } = {};
 
 // tslint:disable-next-line:promise-function-async // Grandfathered in
@@ -116,14 +123,14 @@ function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<
         return doFetchHttpsJson(opts);
     }
 
-    let cache_key = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
-    if (!JSON_CACHE[cache_key]) {
-        JSON_CACHE[cache_key] = doFetchHttpsJson(opts);
+    let cacheKey = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
+    if (!JSON_CACHE[cacheKey]) {
+        JSON_CACHE[cacheKey] = doFetchHttpsJson(opts);
     }
 
     // new promise to avoid cancelling
     return new Promise<T>((resolve, reject) => {
-        JSON_CACHE[cache_key].then(resolve, reject);
+        JSON_CACHE[cacheKey].then(resolve, reject);
     });
 }
 

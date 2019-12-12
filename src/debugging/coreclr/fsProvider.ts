@@ -13,7 +13,7 @@ export interface FileSystemProvider {
     readDir(path: string): Promise<string[]>;
     readFile(filename: string, encoding?: string): Promise<string>;
     unlinkFile(filename: string): Promise<void>;
-    // tslint:disable-next-line:no-any
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     writeFile(filename: string, data: any): Promise<void>;
 }
 
@@ -75,7 +75,7 @@ export class LocalFileSystemProvider implements FileSystemProvider {
         return await fse.unlink(filename);
     }
 
-    // tslint:disable-next-line:no-any
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     public async writeFile(filename: string, data: any): Promise<void> {
         return await fse.writeFile(filename, data);
     }

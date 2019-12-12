@@ -63,13 +63,13 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
         Object.keys(ports)
-              .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
-              // Exclude port designations we cannot recognize...
-              .filter(port => port.containerPort !== undefined)
-              // Exclude ports that are non-TCP-based (which should be the default)...
-              .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
-              // Exclude ports not mapped to the host...
-              .filter(port => port.mappings && port.mappings.length > 0);
+            .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
+            // Exclude port designations we cannot recognize...
+            .filter(port => port.containerPort !== undefined)
+            // Exclude ports that are non-TCP-based (which should be the default)...
+            .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
+            // Exclude ports not mapped to the host...
+            .filter(port => port.mappings && port.mappings.length > 0);
 
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
 

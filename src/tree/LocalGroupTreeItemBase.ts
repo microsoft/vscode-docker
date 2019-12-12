@@ -12,7 +12,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty
     public group: string;
     private _items: TItem[];
 
-    constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
+    public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);
         this.group = group;
         this._items = items;

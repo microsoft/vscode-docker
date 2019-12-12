@@ -27,7 +27,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
     /* eslint-disable-next-line no-invalid-this */
     public readonly onDidClose: Event<number> = this.closeEmitter.event;
 
-    constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
+    public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
 
     public open(initialDimensions: TerminalDimensions | undefined): void {
         const executeContext: DockerTaskExecutionContext = {

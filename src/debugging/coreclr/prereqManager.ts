@@ -19,7 +19,7 @@ export interface Prerequisite {
 export type ShowErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem | undefined>;
 
 export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly dockerClient: DockerClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
@@ -39,7 +39,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
 }
 
 export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly browserClient: BrowserClient,
         private readonly getExtension: (extensionId: string) => vscode.Extension<unknown> | undefined,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -73,7 +73,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 }
 
 export class DotNetSdkInstalledPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly dotNetClient: DotNetClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
@@ -96,7 +96,7 @@ type DockerSettings = {
 };
 
 export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly osProvider: OSProvider,
         private readonly processProvider: ProcessProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -122,7 +122,7 @@ export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
 }
 
 export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -160,7 +160,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
 }
 
 export class DockerfileExistsPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly fsProvider: FileSystemProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction,
         private readonly executeCommand: (command: string) => void) {
@@ -192,7 +192,7 @@ export class DockerfileExistsPrerequisite implements Prerequisite {
 export class AggregatePrerequisite implements Prerequisite {
     private readonly prerequisites: Prerequisite[];
 
-    constructor(...prerequisites: Prerequisite[]) {
+    public constructor(...prerequisites: Prerequisite[]) {
         this.prerequisites = prerequisites;
     }
 

@@ -6,7 +6,7 @@ export class Lazy<T> {
     private _isValueCreated: boolean = false;
     private _value: T | undefined;
 
-    constructor(private readonly valueFactory: () => T) {
+    public constructor(private readonly valueFactory: () => T) {
     }
 
     public get isValueCreated(): boolean {

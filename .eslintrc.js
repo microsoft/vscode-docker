@@ -25,10 +25,7 @@ module.exports = {
         "@typescript-eslint/explicit-member-accessibility": [
             "error",
             {
-                "accessibility": "explicit",
-                "overrides": {
-                    "constructors": "no-public"
-                }
+                "accessibility": "explicit"
             }
         ],
         "@typescript-eslint/indent": [
@@ -126,7 +123,6 @@ module.exports = {
             "error",
             "any",
             "number",
-            "String",
             "string",
             "Boolean",
             "boolean",
@@ -386,7 +382,8 @@ module.exports = {
                         "check-separator",
                         "check-type"
                     ]
-                }
+                },
+                "rulesDirectory": ["node_modules/tslint-microsoft-contrib"]
             }
         ]
     }

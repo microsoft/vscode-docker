@@ -57,7 +57,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     tag: getDefaultImageName(context.folder.name, 'dev'),
                     target: 'base',
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
-                    // tslint:disable-next-line: no-invalid-template-strings
+                    /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
                 },
                 netCore: {
@@ -71,7 +71,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name, 'latest'), // The 'latest' here is redundant but added to differentiate from above's 'dev'
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
-                    // tslint:disable-next-line: no-invalid-template-strings
+                    /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
                 },
                 netCore: {
@@ -116,10 +116,10 @@ export class NetCoreTaskHelper implements TaskHelper {
     public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NetCoreBuildTaskDefinition): Promise<DockerBuildOptions> {
         const buildOptions = buildDefinition.dockerBuild;
 
-        // tslint:disable: no-invalid-template-strings
+        /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
-        // tslint:enable: no-invalid-template-strings
+        /* eslint-enable no-template-curly-in-string */
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
 
         return buildOptions;
@@ -188,16 +188,15 @@ export class NetCoreTaskHelper implements TaskHelper {
             if (await fse.pathExists(launchSettingsPath)) {
                 const launchSettings = await fse.readJson(launchSettingsPath);
 
-                //tslint:disable:no-unsafe-any no-any
                 if (launchSettings && launchSettings.profiles) {
                     // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
+                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                     const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
 
                     if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
                         return true;
                     }
                 }
-                //tslint:enable:no-unsafe-any no-any
             }
         } catch { }
 

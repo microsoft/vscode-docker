@@ -15,7 +15,7 @@ export class DockerComposeHoverProvider implements HoverProvider {
     public _keyInfo: KeyInfo;
 
     // Provide the parser you want to use as well as keyinfo dictionary.
-    constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
+    public constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
         this._parser = wordParser;
         this._keyInfo = keyInfo;
     }
