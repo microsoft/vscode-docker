@@ -16,7 +16,7 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
     });
 
     const engineVersion = await ext.dockerode.version();
-    const drivers = engineVersion.Os === "windows"
+    const drivers = engineVersion.Os === 'windows'
         ? [
             { label: 'nat' },
             { label: 'transparent' }
