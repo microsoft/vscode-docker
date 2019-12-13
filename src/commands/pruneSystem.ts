@@ -14,10 +14,12 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
+    /* eslint-disable @typescript-eslint/promise-function-async */
     const containersResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneContainers());
     const imagesResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneImages());
     const networksResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneNetworks());
     const volumesResult = await wrapDockerodeENOENT(() => ext.dockerode.pruneVolumes());
+    /* eslint-enable @typescript-eslint/promise-function-async */
 
     const numContainers = (containersResult.ContainersDeleted || []).length;
     const numImages = (imagesResult.ImagesDeleted || []).length;

@@ -71,6 +71,7 @@ export async function getDockerOSType(): Promise<DockerOSType> {
         // so short-circuit the Docker call entirely.
         return "linux";
     } else {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const info = <{ OSType: DockerOSType }>await wrapDockerodeENOENT(() => ext.dockerode.info());
         return info.OSType;
     }

@@ -14,6 +14,7 @@ export async function pruneImages(_context: IActionContext): Promise<void> {
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     const result = await wrapDockerodeENOENT(() => ext.dockerode.pruneImages());
 
     const numDeleted = (result.ImagesDeleted || []).length;

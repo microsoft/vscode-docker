@@ -55,6 +55,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, context));
     }
 
@@ -96,6 +97,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         // Sort ports in ascending order...
         items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
 
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.

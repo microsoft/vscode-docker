@@ -351,6 +351,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     let folder: vscode.WorkspaceFolder;
     if (!rootFolderPath) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         folder = await captureConfigureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
         rootFolderPath = folder.uri.fsPath;
     }
@@ -404,6 +405,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
 
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         ports = await captureConfigureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
     }
 
