@@ -19,13 +19,11 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
     const drivers = engineVersion.Os === "windows"
         ? [
             { label: 'nat' },
-            { label: 'transparent' },
-            { label: 'overlay' }
+            { label: 'transparent' }
         ]
         : [
             { label: 'bridge' },
             { label: 'host' },
-            { label: 'overlay' },
             { label: 'macvlan' }
         ];
 
