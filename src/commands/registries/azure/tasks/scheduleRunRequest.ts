@@ -16,7 +16,7 @@ import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRe
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { getBlobInfo, streamLogs } from "../../../../utils/azureUtils";
 import { delay } from '../../../../utils/delay';
-import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quick-pick-file';
+import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 

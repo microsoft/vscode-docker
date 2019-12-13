@@ -2,6 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+/* eslint-disable unicorn/filename-case */
+
 import * as os from 'os';
 import * as path from 'path';
 import { pathNormalize } from '../../utils/pathNormalize';

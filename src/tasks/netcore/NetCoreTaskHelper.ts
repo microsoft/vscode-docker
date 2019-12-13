@@ -11,7 +11,7 @@ import { WorkspaceFolder } from 'vscode';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { PlatformOS } from '../../utils/platform';
-import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
@@ -37,6 +37,15 @@ export interface NetCoreRunTaskDefinition extends DockerRunTaskDefinitionBase {
 export interface NetCoreTaskScaffoldingOptions {
     appProject?: string;
     platformOS?: PlatformOS;
+}
+
+interface LaunchProfile {
+    applicationUrl?: string;
+    commandName?: string;
+}
+
+interface LaunchSettings {
+    profiles?: { [key: string]: LaunchProfile };
 }
 
 const UserSecretsRegex = /UserSecretsId/i;
@@ -186,12 +195,11 @@ export class NetCoreTaskHelper implements TaskHelper {
             const launchSettingsPath = path.join(path.dirname(helperOptions.appProject), 'Properties', 'launchSettings.json');
 
             if (await fse.pathExists(launchSettingsPath)) {
-                const launchSettings = await fse.readJson(launchSettingsPath);
+                const launchSettings = <LaunchSettings>await fse.readJson(launchSettingsPath);
 
                 if (launchSettings && launchSettings.profiles) {
                     // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
-                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                    const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
+                    const projectProfile = Object.values(launchSettings.profiles).find(p => p.commandName === 'Project');
 
                     if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
                         return true;

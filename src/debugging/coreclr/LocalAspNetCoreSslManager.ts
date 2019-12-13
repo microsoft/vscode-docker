@@ -8,7 +8,7 @@ import * as process from 'process';
 import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { PlatformOS } from '../../utils/platform';
-import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DotNetClient, TrustState } from './CommandLineDotNetClient';

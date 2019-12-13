@@ -133,7 +133,7 @@ module.exports = {
         "import/no-extraneous-dependencies": "error",
         "import/no-internal-modules": "off",
         "import/no-unassigned-import": "error",
-        "import/order": "error",
+        "import/order": "off",
         "linebreak-style": "off",
         "max-classes-per-file": [
             "off",
@@ -336,6 +336,7 @@ module.exports = {
                         "check-else",
                         "check-whitespace"
                     ],
+                    "ordered-imports": true, // CONSIDER: Switching to import/order
                     "possible-timing-attack": true,
                     "prefer-array-literal": true,
                     "prefer-method-signature": true,
