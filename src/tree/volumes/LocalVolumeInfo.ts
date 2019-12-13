@@ -13,8 +13,8 @@ type VolumeInspectInfoExt = VolumeInspectInfo & { CreatedAt: string };
  */
 export class LocalVolumeInfo implements ILocalItem {
     public data: VolumeInspectInfoExt;
-    public constructor(data: VolumeInspectInfoExt) {
-        this.data = data;
+    public constructor(data: VolumeInspectInfo) {
+        this.data = <VolumeInspectInfoExt>data;
     }
 
     public get createdTime(): number {
