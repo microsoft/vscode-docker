@@ -74,6 +74,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         await wizard.execute();
 
         // don't wait
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
         return new AzureRegistryTreeItem(this, nonNullProp(wizardContext, 'registry'));
     }

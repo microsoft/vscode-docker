@@ -20,5 +20,6 @@ export async function pruneVolumes(_context: IActionContext): Promise<void> {
     const mbReclaimed = convertToMB(result.SpaceReclaimed);
     let message = `Removed ${numDeleted} volumes(s) and reclaimed ${mbReclaimed}MB of space.`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(message);
 }

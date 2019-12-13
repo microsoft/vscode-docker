@@ -65,6 +65,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const createdNewWebApp: string = `Successfully created web app "${site.name}": https://${site.defaultHostName}`;
     ext.outputChannel.appendLine(createdNewWebApp);
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(createdNewWebApp);
 }
 

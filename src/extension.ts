@@ -126,7 +126,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerListeners(ctx);
 
         // Don't wait
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         nps(ctx.globalState);
     });
 }
@@ -140,7 +140,7 @@ function validateOldPublisher(activateContext: IActionContext): void {
         let message: string = 'Please reload Visual Studio Code to complete updating the Docker extension.';
         let reload: vscode.MessageItem = { title: 'Reload Now' };
         // Don't wait
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage(message, reload).then(async result => {
             if (result === reload) {
                 await vscode.commands.executeCommand('workbench.action.reloadWindow');
@@ -193,6 +193,7 @@ namespace Configuration {
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
         let serverModule = ext.context.asAbsolutePath(
@@ -240,7 +241,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             serverOptions,
             clientOptions
         );
-        // tslint:disable-next-line:no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         client.onReady().then(() => {
             // attach the VS Code settings listener
             Configuration.initialize(ctx);

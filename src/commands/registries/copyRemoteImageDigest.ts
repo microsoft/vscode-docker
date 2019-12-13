@@ -29,5 +29,6 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Dock
         });
     }
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.clipboard.writeText(digest);
 }

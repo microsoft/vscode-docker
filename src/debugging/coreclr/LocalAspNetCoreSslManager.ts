@@ -54,7 +54,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.';
 
             // Don't wait
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
@@ -68,7 +68,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.';
 
             // Don't wait
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' });

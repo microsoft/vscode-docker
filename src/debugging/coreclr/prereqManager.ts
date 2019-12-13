@@ -32,6 +32,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core debugging.')
 
         return false;
@@ -57,6 +58,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
                 title: 'View extension in gallery'
             };
 
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             this
                 .showErrorMessage(
                     'To debug .NET Core in Docker containers, install the C# extension for VS Code.',
@@ -85,6 +87,7 @@ export class DotNetSdkInstalledPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The .NET Core SDK must be installed to debug .NET Core applications running within Docker containers.');
 
         return false;
@@ -115,6 +118,7 @@ export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The current user is not a member of the "docker" group. Add it using the command "sudo usermod -a -G docker $USER".')
 
         return false;
@@ -153,6 +157,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage(`To debug .NET Core in Docker containers, add "${MacNuGetPackageFallbackFolderPath}" as a shared folder in your Docker preferences.`);
 
         return false;
@@ -175,6 +180,7 @@ export class DockerfileExistsPrerequisite implements Prerequisite {
             title: 'Add Docker files'
         };
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this
             .showErrorMessage(
                 'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?',

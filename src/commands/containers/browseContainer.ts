@@ -74,7 +74,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
 
     if (possiblePorts.length === 0) {
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
 
         return;
@@ -111,5 +111,6 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;
     const url = `${protocol}://${host}:${mappedPort.HostPort}`;
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
 }

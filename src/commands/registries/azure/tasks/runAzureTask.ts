@@ -19,5 +19,6 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     let run = await registryTI.client.registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
     await node.parent.refresh();
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(`Successfully scheduled run "${run.runId}" for task "${node.taskName}".`);
 }

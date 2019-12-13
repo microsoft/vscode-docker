@@ -18,5 +18,6 @@ export async function pruneNetworks(_context: IActionContext): Promise<void> {
     const numDeleted = (result.NetworksDeleted || []).length;
     let message = `Removed ${numDeleted} networks(s).`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(message);
 }

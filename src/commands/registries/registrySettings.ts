@@ -20,6 +20,7 @@ export async function setRegistryAsDefault(context: IActionContext, node?: Regis
 
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     await configOptions.update(configurationKeys.defaultRegistryPath, node.baseImagePath, vscode.ConfigurationTarget.Global);
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.window.showInformationMessage(`Updated setting "docker.defaultRegistryPath" to "${node.baseImagePath}".`);
 }
 
@@ -33,6 +34,7 @@ export async function consolidateDefaultRegistrySettings(): Promise<void> {
         let updatedPath = defaultRegistryPath ? `${defaultRegistry}/${defaultRegistryPath}` : `${defaultRegistry}`;
         await ext.context.workspaceState.update(hasCheckedRegistryPaths, true);
         await configOptions.update(configurationKeys.defaultRegistryPath, updatedPath, vscode.ConfigurationTarget.Global);
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         vscode.window.showInformationMessage(`The 'docker.defaultRegistry' setting is now obsolete, please use the 'docker.${configurationKeys.defaultRegistryPath}' setting by itself. Your settings have been updated to reflect this change.`)
     }
 }
@@ -58,6 +60,7 @@ export async function askToSaveRegistryPath(imagePath: string, promptForSave?: b
         }
         if (userPrefixPreference === DialogResponses.yes) {
             await configOptions.update(configurationKeys.defaultRegistryPath, prefix, vscode.ConfigurationTarget.Workspace);
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(`Default registry path saved to the 'docker.${configurationKeys.defaultRegistryPath}' setting.`);
         }
     }
