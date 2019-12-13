@@ -15,13 +15,20 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
         prompt: 'Name of the network'
     });
 
-    const driverSelection = await ext.ui.showQuickPick(
-        [
+    const engineVersion = await ext.dockerode.version();
+    const drivers = engineVersion.Os === 'windows'
+        ? [
+            { label: 'nat' },
+            { label: 'transparent' }
+        ]
+        : [
             { label: 'bridge' },
             { label: 'host' },
-            { label: 'overlay' },
             { label: 'macvlan' }
-        ],
+        ];
+
+    const driverSelection = await ext.ui.showQuickPick(
+        drivers,
         {
             canPickMany: false,
             placeHolder: 'Select the network driver to use (default is "bridge").'
