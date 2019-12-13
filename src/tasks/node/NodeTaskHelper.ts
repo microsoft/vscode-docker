@@ -44,6 +44,7 @@ export class NodeTaskHelper implements TaskHelper {
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     // tslint:disable-next-line: no-invalid-template-strings
                     context: '${workspaceFolder}',
+                    pull: true
                 }
             }
         ];
