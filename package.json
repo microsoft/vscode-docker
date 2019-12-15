@@ -217,14 +217,38 @@
                     "group": "navigation@8"
                 },
                 {
-                    "command": "vscode-docker.networks.configureExplorer",
-                    "when": "view == dockerNetworks",
-                    "group": "navigation@8"
-                },
-                {
                     "command": "vscode-docker.containers.refresh",
                     "when": "view == dockerContainers",
                     "group": "navigation@9"
+                },
+                {
+                    "command": "vscode-docker.containers.attachShell",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.containers.inspect",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.containers.remove",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.containers.restart",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.containers.stop",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.containers.viewLogs",
+                    "when": "view == dockerContainers"
+                },
+                {
+                    "command": "vscode-docker.networks.configureExplorer",
+                    "when": "view == dockerNetworks",
+                    "group": "navigation@8"
                 },
                 {
                     "command": "vscode-docker.networks.create",
@@ -255,6 +279,34 @@
                     "command": "vscode-docker.images.refresh",
                     "when": "view == dockerImages",
                     "group": "navigation@9"
+                },
+                {
+                    "command": "vscode-docker.images.build",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.inspect",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.push",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.remove",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.run",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.tag",
+                    "when": "view == dockerImages"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages"
                 },
                 {
                     "command": "vscode-docker.registries.refresh",
