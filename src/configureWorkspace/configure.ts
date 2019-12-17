@@ -16,7 +16,6 @@ import { captureCancelStep } from '../utils/captureCancelStep';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { globAsync } from '../utils/globAsync';
 import { Platform, PlatformOS } from '../utils/platform';
-import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { configureCpp } from './configureCpp';
 import { configureAspDotNetCore, configureDotNetCoreConsole } from './configureDotNetCore';
 import { configureGo } from './configureGo';
@@ -25,7 +24,8 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
+import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
+import { registerScaffolder, scaffold, Scaffolder, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
     npmStart: boolean; //has npm start
@@ -78,6 +78,42 @@ export function getExposeStatements(ports: number[]): string {
 export function getComposePorts(ports: number[]): string {
     return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
 }
+
+function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
+    return async context => {
+        let files = await configureCore(
+            context,
+            {
+                folder: context.folder,
+                os: context.os,
+                outputFolder: context.outputFolder,
+                platform: context.platform,
+                ports: context.ports,
+                rootPath: context.rootFolder,
+            });
+
+        const updatedFiles = files.map(
+            file => {
+                return {
+                    fileName: file.fileName,
+                    contents: file.contents,
+                    open: path.basename(file.fileName).toLowerCase() === 'dockerfile'
+                };
+            });
+
+        return updatedFiles;
+    };
+}
+
+registerScaffolder('ASP.NET Core', configureScaffolder(configureAspDotNetCore));
+registerScaffolder('C++', configureScaffolder(configureCpp));
+registerScaffolder('Go', configureScaffolder(configureGo));
+registerScaffolder('Java', configureScaffolder(configureJava));
+registerScaffolder('.NET Core Console', configureScaffolder(configureDotNetCoreConsole));
+registerScaffolder('Node.js', configureScaffolder(configureNode));
+registerScaffolder('Python', configureScaffolder(configurePython));
+registerScaffolder('Ruby', configureScaffolder(configureRuby));
+registerScaffolder('Other', configureScaffolder(configureOther));
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
 generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
@@ -319,6 +355,7 @@ export interface ConfigureApiOptions {
     /**
      * Output folder for the docker files. Relative paths in the Dockerfile we will calculated based on this folder
      */
+    // TODO: Deprecate this?
     outputFolder: string;
 
     /**
@@ -337,55 +374,46 @@ export interface ConfigureApiOptions {
     os?: PlatformOS;
 
     /**
-     * Open the Dockerfile that was generated
-     */
-    openDockerFile?: boolean;
-
-    /**
      * The workspace folder for configuring
      */
     folder?: vscode.WorkspaceFolder;
 }
 
 export async function configure(context: IActionContext, rootFolderPath: string | undefined): Promise<void> {
-    const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
-    let folder: vscode.WorkspaceFolder;
-    if (!rootFolderPath) {
-        folder = await captureConfigureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
-        rootFolderPath = folder.uri.fsPath;
-    }
+    const scaffoldContext = {
+        ...context,
+        rootFolder: rootFolderPath
+    };
 
-    let filesWritten = await configureCore(
-        context,
-        {
-            rootPath: rootFolderPath,
-            outputFolder: rootFolderPath,
-            openDockerFile: true,
-            folder: folder,
+    const files = await scaffold(scaffoldContext);
+
+    files.filter(file => file.open).forEach(
+        file => {
+            vscode.window.showTextDocument(vscode.Uri.file(file.fileName));
         });
-
-    // Open the dockerfile (if written)
-    try {
-        let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
-        if (dockerfile) {
-            await vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
-        }
-    } catch (err) {
-        // Ignore
-    }
 }
 
 export async function configureApi(context: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    await configureCore(context, options);
+    const scaffoldContext = {
+        ...context,
+        folder: options?.folder,
+        os: options?.os,
+        outputFolder: options?.outputFolder,
+        platform: options?.platform,
+        ports: options?.ports,
+        rootFolder: options?.rootPath,
+    };
+
+    await scaffold(scaffoldContext);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(context: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
+async function configureCore(context: IActionContext, options: ConfigureApiOptions): Promise<ScaffoldFile[]> {
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     const rootFolderPath: string = options.rootPath;
     const outputFolder = options.outputFolder;
 
-    const platformType: Platform = options.platform || await captureConfigureCancelStep('platform', properties, quickPickPlatform);
+    const platformType: Platform = options.platform;
     properties.configurePlatform = platformType;
     let generatorInfo = generatorsByPlatform.get(platformType);
 
@@ -455,7 +483,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
         packageInfo.artifactName = projFile;
     }
 
-    let filesWritten: string[] = [];
+    let filesWritten: ScaffoldFile[] = [];
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
         const dockerFileType = DOCKER_FILE_TYPES[fileName];
 
@@ -476,24 +504,10 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     return filesWritten;
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
-        const filePath = path.join(outputFolder, fileName);
-        let writeFile = false;
-        if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
-            if (response === YES_PROMPT) {
-                writeFile = true;
-            }
-        } else {
-            writeFile = true;
-        }
-
-        if (writeFile) {
-            // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
-            let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, ports, packageInfo);
-            if (fileContents) {
-                fse.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
-                filesWritten.push(filePath);
-            }
+        // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
+        let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, ports, packageInfo);
+        if (fileContents) {
+            filesWritten.push({ contents: fileContents, fileName });
         }
     }
 
