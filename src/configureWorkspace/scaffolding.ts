@@ -152,7 +152,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
     await Promise.all(
         files.map(
             async file => {
-                const filePath = path.join(folder.uri.fsPath, file.fileName);
+                const filePath = path.join(rootFolder, file.fileName);
 
                 if (await fse.pathExists(filePath) === false || await promptForOverwrite(file.fileName)) {
                     await fse.writeFile(filePath, file.contents, 'utf8');
