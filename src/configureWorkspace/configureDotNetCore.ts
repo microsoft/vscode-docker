@@ -4,16 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as vscode from 'vscode';
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
+import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
 
@@ -267,6 +272,29 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     return contents;
 }
 
+// Returns the relative path of the project file without the extension
+async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
+    const opt: vscode.QuickPickOptions = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select Project'
+    }
+
+    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
+
+    if (!projectFiles || !projectFiles.length) {
+        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
+    }
+
+    if (projectFiles.length > 1) {
+        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
+        let result = await ext.ui.showQuickPick(items, opt);
+        return result.label;
+    } else {
+        return projectFiles[0];
+    }
+}
+
 async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, { artifactName }: Partial<PackageInfo>): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
@@ -283,4 +311,29 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
     }
 
     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
+}
+
+export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
+    const os = context.os ?? await context.promptForOS();
+    const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
+
+    const files: ScaffoldFile[] = [];
+
+    files.push(await context.scaffoldDockerIgnoreFile(context));
+
+    const projFilePath = await findCSProjOrFSProjFile(context.rootFolder);
+    const serviceNameAndPathRelativeToRoot = projFilePath.slice(0, -(path.extname(projFilePath).length));
+    const projFileContents = (await fse.readFile(path.join(context.rootFolder, projFilePath))).toString();
+
+    // Extract TargetFramework for version
+    const [version] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+    const projFile = projFilePath;
+
+    const dockerFileContents = genDockerFile(serviceNameAndPathRelativeToRoot, context.platform, os, ports, { version, artifactName: projFile });
+
+    files.push({ fileName: 'dockerfile', contents: dockerFileContents, open: true });
+
+    await initializeForDebugging(context, context.folder, context.os, 'dockerfile', { artifactName: projFile });
+
+    return files;
 }

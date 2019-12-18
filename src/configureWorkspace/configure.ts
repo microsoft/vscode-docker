@@ -11,13 +11,10 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
 import { DockerOrchestration } from '../constants';
-import { ext } from '../extensionVariables';
 import { captureCancelStep } from '../utils/captureCancelStep';
-import { extractRegExGroups } from '../utils/extractRegExGroups';
-import { globAsync } from '../utils/globAsync';
 import { Platform, PlatformOS } from '../utils/platform';
 import { configureCpp } from './configureCpp';
-import { configureAspDotNetCore, configureDotNetCoreConsole } from './configureDotNetCore';
+import { scaffoldNetCore } from './configureDotNetCore';
 import { configureGo } from './configureGo';
 import { configureJava } from './configureJava';
 import { configureNode } from './configureNode';
@@ -105,22 +102,20 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
     };
 }
 
-registerScaffolder('ASP.NET Core', configureScaffolder(configureAspDotNetCore));
+registerScaffolder('ASP.NET Core', scaffoldNetCore);
 registerScaffolder('C++', configureScaffolder(configureCpp));
 registerScaffolder('Go', configureScaffolder(configureGo));
 registerScaffolder('Java', configureScaffolder(configureJava));
-registerScaffolder('.NET Core Console', configureScaffolder(configureDotNetCoreConsole));
+registerScaffolder('.NET Core Console', scaffoldNetCore);
 registerScaffolder('Node.js', configureScaffolder(configureNode));
 registerScaffolder('Python', configureScaffolder(configurePython));
 registerScaffolder('Ruby', configureScaffolder(configureRuby));
 registerScaffolder('Other', configureScaffolder(configureOther));
 
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
-generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
 generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
-generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
 generatorsByPlatform.set('Node.js', configureNode);
 generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
@@ -301,29 +296,6 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
     return { foundPath, packageInfo: pkg };
 }
 
-// Returns the relative path of the project file without the extension
-async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
-    const opt: vscode.QuickPickOptions = {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: 'Select Project'
-    }
-
-    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
-
-    if (!projectFiles || !projectFiles.length) {
-        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
-    }
-
-    if (projectFiles.length > 1) {
-        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
-        let result = await ext.ui.showQuickPick(items, opt);
-        return result.label;
-    } else {
-        return projectFiles[0];
-    }
-}
-
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
 type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo) => Promise<void>;
 
@@ -333,18 +305,6 @@ const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComp
     'Dockerfile': { generator: genDockerFile },
     '.dockerignore': { generator: genDockerIgnoreFile }
 };
-
-const YES_PROMPT: vscode.MessageItem = {
-    title: "Yes",
-    isCloseAffordance: false
-};
-const YES_OR_NO_PROMPTS: vscode.MessageItem[] = [
-    YES_PROMPT,
-    {
-        title: "No",
-        isCloseAffordance: true
-    }
-];
 
 export interface ConfigureApiOptions {
     /**
@@ -389,7 +349,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
 
     files.filter(file => file.open).forEach(
         file => {
-            vscode.window.showTextDocument(vscode.Uri.file(file.fileName));
+            vscode.window.showTextDocument(vscode.Uri.file(file.filePath));
         });
 }
 
@@ -441,20 +401,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     {
         // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
-        if (platformType.toLowerCase().includes('.net')) {
-            let projFilePath = await findCSProjOrFSProjFile(rootFolderPath);
-            serviceNameAndPathRelativeToRoot = projFilePath.slice(0, -(path.extname(projFilePath).length));
-            let projFileContents = (await fse.readFile(path.join(rootFolderPath, projFilePath))).toString();
-
-            // Extract TargetFramework for version
-            [targetFramework] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
-            projFile = projFilePath;
-
-            properties.packageFileType = projFilePath.endsWith('.csproj') ? '.csproj' : '.fsproj';
-            properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
-        } else {
-            serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
-        }
+        serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
 
         // We need paths in the Dockerfile to be relative to the output folder, not the root
         serviceNameAndPathRelativeToOutput = path.relative(outputFolder, path.join(rootFolderPath, serviceNameAndPathRelativeToRoot));
