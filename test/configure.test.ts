@@ -9,10 +9,11 @@ import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Suite } from 'mocha';
-import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension.bundle';
+import { PlatformOS, Platform, ext, configure, ConfigureApiOptions, globAsync } from '../extension.bundle';
 import { IActionContext, TelemetryProperties, IAzExtOutputChannel, createAzExtOutputChannel } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
 import { TestInput } from 'vscode-azureextensiondev';
+import { ConfigureTelemetryProperties } from '../src/configureWorkspace/configUtils';
 
 // Can be useful for testing
 const outputAllGeneratedFileContents = false;

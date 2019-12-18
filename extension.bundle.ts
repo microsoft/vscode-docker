@@ -17,7 +17,7 @@ export { activateInternal } from './src/extension';
 //
 // The tests should import '../extension.bundle.ts'. At design-time they live in tests/ and so will pick up this file (extension.bundle.ts).
 // At runtime the tests live in dist/tests and will therefore pick up the main webpack bundle at dist/extension.bundle.js.
-export { configure, ConfigureApiOptions, ConfigureTelemetryProperties } from './src/configureWorkspace/configure';
+export { configure, ConfigureApiOptions } from './src/configureWorkspace/configure';
 export { configPrefix } from './src/constants';
 export { ProcessProvider } from './src/debugging/coreclr/ChildProcessProvider';
 export { DockerBuildImageOptions, DockerClient } from './src/debugging/coreclr/CliDockerClient';

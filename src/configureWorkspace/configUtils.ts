@@ -4,9 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, TelemetryProperties } from 'vscode-azureextensionui';
+import { DockerOrchestration } from '../constants';
 import { ext } from "../extensionVariables";
+import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from '../utils/platform';
+
+export type ConfigureTelemetryProperties = {
+    configurePlatform?: Platform;
+    configureOs?: PlatformOS;
+    orchestration?: DockerOrchestration;
+    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
+    packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
+};
+
+export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port';
+
+export async function captureConfigureCancelStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: TPrompt): Promise<TReturn> {
+    return await captureCancelStep(cancelStep, properties, prompt)();
+}
 
 /**
  * Prompts for port numbers

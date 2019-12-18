@@ -3,9 +3,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem, } from "vscode-azureextensionui";
 import { ext } from "../extensionVariables";
+import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from "../utils/platform";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { promptForPorts as promptForPortsUtil, quickPickOS } from './configUtils';
+import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPorts as promptForPortsUtil, quickPickOS } from './configUtils';
 
 export interface ScaffoldContext extends IActionContext {
     folder?: vscode.WorkspaceFolder;
@@ -17,6 +18,7 @@ export interface ScaffoldContext extends IActionContext {
 }
 
 export interface ScaffolderContext extends ScaffoldContext {
+    captureStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(step: ConfigureTelemetryCancelStep, prompt: TPrompt): TPrompt;
     folder: vscode.WorkspaceFolder;
     outputFolder: string;
     platform: Platform;
@@ -126,23 +128,35 @@ export function registerScaffolder(platform: Platform, scaffolder: Scaffolder): 
 }
 
 export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile[]> {
-    const folder = context.folder ?? await promptForFolder();
+    function captureStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(step: ConfigureTelemetryCancelStep, prompt: TPrompt): TPrompt {
+        return captureCancelStep(step, context.telemetry.properties, prompt);
+    }
+
+    const folder = context.folder ?? await captureStep('folder', promptForFolder)();
     const rootFolder = context.rootFolder ?? folder.uri.fsPath;
     const outputFolder = context.outputFolder ?? rootFolder;
-    const platform = context.platform ?? await promptForPlatform();
+    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+
+    const platform = context.platform ?? await captureStep('platform', promptForPlatform)();
+
+    telemetryProperties.configurePlatform = platform;
+
     const scaffolder = scaffolders.get(platform);
 
     if (!scaffolder) {
         throw new Error(`No scaffolder is registered for platform '${context.platform}'.`);
     }
 
+    telemetryProperties.orchestration = 'docker-compose';
+
     const files = await scaffolder({
         ...context,
+        captureStep,
         folder,
         outputFolder,
         platform,
-        promptForOS,
-        promptForPorts,
+        promptForOS: captureStep('os', promptForOS),
+        promptForPorts: captureStep('port', promptForPorts),
         rootFolder,
         scaffoldDockerIgnoreFile
     });

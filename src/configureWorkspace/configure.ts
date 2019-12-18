@@ -11,7 +11,6 @@ import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
 import { DockerOrchestration } from '../constants';
-import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from '../utils/platform';
 import { configureCpp } from './configureCpp';
 import { scaffoldNetCore } from './configureDotNetCore';
@@ -21,7 +20,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
+import { captureConfigureCancelStep, ConfigureTelemetryProperties, promptForPorts, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
@@ -46,19 +45,6 @@ interface PomXmlContents {
         artifactid?: string;
     };
 }
-
-type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port';
-
-async function captureConfigureCancelStep<T>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    return await captureCancelStep(cancelStep, properties, prompt)
-}
-
-export type ConfigureTelemetryProperties = {
-    configurePlatform?: Platform;
-    configureOs?: PlatformOS;
-    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
-    packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
-};
 
 export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
