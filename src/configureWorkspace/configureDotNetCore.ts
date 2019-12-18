@@ -308,6 +308,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     files.push(await context.scaffoldDockerIgnoreFile(context));
 
     const rootRelativeProjectFileName = await findCSProjOrFSProjFile(context.rootFolder);
+    const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
 
     const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);
     const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
@@ -320,7 +321,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     const dockerFileContents = genDockerFile(serviceNameAndPathRelativeToRoot, context.platform, os, ports, version, workspaceRelativeProjectFileName);
 
-    const rootRelativeDockerfileName = 'Dockerfile';
+    const rootRelativeDockerfileName = path.posix.join(rootRelativeProjectDirectory, 'Dockerfile');
     const dockerfilePath = path.posix.join(context.rootFolder, rootRelativeDockerfileName);
     const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerfilePath);
 
