@@ -147,7 +147,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         throw new Error(`No scaffolder is registered for platform '${context.platform}'.`);
     }
 
-    telemetryProperties.orchestration = 'docker-compose';
+    telemetryProperties.orchestration = 'single';
 
     const files = await scaffolder({
         ...context,

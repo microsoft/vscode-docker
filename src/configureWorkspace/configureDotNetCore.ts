@@ -257,7 +257,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 }
 
 // Returns the relative path of the project file without the extension
-async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
+async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
@@ -307,7 +307,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     files.push(await context.scaffoldDockerIgnoreFile(context));
 
-    const rootRelativeProjectFileName = await findCSProjOrFSProjFile(context.rootFolder);
+    const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
 
     const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);

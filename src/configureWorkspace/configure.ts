@@ -10,7 +10,6 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
-import { DockerOrchestration } from '../constants';
 import { Platform, PlatformOS } from '../utils/platform';
 import { configureCpp } from './configureCpp';
 import { scaffoldNetCore } from './configureDotNetCore';
@@ -20,8 +19,8 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { captureConfigureCancelStep, ConfigureTelemetryProperties, promptForPorts, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
-import { registerScaffolder, scaffold, Scaffolder, ScaffoldFile } from './scaffolding';
+import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles } from './configUtils';
+import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
     npmStart: boolean; //has npm start
@@ -354,31 +353,28 @@ export async function configureApi(context: IActionContext, options: ConfigureAp
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(context: IActionContext, options: ConfigureApiOptions): Promise<ScaffoldFile[]> {
+async function configureCore(context: ScaffolderContext, options: ConfigureApiOptions): Promise<ScaffoldFile[]> {
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     const rootFolderPath: string = options.rootPath;
     const outputFolder = options.outputFolder;
 
     const platformType: Platform = options.platform;
-    properties.configurePlatform = platformType;
     let generatorInfo = generatorsByPlatform.get(platformType);
 
     let os: PlatformOS | undefined = options.os;
-    if (!os && platformType.toLowerCase().includes('.net')) {
-        os = await captureConfigureCancelStep('os', properties, quickPickOS);
-    }
-    properties.configureOs = os;
-    properties.orchestration = 'single' as DockerOrchestration;
 
     let generateComposeFiles = true;
 
     if (platformType === 'Node.js') {
-        generateComposeFiles = await captureConfigureCancelStep('compose', properties, quickPickGenerateComposeFiles);
+        generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
+        if (generateComposeFiles) {
+            properties.orchestration = 'docker-compose';
+        }
     }
 
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
-        ports = await captureConfigureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
+        ports = await context.promptForPorts(generatorInfo.defaultPorts);
     }
 
     let targetFramework: string;
@@ -421,7 +417,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
         const dockerFileType = DOCKER_FILE_TYPES[fileName];
 
         if (dockerFileType.isComposeGenerator && generateComposeFiles) {
-            properties.orchestration = 'docker-compose' as DockerOrchestration;
+            properties.orchestration = 'docker-compose';
         }
 
         return dockerFileType.isComposeGenerator !== true || generateComposeFiles
