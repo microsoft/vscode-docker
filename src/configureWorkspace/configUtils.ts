@@ -134,3 +134,34 @@ export function getSubfolderDepth(outputFolder: string, filePath: string): strin
     let depth: number = matches ? matches.length : 0;
     return String(depth);
 }
+
+export function genCommonDockerIgnoreFile(platformType: Platform): string {
+    const ignoredItems = [
+        '**/.classpath',
+        '**/.dockerignore',
+        '**/.env',
+        '**/.git',
+        '**/.gitignore',
+        '**/.project',
+        '**/.settings',
+        '**/.toolstarget',
+        '**/.vs',
+        '**/.vscode',
+        '**/*.*proj.user',
+        '**/*.dbmdl',
+        '**/*.jfm',
+        '**/azds.yaml',
+        platformType !== 'Node.js' ? '**/bin' : undefined,
+        '**/charts',
+        '**/docker-compose*',
+        '**/Dockerfile*',
+        '**/node_modules',
+        '**/npm-debug.log',
+        '**/obj',
+        '**/secrets.dev.yaml',
+        '**/values.dev.yaml',
+        'README.md'
+    ];
+
+    return ignoredItems.filter(item => item !== undefined).join('\n');
+}

@@ -19,7 +19,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles, getSubfolderDepth } from './configUtils';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth, quickPickGenerateComposeFiles } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
@@ -87,11 +87,11 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
     };
 }
 
+registerScaffolder('.NET Core Console', scaffoldNetCore);
 registerScaffolder('ASP.NET Core', scaffoldNetCore);
 registerScaffolder('C++', configureScaffolder(configureCpp));
 registerScaffolder('Go', configureScaffolder(configureGo));
 registerScaffolder('Java', configureScaffolder(configureJava));
-registerScaffolder('.NET Core Console', scaffoldNetCore);
 registerScaffolder('Node.js', configureScaffolder(configureNode));
 registerScaffolder('Python', configureScaffolder(configurePython));
 registerScaffolder('Ruby', configureScaffolder(configureRuby));
@@ -138,34 +138,7 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
 }
 
 function genDockerIgnoreFile(service: string, platformType: Platform, os: string, ports: number[]): string {
-    const ignoredItems = [
-        '**/.classpath',
-        '**/.dockerignore',
-        '**/.env',
-        '**/.git',
-        '**/.gitignore',
-        '**/.project',
-        '**/.settings',
-        '**/.toolstarget',
-        '**/.vs',
-        '**/.vscode',
-        '**/*.*proj.user',
-        '**/*.dbmdl',
-        '**/*.jfm',
-        '**/azds.yaml',
-        platformType !== 'Node.js' ? '**/bin' : undefined,
-        '**/charts',
-        '**/docker-compose*',
-        '**/Dockerfile*',
-        '**/node_modules',
-        '**/npm-debug.log',
-        '**/obj',
-        '**/secrets.dev.yaml',
-        '**/values.dev.yaml',
-        'README.md'
-    ];
-
-    return ignoredItems.filter(item => item !== undefined).join('\n');
+    return genCommonDockerIgnoreFile(platformType);
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {

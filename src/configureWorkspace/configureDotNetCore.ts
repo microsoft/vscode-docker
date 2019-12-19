@@ -18,7 +18,7 @@ import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements } from './configure';
-import { ConfigureTelemetryProperties, getSubfolderDepth } from './configUtils';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
@@ -328,7 +328,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     const files: ScaffoldFile[] = [
         { fileName: rootRelativeDockerfileName, contents: dockerFileContents, open: true },
-        await context.scaffoldDockerIgnoreFile(context)
+        { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) }
     ];
 
     await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);

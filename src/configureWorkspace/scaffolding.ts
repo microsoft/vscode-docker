@@ -25,7 +25,6 @@ export interface ScaffolderContext extends ScaffoldContext {
     promptForOS(): Promise<PlatformOS>;
     promptForPorts(defaultPorts?: number[]): Promise<number[]>;
     rootFolder: string;
-    scaffoldDockerIgnoreFile(context: ScaffolderContext): Promise<ScaffoldFile>;
 }
 
 export type ScaffoldedFile = {
@@ -69,44 +68,6 @@ async function promptForOverwrite(fileName: string): Promise<boolean> {
 
 async function promptForPorts(defaultPorts?: number[]): Promise<number[]> {
     return await promptForPortsUtil(defaultPorts);
-}
-
-// tslint:disable-next-line: promise-function-async
-function scaffoldDockerIgnoreFile(context: ScaffolderContext): Promise<ScaffoldFile> {
-    const ignoredItems = [
-        '**/.classpath',
-        '**/.dockerignore',
-        '**/.env',
-        '**/.git',
-        '**/.gitignore',
-        '**/.project',
-        '**/.settings',
-        '**/.toolstarget',
-        '**/.vs',
-        '**/.vscode',
-        '**/*.*proj.user',
-        '**/*.dbmdl',
-        '**/*.jfm',
-        '**/azds.yaml',
-        context.platform !== 'Node.js' ? '**/bin' : undefined,
-        '**/charts',
-        '**/docker-compose*',
-        '**/Dockerfile*',
-        '**/node_modules',
-        '**/npm-debug.log',
-        '**/obj',
-        '**/secrets.dev.yaml',
-        '**/values.dev.yaml',
-        'README.md'
-    ];
-
-    const contents = ignoredItems.filter(item => item !== undefined).join('\n');
-
-    return Promise.resolve(
-        {
-            contents,
-            fileName: '.dockerignore'
-        });
 }
 
 const scaffolders: Map<Platform, Scaffolder> = new Map<Platform, Scaffolder>();
@@ -157,8 +118,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         platform,
         promptForOS: captureStep('os', promptForOS),
         promptForPorts: captureStep('port', promptForPorts),
-        rootFolder,
-        scaffoldDockerIgnoreFile
+        rootFolder
     });
 
     const writtenFiles: ScaffoldedFile[] = [];
