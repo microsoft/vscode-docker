@@ -18,6 +18,7 @@ import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getExposeStatements } from './configure';
+import { ConfigureTelemetryProperties, getSubfolderDepth } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
@@ -303,12 +304,12 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const os = context.os ?? await context.promptForOS();
     const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
-    const files: ScaffoldFile[] = [];
-
-    files.push(await context.scaffoldDockerIgnoreFile(context));
-
     const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
+
+    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+    telemetryProperties.packageFileType = path.extname(rootRelativeProjectFileName);
+    telemetryProperties.packageFileSubfolderDepth = getSubfolderDepth(context.rootFolder, rootRelativeProjectFileName);
 
     const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);
     const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
@@ -325,7 +326,10 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const dockerfilePath = path.posix.join(context.rootFolder, rootRelativeDockerfileName);
     const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerfilePath);
 
-    files.push({ fileName: rootRelativeDockerfileName, contents: dockerFileContents, open: true });
+    const files: ScaffoldFile[] = [
+        { fileName: rootRelativeDockerfileName, contents: dockerFileContents, open: true },
+        await context.scaffoldDockerIgnoreFile(context)
+    ];
 
     await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
 

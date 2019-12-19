@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import vscode = require('vscode');
 import { IAzureQuickPickItem, TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
@@ -125,4 +126,11 @@ export async function quickPickGenerateComposeFiles(): Promise<boolean> {
         opt);
 
     return response.data;
+}
+
+export function getSubfolderDepth(outputFolder: string, filePath: string): string {
+    let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
+    let matches = relativeToRoot.match(/[\/\\]/g);
+    let depth: number = matches ? matches.length : 0;
+    return String(depth);
 }

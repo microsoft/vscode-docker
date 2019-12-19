@@ -19,7 +19,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles } from './configUtils';
+import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles, getSubfolderDepth } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
@@ -396,14 +396,14 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
         ({ packageInfo, foundPath: foundPomOrGradlePath } = await readPomOrGradle(rootFolderPath));
         if (foundPomOrGradlePath) {
             properties.packageFileType = path.basename(foundPomOrGradlePath);
-            properties.packageFileSubfolderDepth = getSubfolderDepth(foundPomOrGradlePath);
+            properties.packageFileSubfolderDepth = getSubfolderDepth(outputFolder, foundPomOrGradlePath);
         }
     } else {
         let packagePath: string | undefined;
         ({ packagePath, packageInfo } = await readPackageJson(rootFolderPath));
         if (packagePath) {
             properties.packageFileType = 'package.json';
-            properties.packageFileSubfolderDepth = getSubfolderDepth(packagePath);
+            properties.packageFileSubfolderDepth = getSubfolderDepth(outputFolder, packagePath);
         }
     }
 
@@ -438,12 +438,5 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
         if (fileContents) {
             filesWritten.push({ contents: fileContents, fileName });
         }
-    }
-
-    function getSubfolderDepth(filePath: string): string {
-        let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
-        let matches = relativeToRoot.match(/[\/\\]/g);
-        let depth: number = matches ? matches.length : 0;
-        return String(depth);
     }
 }
