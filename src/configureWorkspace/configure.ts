@@ -344,6 +344,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
     let generatorInfo = generatorsByPlatform.get(platformType);
 
     let os: PlatformOS | undefined = options.os;
+    properties.configureOs = os;
 
     let generateComposeFiles = true;
 

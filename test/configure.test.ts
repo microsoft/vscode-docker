@@ -656,13 +656,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileSubfolderDepth: '1'
                 },
                 ['Windows', 'projectFolder2/aspnetapp.csproj'],
-                ['projectFolder1/Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
+                ['projectFolder2/Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
             );
 
-            assertFileContains('projectFolder1/Dockerfile', 'projectFolder1');
-            assertFileContains('projectFolder1/Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
-            assertFileContains('projectFolder1/Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
-            assertFileContains('projectFolder1/Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
+            assertFileContains('projectFolder2/Dockerfile', 'projectFolder1');
+            assertFileContains('projectFolder2/Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
+            assertFileContains('projectFolder2/Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
+            assertFileContains('projectFolder2/Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
         });
     });
 

@@ -302,12 +302,16 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
     const os = context.os ?? await context.promptForOS();
+
+    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+
+    telemetryProperties.configureOs = os;
+
     const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
     const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
 
-    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
     telemetryProperties.packageFileType = path.extname(rootRelativeProjectFileName);
     telemetryProperties.packageFileSubfolderDepth = getSubfolderDepth(context.rootFolder, rootRelativeProjectFileName);
 
