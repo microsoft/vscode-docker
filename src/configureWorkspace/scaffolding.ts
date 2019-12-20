@@ -15,6 +15,7 @@ import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPo
 
 export interface ScaffoldContext extends IActionContext {
     folder?: vscode.WorkspaceFolder;
+    initializeForDebugging?: boolean;
     os?: PlatformOS;
     outputFolder?: string;
     platform?: Platform;
@@ -25,6 +26,7 @@ export interface ScaffoldContext extends IActionContext {
 export interface ScaffolderContext extends ScaffoldContext {
     captureStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(step: ConfigureTelemetryCancelStep, prompt: TPrompt): TPrompt;
     folder: vscode.WorkspaceFolder;
+    initializeForDebugging: boolean;
     outputFolder: string;
     platform: Platform;
     promptForOS(): Promise<PlatformOS>;
@@ -119,6 +121,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         ...context,
         captureStep,
         folder,
+        initializeForDebugging: context.initializeForDebugging === undefined || context.initializeForDebugging,
         outputFolder,
         platform,
         promptForOS: captureStep('os', promptForOS),

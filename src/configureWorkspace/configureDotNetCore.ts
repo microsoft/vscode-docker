@@ -331,7 +331,9 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
         { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) }
     ];
 
-    await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
+    if (context.initializeForDebugging) {
+        await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
+    }
 
     return files;
 }

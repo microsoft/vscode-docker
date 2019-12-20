@@ -266,6 +266,11 @@ const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComp
 
 export interface ConfigureApiOptions {
     /**
+     * Determines whether to add debugging tasks/configuration during scaffolding.
+     */
+    initializeForDebugging?: boolean;
+
+    /**
      * Root folder from which to search for .csproj, package.json, .pom or .gradle files
      */
     rootPath: string;
@@ -300,6 +305,9 @@ export interface ConfigureApiOptions {
 export async function configure(context: IActionContext, rootFolderPath: string | undefined): Promise<void> {
     const scaffoldContext = {
         ...context,
+        // NOTE: Currently only tests use rootFolderPath and they do not function when debug tasks/configuration are added.
+        // TODO: Refactor tests to allow for (and verify) debug tasks/configuration.
+        initializeForDebugging: rootFolderPath === undefined,
         rootFolder: rootFolderPath
     };
 
@@ -315,6 +323,7 @@ export async function configureApi(context: IActionContext, options: ConfigureAp
     const scaffoldContext = {
         ...context,
         folder: options?.folder,
+        initializeForDebugging: options?.initializeForDebugging,
         os: options?.os,
         outputFolder: options?.outputFolder,
         platform: options?.platform,
@@ -399,7 +408,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
     }));
 
     // Can only configure for debugging if there's a workspace folder, and there's a scaffold function
-    if (options.folder && generatorInfo.initializeForDebugging) {
+    if (options.folder && context.initializeForDebugging && generatorInfo.initializeForDebugging) {
         await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo);
     }
 

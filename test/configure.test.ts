@@ -67,7 +67,14 @@ async function readFile(pathRelativeToTestRootFolder: string): Promise<string> {
 
 async function testConfigureDockerViaApi(options: ConfigureApiOptions, inputs: (string | TestInput)[] = [], expectedOutputFiles?: string[]): Promise<void> {
     await testUserInput.runWithInputs(inputs, async () => {
-        await vscode.commands.executeCommand('vscode-docker.api.configure', options);
+        await vscode.commands.executeCommand(
+            'vscode-docker.api.configure',
+            {
+                // NOTE: Currently the tests do not comprehend adding debug tasks/configuration.
+                // TODO: Refactor tests to do so (and verify results).
+                initializeForDebugging: false,
+                ...options
+            });
     });
 
     if (expectedOutputFiles) {
