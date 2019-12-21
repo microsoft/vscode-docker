@@ -62,6 +62,7 @@
         "onCommand:vscode-docker.images.runAzureCli",
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
+        "onCommand:vscode-docker.images.copyFullTag",
         "onCommand:vscode-docker.networks.configureExplorer",
         "onCommand:vscode-docker.networks.create",
         "onCommand:vscode-docker.networks.inspect",
@@ -346,6 +347,11 @@
                     "command": "vscode-docker.images.tag",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@4"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -1701,6 +1707,11 @@
             {
                 "command": "vscode-docker.images.tag",
                 "title": "Tag...",
+                "category": "Docker Images"
+            },
+            {
+                "command": "vscode-docker.images.copyFullTag",
+                "title": "Copy Full Tag",
                 "category": "Docker Images"
             },
             {

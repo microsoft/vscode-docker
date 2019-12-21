@@ -68,6 +68,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
+                    pull: true
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
@@ -82,6 +83,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
+                    pull: true
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
