@@ -318,24 +318,38 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);
     const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
 
-    const serviceNameAndPathRelativeToRoot = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
+    let serviceNameAndPathRelative = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
     const projFileContents = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
 
     // Extract TargetFramework for version
     const [version] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
 
-    const dockerFileContents = genDockerFile(serviceNameAndPathRelativeToRoot, context.platform, os, ports, version, workspaceRelativeProjectFileName);
+    if (context.outputFolder) {
+        // We need paths in the Dockerfile to be relative to the output folder, not the root
+        serviceNameAndPathRelative = path.relative(context.outputFolder, path.join(context.rootFolder, serviceNameAndPathRelative));
+    }
 
-    const rootRelativeDockerfileName = path.posix.join(rootRelativeProjectDirectory, 'Dockerfile');
-    const dockerfilePath = path.posix.join(context.rootFolder, rootRelativeDockerfileName);
-    const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerfilePath);
+    serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
+
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName);
+
+    // Remove multiple empty lines with single empty lines, as might be produced
+    // if $expose_statements$ or another template variable is an empty string
+    dockerFileContents = dockerFileContents.replace(/(\r\n){3,4}/g, "\r\n\r\n")
+            .replace(/(\n){3,4}/g, "\n\n");
+
+    const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
+    const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
 
     const files: ScaffoldFile[] = [
-        { fileName: rootRelativeDockerfileName, contents: dockerFileContents, open: true },
-        { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) }
+        { fileName: dockerFileName, contents: dockerFileContents, open: true },
+        { fileName: dockerIgnoreFileName, contents: genCommonDockerIgnoreFile(context.platform) }
     ];
 
     if (context.initializeForDebugging) {
+        const dockerFilePath = path.resolve(context.rootFolder, dockerFileName);
+        const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerFilePath);
+
         await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
     }
 

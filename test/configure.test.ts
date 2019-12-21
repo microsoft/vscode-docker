@@ -659,7 +659,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 ['projectFolder2/Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
             );
 
-            assertFileContains('projectFolder2/Dockerfile', 'projectFolder1');
+            assertFileContains('projectFolder2/Dockerfile', 'projectFolder2');
             assertFileContains('projectFolder2/Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
             assertFileContains('projectFolder2/Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
             assertFileContains('projectFolder2/Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
@@ -699,7 +699,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('ConsoleApp1Folder/Dockerfile', 'EXPOSE');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -731,7 +731,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('ConsoleApp1Folder/Dockerfile', 'EXPOSE');
         });
     });
 
@@ -768,7 +768,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
         });
 
         testInEmptyFolder("Linux", async () => {

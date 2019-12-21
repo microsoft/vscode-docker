@@ -27,7 +27,6 @@ export interface ScaffolderContext extends ScaffoldContext {
     captureStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(step: ConfigureTelemetryCancelStep, prompt: TPrompt): TPrompt;
     folder: vscode.WorkspaceFolder;
     initializeForDebugging: boolean;
-    outputFolder: string;
     platform: Platform;
     promptForOS(): Promise<PlatformOS>;
     promptForPorts(defaultPorts?: number[]): Promise<number[]>;
@@ -102,7 +101,6 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
 
     const folder = context.folder ?? await captureStep('folder', promptForFolder)();
     const rootFolder = context.rootFolder ?? folder.uri.fsPath;
-    const outputFolder = context.outputFolder ?? rootFolder;
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
 
     const platform = context.platform ?? await captureStep('platform', promptForPlatform)();
@@ -122,7 +120,6 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         captureStep,
         folder,
         initializeForDebugging: context.initializeForDebugging === undefined || context.initializeForDebugging,
-        outputFolder,
         platform,
         promptForOS: captureStep('os', promptForOS),
         promptForPorts: captureStep('port', promptForPorts),
@@ -134,7 +131,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
     await Promise.all(
         files.map(
             async file => {
-                const filePath = path.join(rootFolder, file.fileName);
+                const filePath = path.resolve(rootFolder, file.fileName);
 
                 if (await fse.pathExists(filePath) === false || await promptForOverwrite(file.fileName)) {
                     await fse.writeFile(filePath, file.contents, 'utf8');

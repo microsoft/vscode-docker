@@ -278,8 +278,7 @@ export interface ConfigureApiOptions {
     /**
      * Output folder for the docker files. Relative paths in the Dockerfile we will calculated based on this folder
      */
-    // TODO: Deprecate this?
-    outputFolder: string;
+    outputFolder?: string;
 
     /**
      * Platform
@@ -338,7 +337,7 @@ export async function configureApi(context: IActionContext, options: ConfigureAp
 async function configureCore(context: ScaffolderContext, options: ConfigureApiOptions): Promise<ScaffoldFile[]> {
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     const rootFolderPath: string = options.rootPath;
-    const outputFolder = options.outputFolder;
+    const outputFolder = options.outputFolder ?? rootFolderPath;
 
     const platformType: Platform = options.platform;
     let generatorInfo = generatorsByPlatform.get(platformType);
