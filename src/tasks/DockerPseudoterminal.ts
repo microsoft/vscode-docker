@@ -22,10 +22,12 @@ export class DockerPseudoterminal implements Pseudoterminal {
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
 
+    /* eslint-disable-next-line no-invalid-this */
     public readonly onDidWrite: Event<string> = this.writeEmitter.event;
+    /* eslint-disable-next-line no-invalid-this */
     public readonly onDidClose: Event<number> = this.closeEmitter.event;
 
-    constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
+    public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
 
     public open(initialDimensions: TerminalDimensions | undefined): void {
         const folder = this.task.scope === TaskScope.Workspace
@@ -40,7 +42,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
     }
 

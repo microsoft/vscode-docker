@@ -55,6 +55,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, context));
     }
 
@@ -63,18 +64,18 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
         Object.keys(ports)
-              .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
-              // Exclude port designations we cannot recognize...
-              .filter(port => port.containerPort !== undefined)
-              // Exclude ports that are non-TCP-based (which should be the default)...
-              .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
-              // Exclude ports not mapped to the host...
-              .filter(port => port.mappings && port.mappings.length > 0);
+            .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
+            // Exclude port designations we cannot recognize...
+            .filter(port => port.containerPort !== undefined)
+            // Exclude ports that are non-TCP-based (which should be the default)...
+            .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
+            // Exclude ports not mapped to the host...
+            .filter(port => port.mappings && port.mappings.length > 0);
 
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
 
     if (possiblePorts.length === 0) {
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
 
         return;
@@ -96,6 +97,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         // Sort ports in ascending order...
         items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
 
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
@@ -111,5 +113,6 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;
     const url = `${protocol}://${host}:${mappedPort.HostPort}`;
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
 }

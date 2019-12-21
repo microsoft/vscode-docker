@@ -70,9 +70,9 @@ function formatVersion(format: string, version: string, tagForWindowsVersion: st
         .replace('{2}', tagForWindowsVersion);
 }
 
-//#region ASP.NET Core templates
+// #region ASP.NET Core templates
 
-//AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
@@ -119,9 +119,9 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-//#endregion
+// #endregion
 
-//#region .NET Core Console templates
+// #region .NET Core Console templates
 
 // AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
@@ -170,7 +170,7 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-//#endregion
+// #endregion
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], { version, artifactName }: Partial<PackageInfo>): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
@@ -277,7 +277,7 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 
     const options: NetCoreScaffoldingOptions = {
         // always use posix for debug config because it's committed to source control and works on all OS's
-        // tslint:disable-next-line: no-invalid-template-strings
+        /* eslint-disable-next-line no-template-curly-in-string */
         appProject: path.posix.join('${workspaceFolder}', artifactName),
         platformOS: platformOS,
     }

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/* eslint-disable unicorn/filename-case */
+
 import { env, ExtensionKind, extensions } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { extensionId } from '../constants';

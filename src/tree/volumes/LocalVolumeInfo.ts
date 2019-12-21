@@ -6,18 +6,20 @@
 import { VolumeInspectInfo } from "dockerode";
 import { ILocalItem } from "../LocalRootTreeItemBase";
 
+type VolumeInspectInfoExt = VolumeInspectInfo & { CreatedAt: string };
+
 /**
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
 export class LocalVolumeInfo implements ILocalItem {
-    public data: VolumeInspectInfo;
+    public data: VolumeInspectInfoExt;
     public constructor(data: VolumeInspectInfo) {
-        this.data = data;
+        this.data = <VolumeInspectInfoExt>data;
     }
 
     public get createdTime(): number {
-        // tslint:disable-next-line: no-unsafe-any no-any
-        return new Date((<any>this.data).CreatedAt).valueOf();
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        return new Date(this.data.CreatedAt).valueOf();
     }
 
     public get volumeName(): string {

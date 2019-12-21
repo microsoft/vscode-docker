@@ -6,14 +6,14 @@ export class Lazy<T> {
     private _isValueCreated: boolean = false;
     private _value: T | undefined;
 
-    constructor(private readonly valueFactory: () => T) {
+    public constructor(private readonly valueFactory: () => T) {
     }
 
-    get isValueCreated(): boolean {
+    public get isValueCreated(): boolean {
         return this._isValueCreated;
     }
 
-    get value(): T {
+    public get value(): T {
         if (!this._isValueCreated) {
             this._value = this.valueFactory();
             this._isValueCreated = true;

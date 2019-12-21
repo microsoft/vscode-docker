@@ -23,7 +23,7 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
     return '';
 }
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
+/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult | undefined> {
     return invokeHubSearch(imageName, 1, cache).then((data) => {
         if ((<IHubSearchResponseResult[]>data.results).length === 0) {
@@ -46,7 +46,7 @@ let popular = [
     { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": "ASP.NET is an open source server-side Web application framework" }
 ];
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
+/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promise<IHubSearchResponseResult[]> {
     if (prefix.length === 0) {
         // return the popular images if user invoked intellisense
@@ -78,7 +78,7 @@ export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promi
 //     "query": "redis",
 //     "page": 1
 // }
-// tslint:disable-next-line:promise-function-async // Grandfathered in
+/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 function invokeHubSearch(imageName: string, count: number, cache: boolean): Promise<IHubSearchResponse> {
     // https://registry.hub.docker.com/v1/search?q=redis&n=1
     return fetchHttpsJson<IHubSearchResponse>(
@@ -91,43 +91,50 @@ function invokeHubSearch(imageName: string, count: number, cache: boolean): Prom
         cache);
 }
 export interface IHubSearchResponse {
+    /* eslint-disable-next-line camelcase */
     num_pages: number;
+    /* eslint-disable-next-line camelcase */
     num_results: number;
     results: [IHubSearchResponseResult];
+    /* eslint-disable-next-line camelcase */
     page_size: number;
     query: string;
     page: number;
 }
 export interface IHubSearchResponseResult {
+    /* eslint-disable-next-line camelcase */
     is_automated: boolean;
     name: string;
+    /* eslint-disable-next-line camelcase */
     is_trusted: boolean;
+    /* eslint-disable-next-line camelcase */
     is_official: boolean;
+    /* eslint-disable-next-line camelcase */
     star_count: number;
     description: string;
 }
 
-// tslint:disable-next-line:no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 let JSON_CACHE: { [key: string]: Promise<any> } = {};
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
+/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<T> {
     if (!cache) {
         return doFetchHttpsJson(opts);
     }
 
-    let cache_key = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
-    if (!JSON_CACHE[cache_key]) {
-        JSON_CACHE[cache_key] = doFetchHttpsJson(opts);
+    let cacheKey = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
+    if (!JSON_CACHE[cacheKey]) {
+        JSON_CACHE[cacheKey] = doFetchHttpsJson(opts);
     }
 
     // new promise to avoid cancelling
     return new Promise<T>((resolve, reject) => {
-        JSON_CACHE[cache_key].then(resolve, reject);
+        JSON_CACHE[cacheKey].then(resolve, reject);
     });
 }
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
+/* eslint-disable-next-line , @typescript-eslint/promise-function-async */ // Grandfathered in
 function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
     opts.headers = opts.headers || {};
     opts.headers.Accept = 'application/json';

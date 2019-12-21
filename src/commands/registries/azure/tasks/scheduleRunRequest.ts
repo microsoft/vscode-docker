@@ -16,7 +16,7 @@ import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRe
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { getBlobInfo, streamLogs } from "../../../../utils/azureUtils";
 import { delay } from '../../../../utils/delay';
-import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quick-pick-file';
+import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 
@@ -24,7 +24,7 @@ const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
 
 export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<void> {
-    //Acquire information.
+    // Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
     let imageName: string;
@@ -46,7 +46,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 
     const tarFilePath: string = getTempSourceArchivePath();
 
-    //Prepare to run.
+    // Prepare to run.
     ext.outputChannel.show();
 
     const uploadedSourceLocation: string = await uploadSourceCode(node.client, node.registryName, node.resourceGroup, rootFolder, tarFilePath);
@@ -71,7 +71,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         }
     }
 
-    //Schedule the run and Clean up.
+    // Schedule the run and Clean up.
     ext.outputChannel.appendLine("Set up run request");
 
     const run = await node.client.registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
@@ -120,12 +120,12 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
     ext.outputChannel.appendLine("   Getting build source upload URL ");
     let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
-    let upload_url: string = sourceUploadLocation.uploadUrl;
-    let relative_path: string = sourceUploadLocation.relativePath;
+    let uploadUrl: string = sourceUploadLocation.uploadUrl;
+    let relativePath: string = sourceUploadLocation.relativePath;
 
     ext.outputChannel.appendLine("   Getting blob info from upload URL ");
     // Right now, accountName and endpointSuffix are unused, but will be used for streaming logs later.
-    let blobInfo = getBlobInfo(upload_url);
+    let blobInfo = getBlobInfo(uploadUrl);
     ext.outputChannel.appendLine("   Creating blob service ");
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
     ext.outputChannel.appendLine("   Creating block blob ");
@@ -138,7 +138,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
             }
         });
     });
-    return relative_path;
+    return relativePath;
 }
 
 function getTempSourceArchivePath(): string {

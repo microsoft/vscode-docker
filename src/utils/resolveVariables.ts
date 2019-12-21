@@ -30,7 +30,7 @@ export function resolveVariables<T>(target: T, folder: WorkspaceFolder): T {
 }
 
 function resolveSingleVariable(variable: string, folder: WorkspaceFolder): string {
-    // tslint:disable: no-invalid-template-strings
+    /* eslint-disable no-template-curly-in-string */
     switch (variable) {
         case '${workspaceFolder}':
         case '${workspaceRoot}':
@@ -42,7 +42,7 @@ function resolveSingleVariable(variable: string, folder: WorkspaceFolder): strin
         default:
             return variable; // Return as-is, we don't know what to do with it
     }
-    // tslint:enable: no-invalid-template-strings
+    /* eslint-enable no-template-curly-in-string */
 }
 
 function getActiveFilePath(): string | undefined {
@@ -58,7 +58,7 @@ function getActiveFilePath(): string | undefined {
  * @param folder The workspace folder
  */
 export function unresolveWorkspaceFolder(filePath: string, folder: WorkspaceFolder): string {
-    // tslint:disable-next-line: no-invalid-template-strings
+    /* eslint-disable-next-line no-template-curly-in-string */
     let replacedPath = filePath.replace(folder.uri.fsPath, '${workspaceFolder}');
 
     // By convention, VSCode uses forward slash for files in tasks/launch

@@ -30,7 +30,7 @@ export interface DotNetClient {
 }
 
 export class CommandLineDotNetClient implements DotNetClient {
-    constructor(
+    public constructor(
         private readonly processProvider: ProcessProvider,
         private readonly fsProvider: FileSystemProvider,
         private readonly osProvider: OSProvider) {

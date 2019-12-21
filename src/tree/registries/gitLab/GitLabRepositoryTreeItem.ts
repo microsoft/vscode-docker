@@ -60,5 +60,6 @@ interface ITag {
 }
 
 interface ITagDetails {
+    /* eslint-disable-next-line camelcase */
     created_at: string;
 }

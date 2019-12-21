@@ -87,6 +87,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         this._token = undefined;
         const options = {
             form: {
+                /* eslint-disable-next-line camelcase */
                 grant_type: "password",
                 username: this.username,
                 password: await this.getPassword()
@@ -100,9 +101,11 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
 
 interface IProject {
     id: number;
+    /* eslint-disable-next-line camelcase */
     path_with_namespace: string;
 }
 
 interface IToken {
+    /* eslint-disable-next-line camelcase */
     access_token: string
 }

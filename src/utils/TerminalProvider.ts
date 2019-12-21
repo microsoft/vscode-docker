@@ -8,15 +8,15 @@ import { Terminal } from 'vscode';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
 export interface ITerminalProvider {
-  createTerminal(name: string): Terminal;
+    createTerminal(name: string): Terminal;
 }
 
 export class DefaultTerminalProvider {
-  public createTerminal(name: string): Terminal {
-    let terminalOptions: vscode.TerminalOptions = {};
-    terminalOptions.name = name;
-    terminalOptions.env = {};
-    addDockerSettingsToEnv(terminalOptions.env, process.env);
-    return vscode.window.createTerminal(terminalOptions);
-  }
+    public createTerminal(name: string): Terminal {
+        let terminalOptions: vscode.TerminalOptions = {};
+        terminalOptions.name = name;
+        terminalOptions.env = {};
+        addDockerSettingsToEnv(terminalOptions.env, process.env);
+        return vscode.window.createTerminal(terminalOptions);
+    }
 }

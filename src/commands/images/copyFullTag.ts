@@ -12,6 +12,7 @@ export async function copyFullTag(context: IActionContext, node: ImageTreeItem |
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
     }
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     vscode.env.clipboard.writeText(node.fullTag);
     return node.fullTag;
 }

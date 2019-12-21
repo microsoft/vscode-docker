@@ -99,7 +99,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
             // Don't wait, no input to wait for anyway
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(`The "${provider.label}" registry provider is already connected.`);
             context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
             throw new UserCancelledError();
@@ -172,7 +172,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             await deleteRegistryPassword(cachedProvider);
         } catch (err) {
             // Don't wait, no input to wait for anyway
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(`The registry password could not be removed from the cache: ${err}`);
         }
 

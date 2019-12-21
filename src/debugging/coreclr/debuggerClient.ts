@@ -25,7 +25,7 @@ export class DefaultDebuggerClient {
     private static debuggerLinuxReleaseIdScript: string = '/bin/sh -c \'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\'';
     private static debuggerLinuxReleaseIdScriptOnWindows: string = '/bin/sh -c \"ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID\"';
 
-    constructor(
+    public constructor(
         private readonly dockerClient: DockerClient,
         private readonly osProvider: OSProvider,
         private readonly vsdbgClient: VsDbgClient) {

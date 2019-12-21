@@ -28,9 +28,9 @@ import { configureRuby } from './configureRuby';
 import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
 
 export interface PackageInfo {
-    npmStart: boolean; //has npm start
+    npmStart: boolean; // has npm start
     cmd: string;
-    fullCommand: string; //full command
+    fullCommand: string; // full command
     author: string;
     version: string;
     artifactName: string;
@@ -170,7 +170,7 @@ function getDefaultPackageInfo(): PackageInfo {
 async function readPackageJson(folderPath: string): Promise<{ packagePath?: string, packageInfo: PackageInfo }> {
     // open package.json and look for main, scripts start
     const uris: vscode.Uri[] = await getPackageJson(folderPath);
-    let packageInfo: PackageInfo = getDefaultPackageInfo(); //default
+    let packageInfo: PackageInfo = getDefaultPackageInfo(); // default
     let packagePath: string | undefined;
 
     if (uris && uris.length > 0) {
@@ -205,7 +205,7 @@ async function readPackageJson(folderPath: string): Promise<{ packagePath?: stri
  * Looks for a pom.xml or build.gradle file, and returns its parsed contents, or else a default package contents if none path
  */
 async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string, packageInfo: PackageInfo }> {
-    let pkg: PackageInfo = getDefaultPackageInfo(); //default
+    let pkg: PackageInfo = getDefaultPackageInfo();  // default
     let foundPath: string | undefined;
 
     let pomPath = path.join(folderPath, 'pom.xml');
@@ -351,6 +351,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     let folder: vscode.WorkspaceFolder;
     if (!rootFolderPath) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         folder = await captureConfigureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
         rootFolderPath = folder.uri.fsPath;
     }
@@ -404,6 +405,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
 
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         ports = await captureConfigureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
     }
 

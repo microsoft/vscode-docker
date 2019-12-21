@@ -10,7 +10,7 @@ import { getThemedIconPath } from "./IconPath";
 export class OpenUrlTreeItem extends GenericTreeItem {
     private _url: string;
 
-    constructor(parent: AzExtParentTreeItem, label: string, url: string) {
+    public constructor(parent: AzExtParentTreeItem, label: string, url: string) {
         super(parent, {
             commandId: 'vscode-docker.openUrl',
             contextValue: 'openUrl',

@@ -13,11 +13,11 @@ import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind
  * Registers a command that requires running in the "workspace" environment (as opposed to a "ui" extension).
  * The most common reason this is required is when using the file system and/or a terminal.
  */
-// tslint:disable-next-line: no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export function registerWorkspaceCommand(commandId: string, callback: (context: IActionContext, ...args: any[]) => any, debounce?: number): void {
     registerCommand(
         commandId,
-        // tslint:disable-next-line: no-any
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         async (context, ...args: any[]) => {
             await verifyIsRunningInWorkspace(context);
             return callback(context, ...args);
@@ -100,5 +100,7 @@ function updateExtensionKind(newKind: string): void {
     }
 
     value[extensionId] = newKind;
+    // TODO: Should this be awaited?
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     config.update(settingKey, value, target);
 }
