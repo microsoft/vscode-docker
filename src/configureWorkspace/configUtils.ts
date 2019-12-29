@@ -30,7 +30,10 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
     return splitPorts(await ext.ui.showInputBox(opt));
 }
 
-function splitPorts(value: string): number[] | undefined {
+/**
+ * Splits a comma separated string of port numbers
+ */
+export function splitPorts(value: string): number[] | undefined {
     value = value ? value : '';
     let matches = value.match(/\d+/g);
 
