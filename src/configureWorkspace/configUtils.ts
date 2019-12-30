@@ -7,6 +7,7 @@ import vscode = require('vscode');
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
+import { parseNumbers } from 'xml2js/lib/processors';
 
 /**
  * Prompts for port numbers
@@ -34,13 +35,15 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
  * Splits a comma separated string of port numbers
  */
 export function splitPorts(value: string): number[] | undefined {
-    value = value ? value : '';
-    let matches = value.match(/\d+/g);
+    if (!value || value === '') {
+        return [];
+    }
 
-    if (!matches && value !== '') {
+    let elements = value.split(',').map(p => p.trim());
+    let matches = elements.filter(p => p.match(/^-*\d+$/));
+
+    if (matches.length < elements.length) {
         return undefined;
-    } else if (!matches) {
-        return []; // Empty list
     }
 
     let ports = matches.map(Number);

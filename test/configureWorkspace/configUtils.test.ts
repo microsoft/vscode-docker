@@ -16,18 +16,19 @@ suite('configureWorkspace/configUtils', () => {
         }
 
         genTest('', []);
-        genTest('-1', [1]); // Incorrect, should be undefined
+        genTest('-1', undefined);
         genTest('1', [1]);
         genTest('80', [80]);
         genTest('65535', [65535]);
         genTest('65536', undefined);
 
         genTest('80,81', [80, 81]);
-        genTest('80;81', [80, 81]); // Incorrect, should be undefined
-        genTest('80,81;82', [80, 81, 82]); // Incorrect, should be undefined
+        genTest('80, 81', [80, 81]);
+        genTest('80;81', undefined);
+        genTest('80,81;82', undefined);
 
-        genTest('3;;\'[\'\']?><', [3]); // Incorrect, should be undefined
+        genTest('3;;\'[\'\']?><', undefined);
         genTest('abc', undefined);
-        genTest('80,abc', [80]); // Incorrect, should be undefined
+        genTest('80,abc', undefined);
     });
 });
