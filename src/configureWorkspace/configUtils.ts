@@ -7,7 +7,6 @@ import vscode = require('vscode');
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from "../extensionVariables";
 import { Platform, PlatformOS } from '../utils/platform';
-import { parseNumbers } from 'xml2js/lib/processors';
 
 /**
  * Prompts for port numbers
