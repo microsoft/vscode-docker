@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzureAccountTreeItemBase, ISubscriptionContext } from "vscode-azureextensionui";
+import { extensions } from 'vscode';
+import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
+import { delay } from '../../../utils/delay';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
@@ -27,5 +29,26 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
 
     public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {
         return new SubscriptionTreeItem(this, subContext);
+    }
+
+    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+        const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(_clearCache, context);
+
+        if (treeItems.length === 1 && treeItems[0].commandId === 'extension.open') {
+            // tslint:disable-next-line: no-floating-promises
+            this.refreshNodeWhenAzureExtensionIsInstalled();
+        }
+
+        return treeItems;
+    }
+
+    private async refreshNodeWhenAzureExtensionIsInstalled(): Promise<void> {
+        while (!extensions.getExtension('ms-vscode.azure-account')) {
+            await delay(1000);
+        }
+
+        // Now the extension is installed, refresh the node.
+        // tslint:disable-next-line: no-floating-promises
+        this.refresh();
     }
 }
