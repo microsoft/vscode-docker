@@ -17,11 +17,11 @@ export interface ProcessProvider {
 
 export class ChildProcessProvider implements ProcessProvider {
 
-    get env(): { [key: string]: string | undefined } {
+    public get env(): { [key: string]: string | undefined } {
         return process.env;
     }
 
-    get pid(): number {
+    public get pid(): number {
         return process.pid;
     }
 

@@ -13,7 +13,7 @@ import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
-// tslint:disable-next-line: no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const localize = (message: string, formatString: string, ...param: any[]): string => {
     // NOTE: This is a mock of the VS Code localize() method so its implementation may be subtly different.
     return util.format(formatString.replace(/\{[0-9]+\}/g, '%s'), ...param);
@@ -21,7 +21,7 @@ const localize = (message: string, formatString: string, ...param: any[]): strin
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
 const URI_FORMAT = 'http://localhost:%s';
-// tslint:disable-next-line: no-invalid-template-strings
+/* eslint-disable-next-line no-template-curly-in-string */
 const WEB_ROOT = '${workspaceFolder}';
 
 export class ServerReadyDetector extends vscode.Disposable {
@@ -78,7 +78,7 @@ export class ServerReadyDetector extends vscode.Disposable {
         if (!this.hasFired) {
             const matches = this.regexp.exec(s);
             if (matches && matches.length >= 1) {
-                // tslint:disable-next-line: no-floating-promises
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 this.openExternalWithString(this.session, matches.length > 1 ? matches[1] : '');
                 this.hasFired = true;
                 this.internalDispose();
@@ -100,6 +100,7 @@ export class ServerReadyDetector extends vscode.Disposable {
             // verify that format does not contain '%s'
             if (format.indexOf('%s') >= 0) {
                 const errMsg = localize('server.ready.nocapture.error', "Format uri ('{0}') uses a substitution placeholder but pattern did not capture anything.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -110,6 +111,7 @@ export class ServerReadyDetector extends vscode.Disposable {
             const s = format.split('%s');
             if (s.length !== 2) {
                 const errMsg = localize('server.ready.placeholder.error', "Format uri ('{0}') must contain exactly one substitution placeholder.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -128,6 +130,7 @@ export class ServerReadyDetector extends vscode.Disposable {
 
             if (containerPort === undefined) {
                 const errMsg = localize('server.ready.port.error', "Captured string ('{0}') must contain a port number.", captureString);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -150,6 +153,7 @@ export class ServerReadyDetector extends vscode.Disposable {
                 captureString = util.format(format, containerProtocol, hostPort);
             } else {
                 const errMsg = localize('server.ready.placeholder.error', "Format uri ('{0}') must contain exactly two substitution placeholders.", format);
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 return;
             }
@@ -181,11 +185,13 @@ export class ServerReadyDetector extends vscode.Disposable {
         const args = configuration.dockerOptions.dockerServerReadyAction;
         switch (args.action || 'openExternally') {
             case 'openExternally':
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 vscode.env.openExternal(vscode.Uri.parse(uri));
                 break;
             case 'debugWithChrome':
                 const remoteName = 'remoteName';
                 if (vscode.env[remoteName] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                     vscode.debug.startDebugging(
                         session.workspaceFolder,
                         {
@@ -197,6 +203,7 @@ export class ServerReadyDetector extends vscode.Disposable {
                         });
                 } else {
                     const errMsg = localize('server.ready.chrome.not.installed', "The action '{0}' requires the '{1}' extension.", 'debugWithChrome', 'Debugger for Chrome');
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                     vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
                 }
                 break;

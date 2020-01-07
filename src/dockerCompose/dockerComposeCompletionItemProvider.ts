@@ -15,7 +15,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     public triggerCharacters: string[] = [];
     public excludeTokens: string[] = [];
 
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
         let yamlSuggestSupport = new helper.SuggestSupportHelper();
 

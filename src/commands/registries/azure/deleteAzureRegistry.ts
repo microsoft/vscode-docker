@@ -25,5 +25,6 @@ export async function deleteAzureRegistry(context: IActionContext, node?: AzureR
 
     const message = `Successfully deleted registry "${node.registryName}".`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(message);
 }

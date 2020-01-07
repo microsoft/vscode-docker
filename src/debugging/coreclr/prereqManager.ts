@@ -19,7 +19,7 @@ export interface Prerequisite {
 export type ShowErrorMessageFunction = (message: string, ...items: vscode.MessageItem[]) => Thenable<vscode.MessageItem | undefined>;
 
 export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly dockerClient: DockerClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
@@ -32,6 +32,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The Docker daemon is not configured to run Linux containers. Only Linux containers can be used for .NET Core debugging.')
 
         return false;
@@ -39,7 +40,7 @@ export class DockerDaemonIsLinuxPrerequisite implements Prerequisite {
 }
 
 export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly browserClient: BrowserClient,
         private readonly getExtension: (extensionId: string) => vscode.Extension<unknown> | undefined,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -57,6 +58,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
                 title: 'View extension in gallery'
             };
 
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             this
                 .showErrorMessage(
                     'To debug .NET Core in Docker containers, install the C# extension for VS Code.',
@@ -73,7 +75,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
 }
 
 export class DotNetSdkInstalledPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly dotNetClient: DotNetClient,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
     }
@@ -85,6 +87,7 @@ export class DotNetSdkInstalledPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The .NET Core SDK must be installed to debug .NET Core applications running within Docker containers.');
 
         return false;
@@ -96,7 +99,7 @@ type DockerSettings = {
 };
 
 export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly osProvider: OSProvider,
         private readonly processProvider: ProcessProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -115,6 +118,7 @@ export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage('The current user is not a member of the "docker" group. Add it using the command "sudo usermod -a -G docker $USER".')
 
         return false;
@@ -122,7 +126,7 @@ export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
 }
 
 export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly osProvider: OSProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction) {
@@ -153,6 +157,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
             return true;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this.showErrorMessage(`To debug .NET Core in Docker containers, add "${MacNuGetPackageFallbackFolderPath}" as a shared folder in your Docker preferences.`);
 
         return false;
@@ -160,7 +165,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
 }
 
 export class DockerfileExistsPrerequisite implements Prerequisite {
-    constructor(
+    public constructor(
         private readonly fsProvider: FileSystemProvider,
         private readonly showErrorMessage: ShowErrorMessageFunction,
         private readonly executeCommand: (command: string) => void) {
@@ -175,6 +180,7 @@ export class DockerfileExistsPrerequisite implements Prerequisite {
             title: 'Add Docker files'
         };
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         this
             .showErrorMessage(
                 'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?',
@@ -192,7 +198,7 @@ export class DockerfileExistsPrerequisite implements Prerequisite {
 export class AggregatePrerequisite implements Prerequisite {
     private readonly prerequisites: Prerequisite[];
 
-    constructor(...prerequisites: Prerequisite[]) {
+    public constructor(...prerequisites: Prerequisite[]) {
         this.prerequisites = prerequisites;
     }
 

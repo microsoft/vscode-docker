@@ -31,7 +31,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
     private readonly vsdbgPath: string;
     private readonly options: VsDbgScriptPlatformOptions;
 
-    constructor(
+    public constructor(
         private readonly dockerOutputManager: OutputManager,
         private readonly fileSystemProvider: FileSystemProvider,
         private readonly globalState: Memento,

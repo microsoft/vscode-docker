@@ -35,7 +35,9 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
         }
     );
 
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     const result = <{ id: string }>await wrapDockerodeENOENT(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }));
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(`Network Created with ID ${result.id.substr(0, 12)}`);
 }

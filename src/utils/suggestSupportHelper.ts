@@ -11,7 +11,7 @@ import hub = require('../dockerHubSearch');
 import parser = require('../parser');
 
 export class SuggestSupportHelper {
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public suggestImages(word: string): Promise<vscode.CompletionItem[]> {
         return hub.searchImagesInRegistryHub(word, true).then((results) => {
             return results.map((image) => {
@@ -31,7 +31,7 @@ export class SuggestSupportHelper {
         });
     }
 
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[] | undefined> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
@@ -61,7 +61,7 @@ export class SuggestSupportHelper {
         })
     }
 
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
         // -------------
         // Detect <<image: [["something"]]>>

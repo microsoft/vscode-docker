@@ -10,7 +10,7 @@ import { TextLine } from 'vscode';
 export abstract class Parser {
     public _tokenParseRegex: RegExp;
 
-    constructor(parseTokenRegex: RegExp) {
+    public constructor(parseTokenRegex: RegExp) {
         this._tokenParseRegex = parseTokenRegex;
     }
 

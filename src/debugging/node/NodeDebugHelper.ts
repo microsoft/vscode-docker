@@ -82,7 +82,7 @@ export class NodeDebugHelper implements DebugHelper {
         };
 
         if (resolvedConfiguration.localRoot === undefined) {
-            // tslint:disable-next-line: no-invalid-template-strings
+            /* eslint-disable-next-line no-template-curly-in-string */
             resolvedConfiguration.localRoot = '${workspaceFolder}';
         }
 

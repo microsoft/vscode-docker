@@ -118,7 +118,7 @@ export function compareBuildImageOptions(options1: DockerBuildImageOptions | und
 export class DefaultDockerManager implements DockerManager {
     private static readonly DebugContainersKey: string = 'DefaultDockerManager.debugContainers';
 
-    constructor(
+    public constructor(
         private readonly appCacheFactory: AppStorageProvider,
         private readonly debuggerClient: DebuggerClient,
         private readonly dockerClient: DockerClient,
@@ -270,9 +270,9 @@ export class DefaultDockerManager implements DockerManager {
         return {
             browserUrl,
             debuggerPath: this.osProvider.pathJoin(options.run.os, options.run.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger', debuggerPath, 'vsdbg'),
-            // tslint:disable-next-line:no-invalid-template-strings
+            /* eslint-disable-next-line no-template-curly-in-string */
             pipeArgs: ['exec', '-i', containerId, '${debuggerCommand}'],
-            // tslint:disable-next-line:no-invalid-template-strings
+            /* eslint-disable-next-line no-template-curly-in-string */
             pipeCwd: '${workspaceFolder}',
             pipeProgram: 'docker',
             program: 'dotnet',

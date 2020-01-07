@@ -6,18 +6,18 @@
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureJava: IPlatformGeneratorInfo = {
-  genDockerFile,
-  genDockerCompose,
-  genDockerComposeDebug,
-  defaultPorts: [3000],
-  initializeForDebugging: undefined,
+    genDockerFile,
+    genDockerCompose,
+    genDockerComposeDebug,
+    defaultPorts: [3000],
+    initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(ports);
-  const artifact = artifactName ? artifactName : `${serviceNameAndRelativePath}.jar`;
+    let exposeStatements = getExposeStatements(ports);
+    const artifact = artifactName ? artifactName : `${serviceNameAndRelativePath}.jar`;
 
-  return `
+    return `
 FROM openjdk:8-jdk-alpine
 VOLUME /tmp
 ARG JAVA_OPTS
@@ -31,7 +31,7 @@ ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceNameAndRelativePath}.jar
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-  return `version: '2.1'
+    return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -41,7 +41,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-  return `version: '2.1'
+    return `version: '2.1'
 
 services:
   ${serviceNameAndRelativePath}:

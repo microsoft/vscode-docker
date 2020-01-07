@@ -63,7 +63,7 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurationProvider {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
-    constructor(
+    public constructor(
         private readonly debugSessionManager: DebugSessionManager,
         private readonly dockerManager: DockerManager,
         private readonly fsProvider: FileSystemProvider,
@@ -76,13 +76,14 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         const add: MessageItem = { title: 'Add Docker Files' };
 
         // Prompt them to add Docker files since they probably haven't
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
             'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
             ...[add]).then((result) => {
-                if (result === add) {
-                    commands.executeCommand('vscode-docker.configure');
-                }
-            });
+            if (result === add) {
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                commands.executeCommand('vscode-docker.configure');
+            }});
 
         return [];
     }
@@ -184,7 +185,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
             debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT = debugConfiguration.dockerRun.env.ASPNETCORE_ENVIRONMENT || 'Development';
 
             if (ssl) {
-                //tslint:disable-next-line:no-http-string
+                // tslint:disable-next-line:no-http-string
                 debugConfiguration.dockerRun.env.ASPNETCORE_URLS = debugConfiguration.dockerRun.env.ASPNETCORE_URLS || 'http://+:80;https://+:443';
             }
         }
@@ -323,16 +324,17 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
             if (await this.fsProvider.fileExists(launchSettingsPath)) {
                 const launchSettings = await fse.readJson(launchSettingsPath);
 
-                //tslint:disable:no-unsafe-any no-any
+                // tslint:disable:no-unsafe-any no-any
                 if (launchSettings && launchSettings.profiles) {
                     // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
+                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                     const projectProfile = Object.values<any>(launchSettings.profiles).find(p => p.commandName === 'Project');
 
                     if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
                         return true;
                     }
                 }
-                //tslint:enable:no-unsafe-any no-any
+                // tslint:enable:no-unsafe-any no-any
             }
         } catch { }
 

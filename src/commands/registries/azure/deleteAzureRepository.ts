@@ -25,5 +25,6 @@ export async function deleteAzureRepository(context: IActionContext, node?: Azur
 
     const deleteSucceeded = `Successfully deleted repository "${node.repoName}".`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(deleteSucceeded);
 }

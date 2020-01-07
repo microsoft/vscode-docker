@@ -9,7 +9,7 @@ import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configU
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
-import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {

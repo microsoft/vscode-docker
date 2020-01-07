@@ -13,7 +13,7 @@ export interface NetCoreProjectProvider {
 }
 
 export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
-    constructor(
+    public constructor(
         private readonly fsProvider: FileSystemProvider,
         private readonly dotNetClient: DotNetClient,
         private readonly tempFileProvider: TempFileProvider) {

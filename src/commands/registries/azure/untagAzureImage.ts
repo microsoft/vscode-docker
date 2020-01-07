@@ -27,5 +27,6 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
     });
 
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(`Successfully untagged "${node.repoNameAndTag}".`);
 }

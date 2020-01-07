@@ -51,12 +51,15 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             //       the user never noticing them in the first place, which means the wizard would never complete, and the
             //       user left with the impression that the action is hung.
 
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window
                 .showInformationMessage(`To set up a CI/CD webhook, open the page "${dockerhubUri}" and enter the URI to the created web app in your dockerhub account`, dockerhubPrompt)
                 .then(response => {
                     if (response) {
+                        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                         vscode.env.clipboard.writeText(appUri);
-                        // tslint:disable-next-line: no-floating-promises
+
+                        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                         openExternal(dockerhubUri);
                     }
                 });

@@ -15,7 +15,7 @@ export interface AppStorageProvider {
 }
 
 export class DefaultAppStorage implements MementoAsync {
-    constructor(
+    public constructor(
         private readonly appFolder: string,
         private readonly fileSystemProvider: FileSystemProvider) {
     }
@@ -52,7 +52,7 @@ export class DefaultAppStorage implements MementoAsync {
 }
 
 export class DefaultAppStorageProvider implements AppStorageProvider {
-    constructor(private readonly fileSystemProvider: FileSystemProvider) {
+    public constructor(private readonly fileSystemProvider: FileSystemProvider) {
     }
 
     public async getStorage(appFolder: string): Promise<MementoAsync> {

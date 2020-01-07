@@ -2,6 +2,8 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+/* eslint-disable unicorn/filename-case */
+
 import * as os from 'os';
 import * as path from 'path';
 import { pathNormalize } from '../../utils/pathNormalize';
@@ -18,19 +20,19 @@ export interface OSProvider {
 }
 
 export class LocalOSProvider implements OSProvider {
-    get homedir(): string {
+    public get homedir(): string {
         return os.homedir();
     }
 
-    get isMac(): boolean {
+    public get isMac(): boolean {
         return os.platform() === 'darwin';
     }
 
-    get os(): PlatformOS {
+    public get os(): PlatformOS {
         return os.platform() === 'win32' ? 'Windows' : 'Linux';
     }
 
-    get tmpdir(): string {
+    public get tmpdir(): string {
         return os.tmpdir();
     }
 

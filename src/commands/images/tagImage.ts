@@ -47,7 +47,7 @@ export async function getTagFromUserInput(fullTag: string, addDefaultRegistry: b
             fullTag = defaultRegistryPath + '/' + fullTag;
             registryLength = defaultRegistryPath.length;
         }
-        opt.valueSelection = registryLength < 0 ? undefined : [0, registryLength + 1];  //include the '/'
+        opt.valueSelection = registryLength < 0 ? undefined : [0, registryLength + 1];  // include the '/'
     }
 
     opt.value = fullTag;
