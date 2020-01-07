@@ -314,6 +314,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
 
     files.filter(file => file.open).forEach(
         file => {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showTextDocument(vscode.Uri.file(file.filePath));
         });
 }

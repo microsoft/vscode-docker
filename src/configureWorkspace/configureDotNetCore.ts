@@ -336,8 +336,9 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string
-    dockerFileContents = dockerFileContents.replace(/(\r\n){3,4}/g, "\r\n\r\n")
-            .replace(/(\n){3,4}/g, "\n\n");
+    dockerFileContents = dockerFileContents
+        .replace(/(\r\n){3,4}/g, "\r\n\r\n")
+        .replace(/(\n){3,4}/g, "\n\n");
 
     const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
     const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');

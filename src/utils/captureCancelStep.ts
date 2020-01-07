@@ -5,7 +5,7 @@
 
 import { TelemetryProperties, UserCancelledError } from "vscode-azureextensionui";
 
-// tslint:disable-next-line: no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export function wrapWithCatch<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(prompt: TPrompt, onRejected: (reason: any) => Promise<TReturn>): TPrompt {
     return <TPrompt>(async (...args: []) => {
         return prompt(...args).catch(onRejected);
