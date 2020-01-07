@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtTreeItem } from "vscode-azureextensionui";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
@@ -33,5 +34,14 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContaine
         }
 
         return getThemedIconPath(icon);
+    }
+
+    public isAncestorOfImpl(expectedContextValue: string | RegExp): boolean {
+        return this.ChildrenTreeItems.some((container: AzExtTreeItem) => this.matchesValue(container, expectedContextValue));
+    }
+
+    private matchesValue(container: AzExtTreeItem, expectedContextValue: (string | RegExp)): boolean {
+        return container.contextValue === expectedContextValue
+            || (expectedContextValue instanceof RegExp && expectedContextValue.test(container.contextValue));
     }
 }
