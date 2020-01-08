@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { extensions } from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
-import { delay } from '../../../utils/delay';
+import { ExtensionUtils } from '../../../utils/extensionUtils';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
@@ -35,28 +34,13 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
         const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(_clearCache, context);
 
         if (treeItems.length === 1 && treeItems[0].commandId === 'extension.open') {
-            // tslint:disable-next-line: no-floating-promises
-            this.refreshNodeWhenAzureExtensionIsInstalled();
+            const extensionUtils: ExtensionUtils = new ExtensionUtils('ms-vscode.azure-account');
+            extensionUtils.onExtensionInstalled(() => {
+                // tslint:disable-next-line: no-floating-promises
+                this.refresh();
+            });
         }
 
         return treeItems;
-    }
-
-    private async refreshNodeWhenAzureExtensionIsInstalled(): Promise<void> {
-        let isExtensionInstalled: boolean = false;
-        let timedout: boolean = false;
-        const maxTimeout: number = 600000; //10 minutes
-        setTimeout(() => { timedout = true; }, maxTimeout);
-
-        while (!timedout && !isExtensionInstalled) {
-            await delay(1000);
-            isExtensionInstalled = extensions.getExtension('ms-vscode.azure-account') !== undefined;
-        }
-
-        if (isExtensionInstalled) {
-            // Now the extension is installed, refresh the node.
-            // tslint:disable-next-line: no-floating-promises
-            this.refresh();
-        }
     }
 }
