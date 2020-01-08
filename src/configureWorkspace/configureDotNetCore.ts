@@ -330,6 +330,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
         serviceNameAndPathRelative = path.relative(context.outputFolder, path.join(context.rootFolder, serviceNameAndPathRelative));
     }
 
+    // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
     serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
 
     let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName);
