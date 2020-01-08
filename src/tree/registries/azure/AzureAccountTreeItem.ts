@@ -43,12 +43,20 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
     }
 
     private async refreshNodeWhenAzureExtensionIsInstalled(): Promise<void> {
-        while (!extensions.getExtension('ms-vscode.azure-account')) {
+        let isExtensionInstalled: boolean = false;
+        let timedout: boolean = false;
+        const maxTimeout: number = 600000; //10 minutes
+        setTimeout(() => { timedout = true; }, maxTimeout);
+
+        while (!timedout && !isExtensionInstalled) {
             await delay(1000);
+            isExtensionInstalled = extensions.getExtension('ms-vscode.azure-account') !== undefined;
         }
 
-        // Now the extension is installed, refresh the node.
-        // tslint:disable-next-line: no-floating-promises
-        this.refresh();
+        if (isExtensionInstalled) {
+            // Now the extension is installed, refresh the node.
+            // tslint:disable-next-line: no-floating-promises
+            this.refresh();
+        }
     }
 }
