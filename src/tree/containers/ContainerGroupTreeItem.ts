@@ -37,7 +37,7 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContaine
     }
 
     public isAncestorOfImpl(expectedContextValue: string | RegExp): boolean {
-        return this.ChildrenTreeItems.some((container: AzExtTreeItem) => this.matchesValue(container, expectedContextValue));
+        return this.ChildTreeItems.some((container: AzExtTreeItem) => this.matchesValue(container, expectedContextValue));
     }
 
     private matchesValue(container: AzExtTreeItem, expectedContextValue: (string | RegExp)): boolean {
