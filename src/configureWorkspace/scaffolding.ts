@@ -13,6 +13,9 @@ import { Platform, PlatformOS } from "../utils/platform";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPorts as promptForPortsUtil, quickPickOS } from './configUtils';
 
+/**
+ * Represents the options that can be passed by callers (e.g. the programmatic scaffolding API used by IoT extension).
+ */
 export interface ScaffoldContext extends IActionContext {
     folder?: vscode.WorkspaceFolder;
     initializeForDebugging?: boolean;
@@ -23,6 +26,9 @@ export interface ScaffoldContext extends IActionContext {
     rootFolder?: string;
 }
 
+/**
+ * Represents the context passed to individual scaffolders, with suitable defaults for critical properties.
+ */
 export interface ScaffolderContext extends ScaffoldContext {
     captureStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(step: ConfigureTelemetryCancelStep, prompt: TPrompt): TPrompt;
     folder: vscode.WorkspaceFolder;
@@ -115,6 +121,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
 
     telemetryProperties.orchestration = 'single';
 
+    // Invoke the individual scaffolder, passing a copy of the original context, with omitted properies given suitable defaults...
     const files = await scaffolder({
         ...context,
         captureStep,
