@@ -4,34 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as vscode from 'vscode';
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
+import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { getExposeStatements } from './configure';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
+import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
-
-export const configureAspDotNetCore: IPlatformGeneratorInfo = {
-    genDockerFile,
-    genDockerCompose: undefined, // We don't generate compose files for .net core
-    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: [80, 443],
-    initializeForDebugging,
-};
-
-export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
-    genDockerFile,
-    genDockerCompose: undefined, // We don't generate compose files for .net core
-    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: undefined,
-    initializeForDebugging,
-};
 
 // .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
 const LegacyAspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
@@ -172,7 +162,7 @@ ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 
 // #endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], { version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -267,20 +257,104 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     return contents;
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, { artifactName }: Partial<PackageInfo>): Promise<void> {
+// Returns the relative path of the project file without the extension
+async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
+    const opt: vscode.QuickPickOptions = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select Project'
+    }
+
+    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
+
+    if (!projectFiles || !projectFiles.length) {
+        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
+    }
+
+    if (projectFiles.length > 1) {
+        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
+        let result = await ext.ui.showQuickPick(items, opt);
+        return result.label;
+    } else {
+        return projectFiles[0];
+    }
+}
+
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'netCore',
         actionContext: context,
-        dockerfile: dockerfile,
+        // always use posix for debug config because it's committed to source control and works on all OS's
+        /* eslint-disable-next-line no-template-curly-in-string */
+        dockerfile: path.posix.join('${workspaceFolder}', workspaceRelativeDockerfileName),
     }
 
     const options: NetCoreScaffoldingOptions = {
         // always use posix for debug config because it's committed to source control and works on all OS's
         /* eslint-disable-next-line no-template-curly-in-string */
-        appProject: path.posix.join('${workspaceFolder}', artifactName),
+        appProject: path.posix.join('${workspaceFolder}', workspaceRelativeProjectFileName),
         platformOS: platformOS,
     }
 
     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
+}
+
+// tslint:disable-next-line: export-name
+export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
+    const os = context.os ?? await context.promptForOS();
+
+    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+
+    telemetryProperties.configureOs = os;
+
+    const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
+
+    const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
+    const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
+
+    telemetryProperties.packageFileType = path.extname(rootRelativeProjectFileName);
+    telemetryProperties.packageFileSubfolderDepth = getSubfolderDepth(context.rootFolder, rootRelativeProjectFileName);
+
+    const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);
+    const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
+
+    let serviceNameAndPathRelative = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
+    const projFileContents = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
+
+    // Extract TargetFramework for version
+    const [version] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+
+    if (context.outputFolder) {
+        // We need paths in the Dockerfile to be relative to the output folder, not the root
+        serviceNameAndPathRelative = path.relative(context.outputFolder, path.join(context.rootFolder, serviceNameAndPathRelative));
+    }
+
+    // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
+    serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
+
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName);
+
+    // Remove multiple empty lines with single empty lines, as might be produced
+    // if $expose_statements$ or another template variable is an empty string
+    dockerFileContents = dockerFileContents
+        .replace(/(\r\n){3,4}/g, "\r\n\r\n")
+        .replace(/(\n){3,4}/g, "\n\n");
+
+    const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
+    const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
+
+    const files: ScaffoldFile[] = [
+        { fileName: dockerFileName, contents: dockerFileContents, open: true },
+        { fileName: dockerIgnoreFileName, contents: genCommonDockerIgnoreFile(context.platform) }
+    ];
+
+    if (context.initializeForDebugging) {
+        const dockerFilePath = path.resolve(context.rootFolder, dockerFileName);
+        const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerFilePath);
+
+        await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
+    }
+
+    return files;
 }

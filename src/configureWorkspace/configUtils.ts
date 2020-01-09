@@ -3,10 +3,27 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import vscode = require('vscode');
-import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, TelemetryProperties } from 'vscode-azureextensionui';
+import { DockerOrchestration } from '../constants';
 import { ext } from "../extensionVariables";
+import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from '../utils/platform';
+
+export type ConfigureTelemetryProperties = {
+    configurePlatform?: Platform;
+    configureOs?: PlatformOS;
+    orchestration?: DockerOrchestration;
+    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
+    packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
+};
+
+export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project';
+
+export async function captureConfigureCancelStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: TPrompt): Promise<TReturn> {
+    return await captureCancelStep(cancelStep, properties, prompt)();
+}
 
 /**
  * Prompts for port numbers
@@ -109,4 +126,42 @@ export async function quickPickGenerateComposeFiles(): Promise<boolean> {
         opt);
 
     return response.data;
+}
+
+export function getSubfolderDepth(outputFolder: string, filePath: string): string {
+    let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
+    let matches = relativeToRoot.match(/[\/\\]/g);
+    let depth: number = matches ? matches.length : 0;
+    return String(depth);
+}
+
+export function genCommonDockerIgnoreFile(platformType: Platform): string {
+    const ignoredItems = [
+        '**/.classpath',
+        '**/.dockerignore',
+        '**/.env',
+        '**/.git',
+        '**/.gitignore',
+        '**/.project',
+        '**/.settings',
+        '**/.toolstarget',
+        '**/.vs',
+        '**/.vscode',
+        '**/*.*proj.user',
+        '**/*.dbmdl',
+        '**/*.jfm',
+        '**/azds.yaml',
+        platformType !== 'Node.js' ? '**/bin' : undefined,
+        '**/charts',
+        '**/docker-compose*',
+        '**/Dockerfile*',
+        '**/node_modules',
+        '**/npm-debug.log',
+        '**/obj',
+        '**/secrets.dev.yaml',
+        '**/values.dev.yaml',
+        'README.md'
+    ];
+
+    return ignoredItems.filter(item => item !== undefined).join('\n');
 }
