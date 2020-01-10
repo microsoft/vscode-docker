@@ -14,7 +14,7 @@ type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[
 type ConfigureBrowseCancelStep = 'node' | 'port';
 
 async function captureBrowseCancelStep<T>(cancelStep: ConfigureBrowseCancelStep, properties: BrowseTelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    return await captureCancelStep(cancelStep, properties, prompt)
+    return await captureCancelStep(cancelStep, properties, prompt)();
 }
 
 // NOTE: These ports are ordered in order of preference.
