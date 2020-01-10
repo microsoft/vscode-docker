@@ -25,6 +25,7 @@ import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
+import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
 import { nps } from './utils/nps';
 import { refreshDockerode } from './utils/refreshDockerode';
@@ -128,6 +129,13 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         // Don't wait
         // tslint:disable-next-line: no-floating-promises
         nps(ctx.globalState);
+    });
+}
+
+export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
+    await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
+        activateContext.telemetry.properties.isActivationEvent = 'true';
+        AzureAccountExtensionListener.dispose();
     });
 }
 

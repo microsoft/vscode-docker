@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { Disposable } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
-import { ExtensionUtils } from '../../../utils/extensionUtils';
+import { AzureAccountExtensionListener } from "../../../utils/AzureAccountExtensionListener";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
@@ -32,10 +33,11 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(_clearCache, context);
-
         if (treeItems.length === 1 && treeItems[0].commandId === 'extension.open') {
-            const extensionUtils: ExtensionUtils = new ExtensionUtils('ms-vscode.azure-account');
-            extensionUtils.onExtensionInstalled(() => {
+            //this.extensionInstallListener = new ExtensionListener('ms-vscode.azure-account');
+            const extensionInstallEventDisposable: Disposable = AzureAccountExtensionListener.onExtensionInstalled(() => {
+                extensionInstallEventDisposable.dispose();
+
                 // tslint:disable-next-line: no-floating-promises
                 this.refresh();
             });
