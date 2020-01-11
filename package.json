@@ -1513,6 +1513,20 @@
                     "default": "powershell",
                     "description": "Attach command to use for Windows containers"
                 },
+                "docker.viewLogsCommand.follow": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Follow log output"
+                },
+                "docker.viewLogsCommand.tail": {
+                    "type": [
+                        "integer",
+                        "null"
+                    ],
+                    "minimum": 0,
+                    "default": null,
+                    "description": "Number of lines to show from the end of the logs"
+                },
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,

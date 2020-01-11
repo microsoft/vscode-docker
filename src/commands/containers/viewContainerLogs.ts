@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
@@ -12,7 +13,18 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
     }
 
+    const commandOptions: string[] = [];
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    const follow: boolean = configOptions.get('viewLogsCommand.follow');
+    const tail: number | null = configOptions.get('viewLogsCommand.tail');
+    if (follow) {
+        commandOptions.push('-f');
+    }
+    if (tail !== null) {
+        commandOptions.push(`--tail=${tail}`);
+    }
+
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);
-    terminal.sendText(`docker logs -f ${node.containerId}`);
+    terminal.sendText(`docker logs ${commandOptions.join(' ')} ${node.containerId}`);
     terminal.show();
 }
