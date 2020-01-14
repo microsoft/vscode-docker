@@ -16,7 +16,14 @@
         "noUnusedLocals": true,
         "noUnusedParameters": false, // TODO
         "strictNullChecks": false, // TODO
-        "strict": true
+        "strict": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": [
+                "node_modules/vscode/*",
+                "*"
+            ]
+        }
     },
     "exclude": [
         "node_modules",
