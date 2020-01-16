@@ -32,6 +32,7 @@ export class AzureAccountExtensionListener extends Disposable {
                 AzureAccountExtensionListener.extensionInstalledEmitter.fire(true);
                 AzureAccountExtensionListener.extensionInstalledEmitter.dispose();
                 listener.dispose();
+                AzureAccountExtensionListener.extensionsChangeEventListener = undefined;
             }
         });
         return listener;
@@ -44,9 +45,11 @@ export class AzureAccountExtensionListener extends Disposable {
     public static dispose(): void {
         if (AzureAccountExtensionListener.extensionInstalledEmitter) {
             AzureAccountExtensionListener.extensionInstalledEmitter.dispose();
+            AzureAccountExtensionListener.extensionInstalledEmitter = undefined;
         }
         if (AzureAccountExtensionListener.extensionsChangeEventListener) {
             AzureAccountExtensionListener.extensionsChangeEventListener.dispose();
+            AzureAccountExtensionListener.extensionsChangeEventListener = undefined;
         }
     }
 }
