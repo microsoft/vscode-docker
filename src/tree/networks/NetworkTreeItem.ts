@@ -31,6 +31,10 @@ export class NetworkTreeItem extends AzExtTreeItem {
         return this._item.createdTime;
     }
 
+    public get networkName(): string {
+        return this._item.networkName;
+    }
+
     public get label(): string {
         return ext.networksRoot.getTreeItemLabel(this._item);
     }

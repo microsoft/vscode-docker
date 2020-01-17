@@ -1307,6 +1307,11 @@
                         ]
                     }
                 },
+                "docker.networks.hideBuiltInNetworks": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Hide the built in networks from the explorer"
+                },
                 "docker.networks.label": {
                     "type": "string",
                     "default": "NetworkName",

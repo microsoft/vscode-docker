@@ -13,6 +13,9 @@ import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
 import { networkProperties, NetworkProperty } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
 
+import { workspace } from "vscode";
+import { configPrefix } from "../../constants";
+
 export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, NetworkProperty> {
     public treePrefix: string = 'networks';
     public label: string = 'Networks';
@@ -40,7 +43,17 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, Ne
     }
 
     public async getItems(): Promise<LocalNetworkInfo[]> {
-        const networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+        let config = workspace.getConfiguration(configPrefix);
+        let hideBuiltInNetworks: boolean = config.get<boolean>('networks.hideBuiltInNetworks');
+
+        let networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+
+        if (hideBuiltInNetworks) {
+            networks = networks.filter((network) => {
+                !['bridge', 'host', 'none'].includes(network.Name);
+            })
+        }
+
         return networks.map(n => new LocalNetworkInfo(n));
     }
 

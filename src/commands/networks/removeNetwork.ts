@@ -16,6 +16,11 @@ export async function removeNetwork(context: IActionContext, node: NetworkTreeIt
         nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.contextValue, { ...context, canPickMany: true, suppressCreatePick: true });
     }
 
+    if (nodes.some(node => ['bridge', 'host', 'none'].includes(node.networkName))) {
+        ext.ui.showWarningMessage("It's not possible to remove the built-in networks 'bridge', 'host', or 'none'");
+        nodes = nodes.filter((node) => !['bridge', 'host', 'none'].includes(node.networkName));
+    };
+
     let confirmRemove: string;
     if (nodes.length === 0) {
         throw new UserCancelledError();
