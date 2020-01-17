@@ -1137,12 +1137,12 @@
                 "docker.explorerRefreshInterval": {
                     "type": "number",
                     "default": 2000,
-                    "description": "Explorer refresh interval, default is 2000ms"
+                    "description": "Docker view refresh interval (milliseconds)"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping containers.",
+                    "description": "The property to use to group containers in Docker view: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, Tag, or None",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1167,7 +1167,7 @@
                         "ContainerName",
                         "Status"
                     ],
-                    "description": "Any secondary properties to display for a container.",
+                    "description": "Any secondary properties to display for a container (an array). Possible elements include: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, and Tag",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1191,7 +1191,7 @@
                 "docker.containers.label": {
                     "type": "string",
                     "default": "FullTag",
-                    "description": "The primary property to display for a container.",
+                    "description": "The primary property to display for a container: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, or Tag",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1212,7 +1212,7 @@
                 "docker.containers.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting containers.",
+                    "description": "The property to use to sort containers in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1221,7 +1221,7 @@
                 "docker.images.groupBy": {
                     "type": "string",
                     "default": "Repository",
-                    "description": "The property to use when grouping images.",
+                    "description": "The property to use to group images in Docker view: CreatedTime, FullTag, ImageId, None, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1239,7 +1239,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a image.",
+                    "description": "Any secondary properties to display for a image (an array). Possible elements include: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, and Tag",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1257,7 +1257,7 @@
                 "docker.images.label": {
                     "type": "string",
                     "default": "Tag",
-                    "description": "The primary property to display for a image.",
+                    "description": "The primary property to display for a image: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1272,7 +1272,7 @@
                 "docker.images.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting images.",
+                    "description": "The property to use to sort images in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1281,7 +1281,7 @@
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping networks.",
+                    "description": "The property to use to group networks in Docker view: CreatedTime, NetworkDriver, NetworkId, NetworkName, or None",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1296,7 +1296,7 @@
                         "NetworkDriver",
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a network.",
+                    "description": "Any secondary properties to display for a Docker network (an array). Possible elements include CreatedTime, NetworkDriver, NetworkId, and NetworkName",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1310,7 +1310,7 @@
                 "docker.networks.label": {
                     "type": "string",
                     "default": "NetworkName",
-                    "description": "The primary property to display for a network.",
+                    "description": "The primary property to display for a Docker network: CreatedTime, NetworkDriver, NetworkId, or NetworkName",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1321,7 +1321,7 @@
                 "docker.networks.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting networks.",
+                    "description": "The property to use to sort networks in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1330,7 +1330,7 @@
                 "docker.volumes.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping volumes.",
+                    "description": "The property to use to group volumes in Docker view: CreatedTime, VolumeName, or None",
                     "enum": [
                         "CreatedTime",
                         "VolumeName",
@@ -1342,7 +1342,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a volume.",
+                    "description": "Any secondary properties to display for a Docker volume (an array). Possible values include CreatedTime and VolumeName",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1354,7 +1354,7 @@
                 "docker.volumes.label": {
                     "type": "string",
                     "default": "VolumeName",
-                    "description": "The primary property to display for a volume.",
+                    "description": "The primary property to display for a Docker volume: CreatedTime or VolumeName",
                     "enum": [
                         "CreatedTime",
                         "VolumeName"
@@ -1363,7 +1363,7 @@
                 "docker.volumes.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting volumes.",
+                    "description": "The property to use to sort volumes in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1377,12 +1377,12 @@
                 "docker.truncateLongRegistryPaths": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Truncate long Image and Container registry paths in the Explorer"
+                    "description": "Set to true to truncate long image and container registry paths in Docker view"
                 },
                 "docker.truncateMaxLength": {
                     "type": "number",
                     "default": 10,
-                    "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis"
+                    "description": "Maximum length of a registry paths displayed in Docker view, including elipsis. The truncateLongRegistryPaths setting must be set to true for truncateMaxLength setting to be effective."
                 },
                 "docker.host": {
                     "type": "string",
@@ -1516,17 +1516,17 @@
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Run docker-compose with the --build argument, defaults to true"
+                    "description": "Set to true to include --build option when docker-compose command is invoked"
                 },
                 "docker.dockerComposeDetached": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Run docker-compose with the --d (detached) argument, defaults to true"
+                    "description": "Set to true to include --d (detached) option when docker-compose command is invoked"
                 },
                 "docker.showRemoteWorkspaceWarning": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Show a prompt to switch from \"UI\" extension to \"Workspace\" extension if an operation is not supported."
+                    "description": "Set to true to prompt to switch from \"UI\" extension mode to \"Workspace\" extension mode if an operation is not supported in UI mode."
                 }
             }
         },
