@@ -34,11 +34,10 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(_clearCache, context);
         if (treeItems.length === 1 && treeItems[0].commandId === 'extension.open') {
-            //this.extensionInstallListener = new ExtensionListener('ms-vscode.azure-account');
             const extensionInstallEventDisposable: Disposable = AzureAccountExtensionListener.onExtensionInstalled(() => {
                 extensionInstallEventDisposable.dispose();
 
-                // tslint:disable-next-line: no-floating-promises
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 this.refresh();
             });
         }
