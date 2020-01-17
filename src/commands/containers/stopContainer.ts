@@ -13,7 +13,11 @@ export async function stopContainer(context: IActionContext, node: ContainerTree
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.containersTree.showTreeItemPicker(/^(paused|restarting|running)Container$/i, { ...context, canPickMany: true });
+        nodes = await ext.containersTree.showTreeItemPicker(/^(paused|restarting|running)Container$/i, {
+            ...context,
+            canPickMany: true,
+            noItemFoundErrorMessage: 'No containers are availble to stop.'
+        });
     }
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Stopping Container(s)..." }, async () => {

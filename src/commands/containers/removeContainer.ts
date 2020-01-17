@@ -13,7 +13,11 @@ export async function removeContainer(context: IActionContext, node: ContainerTr
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.allContextRegExp, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.allContextRegExp, {
+            ...context,
+            canPickMany: true,
+            noItemFoundErrorMessage: 'No containers are available to remove'
+        });
     }
 
     let confirmRemove: string;

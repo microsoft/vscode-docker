@@ -56,7 +56,11 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     if (!node) {
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, context));
+        node = await captureBrowseCancelStep('node', telemetryProperties, () =>
+            ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
+                ...context,
+                noItemFoundErrorMessage: 'No running containers are available to open in browser.'
+            }));
     }
 
     const inspectInfo = await node.getContainer().inspect();

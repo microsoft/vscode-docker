@@ -9,7 +9,10 @@ import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to inspect'
+        });
     }
 
     const inspectInfo = await node.getImage().inspect();

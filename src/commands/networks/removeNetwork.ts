@@ -13,7 +13,12 @@ export async function removeNetwork(context: IActionContext, node: NetworkTreeIt
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.contextValue, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.contextValue, {
+            ...context,
+            canPickMany: true,
+            suppressCreatePick: true,
+            noItemFoundErrorMessage: 'No networks are available to remove'
+        });
     }
 
     let confirmRemove: string;

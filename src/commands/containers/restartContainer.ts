@@ -13,7 +13,11 @@ export async function restartContainer(context: IActionContext, node: ContainerT
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused|running)Container$/i, { ...context, canPickMany: true });
+        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused|running)Container$/i, {
+            ...context,
+            canPickMany: true,
+            noItemFoundErrorMessage: 'No containers are available to restart'
+        });
     }
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Restarting Container(s)..." }, async () => {

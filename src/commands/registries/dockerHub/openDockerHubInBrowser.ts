@@ -14,7 +14,10 @@ import { openExternal } from "../../../utils/openExternal";
 
 export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | RemoteTagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, context);
+        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, {
+            ...context,
+            noItemFoundErrorMessage: 'No Docker Hub registries available to browse.'
+        });
     }
 
     let url = dockerHubUrl;

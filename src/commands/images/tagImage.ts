@@ -13,7 +13,10 @@ import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
     if (!node) {
-        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to tag'
+        });
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');

@@ -13,7 +13,11 @@ export async function startContainer(context: IActionContext, node: ContainerTre
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused)Container$/i, { ...context, canPickMany: true });
+        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused)Container$/i, {
+            ...context,
+            canPickMany: true,
+            noItemFoundErrorMessage: 'No containers are available to start'
+        });
     }
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Starting Container(s)..." }, async () => {
