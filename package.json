@@ -1372,7 +1372,7 @@
                 "docker.imageBuildContextPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Build context PATH to pass to Docker build command"
+                    "description": "Build context PATH to pass to Docker build command."
                 },
                 "docker.truncateLongRegistryPaths": {
                     "type": "boolean",
