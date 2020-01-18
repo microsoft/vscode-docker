@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { Container } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 
 export async function stopContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
     let nodes: ContainerTreeItem[];
@@ -16,13 +18,16 @@ export async function stopContainer(context: IActionContext, node: ContainerTree
         nodes = await ext.containersTree.showTreeItemPicker(/^(paused|restarting|running)Container$/i, {
             ...context,
             canPickMany: true,
-            noItemFoundErrorMessage: 'No containers are availble to stop'
+            noItemFoundErrorMessage: 'No containers are availble to stop.'
         });
     }
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Stopping Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
-            await n.getContainer().stop();
+            const container: Container = n.getContainer();
+            // eslint-disable-next-line @typescript-eslint/promise-function-async
+            await callDockerodeWithErrorHandling(() => container.stop(), context);
+
         }));
     });
 }

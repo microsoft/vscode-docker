@@ -15,7 +15,11 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.azure.tag, {
             ...context,
             suppressCreatePick: true,
+<<<<<<< Updated upstream
             noItemFoundErrorMessage: 'No images are available to untag'
+=======
+            noItemFoundErrorMessage: 'No images are available to untag.'
+>>>>>>> Stashed changes
         });
     }
 
