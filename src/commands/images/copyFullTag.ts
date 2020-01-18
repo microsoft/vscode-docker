@@ -10,7 +10,10 @@ import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 
 export async function copyFullTag(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
     if (!node) {
-        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to copy tag'
+        });
     }
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     vscode.env.clipboard.writeText(node.fullTag);

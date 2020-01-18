@@ -13,7 +13,12 @@ export async function removeVolume(context: IActionContext, node: VolumeTreeItem
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, {
+            ...context,
+            canPickMany: true,
+            suppressCreatePick: true,
+            noItemFoundErrorMessage: 'No volumes are available to remove'
+        });
     }
 
     let confirmRemove: string;

@@ -17,7 +17,10 @@ export async function runImageInteractive(context: IActionContext, node?: ImageT
 
 async function runImageCore(context: IActionContext, node: ImageTreeItem | undefined, interactive: boolean): Promise<void> {
     if (!node) {
-        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to run'
+        });
     }
 
     const inspectInfo = await node.getImage().inspect();

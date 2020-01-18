@@ -13,7 +13,12 @@ export async function removeImage(context: IActionContext, node: ImageTreeItem |
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.imagesTree.showTreeItemPicker(ImageTreeItem.contextValue, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.imagesTree.showTreeItemPicker(ImageTreeItem.contextValue, {
+            ...context,
+            canPickMany: true,
+            suppressCreatePick: true,
+            noItemFoundErrorMessage: 'No images are available to remove'
+        });
     }
 
     let confirmRemove: string;

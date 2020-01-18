@@ -9,7 +9,10 @@ import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
+        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
+            ...context,
+            noItemFoundErrorMessage: 'No continers are available to view logs'
+        });
     }
 
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);

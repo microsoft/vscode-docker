@@ -13,7 +13,10 @@ import { nonNullProp } from "../../utils/nonNull";
 
 export async function copyRemoteImageDigest(context: IActionContext, node?: DockerV2TagTreeItem | AzureTaskRunTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, context);
+        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, {
+            ...context,
+            noItemFoundErrorMessage: 'No remote images are available to copy the digest'
+        });
     }
 
     let digest: string;
