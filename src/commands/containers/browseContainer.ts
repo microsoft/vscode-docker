@@ -59,7 +59,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         node = await captureBrowseCancelStep('node', telemetryProperties, () =>
             ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
                 ...context,
-                noItemFoundErrorMessage: 'No running containers are available to open in browser.'
+                noItemFoundErrorMessage: 'No running containers are available to open in a browser'
             }));
     }
 

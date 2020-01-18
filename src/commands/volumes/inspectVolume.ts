@@ -9,7 +9,7 @@ import { VolumeTreeItem } from "../../tree/volumes/VolumeTreeItem";
 
 export async function inspectVolume(context: IActionContext, node?: VolumeTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: 'No volumes are available to inspect.' });
+        node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: 'No volumes are available to inspect' });
     }
 
     const inspectInfo = await node.getVolume().inspect();

@@ -17,7 +17,7 @@ export async function removeVolume(context: IActionContext, node: VolumeTreeItem
             ...context,
             canPickMany: true,
             suppressCreatePick: true,
-            noItemFoundErrorMessage: 'No volumes are available to remove.'
+            noItemFoundErrorMessage: 'No volumes are available to remove'
         });
     }
 

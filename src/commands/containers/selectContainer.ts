@@ -16,7 +16,7 @@ export async function selectContainer(context: IActionContext): Promise<string> 
 
     node = await ext.containersTree.showTreeItemPicker(/^runningContainer$/i, {
         ...context,
-        noItemFoundErrorMessage: 'No running containers are available.'
+        noItemFoundErrorMessage: 'No running containers are available'
     });
 
     return node.containerId;

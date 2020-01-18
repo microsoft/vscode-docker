@@ -16,7 +16,7 @@ export async function stopContainer(context: IActionContext, node: ContainerTree
         nodes = await ext.containersTree.showTreeItemPicker(/^(paused|restarting|running)Container$/i, {
             ...context,
             canPickMany: true,
-            noItemFoundErrorMessage: 'No containers are availble to stop.'
+            noItemFoundErrorMessage: 'No containers are availble to stop'
         });
     }
 
