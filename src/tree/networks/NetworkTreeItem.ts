@@ -5,18 +5,25 @@
 
 import { Network } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { builtInNetworks } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { LocalNetworkInfo } from "./LocalNetworkInfo";
 
 export class NetworkTreeItem extends AzExtTreeItem {
-    public static contextValue: string = 'network';
-    public contextValue: string = NetworkTreeItem.contextValue;
+    public static allContextRegExp: RegExp = /Network$/;
+    public static removeableNetworkRegExp: RegExp = /^removeableNetwork$/i;
+
     private readonly _item: LocalNetworkInfo;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: LocalNetworkInfo) {
         super(parent);
         this._item = itemInfo;
+    }
+
+    public get contextValue(): string {
+        const prefix = builtInNetworks.includes(this._item.networkName) ? 'unremoveable' : 'removeable';
+        return prefix + 'Network';
     }
 
     public get id(): string {

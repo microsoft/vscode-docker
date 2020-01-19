@@ -5,6 +5,7 @@
 
 import vscode = require('vscode');
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { builtInNetworks } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { NetworkTreeItem } from '../../tree/networks/NetworkTreeItem';
 
@@ -13,13 +14,13 @@ export async function removeNetwork(context: IActionContext, node: NetworkTreeIt
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.contextValue, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.removeableNetworkRegExp, { ...context, canPickMany: true, suppressCreatePick: true });
     }
 
-    if (nodes.some(node => ['bridge', 'host', 'none'].includes(node.networkName))) {
-        ext.ui.showWarningMessage("It's not possible to remove the built-in networks 'bridge', 'host', or 'none'");
-        nodes = nodes.filter((node) => !['bridge', 'host', 'none'].includes(node.networkName));
-    };
+    if (nodes.some(n => builtInNetworks.includes(n.networkName))) {
+        await ext.ui.showWarningMessage("The built-in networks 'bridge', 'host', and 'none' cannot be removed.");
+        nodes = nodes.filter(n => !builtInNetworks.includes(n.networkName));
+    }
 
     let confirmRemove: string;
     if (nodes.length === 0) {

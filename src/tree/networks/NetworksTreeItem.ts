@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { NetworkInspectInfo } from "dockerode";
+import { workspace } from "vscode";
+import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
@@ -12,9 +14,6 @@ import { LocalNetworkInfo } from "./LocalNetworkInfo";
 import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
 import { networkProperties, NetworkProperty } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
-
-import { workspace } from "vscode";
-import { configPrefix } from "../../constants";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, NetworkProperty> {
     public treePrefix: string = 'networks';
@@ -49,9 +48,7 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, Ne
         let networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
 
         if (hideBuiltInNetworks) {
-            networks = networks.filter((network) => {
-                !['bridge', 'host', 'none'].includes(network.Name);
-            })
+            networks = networks.filter(network => !builtInNetworks.includes(network.Name));
         }
 
         return networks.map(n => new LocalNetworkInfo(n));

@@ -9,7 +9,7 @@ import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.contextValue, context);
+        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.allContextRegExp, context);
     }
 
     // tslint:disable-next-line: no-unsafe-any
