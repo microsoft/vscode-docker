@@ -19,7 +19,6 @@ export async function inspectContainer(context: IActionContext, node?: Container
 
     const container = node.getContainer();
     // eslint-disable-next-line @typescript-eslint/promise-function-async
-    let inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
-
+    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
     await openReadOnlyJson(node, inspectInfo);
 }
