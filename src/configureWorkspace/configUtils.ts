@@ -47,14 +47,19 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
     return splitPorts(await ext.ui.showInputBox(opt));
 }
 
-function splitPorts(value: string): number[] | undefined {
-    value = value ? value : '';
-    let matches = value.match(/\d+/g);
+/**
+ * Splits a comma separated string of port numbers
+ */
+export function splitPorts(value: string): number[] | undefined {
+    if (!value || value === '') {
+        return [];
+    }
 
-    if (!matches && value !== '') {
+    let elements = value.split(',').map(p => p.trim());
+    let matches = elements.filter(p => p.match(/^-*\d+$/));
+
+    if (matches.length < elements.length) {
         return undefined;
-    } else if (!matches) {
-        return []; // Empty list
     }
 
     let ports = matches.map(Number);
