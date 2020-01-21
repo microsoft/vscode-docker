@@ -11,10 +11,13 @@ import { getDockerOSType } from '../../utils/osUtils';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
+        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
+            ...context,
+            noItemFoundErrorMessage: 'No containers are available to attach.'
+        });
     }
 
-    let osType = await getDockerOSType();
+    let osType = await getDockerOSType(context);
     context.telemetry.properties.dockerOSType = osType;
 
     let shellCommand: string;

@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerInspectInfo } from 'dockerode';
 import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { captureCancelStep } from '../../utils/captureCancelStep';
 
 type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[], selectedPort?: number };
@@ -63,7 +65,9 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
             }));
     }
 
-    const inspectInfo = await node.getContainer().inspect();
+    const container = node.getContainer();
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
 
     const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =

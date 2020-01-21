@@ -6,9 +6,9 @@
 import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { wrapDockerodeENOENT } from '../../utils/wrapDockerodeENOENT';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 
-export async function createNetwork(_context: IActionContext): Promise<void> {
+export async function createNetwork(context: IActionContext): Promise<void> {
 
     const name = await ext.ui.showInputBox({
         value: '',
@@ -36,7 +36,7 @@ export async function createNetwork(_context: IActionContext): Promise<void> {
     );
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const result = <{ id: string }>await wrapDockerodeENOENT(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }));
+    const result = <{ id: string }>await callDockerodeWithErrorHandling(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }), context);
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(`Network Created with ID ${result.id.substr(0, 12)}`);

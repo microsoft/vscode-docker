@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerInspectInfo } from "dockerode";
 import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 
 export async function inspectContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -15,6 +17,9 @@ export async function inspectContainer(context: IActionContext, node?: Container
         });
     }
 
-    const inspectInfo = await node.getContainer().inspect();
+    const container = node.getContainer();
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    let inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
+
     await openReadOnlyJson(node, inspectInfo);
 }

@@ -100,7 +100,11 @@ suite("Build Image", function (this: Suite): void {
     // Go
 
     testInEmptyFolder("Go", async function (this: Context) {
-        if (await shouldSkipDockerTest({ linuxContainers: true })) {
+        let context: IActionContext = {
+            telemetry: { properties: {}, measurements: {} },
+            errorHandling: { issueProperties: {} }
+        };
+        if (await shouldSkipDockerTest(context, { linuxContainers: true })) {
             this.skip();
             return;
         }
