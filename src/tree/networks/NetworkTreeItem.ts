@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Network } from "dockerode";
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { LocalNetworkInfo } from "./LocalNetworkInfo";
 
@@ -47,7 +48,9 @@ export class NetworkTreeItem extends AzExtTreeItem {
         return ext.dockerode.getNetwork(this.networkId);
     }
 
-    public async deleteTreeItemImpl(): Promise<void> {
-        await this.getNetwork().remove({ force: true });
+    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
+        const network: Network = this.getNetwork();
+        // eslint-disable-next-line @typescript-eslint/promise-function-async
+        await callDockerodeWithErrorHandling(() => network.remove({ force: true }), context);
     }
 }
