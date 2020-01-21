@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "0.9.1-alpha",
+    "version": "0.10.0",
     "preview": true,
     "publisher": "ms-azuretools",
     "displayName": "Docker",
