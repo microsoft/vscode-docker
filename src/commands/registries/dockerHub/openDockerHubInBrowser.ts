@@ -16,11 +16,7 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Doc
     if (!node) {
         node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, {
             ...context,
-<<<<<<< Updated upstream
             noItemFoundErrorMessage: 'No Docker Hub registries available to browse'
-=======
-            noItemFoundErrorMessage: 'No Docker Hub registries available to browse.'
->>>>>>> Stashed changes
         });
     }
 
