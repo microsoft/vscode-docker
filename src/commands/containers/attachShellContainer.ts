@@ -11,7 +11,7 @@ import { getDockerOSType } from '../../utils/osUtils';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
+        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
             noItemFoundErrorMessage: 'No containers are available to attach.'
         });
