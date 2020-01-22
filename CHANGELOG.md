@@ -4,12 +4,13 @@
 * Place Dockerfile next to project file for .NET projects [#592](https://github.com/microsoft/vscode-docker/issues/592)
 * Use container name in shell label [#1463](https://github.com/microsoft/vscode-docker/issues/1463)
 * Auto Refresh Azure Registry node after installing Azure Account extension [#1461](https://github.com/microsoft/vscode-docker/issues/1461)
-* Show only the applicable container groups in conatiner command execution using command palette [#1430](https://github.com/microsoft/vscode-docker/issues/1430)
+* Show only the applicable container groups in container command execution using command palette [#1430](https://github.com/microsoft/vscode-docker/issues/1430)
 * `Copy Full Tag` command added to image context menu and command palette [#1431](https://github.com/microsoft/vscode-docker/issues/1431)
 * pull latest image during docker build [#1409](https://github.com/microsoft/vscode-docker/issues/1409)
 
 ### Fixed
-* Use the default regisry value in `Docker push` [#1478](https://github.com/microsoft/vscode-docker/issues/1478)
+* Port validation during scaffolding [#1510](https://github.com/microsoft/vscode-docker/issues/1510)
+* Use the default registry value in `Docker push` [#1478](https://github.com/microsoft/vscode-docker/issues/1478)
 * Various other fixes and improvements: https://github.com/microsoft/vscode-docker/issues?q=is%3Aissue+milestone%3A0.10.0+is%3Aclosed
 
 ## 0.9.0 - 15 November 2019
