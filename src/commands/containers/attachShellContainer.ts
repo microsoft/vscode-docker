@@ -13,7 +13,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     if (!node) {
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No containers are available to attach.'
+            noItemFoundErrorMessage: 'No running containers are available to attach'
         });
     }
 
