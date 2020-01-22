@@ -1,3 +1,18 @@
+## 0.10.0 - 23 January 2020
+### Added
+* Better error handling in command execution [#1398](https://github.com/microsoft/vscode-docker/issues/1398), [#1528](https://github.com/microsoft/vscode-docker/issues/1528)
+* Place Dockerfile next to project file for .NET projects [#592](https://github.com/microsoft/vscode-docker/issues/592)
+* Use container name in shell label [#1463](https://github.com/microsoft/vscode-docker/issues/1463)
+* Auto Refresh Azure Registry node after installing Azure Account extension [#1461](https://github.com/microsoft/vscode-docker/issues/1461)
+* Show only the applicable container groups in container command execution using command palette [#1430](https://github.com/microsoft/vscode-docker/issues/1430)
+* `Copy Full Tag` command added to image context menu and command palette [#1431](https://github.com/microsoft/vscode-docker/issues/1431)
+* pull latest image during docker build [#1409](https://github.com/microsoft/vscode-docker/issues/1409)
+
+### Fixed
+* Port validation during scaffolding [#1510](https://github.com/microsoft/vscode-docker/issues/1510)
+* Use the default registry value in `Docker push` [#1478](https://github.com/microsoft/vscode-docker/issues/1478)
+* Various other fixes and improvements: https://github.com/microsoft/vscode-docker/issues?q=is%3Aissue+milestone%3A0.10.0+is%3Aclosed
+
 ## 0.9.0 - 15 November 2019
 ### Added
 * Task-based debugging for .NET Core and Node.js: [#1242](https://github.com/microsoft/vscode-docker/issues/1242)
