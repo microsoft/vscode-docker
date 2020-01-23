@@ -69,12 +69,12 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const openLink: string = 'Open Link';
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(createdNewWebApp, ...[openLink])
-        .then(selection => {
-            if (selection === openLink) {
-                env.openExternal(Uri.parse(siteUri));
-            }
-        });
+    window.showInformationMessage(createdNewWebApp, ...[openLink]).then((selection) => {
+        if (selection === openLink) {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            env.openExternal(Uri.parse(siteUri));
+        }
+    });
 }
 
 async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {
