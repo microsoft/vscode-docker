@@ -66,11 +66,11 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const createdNewWebApp: string = `Successfully created web app "${site.name}": ${siteUri}`;
     ext.outputChannel.appendLine(createdNewWebApp);
 
-    const openLink: string = 'Open Link';
+    const openSite: string = 'Open Site';
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(createdNewWebApp, ...[openLink]).then((selection) => {
-        if (selection === openLink) {
+    window.showInformationMessage(createdNewWebApp, ...[openSite]).then((selection) => {
+        if (selection === openSite) {
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             env.openExternal(Uri.parse(siteUri));
         }
