@@ -1,7 +1,7 @@
 jobs:
 - job: Windows
   pool:
-    vmImage: VS2017-Win2016
+    vmImage: windows-latest
   steps:
   - template: common/build.yml
   - template: common/webpack-prod.yml
@@ -10,7 +10,7 @@ jobs:
 
 - job: Linux
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-latest
   steps:
   - template: common/build.yml
   - template: common/webpack-prod.yml # This will also run during vsce package, but vscep pack doesn't show STDOUT so we won't see full errors there
@@ -20,7 +20,7 @@ jobs:
 
 - job: macOS
   pool:
-    vmImage: macOS 10.13
+    vmImage: macOS-latest
   steps:
   - template: common/build.yml
   - template: common/webpack-prod.yml
