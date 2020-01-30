@@ -1523,6 +1523,11 @@
                     "default": true,
                     "description": "Set to true to include --d (detached) option when docker-compose command is invoked"
                 },
+                "docker.dockerComposeProjectName": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Overrides the project name for Compose"
+                },
                 "docker.showRemoteWorkspaceWarning": {
                     "type": "boolean",
                     "default": true,

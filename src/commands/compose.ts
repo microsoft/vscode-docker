@@ -69,10 +69,15 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
     const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
     const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
 
+    let projectName: string = configOptions.get('dockerComposeProjectName', '');
+    if (projectName !== '') {
+        projectName = `-p "${projectName}"`;
+    }
+
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (let command of commands) {
         selectedItems.forEach((item: Item) => {
-            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
+            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose ${projectName} -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose ${projectName} -f "${item.file}" ${command}`);
         });
         terminal.show();
     }
