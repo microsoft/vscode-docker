@@ -84,14 +84,16 @@ export async function quickPickPlatform(platforms?: Platform[]): Promise<Platfor
     }
 
     platforms = platforms || [
-        'Go',
-        'Java',
         '.NET Core Console',
         'ASP.NET Core',
         'Node.js',
-        'Python',
-        'Ruby',
+        'Python: Django',
+        'Python: Flask',
+        'Python: General',
+        'Java',
         'C++',
+        'Go',
+        'Ruby',
         'Other'
     ];
 

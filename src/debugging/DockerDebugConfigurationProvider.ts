@@ -101,9 +101,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration.dockerOptions
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
             && resolvedConfiguration.dockerOptions.containerNameToKill) {
-            try {
-                await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
-            } catch { }
+
+            if (resolvedConfiguration.type !== 'python') {
+                try {
+                    await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
+                } catch { }
+            }
 
             // Now register the container for removal after the debug session ends
             const disposable = debug.onDidTerminateDebugSession(async session => {

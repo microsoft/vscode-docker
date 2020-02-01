@@ -12,11 +12,11 @@ import { PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 import { ScaffoldFile } from './scaffolding';
 
-export let configurePython: IPlatformGeneratorInfo = {
+export let configurePythonFlask: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPorts: [3000],
+  defaultPorts: [5000],
   initializeForDebugging: initializeForDebugging,
   genAdditionalFiles: genAdditionalFiles
 };
@@ -27,7 +27,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: string, os:
   return `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:alpine
 
-# Install pip requirements
+# Install uWSGI prereqs
+RUN apk add python3-dev build-base linux-headers pcre-dev
+
+# Using pip:
 ADD requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 
@@ -37,8 +40,9 @@ ${exposeStatements}
 WORKDIR /app
 ADD . /app
 
-RUN python3 -m pip install -r requirements.txt
-CMD ["python3", "-m", "${serviceNameAndRelativePath}"]
+CMD ["uwsgi", "-http", ":${
+    ports !== undefined ? ports[0] : 0
+  }", "-w", "wsgi:${serviceNameAndRelativePath}"]
 `;
 }
 
@@ -65,22 +69,28 @@ ${getComposePorts(ports)}`;
 }
 
 async function genAdditionalFiles(): Promise<ScaffoldFile[]> {
-  const contents = '# Add requirements when needed'
+    const contents = `Click==7.0
+Flask==1.1.1
+itsdangerous==1.1.0
+Jinja2==2.11.0
+MarkupSafe==1.1.1
+Werkzeug==0.16.1`;
   const fileName = 'requirements.txt'
 
   return [{ contents: contents, fileName: fileName }];
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports: number[]): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: folder,
       platform: 'python',
       actionContext: context,
-      dockerfile: dockerfile
+      dockerfile: dockerfile,
+      ports: ports
   }
 
   const pyOptions: PythonScaffoldingOptions = {
-      projectType: 'general',
+      projectType: 'flask',
       platformOS: platformOS
   }
 

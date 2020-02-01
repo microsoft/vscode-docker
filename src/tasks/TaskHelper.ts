@@ -18,6 +18,7 @@ import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDe
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
+import { pythonTaskHelper } from './python/PythonTaskHelper';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export type DockerTaskProviderName = 'docker-build' | 'docker-run';
@@ -39,6 +40,7 @@ export function throwIfCancellationRequested(context: DockerTaskContext): void {
 
 export interface DockerTaskScaffoldContext extends DockerTaskContext {
     dockerfile: string;
+    ports?: number[];
 }
 
 export interface DockerTaskExecutionContext extends DockerTaskContext {
@@ -69,7 +71,8 @@ export interface TaskHelper {
 export function registerTaskProviders(ctx: ExtensionContext): void {
     const helpers = {
         netCore: netCoreTaskHelper,
-        node: nodeTaskHelper
+        node: nodeTaskHelper,
+        python: pythonTaskHelper
     };
 
     ctx.subscriptions.push(

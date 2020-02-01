@@ -5,12 +5,14 @@
 
 export type PlatformOS = 'Windows' | 'Linux';
 export type Platform =
-    'Go' |
-    'Java' |
     '.NET Core Console' |
     'ASP.NET Core' |
     'Node.js' |
-    'Python' |
-    'Ruby' |
+    'Python: Django' |
+    'Python: Flask' |
+    'Python: General' |
+    'Java' |
     'C++' |
+    'Go' |
+    'Ruby' |
     'Other';

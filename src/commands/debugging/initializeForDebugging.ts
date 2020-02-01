@@ -11,10 +11,11 @@ import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../..
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
+import { PythonScaffoldingOptions } from '../../debugging/python/PythonDebugHelper';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
-    const platform = await quickPickPlatform(['Node.js', 'ASP.NET Core', '.NET Core Console']);
+    const platform = await quickPickPlatform(['Node.js', 'ASP.NET Core', '.NET Core Console', 'Python: Django', 'Python: Flask', 'Python: General']);
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
@@ -24,6 +25,11 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             break;
         case 'Node.js':
             debugPlatform = 'node';
+            break;
+        case 'Python: Django':
+        case 'Python: Flask':
+        case 'Python: General':
+            debugPlatform = 'python';
             break;
         default:
             throw new Error('The selected platform is not yet supported for debugging.');
@@ -48,6 +54,14 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             break;
         case 'node':
             await dockerDebugScaffoldingProvider.initializeNodeForDebugging(context);
+            break;
+        case 'python':
+            const pyOptions: PythonScaffoldingOptions = {
+                projectType: platform == "Python: Django" ? "django" :
+                             platform == "Python: Flask" ? "flask" : "general"
+            }
+
+            await dockerDebugScaffoldingProvider.initializePythonForDebugging(context, pyOptions);
             break;
         default:
     }

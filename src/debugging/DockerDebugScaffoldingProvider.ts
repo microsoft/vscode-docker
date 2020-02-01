@@ -9,17 +9,20 @@ import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
+import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
 import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
+import { pythonDebugHelper, PythonScaffoldingOptions } from './python/PythonDebugHelper';
 
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 
 export interface IDockerDebugScaffoldingProvider {
     initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void>;
     initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void>;
+    initializePythonForDebugging(context: DockerDebugScaffoldContext, options: PythonScaffoldingOptions): Promise<void>;
 }
 
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
@@ -39,6 +42,14 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
             () => nodeTaskHelper.provideDockerBuildTasks(context),
             () => nodeTaskHelper.provideDockerRunTasks(context));
         /* eslint-enable @typescript-eslint/promise-function-async */
+    }
+
+    public async initializePythonForDebugging(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<void> {
+        await this.initializeForDebugging(
+            () => pythonDebugHelper.provideDebugConfigurations(context, options),
+            () => pythonTaskHelper.provideDockerBuildTasks(context, options),
+            () => pythonTaskHelper.provideDockerRunTasks(context, options)
+        );
     }
 
     private async initializeForDebugging(

@@ -18,6 +18,8 @@ import { configureJava } from './configureJava';
 import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
+import { configurePythonDjango } from './configurePythonDjango';
+import { configurePythonFlask } from './configurePythonFlask';
 import { configureRuby } from './configureRuby';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth, quickPickGenerateComposeFiles } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
@@ -49,6 +51,7 @@ export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
     genDockerComposeDebug: GeneratorFunction,
+    genAdditionalFiles?: AdditionalFilesFunction | undefined,
     defaultPorts: number[] | undefined, // [] = defaults to empty but still asks user if they want a port, undefined = don't ask at all
     initializeForDebugging: DebugScaffoldFunction | undefined,
 }
@@ -89,11 +92,13 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
 
 registerScaffolder('.NET Core Console', scaffoldNetCore);
 registerScaffolder('ASP.NET Core', scaffoldNetCore);
+registerScaffolder('Node.js', configureScaffolder(configureNode));
+registerScaffolder('Python: General', configureScaffolder(configurePython));
+registerScaffolder('Python: Django', configureScaffolder(configurePythonDjango));
+registerScaffolder('Python: Flask', configureScaffolder(configurePythonFlask));
+registerScaffolder('Java', configureScaffolder(configureJava));
 registerScaffolder('C++', configureScaffolder(configureCpp));
 registerScaffolder('Go', configureScaffolder(configureGo));
-registerScaffolder('Java', configureScaffolder(configureJava));
-registerScaffolder('Node.js', configureScaffolder(configureNode));
-registerScaffolder('Python', configureScaffolder(configurePython));
 registerScaffolder('Ruby', configureScaffolder(configureRuby));
 registerScaffolder('Other', configureScaffolder(configureOther));
 
@@ -102,7 +107,9 @@ generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
 generatorsByPlatform.set('Node.js', configureNode);
-generatorsByPlatform.set('Python', configurePython);
+generatorsByPlatform.set('Python: Django', configurePythonDjango);
+generatorsByPlatform.set('Python: Flask', configurePythonFlask);
+generatorsByPlatform.set('Python: General', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('Other', configureOther);
 
@@ -255,7 +262,8 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
 }
 
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
-type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo) => Promise<void>;
+type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports?: number[]) => Promise<void>;
+type AdditionalFilesFunction = (folder: vscode.WorkspaceFolder) => Promise<ScaffoldFile[]>;
 
 const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComposeGenerator?: boolean } } = {
     'docker-compose.yml': { generator: genDockerCompose, isComposeGenerator: true },
@@ -348,7 +356,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
 
     let generateComposeFiles = true;
 
-    if (platformType === 'Node.js') {
+    if (shouldPromptForComposeFiles(platformType)) {
         generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
         if (generateComposeFiles) {
             properties.orchestration = 'docker-compose';
@@ -408,9 +416,14 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
             : Promise.resolve();
     }));
 
+    if (generatorInfo.genAdditionalFiles) {
+        let additionalFiles = await generatorInfo.genAdditionalFiles(options.folder);
+        filesWritten = filesWritten.concat(additionalFiles);
+    }
+
     // Can only configure for debugging if there's a workspace folder, and there's a scaffold function
     if (options.folder && context.initializeForDebugging && generatorInfo.initializeForDebugging) {
-        await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo);
+        await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo, ports);
     }
 
     return filesWritten;
@@ -421,5 +434,12 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
         if (fileContents) {
             filesWritten.push({ contents: fileContents, fileName });
         }
+    }
+
+    function shouldPromptForComposeFiles(platformType: Platform) : boolean {
+        return platformType === "Node.js" ||
+               platformType === "Python: General" ||
+               platformType === "Python: Django" ||
+               platformType === "Python: Flask";
     }
 }

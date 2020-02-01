@@ -1190,9 +1190,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     suite("Python", () => {
         testInEmptyFolder("Python", async () => {
             await testConfigureDocker(
-                'Python',
+                'Python: General',
                 {
-                    configurePlatform: 'Python',
+                    configurePlatform: 'Python: General',
                     configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined

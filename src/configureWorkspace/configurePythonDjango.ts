@@ -12,11 +12,11 @@ import { PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 import { ScaffoldFile } from './scaffolding';
 
-export let configurePython: IPlatformGeneratorInfo = {
+export let configurePythonDjango: IPlatformGeneratorInfo = {
   genDockerFile,
   genDockerCompose,
   genDockerComposeDebug,
-  defaultPorts: [3000],
+  defaultPorts: [8000],
   initializeForDebugging: initializeForDebugging,
   genAdditionalFiles: genAdditionalFiles
 };
@@ -26,6 +26,9 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: string, os:
 
   return `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:alpine
+
+# Install uWSGI prereqs
+RUN apk add python3-dev build-base linux-headers pcre-dev
 
 # Install pip requirements
 ADD requirements.txt .
@@ -37,8 +40,9 @@ ${exposeStatements}
 WORKDIR /app
 ADD . /app
 
-RUN python3 -m pip install -r requirements.txt
-CMD ["python3", "-m", "${serviceNameAndRelativePath}"]
+CMD ["uwsgi", "-http", ":${
+    ports !== undefined ? ports[0] : 0
+  }", "--module", "${serviceNameAndRelativePath}.wsgi"]
 `;
 }
 
@@ -65,22 +69,27 @@ ${getComposePorts(ports)}`;
 }
 
 async function genAdditionalFiles(): Promise<ScaffoldFile[]> {
-  const contents = '# Add requirements when needed'
+    const contents = `asgiref==3.2.3
+Django==3.0.2
+pytz==2019.3
+sqlparse==0.3.0
+uWSGI==2.0.18`;
   const fileName = 'requirements.txt'
 
   return [{ contents: contents, fileName: fileName }];
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports: number[]): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: folder,
       platform: 'python',
       actionContext: context,
-      dockerfile: dockerfile
+      dockerfile: dockerfile,
+      ports: ports
   }
 
   const pyOptions: PythonScaffoldingOptions = {
-      projectType: 'general',
+      projectType: 'django',
       platformOS: platformOS
   }
 
