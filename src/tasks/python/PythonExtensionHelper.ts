@@ -5,7 +5,6 @@
 
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
-import * as path from "path";
 import { extensions } from "vscode";
 
 export namespace PythonExtensionHelper {
@@ -23,7 +22,7 @@ export namespace PythonExtensionHelper {
     wait?: boolean;
   }
 
-  export async function getRemoteLauncherCommand(target: FileTarget | ModuleTarget, args?: string[], options?: DebugLaunchOptions): Promise<string> {
+  export function getRemoteLauncherCommand(target: FileTarget | ModuleTarget, args?: string[], options?: DebugLaunchOptions): string {
     let fullTarget: string;
     if ((target as FileTarget).file) {
       fullTarget = (target as FileTarget).file;
@@ -39,12 +38,10 @@ export namespace PythonExtensionHelper {
     options.wait = !!options.wait;
     args = args || [];
 
-    const launcherFolder = await getLauncherFolderPath();
-
-    return `python ${path.join(launcherFolder,"ptvsd")} --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
+    return `/pydbg/ptvsd --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
   }
 
-  export async function getLauncherFolderPath(): Promise<string> {
+  export function getLauncherFolderPath(): string {
     const pyExt = extensions.getExtension("ms-python.python");
 
     if (!pyExt) {

@@ -11,6 +11,7 @@ import { PythonScaffoldingOptions } from '../debugging/python/PythonDebugHelper'
 import { PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 import { ScaffoldFile } from './scaffolding';
+import { PythonExtensionHelper } from '../tasks/python/PythonExtensionHelper';
 
 export let configurePythonDjango: IPlatformGeneratorInfo = {
   genDockerFile,
@@ -57,6 +58,26 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
+  const defaultDebugPort = 5678;
+  const defaultDebugOptions : PythonExtensionHelper.DebugLaunchOptions =
+  {
+    host: "0.0.0.0",
+    port: defaultDebugPort,
+    wait: true
+  };
+
+  const file : PythonExtensionHelper.FileTarget =
+  {
+    file: "manage.py"
+  };
+  const args = [
+    "runserver",
+    `0.0.0.0:${ports ? ports[0] : 8000}`
+  ];
+
+  const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(file, args, defaultDebugOptions);
+  const entrypoint = 'python '.concat(launcherCommand);
+
   return `version: '2.1'
 
 services:
@@ -65,7 +86,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-${getComposePorts(ports)}`;
+    volumes:
+      - ${PythonExtensionHelper.getLauncherFolderPath()}:/pydbg
+    entrypoint: ${entrypoint}
+${getComposePorts(ports.concat(defaultDebugPort))}`;
 }
 
 async function genAdditionalFiles(): Promise<ScaffoldFile[]> {

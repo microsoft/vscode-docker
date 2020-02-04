@@ -58,7 +58,7 @@ export class PythonTaskHelper implements TaskHelper {
       ? { file: helperOptions.file }
       : { module: helperOptions.module };
 
-    const launcherCommand = await PythonExtensionHelper.getRemoteLauncherCommand(
+    const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(
       target,
       helperOptions.args,
       {
@@ -67,7 +67,7 @@ export class PythonTaskHelper implements TaskHelper {
         wait: helperOptions.wait === undefined ? true : helperOptions.wait
       }
     );
-    const launcherFolder = await PythonExtensionHelper.getLauncherFolderPath();
+    const launcherFolder = PythonExtensionHelper.getLauncherFolderPath();
 
     runOptions.image = inferImageName(
       runDefinition as DockerRunTaskDefinition,
@@ -77,10 +77,10 @@ export class PythonTaskHelper implements TaskHelper {
 
     runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
 
-    runOptions.volumes = await this.inferVolumes(runOptions, launcherFolder); // This method internally checks the user-defined input first
-    runOptions.ports = await this.inferPorts(runOptions, helperOptions); // This method internally checks the user-defined input first
-    runOptions.entrypoint = runOptions.entrypoint || await this.inferEntrypoint(launcherCommand);
-    runOptions.command = runOptions.command || await this.inferCommand(launcherCommand, launcherFolder);
+    runOptions.volumes = this.inferVolumes(runOptions, launcherFolder); // This method internally checks the user-defined input first
+    runOptions.ports = this.inferPorts(runOptions, helperOptions); // This method internally checks the user-defined input first
+    runOptions.entrypoint = runOptions.entrypoint || "python";
+    runOptions.command = runOptions.command || launcherCommand;
 
     runOptions.env = this.addDebuggerEnvironmentVar(runOptions.env, context.folder.name);
     runOptions.portsPublishAll = runOptions.portsPublishAll || true;
@@ -124,7 +124,7 @@ export class PythonTaskHelper implements TaskHelper {
     ];
   }
 
-  private async inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): Promise<DockerContainerVolume[]> {
+  private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
     const volumes: DockerContainerVolume[] = [];
 
     if (runOptions.volumes) {
@@ -144,7 +144,7 @@ export class PythonTaskHelper implements TaskHelper {
     return volumes;
   }
 
-  private async inferPorts(runOptions: DockerRunOptions, pythonOptions: PythonTaskRunOptions): Promise<DockerContainerPort[]> {
+  private inferPorts(runOptions: DockerRunOptions, pythonOptions: PythonTaskRunOptions): DockerContainerPort[] {
     const ports: DockerContainerPort[] = [];
     const debugPort = pythonOptions.debugPort || 5678;
 
@@ -163,26 +163,6 @@ export class PythonTaskHelper implements TaskHelper {
     }
 
     return ports;
-  }
-
-  private async inferEntrypoint(launcherCommand: string): Promise<string> {
-    const parts = launcherCommand.split(/\s/i);
-    const dbgEntrypoint = parts.length > 0 ? parts[0] : undefined;
-
-    return dbgEntrypoint;
-  }
-
-  private async inferCommand(launcherCommand: string, launcherFolder: string): Promise<string> {
-    let parts = launcherCommand.split(/\s/i);
-    parts = parts.map((part: string) => {
-      if (part.includes(launcherFolder)) {
-          return part.replace(launcherFolder, "/pydbg").replace(/\\/g, "/");
-      }
-
-      return part;
-    });
-
-    return parts.slice(1).join(" ");
   }
 
   private inferArgs(projectType: PythonProjectType, context: DockerTaskScaffoldContext): string[] | undefined {
