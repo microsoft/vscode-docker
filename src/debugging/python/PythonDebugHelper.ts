@@ -51,7 +51,9 @@ export class PythonDebugHelper implements DebugHelper {
     options?: PythonScaffoldingOptions
   ): Promise<DockerDebugConfiguration[]> {
     // tslint:disable: no-invalid-template-strings
-    return [
+
+    let configs = [];
+    configs.push(
       {
         name: "Docker: Python Launch and Attach",
         type: "docker",
@@ -67,8 +69,26 @@ export class PythonDebugHelper implements DebugHelper {
           ],
           projectType: options.projectType
         }
-      }
-    ];
+      });
+
+    if (context.generateComposeTask == true){
+      configs.push(
+      {
+        name: "Python: Remote Attach",
+        type: "python",
+        request: "attach",
+        host: "localhost",
+        port: 5678,
+        pathMappings: [
+          {
+            localRoot: "${workspaceFolder}",
+            remoteRoot: "/app"
+          }
+        ]
+      });
+    }
+
+    return configs;
   }
 
   // tslint:disable-next-line: max-func-body-length
@@ -91,7 +111,7 @@ export class PythonDebugHelper implements DebugHelper {
         );
       } catch {}
 
-    const debuggerSemaphoreFilePath = await this.getSemaphoreFilePath(context.folder.name, this.localOsProvider.os);
+    const debuggerSemaphoreFilePath = this.getSemaphoreFilePath(context.folder.name, this.localOsProvider.os);
     await fse.remove(debuggerSemaphoreFilePath);
 
     let debuggerReadyPromise = new Promise((resolve) => resolve());
@@ -105,7 +125,7 @@ export class PythonDebugHelper implements DebugHelper {
       debugConfiguration.preLaunchTask = null;
 
       vscode.tasks.executeTask(task);
-      debuggerReadyPromise = this.ensureDebuggerReady(task, debuggerSemaphoreFilePath);
+      debuggerReadyPromise = this.ensureDebuggerReady(task, debuggerSemaphoreFilePath, containerName);
     }
 
     return await debuggerReadyPromise.then(() => {
@@ -183,21 +203,28 @@ export class PythonDebugHelper implements DebugHelper {
     }
   }
 
-  private async getSemaphoreFilePath(folderName: string, os: PlatformOS) : Promise<string> {
-    const launcherPath = await PythonExtensionHelper.getLauncherFolderPath();
+  private getSemaphoreFilePath(folderName: string, os: PlatformOS) : string {
+    const launcherPath = PythonExtensionHelper.getLauncherFolderPath();
     const filePath = launcherPath + `\\ptvsd\\dbg_${folderName}.sem`;
 
     return filePath.replace(/\\/g, "/");
   }
 
-  private async ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string): Promise<void> {
+  private async ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string): Promise<void> {
     return new Promise((resolve, reject) => {
       vscode.tasks.onDidEndTask(async e => {
         if (e.execution.task === prelaunchTask) {
+          const inspect = await this.cliDockerClient.inspectObject(containerName, { format: "{{.State.Running}}" });
+
+          if (inspect == "false"){
+            reject("Failed to attach the debugger, please see the terminal output for more details.");
+          }
+
+          const maxRetriesCount = 20;
           let retries = 0;
           let created = false;
 
-          while (++retries < 50 && !created) {
+          while (++retries < maxRetriesCount && !created) {
               created = await fse.pathExists(debuggerSemaphorePath);
               await fse.remove(debuggerSemaphorePath);
 
@@ -207,7 +234,7 @@ export class PythonDebugHelper implements DebugHelper {
           if (created) {
             resolve();
           } else {
-            reject();
+            reject("Failed to attach the debugger within the alotted timeout.");
           }
       }});
     })

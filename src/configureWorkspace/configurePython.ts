@@ -92,12 +92,13 @@ async function genAdditionalFiles(): Promise<ScaffoldFile[]> {
   return [{ contents: contents, fileName: fileName }];
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports: number[], generateComposeFiles: boolean): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: folder,
       platform: 'python',
       actionContext: context,
-      dockerfile: dockerfile
+      dockerfile: dockerfile,
+      generateComposeTask: generateComposeFiles
   }
 
   const pyOptions: PythonScaffoldingOptions = {

@@ -41,6 +41,7 @@ export function throwIfCancellationRequested(context: DockerTaskContext): void {
 export interface DockerTaskScaffoldContext extends DockerTaskContext {
     dockerfile: string;
     ports?: number[];
+    generateComposeTask?: boolean;
 }
 
 export interface DockerTaskExecutionContext extends DockerTaskContext {

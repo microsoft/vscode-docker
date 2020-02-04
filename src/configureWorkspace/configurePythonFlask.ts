@@ -100,13 +100,14 @@ Werkzeug==0.16.1`;
   return [{ contents: contents, fileName: fileName }];
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports: number[]): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports: number[], generateComposeFiles: boolean): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: folder,
       platform: 'python',
       actionContext: context,
       dockerfile: dockerfile,
-      ports: ports
+      ports: ports,
+      generateComposeTask: generateComposeFiles
   }
 
   const pyOptions: PythonScaffoldingOptions = {

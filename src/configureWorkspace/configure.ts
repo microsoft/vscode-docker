@@ -262,7 +262,7 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
 }
 
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
-type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports?: number[]) => Promise<void>;
+type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo, ports?: number[], generateCompose?: boolean) => Promise<void>;
 type AdditionalFilesFunction = (folder: vscode.WorkspaceFolder) => Promise<ScaffoldFile[]>;
 
 const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComposeGenerator?: boolean } } = {
@@ -423,7 +423,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
 
     // Can only configure for debugging if there's a workspace folder, and there's a scaffold function
     if (options.folder && context.initializeForDebugging && generatorInfo.initializeForDebugging) {
-        await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo, ports);
+        await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo, ports, generateComposeFiles);
     }
 
     return filesWritten;
