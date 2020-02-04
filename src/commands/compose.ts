@@ -78,11 +78,15 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (let command of commands) {
-        const fileParameter: string = selectedItems.map(i => `-f "${i.file}"`).join(' ');
-        terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose ${fileParameter} ${command} ${detached} ${build}` : `docker-compose ${fileParameter} ${command}`);
+        if (selectedItems.length === 0) {
+            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose ${command} ${detached} ${build}` : `docker-compose ${command}`);
+        } else {
+            selectedItems.forEach((item: Item) => {
+                terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
+            });
+        }
         terminal.show();
     }
-
 }
 
 function isDefaultDockerComposeFile(fileName: string): boolean {
