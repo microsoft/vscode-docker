@@ -2,104 +2,91 @@
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/Nightly/vscode-docker-nightly-2?branchName=master)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=22&branchName=master)
 
-The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code. Check out the ["Working with Docker" tutorial](https://code.visualstudio.com/docs/azure/docker) to get started.
+The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code.
 
-**Visit the [wiki](https://github.com/Microsoft/vscode-docker/wiki) for additional information about the extension.**
+**Check out [Working with containers](https://code.visualstudio.com/docs/containers/overview) topic on Visual Studio Code documentation site to get started**.
 
-## Prerequisites
+[The Docker extension wiki](https://github.com/Microsoft/vscode-docker/wiki) has troubleshooting tips and additional technical information.
 
-Install [Docker](https://aka.ms/AA37qtj) on your machine and add it to the system path.
+## Installation
 
-On Linux, you must also follow the steps in “Manage Docker as a non-root user” from [Post-installation steps for Linux](https://aka.ms/AA37yk6) because VS Code runs as a non-root user.
+[Install Docker](https://docs.docker.com/install/) on your machine and add it to the system path.
 
-## Features
+On Linux, you should also [enable Docker CLI for the non-root user account](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user) that will be used to run VS Code.
 
-* Automatic `Dockerfile`, `docker-compose.yml`, and `.dockerignore` file generation (Open the command Palette, <kbd>F1</kbd> by default, and search for `Docker: Add Docker files to Workspace`)
-* Syntax highlighting, hover tips, IntelliSense (completions) for `docker-compose.yml` and `Dockerfile` files
-* Linting (errors and warnings) for `Dockerfile` files
-* Command Palette (<kbd>F1</kbd> by default) integration for the most common Docker commands (for example `docker build`, `docker push`, etc.)
-* Explorer integration for managing images, containers, registries, and more
-* Deploy images from a registry directly to Azure App Service
-* [Debug .NET Core applications](https://aka.ms/AA6jdzn) running in Linux Docker containers
+To install the extension, open the Extensions view, search for `docker` to filter results and select Docker extension authored by Microsoft.
 
-### Generating Docker Files
+## Overview of the extension features
 
-Press <kbd>F1</kbd> (by default) and search for `Docker: Add Docker Files to Workspace` to generate `Dockerfile`, `docker-compose.yml`, `docker-compose.debug.yml`, and `.dockerignore` files for your workspace type:
+### Editing Docker files
 
-![dockerfile](resources/readme/generateFiles.gif)
+You can get IntelliSense when editing your `Dockerfile` and `docker-compose.yml` files, with completions and syntax help for common commands.
 
-> Note: The `docker-compose.yml` and `docker-compose.debug.yml` files are not generated for all platforms, such as .NET Core applications, and are optional for Node.js applications.
+![IntelliSense for Dockerfiles](resources/readme/dockerfile-intellisense.png)
 
-### Editing
+In addition, you can use the Problems panel (`kb(workbench.actions.view.problems)`) to view common errors for `Dockerfile` and `docker-compose.yml` files.
 
-Rich IntelliSense (completions) for `Dockerfile` and `docker-compose.yml` files:
+### Generating Docker files
 
-![IntelliSense for DockerFiles](resources/readme/intelliSense.gif)
+You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate `Dockerfile` and `.dockerignore` files and add them to your workspace. The command will also query you if you want the Docker Compose files added as well; this is optional.
 
-### Docker Commands
+The extension recognizes workspaces that use most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes generated Docker files accordingly.
 
-Many of the most common Docker commands are built right into the Command Palette (<kbd>F1</kbd> by default):
+### Docker view
 
-![commands](resources/readme/commands.png)
+The Docker extension contributes a Docker view to VS Code. The Docker view lets you examine and manage Docker assets: containers, images, volumes, networks, and container registries. If the Azure Account extension is installed, you can browse your Azure Container Registries as well.
 
-### Docker View
+The right-click menu provides access to commonly used commands for each type of asset.
 
-The Docker extension contributes explorers to view and manage containers, images, registries, volumes, and networks. The right click context menus provide quick access to the same rich set of commands found in the Command Palette (<kbd>F1</kbd> by default).
+![Docker view context menu](resources/readme/docker-view-context-menu.gif)
 
-![explorers](resources/readme/explorers.png)
+You can rearrange the Docker view panes by dragging them up or down with a mouse and use the context menu to hide or show them.
 
-**TIP**: You can reorder the explorers by clicking and dragging on the explorer title. You can also hide the entire view by right clicking on the Docker icon or hide individual explorers by right clicking on the explorer title.
+![Customize Docker view](resources/readme/docker-view-rearrange.gif)
 
-![hideView](resources/readme/hideView.png) ![hideExplorer](resources/readme/hideExplorer.png)
+### Docker commands
 
-### Debugging in Containers
+Many of the most common Docker commands are built right into the Command Palette:
 
-With the Docker extension installed, you can easily debug .NET Core and Node.js apps within a container. Debugging support is enabled automatically when you dockerize your code with `Docker: Add Docker Files to Workspace`. To enable debugging for code that's already dockerized, open the Command Palette (<kbd>F1</kbd> by default) and do `Docker: Initialize for Docker Debugging`.
+![Docker commands](resources/readme/command-palette.png)
 
-![debugging](resources/readme/debugging.gif)
+You can run Docker commands to manage [images](https://docs.docker.com/engine/reference/commandline/image/), [networks](https://docs.docker.com/engine/reference/commandline/network/), [volumes](https://docs.docker.com/engine/reference/commandline/volume/), [image registries](https://docs.docker.com/engine/reference/commandline/push/), and [Docker Compose](https://docs.docker.com/compose/reference/overview/). In addition, the **Docker: Prune System** command will remove stopped containers, dangling images, and unused networks and volumes.
 
-### Tasks
 
-Use Visual Studio Code's tasks to build and launch Docker containers with custom settings like ports, volumes, networks, etc.
+### Docker Compose
 
-![tasks](resources/readme/tasks.gif)
+[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Visual Studio Code's experience for authoring `docker-compose.yml` is very rich, providing IntelliSense for valid Docker compose directives:
 
-### Registries
+ ![Docker Compose IntelliSense](resources/readme/dockercomposeintellisense.png)
 
-The first time you expand the registries explorer you'll be prompted to connect a registry. This will prompt you for credentials based on your provider (Azure, Docker Hub, etc.). These credentials will be stored in your operating system credentials vault (for example macOS keychain, Windows Credential Store) so that you don't need to sign in every time. You can right click on a registry provider to disconnect it and remove credentials from the OS store.
+For the `image` directive, you can press <kbd>ctrl+space</kbd> and VS Code will query the Docker Hub index for public images:
 
-> **NOTE**: Azure leverages the [Azure Account Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.azure-account) instead of storing Docker-specific credentials. After connecting Azure, you will be prompted separately to install that extension and/or sign in.
+ ![Docker Compose image suggestions](resources/readme/dockercomposeimageintellisense.png)
 
-### Deploy images to Azure App Service
+VS Code will first show a list of popular images along with metadata such as the number of stars and description. If you continue typing, VS Code will query the Docker Hub index for matching images, including searching public profiles. For example, searching for 'Microsoft' will show you all the public Microsoft images.
 
-With the Docker Explorer you can deploy images from Docker Hub Registries or Azure Container Registries directly to an Azure App Service instance. Check out [this tutorial](https://code.visualstudio.com/tutorials/docker-extension/getting-started) to get started.
+ ![Docker Compose Microsoft image suggestions](resources/readme/dockercomposesearch.png)
 
-### Azure CLI
 
-Microsoft ships the latest [Azure CLI](https://github.com/azure/azure-cli) as a [Docker image](https://hub.docker.com/r/azuresdk/azure-cli-python/). You can easily launch a container running the CLI from the Command Palette (press <kbd>F1</kbd> by default and search for `Docker Images: Run Azure CLI`). The extension will then run an interactive terminal attached to the container.
+### Using image registries
 
-After the container is started, you will be prompted to sign in to your Azure account. From there, set the subscription you want to work with using `az account set` (you can see all of your subscriptions with `az account list`). You do not need to sign in every time you run the container because the extension volume mounts the local `$HOME/.azure` folder to the container's `$HOME/.azure` folder.
+You can display the content and push/pull/delete images from [Docker Hub](https://hub.docker.com/) and [Azure Container Registry](https://docs.microsoft.com/azure/container-registry/):
 
-### Connect to `docker-machine`
+![Azure Container Registry content](resources/readme/container-registry.png)
 
-The default behavior of the extension is to connect to the local Docker daemon. You can connect to a docker-machine instance if you launch Visual Studio Code and have the [Docker environment variables](https://docs.docker.com/machine/reference/env/) set in your environment or through the following VS Code settings: `docker.host`, `docker.certPath`, `docker.tlsVerify`, and `docker.machineName`.
+An image in an Azure Container Registry can be deployed to Azure App Service directly from VS Code; see [Deploy images to Azure App Service](https://code.visualstudio.com/docs/containers/app-service) page. For more information about how to authenticate to and work with registries see [Using container registries](https://code.visualstudio.com/docs/containers/quickstart-container-registries) page.
+
+### Debugging services running inside a container
+
+You can debug services built using .NET (C#) and Node.js that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://code.visualstudio.com/docs/containers/debug-common)  and [Extension Properties and Tasks](https://code.visualstudio.com/docs/containers/reference) pages.
+
+### Azure CLI integration
+
+You can start Azure CLI (command-line interface) in a standalone, Linux-based container with **Docker Images: Run Azure CLI** command. This allows access to full Azure CLI command set in an isolated environment. See [Get started with Azure CLI](https://docs.microsoft.com/cli/azure/get-started-with-azure-cli?view=azure-cli-latest#sign-in) page for more information on available commands.
 
 ## Contributing
 
-There are a couple of ways you can contribute to this repo:
-
-* **Ideas, feature requests, and bugs**: We are open to all ideas and we want to get rid of bugs! Use the Issues section to either report a new issue, provide your ideas or contribute to existing threads.
-* **Documentation**: Found a typo or strangely worded sentences? Submit a PR!
-* **Code**: Contribute bug fixes, features, or design changes:
-  * Clone the repository locally and open in VS Code.
-  * Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
-  * Open the terminal (<kbd>CTRL</kbd>+ <kbd>\`</kbd> by default) and run `npm install`.
-  * To build, open the Command Palette (<kbd>F1</kbd> by default) and type in `Tasks: Run Build Task`.
-  * Debug: press <kbd>F5</kbd> (by default) to start debugging the extension.
-
-### Legal
-
-Before we can accept your pull request you will need to sign a **Contribution License Agreement**. All you need to do is to submit a pull request, then the PR will get appropriately labelled (e.g. `cla-required`, `cla-norequired`, `cla-signed`, `cla-already-signed`). If you already signed the agreement we will continue with reviewing the PR, otherwise system will tell you how you can sign the CLA. Once you sign the CLA all future PR's will be labeled as `cla-signed`.
+See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the extension. Thank you!
 
 ### Code of Conduct
 
