@@ -17,8 +17,7 @@ import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
 export type PythonProjectType = "django" | "flask" | "general";
 export interface PythonScaffoldingOptions {
   projectType?: PythonProjectType;
-  platformOS?: PlatformOS;
-  filePath?: string
+  target?: PythonExtensionHelper.FileTarget | PythonExtensionHelper.ModuleTarget
 };
 
 export interface PythonPathMapping {
@@ -115,7 +114,7 @@ export class PythonDebugHelper implements DebugHelper {
         throw new Error(`Unable to find the prelaunch task with the name ${debugConfiguration.preLaunchTask}`);
       }
 
-      debugConfiguration.preLaunchTask = null;
+      debugConfiguration.preLaunchTask = undefined;
 
       vscode.tasks.executeTask(task);
       debuggerReadyPromise = this.ensureDebuggerReady(task, debuggerSemaphoreFilePath, containerName);
@@ -138,7 +137,7 @@ export class PythonDebugHelper implements DebugHelper {
                                       },
                                      true);
 
-    let debugOptions = ["FixFilePathCase"];
+    let debugOptions = ["FixFilePathCase", "RedirectOutput", "ShowReturnValue"];
 
     if (this.localOsProvider.os === "Windows"){
       debugOptions.push("WindowsClient");
@@ -161,8 +160,6 @@ export class PythonDebugHelper implements DebugHelper {
         dockerServerReadyAction: dockerServerReadyAction,
         removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
       },
-      showReturnValue: true,
-      redirectOutput: true,
       debugOptions: debugOptions
     };
   }
@@ -213,22 +210,24 @@ export class PythonDebugHelper implements DebugHelper {
             reject("Failed to attach the debugger, please see the terminal output for more details.");
           }
 
-          const maxRetriesCount = 20;
-          let retries = 0;
-          let created = false;
+          await delay(3000);
+          resolve();
+          // const maxRetriesCount = 20;
+          // let retries = 0;
+          // let created = false;
 
-          while (++retries < maxRetriesCount && !created) {
-              created = await fse.pathExists(debuggerSemaphorePath);
-              await fse.remove(debuggerSemaphorePath);
+          // while (++retries < maxRetriesCount && !created) {
+          //     created = await fse.pathExists(debuggerSemaphorePath);
+          //     await fse.remove(debuggerSemaphorePath);
 
-              await delay(500);
-          }
+          //     await delay(500);
+          // }
 
-          if (created) {
-            resolve();
-          } else {
-            reject("Failed to attach the debugger within the alotted timeout.");
-          }
+          // if (created) {
+          //   resolve();
+          // } else {
+          //   reject("Failed to attach the debugger within the alotted timeout.");
+          // }
       }});
     })
   }

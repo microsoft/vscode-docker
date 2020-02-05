@@ -12,6 +12,7 @@ import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { PythonScaffoldingOptions } from '../../debugging/python/PythonDebugHelper';
+import { promptForLaunchFile } from '../../configureWorkspace/configurePython';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
@@ -58,7 +59,8 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
         case 'python':
             const pyOptions: PythonScaffoldingOptions = {
                 projectType: platform == "Python: Django" ? "django" :
-                             platform == "Python: Flask" ? "flask" : "general"
+                             platform == "Python: Flask" ? "flask" : "general",
+                target: await promptForLaunchFile(platform)
             }
 
             await dockerDebugScaffoldingProvider.initializePythonForDebugging(context, pyOptions);

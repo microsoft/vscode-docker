@@ -39,7 +39,7 @@ export namespace PythonExtensionHelper {
     options.wait = !!options.wait;
     args = args || [];
 
-    return `/pydbg/ptvsd_launcher.py --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
+    return `/pydbg/ptvsd_launcher.py --default --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
   }
 
   export function getLauncherFolderPath(): string {

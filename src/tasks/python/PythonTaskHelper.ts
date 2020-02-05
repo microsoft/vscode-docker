@@ -113,12 +113,11 @@ export class PythonTaskHelper implements TaskHelper {
       args: this.inferArgs(options.projectType, context)
     };
 
-    const unresolvedPath = unresolveWorkspaceFolder(options.filePath, context.folder);;
-    if (unresolvedPath.toLowerCase().endsWith('.py')){
-      runOptions.file = unresolvedPath;
+    if ((options.target as PythonExtensionHelper.FileTarget).file){
+      runOptions.file = unresolveWorkspaceFolder((options.target as PythonExtensionHelper.FileTarget).file, context.folder);
     }
     else{
-      runOptions.module = unresolvedPath;
+      runOptions.module = unresolveWorkspaceFolder((options.target as PythonExtensionHelper.ModuleTarget).module, context.folder);
     }
 
     return [{
@@ -175,7 +174,9 @@ export class PythonTaskHelper implements TaskHelper {
       case 'django':
         return [
           "runserver",
-          `0.0.0.0:${context.ports !== undefined ? context.ports[0] : 8000}`
+          `0.0.0.0:${context.ports !== undefined ? context.ports[0] : 8000}`,
+          "--nothreading",
+          "--noreload"
         ];
       default:
         return undefined;
