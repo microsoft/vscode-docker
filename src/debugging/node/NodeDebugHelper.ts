@@ -39,7 +39,7 @@ export class NodeDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]> {
         return [
             {
-                name: 'Docker Node.js Launch and Attach',
+                name: 'Docker Node.js Launch',
                 type: 'docker',
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
