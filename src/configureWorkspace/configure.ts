@@ -60,8 +60,14 @@ export function getExposeStatements(ports: number[]): string {
     return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
 }
 
-export function getComposePorts(ports: number[]): string {
-    return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
+export function getComposePorts(ports: number[], debugPort?: number): string {
+    let portMappings: string[] = ports.map(port => `      - ${port}`);
+
+    if (debugPort){
+        portMappings.push(`      - ${debugPort}:${debugPort}`);
+    }
+
+    return portMappings && portMappings.length > 0 ? '    ports:\n' + portMappings.join('\n') : '';
 }
 
 function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
@@ -90,8 +96,8 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
     };
 }
 
-registerScaffolder('.NET Core Console', scaffoldNetCore);
-registerScaffolder('ASP.NET Core', scaffoldNetCore);
+registerScaffolder('.NET: Core Console', scaffoldNetCore);
+registerScaffolder('.NET: ASP.NET Core', scaffoldNetCore);
 registerScaffolder('Node.js', configureScaffolder(configureNode));
 registerScaffolder('Python: General', configureScaffolder(configurePython));
 registerScaffolder('Python: Django', configureScaffolder(configurePythonDjango));

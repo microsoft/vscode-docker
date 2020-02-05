@@ -396,9 +396,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
 
             await testConfigureDocker(
-                '.NET Core Console',
+                '.NET: Core Console',
                 {
-                    configurePlatform: '.NET Core Console',
+                    configurePlatform: '.NET: Core Console',
                     configureOs: os,
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: projectFolder.includes('/') ? '2' : '1'
@@ -427,9 +427,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile(projectFolder, 'Program.cs', dotNetCoreConsole_10_ProjectFileContents);
 
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 {
-                    configurePlatform: 'ASP.NET Core',
+                    configurePlatform: '.NET: ASP.NET Core',
                     configureOs: os,
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
@@ -625,9 +625,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("No project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () =>
                 testConfigureDocker(
-                    '.NET Core Console',
+                    '.NET: Core Console',
                     {
-                        configurePlatform: '.NET Core Console',
+                        configurePlatform: '.NET: Core Console',
                         configureOs: 'Windows',
                         packageFileType: undefined,
                         packageFileSubfolderDepth: undefined
@@ -639,7 +639,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
 
         testInEmptyFolder("ASP.NET Core no project file", async () => {
-            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', '1234']),
+            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('.NET: ASP.NET Core', {}, ['Windows', '1234']),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
@@ -648,9 +648,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await writeFile('projectFolder2', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                '.NET Core Console',
+                '.NET: Core Console',
                 {
-                    configurePlatform: '.NET Core Console',
+                    configurePlatform: '.NET: Core Console',
                     configureOs: 'Windows',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
@@ -870,7 +870,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Default port (80)", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 undefined,
                 ['Windows', TestInput.UseDefaultValue]
             );
@@ -881,7 +881,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("No port", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 undefined,
                 ['Windows', '']
             );
@@ -1351,7 +1351,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     {
                         rootPath: testRootFolder,
                         outputFolder: testRootFolder,
-                        platform: '.NET Core Console',
+                        platform: '.NET: Core Console',
                         os: "Linux"
                     },
                     [

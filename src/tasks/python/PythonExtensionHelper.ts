@@ -5,6 +5,7 @@
 
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
+import * as path from 'path';
 import { extensions } from "vscode";
 
 export namespace PythonExtensionHelper {
@@ -38,7 +39,7 @@ export namespace PythonExtensionHelper {
     options.wait = !!options.wait;
     args = args || [];
 
-    return `/pydbg/ptvsd --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
+    return `/pydbg/ptvsd_launcher.py --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
   }
 
   export function getLauncherFolderPath(): string {
@@ -48,6 +49,6 @@ export namespace PythonExtensionHelper {
       throw new Error("The Python extension must be installed.");
     }
 
-    return 'C:\\temp\\ptvsd-master\\ptvsd-master\\src'; //path.join(pyExt.extensionPath, "pythonFiles");
+    return path.join(pyExt.extensionPath, "pythonFiles");
   }
 }

@@ -5,9 +5,9 @@
 
 export type PlatformOS = 'Windows' | 'Linux';
 export type Platform =
-    '.NET Core Console' |
-    'ASP.NET Core' |
     'Node.js' |
+    '.NET: ASP.NET Core' |
+    '.NET: Core Console' |
     'Python: Django' |
     'Python: Flask' |
     'Python: General' |

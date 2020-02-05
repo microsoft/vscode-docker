@@ -109,19 +109,24 @@ export class PythonTaskHelper implements TaskHelper {
   }
 
   public async provideDockerRunTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
-    return [
-      {
-        type: "docker-run",
-        label: "docker-run: debug",
-        dependsOn: ["docker-build"],
-        platform: "python",
-        python: {
-          // tslint:disable-next-line: no-invalid-template-strings
-          file: this.inferRunFile(options.projectType),
-          args: this.inferArgs(options.projectType, context)
-        }
-      }
-    ];
+    let runOptions: PythonTaskRunOptions = {
+      args: this.inferArgs(options.projectType, context)
+    };
+
+    const unresolvedPath = unresolveWorkspaceFolder(options.filePath, context.folder);;
+    if (unresolvedPath.toLowerCase().endsWith('.py')){
+      runOptions.file = unresolvedPath;
+    }
+    else{
+      runOptions.module = unresolvedPath;
+    }
+
+    return [{
+      type: "docker-run",
+      label: "docker-run: debug",
+      dependsOn: ["docker-build"],
+      python: runOptions
+    }];
   }
 
   private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
@@ -177,19 +182,9 @@ export class PythonTaskHelper implements TaskHelper {
     }
   }
 
-  private inferRunFile(projectType: PythonProjectType): string {
-    // tslint:disable: no-invalid-template-strings
-    switch (projectType) {
-      case 'django':
-        return 'manage.py';
-      default:
-        return "${relativeFile}"
-    }
-  }
-
   private addDebuggerEnvironmentVar(env: { [key: string]: string }, folder: string): { [key: string]: string }{
     env = env || {};
-    env["PTVSD_ADAPTER_ENDPOINTS"] = `/pydbg/ptvsd/dbg_${folder}.sem`;
+    env["PTVSD_ADAPTER_ENDPOINTS"] = `/pydbg/dbg_${folder}.sem`;
 
     return env;
   }

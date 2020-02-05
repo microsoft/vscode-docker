@@ -28,15 +28,14 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: string, os:
   return `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:alpine
 
+${exposeStatements}
+
 # Install uWSGI prereqs
 RUN apk add python3-dev build-base linux-headers pcre-dev
 
 # Using pip:
 ADD requirements.txt .
 RUN python3 -m pip install -r requirements.txt
-
-LABEL Name=${serviceNameAndRelativePath} Version=${version}
-${exposeStatements}
 
 WORKDIR /app
 ADD . /app
@@ -85,7 +84,7 @@ services:
     volumes:
       - ${PythonExtensionHelper.getLauncherFolderPath()}:/pydbg
     entrypoint: ${entrypoint}
-${getComposePorts(ports.concat(defaultDebugPort))}`;
+${getComposePorts(ports, defaultDebugPort)}`;
 }
 
 async function genAdditionalFiles(): Promise<ScaffoldFile[]> {

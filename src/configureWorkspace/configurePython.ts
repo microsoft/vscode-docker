@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import vscode = require('vscode');
+import { ext } from "../extensionVariables";
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
@@ -22,18 +24,28 @@ export let configurePython: IPlatformGeneratorInfo = {
   genAdditionalFiles: genAdditionalFiles
 };
 
+export async function promptForLaunchFile(prompt: string, defaultFile: string) : Promise<string>{
+  let opt: vscode.InputBoxOptions = {
+    placeHolder: defaultFile,
+    prompt: prompt,
+    value: defaultFile,
+    validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : "Enter a valid Python file path." }
+  };
+
+  return await ext.ui.showInputBox(opt);
+}
+
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
   let exposeStatements = getExposeStatements(ports);
 
   return `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:alpine
 
+${exposeStatements}
+
 # Install pip requirements
 ADD requirements.txt .
 RUN python3 -m pip install -r requirements.txt
-
-LABEL Name=${serviceNameAndRelativePath} Version=${version}
-${exposeStatements}
 
 WORKDIR /app
 ADD . /app
@@ -82,7 +94,7 @@ services:
     volumes:
       - ${PythonExtensionHelper.getLauncherFolderPath()}:/pydbg
     entrypoint: ${entrypoint}
-${getComposePorts(ports.concat(defaultDebugPort))}`;
+${getComposePorts(ports, defaultDebugPort)}`;
 }
 
 async function genAdditionalFiles(): Promise<ScaffoldFile[]> {
@@ -103,7 +115,8 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 
   const pyOptions: PythonScaffoldingOptions = {
       projectType: 'general',
-      platformOS: platformOS
+      platformOS: platformOS,
+      filePath: await promptForLaunchFile("Enter the path to the application, e.g. 'app.py' or 'app'", "app.py")
   }
 
   await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);

@@ -15,12 +15,12 @@ import { PythonScaffoldingOptions } from '../../debugging/python/PythonDebugHelp
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
-    const platform = await quickPickPlatform(['Node.js', 'ASP.NET Core', '.NET Core Console', 'Python: Django', 'Python: Flask', 'Python: General']);
+    const platform = await quickPickPlatform(['Node.js', '.NET: ASP.NET Core', '.NET: Core Console', 'Python: Django', 'Python: Flask', 'Python: General']);
 
     let debugPlatform: DockerPlatform;
     switch (platform) {
-        case '.NET Core Console':
-        case 'ASP.NET Core':
+        case '.NET: Core Console':
+        case '.NET: ASP.NET Core':
             debugPlatform = 'netCore';
             break;
         case 'Node.js':

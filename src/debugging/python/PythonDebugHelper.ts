@@ -18,6 +18,7 @@ export type PythonProjectType = "django" | "flask" | "general";
 export interface PythonScaffoldingOptions {
   projectType?: PythonProjectType;
   platformOS?: PlatformOS;
+  filePath?: string
 };
 
 export interface PythonPathMapping {
@@ -46,20 +47,16 @@ export class PythonDebugHelper implements DebugHelper {
     private readonly localOsProvider: LocalOSProvider) {
   }
 
-  public async provideDebugConfigurations(
-    context: DockerDebugScaffoldContext,
-    options?: PythonScaffoldingOptions
-  ): Promise<DockerDebugConfiguration[]> {
+  public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
     // tslint:disable: no-invalid-template-strings
 
     let configs = [];
     configs.push(
       {
-        name: "Docker: Python Launch and Attach",
+        name: "Docker Python Launch",
         type: "docker",
         request: "launch",
         preLaunchTask: "docker-run: debug",
-        platform: "python",
         python: {
           pathMappings: [
             {
@@ -91,11 +88,7 @@ export class PythonDebugHelper implements DebugHelper {
     return configs;
   }
 
-  // tslint:disable-next-line: max-func-body-length
-  public async resolveDebugConfiguration(
-    context: DockerDebugContext,
-    debugConfiguration: PythonDockerDebugConfiguration
-  ): Promise<ResolvedDebugConfiguration | undefined> {
+  public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
     const containerName = inferContainerName(
       debugConfiguration,
       context,
@@ -205,9 +198,9 @@ export class PythonDebugHelper implements DebugHelper {
 
   private getSemaphoreFilePath(folderName: string, os: PlatformOS) : string {
     const launcherPath = PythonExtensionHelper.getLauncherFolderPath();
-    const filePath = launcherPath + `\\ptvsd\\dbg_${folderName}.sem`;
+    const filePath = launcherPath + `\\dbg_${folderName}.sem`;
 
-    return filePath.replace(/\\/g, "/");
+    return os == "Linux" ? filePath.replace(/\\/g, "/") : filePath;
   }
 
   private async ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string): Promise<void> {
