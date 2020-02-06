@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { IClock } from '../utils/Clock';
 import { ITelemetryPublisher } from './TelemetryPublisher';
 
 const lastActivationDateKey = 'ActiveUseListener.lastActivationDate';
@@ -15,12 +16,12 @@ export default class ActiveUseListener extends vscode.Disposable {
     private lastActivationDate: string | undefined;
     private lastUseDate: string | undefined;
 
-    public constructor(publisher: ITelemetryPublisher, state: vscode.Memento) {
+    public constructor(clock: IClock, publisher: ITelemetryPublisher, state: vscode.Memento) {
         super(() => { this.listener.dispose(); });
 
         this.listener = publisher.onEvent(
             event => {
-                const eventDate = new Date().toDateString();
+                const eventDate = clock.now().toDateString();
 
                 if (event.properties?.isActivationEvent === 'true') {
                     if (this.lastActivationDate !== eventDate) {
