@@ -207,7 +207,7 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
   await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);
 }
 
-export async function promptForLaunchFile(platform: Platform) : Promise<PythonFileTarget | PythonModuleTarget>{
+export async function promptForLaunchFile(platform?: Platform) : Promise<PythonFileTarget | PythonModuleTarget>{
   const launchFilePrompt = defaultLaunchFile.get(platform);
 
   let opt: vscode.InputBoxOptions = {
@@ -220,7 +220,7 @@ export async function promptForLaunchFile(platform: Platform) : Promise<PythonFi
   const file = await ext.ui.showInputBox(opt);
 
   if (file.toLowerCase().endsWith(".py")){
-    return { file: file };
+    return { file: file.replace(/\\/g, '/') };
   }
   else{
     return { module: file};
@@ -242,7 +242,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     ports = await context.promptForPorts([ defaultPort ]);
   }
 
-  const launchFile = await promptForLaunchFile(context.platform);
+  const launchFile = await context.captureStep('pythonFile', promptForLaunchFile)(context.platform);
 
   let dockerFileContents = genDockerFile(serviceName, launchFile, context.platform, ports);
 

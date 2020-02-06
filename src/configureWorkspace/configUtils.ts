@@ -19,7 +19,7 @@ export type ConfigureTelemetryProperties = {
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
 
-export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project';
+export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project' | 'pythonFile';
 
 export async function captureConfigureCancelStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: TPrompt): Promise<TReturn> {
     return await captureCancelStep(cancelStep, properties, prompt)();
