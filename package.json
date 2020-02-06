@@ -660,6 +660,16 @@
                                     "justMyCode": {
                                         "type": "boolean",
                                         "description": "Debug only user-written code."
+                                    },
+                                    "django": {
+                                        "type": "boolean",
+                                        "description": "Django debugging.",
+                                        "default": false
+                                    },
+                                    "jinja": {
+                                        "type": "boolean",
+                                        "description": "Jinja template debugging (e.g. Flask).",
+                                        "default": false
                                     }
                                 }
                             }
@@ -1148,7 +1158,7 @@
                             {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "description": "Options for building Python applications in Docker.",
+                                "description": "Options for running Python applications in Docker.",
                                 "properties": {
                                     "file": {
                                         "type": "string",
@@ -1166,13 +1176,18 @@
                                         "type": "boolean",
                                         "description": "Whether to wait for debugger to attach.",
                                         "default": true
+                                    },
+                                    "debugPort": {
+                                        "type": "number",
+                                        "description": "The port that the debugger will listen on.",
+                                        "default": 5678
                                     }
                                 }
                             },
                             {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "description": "Options for building Python applications in Docker.",
+                                "description": "Options for running Python applications in Docker.",
                                 "properties": {
                                     "module": {
                                         "type": "string",
@@ -1189,6 +1204,11 @@
                                         "type": "boolean",
                                         "description": "Whether to wait for debugger to attach.",
                                         "default": true
+                                    },
+                                    "debugPort": {
+                                        "type": "number",
+                                        "description": "The port that the debugger will listen on.",
+                                        "default": 5678
                                     }
                                 }
                             }

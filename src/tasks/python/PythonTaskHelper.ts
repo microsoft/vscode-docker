@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PythonProjectType, PythonScaffoldingOptions } from "../../debugging/python/PythonDebugHelper";
+import * as fse from 'fs-extra';
+import * as path from 'path';
+import { PythonProjectType, PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from "../../debugging/python/PythonDebugHelper";
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
 import { DockerContainerPort, DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
@@ -40,7 +42,6 @@ export class PythonTaskHelper implements TaskHelper {
     buildOptions.context = buildOptions.context || "${workspaceFolder}";
     buildOptions.dockerfile =
       buildOptions.dockerfile || "${workspaceFolder}/Dockerfile";
-    // tslint:enable: no-invalid-template-strings
     buildOptions.tag =
       buildOptions.tag || getDefaultImageName(context.folder.name);
     buildOptions.labels = buildOptions.labels || PythonTaskHelper.defaultLabels;
@@ -52,10 +53,8 @@ export class PythonTaskHelper implements TaskHelper {
     const helperOptions = runDefinition.python || {};
     const runOptions = runDefinition.dockerRun;
 
-    const target:
-      | PythonExtensionHelper.FileTarget
-      | PythonExtensionHelper.ModuleTarget = helperOptions.file
-      ? { file: helperOptions.file }
+    const target: PythonFileTarget | PythonModuleTarget = helperOptions.file
+      ? { file: helperOptions.file, }
       : { module: helperOptions.module };
 
     const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(
@@ -82,7 +81,13 @@ export class PythonTaskHelper implements TaskHelper {
     runOptions.entrypoint = runOptions.entrypoint || "python";
     runOptions.command = runOptions.command || launcherCommand;
 
-    runOptions.env = this.addDebuggerEnvironmentVar(runOptions.env, context.folder.name);
+    const dbgLogsFolder = path.join(launcherFolder, context.folder.name);
+
+    if (!fse.existsSync(dbgLogsFolder)){
+      fse.emptyDirSync(dbgLogsFolder);
+    }
+
+    runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env, context.folder.name);
     runOptions.portsPublishAll = runOptions.portsPublishAll || true;
 
     return runOptions;
@@ -113,11 +118,11 @@ export class PythonTaskHelper implements TaskHelper {
       args: this.inferArgs(options.projectType, context)
     };
 
-    if ((options.target as PythonExtensionHelper.FileTarget).file){
-      runOptions.file = unresolveWorkspaceFolder((options.target as PythonExtensionHelper.FileTarget).file, context.folder);
+    if ((options.target as PythonFileTarget).file){
+      runOptions.file = (options.target as PythonFileTarget).file;
     }
     else{
-      runOptions.module = unresolveWorkspaceFolder((options.target as PythonExtensionHelper.ModuleTarget).module, context.folder);
+      runOptions.module = (options.target as PythonModuleTarget).module;
     }
 
     return [{
@@ -183,9 +188,13 @@ export class PythonTaskHelper implements TaskHelper {
     }
   }
 
-  private addDebuggerEnvironmentVar(env: { [key: string]: string }, folder: string): { [key: string]: string }{
+  private addDebuggerEnvironmentVars(env: { [key: string]: string }, folder: string): { [key: string]: string }{
     env = env || {};
-    env["PTVSD_ADAPTER_ENDPOINTS"] = `/pydbg/dbg_${folder}.sem`;
+    const debuggerVars = (PythonExtensionHelper.getDebuggerEnvironmentVars(folder));
+
+    Object.keys(debuggerVars).map(varName => {
+      env[varName] = debuggerVars[varName];
+    });
 
     return env;
   }

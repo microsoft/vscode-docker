@@ -6,31 +6,76 @@
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
 import * as path from 'path';
-import { extensions } from "vscode";
+import * as vscode from "vscode";
+import * as fse from 'fs-extra';
+import { delay } from '../../utils/delay';
+import { PythonFileTarget, PythonModuleTarget } from '../../debugging/python/PythonDebugHelper';
+import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
+import { PlatformOS } from '../../utils/platform';
 
 export namespace PythonExtensionHelper {
-  export interface FileTarget {
-    file: string;
-  }
-
-  export interface ModuleTarget {
-    module: string;
-  }
-
   export interface DebugLaunchOptions {
     host?: string;
     port?: number;
     wait?: boolean;
   }
 
-  export function getRemoteLauncherCommand(target: FileTarget | ModuleTarget, args?: string[], options?: DebugLaunchOptions): string {
+  export function getDebuggerEnvironmentVars(folder: string): { [key: string]: string }{
+    return { ["PTVSD_LOG_DIR"]: `/pydbg/${folder}` };
+  }
+
+  export function getSemaphoreFilePath(folderName: string, os: PlatformOS) : string {
+    const launcherPath = PythonExtensionHelper.getLauncherFolderPath();
+    const filePath = launcherPath + `\\${folderName}\\ptvsd-1.log`;
+
+    return os == "Linux" ? filePath.replace(/\\/g, "/") : filePath;
+  }
+
+  export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
+    return new Promise((resolve, reject) => {
+      vscode.tasks.onDidEndTask(async e => {
+        if (e.execution.task === prelaunchTask) {
+          const containerRunning = await cliDockerClient.inspectObject(containerName, { format: "{{.State.Running}}" });
+
+          if (containerRunning == "false"){
+            reject("Failed to attach the debugger, please see the terminal output for more details.");
+          }
+
+          const maxRetriesCount = 20;
+          let retries = 0;
+          let created = false;
+
+          while (++retries < maxRetriesCount && !created) {
+              if (fse.existsSync(debuggerSemaphorePath)){
+                const contents = fse.readFileSync(debuggerSemaphorePath);
+
+                created = contents.toString().indexOf("Starting server daemon on") >= 0;
+                if (created){
+                  break;
+                }
+              }
+
+              await delay(500);
+          }
+
+          if (created) {
+            resolve();
+          } else {
+            reject("Failed to attach the debugger within the alotted timeout.");
+          }
+      }});
+    })
+  }
+
+  export function getRemoteLauncherCommand(target: PythonFileTarget | PythonModuleTarget, args?: string[], options?: DebugLaunchOptions): string {
     let fullTarget: string;
-    if ((target as FileTarget).file) {
-      fullTarget = (target as FileTarget).file;
-    } else if ((target as ModuleTarget).module) {
-      fullTarget = `-m ${(target as ModuleTarget).module}`;
+
+    if ((target as PythonFileTarget).file) {
+      fullTarget = (target as PythonFileTarget).file;
+    } else if ((target as PythonModuleTarget).module) {
+      fullTarget = `-m ${(target as PythonModuleTarget).module}`;
     } else {
-      throw new Error("One of either module or file must be given.");
+      throw new Error("One of either module or file must be provided.");
     }
 
     options = options || {};
@@ -43,7 +88,7 @@ export namespace PythonExtensionHelper {
   }
 
   export function getLauncherFolderPath(): string {
-    const pyExt = extensions.getExtension("ms-python.python");
+    const pyExt = vscode.extensions.getExtension("ms-python.python");
 
     if (!pyExt) {
       throw new Error("The Python extension must be installed.");
