@@ -8,10 +8,10 @@
 import * as path from 'path';
 import * as vscode from "vscode";
 import * as fse from 'fs-extra';
+import * as os from 'os';
 import { delay } from '../../utils/delay';
 import { PythonFileTarget, PythonModuleTarget } from '../../debugging/python/PythonDebugHelper';
 import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
-import { PlatformOS } from '../../utils/platform';
 
 export namespace PythonExtensionHelper {
   export interface DebugLaunchOptions {
@@ -21,14 +21,11 @@ export namespace PythonExtensionHelper {
   }
 
   export function getDebuggerEnvironmentVars(folder: string): { [key: string]: string }{
-    return { ["PTVSD_LOG_DIR"]: `/pydbg/${folder}` };
+    return { ["PTVSD_LOG_DIR"]: `/dbglogs` };
   }
 
-  export function getSemaphoreFilePath(folderName: string, os: PlatformOS) : string {
-    const launcherPath = PythonExtensionHelper.getLauncherFolderPath();
-    const filePath = launcherPath + `\\${folderName}\\ptvsd-1.log`;
-
-    return os == "Linux" ? filePath.replace(/\\/g, "/") : filePath;
+  export function getSemaphoreFilePath(folderName: string) : string {
+    return path.join(os.tmpdir(), folderName, "ptvsd-1.log");
   }
 
   export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {

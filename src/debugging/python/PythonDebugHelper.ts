@@ -109,7 +109,7 @@ export class PythonDebugHelper implements DebugHelper {
         );
       } catch {}
 
-    const debuggerSemaphoreFilePath = PythonExtensionHelper.getSemaphoreFilePath(context.folder.name, this.localOsProvider.os);
+    const debuggerSemaphoreFilePath = PythonExtensionHelper.getSemaphoreFilePath(context.folder.name);
     await fse.remove(debuggerSemaphoreFilePath);
 
     let debuggerReadyPromise = new Promise((resolve) => resolve());

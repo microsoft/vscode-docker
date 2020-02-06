@@ -5,6 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import * as os from 'os';
 import { PythonProjectType, PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from "../../debugging/python/PythonDebugHelper";
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
@@ -76,16 +77,16 @@ export class PythonTaskHelper implements TaskHelper {
 
     runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
 
-    runOptions.volumes = this.inferVolumes(runOptions, launcherFolder); // This method internally checks the user-defined input first
-    runOptions.ports = this.inferPorts(runOptions, helperOptions); // This method internally checks the user-defined input first
-    runOptions.entrypoint = runOptions.entrypoint || "python";
-    runOptions.command = runOptions.command || launcherCommand;
-
-    const dbgLogsFolder = path.join(launcherFolder, context.folder.name);
+    const dbgLogsFolder = path.join(os.tmpdir(), context.folder.name);
 
     if (!fse.existsSync(dbgLogsFolder)){
       fse.emptyDirSync(dbgLogsFolder);
     }
+
+    runOptions.volumes = this.inferVolumes(runOptions, launcherFolder, dbgLogsFolder); // This method internally checks the user-defined input first
+    runOptions.ports = this.inferPorts(runOptions, helperOptions); // This method internally checks the user-defined input first
+    runOptions.entrypoint = runOptions.entrypoint || "python";
+    runOptions.command = runOptions.command || launcherCommand;
 
     runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env, context.folder.name);
     runOptions.portsPublishAll = runOptions.portsPublishAll || true;
@@ -133,7 +134,7 @@ export class PythonTaskHelper implements TaskHelper {
     }];
   }
 
-  private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
+  private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string, dbgLogsFolder: string): DockerContainerVolume[] {
     const volumes: DockerContainerVolume[] = [];
 
     if (runOptions.volumes) {
@@ -142,13 +143,21 @@ export class PythonTaskHelper implements TaskHelper {
       }
     }
 
-    const dbgVolume: DockerContainerVolume = {
+    const dbgVolumes: DockerContainerVolume[] = [
+    {
       localPath: launcherFolder,
       containerPath: "/pydbg",
       permissions: "rw"
-    };
+    },
+    {
+      localPath: dbgLogsFolder,
+      containerPath: "/dbglogs",
+      permissions: "rw"
+    }];
 
-    volumes.push(dbgVolume);
+    dbgVolumes.map(vol => {
+      volumes.push(vol);
+    });
 
     return volumes;
   }
@@ -190,7 +199,7 @@ export class PythonTaskHelper implements TaskHelper {
 
   private addDebuggerEnvironmentVars(env: { [key: string]: string }, folder: string): { [key: string]: string }{
     env = env || {};
-    const debuggerVars = (PythonExtensionHelper.getDebuggerEnvironmentVars(folder));
+    const debuggerVars = PythonExtensionHelper.getDebuggerEnvironmentVars(folder);
 
     Object.keys(debuggerVars).map(varName => {
       env[varName] = debuggerVars[varName];

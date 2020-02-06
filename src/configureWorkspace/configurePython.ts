@@ -114,7 +114,7 @@ function genDockerFile(serviceName: string, target: PythonFileTarget | PythonMod
   }
   else if (platform == "Python: Flask"){
     dockerFile = uwsgiDockerfile;
-    command = `CMD ["uwsgi", "--http", ":${ports !== undefined ? ports[0] : 0}", "-w", "wsgi:${serviceName}"]`;
+    command = `CMD ["uwsgi", "--http", ":${ports !== undefined ? ports[0] : 0}", "-w", "${serviceName}:app"]`;
   }
 
   return dockerFile
