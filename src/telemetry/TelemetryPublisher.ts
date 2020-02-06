@@ -1,9 +1,14 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from 'vscode';
-import { TelemetryProperties } from 'vscode-azureextensionui';
 
 export interface TelemetryEvent {
     eventName: string;
-    properties?: TelemetryProperties;
+    measurements?: { [key: string]: number };
+    properties?: { [key: string]: string };
 }
 
 export interface ITelemetryPublisher {

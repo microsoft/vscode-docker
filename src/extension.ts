@@ -24,6 +24,7 @@ import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProv
 import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
+import ActiveUseListener from './telemetry/ActiveUseListener';
 import TelemetryPublisher from './telemetry/TelemetryPublisher';
 import TelemetryReporterProxy from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
@@ -63,6 +64,9 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
     const publisher = new TelemetryPublisher();
     ctx.subscriptions.push(publisher);
+
+    const activeUseListener = new ActiveUseListener(publisher, ctx.globalState);
+    ctx.subscriptions.push(activeUseListener);
 
     ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
