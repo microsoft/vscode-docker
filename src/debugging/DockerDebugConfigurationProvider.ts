@@ -102,6 +102,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
             && resolvedConfiguration.dockerOptions.containerNameToKill) {
 
+            // Since Python is a special case as we handle waiting for the debugger to be ready while resolving
+            // the launch configuration, and since this method comes later then we shouldn't remove a container
+            // that we just created.
+            // TODO: needs improvement to wait for the debugger in an implicit task if possible.
             if (resolvedConfiguration.type !== 'python') {
                 try {
                     await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });

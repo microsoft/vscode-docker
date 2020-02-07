@@ -20,7 +20,7 @@ export namespace PythonExtensionHelper {
     wait?: boolean;
   }
 
-  export function getDebuggerEnvironmentVars(folder: string): { [key: string]: string }{
+  export function getDebuggerEnvironmentVars(): { [key: string]: string }{
     return { ["PTVSD_LOG_DIR"]: `/dbglogs` };
   }
 

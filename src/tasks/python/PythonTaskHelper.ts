@@ -6,22 +6,15 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { PythonProjectType, PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from "../../debugging/python/PythonDebugHelper";
-import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from "../DockerBuildTaskDefinitionBase";
+import { PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from "../../debugging/python/PythonDebugHelper";
+import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
 import { DockerContainerPort, DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from "../TaskHelper";
 import { PythonExtensionHelper } from "./PythonExtensionHelper";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
-
-// tslint:disable-next-line: no-empty-interface
-export interface PythonTaskBuildOptions {}
-
-export interface PythonBuildTaskDefinition
-  extends DockerBuildTaskDefinitionBase {
-  python?: PythonTaskBuildOptions;
-}
+import { inferArgs } from '../../utils/pythonUtils';
 
 export interface PythonTaskRunOptions {
   file?: string;
@@ -36,6 +29,10 @@ export interface PythonRunTaskDefinition extends DockerRunTaskDefinitionBase {
 }
 
 export class PythonTaskHelper implements TaskHelper {
+  private static readonly defaultLabels: { [key: string]: string } = {
+    "com.microsoft.created-by": "visual-studio-code"
+  };
+
   public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions> {
     const buildOptions = buildDefinition.dockerBuild;
 
@@ -67,6 +64,7 @@ export class PythonTaskHelper implements TaskHelper {
         wait: helperOptions.wait === undefined ? true : helperOptions.wait
       }
     );
+
     const launcherFolder = PythonExtensionHelper.getLauncherFolderPath();
 
     runOptions.image = inferImageName(
@@ -88,15 +86,11 @@ export class PythonTaskHelper implements TaskHelper {
     runOptions.entrypoint = runOptions.entrypoint || "python";
     runOptions.command = runOptions.command || launcherCommand;
 
-    runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env, context.folder.name);
+    runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env);
     runOptions.portsPublishAll = runOptions.portsPublishAll || true;
 
     return runOptions;
   }
-
-  private static readonly defaultLabels: { [key: string]: string } = {
-    "com.microsoft.created-by": "visual-studio-code"
-  };
 
   public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
     return [
@@ -116,7 +110,7 @@ export class PythonTaskHelper implements TaskHelper {
 
   public async provideDockerRunTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
     let runOptions: PythonTaskRunOptions = {
-      args: this.inferArgs(options.projectType, context)
+      args: inferArgs(options.projectType, context.ports)
     };
 
     if ((options.target as PythonFileTarget).file){
@@ -183,23 +177,9 @@ export class PythonTaskHelper implements TaskHelper {
     return ports;
   }
 
-  private inferArgs(projectType: PythonProjectType, context: DockerTaskScaffoldContext): string[] | undefined {
-    switch (projectType) {
-      case 'django':
-        return [
-          "runserver",
-          `0.0.0.0:${context.ports !== undefined ? context.ports[0] : 8000}`,
-          "--nothreading",
-          "--noreload"
-        ];
-      default:
-        return undefined;
-    }
-  }
-
-  private addDebuggerEnvironmentVars(env: { [key: string]: string }, folder: string): { [key: string]: string }{
+  private addDebuggerEnvironmentVars(env: { [key: string]: string }): { [key: string]: string }{
     env = env || {};
-    const debuggerVars = PythonExtensionHelper.getDebuggerEnvironmentVars(folder);
+    const debuggerVars = PythonExtensionHelper.getDebuggerEnvironmentVars();
 
     Object.keys(debuggerVars).map(varName => {
       env[varName] = debuggerVars[varName];

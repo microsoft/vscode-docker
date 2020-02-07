@@ -15,6 +15,7 @@ import { getComposePorts, getExposeStatements } from './configure';
 import { ScaffoldFile, ScaffolderContext } from './scaffolding';
 import { PythonExtensionHelper } from '../tasks/python/PythonExtensionHelper';
 import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles, genCommonDockerIgnoreFile } from './configUtils';
+import { getPythonProjectType } from "../utils/pythonUtils";
 
 interface LaunchFilePrompt{
   prompt: string,
@@ -152,7 +153,7 @@ function genDockerComposeDebug(serviceName: string, platform: Platform, ports: n
   }
 
   const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(target, args, defaultDebugOptions);
-  const entrypoint = 'python '.concat(launcherCommand);
+  const entrypoint = "python ".concat(launcherCommand);
 
   return dockerComposeDebugfile
          .replace(/\$service_name\$/g, serviceName)
@@ -183,25 +184,15 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
                                       target: PythonFileTarget | PythonModuleTarget): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: context.folder,
-      platform: 'python',
+      platform: "python",
       actionContext: context,
       dockerfile: dockerfile,
       generateComposeTask: generateComposeFiles
   }
 
   const pyOptions: PythonScaffoldingOptions = {
-      target: target
-  }
-
-  switch (context.platform) {
-    case "Python: Django":
-      pyOptions.projectType = "django";
-      break;
-    case "Python: Flask":
-      pyOptions.projectType = "flask";
-      break;
-    default:
-      break;
+      target: target,
+      projectType: getPythonProjectType(context.platform)
   }
 
   await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);
@@ -233,7 +224,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
   const rootFolderPath: string = context.rootFolder;
   const outputFolder = context.outputFolder ?? rootFolderPath;
 
-  const generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
+  const generateComposeFiles = await context.captureStep("compose", quickPickGenerateComposeFiles)();
 
   const defaultPort = defaultPorts.get(context.platform);
   let ports = [];
@@ -242,7 +233,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     ports = await context.promptForPorts([ defaultPort ]);
   }
 
-  const launchFile = await context.captureStep('pythonFile', promptForLaunchFile)(context.platform);
+  const launchFile = await context.captureStep("pythonFile", promptForLaunchFile)(context.platform);
 
   let dockerFileContents = genDockerFile(serviceName, launchFile, context.platform, ports);
 
@@ -272,7 +263,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
   });
 
   if (context.initializeForDebugging){
-    await initializeForDebugging(context, path.join(outputFolder, 'Dockerfile'), ports, generateComposeFiles, launchFile);
+    await initializeForDebugging(context, path.join(outputFolder, "Dockerfile"), ports, generateComposeFiles, launchFile);
   }
 
   return files;

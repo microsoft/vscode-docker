@@ -73,7 +73,8 @@ export class PythonDebugHelper implements DebugHelper {
         }
       });
 
-    if (context.generateComposeTask == true){
+    // If we generated compose files, then we should generate a Python attach configuration.
+    if (context.generateComposeTask){
       configs.push(
       {
         name: "Python: Remote Attach",
@@ -117,7 +118,7 @@ export class PythonDebugHelper implements DebugHelper {
       let task = await this.tryGetPrelaunchTask(debugConfiguration.preLaunchTask);
 
       if (!task) {
-        throw new Error(`Unable to find the prelaunch task with the name ${debugConfiguration.preLaunchTask}`);
+        throw new Error(`Unable to find the prelaunch task with the name: ${debugConfiguration.preLaunchTask}`);
       }
 
       debugConfiguration.preLaunchTask = undefined;
@@ -138,7 +139,7 @@ export class PythonDebugHelper implements DebugHelper {
       resolveDockerServerReadyAction(debugConfiguration,
                                      {
                                         containerName: containerName,
-                                        pattern: this.getServerReadyMessage(projectType),
+                                        pattern: this.getServerReadyPattern(projectType),
                                         uriFormat: "%s://localhost:%s"
                                       },
                                      true);
@@ -170,15 +171,15 @@ export class PythonDebugHelper implements DebugHelper {
     };
   }
 
-  private async tryGetPrelaunchTask(prelaunchTask: string) : Promise<vscode.Task> | undefined {
-    if (!prelaunchTask) {
+  private async tryGetPrelaunchTask(prelaunchTaskName: string) : Promise<vscode.Task> | undefined {
+    if (!prelaunchTaskName) {
       return undefined;
     }
 
     let tasks = await vscode.tasks.fetchTasks();
 
     if (tasks) {
-      let results = tasks.filter(t => t.name === prelaunchTask);
+      let results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName));
 
       if (results && results.length > 0) {
         return results[0];
@@ -188,7 +189,7 @@ export class PythonDebugHelper implements DebugHelper {
     return undefined;
   }
 
-  private getServerReadyMessage(projectType: PythonProjectType) : string | undefined {
+  private getServerReadyPattern(projectType: PythonProjectType) : string | undefined {
     switch (projectType) {
       case "django":
         return "Starting development server at (https?://\\S+|[0-9]+)";
