@@ -124,6 +124,10 @@
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.help",
+                    "when": "never"
                 }
             ],
             "editor/context": [
@@ -280,6 +284,11 @@
                     "command": "vscode-docker.volumes.refresh",
                     "when": "view == dockerVolumes",
                     "group": "navigation@9"
+                },
+                {
+                    "command": "vscode-docker.help",
+                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerRegistries || view == dockerNetworks",
+                    "group": "navigation@10"
                 }
             ],
             "view/item/context": [
@@ -1931,6 +1940,12 @@
                 "command": "vscode-docker.volumes.remove",
                 "title": "Remove...",
                 "category": "Docker Volumes"
+            },
+            {
+                "command": "vscode-docker.help",
+                "title": "Docker help...",
+                "category": "Docker",
+                "icon": "$(question)"
             }
         ],
         "views": {

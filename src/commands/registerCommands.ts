@@ -59,6 +59,7 @@ import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
+import { showHelpMenu } from "./help";
 
 export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.api.configure', configureApi);
@@ -127,4 +128,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);
+
+    registerCommand('vscode-docker.help', showHelpMenu);
 }
