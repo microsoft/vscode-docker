@@ -34,7 +34,7 @@ const defaultLaunchFile: Map<Platform, LaunchFilePrompt> = new Map<Platform, Lau
 ]);
 
 const generalDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:alpine
+FROM python
 
 $expose_statements$
 
@@ -49,12 +49,9 @@ $cmd$
 `;
 
 const uwsgiDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:alpine
+FROM python
 
 $expose_statements$
-
-# Install uWSGI prereqs
-RUN apk add python3-dev build-base linux-headers pcre-dev
 
 # Install pip requirements
 ADD requirements.txt .
@@ -66,7 +63,7 @@ ADD . /app
 $cmd$
 `;
 
-const dockerComposefile = `version: '2.1'
+const dockerComposefile = `version: '3.4'
 
 services:
   $service_name$:
@@ -76,7 +73,7 @@ services:
       dockerfile: Dockerfile
 $ports$`;
 
-const dockerComposeDebugfile = `version: '2.1'
+const dockerComposeDebugfile = `version: '3.4'
 
 services:
   $service_name$:
@@ -89,11 +86,11 @@ services:
     entrypoint: $entrypoint$
 $ports$`;
 
-const djangoRequirements = `Django==3.0.2
-uWSGI==2.0.18`;
+const djangoRequirements = `Django
+gunicorn`;
 
-const flaskRequirements = `Flask==1.1.1
-uWSGI==2.0.18`;
+const flaskRequirements = `Flask
+gunicorn`;
 
 function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, platform: Platform, ports: number[]): string {
   const exposeStatements = getExposeStatements(ports);
@@ -111,11 +108,11 @@ function genDockerFile(serviceName: string, target: PythonFileTarget | PythonMod
   }
   else if (platform == "Python: Django"){
     dockerFile = uwsgiDockerfile;
-    command = `CMD ["uwsgi", "--http", ":${ports !== undefined ? ports[0] : 0}", "--module", "${serviceName}.wsgi"]`;
+    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports !== undefined ? ports[0] : 0}", "${serviceName}.wsgi"]`;
   }
   else if (platform == "Python: Flask"){
     dockerFile = uwsgiDockerfile;
-    command = `CMD ["uwsgi", "--http", ":${ports !== undefined ? ports[0] : 0}", "-w", "${serviceName}:app"]`;
+    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports !== undefined ? ports[0] : 0}", "${serviceName}:app"]`;
   }
 
   return dockerFile

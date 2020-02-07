@@ -25,6 +25,8 @@ export namespace PythonExtensionHelper {
   }
 
   export function getSemaphoreFilePath(folderName: string) : string {
+    // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
+    // So given that we run the debugger as the entry point, so the PID = 1.
     return path.join(os.tmpdir(), folderName, "ptvsd-1.log");
   }
 
@@ -81,7 +83,7 @@ export namespace PythonExtensionHelper {
     options.wait = !!options.wait;
     args = args || [];
 
-    return `/pydbg/ptvsd_launcher.py --default --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
+    return `/pydbg/ptvsd --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
   }
 
   export function getLauncherFolderPath(): string {
@@ -91,6 +93,17 @@ export namespace PythonExtensionHelper {
       throw new Error("The Python extension must be installed.");
     }
 
-    return path.join(pyExt.extensionPath, "pythonFiles");
+    const debuggerPath = path.join(pyExt.extensionPath, "pythonFiles/lib/python");
+    const oldDebugger = path.join(debuggerPath, "old_ptvsd");
+    const newDebugger = path.join(debuggerPath, "new_ptvsd");
+
+    if (fse.existsSync(oldDebugger)){
+      return oldDebugger;
+    }
+    else if (fse.existsSync(newDebugger)){
+      return newDebugger;
+    }
+
+    throw new Error("Unable to find the debugger in the Python extension.");
   }
 }

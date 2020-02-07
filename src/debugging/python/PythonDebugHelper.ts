@@ -179,7 +179,7 @@ export class PythonDebugHelper implements DebugHelper {
     let tasks = await vscode.tasks.fetchTasks();
 
     if (tasks) {
-      let results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName));
+      let results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName) == 0);
 
       if (results && results.length > 0) {
         return results[0];
