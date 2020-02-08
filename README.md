@@ -24,7 +24,7 @@ You can get IntelliSense when editing your `Dockerfile` and `docker-compose.yml`
 
 ![IntelliSense for Dockerfiles](resources/readme/dockerfile-intellisense.png)
 
-In addition, you can use the Problems panel (`kb(workbench.actions.view.problems)`) to view common errors for `Dockerfile` and `docker-compose.yml` files.
+In addition, you can use the Problems panel (<kbd>Ctrl+Shift+M</kbd> on Windows/Linux, <kbd>Shift+Command+M</kbd> on Mac) to view common errors for `Dockerfile` and `docker-compose.yml` files.
 
 ### Generating Docker files
 
