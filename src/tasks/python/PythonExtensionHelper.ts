@@ -10,8 +10,8 @@ import * as vscode from "vscode";
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import { delay } from '../../utils/delay';
-import { PythonFileTarget, PythonModuleTarget } from '../../debugging/python/PythonDebugHelper';
 import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
+import { PythonFileTarget, PythonModuleTarget, PythonDefaultDebugPort } from '../../utils/pythonUtils';
 
 export namespace PythonExtensionHelper {
   export interface DebugLaunchOptions {
@@ -24,9 +24,9 @@ export namespace PythonExtensionHelper {
     return { ["PTVSD_LOG_DIR"]: `/dbglogs` };
   }
 
-  export function getSemaphoreFilePath(folderName: string) : string {
+  export function getDebuggerLogFilePath(folderName: string) : string {
     // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
-    // So given that we run the debugger as the entry point, so the PID = 1.
+    // So given that we run the debugger as the entry point, then the PID is guaranteed to be 1.
     return path.join(os.tmpdir(), folderName, "ptvsd-1.log");
   }
 
@@ -34,6 +34,7 @@ export namespace PythonExtensionHelper {
     return new Promise((resolve, reject) => {
       vscode.tasks.onDidEndTask(async e => {
         if (e.execution.task === prelaunchTask) {
+          // There is no way to know the result of the completed task, so a best guess is to check if the container is running.
           const containerRunning = await cliDockerClient.inspectObject(containerName, { format: "{{.State.Running}}" });
 
           if (containerRunning == "false"){
@@ -44,6 +45,8 @@ export namespace PythonExtensionHelper {
           let retries = 0;
           let created = false;
 
+          // Look for the magic string below in the log file with a retry every 0.5 second for a maximum of 10 seconds.
+          // TODO: Should be gone as soon as the retry logic is part of the Python debugger/extension.
           while (++retries < maxRetriesCount && !created) {
               if (fse.existsSync(debuggerSemaphorePath)){
                 const contents = fse.readFileSync(debuggerSemaphorePath);
@@ -66,7 +69,7 @@ export namespace PythonExtensionHelper {
     })
   }
 
-  export function getRemoteLauncherCommand(target: PythonFileTarget | PythonModuleTarget, args?: string[], options?: DebugLaunchOptions): string {
+  export function getRemotePtvsdCommand(target: PythonFileTarget | PythonModuleTarget, args?: string[], options?: DebugLaunchOptions): string {
     let fullTarget: string;
 
     if ((target as PythonFileTarget).file) {
@@ -79,7 +82,7 @@ export namespace PythonExtensionHelper {
 
     options = options || {};
     options.host = options.host || "0.0.0.0";
-    options.port = options.port || 5678;
+    options.port = options.port || PythonDefaultDebugPort;
     options.wait = !!options.wait;
     args = args || [];
 
@@ -93,7 +96,7 @@ export namespace PythonExtensionHelper {
       throw new Error("The Python extension must be installed.");
     }
 
-    const debuggerPath = path.join(pyExt.extensionPath, "pythonFiles/lib/python");
+    const debuggerPath = path.join(pyExt.extensionPath, "pythonFiles", "lib", "python");
     const oldDebugger = path.join(debuggerPath, "old_ptvsd");
     const newDebugger = path.join(debuggerPath, "new_ptvsd");
 

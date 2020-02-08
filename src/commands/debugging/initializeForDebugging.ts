@@ -7,11 +7,10 @@ import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
-import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
-import { PythonScaffoldingOptions } from '../../debugging/python/PythonDebugHelper';
 import { promptForLaunchFile } from '../../configureWorkspace/configurePython';
 import { getPythonProjectType } from '../../utils/pythonUtils';
 
@@ -58,9 +57,11 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             await dockerDebugScaffoldingProvider.initializeNodeForDebugging(context);
             break;
         case 'python':
+            const pythonProjectType = getPythonProjectType(platform);
+
             const pyOptions: PythonScaffoldingOptions = {
-                projectType: getPythonProjectType(platform),
-                target: await promptForLaunchFile(platform)
+                projectType: pythonProjectType,
+                target: await promptForLaunchFile(pythonProjectType)
             }
 
             await dockerDebugScaffoldingProvider.initializePythonForDebugging(context, pyOptions);

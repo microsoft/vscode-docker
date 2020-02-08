@@ -8,29 +8,22 @@ import vscode = require('vscode');
 import { ext } from "../extensionVariables";
 import { TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
-import { dockerDebugScaffoldingProvider } from '../debugging/DockerDebugScaffoldingProvider';
-import { PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from '../debugging/python/PythonDebugHelper';
-import { Platform } from '../utils/platform';
+import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ScaffoldFile, ScaffolderContext } from './scaffolding';
 import { PythonExtensionHelper } from '../tasks/python/PythonExtensionHelper';
 import { ConfigureTelemetryProperties, quickPickGenerateComposeFiles, genCommonDockerIgnoreFile } from './configUtils';
-import { getPythonProjectType } from "../utils/pythonUtils";
+import { getPythonProjectType, PythonDefaultDebugPort, inferPythonArgs, PythonDefaultPorts, PythonProjectType, PythonFileTarget, PythonModuleTarget } from "../utils/pythonUtils";
 
 interface LaunchFilePrompt{
   prompt: string,
   defaultFile: string
 };
 
-const defaultPorts: Map<Platform, number> = new Map<Platform, number>([
-  ["Python: Django", 8000],
-  ["Python: Flask", 5000],
-]);
-
-const defaultLaunchFile: Map<Platform, LaunchFilePrompt> = new Map<Platform, LaunchFilePrompt>([
-  ["Python: Django", { prompt: "Enter the relative path to the application (e.g. manage.py)", defaultFile: "manage.py" }],
-  ["Python: Flask", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
-  ["Python: General", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
+const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<PythonProjectType, LaunchFilePrompt>([
+  ["django", { prompt: "Enter the relative path to the application (e.g. manage.py)", defaultFile: "manage.py" }],
+  ["flask", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
+  ["general", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
 ]);
 
 const generalDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
@@ -48,7 +41,7 @@ ADD . /app
 $cmd$
 `;
 
-const uwsgiDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
+const pythonWebDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python
 
 $expose_statements$
@@ -86,18 +79,18 @@ services:
     entrypoint: $entrypoint$
 $ports$`;
 
-const djangoRequirements = `Django
+const djangoRequirements = `django
 gunicorn`;
 
-const flaskRequirements = `Flask
+const flaskRequirements = `flask
 gunicorn`;
 
-function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, platform: Platform, ports: number[]): string {
+function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType, ports: number[]): string {
   const exposeStatements = getExposeStatements(ports);
   let command = "";
   let dockerFile = "";
 
-  if (platform == "Python: General"){
+  if (projectType == "general"){
     dockerFile = generalDockerfile;
     if ((target as PythonFileTarget).file){
       command = `CMD ["python", "${(target as PythonFileTarget).file}"]`;
@@ -106,13 +99,13 @@ function genDockerFile(serviceName: string, target: PythonFileTarget | PythonMod
       command = `CMD ["python", "-m", "${(target as PythonModuleTarget).module}"]`;
     }
   }
-  else if (platform == "Python: Django"){
-    dockerFile = uwsgiDockerfile;
-    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports !== undefined ? ports[0] : 0}", "${serviceName}.wsgi"]`;
+  else if (projectType == "django"){
+    dockerFile = pythonWebDockerfile;
+    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}.wsgi"]`;
   }
-  else if (platform == "Python: Flask"){
-    dockerFile = uwsgiDockerfile;
-    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports !== undefined ? ports[0] : 0}", "${serviceName}:app"]`;
+  else if (projectType == "flask"){
+    dockerFile = pythonWebDockerfile;
+    command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}:app"]`;
   }
 
   return dockerFile
@@ -126,47 +119,33 @@ function genDockerCompose(serviceName: string, ports: number[]): string {
         .replace(/\$ports\$/g, getComposePorts(ports));
 }
 
-function genDockerComposeDebug(serviceName: string, platform: Platform, ports: number[], target: PythonFileTarget | PythonModuleTarget): string {
-  const defaultDebugPort = 5678;
+function genDockerComposeDebug(serviceName: string, projectType: PythonProjectType, ports: number[], target: PythonFileTarget | PythonModuleTarget): string {
   const defaultDebugOptions : PythonExtensionHelper.DebugLaunchOptions =
   {
     host: "0.0.0.0",
-    port: defaultDebugPort,
+    port: PythonDefaultDebugPort,
     wait: true
   };
 
-  let args = [];
-  switch (platform) {
-    case "Python: Django":
-      args = [
-        "runserver",
-        `0.0.0.0:${ports ? ports[0] : 8000}`,
-        "--nothreading",
-        "--noreload"
-      ];
-      break;
-    default:
-      break;
-  }
-
-  const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(target, args, defaultDebugOptions);
+  const args = inferPythonArgs(projectType, ports);
+  const launcherCommand = PythonExtensionHelper.getRemotePtvsdCommand(target, args, defaultDebugOptions);
   const entrypoint = "python ".concat(launcherCommand);
 
   return dockerComposeDebugfile
          .replace(/\$service_name\$/g, serviceName)
          .replace(/\$entrypoint\$/g, entrypoint)
-         .replace(/\$ports\$/g, getComposePorts(ports, defaultDebugPort));
+         .replace(/\$ports\$/g, getComposePorts(ports, PythonDefaultDebugPort));
 }
 
-function genRequirementsFile(platform: Platform): string {
+function genRequirementsFile(projectType: PythonProjectType): string {
   let contents = '# Add requirements when needed'
 
-  switch (platform) {
-    case "Python: Django":
+  switch (projectType) {
+    case "django":
       contents = djangoRequirements;
       break;
 
-    case "Python: Flask":
+    case "flask":
       contents = flaskRequirements
       break;
 
@@ -178,25 +157,26 @@ function genRequirementsFile(platform: Platform): string {
 }
 
 async function initializeForDebugging(context: ScaffolderContext, dockerfile: string, ports: number[], generateComposeFiles: boolean,
-                                      target: PythonFileTarget | PythonModuleTarget): Promise<void> {
+                                      target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType): Promise<void> {
   const scaffoldContext: DockerDebugScaffoldContext = {
       folder: context.folder,
       platform: "python",
       actionContext: context,
       dockerfile: dockerfile,
-      generateComposeTask: generateComposeFiles
+      generateComposeTask: generateComposeFiles,
+      ports: ports
   }
 
   const pyOptions: PythonScaffoldingOptions = {
       target: target,
-      projectType: getPythonProjectType(context.platform)
+      projectType: projectType
   }
 
   await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);
 }
 
-export async function promptForLaunchFile(platform?: Platform) : Promise<PythonFileTarget | PythonModuleTarget>{
-  const launchFilePrompt = defaultLaunchFile.get(platform);
+export async function promptForLaunchFile(projectType?: PythonProjectType) : Promise<PythonFileTarget | PythonModuleTarget>{
+  const launchFilePrompt = defaultLaunchFile.get(projectType);
 
   let opt: vscode.InputBoxOptions = {
     placeHolder: launchFilePrompt.defaultFile,
@@ -207,6 +187,8 @@ export async function promptForLaunchFile(platform?: Platform) : Promise<PythonF
 
   const file = await ext.ui.showInputBox(opt);
 
+  // If the input has the .py extension, then assume it is a file.
+  // TODO: is there a more robust way to check?
   if (file.toLowerCase().endsWith(".py")){
     return { file: file.replace(/\\/g, '/') };
   }
@@ -222,29 +204,30 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
   const outputFolder = context.outputFolder ?? rootFolderPath;
 
   const generateComposeFiles = await context.captureStep("compose", quickPickGenerateComposeFiles)();
+  const projectType = getPythonProjectType(context.platform);
 
-  const defaultPort = defaultPorts.get(context.platform);
+  const defaultPort = PythonDefaultPorts.get(projectType);
   let ports = [];
 
   if (defaultPort){
     ports = await context.promptForPorts([ defaultPort ]);
   }
 
-  const launchFile = await context.captureStep("pythonFile", promptForLaunchFile)(context.platform);
+  const launchFile = await context.captureStep("pythonFile", promptForLaunchFile)(projectType);
 
-  let dockerFileContents = genDockerFile(serviceName, launchFile, context.platform, ports);
+  const dockerFileContents = genDockerFile(serviceName, launchFile, projectType, ports);
 
-  let files: ScaffoldFile[] = [
+  const files: ScaffoldFile[] = [
     { fileName: 'Dockerfile', contents: dockerFileContents, open: true },
     { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) },
-    { fileName: 'requirements.txt', contents: genRequirementsFile(context.platform) }
+    { fileName: 'requirements.txt', contents: genRequirementsFile(projectType) }
   ];
 
   if (generateComposeFiles){
     properties.orchestration = 'docker-compose';
 
     const dockerComposeFile = genDockerCompose(serviceName, ports);
-    const dockerComposeDebugFile = genDockerComposeDebug(serviceName, context.platform, ports, launchFile);
+    const dockerComposeDebugFile = genDockerComposeDebug(serviceName, projectType, ports, launchFile);
 
     files.push(
       { fileName: 'docker-compose.yml', contents: dockerComposeFile },
@@ -260,7 +243,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
   });
 
   if (context.initializeForDebugging){
-    await initializeForDebugging(context, path.join(outputFolder, "Dockerfile"), ports, generateComposeFiles, launchFile);
+    await initializeForDebugging(context, path.join(outputFolder, "Dockerfile"), ports, generateComposeFiles, launchFile, projectType);
   }
 
   return files;

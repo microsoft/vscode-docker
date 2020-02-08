@@ -11,12 +11,8 @@ import LocalOSProvider from "../coreclr/LocalOSProvider";
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfigurationBase } from "../DockerDebugConfigurationBase";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
-
-export type PythonProjectType = "django" | "flask" | "general";
-export interface PythonScaffoldingOptions {
-  projectType?: PythonProjectType;
-  target?: PythonFileTarget | PythonModuleTarget
-};
+import { PythonProjectType, PythonDefaultDebugPort } from '../../utils/pythonUtils';
+import { PythonScaffoldingOptions } from '../DockerDebugScaffoldingProvider';
 
 export interface PythonPathMapping {
   localRoot: string;
@@ -33,17 +29,8 @@ export interface PythonDebugOptions {
   jinja?: boolean;
 }
 
-export interface PythonDockerDebugConfiguration
-  extends DockerDebugConfigurationBase {
+export interface PythonDockerDebugConfiguration extends DockerDebugConfigurationBase {
   python?: PythonDebugOptions;
-}
-
-export interface PythonFileTarget {
-  file: string;
-}
-
-export interface PythonModuleTarget {
-  module: string;
 }
 
 export class PythonDebugHelper implements DebugHelper {
@@ -81,7 +68,7 @@ export class PythonDebugHelper implements DebugHelper {
         type: "python",
         request: "attach",
         host: "localhost",
-        port: 5678,
+        port: PythonDefaultDebugPort,
         pathMappings: [
           {
             localRoot: "${workspaceFolder}",
@@ -95,11 +82,7 @@ export class PythonDebugHelper implements DebugHelper {
   }
 
   public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
-    const containerName = inferContainerName(
-      debugConfiguration,
-      context,
-      context.folder.name
-    );
+    const containerName = inferContainerName(debugConfiguration, context, context.folder.name);
 
     // Since Python is a special case, we need to ensure the container is removed before attempting to resolve
     // the debug configuration.
@@ -110,11 +93,16 @@ export class PythonDebugHelper implements DebugHelper {
         );
       } catch {}
 
-    const debuggerSemaphoreFilePath = PythonExtensionHelper.getSemaphoreFilePath(context.folder.name);
-    await fse.remove(debuggerSemaphoreFilePath);
+    const debuggerLogFilePath = PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
+    await fse.remove(debuggerLogFilePath);
 
     let debuggerReadyPromise = new Promise((resolve) => resolve());
     if (debugConfiguration.preLaunchTask) {
+      // There is this limitation with the Python debugger where we need to ensure it's ready before allowing VSCode to attach,
+      // if attach happens too soon then it will fail silently. The workaround here is to set the preLaunchTask to undefined,
+      // then execute it ourselves with a listener to when it is finished, then wait for the debugger to be ready and then
+      // return the resolved launch configuration.
+
       let task = await this.tryGetPrelaunchTask(debugConfiguration.preLaunchTask);
 
       if (!task) {
@@ -124,7 +112,7 @@ export class PythonDebugHelper implements DebugHelper {
       debugConfiguration.preLaunchTask = undefined;
 
       vscode.tasks.executeTask(task);
-      debuggerReadyPromise = PythonExtensionHelper.ensureDebuggerReady(task, debuggerSemaphoreFilePath, containerName, this.cliDockerClient);
+      debuggerReadyPromise = PythonExtensionHelper.ensureDebuggerReady(task, debuggerLogFilePath, containerName, this.cliDockerClient);
     }
 
     return await debuggerReadyPromise.then(() => {
@@ -136,13 +124,14 @@ export class PythonDebugHelper implements DebugHelper {
     let projectType = debugConfiguration.python.projectType;
 
     const dockerServerReadyAction =
-      resolveDockerServerReadyAction(debugConfiguration,
-                                     {
-                                        containerName: containerName,
-                                        pattern: this.getServerReadyPattern(projectType),
-                                        uriFormat: "%s://localhost:%s"
-                                      },
-                                     true);
+      resolveDockerServerReadyAction(
+        debugConfiguration,
+        {
+          containerName: containerName,
+          pattern: this.getServerReadyPattern(projectType),
+          uriFormat: "%s://localhost:%s"
+        },
+        true);
 
     let debugOptions = ["FixFilePathCase", "RedirectOutput", "ShowReturnValue"];
 
@@ -156,7 +145,7 @@ export class PythonDebugHelper implements DebugHelper {
       request: "attach",
       workspaceFolder: context.folder.uri.fsPath,
       host: debugConfiguration.python.host || "localhost",
-      port: debugConfiguration.python.port || 5678,
+      port: debugConfiguration.python.port || PythonDefaultDebugPort,
       pathMappings: debugConfiguration.python.pathMappings,
       justMyCode: debugConfiguration.python.justMyCode || true,
       django: debugConfiguration.python.django || projectType === "django",

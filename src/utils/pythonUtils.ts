@@ -3,15 +3,30 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PythonProjectType } from '../debugging/python/PythonDebugHelper';
 import { Platform } from './platform';
 
-export function inferArgs(projectType: PythonProjectType, ports: number[]): string[] | undefined {
+export type PythonProjectType = "django" | "flask" | "general";
+
+export const PythonDefaultDebugPort: number = 5678;
+export const PythonDefaultPorts: Map<PythonProjectType, number> = new Map<PythonProjectType, number>([
+  ["django", 8000],
+  ["flask", 5000],
+]);
+
+export interface PythonFileTarget {
+  file: string;
+}
+
+export interface PythonModuleTarget {
+  module: string;
+}
+
+export function inferPythonArgs(projectType: PythonProjectType, ports: number[]): string[] | undefined {
     switch (projectType) {
       case 'django':
         return [
           "runserver",
-          `0.0.0.0:${ports !== undefined ? ports[0] : 8000}`,
+          `0.0.0.0:${ports !== undefined ? ports[0] : PythonDefaultPorts[projectType]}`,
           "--nothreading",
           "--noreload"
         ];

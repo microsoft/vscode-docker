@@ -96,9 +96,9 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
 registerScaffolder('Node.js', configureScaffolder(configureNode));
 registerScaffolder('.NET: Core Console', scaffoldNetCore);
 registerScaffolder('.NET: ASP.NET Core', scaffoldNetCore);
-registerScaffolder('Python: General', scaffoldPython);
 registerScaffolder('Python: Django', scaffoldPython);
 registerScaffolder('Python: Flask', scaffoldPython);
+registerScaffolder('Python: General', scaffoldPython);
 registerScaffolder('Java', configureScaffolder(configureJava));
 registerScaffolder('C++', configureScaffolder(configureCpp));
 registerScaffolder('Go', configureScaffolder(configureGo));

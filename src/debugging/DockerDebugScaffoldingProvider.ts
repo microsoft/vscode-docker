@@ -15,9 +15,14 @@ import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
-import { pythonDebugHelper, PythonScaffoldingOptions } from './python/PythonDebugHelper';
+import { pythonDebugHelper } from './python/PythonDebugHelper';
+import { PythonProjectType, PythonFileTarget, PythonModuleTarget } from '../utils/pythonUtils';
 
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
+export interface PythonScaffoldingOptions {
+    projectType?: PythonProjectType;
+    target?: PythonFileTarget | PythonModuleTarget
+  };
 
 export interface IDockerDebugScaffoldingProvider {
     initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void>;
@@ -47,7 +52,7 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
     public async initializePythonForDebugging(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
             () => pythonDebugHelper.provideDebugConfigurations(context, options),
-            () => pythonTaskHelper.provideDockerBuildTasks(context, options),
+            () => pythonTaskHelper.provideDockerBuildTasks(context),
             () => pythonTaskHelper.provideDockerRunTasks(context, options)
         );
     }

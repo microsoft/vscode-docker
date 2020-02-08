@@ -1198,13 +1198,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileSubfolderDepth: undefined
                 },
                 [TestInput.UseDefaultValue /*port*/],
-                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'requirements.txt']
             );
 
-            assertFileContains('Dockerfile', 'FROM python:alpine');
-            assertFileContains('Dockerfile', 'LABEL Name=testoutput Version=0.0.1');
-            assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('Dockerfile', 'CMD ["python3", "-m", "testoutput"]');
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python3 -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["python3", "app.py"]');
         });
     });
 

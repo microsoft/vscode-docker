@@ -6,7 +6,6 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { PythonScaffoldingOptions, PythonFileTarget, PythonModuleTarget } from "../../debugging/python/PythonDebugHelper";
 import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
 import { DockerContainerPort, DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
@@ -14,7 +13,8 @@ import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from "../TaskHelper";
 import { PythonExtensionHelper } from "./PythonExtensionHelper";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
-import { inferArgs } from '../../utils/pythonUtils';
+import { inferPythonArgs, PythonFileTarget, PythonModuleTarget, PythonDefaultDebugPort } from '../../utils/pythonUtils';
+import { PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 
 export interface PythonTaskRunOptions {
   file?: string;
@@ -38,10 +38,8 @@ export class PythonTaskHelper implements TaskHelper {
 
     // tslint:disable: no-invalid-template-strings
     buildOptions.context = buildOptions.context || "${workspaceFolder}";
-    buildOptions.dockerfile =
-      buildOptions.dockerfile || "${workspaceFolder}/Dockerfile";
-    buildOptions.tag =
-      buildOptions.tag || getDefaultImageName(context.folder.name);
+    buildOptions.dockerfile = buildOptions.dockerfile || "${workspaceFolder}/Dockerfile";
+    buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
     buildOptions.labels = buildOptions.labels || PythonTaskHelper.defaultLabels;
 
     return buildOptions;
@@ -55,12 +53,12 @@ export class PythonTaskHelper implements TaskHelper {
       ? { file: helperOptions.file, }
       : { module: helperOptions.module };
 
-    const launcherCommand = PythonExtensionHelper.getRemoteLauncherCommand(
+    const launcherCommand = PythonExtensionHelper.getRemotePtvsdCommand(
       target,
       helperOptions.args,
       {
         host: "0.0.0.0",
-        port: helperOptions.debugPort || 5678,
+        port: helperOptions.debugPort || PythonDefaultDebugPort,
         wait: helperOptions.wait === undefined ? true : helperOptions.wait
       }
     );
@@ -77,6 +75,7 @@ export class PythonTaskHelper implements TaskHelper {
 
     const dbgLogsFolder = path.join(os.tmpdir(), context.folder.name);
 
+    // The debugger will complain if the logs directory does not exist.
     if (!fse.existsSync(dbgLogsFolder)){
       fse.emptyDirSync(dbgLogsFolder);
     }
@@ -92,7 +91,7 @@ export class PythonTaskHelper implements TaskHelper {
     return runOptions;
   }
 
-  public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
+  public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
     return [
       {
         type: "docker-build",
@@ -110,7 +109,7 @@ export class PythonTaskHelper implements TaskHelper {
 
   public async provideDockerRunTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
     let runOptions: PythonTaskRunOptions = {
-      args: inferArgs(options.projectType, context.ports)
+      args: inferPythonArgs(options.projectType, context.ports)
     };
 
     if ((options.target as PythonFileTarget).file){
@@ -141,7 +140,7 @@ export class PythonTaskHelper implements TaskHelper {
     {
       localPath: launcherFolder,
       containerPath: "/pydbg",
-      permissions: "rw"
+      permissions: "ro"
     },
     {
       localPath: dbgLogsFolder,
@@ -149,16 +148,19 @@ export class PythonTaskHelper implements TaskHelper {
       permissions: "rw"
     }];
 
-    dbgVolumes.map(vol => {
-      volumes.push(vol);
-    });
+    // Add the debugger volumes while honoring user input.
+    dbgVolumes.map(dbgVol => {
+      if (volumes.find(volume => volume.localPath == dbgVol.localPath) == undefined){
+        volumes.push(dbgVol);
+      }
+     });
 
     return volumes;
   }
 
   private inferPorts(runOptions: DockerRunOptions, pythonOptions: PythonTaskRunOptions): DockerContainerPort[] {
     const ports: DockerContainerPort[] = [];
-    const debugPort = pythonOptions.debugPort || 5678;
+    const debugPort = pythonOptions.debugPort || PythonDefaultDebugPort;
 
     if (runOptions.ports) {
       for (const port of runOptions.ports) {
@@ -166,6 +168,7 @@ export class PythonTaskHelper implements TaskHelper {
       }
     }
 
+    // Add the debugger port while honoring user input.
     if (ports.find(port => port.containerPort === debugPort) === undefined)
     {
         ports.push({
