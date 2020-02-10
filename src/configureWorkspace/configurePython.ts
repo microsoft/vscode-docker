@@ -73,7 +73,6 @@ gunicorn`;
 function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType, ports: number[]): string {
   const exposeStatements = getExposeStatements(ports);
   let command = "";
-  let dockerFile = pythonDockerfile;
 
   if (projectType == "general"){
     if ((target as PythonFileTarget).file){
@@ -94,7 +93,7 @@ function genDockerFile(serviceName: string, target: PythonFileTarget | PythonMod
     throw new Error(`Unknown project type: ${projectType}`);
   }
 
-  return dockerFile
+  return pythonDockerfile
         .replace(/\$expose_statements\$/g, exposeStatements)
         .replace(/\$cmd\$/g, command);
 }
