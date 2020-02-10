@@ -1197,14 +1197,62 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                [TestInput.UseDefaultValue /*port*/],
-                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore', 'requirements.txt']
+                ['No', 'app.py'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
             );
 
             assertFileContains('Dockerfile', 'FROM python');
             assertFileContains('Dockerfile', 'ADD requirements.txt .');
-            assertFileContains('Dockerfile', 'RUN python3 -m pip install -r requirements.txt');
-            assertFileContains('Dockerfile', 'CMD ["python3", "app.py"]');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["python", "app.py"]');
+        });
+    });
+
+    suite("Python", () => {
+        testInEmptyFolder("Python", async () => {
+            await testConfigureDocker(
+                'Python: Django',
+                {
+                    configurePlatform: 'Python: Django',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                ['No', '8000', 'manage.py'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
+            );
+
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'EXPOSE 8000');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:8000", "testOutput.wsgi"]');
+            assertFileContains('requirements.txt', 'django');
+            assertFileContains('requirements.txt', 'gunicorn');
+        });
+    });
+
+    suite("Python", () => {
+        testInEmptyFolder("Python", async () => {
+            await testConfigureDocker(
+                'Python: Flask',
+                {
+                    configurePlatform: 'Python: Flask',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                ['No', '5000', 'app.py'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
+            );
+
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'EXPOSE 5000');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:5000", "testOutput:app"]');
+            assertFileContains('requirements.txt', 'flask');
+            assertFileContains('requirements.txt', 'gunicorn');
         });
     });
 

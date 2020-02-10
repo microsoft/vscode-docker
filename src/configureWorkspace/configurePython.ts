@@ -33,7 +33,7 @@ $expose_statements$
 
 # Install pip requirements
 ADD requirements.txt .
-RUN python3 -m pip install -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
 ADD . /app
