@@ -670,6 +670,15 @@
                                         "type": "boolean",
                                         "description": "Jinja template debugging (e.g. Flask).",
                                         "default": false
+                                    },
+                                    "projectType": {
+                                        "type": "string",
+                                        "description": "Type of the Python app.",
+                                        "enum": [
+                                            "django",
+                                            "flask",
+                                            "general"
+                                        ]
                                     }
                                 }
                             }
