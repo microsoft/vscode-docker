@@ -80,8 +80,9 @@ export class PythonTaskHelper implements TaskHelper {
       fse.emptyDirSync(dbgLogsFolder);
     }
 
-    runOptions.volumes = this.inferVolumes(runOptions, launcherFolder, dbgLogsFolder); // This method internally checks the user-defined input first
-    runOptions.ports = this.inferPorts(runOptions, helperOptions); // This method internally checks the user-defined input first
+    // User input is honored in all of the below.
+    runOptions.volumes = this.inferVolumes(runOptions, launcherFolder, dbgLogsFolder);
+    runOptions.ports = this.inferPorts(runOptions, helperOptions);
     runOptions.entrypoint = runOptions.entrypoint || "python";
     runOptions.command = runOptions.command || launcherCommand;
 
@@ -108,7 +109,7 @@ export class PythonTaskHelper implements TaskHelper {
   }
 
   public async provideDockerRunTasks(context: DockerTaskScaffoldContext, options: PythonScaffoldingOptions): Promise<DockerRunTaskDefinition[]> {
-    let runOptions: PythonTaskRunOptions = {
+    const runOptions: PythonTaskRunOptions = {
       args: inferPythonArgs(options.projectType, context.ports)
     };
 
@@ -148,9 +149,8 @@ export class PythonTaskHelper implements TaskHelper {
       permissions: "rw"
     }];
 
-    // Add the debugger volumes while honoring user input.
     dbgVolumes.map(dbgVol => {
-      if (volumes.find(volume => volume.localPath == dbgVol.localPath) == undefined){
+      if (volumes.find(volume => volume.containerPath == dbgVol.containerPath) == undefined){
         volumes.push(dbgVol);
       }
      });
@@ -168,7 +168,6 @@ export class PythonTaskHelper implements TaskHelper {
       }
     }
 
-    // Add the debugger port while honoring user input.
     if (ports.find(port => port.containerPort === debugPort) === undefined)
     {
         ports.push({

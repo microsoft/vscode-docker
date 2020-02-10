@@ -26,22 +26,7 @@ const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<Pyth
   ["general", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
 ]);
 
-const generalDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python
-
-$expose_statements$
-
-# Install pip requirements
-ADD requirements.txt .
-RUN python3 -m pip install -r requirements.txt
-
-WORKDIR /app
-ADD . /app
-
-$cmd$
-`;
-
-const pythonWebDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
+const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python
 
 $expose_statements$
@@ -88,10 +73,9 @@ gunicorn`;
 function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType, ports: number[]): string {
   const exposeStatements = getExposeStatements(ports);
   let command = "";
-  let dockerFile = "";
+  let dockerFile = pythonDockerfile;
 
   if (projectType == "general"){
-    dockerFile = generalDockerfile;
     if ((target as PythonFileTarget).file){
       command = `CMD ["python", "${(target as PythonFileTarget).file}"]`;
     }
@@ -100,12 +84,14 @@ function genDockerFile(serviceName: string, target: PythonFileTarget | PythonMod
     }
   }
   else if (projectType == "django"){
-    dockerFile = pythonWebDockerfile;
     command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}.wsgi"]`;
   }
   else if (projectType == "flask"){
-    dockerFile = pythonWebDockerfile;
     command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}:app"]`;
+  }
+  else{
+    // Unlikely
+    throw new Error(`Unknown project type: ${projectType}`);
   }
 
   return dockerFile
@@ -178,11 +164,11 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
 export async function promptForLaunchFile(projectType?: PythonProjectType) : Promise<PythonFileTarget | PythonModuleTarget>{
   const launchFilePrompt = defaultLaunchFile.get(projectType);
 
-  let opt: vscode.InputBoxOptions = {
+  const opt: vscode.InputBoxOptions = {
     placeHolder: launchFilePrompt.defaultFile,
     prompt: launchFilePrompt.prompt,
     value: launchFilePrompt.defaultFile,
-    validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : "Enter a valid Python file path." }
+    validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : "Enter a valid Python file path/module." }
   };
 
   const file = await ext.ui.showInputBox(opt);
@@ -214,7 +200,6 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
   }
 
   const launchFile = await context.captureStep("pythonFile", promptForLaunchFile)(projectType);
-
   const dockerFileContents = genDockerFile(serviceName, launchFile, projectType, ports);
 
   const files: ScaffoldFile[] = [
@@ -236,7 +221,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
 
   files.forEach(file => {
     // Remove multiple empty lines with single empty lines, as might be produced
-    // if $expose_statements$ or another template variable is an empty string
+    // if $expose_statements$ or another template variable is an empty string.
     file.contents = file.contents
       .replace(/(\r\n){3,4}/g, "\r\n\r\n")
       .replace(/(\n){3,4}/g, "\n\n");

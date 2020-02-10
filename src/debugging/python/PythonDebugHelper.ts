@@ -2,6 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import * as fse from 'fs-extra';
 import * as vscode from "vscode";
 import { PythonExtensionHelper } from "../../tasks/python/PythonExtensionHelper";
@@ -41,10 +42,8 @@ export class PythonDebugHelper implements DebugHelper {
 
   public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
     // tslint:disable: no-invalid-template-strings
-
-    let configs = [];
-    configs.push(
-      {
+    const configs : DockerDebugConfiguration[] =
+      [{
         name: "Docker Python Launch",
         type: "docker",
         request: "launch",
@@ -58,7 +57,7 @@ export class PythonDebugHelper implements DebugHelper {
           ],
           projectType: options.projectType
         }
-      });
+      }];
 
     // If we generated compose files, then we should generate a Python attach configuration.
     if (context.generateComposeTask){
@@ -87,11 +86,9 @@ export class PythonDebugHelper implements DebugHelper {
     // Since Python is a special case, we need to ensure the container is removed before attempting to resolve
     // the debug configuration.
     try {
-        await this.cliDockerClient.removeContainer(
-          containerName,
-          { force: true }
-        );
-      } catch {}
+        await this.cliDockerClient.removeContainer(containerName, { force: true });
+      }
+    catch {}
 
     const debuggerLogFilePath = PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
     await fse.remove(debuggerLogFilePath);
@@ -100,10 +97,10 @@ export class PythonDebugHelper implements DebugHelper {
     if (debugConfiguration.preLaunchTask) {
       // There is this limitation with the Python debugger where we need to ensure it's ready before allowing VSCode to attach,
       // if attach happens too soon then it will fail silently. The workaround here is to set the preLaunchTask to undefined,
-      // then execute it ourselves with a listener to when it is finished, then wait for the debugger to be ready and then
-      // return the resolved launch configuration.
+      // then execute it ourselves with a listener to when it is finished, then wait for the debugger to be ready and return
+      // the resolved launch configuration.
 
-      let task = await this.tryGetPrelaunchTask(debugConfiguration.preLaunchTask);
+      const task = await this.tryGetPrelaunchTask(debugConfiguration.preLaunchTask);
 
       if (!task) {
         throw new Error(`Unable to find the prelaunch task with the name: ${debugConfiguration.preLaunchTask}`);
@@ -121,7 +118,7 @@ export class PythonDebugHelper implements DebugHelper {
   }
 
   private resolveDebugConfigurationInternal(debugConfiguration: PythonDockerDebugConfiguration, containerName: string, context: DockerDebugContext): ResolvedDebugConfiguration {
-    let projectType = debugConfiguration.python.projectType;
+    const projectType = debugConfiguration.python.projectType;
 
     const dockerServerReadyAction =
       resolveDockerServerReadyAction(
@@ -133,7 +130,9 @@ export class PythonDebugHelper implements DebugHelper {
         },
         true);
 
-    let debugOptions = ["FixFilePathCase", "RedirectOutput", "ShowReturnValue"];
+    // These properties are required by the old debugger, should be changed to normal properties in the configuration
+    // as soon as the new debugger is released to 100% of the users.
+    const debugOptions = ["FixFilePathCase", "RedirectOutput", "ShowReturnValue"];
 
     if (this.localOsProvider.os === "Windows"){
       debugOptions.push("WindowsClient");
@@ -150,7 +149,6 @@ export class PythonDebugHelper implements DebugHelper {
       justMyCode: debugConfiguration.python.justMyCode || true,
       django: debugConfiguration.python.django || projectType === "django",
       jinja: debugConfiguration.python.jinja || projectType === "flask",
-      serverReadyAction: debugConfiguration.serverReadyAction,
       dockerOptions: {
         containerNameToKill: containerName,
         dockerServerReadyAction: dockerServerReadyAction,
@@ -165,10 +163,10 @@ export class PythonDebugHelper implements DebugHelper {
       return undefined;
     }
 
-    let tasks = await vscode.tasks.fetchTasks();
+    const tasks = await vscode.tasks.fetchTasks();
 
     if (tasks) {
-      let results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName) == 0);
+      const results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName) == 0);
 
       if (results && results.length > 0) {
         return results[0];

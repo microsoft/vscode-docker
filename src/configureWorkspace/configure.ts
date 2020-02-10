@@ -94,8 +94,8 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
 }
 
 registerScaffolder('Node.js', configureScaffolder(configureNode));
-registerScaffolder('.NET: Core Console', scaffoldNetCore);
 registerScaffolder('.NET: ASP.NET Core', scaffoldNetCore);
+registerScaffolder('.NET: Core Console', scaffoldNetCore);
 registerScaffolder('Python: Django', scaffoldPython);
 registerScaffolder('Python: Flask', scaffoldPython);
 registerScaffolder('Python: General', scaffoldPython);
