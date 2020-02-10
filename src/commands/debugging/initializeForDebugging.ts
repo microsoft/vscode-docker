@@ -5,14 +5,14 @@
 
 import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
+import { promptForLaunchFile } from '../../configureWorkspace/configurePython';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
+import { getPythonProjectType } from '../../utils/pythonUtils';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
-import { promptForLaunchFile } from '../../configureWorkspace/configurePython';
-import { getPythonProjectType } from '../../utils/pythonUtils';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
     const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');

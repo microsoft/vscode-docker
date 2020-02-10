@@ -60,7 +60,7 @@ export function getExposeStatements(ports: number[]): string {
 export function getComposePorts(ports: number[], debugPort?: number): string {
     let portMappings: string[] = ports.map(port => `      - ${port}`);
 
-    if (debugPort){
+    if (debugPort) {
         portMappings.push(`      - ${debugPort}:${debugPort}`);
     }
 
