@@ -94,7 +94,7 @@ export namespace PythonExtensionHelper {
         const pyExt = vscode.extensions.getExtension("ms-python.python");
 
         if (!pyExt) {
-            throw new Error("For debugging Python apps in a container to work, the Python extension must be installed.");
+            throw new Error("The Python extension must be installed.");
         }
 
         const debuggerPath = path.join(pyExt.extensionPath, "pythonFiles", "lib", "python");
