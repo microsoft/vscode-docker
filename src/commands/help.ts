@@ -11,20 +11,21 @@ import { openExternal } from '../utils/openExternal';
 import { getDockerExtensionPackageJson } from '../utils/extension';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
-    handler: () => Promise<void>
+    handler: () => Promise<void>,
+    telemetryID: string
 }
 
 export async function showHelpMenu(context: IActionContext): Promise<void> {
     let items: HelpMenuItem[] = [
-        { label: 'Get started with Docker...', handler: getStarted },
-        { label: 'Review Docker extension issues...', handler: reviewIssues },
-        { label: 'Report Docker extension issue...', handler: reportIssue },
-        { label: 'Edit settings...', handler: editSettings }
+        { label: 'Get started with Docker...', handler: getStarted, telemetryID: 'getStarted' },
+        { label: 'Review Docker extension issues...', handler: reviewIssues, telemetryID: 'reviewIssues' },
+        { label: 'Report Docker extension issue...', handler: reportIssue, telemetryID: 'reportIssue' },
+        { label: 'Edit settings...', handler: editSettings, telemetryID: 'editSettings' }
     ];
 
     const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true }
     let selectedItem: HelpMenuItem = await ext.ui.showQuickPick(items, options);
-    context.telemetry.properties.helpItem = selectedItem.handler.name;
+    context.telemetry.properties.helpItem = selectedItem.telemetryID;
     await selectedItem.handler();
 }
 
