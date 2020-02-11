@@ -27,7 +27,6 @@ import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
-import { nps } from './utils/nps';
 import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 
@@ -126,9 +125,10 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerListeners(ctx);
 
+        // NOTE: Temporarily disabled.
         // Don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        nps(ctx.globalState);
+        // nps(ctx.globalState);
     });
 }
 
