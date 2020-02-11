@@ -447,7 +447,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         }
     }
 
-    // Node.js
+    // `Node.`js
 
     suite("Node.js", () => {
         testInEmptyFolder("No package.json", async () => {
@@ -466,13 +466,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
             assertFileContains('Dockerfile', 'CMD npm start');
 
-            assertFileContains('docker-compose.debug.yml', '1234:1234');
+            assertFileContains('docker-compose.debug.yml', '1234');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
             assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
 
-            assertFileContains('docker-compose.yml', '1234:1234');
+            assertFileContains('docker-compose.yml', '1234');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
@@ -537,13 +537,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
             assertFileContains('Dockerfile', 'CMD npm start');
 
-            assertFileContains('docker-compose.debug.yml', '4321:4321');
+            assertFileContains('docker-compose.debug.yml', '4321');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
             assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
 
-            assertFileContains('docker-compose.yml', '4321:4321');
+            assertFileContains('docker-compose.yml', '4321');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
@@ -1348,7 +1348,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     image: testoutput
                     build: .
                     ports:
-                      - 3000:3000`));
+                      - 3000`));
             assert.strictEqual(debugComposeContents, removeIndentation(`
                 version: '2.1'
 
@@ -1359,7 +1359,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                       context: .
                       dockerfile: Dockerfile
                     ports:
-                      - 3000:3000`));
+                      - 3000`));
         });
     });
 
@@ -1445,7 +1445,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Linux",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET: Core Console'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/somefile1.cs', 'serviceFolder/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1464,7 +1464,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET: Core Console'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1482,7 +1482,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234, 5678]
                         },
-                        ['ASP.NET Core'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
+                        ['.NET: ASP.NET Core'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/subfolder1/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });
