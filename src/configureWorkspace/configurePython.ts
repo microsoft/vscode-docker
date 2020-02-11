@@ -113,7 +113,7 @@ function genDockerComposeDebug(serviceName: string, projectType: PythonProjectTy
 
     return dockerComposeDebugfile
         .replace(/\$service_name\$/g, serviceName)
-        .replace(/\$dbg_volume\$/g,`- ${PythonExtensionHelper.getLauncherFolderPath()}:/pydbg`)
+        .replace(/\$dbg_volume\$/g, `- ${PythonExtensionHelper.getLauncherFolderPath()}:/pydbg`)
         .replace(/\$entrypoint\$/g, entrypoint)
         .replace(/\$ports\$/g, getComposePorts(ports, PythonDefaultDebugPort));
 }
