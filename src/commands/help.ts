@@ -8,7 +8,7 @@ import { IActionContext, IAzureQuickPickOptions } from 'vscode-azureextensionui'
 
 import { ext } from '../extensionVariables';
 import { openExternal } from '../utils/openExternal';
-import { getDockerExtensionPackageJson } from '../utils/extension';
+import { extensionId } from '../constants';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
     handler: () => Promise<void>,
@@ -40,11 +40,9 @@ async function reviewIssues(): Promise<void> {
 }
 
 async function reportIssue(): Promise<void> {
-    const packageJson = getDockerExtensionPackageJson();
-    return vscode.commands.executeCommand('vscode.openIssueReporter', `${packageJson.publisher}.${packageJson.name}`);
+    return vscode.commands.executeCommand('vscode.openIssueReporter', `${extensionId}`);
 }
 
 async function editSettings(): Promise<void> {
-    const packageJson = getDockerExtensionPackageJson();
-    return vscode.commands.executeCommand('workbench.action.openSettings', `@ext:${packageJson.publisher}.${packageJson.name}`);
+    return vscode.commands.executeCommand('workbench.action.openSettings', `@ext:${extensionId}`);
 }
