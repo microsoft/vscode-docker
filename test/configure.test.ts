@@ -447,7 +447,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         }
     }
 
-    // `Node.`js
+    // Node.js
 
     suite("Node.js", () => {
         testInEmptyFolder("No package.json", async () => {
