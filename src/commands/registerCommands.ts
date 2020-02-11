@@ -18,6 +18,7 @@ import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
+import { help } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
@@ -127,4 +128,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);
+
+    registerCommand('vscode-docker.help', help);
 }

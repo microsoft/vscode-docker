@@ -31,7 +31,6 @@ import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import RealClock from './utils/Clock';
 import { Keytar } from './utils/keytar';
-// import { nps } from './utils/nps';
 import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 
@@ -137,7 +136,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerListeners(ctx);
 
-        // NOTE: NPS is temporarily disabled.
+        // NOTE: Temporarily disabled.
+        // Don't wait
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         // nps(ctx.globalState);
     });
 }
