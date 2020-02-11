@@ -6,16 +6,16 @@
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickOptions } from 'vscode-azureextensionui';
 
+import { extensionId } from '../constants';
 import { ext } from '../extensionVariables';
 import { openExternal } from '../utils/openExternal';
-import { extensionId } from '../constants';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
-    handler: () => Promise<void>,
+    handler(): Promise<void>,
     telemetryID: string
 }
 
-export async function showHelpMenu(context: IActionContext): Promise<void> {
+export async function help(context: IActionContext): Promise<void> {
     let items: HelpMenuItem[] = [
         { label: 'Get started with Docker...', handler: getStarted, telemetryID: 'getStarted' },
         { label: 'Review Docker extension issues...', handler: reviewIssues, telemetryID: 'reviewIssues' },
