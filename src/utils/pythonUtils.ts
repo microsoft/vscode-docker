@@ -5,12 +5,12 @@
 
 import { Platform } from './platform';
 
-export type PythonProjectType = "django" | "flask" | "general";
+export type PythonProjectType = 'django' | 'flask' | 'general';
 
 export const PythonDefaultDebugPort: number = 5678;
 export const PythonDefaultPorts: Map<PythonProjectType, number> = new Map<PythonProjectType, number>([
-    ["django", 8000],
-    ["flask", 5000],
+    ['django', 8000],
+    ['flask', 5000],
 ]);
 
 export interface PythonFileTarget {
@@ -25,10 +25,10 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
     switch (projectType) {
         case 'django':
             return [
-                "runserver",
+                'runserver',
                 `0.0.0.0:${ports !== undefined ? ports[0] : PythonDefaultPorts[projectType]}`,
-                "--nothreading",
-                "--noreload"
+                '--nothreading',
+                '--noreload'
             ];
         default:
             return undefined;
@@ -38,11 +38,11 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
 export function getPythonProjectType(platform: Platform): PythonProjectType | undefined {
     switch (platform) {
         case 'Python: Django':
-            return "django";
+            return 'django';
         case 'Python: Flask':
-            return "flask";
+            return 'flask';
         case 'Python: General':
-            return "general";
+            return 'general';
         default:
             return undefined;
     }

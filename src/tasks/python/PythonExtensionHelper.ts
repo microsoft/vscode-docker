@@ -21,13 +21,13 @@ export namespace PythonExtensionHelper {
     }
 
     export function getDebuggerEnvironmentVars(): { [key: string]: string } {
-        return { ["PTVSD_LOG_DIR"]: `/dbglogs` };
+        return { ['PTVSD_LOG_DIR']: `/dbglogs` };
     }
 
     export function getDebuggerLogFilePath(folderName: string) : string {
     // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
     // So given that we run the debugger as the entry point, then the PID is guaranteed to be 1.
-        return path.join(os.tmpdir(), folderName, "ptvsd-1.log");
+        return path.join(os.tmpdir(), folderName, 'ptvsd-1.log');
     }
 
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
@@ -36,10 +36,10 @@ export namespace PythonExtensionHelper {
             vscode.tasks.onDidEndTask(async e => {
                 if (e.execution.task === prelaunchTask) {
                     // There is no way to know the result of the completed task, so a best guess is to check if the container is running.
-                    const containerRunning = await cliDockerClient.inspectObject(containerName, { format: "{{.State.Running}}" });
+                    const containerRunning = await cliDockerClient.inspectObject(containerName, { format: '{{.State.Running}}' });
 
-                    if (containerRunning === "false") {
-                        reject("Failed to attach the debugger, please see the terminal output for more details.");
+                    if (containerRunning === 'false') {
+                        reject('Failed to attach the debugger, please see the terminal output for more details.');
                     }
 
                     const maxRetriesCount = 20;
@@ -52,7 +52,7 @@ export namespace PythonExtensionHelper {
                         if (fse.existsSync(debuggerSemaphorePath)) {
                             const contents = fse.readFileSync(debuggerSemaphorePath);
 
-                            created = contents.toString().indexOf("Starting server daemon on") >= 0;
+                            created = contents.toString().indexOf('Starting server daemon on') >= 0;
                             if (created) {
                                 break;
                             }
@@ -64,7 +64,7 @@ export namespace PythonExtensionHelper {
                     if (created) {
                         resolve();
                     } else {
-                        reject("Failed to attach the debugger within the alotted timeout.");
+                        reject('Failed to attach the debugger within the alotted timeout.');
                     }
                 }});
         })
@@ -78,28 +78,28 @@ export namespace PythonExtensionHelper {
         } else if ((target as PythonModuleTarget).module) {
             fullTarget = `-m ${(target as PythonModuleTarget).module}`;
         } else {
-            throw new Error("One of either module or file must be provided.");
+            throw new Error('One of either module or file must be provided.');
         }
 
         options = options || {};
-        options.host = options.host || "0.0.0.0";
+        options.host = options.host || '0.0.0.0';
         options.port = options.port || PythonDefaultDebugPort;
         options.wait = !!options.wait;
         args = args || [];
 
-        return `/pydbg/ptvsd --host ${options.host} --port ${options.port} ${options.wait ? "--wait" : ""} ${fullTarget} ${args.join(" ")}`;
+        return `/pydbg/ptvsd --host ${options.host} --port ${options.port} ${options.wait ? '--wait' : ''} ${fullTarget} ${args.join(' ')}`;
     }
 
     export function getLauncherFolderPath(): string {
-        const pyExt = vscode.extensions.getExtension("ms-python.python");
+        const pyExt = vscode.extensions.getExtension('ms-python.python');
 
         if (!pyExt) {
-            throw new Error("For debugging Python apps in a container to work, the Python extension must be installed.");
+            throw new Error('For debugging Python apps in a container to work, the Python extension must be installed.');
         }
 
-        const debuggerPath = path.join(pyExt.extensionPath, "pythonFiles", "lib", "python");
-        const oldDebugger = path.join(debuggerPath, "old_ptvsd");
-        const newDebugger = path.join(debuggerPath, "new_ptvsd");
+        const debuggerPath = path.join(pyExt.extensionPath, 'pythonFiles', 'lib', 'python');
+        const oldDebugger = path.join(debuggerPath, 'old_ptvsd');
+        const newDebugger = path.join(debuggerPath, 'new_ptvsd');
 
         // Always favor the old_ptvsd debugger since it will work in all cases.
         // If it is not found, then look for the new instead.
@@ -111,6 +111,6 @@ export namespace PythonExtensionHelper {
             return newDebugger;
         }
 
-        throw new Error("Unable to find the debugger in the Python extension.");
+        throw new Error('Unable to find the debugger in the Python extension.');
     }
 }

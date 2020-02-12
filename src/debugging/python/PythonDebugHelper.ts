@@ -43,16 +43,16 @@ export class PythonDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         const configs : DockerDebugConfiguration[] =
         [{
-            name: "Docker Python Launch",
-            type: "docker",
-            request: "launch",
-            preLaunchTask: "docker-run: debug",
+            name: 'Docker Python Launch',
+            type: 'docker',
+            request: 'launch',
+            preLaunchTask: 'docker-run: debug',
             python: {
                 pathMappings: [
                     {
                         /* eslint-disable-next-line no-template-curly-in-string */
-                        localRoot: "${workspaceFolder}",
-                        remoteRoot: "/app"
+                        localRoot: '${workspaceFolder}',
+                        remoteRoot: '/app'
                     }
                 ],
                 projectType: options.projectType
@@ -63,16 +63,16 @@ export class PythonDebugHelper implements DebugHelper {
         if (context.generateComposeTask) {
             configs.push(
                 {
-                    name: "Python: Remote Attach",
-                    type: "python",
-                    request: "attach",
-                    host: "localhost",
+                    name: 'Python: Remote Attach',
+                    type: 'python',
+                    request: 'attach',
+                    host: 'localhost',
                     port: PythonDefaultDebugPort,
                     pathMappings: [
                         {
                             /* eslint-disable-next-line no-template-curly-in-string */
-                            localRoot: "${workspaceFolder}",
-                            remoteRoot: "/app"
+                            localRoot: '${workspaceFolder}',
+                            remoteRoot: '/app'
                         }
                     ]
                 });
@@ -128,29 +128,29 @@ export class PythonDebugHelper implements DebugHelper {
           {
               containerName: containerName,
               pattern: this.getServerReadyPattern(projectType),
-              uriFormat: "%s://localhost:%s"
+              uriFormat: '%s://localhost:%s'
           },
           true);
 
         // These properties are required by the old debugger, should be changed to normal properties in the configuration
         // as soon as the new debugger is released to 100% of the users.
-        const debugOptions = ["FixFilePathCase", "RedirectOutput", "ShowReturnValue"];
+        const debugOptions = ['FixFilePathCase', 'RedirectOutput', 'ShowReturnValue'];
 
-        if (this.localOsProvider.os === "Windows") {
-            debugOptions.push("WindowsClient");
+        if (this.localOsProvider.os === 'Windows') {
+            debugOptions.push('WindowsClient');
         }
 
         return {
             ...debugConfiguration,
-            type: "python",
-            request: "attach",
+            type: 'python',
+            request: 'attach',
             workspaceFolder: context.folder.uri.fsPath,
-            host: debugConfiguration.python.host || "localhost",
+            host: debugConfiguration.python.host || 'localhost',
             port: debugConfiguration.python.port || PythonDefaultDebugPort,
             pathMappings: debugConfiguration.python.pathMappings,
             justMyCode: debugConfiguration.python.justMyCode || true,
-            django: debugConfiguration.python.django || projectType === "django",
-            jinja: debugConfiguration.python.jinja || projectType === "flask",
+            django: debugConfiguration.python.django || projectType === 'django',
+            jinja: debugConfiguration.python.jinja || projectType === 'flask',
             dockerOptions: {
                 containerNameToKill: containerName,
                 dockerServerReadyAction: dockerServerReadyAction,
@@ -180,10 +180,10 @@ export class PythonDebugHelper implements DebugHelper {
 
     private getServerReadyPattern(projectType: PythonProjectType) : string | undefined {
         switch (projectType) {
-            case "django":
-                return "Starting development server at (https?://\\S+|[0-9]+)";
-            case "flask":
-                return "Running on (https?://\\S+|[0-9]+)";
+            case 'django':
+                return 'Starting development server at (https?://\\S+|[0-9]+)';
+            case 'flask':
+                return 'Running on (https?://\\S+|[0-9]+)';
             default:
                 return undefined
         }

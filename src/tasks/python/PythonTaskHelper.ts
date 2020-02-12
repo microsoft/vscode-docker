@@ -30,15 +30,15 @@ export interface PythonRunTaskDefinition extends DockerRunTaskDefinitionBase {
 
 export class PythonTaskHelper implements TaskHelper {
     private static readonly defaultLabels: { [key: string]: string } = {
-        "com.microsoft.created-by": "visual-studio-code"
+        'com.microsoft.created-by': 'visual-studio-code'
     };
 
     public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions> {
         const buildOptions = buildDefinition.dockerBuild;
 
         /* eslint-disable no-template-curly-in-string */
-        buildOptions.context = buildOptions.context || "${workspaceFolder}";
-        buildOptions.dockerfile = buildOptions.dockerfile || "${workspaceFolder}/Dockerfile";
+        buildOptions.context = buildOptions.context || '${workspaceFolder}';
+        buildOptions.dockerfile = buildOptions.dockerfile || '${workspaceFolder}/Dockerfile';
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
         buildOptions.labels = buildOptions.labels || PythonTaskHelper.defaultLabels;
 
@@ -58,7 +58,7 @@ export class PythonTaskHelper implements TaskHelper {
             target,
             helperOptions.args,
             {
-                host: "0.0.0.0",
+                host: '0.0.0.0',
                 port: helperOptions.debugPort || PythonDefaultDebugPort,
                 wait: helperOptions.wait === undefined ? true : helperOptions.wait
             }
@@ -84,7 +84,7 @@ export class PythonTaskHelper implements TaskHelper {
         // User input is honored in all of the below.
         runOptions.volumes = this.inferVolumes(runOptions, launcherFolder, dbgLogsFolder);
         runOptions.ports = this.inferPorts(runOptions, helperOptions);
-        runOptions.entrypoint = runOptions.entrypoint || "python";
+        runOptions.entrypoint = runOptions.entrypoint || 'python';
         runOptions.command = runOptions.command || launcherCommand;
 
         runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env);
@@ -96,14 +96,14 @@ export class PythonTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
-                type: "docker-build",
-                label: "docker-build",
-                platform: "python",
+                type: 'docker-build',
+                label: 'docker-build',
+                platform: 'python',
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name),
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable no-template-curly-in-string */
-                    context: "${workspaceFolder}"
+                    context: '${workspaceFolder}'
                 }
             }
         ];
@@ -121,9 +121,9 @@ export class PythonTaskHelper implements TaskHelper {
         }
 
         return [{
-            type: "docker-run",
-            label: "docker-run: debug",
-            dependsOn: ["docker-build"],
+            type: 'docker-run',
+            label: 'docker-run: debug',
+            dependsOn: ['docker-build'],
             python: runOptions
         }];
     }
@@ -140,13 +140,13 @@ export class PythonTaskHelper implements TaskHelper {
         const dbgVolumes: DockerContainerVolume[] = [
             {
                 localPath: launcherFolder,
-                containerPath: "/pydbg",
-                permissions: "ro"
+                containerPath: '/pydbg',
+                permissions: 'ro'
             },
             {
                 localPath: dbgLogsFolder,
-                containerPath: "/dbglogs",
-                permissions: "rw"
+                containerPath: '/dbglogs',
+                permissions: 'rw'
             }];
 
         dbgVolumes.map(dbgVol => {

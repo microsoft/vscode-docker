@@ -21,9 +21,9 @@ interface LaunchFilePrompt {
 }
 
 const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<PythonProjectType, LaunchFilePrompt>([
-    ["django", { prompt: "Enter the relative path to the application (e.g. manage.py)", defaultFile: "manage.py" }],
-    ["flask", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
-    ["general", { prompt: "Enter the relative path to the application, e.g. 'app.py' or 'app'", defaultFile: "app.py" }],
+    ['django', { prompt: 'Enter the relative path to the application (e.g. manage.py)', defaultFile: 'manage.py' }],
+    ['flask', { prompt: 'Enter the relative path to the application, e.g. \'app.py\' or \'app\'', defaultFile: 'app.py' }],
+    ['general', { prompt: 'Enter the relative path to the application, e.g. \'app.py\' or \'app\'', defaultFile: 'app.py' }],
 ]);
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
@@ -72,17 +72,17 @@ gunicorn`;
 
 function genDockerFile(serviceName: string, target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType, ports: number[]): string {
     const exposeStatements = getExposeStatements(ports);
-    let command = "";
+    let command = '';
 
-    if (projectType === "general") {
+    if (projectType === 'general') {
         if ((target as PythonFileTarget).file) {
             command = `CMD ["python", "${(target as PythonFileTarget).file}"]`;
         } else {
             command = `CMD ["python", "-m", "${(target as PythonModuleTarget).module}"]`;
         }
-    } else if (projectType === "django") {
+    } else if (projectType === 'django') {
         command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}.wsgi"]`;
-    } else if (projectType === "flask") {
+    } else if (projectType === 'flask') {
         command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}:app"]`;
     } else {
         // Unlikely
@@ -102,14 +102,14 @@ function genDockerCompose(serviceName: string, ports: number[]): string {
 
 function genDockerComposeDebug(serviceName: string, projectType: PythonProjectType, ports: number[], target: PythonFileTarget | PythonModuleTarget): string {
     const defaultDebugOptions : PythonExtensionHelper.DebugLaunchOptions = {
-        host: "0.0.0.0",
+        host: '0.0.0.0',
         port: PythonDefaultDebugPort,
         wait: true
     };
 
     const args = inferPythonArgs(projectType, ports);
     const launcherCommand = PythonExtensionHelper.getRemotePtvsdCommand(target, args, defaultDebugOptions);
-    const entrypoint = "python ".concat(launcherCommand);
+    const entrypoint = 'python '.concat(launcherCommand);
 
     return dockerComposeDebugfile
         .replace(/\$service_name\$/g, serviceName)
@@ -122,10 +122,10 @@ function genRequirementsFile(projectType: PythonProjectType): string {
     let contents = '# Add requirements when needed'
 
     switch (projectType) {
-        case "django":
+        case 'django':
             contents = djangoRequirements;
             break;
-        case "flask":
+        case 'flask':
             contents = flaskRequirements
             break;
         default:
@@ -138,7 +138,7 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
                                       target: PythonFileTarget | PythonModuleTarget, projectType: PythonProjectType): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: context.folder,
-        platform: "python",
+        platform: 'python',
         actionContext: context,
         dockerfile: dockerfile,
         generateComposeTask: generateComposeFiles,
@@ -160,14 +160,13 @@ export async function promptForLaunchFile(projectType?: PythonProjectType) : Pro
         placeHolder: launchFilePrompt.defaultFile,
         prompt: launchFilePrompt.prompt,
         value: launchFilePrompt.defaultFile,
-        validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : "Enter a valid Python file path/module." }
+        validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : 'Enter a valid Python file path/module.' }
     };
 
     const file = await ext.ui.showInputBox(opt);
 
     // If the input has the .py extension, then assume it is a file.
-    // TODO: is there a more robust way to check?
-    if (file.toLowerCase().endsWith(".py")) {
+    if (path.extname(file).toLocaleUpperCase() === 'PY') {
         return { file: file.replace(/\\/g, '/') };
     } else {
         return { module: file};
@@ -180,7 +179,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     const rootFolderPath: string = context.rootFolder;
     const outputFolder = context.outputFolder ?? rootFolderPath;
 
-    const generateComposeFiles = await context.captureStep("compose", quickPickGenerateComposeFiles)();
+    const generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
     const projectType = getPythonProjectType(context.platform);
 
     const defaultPort = PythonDefaultPorts.get(projectType);
@@ -190,7 +189,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
         ports = await context.promptForPorts([ defaultPort ]);
     }
 
-    const launchFile = await context.captureStep("pythonFile", promptForLaunchFile)(projectType);
+    const launchFile = await context.captureStep('pythonFile', promptForLaunchFile)(projectType);
     const dockerFileContents = genDockerFile(serviceName, launchFile, projectType, ports);
 
     const files: ScaffoldFile[] = [
@@ -214,12 +213,12 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string.
         file.contents = file.contents
-            .replace(/(\r\n){3,4}/g, "\r\n\r\n")
-            .replace(/(\n){3,4}/g, "\n\n");
+            .replace(/(\r\n){3,4}/g, '\r\n\r\n')
+            .replace(/(\n){3,4}/g, '\n\n');
     });
 
     if (context.initializeForDebugging) {
-        await initializeForDebugging(context, path.join(outputFolder, "Dockerfile"), ports, generateComposeFiles, launchFile, projectType);
+        await initializeForDebugging(context, path.join(outputFolder, 'Dockerfile'), ports, generateComposeFiles, launchFile, projectType);
     }
 
     return files;
