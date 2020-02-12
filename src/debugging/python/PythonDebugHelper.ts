@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
+import * as os from 'os';
 import * as vscode from "vscode";
 import { PythonExtensionHelper } from "../../tasks/python/PythonExtensionHelper";
 import { PythonDefaultDebugPort, PythonProjectType } from '../../utils/pythonUtils';
 import ChildProcessProvider from "../coreclr/ChildProcessProvider";
 import CliDockerClient from "../coreclr/CliDockerClient";
-import LocalOSProvider from "../coreclr/LocalOSProvider";
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfigurationBase } from "../DockerDebugConfigurationBase";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
@@ -36,8 +36,7 @@ export interface PythonDockerDebugConfiguration extends DockerDebugConfiguration
 
 export class PythonDebugHelper implements DebugHelper {
     public constructor(
-        private readonly cliDockerClient: CliDockerClient,
-        private readonly localOsProvider: LocalOSProvider) {
+        private readonly cliDockerClient: CliDockerClient) {
     }
 
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
@@ -63,7 +62,7 @@ export class PythonDebugHelper implements DebugHelper {
         if (context.generateComposeTask) {
             configs.push(
                 {
-                    name: 'Python: Remote Attach',
+                    name: 'Python Remote Attach',
                     type: 'python',
                     request: 'attach',
                     host: 'localhost',
@@ -93,25 +92,24 @@ export class PythonDebugHelper implements DebugHelper {
         const debuggerLogFilePath = PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
         await fse.remove(debuggerLogFilePath);
 
-        let debuggerReadyPromise = new Promise((resolve) => resolve());
+        let debuggerReadyPromise = Promise.resolve();
         if (debugConfiguration.preLaunchTask) {
             // There is this limitation with the Python debugger where we need to ensure it's ready before allowing VSCode to attach,
             // if attach happens too soon then it will fail silently. The workaround here is to set the preLaunchTask to undefined,
             // then execute it ourselves with a listener to when it is finished, then wait for the debugger to be ready and return
             // the resolved launch configuration.
 
-            const task = await this.tryGetPrelaunchTask(debugConfiguration.preLaunchTask);
+            const task = await this.tryGetPreLaunchTask(debugConfiguration.preLaunchTask);
 
             if (!task) {
                 throw new Error(`Unable to find the prelaunch task with the name: ${debugConfiguration.preLaunchTask}`);
             }
 
             debugConfiguration.preLaunchTask = undefined;
+            debuggerReadyPromise = PythonExtensionHelper.ensureDebuggerReady(task, debuggerLogFilePath, containerName, this.cliDockerClient);
 
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.tasks.executeTask(task);
-
-            debuggerReadyPromise = PythonExtensionHelper.ensureDebuggerReady(task, debuggerLogFilePath, containerName, this.cliDockerClient);
         }
 
         return await debuggerReadyPromise.then(() => {
@@ -136,7 +134,7 @@ export class PythonDebugHelper implements DebugHelper {
         // as soon as the new debugger is released to 100% of the users.
         const debugOptions = ['FixFilePathCase', 'RedirectOutput', 'ShowReturnValue'];
 
-        if (this.localOsProvider.os === 'Windows') {
+        if (os.platform() === 'win32') {
             debugOptions.push('WindowsClient');
         }
 
@@ -160,7 +158,7 @@ export class PythonDebugHelper implements DebugHelper {
         };
     }
 
-    private async tryGetPrelaunchTask(prelaunchTaskName: string) : Promise<vscode.Task> | undefined {
+    private async tryGetPreLaunchTask(prelaunchTaskName: string) : Promise<vscode.Task> | undefined {
         if (!prelaunchTaskName) {
             return undefined;
         }
@@ -170,7 +168,7 @@ export class PythonDebugHelper implements DebugHelper {
         if (tasks) {
             const results = tasks.filter(t => t.name.localeCompare(prelaunchTaskName) === 0);
 
-            if (results && results.length > 0) {
+            if (results.length > 0) {
                 return results[0];
             }
         }
@@ -185,12 +183,11 @@ export class PythonDebugHelper implements DebugHelper {
             case 'flask':
                 return 'Running on (https?://\\S+|[0-9]+)';
             default:
-                return undefined
+                return undefined;
         }
     }
 }
 
 const dockerClient = new CliDockerClient(new ChildProcessProvider());
-const osProvider = new LocalOSProvider();
 
-export const pythonDebugHelper = new PythonDebugHelper(dockerClient, osProvider);
+export const pythonDebugHelper = new PythonDebugHelper(dockerClient);

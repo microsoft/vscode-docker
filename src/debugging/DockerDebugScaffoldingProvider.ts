@@ -11,7 +11,7 @@ import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netco
 import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
 import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
-import { PythonFileTarget, PythonModuleTarget, PythonProjectType } from '../utils/pythonUtils';
+import { PythonProjectType, PythonTarget } from '../utils/pythonUtils';
 import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
@@ -21,7 +21,7 @@ import { pythonDebugHelper } from './python/PythonDebugHelper';
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 export interface PythonScaffoldingOptions {
     projectType?: PythonProjectType;
-    target?: PythonFileTarget | PythonModuleTarget
+    target?: PythonTarget
 }
 
 export interface IDockerDebugScaffoldingProvider {

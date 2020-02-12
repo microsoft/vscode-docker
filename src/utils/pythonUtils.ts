@@ -7,12 +7,14 @@ import { Platform } from './platform';
 
 export type PythonProjectType = 'django' | 'flask' | 'general';
 
+export const PythonFileExtension = ".py";
 export const PythonDefaultDebugPort: number = 5678;
 export const PythonDefaultPorts: Map<PythonProjectType, number> = new Map<PythonProjectType, number>([
     ['django', 8000],
     ['flask', 5000],
 ]);
 
+export type PythonTarget = PythonFileTarget | PythonModuleTarget;
 export interface PythonFileTarget {
     file: string;
 }

@@ -14,7 +14,7 @@ import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
-import { DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
+import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
@@ -211,6 +211,15 @@ export async function recursiveFindTaskByType(allTasks: TaskDefinitionBase[], ty
     // tslint:enable: no-unsafe-any
 
     return undefined;
+}
+
+export function addVolumeWithoutConflicts(volumes: DockerContainerVolume[], volume: DockerContainerVolume): boolean {
+    if (volumes.find(v => v.containerPath === volume.containerPath)) {
+        return false;
+    }
+
+    volumes.push(volume);
+    return true;
 }
 
 async function findTaskByLabel(allTasks: TaskDefinitionBase[], label: string): Promise<TaskDefinitionBase | undefined> {

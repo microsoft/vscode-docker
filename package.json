@@ -629,7 +629,7 @@
                                 }
                             },
                             "python": {
-                                "description": "Options for building Python applications in Docker.",
+                                "description": "Options for debugging Python applications in Docker.",
                                 "properties": {
                                     "host": {
                                         "type": "string",
