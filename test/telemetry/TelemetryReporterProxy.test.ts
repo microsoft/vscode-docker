@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
- import * as assert from 'assert';
+import * as assert from 'assert';
 
 import { TelemetryReporterProxy } from '../../extension.bundle';
 import { ITelemetryReporter } from 'vscode-azureextensionui';
@@ -12,8 +12,8 @@ import { ITelemetryPublisher } from '../../extension.bundle';
 suite('telemetry/TelemetryReporterProxy', () => {
     test('Events sent to both reporter and publisher', () => {
         const eventName = 'event';
-        const properties = {};
         const measurements = {};
+        const properties = {};
 
         let eventPublished = false;
         let eventSent = false;

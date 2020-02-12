@@ -16,7 +16,7 @@ export interface ITelemetryPublisher {
     publishEvent(event: TelemetryEvent): void;
 }
 
-export default class TelemetryPublisher extends vscode.Disposable implements ITelemetryPublisher {
+export class TelemetryPublisher extends vscode.Disposable implements ITelemetryPublisher {
     private readonly onEventEmitter: vscode.EventEmitter<TelemetryEvent>;
 
     public constructor() {
