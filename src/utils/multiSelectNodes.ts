@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, ITreeItemPickerContext, AzExtTreeDataProvider, UserCancelledError } from "vscode-azureextensionui";
+import { AzExtTreeItem, ITreeItemPickerContext, AzExtTreeDataProvider, UserCancelledError, AzExtParentTreeItem } from "vscode-azureextensionui";
 
 /**
  * Helps determine the full list of eligible selected tree item nodes for context menu and commands
@@ -35,6 +35,9 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
         // Otherwise if there's a filter, need to filter our selection to exclude ineligible nodes
         nodes = nodes.filter(n => expectedContextValue.test(n.contextValue));
     }
+
+    // Filter off parent items (i.e. group items), as it doesn't make sense to perform actions on them, when we don't allow actions to be performed on *only* them
+    nodes.filter(n => !(n instanceof AzExtParentTreeItem));
 
     // If we end with no nodes, cancel
     if (nodes.length === 0) {
