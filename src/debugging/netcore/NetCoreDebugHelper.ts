@@ -199,22 +199,22 @@ export class NetCoreDebugHelper implements DebugHelper {
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
 
         // If debugger path is not specified, install the debugger
-        const debuggerFilePath: string = debugConfiguration.debuggerFilePath ?? await this.InstallDebuggerOnContainer(containerName);
+        const debuggerPath: string = debugConfiguration.debuggerPath ?? await this.installDebuggerInContainer(containerName);
 
         return {
             ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.
             type: 'coreclr',
             request: 'attach',
-            "justMyCode": false,
+            'justMyCode': false,
             // if processId is specified in the debugConfiguration, then it will take precedences
             // and processName will be ignored.
-            processName: debugConfiguration.processName || "dotnet",
+            processName: debugConfiguration.processName || 'dotnet',
             pipeTransport: {
                 pipeProgram: 'docker',
                 pipeArgs: ['exec', '-i', containerName],
                 // eslint-disable-next-line no-template-curly-in-string
                 pipeCwd: '${workspaceFolder}',
-                debuggerPath: debuggerFilePath,
+                debuggerPath: debuggerPath,
                 quoteArgs: false,
             },
             sourceFileMap: debugConfiguration.sourceFileMap || {
@@ -286,7 +286,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async InstallDebuggerOnContainer(containerName: string): Promise<string> {
+    private async installDebuggerInContainer(containerName: string): Promise<string> {
         const debuggerPath: string = '/remote_debugger';
         const installUnZip: string = '/bin/sh -c "apt-get update && apt-get install unzip"';
         const installDebugger: string = `/bin/sh -c "curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}"`;
@@ -314,7 +314,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No running containers are availble to attach'
+            noItemFoundErrorMessage: 'No running containers are available to attach'
         });
         return containerItem.containerName;
     }
