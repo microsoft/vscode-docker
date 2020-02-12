@@ -29,6 +29,7 @@ import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDe
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
+    debuggerPath?: string;
 }
 
 export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
@@ -199,7 +200,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
 
         // If debugger path is not specified, install the debugger
-        const debuggerPath: string = debugConfiguration.debuggerPath ?? await this.installDebuggerInContainer(containerName);
+        const debuggerPath: string = debugConfiguration.netCore?.debuggerPath ?? await this.installDebuggerInContainer(containerName);
 
         return {
             ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.

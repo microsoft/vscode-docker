@@ -18,7 +18,6 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
 }
 
 export interface DockerAttachConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
-    debuggerPath?: string;
     processName?: string;
     processId?: string | number;
 }

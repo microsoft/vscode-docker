@@ -653,10 +653,6 @@
                                     }
                                 ]
                             },
-                            "debuggerPath": {
-                                "type": "string",
-                                "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
-                            },
                             "platform": {
                                 "type": "string",
                                 "description": "The target plaform for the application.",
@@ -672,6 +668,15 @@
                                 },
                                 "default": {
                                     "<insert-source-path-here>": "<insert-target-path-here>"
+                                }
+                            },
+                            "netCore": {
+                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "properties": {
+                                    "debuggerPath": {
+                                        "type": "string",
+                                        "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                                    }
                                 }
                             }
                         }
