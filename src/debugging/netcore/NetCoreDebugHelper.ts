@@ -6,8 +6,8 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { DebugConfiguration } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { DebugConfiguration, MessageItem, window } from 'vscode';
+import { DialogResponses, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
@@ -287,6 +287,12 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async installDebuggerInContainer(containerName: string): Promise<string> {
+        const yesItem: MessageItem = DialogResponses.yes;
+        const install = (yesItem === await window.showInformationMessage('Attaching to container requiers .NET Core debugger in the container. Do you want to install debugger in the container?', ...[DialogResponses.yes, DialogResponses.no]));
+        if (!install) {
+            throw new UserCancelledError("User didn't grand permission to install .NET Core debugger.");
+        }
+
         const debuggerPath: string = '/remote_debugger';
         const installUnZip: string = '/bin/sh -c "apt-get update && apt-get install unzip"';
         const installDebugger: string = `/bin/sh -c "curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}"`;
