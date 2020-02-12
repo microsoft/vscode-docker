@@ -628,6 +628,53 @@
                                 }
                             }
                         }
+                    },
+                    "attach": {
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "The container name to attach to. If not specified, then user will be prompted to pick a container."
+                            },
+                            "processName": {
+                                "type": "string",
+                                "description": "The process name to attach to. If this is used, 'processId' should not be used."
+                            },
+                            "processId": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": "${command:pickProcess}"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": 0
+                                    }
+                                ]
+                            },
+                            "debuggerPath": {
+                                "type": "string",
+                                "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore"
+                                ]
+                            },
+                            "sourceFileMap": {
+                                "type": "object",
+                                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "<insert-source-path-here>": "<insert-target-path-here>"
+                                }
+                            }
+                        }
                     }
                 },
                 "configurationSnippets": [

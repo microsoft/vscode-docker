@@ -7,12 +7,15 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { DebugConfiguration } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
+import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
+import CliDockerClient from '../coreclr/CliDockerClient';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
 import { LocalFileSystemProvider } from '../coreclr/fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
@@ -22,7 +25,7 @@ import { DefaultOutputManager } from '../coreclr/outputManager';
 import { OSTempFileProvider } from '../coreclr/tempFileProvider';
 import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
-import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -94,11 +97,34 @@ export class NetCoreDebugHelper implements DebugHelper {
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
                 }
+            },
+            {
+                name: 'Docker .NET Core Attach',
+                type: 'docker',
+                request: 'attach',
+                platform: 'netCore',
+                sourceFileMap: {
+                    // eslint-disable-next-line no-template-curly-in-string
+                    '/src': '${workspaceFolder}'
+                }
             }
         ];
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+        switch (debugConfiguration.request) {
+            case 'launch':
+                return this.resolveLauchDebugConfiguration(context, debugConfiguration);
+                break;
+            case 'attach':
+                return this.resolveAttachDebugConfiguration(context, debugConfiguration);
+                break;
+            default:
+                throw Error(`Unknown request ${debugConfiguration.request} specified in the debug config.`);
+        }
+    }
+
+    public async resolveLauchDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
@@ -167,6 +193,37 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
+    public async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+        // TODO: Validate the target container OS and fail debugging
+        // Get Container Name if missing
+        const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
+
+        // If debugger path is not specified, install the debugger
+        const debuggerFilePath: string = debugConfiguration.debuggerFilePath ?? await this.InstallDebuggerOnContainer(containerName);
+
+        return {
+            ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.
+            type: 'coreclr',
+            request: 'attach',
+            "justMyCode": false,
+            // if processId is specified in the debugConfiguration, then it will take precedences
+            // and processName will be ignored.
+            processName: debugConfiguration.processName || "dotnet",
+            pipeTransport: {
+                pipeProgram: 'docker',
+                pipeArgs: ['exec', '-i', containerName],
+                // eslint-disable-next-line no-template-curly-in-string
+                pipeCwd: '${workspaceFolder}',
+                debuggerPath: debuggerFilePath,
+                quoteArgs: false,
+            },
+            sourceFileMap: debugConfiguration.sourceFileMap || {
+                // eslint-disable-next-line no-template-curly-in-string
+                '/src': '${workspaceFolder}'
+            }
+        };
+    }
+
     public static getHostDebuggerPathBase(): string {
         return path.join(os.homedir(), '.vsdbg');
     }
@@ -227,6 +284,39 @@ export class NetCoreDebugHelper implements DebugHelper {
             path.posix.join('/app', relativePath);
 
         return pathNormalize(result, platformOS);
+    }
+
+    private async InstallDebuggerOnContainer(containerName: string): Promise<string> {
+        const debuggerPath: string = '/remote_debugger';
+        const installUnZip: string = '/bin/sh -c "apt-get update && apt-get install unzip"';
+        const installDebugger: string = `/bin/sh -c "curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}"`;
+
+        const outputManager = new DefaultOutputManager(ext.outputChannel);
+        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+        const options = { interactive: true };
+
+        await outputManager.performOperation(
+            'Installing the latest .NET Core debugger...',
+            async (output) => {
+                let result = await dockerClient.exec(containerName, installUnZip, options);
+                output.appendLine(result);
+                await dockerClient.exec(containerName, installDebugger, options);
+                output.appendLine(result);
+            },
+            'Debugger installed',
+            'Unable to install the .NET Core debugger.'
+        );
+
+        return `${debuggerPath}/vsdbg`;
+    }
+
+    private async getContainerNameToAttach(): Promise<string> {
+        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
+        const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
+            ...context,
+            noItemFoundErrorMessage: 'No running containers are availble to attach'
+        });
+        return containerItem.containerName;
     }
 }
 
