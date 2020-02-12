@@ -4,29 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { VolumeTreeItem } from '../../tree/volumes/VolumeTreeItem';
+import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
-export async function removeVolume(context: IActionContext, node: VolumeTreeItem | undefined): Promise<void> {
-    let nodes: VolumeTreeItem[] = [];
-    if (node) {
-        nodes = [node];
-    } else {
-        nodes = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, {
-            ...context,
-            canPickMany: true,
-            suppressCreatePick: true,
-            noItemFoundErrorMessage: 'No volumes are available to remove'
-        });
-    }
+export async function removeVolume(context: IActionContext, node?: VolumeTreeItem, nodes?: VolumeTreeItem[]): Promise<void> {
+    nodes = await multiSelectNodes(
+        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: 'No volumes are available to remove' },
+        ext.volumesTree,
+        new RegExp(VolumeTreeItem.contextValue, 'i'),
+        node,
+        nodes
+    );
 
     let confirmRemove: string;
-    if (nodes.length === 0) {
-        throw new UserCancelledError();
-    } else if (nodes.length === 1) {
-        node = nodes[0];
-        confirmRemove = `Are you sure you want to remove volume "${node.label}"?`;
+    if (nodes.length === 1) {
+        confirmRemove = `Are you sure you want to remove volume "${nodes[0].label}"?`;
     } else {
         confirmRemove = "Are you sure you want to remove selected volumes?";
     }

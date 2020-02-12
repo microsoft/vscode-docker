@@ -9,18 +9,16 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
-export async function startContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
-    let nodes: ContainerTreeItem[];
-    if (node) {
-        nodes = [node];
-    } else {
-        nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused)Container$/i, {
-            ...context,
-            canPickMany: true,
-            noItemFoundErrorMessage: 'No containers are available to start'
-        });
-    }
+export async function startContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
+    nodes = await multiSelectNodes(
+        { ...context, noItemFoundErrorMessage: 'No containers are available to start' },
+        ext.containersTree,
+        /^(created|dead|exited|paused)Container$/i,
+        node,
+        nodes
+    );
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Starting Container(s)..." }, async () => {
         await Promise.all(nodes.map(async n => {
