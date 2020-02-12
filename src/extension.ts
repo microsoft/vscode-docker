@@ -24,12 +24,11 @@ import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProv
 import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
-import ActiveUseListener from './telemetry/ActiveUseListener';
+import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
 import TelemetryPublisher from './telemetry/TelemetryPublisher';
 import TelemetryReporterProxy from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
-import RealClock from './utils/Clock';
 import { Keytar } from './utils/keytar';
 import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
@@ -65,8 +64,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     const publisher = new TelemetryPublisher();
     ctx.subscriptions.push(publisher);
 
-    const activeUseListener = new ActiveUseListener(new RealClock(), publisher, ctx.globalState);
-    ctx.subscriptions.push(activeUseListener);
+    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
     ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
