@@ -6,7 +6,7 @@
 import { ITelemetryReporter } from "vscode-azureextensionui";
 import { ITelemetryPublisher } from "./TelemetryPublisher";
 
-export default class TelemetryReporterProxy implements ITelemetryReporter {
+export class TelemetryReporterProxy implements ITelemetryReporter {
     public constructor(
         private readonly publisher: ITelemetryPublisher,
         private readonly wrappedReporter: ITelemetryReporter) {

@@ -26,7 +26,7 @@ import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
 import TelemetryPublisher from './telemetry/TelemetryPublisher';
-import TelemetryReporterProxy from './telemetry/TelemetryReporterProxy';
+import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';

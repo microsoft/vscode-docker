@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { ITelemetryPublisher } from '../TelemetryPublisher';
 import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 
-// TODO: Verify aka.ms link.
 const SURVEY_URL = 'https://aka.ms/vscodedockeractiveusesurvey';
 
 const lastUseDateKey = 'activeUseSurvey.lastUseDate';
