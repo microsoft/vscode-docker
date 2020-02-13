@@ -9,13 +9,20 @@ import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 
 const SURVEY_URL = 'https://aka.ms/vscodedockeractiveusesurvey';
 
-const lastUseDateKey = 'activeUseSurvey.lastUseDate';
-const isCandidateKey = 'activeUseSurvey.isCandidate';
+const lastUseDateKey = 'telemetry.surveys.activeUseSurvey.lastUseDate';
+const isCandidateKey = 'telemetry.surveys.activeUseSurvey.isCandidate';
 
-function getDate(clock: () => Date): Date {
+function getIsoDateString(date: Date): string {
+    const isoString = date.toISOString();
+
+    return isoString.split('T')[0];
+}
+
+function getIsoDate(clock: () => Date): Date {
     const now = clock();
+    const isoDateString = getIsoDateString(now);
 
-    return new Date(now.toDateString());
+    return new Date(isoDateString);
 }
 
 async function surveyPrompt(): Promise<boolean> {
@@ -36,9 +43,20 @@ function tryUpdate(state: vscode.Memento, key: string, value: unknown): void {
     state.update(lastUseDateKey, value).then(() => {}, () => {});
 }
 
-export function activeUseSurvey(activationDelay: number, clock: () => Date, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, surveyPrompt: () => Promise<boolean>, surveyOpen: () => Promise<void>): vscode.Disposable {
+export class ActiveUseSurveyDisposable extends vscode.Disposable {
+    public constructor(public readonly postActivationTask: Promise<void>, postActivationTimer: NodeJS.Timeout, telemetryListener: vscode.Disposable) {
+        super(
+            () => {
+                clearTimeout(postActivationTimer);
+
+                telemetryListener.dispose();
+            });
+    }
+}
+
+export function activeUseSurvey(activationDelay: number, clock: () => Date, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, surveyPrompt: () => Promise<boolean>, surveyOpen: () => Promise<void>): ActiveUseSurveyDisposable {
     try {
-        const activationDate = getDate(clock);
+        const activationDate = getIsoDate(clock);
 
         const lastUseDateString = state.get<string>(lastUseDateKey);
 
@@ -53,7 +71,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
 
             lastUseDate = activationDate;
 
-            tryUpdate(state, lastUseDateKey, lastUseDate.toDateString());
+            tryUpdate(state, lastUseDateKey, getIsoDateString(lastUseDate));
         }
 
         //
@@ -62,72 +80,74 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
         // those events to flow through, potentially resetting the last use date, before checking whether the survey prompt is needed.
         //
 
-        const postActivationTimer = setTimeout(
-            async () => {
-                try {
-                    const activationTime = activationDate.getTime();
-                    const lastUseTime = lastUseDate.getTime();
-                    const period = 22 * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
+        let postActivationTimer: NodeJS.Timeout;
 
-                    // Has it been more than X number of days since the last "real use" by the user?
-                    if (activationTime - lastUseTime > period) {
-                        ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
+        const postActivationTask = new Promise<void>(
+            resolve => {
+                postActivationTimer = setTimeout(
+                    async () => {
+                        try {
+                            const activationTime = activationDate.getTime();
+                            const lastUseTime = lastUseDate.getTime();
+                            const period = 22 * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
 
-                        // Is the user eligible (i.e. has not already responded to the prompt and has been (randomly) selected to be prompted)?
-                        if (state.get(isCandidateKey, true) && selector()) {
-                            ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
+                            // Has it been more than X number of days since the last "real use" by the user?
+                            if (activationTime - lastUseTime > period) {
+                                ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
 
-                            const response = await surveyPrompt();
+                                // Is the user eligible (i.e. has not already responded to the prompt and has been (randomly) selected to be prompted)?
+                                if (state.get(isCandidateKey, true) && selector()) {
+                                    ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
 
-                            //
-                            // NOTE: The prompt only resolves if the user actually responds.
-                            //
+                                    const response = await surveyPrompt();
 
-                            // Regardless of how the user responds, the user is no longer eligible.
-                            await state.update(isCandidateKey, false);
+                                    //
+                                    // NOTE: The prompt only resolves if the user actually responds.
+                                    //
 
-                            if (response) {
-                                await surveyOpen();
+                                    // Regardless of how the user responds, the user is no longer eligible.
+                                    await state.update(isCandidateKey, false);
+
+                                    if (response) {
+                                        await surveyOpen();
+                                    }
+
+                                    ext.reporter.sendTelemetryEvent('survey.activeUse.response', { isActivationEvent: 'true', response: response.toString() });
+                                }
                             }
+                        } catch {
+                            // NOTE: Best effort.
+                        }
 
-                            ext.reporter.sendTelemetryEvent('survey.activeUse.response', { isActivationEvent: 'true', response: response.toString() });
+                        resolve();
+                    },
+                    activationDelay);
+            });
+
+        const telemetryListener = publisher.onEvent(
+            event => {
+                try {
+                    if (event.properties?.isActivationEvent !== 'true') {
+                        const eventDate = getIsoDate(clock);
+
+                        if (lastUseDate.getTime() !== eventDate.getTime()) {
+                            lastUseDate = eventDate;
+
+                            tryUpdate(state, lastUseDateKey, getIsoDateString(lastUseDate));
                         }
                     }
                 } catch {
                     // NOTE: Best effort.
                 }
-            },
-            activationDelay);
-
-            const telemetryListener = publisher.onEvent(
-                event => {
-                    try {
-                        if (event.properties?.isActivationEvent !== 'true') {
-                            const eventDate = getDate(clock);
-
-                            if (lastUseDate.getTime() !== eventDate.getTime()) {
-                                lastUseDate = eventDate;
-
-                                tryUpdate(state, lastUseDateKey, lastUseDate.toDateString());
-                            }
-                        }
-                    } catch {
-                        // NOTE: Best effort.
-                    }
-                });
-
-        return new vscode.Disposable(
-            () => {
-                clearTimeout(postActivationTimer);
-
-                telemetryListener.dispose();
             });
+
+        return new ActiveUseSurveyDisposable(postActivationTask, postActivationTimer, telemetryListener);
     } catch {
         // NOTE: Best effort.
     }
 }
 
-export function registerActiveUseSurvey(publisher: ITelemetryPublisher, state: vscode.Memento): vscode.Disposable {
+export function registerActiveUseSurvey(publisher: ITelemetryPublisher, state: vscode.Memento): ActiveUseSurveyDisposable {
     return activeUseSurvey(
         60 * 1000,                  // Check for eligibility 1 minute after activation.
         () => new Date(),           // Use the current clock (i.e. date).
