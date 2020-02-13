@@ -124,6 +124,10 @@ export class PythonTaskHelper implements TaskHelper {
     }
 
     private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string, dbgLogsFolder: string): DockerContainerVolume[] {
+        if (!launcherFolder || !dbgLogsFolder) {
+            return;
+        }
+
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];
         const dbgVolumes: DockerContainerVolume[] = [
             {

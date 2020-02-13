@@ -97,10 +97,18 @@ export namespace PythonExtensionHelper {
     }
 
     export async function getLauncherFolderPath(): Promise<string> {
-        const pyExt = vscode.extensions.getExtension('ms-python.python');
+        const pyExtensionId = 'ms-python.python';
+        const pyExt = vscode.extensions.getExtension(pyExtensionId);
 
         if (!pyExt) {
-            throw new Error('For debugging Python apps in a container to work, the Python extension must be installed.');
+            const response = await vscode.window.showErrorMessage('For debugging Python apps in a container to work, the Python extension must be installed.',
+                                                                  "Open extension");
+
+            if (response === "Open extension") {
+                await vscode.commands.executeCommand('extension.open', pyExtensionId);
+            }
+
+            return undefined;
         }
 
         const debuggerPath = path.join(pyExt.extensionPath, 'pythonFiles', 'lib', 'python');

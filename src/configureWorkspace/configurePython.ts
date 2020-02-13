@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as path from "path";
 import vscode = require('vscode');
 import { TelemetryProperties } from 'vscode-azureextensionui';
@@ -22,8 +23,8 @@ interface LaunchFilePrompt {
 
 const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<PythonProjectType, LaunchFilePrompt>([
     ['django', { prompt: 'Enter the relative path to the application (e.g. manage.py)', defaultFile: 'manage.py' }],
-    ['flask', { prompt: 'Enter the relative path to the application, e.g. \'app.py\' or \'app\'', defaultFile: 'app.py' }],
-    ['general', { prompt: 'Enter the relative path to the application, e.g. \'app.py\' or \'app\'', defaultFile: 'app.py' }],
+    ['flask', { prompt: 'Enter the relative path to the application (e.g. \'app.py\' or \'app\')', defaultFile: 'app.py' }],
+    ['general', { prompt: 'Enter the relative path to the application (e.g. \'app.py\' or \'app\')', defaultFile: 'app.py' }],
 ]);
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
@@ -59,8 +60,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      $dbg_volume$
+$dbg_volume$
     entrypoint: $entrypoint$
 $ports$`;
 
@@ -112,9 +112,15 @@ async function genDockerComposeDebug(serviceName: string, projectType: PythonPro
     const entrypoint = 'python '.concat(launcherCommand);
     const launcherFolder = await PythonExtensionHelper.getLauncherFolderPath();
 
+    let dbgVolume : string = '';
+
+    if (launcherFolder) {
+        dbgVolume = `    volumes:\n      - ${launcherFolder}:/pydbg`;
+    }
+
     return dockerComposeDebugfile
         .replace(/\$service_name\$/g, serviceName)
-        .replace(/\$dbg_volume\$/g, `- ${launcherFolder}:/pydbg`)
+        .replace(/\$dbg_volume\$/g, dbgVolume)
         .replace(/\$entrypoint\$/g, entrypoint)
         .replace(/\$ports\$/g, getComposePorts(ports, PythonDefaultDebugPort));
 }
@@ -147,8 +153,8 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
     }
 
     const pyOptions: PythonScaffoldingOptions = {
-        projectType,
-        target
+        projectType: projectType,
+        target: target
     }
 
     await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);
@@ -195,9 +201,14 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
 
     const files: ScaffoldFile[] = [
         { fileName: 'Dockerfile', contents: dockerFileContents, open: true },
-        { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) },
-        { fileName: 'requirements.txt', contents: genRequirementsFile(projectType) }
+        { fileName: '.dockerignore', contents: genCommonDockerIgnoreFile(context.platform) }
     ];
+
+    const requirementsFileExists = await fse.pathExists(path.join(outputFolder, 'requirements.txt'));
+
+    if (!requirementsFileExists) {
+        files.push({ fileName: 'requirements.txt', contents: genRequirementsFile(projectType) });
+    }
 
     if (generateComposeFiles) {
         properties.orchestration = 'docker-compose';
