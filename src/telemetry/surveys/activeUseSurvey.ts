@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ITelemetryPublisher } from '../TelemetryPublisher';
 import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
+import { ITelemetryPublisher } from '../TelemetryPublisher';
 
-const SURVEY_URL = 'https://aka.ms/vscodedockeractiveusesurvey';
-
+const surveyUrl = 'https://aka.ms/vscodedockeractiveusesurvey';
 const lastUseDateKey = 'telemetry.surveys.activeUseSurvey.lastUseDate';
 const isCandidateKey = 'telemetry.surveys.activeUseSurvey.isCandidate';
+const useLimitInDays = 22;
 
 function getIsoDateString(date: Date): string {
     const isoString = date.toISOString();
@@ -29,6 +29,11 @@ function isEnglishLanguage(): boolean {
     return vscode.env.language === 'en' || vscode.env.language.startsWith('en-');
 }
 
+function select25Percent(): boolean {
+    // tslint:disable-next-line: insecure-random
+    return Math.random() < 0.25; // Select 25% of eligible candidates.
+}
+
 async function surveyPrompt(): Promise<boolean> {
     const prompt = 'We noticed you haven’t used the Docker extension lately, would you take a quick survey?';
     const yes = { title: 'Yes', response: 'yes' };
@@ -39,8 +44,8 @@ async function surveyPrompt(): Promise<boolean> {
     return result === yes;
 }
 
-async function openSurvey(): Promise<void> {
-    await vscode.env.openExternal(vscode.Uri.parse(`${SURVEY_URL}?o=${encodeURIComponent(process.platform)}&m=${encodeURIComponent(vscode.env.machineId)}`));
+async function surveyOpen(): Promise<void> {
+    await vscode.env.openExternal(vscode.Uri.parse(`${surveyUrl}?o=${encodeURIComponent(process.platform)}&m=${encodeURIComponent(vscode.env.machineId)}`));
 }
 
 function tryUpdate(state: vscode.Memento, key: string, value: unknown): void {
@@ -58,7 +63,8 @@ export class ActiveUseSurveyDisposable extends vscode.Disposable {
     }
 }
 
-export function activeUseSurvey(activationDelay: number, clock: () => Date, isChosenLanguage: () => boolean, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, surveyPrompt: () => Promise<boolean>, surveyOpen: () => Promise<void>): ActiveUseSurveyDisposable {
+// tslint:disable-next-line: max-func-body-length
+export function activeUseSurvey(activationDelay: number, clock: () => Date, isChosenLanguage: () => boolean, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, promptForSurvey: () => Promise<boolean>, openSurvey: () => Promise<void>): ActiveUseSurveyDisposable {
     try {
         const activationDate = getIsoDate(clock);
 
@@ -93,7 +99,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                         try {
                             const activationTime = activationDate.getTime();
                             const lastUseTime = lastUseDate.getTime();
-                            const period = 22 * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
+                            const period = useLimitInDays * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
 
                             // Has it been more than X number of days since the last "real use" by the user?
                             if (activationTime - lastUseTime >= period) {
@@ -120,7 +126,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                 if (isCandidate) {
                                     ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
 
-                                    const response = await surveyPrompt();
+                                    const response = await promptForSurvey();
 
                                     // Regardless of the response, user is no longer a candidate.
                                     await state.update(isCandidateKey, false);
@@ -130,7 +136,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                     //
 
                                     if (response) {
-                                        await surveyOpen();
+                                        await openSurvey();
                                     }
 
                                     ext.reporter.sendTelemetryEvent('survey.activeUse.response', { isActivationEvent: 'true', response: response.toString() });
@@ -172,10 +178,10 @@ export function registerActiveUseSurvey(publisher: ITelemetryPublisher, state: v
     return activeUseSurvey(
         60 * 1000,                  // Check for eligibility 1 minute after activation.
         () => new Date(),           // Use the current clock (i.e. date).
-        isEnglishLanguage,          // Only select English-language users.
+        isEnglishLanguage,
         publisher,
-        () => Math.random() < 0.25, // Select 25% of eligible candidates.
+        select25Percent,
         state,
         surveyPrompt,
-        openSurvey);
+        surveyOpen);
 }
