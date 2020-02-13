@@ -14,6 +14,7 @@ interface TestOptions {
     lastUseDate?: string;
     isCandidate?: boolean;
     isSelected?: boolean;
+    isChosenLanguage?: boolean;
     promptResponse?: boolean;
 }
 
@@ -80,6 +81,7 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 activeUseSurvey(
                     0,
                     () => new Date(currentDate),
+                    () => options.isChosenLanguage ?? true,
                     publisher,
                     selector,
                     state,
@@ -120,6 +122,8 @@ suite('telemetry/surveys/activeUseSurvey', () => {
     buildTest('Activation, no use, previous use outside limits, candidate, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: true, promptResponse: true });
 
     buildTest('Activation, no use, previous use outside limits, unknown candidate, not selected', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: false });
+
+    buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, non-native language', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, isChosenLanguage: false });
 
     buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
 

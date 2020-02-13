@@ -25,8 +25,12 @@ function getIsoDate(clock: () => Date): Date {
     return new Date(isoDateString);
 }
 
+function isEnglishLanguage(): boolean {
+    return vscode.env.language === 'en' || vscode.env.language.startsWith('en-');
+}
+
 async function surveyPrompt(): Promise<boolean> {
-    const prompt = 'Do you mind taking a quick feedback survey?';
+    const prompt = 'We noticed you haven’t used the Docker extension lately, would you take a quick survey?';
     const yes = { title: 'Yes', response: 'yes' };
     const no = { title: 'No', response: 'no' };
 
@@ -54,7 +58,7 @@ export class ActiveUseSurveyDisposable extends vscode.Disposable {
     }
 }
 
-export function activeUseSurvey(activationDelay: number, clock: () => Date, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, surveyPrompt: () => Promise<boolean>, surveyOpen: () => Promise<void>): ActiveUseSurveyDisposable {
+export function activeUseSurvey(activationDelay: number, clock: () => Date, isChosenLanguage: () => boolean, publisher: ITelemetryPublisher, selector: () => boolean, state: vscode.Memento, surveyPrompt: () => Promise<boolean>, surveyOpen: () => Promise<void>): ActiveUseSurveyDisposable {
     try {
         const activationDate = getIsoDate(clock);
 
@@ -104,6 +108,12 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
 
                                     // ...and update the user as a known candidate (or not).
                                     await state.update(isCandidateKey, isCandidate);
+                                }
+
+                                // Is the user (assumed to be) a speaker of the survey-chosen language?
+                                // NOTE: The user remains a candidate in case she switches languages.
+                                if (!isChosenLanguage()) {
+                                    isCandidate = false;
                                 }
 
                                 // Is the user still considered a candidate?
@@ -162,6 +172,7 @@ export function registerActiveUseSurvey(publisher: ITelemetryPublisher, state: v
     return activeUseSurvey(
         60 * 1000,                  // Check for eligibility 1 minute after activation.
         () => new Date(),           // Use the current clock (i.e. date).
+        isEnglishLanguage,          // Only select English-language users.
         publisher,
         () => Math.random() < 0.25, // Select 25% of eligible candidates.
         state,
