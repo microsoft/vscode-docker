@@ -96,6 +96,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
                                 ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
 
                                 // Is the user eligible (i.e. has not already responded to the prompt and has been (randomly) selected to be prompted)?
+                                // TODO: Consider a candidate ineligible (onward) if failing to be selected?
                                 if (state.get(isCandidateKey, true) && selector()) {
                                     ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
 

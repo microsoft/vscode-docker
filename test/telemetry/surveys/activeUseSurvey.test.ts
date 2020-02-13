@@ -9,159 +9,104 @@ import { activeUseSurvey } from '../../../extension.bundle';
 import { TelemetryEvent } from '../../../extension.bundle';
 import { ITelemetryPublisher } from '../../../src/telemetry/TelemetryPublisher';
 
+interface TestOptions {
+    activationDate: string;
+    lastUseDate?: string;
+    isCandidate?: boolean;
+    isSelected?: boolean;
+    promptResponse?: boolean;
+}
+
 suite('telemetry/surveys/activeUseSurvey', () => {
     const lastUseDateKey = 'telemetry.surveys.activeUseSurvey.lastUseDate';
     const isCandidateKey = 'telemetry.surveys.activeUseSurvey.isCandidate';
 
-    test('First activation with no use', async () => {
-        const eventPublisher = new vscode.EventEmitter<TelemetryEvent>()
+    function buildTest(name: string, options: TestOptions) {
+        test(name, async () => {
+            const currentDate = Date.parse(options.activationDate);
 
-        const publisher: ITelemetryPublisher = {
-            onEvent: eventPublisher.event,
-            publishEvent: undefined
-        };
+            const eventPublisher = new vscode.EventEmitter<TelemetryEvent>()
 
-        const state: vscode.Memento = {
-            get: key => {
-                return undefined;
-            },
-            update: (key, value) => {
-                return Promise.resolve();
-            }
-        }
+            const publisher: ITelemetryPublisher = {
+                onEvent: eventPublisher.event,
+                publishEvent: undefined
+            };
 
-        const survey =
-            activeUseSurvey(
-                0,
-                () => new Date(),
-                publisher,
-                () => true,
-                state,
-                () => Promise.resolve(true),
-                () => Promise.resolve());
+            let wasIsCandidateUpdated = false;
 
-        await survey.postActivationTask;
-    });
+            const state: vscode.Memento = {
+                get: (key, defaultValue = undefined) => {
+                    switch (key) {
+                        case lastUseDateKey: return options.lastUseDate ?? defaultValue;
+                        case isCandidateKey: return options.isCandidate ?? defaultValue;
+                    }
 
-    test('Activation with no use and previous use within limits', async () => {
-        const currentDate = Date.parse('2020-02-12');
+                    return defaultValue;
+                },
+                update: (key, value) => {
+                    switch (key) {
+                        case isCandidateKey:
+                            wasIsCandidateUpdated = true;
+                            assert(value === false);
+                            break;
+                    }
 
-        const eventPublisher = new vscode.EventEmitter<TelemetryEvent>()
-
-        const publisher: ITelemetryPublisher = {
-            onEvent: eventPublisher.event,
-            publishEvent: undefined
-        };
-
-        const state: vscode.Memento = {
-            get: key => {
-                return '2020-02-11';
-            },
-            update: (key, value) => {
-                return Promise.resolve();
-            }
-        }
-
-        let wasSelected = false;
-        let wasPrompted = false;
-        let wasOpened = false;
-
-        const selector = () => {
-            wasSelected = true;
-
-            return false;
-        };
-
-        const surveyPrompt = () => {
-            wasPrompted = true;
-
-            return new Promise<boolean>(() => {});
-        };
-
-        const surveyOpen = () => {
-            wasOpened = true;
-
-            return Promise.resolve();
-        }
-
-        const survey =
-            activeUseSurvey(
-                0,
-                () => new Date(currentDate),
-                publisher,
-                selector,
-                state,
-                surveyPrompt,
-                surveyOpen);
-
-        await survey.postActivationTask;
-
-        assert(!wasSelected);
-        assert(!wasPrompted);
-        assert(!wasOpened);
-    });
-
-    test('Activation with no use and previous use outside limits', async () => {
-        const currentDate = Date.parse('2020-01-24');
-
-        const eventPublisher = new vscode.EventEmitter<TelemetryEvent>()
-
-        const publisher: ITelemetryPublisher = {
-            onEvent: eventPublisher.event,
-            publishEvent: undefined
-        };
-
-        const state: vscode.Memento = {
-            get: (key, defaultValue = undefined) => {
-                switch (key) {
-                    case lastUseDateKey: return '2020-01-01';
-                    case isCandidateKey: return defaultValue;
+                    return Promise.resolve();
                 }
+            }
 
-                return undefined;
-            },
-            update: (key, value) => {
+            let wasSelected = false;
+            let wasPrompted = false;
+            let wasOpened = false;
+
+            const selector = () => {
+                wasSelected = true;
+
+                return options.isSelected;
+            };
+
+            const surveyPrompt = () => {
+                wasPrompted = true;
+
+                return Promise.resolve(options.promptResponse);
+            };
+
+            const surveyOpen = () => {
+                wasOpened = true;
+
                 return Promise.resolve();
             }
-        }
 
-        let wasSelected = false;
-        let wasPrompted = false;
-        let wasOpened = false;
+            const survey =
+                activeUseSurvey(
+                    0,
+                    () => new Date(currentDate),
+                    publisher,
+                    selector,
+                    state,
+                    surveyPrompt,
+                    surveyOpen);
 
-        const selector = () => {
-            wasSelected = true;
+            await survey.postActivationTask;
 
-            return true;
-        };
+            assert((options.isSelected !== undefined && wasSelected) || (options.isSelected === undefined && !wasSelected));
+            assert((options.promptResponse !== undefined && wasPrompted) || (options.promptResponse === undefined && !wasPrompted));
+            assert((options.promptResponse === true && wasOpened) || (options.promptResponse !== true && !wasOpened));
 
-        const surveyPrompt = () => {
-            wasPrompted = true;
+            assert((options.promptResponse !== undefined && wasIsCandidateUpdated) || (options.promptResponse === undefined && !wasIsCandidateUpdated));
+        });
+    }
 
-            return Promise.resolve(true);
-        };
+    buildTest('First activation, no use', { activationDate: '2020-01-24' });
 
-        const surveyOpen = () => {
-            wasOpened = true;
+    buildTest('Activation, no use, previous use within limits', { activationDate: '2020-01-24', lastUseDate: '2020-01-03' });
 
-            return Promise.resolve();
-        }
+    buildTest('Activation, no use, previous use outside limits, not candidate', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: false });
 
-        const survey =
-            activeUseSurvey(
-                0,
-                () => new Date(currentDate),
-                publisher,
-                selector,
-                state,
-                surveyPrompt,
-                surveyOpen);
+    buildTest('Activation, no use, previous use outside limits, candidate, not selected', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: false });
 
-        await survey.postActivationTask;
+    buildTest('Activation, no use, previous use outside limits, candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
 
-        assert(wasSelected);
-        assert(wasPrompted);
-        assert(wasOpened);
-    });
+    buildTest('Activation, no use, previous use outside limits, candidate, selected, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
 });
 
