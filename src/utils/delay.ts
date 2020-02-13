@@ -8,9 +8,3 @@ export async function delay(ms: number): Promise<void> {
         setTimeout(() => { resolve(); }, ms);
     });
 }
-
-export async function delayWithResult<T>(ms: number, result: T): Promise<T> {
-    return new Promise<T>(resolve => {
-        setTimeout(() => { resolve(result); }, ms);
-    });
-}

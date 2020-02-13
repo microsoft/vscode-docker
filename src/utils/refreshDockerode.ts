@@ -9,7 +9,7 @@ import { Socket } from 'net';
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
-import { delayWithResult } from './delay';
+import { delay } from './delay';
 import { isWindows } from './osUtils';
 import { execAsync } from './spawnAsync';
 
@@ -103,7 +103,7 @@ async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> 
     });
 
     // Unfortunately Socket.setTimeout() does not actually work when attempting to establish a connection, so we need to race
-    const result = await Promise.race([connectPromise, delayWithResult(1000, false)]);
+    const result = await Promise.race([connectPromise, delay(1000).then(() => false)]);
     authSock.end();
 
     return result;
