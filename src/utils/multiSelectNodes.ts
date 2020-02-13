@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, ITreeItemPickerContext, AzExtTreeDataProvider, UserCancelledError, AzExtParentTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPickerContext, UserCancelledError } from "vscode-azureextensionui";
 
 /**
  * Helps determine the full list of eligible selected tree item nodes for context menu and commands
