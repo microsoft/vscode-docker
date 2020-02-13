@@ -107,7 +107,11 @@ async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> 
     });
 
     // Unfortunately Socket.setTimeout() does not actually work when attempting to establish a connection, so we need to race
-    return await Promise.race([connectPromise, delay(1000, cts.token).then(() => false)]).finally(() => authSock.end());
+    return await Promise.race([connectPromise, delay(1000, cts.token).then(() => false)])
+        .finally(() => {
+            authSock.end();
+            cts.dispose();
+        });
 }
 
 async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {
