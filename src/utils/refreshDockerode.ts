@@ -6,6 +6,7 @@
 import Dockerode = require('dockerode');
 import { DockerOptions } from 'dockerode';
 import { Socket } from 'net';
+import { CancellationTokenSource } from 'vscode';
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
@@ -89,13 +90,16 @@ async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> 
     }
 
     const authSock = new Socket();
+    const cts = new CancellationTokenSource();
 
     const connectPromise = new Promise<boolean>(resolve => {
         authSock.on('error', (err) => {
+            cts.cancel();
             resolve(false);
         });
 
         authSock.on('connect', () => {
+            cts.cancel();
             resolve(true);
         });
 
@@ -103,10 +107,7 @@ async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> 
     });
 
     // Unfortunately Socket.setTimeout() does not actually work when attempting to establish a connection, so we need to race
-    const result = await Promise.race([connectPromise, delay(1000).then(() => false)]);
-    authSock.end();
-
-    return result;
+    return await Promise.race([connectPromise, delay(1000, cts.token).then(() => false)]).finally(() => authSock.end());
 }
 
 async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {

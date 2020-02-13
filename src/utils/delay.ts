@@ -3,8 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export async function delay(ms: number): Promise<void> {
-    return new Promise<void>(resolve => {
-        setTimeout(() => { resolve(); }, ms);
+import * as vscode from 'vscode';
+
+export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        let cancellationListener: vscode.Disposable;
+
+        const timeout = setTimeout(() => {
+            cancellationListener?.dispose();
+            resolve();
+        }, ms);
+
+        if (token) {
+            cancellationListener = token.onCancellationRequested(() => {
+                cancellationListener.dispose();
+                clearTimeout(timeout);
+                reject();
+            });
+        }
     });
 }
