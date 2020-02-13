@@ -9,6 +9,7 @@ import { Socket } from 'net';
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
+import { delayWithResult } from './delay';
 import { isWindows } from './osUtils';
 import { execAsync } from './spawnAsync';
 
@@ -61,7 +62,9 @@ async function getDockerodeOptions(newEnv: NodeJS.ProcessEnv): Promise<DockerOpt
             // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
             // Other than that, we use default settings, so return undefined
             if (!await validateSshAuthSock(newEnv)) {
-                await ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.', { learnMoreLink: 'https://aka.ms/AA7assy' });
+                // Don't wait
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.', { learnMoreLink: 'https://aka.ms/AA7assy' });
             }
 
             return undefined;
@@ -85,21 +88,25 @@ async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> 
         return false;
     }
 
-    // Validate the pipe actually exists
-    return await new Promise<boolean>((resolve, reject) => {
-        const authPipe = new Socket();
+    const authSock = new Socket();
 
-        authPipe.on('error', () => {
+    const connectPromise = new Promise<boolean>(resolve => {
+        authSock.on('error', (err) => {
             resolve(false);
         });
 
-        authPipe.on('connect', () => {
-            authPipe.end();
+        authSock.on('connect', () => {
             resolve(true);
         });
 
-        authPipe.connect(newEnv.SSH_AUTH_SOCK);
+        authSock.connect(newEnv.SSH_AUTH_SOCK);
     });
+
+    // Unfortunately Socket.setTimeout() does not actually work when attempting to establish a connection, so we need to race
+    const result = await Promise.race([connectPromise, delayWithResult(1000, false)]);
+    authSock.end();
+
+    return result;
 }
 
 async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {
