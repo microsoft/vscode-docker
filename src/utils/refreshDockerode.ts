@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Socket } from 'net';
-import { DockerOptions } from 'dockerode';
 import Dockerode = require('dockerode');
+import { DockerOptions } from 'dockerode';
+import { Socket } from 'net';
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
