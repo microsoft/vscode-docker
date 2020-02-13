@@ -32,7 +32,7 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 publishEvent: undefined
             };
 
-            let wasIsCandidateUpdated = false;
+            const isCandidateUpdates = [];
 
             const state: vscode.Memento = {
                 get: (key, defaultValue = undefined) => {
@@ -46,8 +46,7 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 update: (key, value) => {
                     switch (key) {
                         case isCandidateKey:
-                            wasIsCandidateUpdated = true;
-                            assert(value === false);
+                            isCandidateUpdates.push(value);
                             break;
                     }
 
@@ -89,11 +88,24 @@ suite('telemetry/surveys/activeUseSurvey', () => {
 
             await survey.postActivationTask;
 
+            // If the user is a known candidate, she should not go through the selection process.
+            if (options.isCandidate !== undefined) {
+                assert(!wasSelected);
+            }
+
+            // If the user was selected, their candidicy should first be saved.
+            if (options.isCandidate === undefined && options.isSelected !== undefined) {
+                assert(isCandidateUpdates.length > 0 && isCandidateUpdates[0] === options.isSelected);
+            }
+
+            // If the user responded, their candidicy should lastly be revoked.
+            if (options.promptResponse !== undefined) {
+                assert(isCandidateUpdates.length > 0 && isCandidateUpdates[isCandidateUpdates.length - 1] === false);
+            }
+
             assert((options.isSelected !== undefined && wasSelected) || (options.isSelected === undefined && !wasSelected));
             assert((options.promptResponse !== undefined && wasPrompted) || (options.promptResponse === undefined && !wasPrompted));
             assert((options.promptResponse === true && wasOpened) || (options.promptResponse !== true && !wasOpened));
-
-            assert((options.promptResponse !== undefined && wasIsCandidateUpdated) || (options.promptResponse === undefined && !wasIsCandidateUpdated));
         });
     }
 
@@ -103,12 +115,16 @@ suite('telemetry/surveys/activeUseSurvey', () => {
 
     buildTest('Activation, no use, previous use outside limits, not candidate', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: false });
 
-    buildTest('Activation, no use, previous use outside limits, candidate, not selected', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: false });
+    buildTest('Activation, no use, previous use outside limits, candidate, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: true, promptResponse: false });
 
-    buildTest('Activation, no use, previous use outside limits, candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
+    buildTest('Activation, no use, previous use outside limits, candidate, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: true, promptResponse: true });
 
-    buildTest('Activation, no use, previous use outside limits, candidate, selected, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
+    buildTest('Activation, no use, previous use outside limits, unknown candidate, not selected', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: false });
 
-    buildTest('Activation, no use, previous use at limits, candidate, selected, positive response', { activationDate: '2020-01-23', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
+    buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
+
+    buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
+
+    buildTest('Activation, no use, previous use at limits, unknown candidate, selected, positive response', { activationDate: '2020-01-23', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
 });
 

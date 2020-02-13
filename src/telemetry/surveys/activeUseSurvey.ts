@@ -95,19 +95,29 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
                             if (activationTime - lastUseTime >= period) {
                                 ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
 
-                                // Is the user eligible (i.e. has not already responded to the prompt and has been (randomly) selected to be prompted)?
-                                // TODO: Consider a candidate ineligible (onward) if failing to be selected?
-                                if (state.get(isCandidateKey, true) && selector()) {
+                                // Is the user a known candidate (or not)?
+                                let isCandidate = state.get<boolean>(isCandidateKey);
+
+                                // If undecided, run the user through the selection process...
+                                if (isCandidate === undefined) {
+                                    isCandidate = selector();
+
+                                    // ...and update the user as a known candidate (or not).
+                                    await state.update(isCandidateKey, isCandidate);
+                                }
+
+                                // Is the user still considered a candidate?
+                                if (isCandidate) {
                                     ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
 
                                     const response = await surveyPrompt();
 
+                                    // Regardless of the response, user is no longer a candidate.
+                                    await state.update(isCandidateKey, false);
+
                                     //
                                     // NOTE: The prompt only resolves if the user actually responds.
                                     //
-
-                                    // Regardless of how the user responds, the user is no longer eligible.
-                                    await state.update(isCandidateKey, false);
 
                                     if (response) {
                                         await surveyOpen();
