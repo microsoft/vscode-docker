@@ -92,7 +92,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, publ
                             const period = 22 * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
 
                             // Has it been more than X number of days since the last "real use" by the user?
-                            if (activationTime - lastUseTime > period) {
+                            if (activationTime - lastUseTime >= period) {
                                 ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
 
                                 // Is the user eligible (i.e. has not already responded to the prompt and has been (randomly) selected to be prompted)?

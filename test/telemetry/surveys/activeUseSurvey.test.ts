@@ -108,5 +108,7 @@ suite('telemetry/surveys/activeUseSurvey', () => {
     buildTest('Activation, no use, previous use outside limits, candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
 
     buildTest('Activation, no use, previous use outside limits, candidate, selected, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
+
+    buildTest('Activation, no use, previous use at limits, candidate, selected, positive response', { activationDate: '2020-01-23', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
 });
 
