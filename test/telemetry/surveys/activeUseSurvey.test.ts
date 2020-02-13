@@ -9,6 +9,11 @@ import { activeUseSurvey } from '../../../extension.bundle';
 import { TelemetryEvent } from '../../../extension.bundle';
 import { ITelemetryPublisher } from '../../../src/telemetry/TelemetryPublisher';
 
+interface TelemetryEventData {
+    date: string;
+    event: TelemetryEvent;
+};
+
 interface TestOptions {
     activationDate: string;
     lastUseDate?: string;
@@ -16,6 +21,8 @@ interface TestOptions {
     isSelected?: boolean;
     isChosenLanguage?: boolean;
     promptResponse?: boolean;
+    preActivationTelemetry?: TelemetryEventData[];
+    postActivationTelemetry?: TelemetryEventData[];
 }
 
 suite('telemetry/surveys/activeUseSurvey', () => {
@@ -24,8 +31,6 @@ suite('telemetry/surveys/activeUseSurvey', () => {
 
     function buildTest(name: string, options: TestOptions) {
         test(name, async () => {
-            const currentDate = Date.parse(options.activationDate);
-
             const eventPublisher = new vscode.EventEmitter<TelemetryEvent>()
 
             const publisher: ITelemetryPublisher = {
@@ -33,6 +38,7 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 publishEvent: undefined
             };
 
+            const lastUseDateUpdates = [];
             const isCandidateUpdates = [];
 
             const state: vscode.Memento = {
@@ -46,6 +52,10 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 },
                 update: (key, value) => {
                     switch (key) {
+                        case lastUseDateKey:
+                            lastUseDateUpdates.push(value);
+                            break;
+
                         case isCandidateKey:
                             isCandidateUpdates.push(value);
                             break;
@@ -77,10 +87,20 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 return Promise.resolve();
             }
 
+            const dates = [
+                new Date(options.activationDate),
+                ...(options.preActivationTelemetry ?? []).map(event => new Date(event.date)),
+                ...(options.postActivationTelemetry ?? []).map(event => new Date(event.date))
+            ];
+
+            const clock = () => {
+                return dates.shift();
+            };
+
             const survey =
                 activeUseSurvey(
-                    0,
-                    () => new Date(currentDate),
+                    10,
+                    clock,
                     () => options.isChosenLanguage ?? true,
                     publisher,
                     selector,
@@ -88,7 +108,20 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                     surveyPrompt,
                     surveyOpen);
 
+            if (options.preActivationTelemetry) {
+                options.preActivationTelemetry.forEach(telemetry => eventPublisher.fire(telemetry.event));
+            }
+
             await survey.postActivationTask;
+
+            if (options.postActivationTelemetry) {
+                options.postActivationTelemetry.forEach(telemetry => eventPublisher.fire(telemetry.event));
+            }
+
+            // If this was the first activation, the "last use" should be set to the activation date.
+            if (options.lastUseDate === undefined) {
+                assert(lastUseDateUpdates.length === 1 && lastUseDateUpdates[0] === options.activationDate);
+            }
 
             // If the user is a known candidate, she should not go through the selection process.
             if (options.isCandidate !== undefined) {
@@ -105,6 +138,10 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 assert(isCandidateUpdates.length > 0 && isCandidateUpdates[isCandidateUpdates.length - 1] === false);
             }
 
+            if (options.postActivationTelemetry?.length > 0) {
+                assert(lastUseDateUpdates.length > 0 && lastUseDateUpdates[lastUseDateUpdates.length - 1] === options.postActivationTelemetry[options.postActivationTelemetry.length - 1].date);
+            }
+
             assert((options.isSelected !== undefined && wasSelected) || (options.isSelected === undefined && !wasSelected));
             assert((options.promptResponse !== undefined && wasPrompted) || (options.promptResponse === undefined && !wasPrompted));
             assert((options.promptResponse === true && wasOpened) || (options.promptResponse !== true && !wasOpened));
@@ -114,6 +151,8 @@ suite('telemetry/surveys/activeUseSurvey', () => {
     buildTest('First activation, no use', { activationDate: '2020-01-24' });
 
     buildTest('Activation, no use, previous use within limits', { activationDate: '2020-01-24', lastUseDate: '2020-01-03' });
+
+    buildTest('Activation, no use, previous use within limits, with post events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build' } }, {date: '2020-01-22', event: { eventName: 'docker-build' } }] });
 
     buildTest('Activation, no use, previous use outside limits, not candidate', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: false });
 
