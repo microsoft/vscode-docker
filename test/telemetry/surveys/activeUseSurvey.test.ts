@@ -87,10 +87,12 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 return Promise.resolve();
             }
 
+            const nonActivationPostActivationTelemetry = (options.postActivationTelemetry ?? []).filter(telemetry => telemetry.event.properties?.isActivationEvent !== 'true');
+
             const dates = [
                 new Date(options.activationDate),
                 ...(options.preActivationTelemetry ?? []).map(event => new Date(event.date)),
-                ...(options.postActivationTelemetry ?? []).map(event => new Date(event.date))
+                ...nonActivationPostActivationTelemetry.map(event => new Date(event.date))
             ];
 
             const clock = () => {
@@ -138,8 +140,9 @@ suite('telemetry/surveys/activeUseSurvey', () => {
                 assert(isCandidateUpdates.length > 0 && isCandidateUpdates[isCandidateUpdates.length - 1] === false);
             }
 
-            if (options.postActivationTelemetry?.length > 0) {
-                assert(lastUseDateUpdates.length > 0 && lastUseDateUpdates[lastUseDateUpdates.length - 1] === options.postActivationTelemetry[options.postActivationTelemetry.length - 1].date);
+            // The last use update should be the last non-activation-event telemetry date.
+            if (nonActivationPostActivationTelemetry.length > 0) {
+                assert(lastUseDateUpdates.length > 0 && lastUseDateUpdates[lastUseDateUpdates.length - 1] === nonActivationPostActivationTelemetry[nonActivationPostActivationTelemetry.length - 1].date);
             }
 
             assert((options.isSelected !== undefined && wasSelected) || (options.isSelected === undefined && !wasSelected));
@@ -152,7 +155,9 @@ suite('telemetry/surveys/activeUseSurvey', () => {
 
     buildTest('Activation, no use, previous use within limits', { activationDate: '2020-01-24', lastUseDate: '2020-01-03' });
 
-    buildTest('Activation, no use, previous use within limits, with post events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build' } }, {date: '2020-01-22', event: { eventName: 'docker-build' } }] });
+    buildTest('Activation, no use, previous use within limits, with post non-activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build' } }, {date: '2020-01-22', event: { eventName: 'docker-build' } }] });
+
+    buildTest('Activation, no use, previous use within limits, with post activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build', properties: { 'isActivationEvent': 'true' } } }] });
 
     buildTest('Activation, no use, previous use outside limits, not candidate', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: false });
 
