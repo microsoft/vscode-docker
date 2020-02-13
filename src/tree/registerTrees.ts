@@ -17,7 +17,7 @@ export function registerTrees(): void {
     ext.containersRoot = new ContainersTreeItem(undefined);
     const containersLoadMore = 'vscode-docker.containers.loadMore';
     ext.containersTree = new AzExtTreeDataProvider(ext.containersRoot, containersLoadMore);
-    ext.containersTreeView = window.createTreeView('dockerContainers', { treeDataProvider: ext.containersTree });
+    ext.containersTreeView = window.createTreeView('dockerContainers', { canSelectMany: true, treeDataProvider: ext.containersTree });
     ext.context.subscriptions.push(ext.containersTreeView);
     ext.containersRoot.registerRefreshEvents(ext.containersTreeView);
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */

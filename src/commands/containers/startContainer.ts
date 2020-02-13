@@ -10,9 +10,11 @@ import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 
-export async function startContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
+export async function startContainer(context: IActionContext, node: ContainerTreeItem | undefined, selectedNodes: ContainerTreeItem[] | undefined): Promise<void> {
     let nodes: ContainerTreeItem[];
-    if (node) {
+    if (selectedNodes) {
+        nodes = selectedNodes;
+    } else if (node) {
         nodes = [node];
     } else {
         nodes = await ext.containersTree.showTreeItemPicker(/^(created|dead|exited|paused)Container$/i, {
