@@ -2050,7 +2050,7 @@
         "azure-storage": "^2.10.3",
         "deep-equal": "^1.1.1",
         "docker-modem": "^2.0.4",
-        "dockerfile-language-server-nodejs": "^0.0.21",
+        "dockerfile-language-server-nodejs": "^0.0.22",
         "dockerode": "^3.0.2",
         "fs-extra": "^8.1.0",
         "glob": "^7.1.6",
@@ -2064,7 +2064,7 @@
         "tar": "^5.0.5",
         "vscode-azureappservice": "^0.54.0",
         "vscode-azureextensionui": "^0.29.5",
-        "vscode-languageclient": "^5.2.1",
+        "vscode-languageclient": "^6.1.0",
         "xml2js": "^0.4.22"
     }
 }
