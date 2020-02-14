@@ -403,7 +403,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: projectFolder.includes('/') ? '2' : '1'
                 },
-                [os /* it doesn't ask for a port, so we don't specify one here */],
+                [os, 'No' /* it doesn't ask for a port, so we don't specify one here */],
                 [`${projectFolder}/Dockerfile`, '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
             );
 
@@ -434,7 +434,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
-                [os, '1234'],
+                [os, 'No', '1234'],
                 [`${projectFolder}/Dockerfile`, '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
             );
 
@@ -632,14 +632,14 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                         packageFileType: undefined,
                         packageFileSubfolderDepth: undefined
                     },
-                    ['Windows']
+                    ['Windows', 'No']
                 ),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
         testInEmptyFolder("ASP.NET Core no project file", async () => {
-            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', '1234']),
+            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', 'No', '1234']),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
@@ -655,7 +655,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
-                ['Windows', 'projectFolder2/aspnetapp.csproj'],
+                ['Windows', 'No', 'projectFolder2/aspnetapp.csproj'],
                 ['projectFolder2/Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
             );
 
@@ -872,7 +872,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'ASP.NET Core',
                 undefined,
-                ['Windows', TestInput.UseDefaultValue]
+                ['Windows', 'No', TestInput.UseDefaultValue]
             );
 
             assertFileContains('projectFolder1/Dockerfile', 'EXPOSE 80');
@@ -883,7 +883,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await testConfigureDocker(
                 'ASP.NET Core',
                 undefined,
-                ['Windows', '']
+                ['Windows', 'No', '']
             );
 
             assertNotFileContains('projectFolder1/Dockerfile', 'EXPOSE');
@@ -1355,6 +1355,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                         os: "Linux"
                     },
                     [
+                        'No',
                         'projectFolder2/aspnetapp.csproj'
                     ],
                     ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']

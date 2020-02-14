@@ -19,7 +19,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth, quickPickGenerateComposeFiles } from './configUtils';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
