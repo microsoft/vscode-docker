@@ -1398,7 +1398,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Linux",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET Core Console', 'No'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/somefile1.cs', 'serviceFolder/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1417,7 +1417,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET Core Console', 'No'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1435,7 +1435,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234, 5678]
                         },
-                        ['ASP.NET Core'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
+                        ['ASP.NET Core', 'No'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/subfolder1/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });
