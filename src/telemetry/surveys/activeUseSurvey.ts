@@ -53,6 +53,7 @@ function tryUpdate(state: vscode.Memento, key: string, value: unknown): void {
 }
 
 function sendSurveyTelemetryEvent(eventName: string, properties?: { [key: string]: string }): void {
+    // NOTE: isActivationEvent must be 'true' to avoid survey telemetry being counted as "real" use.
     ext.reporter.sendTelemetryEvent(eventName, { isActivationEvent: 'true', ...(properties ?? {}) });
 }
 
