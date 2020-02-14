@@ -98,16 +98,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
                 }
-            },
-            {
-                name: 'Docker .NET Core Attach',
-                type: 'docker',
-                request: 'attach',
-                platform: 'netCore',
-                sourceFileMap: {
-                    // eslint-disable-next-line no-template-curly-in-string
-                    '/src': '${workspaceFolder}'
-                }
             }
         ];
     }
@@ -295,8 +285,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         const debuggerPath: string = '/remote_debugger';
-        const installUnZip: string = '/bin/sh -c "apt-get update && apt-get install unzip"';
-        const installDebugger: string = `/bin/sh -c "curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}"`;
+        const installDebugger: string = `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi"`
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
@@ -305,9 +294,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         await outputManager.performOperation(
             'Installing the latest .NET Core debugger...',
             async (output) => {
-                let result = await dockerClient.exec(containerName, installUnZip, options);
-                output.appendLine(result);
-                await dockerClient.exec(containerName, installDebugger, options);
+                let result = await dockerClient.exec(containerName, installDebugger, options);
                 output.appendLine(result);
             },
             'Debugger installed',

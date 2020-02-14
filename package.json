@@ -692,6 +692,19 @@
                             "name": "Docker: Attach to Node",
                             "remoteRoot": "/usr/src/app"
                         }
+                    },
+                    {
+                        "label": "Docker: .NET Core Attach",
+                        "description": "Docker: Attach to a .NET Core process in a container",
+                        "body": {
+                            "name": "Docker .NET Core Attach",
+                            "type": "docker",
+                            "request": "attach",
+                            "platform": "netCore",
+                            "sourceFileMap": {
+                                "/src": "^\"\\${workspaceFolder}\""
+                            }
+                        }
                     }
                 ]
             },
