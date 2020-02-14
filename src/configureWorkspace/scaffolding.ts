@@ -11,7 +11,7 @@ import { ext } from "../extensionVariables";
 import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from "../utils/platform";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPorts as promptForPortsUtil, quickPickOS } from './configUtils';
+import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPorts as promptForPortsUtil, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
 
 /**
  * Represents the options that can be passed by callers (e.g. the programmatic scaffolding API used by IoT extension).
@@ -36,6 +36,7 @@ export interface ScaffolderContext extends ScaffoldContext {
     platform: Platform;
     promptForOS(): Promise<PlatformOS>;
     promptForPorts(defaultPorts?: number[]): Promise<number[]>;
+    promptForCompose(): Promise<boolean>;
     rootFolder: string;
 }
 
@@ -48,6 +49,7 @@ export type ScaffoldFile = {
     contents: string;
     fileName: string;
     open?: boolean;
+    createNewNameIfExist?: boolean;
 };
 
 export type Scaffolder = (context: ScaffolderContext) => Promise<ScaffoldFile[]>;
@@ -130,6 +132,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         platform,
         promptForOS: captureStep('os', promptForOS),
         promptForPorts: captureStep('port', promptForPorts),
+        promptForCompose: captureStep('compose', quickPickGenerateComposeFiles),
         rootFolder
     });
 
@@ -138,14 +141,32 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
     await Promise.all(
         files.map(
             async file => {
-                const filePath = path.resolve(rootFolder, file.fileName);
+                let filePath = path.resolve(rootFolder, file.fileName);
 
-                if (await fse.pathExists(filePath) === false || await promptForOverwrite(file.fileName)) {
-                    await fse.writeFile(filePath, file.contents, 'utf8');
-
-                    writtenFiles.push({ filePath, open: file.open });
+                if (await fse.pathExists(filePath)) {
+                    if (file.createNewNameIfExist) {
+                        filePath = await generateNonConflictFileName(filePath);
+                    } else if (await promptForOverwrite(file.fileName) === false) {
+                        return;
+                    }
                 }
+
+                await fse.writeFile(filePath, file.contents, 'utf8');
+                writtenFiles.push({ filePath, open: file.open });
             }));
 
     return writtenFiles;
+
+    async function generateNonConflictFileName(filePath: string): Promise<string> {
+        let newFilepath = filePath;
+        let i = 1;
+        const extName = path.extname(filePath);
+        const extNameRegEx = new RegExp(`${extName}$`);
+
+        while (await fse.pathExists(newFilepath)) {
+            newFilepath = filePath.replace(extNameRegEx, i + extName);
+            i++;
+        }
+        return newFilepath;
+    }
 }

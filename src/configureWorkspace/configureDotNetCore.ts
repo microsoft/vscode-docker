@@ -160,6 +160,20 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
+const dotNetComposeTemplate = `version: '3.4'
+
+services:
+  $service_name$:
+    image: $image_name$
+    build:
+      context: $build_context$
+      dockerfile: $dockerfile$$ports$
+`;
+
+const dotNetComposeDebugTemplate = `${dotNetComposeTemplate}$environment$
+    volumes:
+$volumes_list$
+`;
 // #endregion
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string): string {
@@ -249,12 +263,71 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
 
+    validateForUnresolvedToken(contents);
+
+    return contents;
+}
+
+function validateForUnresolvedToken(contents: string): void {
     let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
     if (unreplacedToken[0]) {
         assert.fail(`Unreplaced template token "${unreplacedToken}"`);
     }
+}
 
-    return contents;
+function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
+    const serviceName = path.basename(artifactName, path.extname(artifactName));
+    const imageName = serviceName;
+    const buildContext = path.dirname(dockerfileName);
+    let jsonPorts: string = '';
+    if (ports) {
+        const portsArray = ports.map(p => `      - ${p}`).join("\r\n");
+        jsonPorts = `
+    ports:
+${portsArray}`;
+    }
+
+    let environmentVariables: string = '';
+    if (platform === 'ASP.NET Core') {
+        environmentVariables = `    environment:
+      - ASPNETCORE_ENVIRONMENT=Development`;
+        // For now assume the first port is http and the second is https. (default scaffolding behavior)
+        // TODO: This is not the perfect logic, this should be improved later.
+        if (ports && ports.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            let aspNetCoreUrl: string = `      - ASPNETCORE_URLS=http://+:${ports[0]}`;
+            if (ports.length >= 2) {
+                aspNetCoreUrl += `;https://+:${ports[1]}`;
+            }
+            environmentVariables += `\r\n${aspNetCoreUrl}`
+        }
+    }
+
+    let volumesList = '      - ~\\.vsdbg:/remote_debugger';
+    if (os === 'Linux') {
+        volumesList += ':rw'
+    }
+
+    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', serviceName)
+        .replace(/\$image_name\$/g, imageName)
+        .replace(/\$build_context\$/g, buildContext)
+        .replace(/\$dockerfile\$/g, dockerfileName)
+        .replace(/\$ports\$/g, jsonPorts);
+    validateForUnresolvedToken(composeFileContent);
+
+    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', serviceName)
+        .replace(/\$image_name\$/g, imageName)
+        .replace(/\$build_context\$/g, buildContext)
+        .replace(/\$dockerfile\$/g, dockerfileName)
+        .replace(/\$ports\$/g, jsonPorts)
+        .replace(/\$environment\$/g, environmentVariables)
+        .replace(/\$volumes_list\$/g, volumesList);
+    validateForUnresolvedToken(composeDebugFileContent);
+
+    return [
+        { fileName: 'docker-compose.yml', contents: composeFileContent, createNewNameIfExist: true },
+        { fileName: 'docker-compose.debug.yml', contents: composeDebugFileContent, createNewNameIfExist: true }
+    ]
 }
 
 // Returns the relative path of the project file without the extension
@@ -303,6 +376,7 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
     const os = context.os ?? await context.promptForOS();
+    const IsCompose = await context.promptForCompose();
 
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
 
@@ -344,10 +418,15 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
     const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
 
-    const files: ScaffoldFile[] = [
+    const composeFiles = IsCompose ? generateComposeFiles(dockerFileName, context.platform, os, ports, workspaceRelativeProjectFileName) : [];
+
+    let files: ScaffoldFile[] = [
         { fileName: dockerFileName, contents: dockerFileContents, open: true },
         { fileName: dockerIgnoreFileName, contents: genCommonDockerIgnoreFile(context.platform) }
     ];
+
+    // TODO test if adding an empty array is no-op
+    files = files.concat(composeFiles);
 
     if (context.initializeForDebugging) {
         const dockerFilePath = path.resolve(context.rootFolder, dockerFileName);
