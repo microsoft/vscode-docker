@@ -144,7 +144,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                         await openSurvey();
                                     }
 
-                                    ext.reporter.sendTelemetryEvent('surveys.activeUseSurvey.response', { response: response.toString() });
+                                    sendSurveyTelemetryEvent('surveys.activeUseSurvey.response', { response: response.toString() });
                                 }
                             }
                         } catch {
