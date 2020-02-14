@@ -166,9 +166,8 @@ services:
   $service_name$:
     image: $image_name$
     build:
-      context: $build_context$
-      dockerfile: $dockerfile$$ports$
-`;
+      context: .
+      dockerfile: $dockerfile$$ports$`;
 
 const dotNetComposeDebugTemplate = `${dotNetComposeTemplate}$environment$
     volumes:
@@ -276,11 +275,10 @@ function validateForUnresolvedToken(contents: string): void {
 }
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
-    const serviceName = path.basename(artifactName, path.extname(artifactName));
+    const serviceName = path.basename(artifactName, path.extname(artifactName)).toLowerCase();
     const imageName = serviceName;
-    const buildContext = path.dirname(dockerfileName);
     let jsonPorts: string = '';
-    if (ports) {
+    if (ports && ports.length > 0) {
         const portsArray = ports.map(p => `      - ${p}`).join("\r\n");
         jsonPorts = `
     ports:
@@ -308,16 +306,17 @@ ${portsArray}`;
         volumesList += ':rw'
     }
 
+    // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
+    dockerfileName = dockerfileName.replace(/\\/g, '/');
+
     let composeFileContent = dotNetComposeTemplate.replace('$service_name$', serviceName)
         .replace(/\$image_name\$/g, imageName)
-        .replace(/\$build_context\$/g, buildContext)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts);
     validateForUnresolvedToken(composeFileContent);
 
     let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', serviceName)
         .replace(/\$image_name\$/g, imageName)
-        .replace(/\$build_context\$/g, buildContext)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)
