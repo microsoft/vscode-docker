@@ -36,8 +36,8 @@ function select25Percent(): boolean {
 
 async function surveyPrompt(): Promise<boolean> {
     const prompt = 'We noticed you haven’t used the Docker extension lately, would you take a quick survey?';
-    const yes = { title: 'Yes', response: 'yes' };
-    const no = { title: 'No', response: 'no' };
+    const yes = { title: 'Yes' };
+    const no = { title: 'No' };
 
     const result = (await vscode.window.showInformationMessage(prompt, yes, no)) ?? no;
 
@@ -50,6 +50,10 @@ async function surveyOpen(): Promise<void> {
 
 function tryUpdate(state: vscode.Memento, key: string, value: unknown): void {
     state.update(lastUseDateKey, value).then(() => {}, () => {});
+}
+
+function sendSurveyTelemetryEvent(eventName: string, properties?: { [key: string]: string }): void {
+    ext.reporter.sendTelemetryEvent(eventName, { isActivationEvent: 'true', ...(properties ?? {}) });
 }
 
 export class ActiveUseSurveyDisposable extends vscode.Disposable {
@@ -99,11 +103,12 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                         try {
                             const activationTime = activationDate.getTime();
                             const lastUseTime = lastUseDate.getTime();
-                            const period = useLimitInDays * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
+                            const useLimitTime = useLimitInDays * 24 * 60 * 60 * 1000; // day * hour/day * min/hour * sec/min * ms/sec
+                            const inactiveTime = activationTime - lastUseTime;
 
                             // Has it been more than X number of days since the last "real use" by the user?
-                            if (activationTime - lastUseTime >= period) {
-                                ext.reporter.sendTelemetryEvent('survey.activeUse', { isActivationEvent: 'true' });
+                            if (inactiveTime >= useLimitTime) {
+                                sendSurveyTelemetryEvent('surveys.activeUseSurvey.inactive', { inactiveTimeInMs: inactiveTime.toString() })
 
                                 // Is the user a known candidate (or not)?
                                 let isCandidate = state.get<boolean>(isCandidateKey);
@@ -124,7 +129,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
 
                                 // Is the user still considered a candidate?
                                 if (isCandidate) {
-                                    ext.reporter.sendTelemetryEvent('survey.activeUse.eligible', { isActivationEvent: 'true' });
+                                    sendSurveyTelemetryEvent('surveys.activeUseSurvey.eligibleCandidate');
 
                                     const response = await promptForSurvey();
 
@@ -139,7 +144,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                         await openSurvey();
                                     }
 
-                                    ext.reporter.sendTelemetryEvent('survey.activeUse.response', { isActivationEvent: 'true', response: response.toString() });
+                                    ext.reporter.sendTelemetryEvent('surveys.activeUseSurvey.response', { response: response.toString() });
                                 }
                             }
                         } catch {
