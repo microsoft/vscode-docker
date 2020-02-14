@@ -49,7 +49,7 @@ export type ScaffoldFile = {
     contents: string;
     fileName: string;
     open?: boolean;
-    createNewNameIfExist?: boolean;
+    onConflict?(filPath: string): Promise<string | undefined>;
 };
 
 export type Scaffolder = (context: ScaffolderContext) => Promise<ScaffoldFile[]>;
@@ -144,8 +144,11 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
                 let filePath = path.resolve(rootFolder, file.fileName);
 
                 if (await fse.pathExists(filePath)) {
-                    if (file.createNewNameIfExist) {
-                        filePath = await generateNonConflictFileName(filePath);
+                    if (file.onConflict) {
+                        filePath = await file.onConflict(filePath);
+                        if (!filePath) {
+                            return;
+                        }
                     } else if (await promptForOverwrite(file.fileName) === false) {
                         return;
                     }
@@ -156,17 +159,4 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
             }));
 
     return writtenFiles;
-
-    async function generateNonConflictFileName(filePath: string): Promise<string> {
-        let newFilepath = filePath;
-        let i = 1;
-        const extName = path.extname(filePath);
-        const extNameRegEx = new RegExp(`${extName}$`);
-
-        while (await fse.pathExists(newFilepath)) {
-            newFilepath = filePath.replace(extNameRegEx, i + extName);
-            i++;
-        }
-        return newFilepath;
-    }
 }

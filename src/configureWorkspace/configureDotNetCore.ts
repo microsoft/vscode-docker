@@ -324,11 +324,23 @@ ${portsArray}`;
     validateForUnresolvedToken(composeDebugFileContent);
 
     return [
-        { fileName: 'docker-compose.yml', contents: composeFileContent, createNewNameIfExist: true },
-        { fileName: 'docker-compose.debug.yml', contents: composeDebugFileContent, createNewNameIfExist: true }
-    ]
+        { fileName: 'docker-compose.yml', contents: composeFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } },
+        { fileName: 'docker-compose.debug.yml', contents: composeFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } }
+    ];
 }
 
+async function generateNonConflictFileName(filePath: string): Promise<string> {
+    let newFilepath = filePath;
+    let i = 1;
+    const extName = path.extname(filePath);
+    const extNameRegEx = new RegExp(`${extName}$`);
+
+    while (await fse.pathExists(newFilepath)) {
+        newFilepath = filePath.replace(extNameRegEx, i + extName);
+        i++;
+    }
+    return newFilepath;
+}
 // Returns the relative path of the project file without the extension
 async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {
@@ -375,11 +387,14 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
     const os = context.os ?? await context.promptForOS();
-    const IsCompose = await context.promptForCompose();
+    const isCompose = await context.promptForCompose();
 
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
 
     telemetryProperties.configureOs = os;
+    if (isCompose) {
+        telemetryProperties.orchestration = 'docker-compose';
+    }
 
     const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
@@ -417,14 +432,13 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
     const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
 
-    const composeFiles = IsCompose ? generateComposeFiles(dockerFileName, context.platform, os, ports, workspaceRelativeProjectFileName) : [];
+    const composeFiles = isCompose ? generateComposeFiles(dockerFileName, context.platform, os, ports, workspaceRelativeProjectFileName) : [];
 
     let files: ScaffoldFile[] = [
         { fileName: dockerFileName, contents: dockerFileContents, open: true },
         { fileName: dockerIgnoreFileName, contents: genCommonDockerIgnoreFile(context.platform) }
     ];
 
-    // TODO test if adding an empty array is no-op
     files = files.concat(composeFiles);
 
     if (context.initializeForDebugging) {

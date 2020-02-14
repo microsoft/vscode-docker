@@ -349,7 +349,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
     let generateComposeFiles = true;
 
     if (platformType === 'Node.js') {
-        generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
+        generateComposeFiles = await context.promptForCompose();
         if (generateComposeFiles) {
             properties.orchestration = 'docker-compose';
         }
