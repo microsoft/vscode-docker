@@ -1241,7 +1241,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                ['No', '5000', 'app.py'],
+                ['No', '5000', 'flask_app.py'],
                 ['Dockerfile', '.dockerignore', 'requirements.txt']
             );
 
@@ -1249,7 +1249,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 5000');
             assertFileContains('Dockerfile', 'ADD requirements.txt .');
             assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
-            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:5000", "testOutput:app"]');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:5000", "flask_app:app"]');
             assertFileContains('requirements.txt', 'flask');
             assertFileContains('requirements.txt', 'gunicorn');
         });

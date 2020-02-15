@@ -81,9 +81,11 @@ function genDockerFile(serviceName: string, target: PythonTarget, projectType: P
             command = `CMD ["python", "-m", "${(target as PythonModuleTarget).module}"]`;
         }
     } else if (projectType === 'django') {
+        // For Django apps, there **usually** exists a "wsgi" module, so our best guess is to use the folder name.
         command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}.wsgi"]`;
     } else if (projectType === 'flask') {
-        command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}:app"]`;
+        // For Flask apps, our guess is to assume there is a callable "app" object in the file/module that the user provided.
+        command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${inferPythonWsgiModule(target)}:app"]`;
     } else {
         // Unlikely
         throw new Error(`Unknown project type: ${projectType}`);
@@ -159,6 +161,21 @@ async function initializeForDebugging(context: ScaffolderContext, dockerfile: st
 
     await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pyOptions);
 }
+
+function inferPythonWsgiModule(target: PythonTarget): string {
+    let wsgiModule: string;
+
+    if ('module' in target) {
+        wsgiModule = target.module;
+    } else if ('file' in target) {
+        // Get rid of the file extension.
+        wsgiModule = target.file.replace(/\.[^/.]+$/, '');
+    }
+
+    // Replace forward-slashes with dots.
+    return wsgiModule.replace(/\//g, '.');
+}
+
 
 export async function promptForLaunchFile(projectType?: PythonProjectType) : Promise<PythonTarget> {
     const launchFilePrompt = defaultLaunchFile.get(projectType);
