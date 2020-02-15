@@ -195,9 +195,9 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     // For .NET Core 2.1+ use mcr.microsoft.com/dotnet/core/[sdk|aspnet|runtime|runtime-deps] repository.
     // See details here: https://devblogs.microsoft.com/dotnet/net-core-container-images-now-published-to-microsoft-container-registry/
     if (semver.gte(netCoreAppVersion, '2.1.0')) {
-        if (platform === 'ASP.NET Core') {
+        if (platform === '.NET: ASP.NET Core') {
             baseImageFormat = AspNetCoreRuntimeImageFormat;
-        } else if (platform === '.NET Core Console') {
+        } else if (platform === '.NET: Core Console') {
             baseImageFormat = DotNetCoreRuntimeImageFormat;
         } else {
             assert.fail(`Unknown platform`);
@@ -205,10 +205,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
         sdkImageNameFormat = DotNetCoreSdkImageFormat;
     } else {
-        if (platform === 'ASP.NET Core') {
+        if (platform === '.NET: ASP.NET Core') {
             baseImageFormat = LegacyAspNetCoreRuntimeImageFormat;
             sdkImageNameFormat = LegacyAspNetCoreSdkImageFormat;
-        } else if (platform === '.NET Core Console') {
+        } else if (platform === '.NET: Core Console') {
 
             baseImageFormat = LegacyDotNetCoreRuntimeImageFormat;
             sdkImageNameFormat = LegacyDotNetCoreSdkImageFormat;
@@ -231,10 +231,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let template: string;
     switch (platform) {
-        case ".NET Core Console":
+        case ".NET: Core Console":
             template = os === "Linux" ? dotNetCoreConsoleLinuxTemplate : dotNetCoreConsoleWindowsTemplate;
             break;
-        case "ASP.NET Core":
+        case ".NET: ASP.NET Core":
             template = os === "Linux" ? aspNetCoreLinuxTemplate : aspNetCoreWindowsTemplate;
             break;
         default:
@@ -308,7 +308,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     telemetryProperties.configureOs = os;
 
-    const ports = context.ports ?? (context.platform === 'ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
+    const ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
     const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
