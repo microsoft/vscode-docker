@@ -43,11 +43,11 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, Ne
 
     public async getItems(): Promise<LocalNetworkInfo[]> {
         let config = workspace.getConfiguration(configPrefix);
-        let hideBuiltInNetworks: boolean = config.get<boolean>('networks.hideBuiltInNetworks');
+        let showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
         let networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
 
-        if (hideBuiltInNetworks) {
+        if (!showBuiltInNetworks) {
             networks = networks.filter(network => !builtInNetworks.includes(network.Name));
         }
 

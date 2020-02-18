@@ -14,7 +14,7 @@ export async function removeNetwork(context: IActionContext, node: NetworkTreeIt
     if (node) {
         nodes = [node];
     } else {
-        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.removeableNetworkRegExp, { ...context, canPickMany: true, suppressCreatePick: true });
+        nodes = await ext.networksTree.showTreeItemPicker(NetworkTreeItem.customNetworkRegExp, { ...context, canPickMany: true, suppressCreatePick: true });
     }
 
     if (nodes.some(n => builtInNetworks.includes(n.networkName))) {

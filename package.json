@@ -375,7 +375,7 @@
                 },
                 {
                     "command": "vscode-docker.networks.remove",
-                    "when": "view == dockerNetworks && viewItem =~ /^removeableNetwork$/i",
+                    "when": "view == dockerNetworks && viewItem =~ /^customNetwork$/i",
                     "group": "networks_2_destructive@1"
                 },
                 {
@@ -1307,10 +1307,10 @@
                         ]
                     }
                 },
-                "docker.networks.hideBuiltInNetworks": {
+                "docker.networks.showBuiltInNetworks": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Hide the built-in networks from the explorer."
+                    "description": "Show the built-in networks in the explorer."
                 },
                 "docker.networks.label": {
                     "type": "string",

@@ -12,7 +12,7 @@ import { LocalNetworkInfo } from "./LocalNetworkInfo";
 
 export class NetworkTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Network$/;
-    public static removeableNetworkRegExp: RegExp = /^removeableNetwork$/i;
+    public static customNetworkRegExp: RegExp = /^customNetwork$/i;
 
     private readonly _item: LocalNetworkInfo;
 
@@ -22,7 +22,7 @@ export class NetworkTreeItem extends AzExtTreeItem {
     }
 
     public get contextValue(): string {
-        const prefix = builtInNetworks.includes(this._item.networkName) ? 'unremoveable' : 'removeable';
+        const prefix = builtInNetworks.includes(this._item.networkName) ? 'default' : 'custom';
         return prefix + 'Network';
     }
 
