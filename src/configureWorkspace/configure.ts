@@ -17,7 +17,7 @@ import { configureGo } from './configureGo';
 import { configureJava } from './configureJava';
 import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
-import { configurePython } from './configurePython';
+import { scaffoldPython } from './configurePython';
 import { configureRuby } from './configureRuby';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth, quickPickGenerateComposeFiles } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
@@ -57,8 +57,14 @@ export function getExposeStatements(ports: number[]): string {
     return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
 }
 
-export function getComposePorts(ports: number[]): string {
-    return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
+export function getComposePorts(ports: number[], debugPort?: number): string {
+    let portMappings: string[] = ports?.map(port => `      - ${port}`) ?? [];
+
+    if (debugPort) {
+        portMappings.push(`      - ${debugPort}:${debugPort}`);
+    }
+
+    return portMappings && portMappings.length > 0 ? '    ports:\n' + portMappings.join('\n') : '';
 }
 
 function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
@@ -87,13 +93,15 @@ function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
     };
 }
 
-registerScaffolder('.NET Core Console', scaffoldNetCore);
-registerScaffolder('ASP.NET Core', scaffoldNetCore);
+registerScaffolder('Node.js', configureScaffolder(configureNode));
+registerScaffolder('.NET: ASP.NET Core', scaffoldNetCore);
+registerScaffolder('.NET: Core Console', scaffoldNetCore);
+registerScaffolder('Python: Django', scaffoldPython);
+registerScaffolder('Python: Flask', scaffoldPython);
+registerScaffolder('Python: General', scaffoldPython);
+registerScaffolder('Java', configureScaffolder(configureJava));
 registerScaffolder('C++', configureScaffolder(configureCpp));
 registerScaffolder('Go', configureScaffolder(configureGo));
-registerScaffolder('Java', configureScaffolder(configureJava));
-registerScaffolder('Node.js', configureScaffolder(configureNode));
-registerScaffolder('Python', configureScaffolder(configurePython));
 registerScaffolder('Ruby', configureScaffolder(configureRuby));
 registerScaffolder('Other', configureScaffolder(configureOther));
 
@@ -102,7 +110,6 @@ generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
 generatorsByPlatform.set('Node.js', configureNode);
-generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('Other', configureOther);
 
@@ -315,7 +322,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
     files.filter(file => file.open).forEach(
         file => {
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showTextDocument(vscode.Uri.file(file.filePath));
+            vscode.window.showTextDocument(vscode.Uri.file(file.filePath), { preview: false });
         });
 }
 
