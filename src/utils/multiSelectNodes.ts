@@ -37,7 +37,7 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
     }
 
     // Filter off parent items (i.e. group items), as it doesn't make sense to perform actions on them, when we don't allow actions to be performed on *only* them
-    nodes.filter(n => !(n instanceof AzExtParentTreeItem));
+    nodes = nodes.filter(n => !(n instanceof AzExtParentTreeItem));
 
     // If we end with no nodes, cancel
     if (nodes.length === 0) {
