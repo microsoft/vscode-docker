@@ -19,7 +19,7 @@ export type ConfigureTelemetryProperties = {
     packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
 };
 
-export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project';
+export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project' | 'pythonFile';
 
 export async function captureConfigureCancelStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: TPrompt): Promise<TReturn> {
     return await captureCancelStep(cancelStep, properties, prompt)();
@@ -47,14 +47,19 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
     return splitPorts(await ext.ui.showInputBox(opt));
 }
 
-function splitPorts(value: string): number[] | undefined {
-    value = value ? value : '';
-    let matches = value.match(/\d+/g);
+/**
+ * Splits a comma separated string of port numbers
+ */
+export function splitPorts(value: string): number[] | undefined {
+    if (!value || value === '') {
+        return [];
+    }
 
-    if (!matches && value !== '') {
+    let elements = value.split(',').map(p => p.trim());
+    let matches = elements.filter(p => p.match(/^-*\d+$/));
+
+    if (matches.length < elements.length) {
         return undefined;
-    } else if (!matches) {
-        return []; // Empty list
     }
 
     let ports = matches.map(Number);
@@ -79,14 +84,16 @@ export async function quickPickPlatform(platforms?: Platform[]): Promise<Platfor
     }
 
     platforms = platforms || [
-        'Go',
-        'Java',
-        '.NET Core Console',
-        'ASP.NET Core',
         'Node.js',
-        'Python',
-        'Ruby',
+        '.NET: ASP.NET Core',
+        '.NET: Core Console',
+        'Python: Django',
+        'Python: Flask',
+        'Python: General',
+        'Java',
         'C++',
+        'Go',
+        'Ruby',
         'Other'
     ];
 

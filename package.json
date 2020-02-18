@@ -1,10 +1,10 @@
 {
     "name": "vscode-docker",
-    "version": "0.9.1-alpha",
+    "version": "0.10.1-alpha",
     "preview": true,
     "publisher": "ms-azuretools",
     "displayName": "Docker",
-    "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
+    "description": "Makes it easy to create, manage, and debug containerized applications.",
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -123,6 +123,10 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.help",
                     "when": "never"
                 }
             ],
@@ -280,6 +284,11 @@
                     "command": "vscode-docker.volumes.refresh",
                     "when": "view == dockerVolumes",
                     "group": "navigation@9"
+                },
+                {
+                    "command": "vscode-docker.help",
+                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerRegistries || view == dockerNetworks",
+                    "group": "navigation@10"
                 }
             ],
             "view/item/context": [
@@ -546,7 +555,8 @@
                                 "description": "The target plaform for the application.",
                                 "enum": [
                                     "netCore",
-                                    "node"
+                                    "node",
+                                    "python"
                                 ]
                             },
                             "netCore": {
@@ -623,6 +633,60 @@
                                         "enum": [
                                             "verbose",
                                             true
+                                        ]
+                                    }
+                                }
+                            },
+                            "python": {
+                                "description": "Options for debugging Python applications in Docker.",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "The host for remote debugging.",
+                                        "default": "localhost"
+                                    },
+                                    "port": {
+                                        "type": "number",
+                                        "description": "The port for remote debugging.",
+                                        "default": 5678
+                                    },
+                                    "pathMappings": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "localRoot": {
+                                                    "type": "string",
+                                                    "description": "The host path."
+                                                },
+                                                "remoteRoot": {
+                                                    "type": "string",
+                                                    "description": "The container path."
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "justMyCode": {
+                                        "type": "boolean",
+                                        "description": "Debug only user-written code."
+                                    },
+                                    "django": {
+                                        "type": "boolean",
+                                        "description": "Django debugging.",
+                                        "default": false
+                                    },
+                                    "jinja": {
+                                        "type": "boolean",
+                                        "description": "Jinja template debugging (e.g. Flask).",
+                                        "default": false
+                                    },
+                                    "projectType": {
+                                        "type": "string",
+                                        "description": "Type of the Python app.",
+                                        "enum": [
+                                            "django",
+                                            "flask",
+                                            "general"
                                         ]
                                     }
                                 }
@@ -878,7 +942,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -901,6 +966,10 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "description": "Options for building Python applications in Docker.",
+                        "type": "object"
                     }
                 }
             },
@@ -1057,7 +1126,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -1100,6 +1170,49 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Options for running Python applications in Docker.",
+                        "properties": {
+                            "file": {
+                                "type": "string",
+                                "description": "The Python file to run.",
+                                "default": "${file}"
+                            },
+                            "module": {
+                                "type": "string",
+                                "description": "The Python module to run."
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "Arguments passed to the Python app.",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "wait": {
+                                "type": "boolean",
+                                "description": "Whether to wait for debugger to attach.",
+                                "default": true
+                            },
+                            "debugPort": {
+                                "type": "number",
+                                "description": "The port that the debugger will listen on.",
+                                "default": 5678
+                            }
+                        },
+                        "oneOf": [
+                            {
+                                "required": ["file"],
+                                "not": {"enum": ["module"] }
+                            },
+                            {
+                                "required": ["module"],
+                                "not": {"enum": ["file"] }
+                            }
+                        ]
                     }
                 }
             }
@@ -1137,12 +1250,12 @@
                 "docker.explorerRefreshInterval": {
                     "type": "number",
                     "default": 2000,
-                    "description": "Explorer refresh interval, default is 2000ms"
+                    "description": "Docker view refresh interval (milliseconds)"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping containers.",
+                    "description": "The property to use to group containers in Docker view: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, Tag, or None",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1167,7 +1280,7 @@
                         "ContainerName",
                         "Status"
                     ],
-                    "description": "Any secondary properties to display for a container.",
+                    "description": "Any secondary properties to display for a container (an array). Possible elements include: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, and Tag",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1191,7 +1304,7 @@
                 "docker.containers.label": {
                     "type": "string",
                     "default": "FullTag",
-                    "description": "The primary property to display for a container.",
+                    "description": "The primary property to display for a container: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, or Tag",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1212,7 +1325,7 @@
                 "docker.containers.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting containers.",
+                    "description": "The property to use to sort containers in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1221,7 +1334,7 @@
                 "docker.images.groupBy": {
                     "type": "string",
                     "default": "Repository",
-                    "description": "The property to use when grouping images.",
+                    "description": "The property to use to group images in Docker view: CreatedTime, FullTag, ImageId, None, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1239,7 +1352,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a image.",
+                    "description": "Any secondary properties to display for a image (an array). Possible elements include: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, and Tag",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1257,7 +1370,7 @@
                 "docker.images.label": {
                     "type": "string",
                     "default": "Tag",
-                    "description": "The primary property to display for a image.",
+                    "description": "The primary property to display for a image: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1272,7 +1385,7 @@
                 "docker.images.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting images.",
+                    "description": "The property to use to sort images in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1281,7 +1394,7 @@
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping networks.",
+                    "description": "The property to use to group networks in Docker view: CreatedTime, NetworkDriver, NetworkId, NetworkName, or None",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1296,7 +1409,7 @@
                         "NetworkDriver",
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a network.",
+                    "description": "Any secondary properties to display for a Docker network (an array). Possible elements include CreatedTime, NetworkDriver, NetworkId, and NetworkName",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1315,7 +1428,7 @@
                 "docker.networks.label": {
                     "type": "string",
                     "default": "NetworkName",
-                    "description": "The primary property to display for a network.",
+                    "description": "The primary property to display for a Docker network: CreatedTime, NetworkDriver, NetworkId, or NetworkName",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1326,7 +1439,7 @@
                 "docker.networks.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting networks.",
+                    "description": "The property to use to sort networks in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1335,7 +1448,7 @@
                 "docker.volumes.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use when grouping volumes.",
+                    "description": "The property to use to group volumes in Docker view: CreatedTime, VolumeName, or None",
                     "enum": [
                         "CreatedTime",
                         "VolumeName",
@@ -1347,7 +1460,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a volume.",
+                    "description": "Any secondary properties to display for a Docker volume (an array). Possible values include CreatedTime and VolumeName",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1359,7 +1472,7 @@
                 "docker.volumes.label": {
                     "type": "string",
                     "default": "VolumeName",
-                    "description": "The primary property to display for a volume.",
+                    "description": "The primary property to display for a Docker volume: CreatedTime or VolumeName",
                     "enum": [
                         "CreatedTime",
                         "VolumeName"
@@ -1368,7 +1481,7 @@
                 "docker.volumes.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use when sorting volumes.",
+                    "description": "The property to use to sort volumes in Docker view: CreatedTime or Label",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1377,17 +1490,17 @@
                 "docker.imageBuildContextPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Build context PATH to pass to Docker build command"
+                    "description": "Build context PATH to pass to Docker build command."
                 },
                 "docker.truncateLongRegistryPaths": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Truncate long Image and Container registry paths in the Explorer"
+                    "description": "Set to true to truncate long image and container registry paths in Docker view"
                 },
                 "docker.truncateMaxLength": {
                     "type": "number",
                     "default": 10,
-                    "description": "Maximum number of characters for long registry paths in the Explorer, including elipsis"
+                    "description": "Maximum length of a registry paths displayed in Docker view, including elipsis. The truncateLongRegistryPaths setting must be set to true for truncateMaxLength setting to be effective."
                 },
                 "docker.host": {
                     "type": "string",
@@ -1521,17 +1634,17 @@
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Run docker-compose with the --build argument, defaults to true"
+                    "description": "Set to true to include --build option when docker-compose command is invoked"
                 },
                 "docker.dockerComposeDetached": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Run docker-compose with the --d (detached) argument, defaults to true"
+                    "description": "Set to true to include --d (detached) option when docker-compose command is invoked"
                 },
                 "docker.showRemoteWorkspaceWarning": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Show a prompt to switch from \"UI\" extension to \"Workspace\" extension if an operation is not supported."
+                    "description": "Set to true to prompt to switch from \"UI\" extension mode to \"Workspace\" extension mode if an operation is not supported in UI mode."
                 }
             }
         },
@@ -1936,6 +2049,12 @@
                 "command": "vscode-docker.volumes.remove",
                 "title": "Remove...",
                 "category": "Docker Volumes"
+            },
+            {
+                "command": "vscode-docker.help",
+                "title": "Docker help...",
+                "category": "Docker",
+                "icon": "$(question)"
             }
         ],
         "views": {
@@ -2040,7 +2159,7 @@
         "azure-storage": "^2.10.3",
         "deep-equal": "^1.1.1",
         "docker-modem": "^2.0.4",
-        "dockerfile-language-server-nodejs": "^0.0.21",
+        "dockerfile-language-server-nodejs": "^0.0.22",
         "dockerode": "^3.0.2",
         "fs-extra": "^8.1.0",
         "glob": "^7.1.6",
@@ -2053,8 +2172,8 @@
         "semver": "^6.3.0",
         "tar": "^5.0.5",
         "vscode-azureappservice": "^0.54.0",
-        "vscode-azureextensionui": "^0.29.1",
-        "vscode-languageclient": "^5.2.1",
+        "vscode-azureextensionui": "^0.29.5",
+        "vscode-languageclient": "^6.1.0",
         "xml2js": "^0.4.22"
     }
 }

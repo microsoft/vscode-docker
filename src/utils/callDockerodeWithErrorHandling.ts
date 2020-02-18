@@ -5,12 +5,14 @@
 
 /* eslint-disable unicorn/filename-case */
 
-import { parseError } from "vscode-azureextensionui";
+import { IActionContext, parseError } from "vscode-azureextensionui";
 
-export async function wrapDockerodeENOENT<T>(dockerodeCallback: () => Promise<T>): Promise<T> {
+export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
     try {
         return await dockerodeCallback();
     } catch (err) {
+        context.errorHandling.suppressReportIssue = true;
+
         const error = parseError(err);
 
         if (error && error.errorType === 'ENOENT') {

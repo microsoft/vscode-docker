@@ -105,7 +105,16 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         return captureCancelStep(step, context.telemetry.properties, prompt);
     }
 
-    const folder = context.folder ?? await captureStep('folder', promptForFolder)();
+    let folder: vscode.WorkspaceFolder;
+
+    try {
+        folder = context.folder ?? await captureStep('folder', promptForFolder)();
+    } catch (err) {
+        // Suppress reporting issues due to high volume
+        context.errorHandling.suppressReportIssue = true;
+        throw err;
+    }
+
     const rootFolder = context.rootFolder ?? folder.uri.fsPath;
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
 

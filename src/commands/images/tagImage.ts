@@ -9,11 +9,15 @@ import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
     if (!node) {
-        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to tag'
+        });
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
@@ -29,7 +33,8 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
     }
 
     const image: Image = node.getImage();
-    await image.tag({ repo: repo, tag: tag });
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    await callDockerodeWithErrorHandling(() => image.tag({ repo: repo, tag: tag }), context);
     return newTaggedName;
 }
 

@@ -6,16 +6,16 @@
 import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { convertToMB } from '../../utils/convertToMB';
-import { wrapDockerodeENOENT } from '../../utils/wrapDockerodeENOENT';
 
-export async function pruneImages(_context: IActionContext): Promise<void> {
+export async function pruneImages(context: IActionContext): Promise<void> {
     const confirmPrune: string = "Are you sure you want to remove all dangling images?";
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const result = await wrapDockerodeENOENT(() => ext.dockerode.pruneImages());
+    const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneImages(), context);
 
     const numDeleted = (result.ImagesDeleted || []).length;
     const mbReclaimed = convertToMB(result.SpaceReclaimed);
