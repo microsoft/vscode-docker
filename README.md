@@ -4,7 +4,7 @@
 
 The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code.
 
-**Check out [Working with containers](https://code.visualstudio.com/docs/containers/overview) topic on Visual Studio Code documentation site to get started**.
+**Check out [Working with containers](https://aka.ms/AA7arez) topic on Visual Studio Code documentation site to get started**.
 
 [The Docker extension wiki](https://github.com/Microsoft/vscode-docker/wiki) has troubleshooting tips and additional technical information.
 
@@ -74,11 +74,11 @@ You can display the content and push/pull/delete images from [Docker Hub](https:
 
 ![Azure Container Registry content](resources/readme/container-registry.png)
 
-An image in an Azure Container Registry can be deployed to Azure App Service directly from VS Code; see [Deploy images to Azure App Service](https://code.visualstudio.com/docs/containers/app-service) page. For more information about how to authenticate to and work with registries see [Using container registries](https://code.visualstudio.com/docs/containers/quickstart-container-registries) page.
+An image in an Azure Container Registry can be deployed to Azure App Service directly from VS Code; see [Deploy images to Azure App Service](https://aka.ms/AA7arf8) page. For more information about how to authenticate to and work with registries see [Using container registries](https://aka.ms/AA7arf9) page.
 
 ### Debugging services running inside a container
 
-You can debug services built using .NET (C#) and Node.js that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://code.visualstudio.com/docs/containers/debug-common)  and [Extension Properties and Tasks](https://code.visualstudio.com/docs/containers/reference) pages.
+You can debug services built using .NET (C#) and Node.js that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://aka.ms/AA7arfb)  and [Extension Properties and Tasks](https://aka.ms/AA7ay8l) pages.
 
 ### Azure CLI integration
 

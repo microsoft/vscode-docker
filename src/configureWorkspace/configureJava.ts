@@ -51,5 +51,5 @@ services:
       dockerfile: Dockerfile
     environment:
       JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
-${getComposePorts(ports.concat(5005))}`;
+${getComposePorts(ports, 5005)}`;
 }

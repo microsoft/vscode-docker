@@ -555,7 +555,8 @@
                                 "description": "The target plaform for the application.",
                                 "enum": [
                                     "netCore",
-                                    "node"
+                                    "node",
+                                    "python"
                                 ]
                             },
                             "netCore": {
@@ -632,6 +633,60 @@
                                         "enum": [
                                             "verbose",
                                             true
+                                        ]
+                                    }
+                                }
+                            },
+                            "python": {
+                                "description": "Options for debugging Python applications in Docker.",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "The host for remote debugging.",
+                                        "default": "localhost"
+                                    },
+                                    "port": {
+                                        "type": "number",
+                                        "description": "The port for remote debugging.",
+                                        "default": 5678
+                                    },
+                                    "pathMappings": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "localRoot": {
+                                                    "type": "string",
+                                                    "description": "The host path."
+                                                },
+                                                "remoteRoot": {
+                                                    "type": "string",
+                                                    "description": "The container path."
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "justMyCode": {
+                                        "type": "boolean",
+                                        "description": "Debug only user-written code."
+                                    },
+                                    "django": {
+                                        "type": "boolean",
+                                        "description": "Django debugging.",
+                                        "default": false
+                                    },
+                                    "jinja": {
+                                        "type": "boolean",
+                                        "description": "Jinja template debugging (e.g. Flask).",
+                                        "default": false
+                                    },
+                                    "projectType": {
+                                        "type": "string",
+                                        "description": "Type of the Python app.",
+                                        "enum": [
+                                            "django",
+                                            "flask",
+                                            "general"
                                         ]
                                     }
                                 }
@@ -887,7 +942,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -910,6 +966,10 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "description": "Options for building Python applications in Docker.",
+                        "type": "object"
                     }
                 }
             },
@@ -1066,7 +1126,8 @@
                         "description": "The target plaform for the application.",
                         "enum": [
                             "netCore",
-                            "node"
+                            "node",
+                            "python"
                         ]
                     },
                     "netCore": {
@@ -1109,6 +1170,49 @@
                                 "description": "The path to the package.json for the application."
                             }
                         }
+                    },
+                    "python": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Options for running Python applications in Docker.",
+                        "properties": {
+                            "file": {
+                                "type": "string",
+                                "description": "The Python file to run.",
+                                "default": "${file}"
+                            },
+                            "module": {
+                                "type": "string",
+                                "description": "The Python module to run."
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "Arguments passed to the Python app.",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "wait": {
+                                "type": "boolean",
+                                "description": "Whether to wait for debugger to attach.",
+                                "default": true
+                            },
+                            "debugPort": {
+                                "type": "number",
+                                "description": "The port that the debugger will listen on.",
+                                "default": 5678
+                            }
+                        },
+                        "oneOf": [
+                            {
+                                "required": ["file"],
+                                "not": {"enum": ["module"] }
+                            },
+                            {
+                                "required": ["module"],
+                                "not": {"enum": ["file"] }
+                            }
+                        ]
                     }
                 }
             }
@@ -2050,7 +2154,7 @@
         "azure-storage": "^2.10.3",
         "deep-equal": "^1.1.1",
         "docker-modem": "^2.0.4",
-        "dockerfile-language-server-nodejs": "^0.0.21",
+        "dockerfile-language-server-nodejs": "^0.0.22",
         "dockerode": "^3.0.2",
         "fs-extra": "^8.1.0",
         "glob": "^7.1.6",
@@ -2064,7 +2168,7 @@
         "tar": "^5.0.5",
         "vscode-azureappservice": "^0.54.0",
         "vscode-azureextensionui": "^0.29.5",
-        "vscode-languageclient": "^5.2.1",
+        "vscode-languageclient": "^6.1.0",
         "xml2js": "^0.4.22"
     }
 }
