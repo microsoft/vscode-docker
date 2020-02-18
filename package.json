@@ -1205,12 +1205,24 @@
                         },
                         "oneOf": [
                             {
-                                "required": ["file"],
-                                "not": {"enum": ["module"] }
+                                "required": [
+                                    "file"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "module"
+                                    ]
+                                }
                             },
                             {
-                                "required": ["module"],
-                                "not": {"enum": ["file"] }
+                                "required": [
+                                    "module"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "file"
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -2144,6 +2156,7 @@
         "vsce": "^1.71.0",
         "vscode": "^1.1.36",
         "vscode-azureextensiondev": "^0.2.3",
+        "vscode-nls-dev": "^3.3.1",
         "webpack": "^4.41.2",
         "webpack-cli": "^3.3.10"
     },
@@ -2169,6 +2182,7 @@
         "vscode-azureappservice": "^0.54.0",
         "vscode-azureextensionui": "^0.29.5",
         "vscode-languageclient": "^6.1.0",
+        "vscode-nls": "^4.1.1",
         "xml2js": "^0.4.22"
     }
 }
