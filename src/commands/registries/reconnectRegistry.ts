@@ -5,14 +5,14 @@
 
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
-import { RegistryErrorTreeItem } from "../../tree/registries/RegistryErrorTreeItem";
+import { RegistryConnectErrorTreeItem } from "../../tree/registries/RegistryConnectErrorTreeItem";
 
-export async function reconnectRegistry(context: IActionContext, node?: RegistryErrorTreeItem): Promise<void> {
-    if (!node?.data?.cachedProvider || !node?.data?.provider) {
+export async function reconnectRegistry(context: IActionContext, node?: RegistryConnectErrorTreeItem): Promise<void> {
+    if (!node?.cachedProvider || !node?.provider) {
         // TODO: error?
         return;
     }
 
-    await ext.registriesRoot.disconnectRegistry(context, node.data.cachedProvider);
-    await ext.registriesRoot.connectRegistry(context, node.data.provider);
+    await ext.registriesRoot.disconnectRegistry(context, node.cachedProvider);
+    await ext.registriesRoot.connectRegistry(context, node.provider);
 }
