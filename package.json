@@ -90,6 +90,7 @@
         "onCommand:vscode-docker.registries.logOutOfDockerCli",
         "onCommand:vscode-docker.registries.pullImage",
         "onCommand:vscode-docker.registries.pullRepository",
+        "onCommand:vscode-docker.registries.reconnectRegistry",
         "onCommand:vscode-docker.registries.refresh",
         "onCommand:vscode-docker.registries.setAsDefault",
         "onCommand:vscode-docker.volumes.configureExplorer",
@@ -127,6 +128,10 @@
                 },
                 {
                     "command": "vscode-docker.help",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
                 }
             ],
@@ -476,6 +481,11 @@
                     "command": "vscode-docker.registries.azure.viewProperties",
                     "when": "view == dockerRegistries && viewItem =~ /azure(TaskRun|;DockerV2;Registry;)/",
                     "group": "regs_zzz_common@2"
+                },
+                {
+                    "command": "vscode-docker.registries.reconnectRegistry",
+                    "when": "view == dockerRegistries && viewItem == registryConnectError",
+                    "group": "regs_zzz_common@8"
                 },
                 {
                     "command": "vscode-docker.registries.refresh",
@@ -1205,12 +1215,24 @@
                         },
                         "oneOf": [
                             {
-                                "required": ["file"],
-                                "not": {"enum": ["module"] }
+                                "required": [
+                                    "file"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "module"
+                                    ]
+                                }
                             },
                             {
-                                "required": ["module"],
-                                "not": {"enum": ["file"] }
+                                "required": [
+                                    "module"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "file"
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -1992,6 +2014,11 @@
             {
                 "command": "vscode-docker.registries.pullRepository",
                 "title": "Pull Repository",
+                "category": "Docker Registries"
+            },
+            {
+                "command": "vscode-docker.registries.reconnectRegistry",
+                "title": "Re-enter credentials",
                 "category": "Docker Registries"
             },
             {

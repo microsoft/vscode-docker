@@ -76,7 +76,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         return false;
     }
 
-    public async connectRegistry(context: IActionContext): Promise<void> {
+    public async connectRegistry(context: IActionContext, provider?: IRegistryProvider): Promise<void> {
         let picks: IAzureQuickPickItem<IRegistryProvider | undefined>[] = getRegistryProviders().map(rp => {
             return {
                 label: rp.label,
@@ -92,7 +92,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         });
 
         let placeHolder: string = 'Select the provider for your registry';
-        const provider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
+        provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
             await openExternal('https://aka.ms/AA5g7n7');
             context.telemetry.properties.cancelStep = 'learnHowToContribute';
