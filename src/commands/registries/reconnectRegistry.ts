@@ -14,5 +14,5 @@ export async function reconnectRegistry(context: IActionContext, node?: Registry
     }
 
     await ext.registriesRoot.disconnectRegistry(context, node.cachedProvider);
-    await ext.registriesRoot.connectRegistry(context, node.provider);
+    await ext.registriesRoot.connectRegistry(context, node.provider, node.url);
 }

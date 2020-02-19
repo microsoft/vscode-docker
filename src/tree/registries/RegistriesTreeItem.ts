@@ -76,7 +76,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         return false;
     }
 
-    public async connectRegistry(context: IActionContext, provider?: IRegistryProvider): Promise<void> {
+    public async connectRegistry(context: IActionContext, provider?: IRegistryProvider, url?: string): Promise<void> {
         let picks: IAzureQuickPickItem<IRegistryProvider | undefined>[] = getRegistryProviders().map(rp => {
             return {
                 label: rp.label,
@@ -115,7 +115,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
 
         if (provider.connectWizardOptions) {
             const existingProviders: ICachedRegistryProvider[] = this._cachedProviders.filter(rp => rp.id === provider.id);
-            const wizardContext: IConnectRegistryWizardContext = { ...context, ...provider.connectWizardOptions, existingProviders };
+            const wizardContext: IConnectRegistryWizardContext = { ...context, ...provider.connectWizardOptions, url, existingProviders };
             const wizard = new AzureWizard(wizardContext, {
                 title: provider.connectWizardOptions.wizardTitle,
                 promptSteps: [
