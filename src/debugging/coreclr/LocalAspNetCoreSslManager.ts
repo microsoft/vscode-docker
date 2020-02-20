@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
@@ -50,8 +51,8 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
         }
 
         if (this.osProvider.os === 'Windows') {
-            const trust: MessageItem = { title: 'Trust' };
-            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.';
+            const trust: MessageItem = { title: localize('vscode-docker.debug.coreclr.sslManager.trust', 'Trust') };
+            const message = localize('vscode-docker.debug.coreclr.sslManager.notTrusted', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.');
 
             // Don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
@@ -65,7 +66,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
                     LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
                 }});
         } else if (this.osProvider.isMac) {
-            const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.';
+            const message = localize('vscode-docker.debug.coreclr.sslManager.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.');
 
             // Don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
@@ -97,7 +98,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             appDataEnvironmentVariable = process.env.AppData;
 
             if (appDataEnvironmentVariable === undefined) {
-                throw new Error(`The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.`);
+                throw new Error(localize('vscode-docker.debug.coreclr.sslManager.appDataUndefined', 'The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.'));
             }
         }
 
@@ -123,8 +124,8 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
     }
 
     private async pickProjectFile(): Promise<string> {
-        const workspaceFolder = await quickPickWorkspaceFolder("To configure SSL for an ASP.NET Core project you must first open a folder or workspace in VSCode.");
-        const projectItem = await quickPickProjectFileItem(undefined, workspaceFolder, "No .NET Core project file (.csproj or .fsproj) could be found.");
+        const workspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.debug.coreclr.sslManager.workspaceFolder', 'To configure SSL for an ASP.NET Core project you must first open a folder or workspace in VSCode.'));
+        const projectItem = await quickPickProjectFileItem(undefined, workspaceFolder, localize('vscode-docker.debug.coreclr.sslManager.noCsproj', 'No .NET Core project file (.csproj or .fsproj) could be found.'));
 
         return projectItem.absoluteFilePath;
     }

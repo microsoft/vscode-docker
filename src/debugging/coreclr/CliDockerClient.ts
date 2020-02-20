@@ -2,6 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import { localize } from "../../localize";
 import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { spawnAsync } from "../../utils/spawnAsync";
 import { ProcessProvider } from "./ChildProcessProvider";
@@ -139,7 +140,7 @@ export class CliDockerClient implements DockerClient {
         lineSplitter.close();
 
         if (!imageId) {
-            throw new Error('The Docker image was built successfully but the image ID could not be retrieved.');
+            throw new Error(localize('vscode-docker.debug.coreclr.noImageId', 'The Docker image was built successfully but the image ID could not be retrieved.'));
         }
 
         return imageId;
@@ -194,7 +195,7 @@ export class CliDockerClient implements DockerClient {
         const validateArgument =
             id => {
                 if (id === undefined || id1.length < 12) {
-                    throw new Error(`'${id}' must be defined and at least 12 characters.`)
+                    throw new Error(localize('vscode-docker.debug.coreclr.idNotMatched', '\'{0}\' must be defined and at least 12 characters.', id as string))
                 }
             };
 
@@ -244,7 +245,7 @@ export class CliDockerClient implements DockerClient {
         const containerId = result.stdout.trim();
 
         if (!containerId) {
-            throw new Error('The Docker container was run successfully but the container ID could not be retrieved.')
+            throw new Error(localize('vscode-docker.debug.coreclr.noContainer', 'The Docker container was run successfully but the container ID could not be retrieved.'))
         }
 
         return containerId;
@@ -252,13 +253,13 @@ export class CliDockerClient implements DockerClient {
 
     public trimId(id: string): string {
         if (!id) {
-            throw new Error('The ID to be trimmed must be non-empty.');
+            throw new Error(localize('vscode-docker.debug.coreclr.idEmpty', 'The ID to be trimmed must be non-empty.'));
         }
 
         const trimmedId = id.trim();
 
         if (trimmedId.length < 12) {
-            throw new Error('The ID to be trimmed must be at least 12 characters.');
+            throw new Error(localize('vscode-docker.debug.coreclr.idShort', 'The ID to be trimmed must be at least 12 characters.'));
         }
 
         return id.substring(0, 12);

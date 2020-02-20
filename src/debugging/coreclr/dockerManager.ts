@@ -5,6 +5,8 @@
 import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
+import { localize } from '../../localize';
 import { Lazy } from '../../utils/lazy';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
@@ -162,10 +164,10 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const imageId = await this.dockerOutputManager.performOperation(
-            'Building Docker image...',
+            localize('vscode-docker.debug.coreclr.buildingImage', 'Building Docker image...'),
             async outputManager => await this.dockerClient.buildImage(options, content => outputManager.append(content)),
-            id => `Docker image ${this.dockerClient.trimId(id)} built.`,
-            err => `Failed to build Docker image: ${err}`);
+            id => localize('vscode-docker.debug.coreclr.imageBuilt', 'Docker image {0} built.', this.dockerClient.trimId(id)),
+            err => localize('vscode-docker.debug.coreclr.buildError', 'Failed to build Docker image: {0}', parseError(err).message));
 
         const dockerfileHash = await dockerfileHasher.value;
         const dockerIgnoreHash = await dockerIgnoreHasher.value;

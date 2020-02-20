@@ -3,6 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { localize } from '../../localize';
 import { DockerManager } from './dockerManager';
 
 export interface DebugSessionManager {
@@ -28,7 +29,7 @@ export class DockerDebugSessionManager implements DebugSessionManager, vscode.Di
                 () => {
                     this.dockerManager
                         .cleanupAfterLaunch()
-                        .catch(reason => console.log(`Unable to clean up Docker images after launch: ${reason}`));
+                        .catch(reason => console.log(localize('vscode-docker.debug.coreclr.cleanupFailed', 'Unable to clean up Docker images after launch: {0}', reason as string)));
 
                     this.stopListening();
                 });
