@@ -33,6 +33,7 @@ export interface IDockerDebugScaffoldingProvider {
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
     public async initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
+            context,
             /* eslint-disable @typescript-eslint/promise-function-async */
             () => netCoreDebugHelper.provideDebugConfigurations(context, options),
             () => netCoreTaskHelper.provideDockerBuildTasks(context, options),
@@ -42,6 +43,7 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
 
     public async initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void> {
         await this.initializeForDebugging(
+            context,
             /* eslint-disable @typescript-eslint/promise-function-async */
             () => nodeDebugHelper.provideDebugConfigurations(context),
             () => nodeTaskHelper.provideDockerBuildTasks(context),
@@ -51,15 +53,17 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
 
     public async initializePythonForDebugging(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
+            context,
             /* eslint-disable @typescript-eslint/promise-function-async */
             () => pythonDebugHelper.provideDebugConfigurations(context, options),
             () => pythonTaskHelper.provideDockerBuildTasks(context),
             () => pythonTaskHelper.provideDockerRunTasks(context, options)
-        /* eslint-enable @typescript-eslint/promise-function-async */
+            /* eslint-enable @typescript-eslint/promise-function-async */
         );
     }
 
     private async initializeForDebugging(
+        context: DockerDebugScaffoldContext,
         provideDebugConfigurations: () => Promise<DockerDebugConfiguration[]>,
         provideDockerBuildTasks: () => Promise<DockerBuildTaskDefinition[]>,
         provideDockerRunTasks: () => Promise<DockerRunTaskDefinition[]>): Promise<void> {
@@ -71,21 +75,21 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
 
         for (const buildTask of buildTasks) {
             /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(buildTask, _overwrite), overwrite);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite?: boolean) => addTask(buildTask, context.folder, _overwrite), overwrite);
         }
 
         for (const runTask of runTasks) {
             /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(runTask, _overwrite), overwrite);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite?: boolean) => addTask(runTask, context.folder, _overwrite), overwrite);
         }
 
         for (const debugConfiguration of debugConfigurations) {
             /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addDebugConfiguration(debugConfiguration, _overwrite), overwrite);
+            overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite?: boolean) => addDebugConfiguration(debugConfiguration, context.folder, _overwrite), overwrite);
         }
     }
 
-    private static async addObjectWithOverwritePrompt(addMethod: (_overwrite: boolean | undefined) => Promise<boolean>, overwrite: boolean | undefined): Promise<boolean | undefined> {
+    private static async addObjectWithOverwritePrompt(addMethod: (_overwrite?: boolean) => Promise<boolean>, overwrite?: boolean): Promise<boolean | undefined> {
         const added = await addMethod(overwrite);
 
         if (!added && overwrite === undefined) {
