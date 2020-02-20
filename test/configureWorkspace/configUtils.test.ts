@@ -6,7 +6,7 @@
 import { splitPorts } from "../../extension.bundle";
 import * as assert from 'assert';
 
-suite('configureWorkspace/configUtils', () => {
+suite('(unit) configureWorkspace/configUtils', () => {
     suite('splitPorts', () => {
         function genTest(s: string, expected: number[]): void {
             test(`${String(s)}`, () => {

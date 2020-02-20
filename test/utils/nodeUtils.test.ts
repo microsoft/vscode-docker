@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../extension.bundle";
 
- suite('utils/nodeUtils', () => {
+ suite('(unit) utils/nodeUtils', () => {
     suite('inferPackageName', () => {
         test('No package', async () => {
             const packageName = await inferPackageName(undefined, '/Users/user/app/package.json');

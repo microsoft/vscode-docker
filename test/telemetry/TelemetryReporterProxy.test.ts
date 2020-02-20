@@ -9,7 +9,7 @@ import { TelemetryReporterProxy } from '../../extension.bundle';
 import { ITelemetryReporter } from 'vscode-azureextensionui';
 import { ITelemetryPublisher } from '../../extension.bundle';
 
-suite('telemetry/TelemetryReporterProxy', () => {
+suite('(unit) telemetry/TelemetryReporterProxy', () => {
     test('Events sent to both reporter and publisher', () => {
         const eventName = 'event';
         const measurements = {};

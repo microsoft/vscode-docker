@@ -8,7 +8,7 @@ import { recursiveFindTaskByType } from '../../extension.bundle';
 import { TaskDefinitionBase } from '../../extension.bundle';
 import { DebugConfigurationBase } from '../../extension.bundle';
 
-suite('tasks/TaskHelper/recursiveFindTaskByType', async () => {
+suite('(unit) tasks/TaskHelper/recursiveFindTaskByType', async () => {
 
     const simple: TaskDefinitionBase[] = [
         {

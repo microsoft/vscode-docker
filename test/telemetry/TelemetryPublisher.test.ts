@@ -7,7 +7,7 @@ import * as assert from 'assert';
 
 import { TelemetryPublisher } from '../../extension.bundle';
 
-suite('telemetry/TelemetryPublisher', () => {
+suite('(unit) telemetry/TelemetryPublisher', () => {
     test('Listeners are notified of published events', () => {
         const eventName = 'event';
         const measurements = {};
