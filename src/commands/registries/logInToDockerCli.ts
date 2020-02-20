@@ -7,6 +7,7 @@ import { exec } from 'child_process';
 import { IActionContext } from 'vscode-azureextensionui';
 import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
+import { localize } from "../../localize";
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 
@@ -28,7 +29,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
     }
 
     if (!username || !password) {
-        ext.outputChannel.appendLine(`WARNING: Skipping login for "${creds.registryPath}" because it does not require authentication.`)
+        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.logIn.skipping', 'WARNING: Skipping login for "{0}" because it does not require authentication.', creds.registryPath))
     } else {
         await new Promise((resolve, reject) => {
             const dockerLoginCmd = `docker login ${creds.registryPath} --username ${username} --password-stdin`;
@@ -39,7 +40,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                 if (err && err.message.match(/error storing credentials.*The stub received bad data/)) {
                     // Temporary work-around for this error- same as Azure CLI
                     // See https://github.com/Azure/azure-cli/issues/4843
-                    reject(new Error(`In order to log in to the Docker CLI using tokens, you currently need to go to \nOpen your Docker config file and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.`));
+                    reject(new Error(localize('vscode-docker.commands.registries.logIn.dockerCliTokens', 'In order to log in to the Docker CLI using tokens, you currently need to go to \nOpen your Docker config file and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.')));
                 } else if (err) {
                     reject(err);
                 } else {
