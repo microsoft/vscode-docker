@@ -3,11 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerOptions } from 'dockerode';
 import Dockerode = require('dockerode');
+import { DockerOptions } from 'dockerode';
+import { Socket } from 'net';
+import { CancellationTokenSource } from 'vscode';
 import { ext } from '../extensionVariables';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
+import { delay } from './delay';
 import { isWindows } from './osUtils';
 import { execAsync } from './spawnAsync';
 
@@ -56,11 +59,15 @@ async function getDockerodeOptions(newEnv: NodeJS.ProcessEnv): Promise<DockerOpt
 
     try {
         if (newEnv.DOCKER_HOST &&
-            SSH_URL_REGEX.test(newEnv.DOCKER_HOST) &&
-            !newEnv.SSH_AUTH_SOCK) {
-            // If DOCKER_HOST is an SSH URL, we need to configure SSH_AUTH_SOCK for Dockerode
+            SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
+            // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
             // Other than that, we use default settings, so return undefined
-            newEnv.SSH_AUTH_SOCK = await getSshAuthSock();
+            if (!await validateSshAuthSock(newEnv)) {
+                // Don't wait
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.', { learnMoreLink: 'https://aka.ms/AA7assy' });
+            }
+
             return undefined;
         } else if (!newEnv.DOCKER_HOST) {
             // If DOCKER_HOST is unset, try to get default Docker context--this helps support WSL
@@ -72,14 +79,39 @@ async function getDockerodeOptions(newEnv: NodeJS.ProcessEnv): Promise<DockerOpt
     return undefined;
 }
 
-async function getSshAuthSock(): Promise<string | undefined> {
-    if (isWindows()) {
-        return '\\\\.\\pipe\\openssh-ssh-agent';
-    } else {
+async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> {
+    if (!newEnv.SSH_AUTH_SOCK && isWindows()) {
+        // On Windows, we can use this one by default
+        newEnv.SSH_AUTH_SOCK = '\\\\.\\pipe\\openssh-ssh-agent';
+    } else if (!newEnv.SSH_AUTH_SOCK) {
         // On Mac and Linux, if SSH_AUTH_SOCK isn't set there's nothing we can do
         // Running ssh-agent would yield a new agent that doesn't have the needed keys
-        await ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST on OS X and Linux, you must configure an ssh-agent.');
+        return false;
     }
+
+    const authSock = new Socket();
+    const cts = new CancellationTokenSource();
+
+    const connectPromise = new Promise<boolean>(resolve => {
+        authSock.on('error', (err) => {
+            cts.cancel();
+            resolve(false);
+        });
+
+        authSock.on('connect', () => {
+            cts.cancel();
+            resolve(true);
+        });
+
+        authSock.connect(newEnv.SSH_AUTH_SOCK);
+    });
+
+    // Unfortunately Socket.setTimeout() does not actually work when attempting to establish a connection, so we need to race
+    return await Promise.race([connectPromise, delay(1000, cts.token).then(() => false)])
+        .finally(() => {
+            authSock.end();
+            cts.dispose();
+        });
 }
 
 async function getDefaultDockerContext(): Promise<DockerOptions | undefined> {

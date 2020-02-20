@@ -4,29 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
-export async function removeImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
-    let nodes: ImageTreeItem[] = [];
-    if (node) {
-        nodes = [node];
-    } else {
-        nodes = await ext.imagesTree.showTreeItemPicker(ImageTreeItem.contextValue, {
-            ...context,
-            canPickMany: true,
-            suppressCreatePick: true,
-            noItemFoundErrorMessage: 'No images are available to remove'
-        });
-    }
+export async function removeImage(context: IActionContext, node?: ImageTreeItem, nodes?: ImageTreeItem[]): Promise<void> {
+    nodes = await multiSelectNodes(
+        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: 'No images are available to remove' },
+        ext.imagesTree,
+        new RegExp(ImageTreeItem.contextValue, 'i'),
+        node,
+        nodes
+    );
 
     let confirmRemove: string;
-    if (nodes.length === 0) {
-        throw new UserCancelledError();
-    } else if (nodes.length === 1) {
-        node = nodes[0];
-        confirmRemove = `Are you sure you want to remove image "${node.label}"? This will remove all matching and child images.`;
+    if (nodes.length === 1) {
+        confirmRemove = `Are you sure you want to remove image "${nodes[0].label}"? This will remove all matching and child images.`;
     } else {
         confirmRemove = "Are you sure you want to remove selected images? This will remove all matching and child images.";
     }

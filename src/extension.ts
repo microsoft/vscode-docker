@@ -24,6 +24,9 @@ import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProv
 import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
+import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
+import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
+import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
@@ -57,7 +60,13 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
-    ext.reporter = createTelemetryReporter(ctx);
+
+    const publisher = new TelemetryPublisher();
+    ctx.subscriptions.push(publisher);
+
+    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
+
+    ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
