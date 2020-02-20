@@ -177,7 +177,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     }
 
     const dockerFileContents = genDockerFile(serviceName, launchFile, projectType, ports);
-    const dockerIgnoreContents = `**/__pycache__\n${genCommonDockerIgnoreFile(context.platform)}`;
+    const dockerIgnoreContents = '**/__pycache__\n'.concat(genCommonDockerIgnoreFile(context.platform));
 
     const files: ScaffoldFile[] = [
         { fileName: 'Dockerfile', contents: dockerFileContents, open: true },
