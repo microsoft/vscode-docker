@@ -221,7 +221,7 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
             // tslint:disable-next-line:no-unsafe-any
             xml2js.parseString(pomString, options, (error, result: PomXmlContents): void => {
                 if (error) {
-                    reject(localize('vscode-docker.commands.configure.pomError', 'Failed to parse pom.xml: {0}', parseError(error).message));
+                    reject(localize('vscode-docker.configure.pomError', 'Failed to parse pom.xml: {0}', parseError(error).message));
                     return;
                 }
                 resolve(result);
