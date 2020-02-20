@@ -6,7 +6,7 @@
 import { trimWithElipsis } from "../extension.bundle";
 import * as assert from 'assert';
 
-suite('trimWithElipsis', () => {
+suite('(unit) trimWithElipsis', () => {
     function genTest(s: string, max: number, expected: string): void {
         test(`${String(s)}: ${max}`, () => {
             let s2 = trimWithElipsis(s, max);

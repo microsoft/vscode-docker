@@ -5,7 +5,7 @@
 import * as assert from 'assert';
 import { LineSplitter } from '../../../extension.bundle';
 
-suite('debugging/coreclr/LineSplitter', () => {
+suite('(unit) debugging/coreclr/LineSplitter', () => {
     const testCase = (name: string, input: string | string[], output: string[]) => {
         test(name, () => {
             const splitter = new LineSplitter();

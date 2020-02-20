@@ -25,7 +25,7 @@ interface TestOptions {
     postActivationTelemetry?: TelemetryEventData[];
 }
 
-suite('telemetry/surveys/activeUseSurvey', () => {
+suite('(unit) telemetry/surveys/activeUseSurvey', () => {
     const lastUseDateKey = 'telemetry.surveys.activeUseSurvey.lastUseDate';
     const isCandidateKey = 'telemetry.surveys.activeUseSurvey.isCandidate';
 
