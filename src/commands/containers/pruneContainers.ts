@@ -13,7 +13,7 @@ import { convertToMB } from '../../utils/convertToMB';
 export async function pruneContainers(context: IActionContext): Promise<void> {
     const confirmPrune: string = localize('vscode-docker.commands.containers.prune.confirm', 'Are you sure you want to remove all stopped containers?');
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
+    await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.containers.prune.remove', 'Remove') });
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneContainers(), context);
