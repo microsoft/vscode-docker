@@ -7,20 +7,21 @@ import { Container } from 'dockerode';
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function startContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: 'No containers are available to start' },
+        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.start.noContainers', 'No containers are available to start') },
         ext.containersTree,
         /^(created|dead|exited|paused)Container$/i,
         node,
         nodes
     );
 
-    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Starting Container(s)..." }, async () => {
+    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.start.starting', 'Starting Container(s)...') }, async () => {
         await Promise.all(nodes.map(async n => {
             const container: Container = n.getContainer();
             // eslint-disable-next-line @typescript-eslint/promise-function-async

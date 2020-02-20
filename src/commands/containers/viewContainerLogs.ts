@@ -5,13 +5,14 @@
 
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No continers are available to view logs'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.viewLogs.noContainers', 'No continers are available to view logs')
         });
     }
 
