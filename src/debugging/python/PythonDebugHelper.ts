@@ -6,6 +6,7 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as vscode from "vscode";
+import { localize } from '../../localize';
 import { PythonExtensionHelper } from "../../tasks/python/PythonExtensionHelper";
 import { PythonDefaultDebugPort, PythonProjectType } from '../../utils/pythonUtils';
 import ChildProcessProvider from "../coreclr/ChildProcessProvider";
@@ -40,23 +41,23 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
-        const configs : DockerDebugConfiguration[] =
-        [{
-            name: 'Docker Python Launch',
-            type: 'docker',
-            request: 'launch',
-            preLaunchTask: 'docker-run: debug',
-            python: {
-                pathMappings: [
-                    {
-                        /* eslint-disable-next-line no-template-curly-in-string */
-                        localRoot: '${workspaceFolder}',
-                        remoteRoot: '/app'
-                    }
-                ],
-                projectType: options.projectType
-            }
-        }];
+        const configs: DockerDebugConfiguration[] =
+            [{
+                name: 'Docker Python Launch',
+                type: 'docker',
+                request: 'launch',
+                preLaunchTask: 'docker-run: debug',
+                python: {
+                    pathMappings: [
+                        {
+                            /* eslint-disable-next-line no-template-curly-in-string */
+                            localRoot: '${workspaceFolder}',
+                            remoteRoot: '/app'
+                        }
+                    ],
+                    projectType: options.projectType
+                }
+            }];
 
         // If we generated compose files, then we should generate a Python attach configuration.
         if (context.generateComposeTask) {
@@ -87,7 +88,7 @@ export class PythonDebugHelper implements DebugHelper {
         // the debug configuration.
         try {
             await this.cliDockerClient.removeContainer(containerName, { force: true });
-        } catch {}
+        } catch { }
 
         const debuggerLogFilePath = PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
         await fse.remove(debuggerLogFilePath);
@@ -102,7 +103,7 @@ export class PythonDebugHelper implements DebugHelper {
             const task = await this.tryGetPreLaunchTask(debugConfiguration.preLaunchTask);
 
             if (!task) {
-                throw new Error(`Unable to find the prelaunch task with the name: ${debugConfiguration.preLaunchTask}`);
+                throw new Error(localize('vscode-docker.debug.python.noPreLaunch', 'Unable to find the prelaunch task with the name: {0}', debugConfiguration.preLaunchTask));
             }
 
             debugConfiguration.preLaunchTask = undefined;
@@ -121,14 +122,14 @@ export class PythonDebugHelper implements DebugHelper {
         const projectType = debugConfiguration.python.projectType;
 
         const dockerServerReadyAction =
-      resolveDockerServerReadyAction(
-          debugConfiguration,
-          {
-              containerName: containerName,
-              pattern: this.getServerReadyPattern(projectType),
-              uriFormat: '%s://localhost:%s'
-          },
-          true);
+            resolveDockerServerReadyAction(
+                debugConfiguration,
+                {
+                    containerName: containerName,
+                    pattern: this.getServerReadyPattern(projectType),
+                    uriFormat: '%s://localhost:%s'
+                },
+                true);
 
         // These properties are required by the old debugger, should be changed to normal properties in the configuration
         // as soon as the new debugger is released to 100% of the users.
@@ -158,7 +159,7 @@ export class PythonDebugHelper implements DebugHelper {
         };
     }
 
-    private async tryGetPreLaunchTask(prelaunchTaskName: string) : Promise<vscode.Task> | undefined {
+    private async tryGetPreLaunchTask(prelaunchTaskName: string): Promise<vscode.Task> | undefined {
         if (!prelaunchTaskName) {
             return undefined;
         }
@@ -176,7 +177,7 @@ export class PythonDebugHelper implements DebugHelper {
         return undefined;
     }
 
-    private getServerReadyPattern(projectType: PythonProjectType) : string | undefined {
+    private getServerReadyPattern(projectType: PythonProjectType): string | undefined {
         switch (projectType) {
             case 'django':
                 return 'Starting development server at (https?://\\S+|[0-9]+)';
