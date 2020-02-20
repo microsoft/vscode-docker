@@ -5,6 +5,7 @@
 
 import { MessageItem, window } from 'vscode';
 import { DialogResponses } from 'vscode-azureextensionui';
+import { localize } from '../localize';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
@@ -55,7 +56,7 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
             () => pythonDebugHelper.provideDebugConfigurations(context, options),
             () => pythonTaskHelper.provideDockerBuildTasks(context),
             () => pythonTaskHelper.provideDockerRunTasks(context, options)
-        /* eslint-enable @typescript-eslint/promise-function-async */
+            /* eslint-enable @typescript-eslint/promise-function-async */
         );
     }
 
@@ -94,7 +95,7 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
                 title: 'Overwrite'
             };
 
-            overwrite = (overwriteMessageItem === await window.showErrorMessage("Docker launch configurations and/or tasks already exist. Do you want to overwrite them?", ...[overwriteMessageItem, DialogResponses.no]));
+            overwrite = (overwriteMessageItem === await window.showErrorMessage(localize('vscode-docker.debug.scaffoldProvider.confirm', 'Docker launch configurations and/or tasks already exist. Do you want to overwrite them?'), ...[overwriteMessageItem, DialogResponses.no]));
 
             if (overwrite) {
                 // Try again if needed
