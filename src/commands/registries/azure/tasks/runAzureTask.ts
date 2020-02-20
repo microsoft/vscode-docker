@@ -7,6 +7,7 @@ import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-contai
 import { window } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
+import { localize } from "../../../../localize";
 import { AzureTaskTreeItem } from "../../../../tree/registries/azure/AzureTaskTreeItem";
 
 export async function runAzureTask(context: IActionContext, node?: AzureTaskTreeItem): Promise<void> {
@@ -20,5 +21,5 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     await node.parent.refresh();
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(`Successfully scheduled run "${run.runId}" for task "${node.taskName}".`);
+    window.showInformationMessage(localize('vscode-docker.commands.registries.azure.tasks.runTaskScheduled', 'Successfully scheduled run "{0}" for task "{1}".', run.runId, node.taskName));
 }
