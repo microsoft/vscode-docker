@@ -9,8 +9,8 @@ import { RegistryConnectErrorTreeItem } from "../../tree/registries/RegistryConn
 
 export async function reconnectRegistry(context: IActionContext, node?: RegistryConnectErrorTreeItem): Promise<void> {
     if (!node?.cachedProvider || !node?.provider) {
-        // TODO: error?
-        return;
+        // This is not expected ever, so we'll throw an error which can be bubbled up to a Report Issue if it does
+        throw new Error('Unable to determine provider to re-enter credentials. Please disconnect and connect again.');
     }
 
     await ext.registriesRoot.disconnectRegistry(context, node.cachedProvider);
