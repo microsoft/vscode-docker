@@ -1282,11 +1282,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1306,11 +1306,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1330,11 +1330,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1354,11 +1354,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1378,11 +1378,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1402,11 +1402,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
@@ -1426,11 +1426,11 @@
                         "properties": {
                             "template": {
                                 "type": "string",
-                                "description": "The command template"
+                                "description": "The command template."
                             },
                             "label": {
                                 "type": "string",
-                                "description": "The label displayed to the user"
+                                "description": "The label displayed to the user."
                             },
                             "match": {
                                 "type": "string",
