@@ -4,14 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { window, WorkspaceFolder } from 'vscode';
+import { window, workspace, WorkspaceFolder } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 
-export function resolveVariables<T>(target: T, folder: WorkspaceFolder): T {
+const variableMatcher: RegExp = /\$\{[a-z\.\-_:]+\}/ig;
+const configVariableMatcher: RegExp = /\$\{config:([a-z\.\-_]+)\}/i;
+
+export function resolveVariables<T>(target: T, folder?: WorkspaceFolder): T {
     if (!target) {
         return target;
     } else if (typeof (target) === 'string') {
-        return target.replace(/\$\{[a-z]+\}/ig, (match: string) => {
+        return target.replace(variableMatcher, (match: string) => {
             return resolveSingleVariable(match, folder);
         }) as unknown as T;
     } else if (typeof (target) === 'number') {
@@ -29,19 +32,43 @@ export function resolveVariables<T>(target: T, folder: WorkspaceFolder): T {
     }
 }
 
-function resolveSingleVariable(variable: string, folder: WorkspaceFolder): string {
+function resolveSingleVariable(variable: string, folder?: WorkspaceFolder): string {
     /* eslint-disable no-template-curly-in-string */
+
+    // Replace workspace folder variables
+    if (folder) {
+        switch (variable) {
+            case '${workspaceFolder}':
+            case '${workspaceRoot}':
+                return path.normalize(folder.uri.fsPath);
+            case '${relativeFile}':
+                return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
+            default:
+        }
+    }
+
+    // Replace config variables
+    const configMatch = configVariableMatcher.exec(variable);
+    if (configMatch && configMatch.length > 1) {
+        const configName: string = configMatch[1]; // Index 1 is the "something.something" group of "${config:something.something}"
+        const config = workspace.getConfiguration();
+        const configValue = config.get(configName);
+
+        // If it's a string value we'll return it
+        if (typeof (configValue) === 'string') {
+            return configValue;
+        }
+    }
+
+    // Replace other variables
     switch (variable) {
-        case '${workspaceFolder}':
-        case '${workspaceRoot}':
-            return path.normalize(folder.uri.fsPath);
         case '${file}':
             return getActiveFilePath();
-        case '${relativeFile}':
-            return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
         default:
-            return variable; // Return as-is, we don't know what to do with it
     }
+
+    return variable; // Return as-is, we don't know what to do with it
+
     /* eslint-enable no-template-curly-in-string */
 }
 

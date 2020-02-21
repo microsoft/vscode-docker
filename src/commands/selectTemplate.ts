@@ -38,7 +38,7 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
 
     // Get the templates from settings
     const config = vscode.workspace.getConfiguration('docker');
-    let templates: CommandTemplate[] = config[commandSetting] as CommandTemplate[] ?? [];
+    let templates: CommandTemplate[] = config.get(commandSetting) ?? [];
 
     // Make sure all templates have some sort of label
     templates.forEach(template => {
@@ -68,6 +68,8 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
         }
     });
 
+    // TODO: Should we also define the default settings in this file, and fall back to it if needed, thus ensuring that there will always be at least one match?
+    // Note: I don't think it's possible to use VSCode APIs to look up the default setting, so it would have to be defined both here and package.json
     if (templates.length === 0) {
         // No templates matched or user went and deleted everything, this is not a bug so don't show report issue button
         context.errorHandling.suppressReportIssue = true;
@@ -105,7 +107,6 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
 }
 
 function replaceVariables(template: string, variables?: { [key: string]: string }, folder?: vscode.WorkspaceFolder): string {
-
     // Replace caller-supplied variables
     if (variables) {
         Object.keys(variables).forEach(key => {
@@ -113,7 +114,7 @@ function replaceVariables(template: string, variables?: { [key: string]: string 
         });
     }
 
-    // Replace workspace folder variables
+    // Replace other variables
     if (folder) {
         template = resolveVariables(template, folder);
     }
