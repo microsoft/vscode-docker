@@ -9,6 +9,7 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
+import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
 import { getRegistryPassword } from "../registryPasswords";
 import { IDockerCliCredentials } from "../RegistryTreeItemBase";
@@ -48,8 +49,8 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
             } catch (error) {
                 const errorType: string = parseError(error).errorType.toLowerCase();
                 if (errorType === "401" || errorType === "unauthorized") {
-                    const message = 'OAuth support has not yet been implemented in this preview feature. This registry does not appear to support basic authentication.';
-                    throw new Error(message);
+                    const message = 'Incorrect login credentials, or this registry may not support basic authentication. Please note that OAuth support has not yet been implemented in this preview feature.';
+                    return [new RegistryConnectErrorTreeItem(this, new Error(message), this.cachedProvider, this.baseUrl)];
                 } else {
                     throw error;
                 }

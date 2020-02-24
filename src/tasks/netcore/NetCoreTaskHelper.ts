@@ -17,7 +17,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
 import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
@@ -229,7 +229,7 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         if (runOptions.volumes) {
             for (const volume of runOptions.volumes) {
-                NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, volume);
+                addVolumeWithoutConflicts(volumes, volume);
             }
         }
 
@@ -275,11 +275,11 @@ export class NetCoreTaskHelper implements TaskHelper {
                 permissions: 'ro'
             };
 
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, appVolume);
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, srcVolume);
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, debuggerVolume);
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetVolume);
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
+            addVolumeWithoutConflicts(volumes, appVolume);
+            addVolumeWithoutConflicts(volumes, srcVolume);
+            addVolumeWithoutConflicts(volumes, debuggerVolume);
+            addVolumeWithoutConflicts(volumes, nugetVolume);
+            addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
         }
 
         if (userSecrets || ssl) {
@@ -292,7 +292,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 permissions: 'ro'
             };
 
-            NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, userSecretsVolume);
+            addVolumeWithoutConflicts(volumes, userSecretsVolume);
 
             if (ssl) {
                 const certVolume: DockerContainerVolume = {
@@ -301,22 +301,12 @@ export class NetCoreTaskHelper implements TaskHelper {
                     permissions: 'ro'
                 };
 
-                NetCoreTaskHelper.addVolumeWithoutConflicts(volumes, certVolume);
+                addVolumeWithoutConflicts(volumes, certVolume);
             }
         }
 
         return volumes;
     }
-
-    private static addVolumeWithoutConflicts(volumes: DockerContainerVolume[], volume: DockerContainerVolume): boolean {
-        if (volumes.find(v => v.containerPath === volume.containerPath)) {
-            return false;
-        }
-
-        volumes.push(volume);
-        return true;
-    }
-
 }
 
 export const netCoreTaskHelper = new NetCoreTaskHelper();

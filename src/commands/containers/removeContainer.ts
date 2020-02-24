@@ -4,28 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
-export async function removeContainer(context: IActionContext, node: ContainerTreeItem | undefined): Promise<void> {
-    let nodes: ContainerTreeItem[] = [];
-    if (node) {
-        nodes = [node];
-    } else {
-        nodes = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.allContextRegExp, {
-            ...context,
-            canPickMany: true,
-            noItemFoundErrorMessage: 'No containers are available to remove'
-        });
-    }
+export async function removeContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
+    nodes = await multiSelectNodes(
+        { ...context, noItemFoundErrorMessage: 'No containers are available to remove' },
+        ext.containersTree,
+        ContainerTreeItem.allContextRegExp,
+        node,
+        nodes
+    );
 
     let confirmRemove: string;
-    if (nodes.length === 0) {
-        throw new UserCancelledError();
-    } else if (nodes.length === 1) {
-        node = nodes[0];
-        confirmRemove = `Are you sure you want to remove container "${node.label}"?`;
+    if (nodes.length === 1) {
+        confirmRemove = `Are you sure you want to remove container "${nodes[0].label}"?`;
     } else {
         confirmRemove = "Are you sure you want to remove selected containers?";
     }

@@ -6,7 +6,7 @@
 import { unorderedArraysEqual, notUnorderedArraysEqual, throwsOrRejectsAsync } from "./assertEx";
 import * as assert from "assert";
 
-suite("assertEx", () => {
+suite("(unit) assertEx", () => {
     test("areUnorderedArraysEqual", () => {
         unorderedArraysEqual([], []);
         notUnorderedArraysEqual([], [1]);
