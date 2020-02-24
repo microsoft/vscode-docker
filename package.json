@@ -694,10 +694,10 @@
                         }
                     },
                     {
-                        "label": "Docker: .NET Core Attach",
+                        "label": "Docker: .NET Core Attach (Preview)",
                         "description": "Docker: Attach to a .NET Core process in a container",
                         "body": {
-                            "name": "Docker .NET Core Attach",
+                            "name": "Docker .NET Core Attach (Preview)",
                             "type": "docker",
                             "request": "attach",
                             "platform": "netCore",

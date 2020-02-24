@@ -279,7 +279,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async installDebuggerInContainer(containerName: string): Promise<string> {
         const yesItem: MessageItem = DialogResponses.yes;
-        const install = (yesItem === await window.showInformationMessage('Attaching to container requiers .NET Core debugger in the container. Do you want to install debugger in the container?', ...[DialogResponses.yes, DialogResponses.no]));
+        const install = (yesItem === await window.showInformationMessage('Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?', ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
             throw new UserCancelledError("User didn't grand permission to install .NET Core debugger.");
         }
