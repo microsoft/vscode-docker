@@ -1340,7 +1340,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 CMD /usr/games/fortune -a | cowsay
                 `));
             assert.strictEqual(composeContents, removeIndentation(`
-                version: '2.1'
+                version: '3.4'
 
                 services:
                   testoutput:
@@ -1349,7 +1349,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ports:
                       - 3000`));
             assert.strictEqual(debugComposeContents, removeIndentation(`
-                version: '2.1'
+                version: '3.4'
 
                 services:
                   testoutput:
