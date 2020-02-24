@@ -1302,7 +1302,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker build -todo",
+                    "default": "docker build --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
                     "description": "Command template(s) for `docker build` commands."
                 },
                 "docker.commands.run": {
@@ -1333,7 +1333,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run -todo",
+                    "default": "docker run --rm -d ${exposedPorts} ${tag}",
                     "description": "Command templates for `docker run` commands."
                 },
                 "docker.commands.runInteractive": {
@@ -1364,7 +1364,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run -todo -interactive",
+                    "default": "docker run --rm -it ${exposedPorts} ${tag}",
                     "description": "Command templates for `docker run -it` (interactive) commands."
                 },
                 "docker.commands.attach": {
@@ -1395,7 +1395,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker attach -todo",
+                    "default": "docker exec -it ${containerId} ${shellCommand}",
                     "description": "Command templates for `docker attach` / `docker exec -it` commands."
                 },
                 "docker.commands.logs": {
@@ -1426,7 +1426,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker logs -todo",
+                    "default": "docker logs -f ${containerId}",
                     "description": "Command templates for `docker logs` commands."
                 },
                 "docker.commands.composeUp": {
@@ -1457,7 +1457,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose up -todo",
+                    "default": "docker-compose up ${configurationFileSpecified} ${configurationFile} ${detached} ${build}",
                     "description": "Command templates for `docker-compose up` commands."
                 },
                 "docker.commands.composeDown": {
@@ -1488,7 +1488,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose down -todo",
+                    "default": "docker-compose down ${configurationFileSpecified} ${configurationFile}",
                     "description": "Command templates for `docker-compose down` commands."
                 },
                 "docker.containers.groupBy": {
