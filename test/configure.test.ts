@@ -1217,7 +1217,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                ['No', '8000', 'manage.py'],
+                ['No', 'manage.py', '8000'],
                 ['Dockerfile', '.dockerignore', 'requirements.txt']
             );
 
@@ -1241,7 +1241,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                ['No', '5000', 'flask_app.py'],
+                ['No', 'flask_app.py', '5000'],
                 ['Dockerfile', '.dockerignore', 'requirements.txt']
             );
 
