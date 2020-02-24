@@ -6,6 +6,7 @@
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { selectTemplate } from '../selectTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     return await runImageCore(context, node, false);
@@ -19,21 +20,28 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: 'No images are availalbe to run'
+            noItemFoundErrorMessage: 'No images are available to run'
         });
     }
 
     const inspectInfo = await node.getImage().inspect();
-    const ports: string[] = inspectInfo.Config.ExposedPorts ? Object.keys(inspectInfo.Config.ExposedPorts) : [];
+    let portsString: string | undefined;
 
-    let options = `--rm ${interactive ? '-it' : '-d'}`;
-    if (ports.length) {
-        const portMappings = ports.map((port) => `-p ${port.split("/")[0]}:${port}`); // 'port' is of the form number/protocol, eg. 8080/udp.
-        // In the command, the host port has just the number (mentioned in the EXPOSE step), while the destination port can specify the protocol too
-        options += ` ${portMappings.join(' ')}`;
+    if (inspectInfo?.Config?.ExposedPorts) {
+        portsString = Object.keys(inspectInfo.Config.ExposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
+            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
+        });
     }
 
+    const terminalCommand = await selectTemplate(
+        context,
+        interactive ? 'runInteractive' : 'run',
+        `${node.fullTag}`,
+        undefined,
+        { 'exposedPorts': portsString, 'tag': node.fullTag }
+    );
+
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);
-    terminal.sendText(`docker run ${options} ${node.fullTag}`);
+    terminal.sendText(terminalCommand);
     terminal.show();
 }

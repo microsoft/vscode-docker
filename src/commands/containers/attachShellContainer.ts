@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getDockerOSType } from '../../utils/osUtils';
+import { selectTemplate } from '../selectTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -29,7 +30,15 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     }
     context.telemetry.properties.shellCommand = shellCommand;
 
+    const terminalCommand = await selectTemplate(
+        context,
+        'attach',
+        `${node.containerName} ${node.description} ${node.fullTag}`, // TODO
+        undefined,
+        { 'shellCommand': shellCommand, 'containerId': node.containerId }
+    );
+
     const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.containerName}`);
-    terminal.sendText(`docker exec -it ${node.containerId} ${shellCommand}`);
+    terminal.sendText(terminalCommand);
     terminal.show();
 }

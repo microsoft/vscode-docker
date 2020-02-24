@@ -6,6 +6,7 @@
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { selectTemplate } from '../selectTemplate';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -15,7 +16,15 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         });
     }
 
+    const terminalCommand = await selectTemplate(
+        context,
+        'attach',
+        `${node.containerName} ${node.description} ${node.fullTag}`, // TODO
+        undefined,
+        { 'containerId': node.containerId }
+    );
+
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);
-    terminal.sendText(`docker logs -f ${node.containerId}`);
+    terminal.sendText(terminalCommand);
     terminal.show();
 }
