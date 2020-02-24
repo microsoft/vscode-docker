@@ -79,6 +79,9 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
         selectedTemplate = await quickPickTemplate(context, templates);
     }
 
+    context.telemetry.properties.isDefaultCommand = selectedTemplate.template === defaults[command].template ? 'true' : 'false';
+    context.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
+
     return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }
 
