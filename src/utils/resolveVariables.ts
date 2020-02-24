@@ -47,13 +47,11 @@ function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, addit
         }
     }
 
-    const variableNameOnly = variable.replace(/[\$\{\}]/ig, '');
-
     // Replace additional variables
-    if (additionalVariables?.[variable]) {
-        return additionalVariables[variable];
-    } else if (additionalVariables?.[variableNameOnly]) {
-        return additionalVariables[variableNameOnly];
+    const variableNameOnly = variable.replace(/[\$\{\}]/ig, '');
+    const replacement = additionalVariables?.[variable] ?? additionalVariables?.[variableNameOnly];
+    if (replacement !== undefined) {
+        return replacement;
     }
 
     // Replace config variables
