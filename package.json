@@ -2410,24 +2410,5 @@
         "vscode-azureextensionui": "^0.29.5",
         "vscode-languageclient": "^6.1.0",
         "xml2js": "^0.4.22"
-    },
-    "commandsItemTemplate": {
-        "properties": {
-            "template": {
-                "type": "string",
-                "description": "The command template"
-            },
-            "label": {
-                "type": "string",
-                "description": "The label displayed to the user"
-            },
-            "match": {
-                "type": "string",
-                "description": "The regular expression for choosing the right template"
-            }
-        },
-        "required": [
-            "template"
-        ]
     }
 }
