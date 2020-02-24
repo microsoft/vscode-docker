@@ -17,7 +17,7 @@ import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
-import { getExposeStatements } from './configure';
+import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
@@ -277,17 +277,14 @@ function validateForUnresolvedToken(contents: string): void {
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
     const serviceName = path.basename(artifactName, path.extname(artifactName)).toLowerCase();
     const imageName = serviceName;
-    let jsonPorts: string = '';
-    if (ports && ports.length > 0) {
-        const portsArray = ports.map(p => `      - ${p}`).join("\r\n");
-        jsonPorts = `
-    ports:
-${portsArray}`;
+    let jsonPorts: string = `${getComposePorts(ports)}`;
+    if (jsonPorts?.length > 0) {
+        jsonPorts = `\n${jsonPorts}`;
     }
 
     let environmentVariables: string = '';
     if (platform === '.NET: ASP.NET Core') {
-        environmentVariables = `    environment:
+        environmentVariables = `\n    environment:
       - ASPNETCORE_ENVIRONMENT=Development`;
         // For now assume the first port is http and the second is https. (default scaffolding behavior)
         // TODO: This is not the perfect logic, this should be improved later.
@@ -297,7 +294,7 @@ ${portsArray}`;
             if (ports.length >= 2) {
                 aspNetCoreUrl += `;https://+:${ports[1]}`;
             }
-            environmentVariables += `\r\n${aspNetCoreUrl}`
+            environmentVariables += `\n${aspNetCoreUrl}`
         }
     }
 
@@ -325,7 +322,7 @@ ${portsArray}`;
 
     return [
         { fileName: 'docker-compose.yml', contents: composeFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } },
-        { fileName: 'docker-compose.debug.yml', contents: composeFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } }
+        { fileName: 'docker-compose.debug.yml', contents: composeDebugFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } }
     ];
 }
 
