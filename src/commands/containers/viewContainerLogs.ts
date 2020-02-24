@@ -19,7 +19,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
     const terminalCommand = await selectTemplate(
         context,
         'attach',
-        `${node.containerName} ${node.description} ${node.fullTag}`, // TODO
+        `${node.containerName} ${node.fullTag}`,
         undefined,
         { 'containerId': node.containerId }
     );
