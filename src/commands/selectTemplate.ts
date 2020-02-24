@@ -6,7 +6,7 @@
 /* eslint-disable no-template-curly-in-string */
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { resolveVariables } from '../utils/resolveVariables';
 
@@ -99,10 +99,6 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
     const selection = await ext.ui.showQuickPick(items, {
         placeHolder: 'Choose a command template to execute'
     });
-
-    if (!selection) {
-        throw new UserCancelledError();
-    }
 
     return selection.data;
 }
