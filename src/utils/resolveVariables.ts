@@ -10,29 +10,29 @@ import { cloneObject } from '../utils/cloneObject';
 const variableMatcher: RegExp = /\$\{[a-z\.\-_:]+\}/ig;
 const configVariableMatcher: RegExp = /\$\{config:([a-z\.\-_]+)\}/i;
 
-export function resolveVariables<T>(target: T, folder?: WorkspaceFolder): T {
+export function resolveVariables<T>(target: T, folder?: WorkspaceFolder, additionalVariables?: { [key: string]: string }): T {
     if (!target) {
         return target;
     } else if (typeof (target) === 'string') {
         return target.replace(variableMatcher, (match: string) => {
-            return resolveSingleVariable(match, folder);
+            return resolveSingleVariable(match, folder, additionalVariables);
         }) as unknown as T;
     } else if (typeof (target) === 'number') {
         return target;
     } else if (Array.isArray(target)) {
         // tslint:disable-next-line: no-unsafe-any
-        return target.map(value => resolveVariables(value, folder)) as unknown as T;
+        return target.map(value => resolveVariables(value, folder, additionalVariables)) as unknown as T;
     } else {
         const result = cloneObject(target);
         for (const key of Object.keys(target)) {
-            result[key] = resolveVariables(target[key], folder);
+            result[key] = resolveVariables(target[key], folder, additionalVariables);
         }
 
         return result;
     }
 }
 
-function resolveSingleVariable(variable: string, folder?: WorkspaceFolder): string {
+function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, additionalVariables?: { [key: string]: string }): string {
     /* eslint-disable no-template-curly-in-string */
 
     // Replace workspace folder variables
@@ -45,6 +45,11 @@ function resolveSingleVariable(variable: string, folder?: WorkspaceFolder): stri
                 return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
             default:
         }
+    }
+
+    // Replace additional variables
+    if (additionalVariables?.[variable]) {
+        return additionalVariables[variable];
     }
 
     // Replace config variables

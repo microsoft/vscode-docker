@@ -19,7 +19,7 @@ type CommandTemplate = {
     match?: string,
 };
 
-export async function selectTemplate(context: IActionContext, command: TemplateCommands, matchContext?: string, variables?: { [key: string]: string }, folder?: vscode.WorkspaceFolder): Promise<string> {
+export async function selectTemplate(context: IActionContext, command: TemplateCommands, matchContext?: string, folder?: vscode.WorkspaceFolder, additionalVariables?: { [key: string]: string }): Promise<string> {
     let commandSetting: string;
     let backupLabel: string;
 
@@ -78,7 +78,7 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
 
     const selectedTemplate = await quickPickTemplate(context, templates);
 
-    return replaceVariables(selectedTemplate.template, variables, folder);
+    return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }
 
 async function quickPickTemplate(context: IActionContext, templates: CommandTemplate[]): Promise<CommandTemplate> {
@@ -104,20 +104,4 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
     }
 
     return selection.data;
-}
-
-function replaceVariables(template: string, variables?: { [key: string]: string }, folder?: vscode.WorkspaceFolder): string {
-    // Replace caller-supplied variables
-    if (variables) {
-        Object.keys(variables).forEach(key => {
-            template = template.replace(`\${${key}}`, variables[key]);
-        });
-    }
-
-    // Replace other variables
-    if (folder) {
-        template = resolveVariables(template, folder);
-    }
-
-    return template;
 }
