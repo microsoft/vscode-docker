@@ -286,7 +286,7 @@ ${portsArray}`;
     }
 
     let environmentVariables: string = '';
-    if (platform === 'ASP.NET Core') {
+    if (platform === '.NET: ASP.NET Core') {
         environmentVariables = `    environment:
       - ASPNETCORE_ENVIRONMENT=Development`;
         // For now assume the first port is http and the second is https. (default scaffolding behavior)
