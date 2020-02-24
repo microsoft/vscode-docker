@@ -86,7 +86,7 @@ async function compose(context: IActionContext, commands: ('composeUp' | 'compos
                 command,
                 commandMatchContext,
                 folder,
-                { 'configurationFileSpecified': '', 'configurationFile': '', 'detached': detached, 'build': build }
+                { 'configurationFile': '', 'detached': detached, 'build': build }
             );
             terminal.sendText(terminalCommand);
         } else {
@@ -96,7 +96,7 @@ async function compose(context: IActionContext, commands: ('composeUp' | 'compos
                     command,
                     commandMatchContext,
                     folder,
-                    { 'configurationFileSpecified': '-f', 'configurationFile': item.file, 'detached': detached, 'build': build }
+                    { 'configurationFile': `-f \"${item.file}\"`, 'detached': detached, 'build': build }
                 );
                 terminal.sendText(terminalCommand);
             }

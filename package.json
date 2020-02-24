@@ -125,7 +125,7 @@
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
                     "when": "never"
-                },                
+                },
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
@@ -1453,7 +1453,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose up ${configurationFileSpecified} ${configurationFile} ${detached} ${build}",
+                    "default": "docker-compose up ${configurationFile} ${detached} ${build}",
                     "description": "Command templates for `docker-compose up` commands."
                 },
                 "docker.commands.composeDown": {
@@ -1484,7 +1484,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose down ${configurationFileSpecified} ${configurationFile}",
+                    "default": "docker-compose down ${configurationFile}",
                     "description": "Command templates for `docker-compose down` commands."
                 },
                 "docker.containers.groupBy": {
