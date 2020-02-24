@@ -8,10 +8,7 @@ import { IActionContext, IAzureQuickPickItem, UserCancelledError } from 'vscode-
 import { ext } from '../extensionVariables';
 import { resolveVariables } from '../utils/resolveVariables';
 
-export enum TemplateCommands {
-    AttachShell,
-    ViewLogs,
-}
+export type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
 type CommandTemplate = {
     template: string,
@@ -19,30 +16,31 @@ type CommandTemplate = {
     match?: string,
 };
 
-export async function selectTemplate(context: IActionContext, command: TemplateCommands, matchContext?: string, folder?: vscode.WorkspaceFolder, additionalVariables?: { [key: string]: string }): Promise<string> {
-    let commandSetting: string;
-    let backupLabel: string;
+const defaultLabels: { [key in TemplateCommand]: string } = {
+    'build': 'Docker Build',
+    'run': 'Docker Run',
+    'runInteractive': 'Docker Run (Interactive)',
+    'attach': 'Docker Attach',
+    'logs': 'Docker Logs',
+    'composeUp': 'Compose Up',
+    'composeDown': 'Compose Down',
+}
 
-    switch (command) {
-        case TemplateCommands.AttachShell:
-            backupLabel = 'Attach Shell';
-            commandSetting = 'commands.logs';
-            break;
-        case TemplateCommands.ViewLogs:
-            backupLabel = 'View Logs';
-            commandSetting = 'commands.logs';
-            break;
-        default:
-            throw new Error(`Unknown template command type: '${command}'`);
-    }
-
+export async function selectTemplate(context: IActionContext, command: TemplateCommand, matchContext?: string, folder?: vscode.WorkspaceFolder, additionalVariables?: { [key: string]: string }): Promise<string> {
     // Get the templates from settings
     const config = vscode.workspace.getConfiguration('docker');
-    let templates: CommandTemplate[] = config.get(commandSetting) ?? [];
+    const templateSetting: CommandTemplate[] | string = config.get(`commands.${command}`);
+    let templates: CommandTemplate[];
+
+    if (typeof (templateSetting) === 'string') {
+        templates = [{ template: templateSetting }] as CommandTemplate[];
+    } else {
+        templates = templateSetting;
+    }
 
     // Make sure all templates have some sort of label
     templates.forEach(template => {
-        template.label = template.label ?? backupLabel;
+        template.label = template.label ?? defaultLabels[command];
     })
 
     // Filter off non-matching / invalid templates
