@@ -76,7 +76,7 @@ async function compose(context: IActionContext, commands: ('composeUp' | 'compos
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
     const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
-    const commandMatchContext = ``; // TODO: command match context
+    const commandMatchContext = `${folder.name} ${selectedItems.join(' ')}`;
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (const command of commands) {

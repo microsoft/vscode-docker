@@ -1441,7 +1441,7 @@
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against compose yamls, todo, todo, etc."
+                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
                                     }
                                 },
                                 "required": [
@@ -1472,7 +1472,7 @@
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against compose yamls, todo, todo, etc."
+                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
                                     }
                                 },
                                 "required": [

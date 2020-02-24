@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/* eslint-disable no-template-curly-in-string */
+
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
@@ -16,15 +18,17 @@ type CommandTemplate = {
     match?: string,
 };
 
-const defaultLabels: { [key in TemplateCommand]: string } = {
-    'build': 'Docker Build',
-    'run': 'Docker Run',
-    'runInteractive': 'Docker Run (Interactive)',
-    'attach': 'Docker Attach',
-    'logs': 'Docker Logs',
-    'composeUp': 'Compose Up',
-    'composeDown': 'Compose Down',
-}
+// NOTE: the default templates are duplicated in package.json, since VSCode offers no way of looking up extension-level default settings
+// So, when modifying them here, be sure to modify them there as well!
+const defaults: { [key in TemplateCommand]: CommandTemplate } = {
+    'build': { label: 'Docker Build', template: 'docker build --rm -f "${dockerfile}" -t ${tag} "${context}"' },
+    'run': { label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' },
+    'runInteractive': { label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' },
+    'attach': { label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' },
+    'logs': { label: 'Docker Logs', template: 'docker logs -f ${containerId}' },
+    'composeUp': { label: 'Compose Up', template: 'docker-compose up ${configurationFile} ${detached} ${build}' },
+    'composeDown': { label: 'Compose Down', template: 'docker-compose down ${configurationFile}' },
+};
 
 export async function selectTemplate(context: IActionContext, command: TemplateCommand, matchContext?: string, folder?: vscode.WorkspaceFolder, additionalVariables?: { [key: string]: string }): Promise<string> {
     // Get the templates from settings
@@ -40,7 +44,7 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
 
     // Make sure all templates have some sort of label
     templates.forEach(template => {
-        template.label = template.label ?? defaultLabels[command];
+        template.label = template.label ?? defaults[command].label;
     })
 
     // Filter off non-matching / invalid templates
@@ -57,7 +61,7 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
         }
 
         try {
-            return new RegExp(template.match, 'ig').test(matchContext);
+            return new RegExp(template.match, 'i').test(matchContext);
         } catch {
             // Don't wait
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -66,15 +70,14 @@ export async function selectTemplate(context: IActionContext, command: TemplateC
         }
     });
 
-    // TODO: Should we also define the default settings in this file, and fall back to it if needed, thus ensuring that there will always be at least one match?
-    // Note: I don't think it's possible to use VSCode APIs to look up the default setting, so it would have to be defined both here and package.json
-    if (templates.length === 0) {
-        // No templates matched or user went and deleted everything, this is not a bug so don't show report issue button
-        context.errorHandling.suppressReportIssue = true;
-        throw new Error(`No matching templates were found in configuration for template command '${command}'. Please restore the default settings for the template command or define at least one matching template.`);
-    }
+    let selectedTemplate: CommandTemplate;
 
-    const selectedTemplate = await quickPickTemplate(context, templates);
+    if (templates.length === 0) {
+        // No templates matched, so fall back to extension default
+        selectedTemplate = defaults[command];
+    } else {
+        selectedTemplate = await quickPickTemplate(context, templates);
+    }
 
     return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }
