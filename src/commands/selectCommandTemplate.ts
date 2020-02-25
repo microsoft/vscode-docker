@@ -41,11 +41,11 @@ export async function selectBuildCommand(context: IActionContext, matchContext: 
 }
 
 export async function selectRunCommand(context: IActionContext, matchContext: string[], tag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: {} }): Promise<string> {
-    let portsString: string | undefined;
+    let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
             return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
-        }, '');
+        }, portsString);
     }
 
     return await selectCommandTemplate(
