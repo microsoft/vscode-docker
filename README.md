@@ -10,7 +10,7 @@ The Docker extension makes it easy to build, manage and deploy containerized app
 
 ## Installation
 
-[Install Docker](https://docs.docker.com/install/) on your machine and add it to the system path.
+[Install  Docker](https://docs.docker.com/install/) on your machine and add it to the system path.
 
 On Linux, you should also [enable Docker CLI for the non-root user account](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user) that will be used to run VS Code.
 
