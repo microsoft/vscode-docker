@@ -31,7 +31,7 @@ ENTRYPOINT exec java $JAVA_OPTS -jar ${serviceNameAndRelativePath}.jar
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-    return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -41,7 +41,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-    return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:

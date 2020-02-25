@@ -90,6 +90,7 @@
         "onCommand:vscode-docker.registries.logOutOfDockerCli",
         "onCommand:vscode-docker.registries.pullImage",
         "onCommand:vscode-docker.registries.pullRepository",
+        "onCommand:vscode-docker.registries.reconnectRegistry",
         "onCommand:vscode-docker.registries.refresh",
         "onCommand:vscode-docker.registries.setAsDefault",
         "onCommand:vscode-docker.volumes.configureExplorer",
@@ -124,9 +125,9 @@
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
                     "when": "never"
-                },
+                },                
                 {
-                    "command": "vscode-docker.help",
+                    "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
                 }
             ],
@@ -478,6 +479,11 @@
                     "group": "regs_zzz_common@2"
                 },
                 {
+                    "command": "vscode-docker.registries.reconnectRegistry",
+                    "when": "view == dockerRegistries && viewItem == registryConnectError",
+                    "group": "regs_zzz_common@8"
+                },
+                {
                     "command": "vscode-docker.registries.refresh",
                     "when": "view == dockerRegistries && viewItem == connectedRegistries",
                     "group": "regs_zzz_common@9"
@@ -692,6 +698,58 @@
                                 }
                             }
                         }
+                    },
+                    "attach": {
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "The container name to attach to. If not specified, then user will be prompted to pick a container."
+                            },
+                            "processName": {
+                                "type": "string",
+                                "description": "The process name to attach to. If this is used, 'processId' should not be used."
+                            },
+                            "processId": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": "${command:pickProcess}"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": 0
+                                    }
+                                ]
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore"
+                                ]
+                            },
+                            "sourceFileMap": {
+                                "type": "object",
+                                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "<insert-source-path-here>": "<insert-target-path-here>"
+                                }
+                            },
+                            "netCore": {
+                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "properties": {
+                                    "debuggerPath": {
+                                        "type": "string",
+                                        "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "configurationSnippets": [
@@ -703,6 +761,19 @@
                             "request": "attach",
                             "name": "Docker: Attach to Node",
                             "remoteRoot": "/usr/src/app"
+                        }
+                    },
+                    {
+                        "label": "Docker: .NET Core Attach (Preview)",
+                        "description": "Docker: Attach to a .NET Core process in a container",
+                        "body": {
+                            "name": "Docker .NET Core Attach (Preview)",
+                            "type": "docker",
+                            "request": "attach",
+                            "platform": "netCore",
+                            "sourceFileMap": {
+                                "/src": "^\"\\${workspaceFolder}\""
+                            }
                         }
                     }
                 ]
@@ -1205,12 +1276,24 @@
                         },
                         "oneOf": [
                             {
-                                "required": ["file"],
-                                "not": {"enum": ["module"] }
+                                "required": [
+                                    "file"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "module"
+                                    ]
+                                }
                             },
                             {
-                                "required": ["module"],
-                                "not": {"enum": ["file"] }
+                                "required": [
+                                    "module"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "file"
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -1992,6 +2075,11 @@
             {
                 "command": "vscode-docker.registries.pullRepository",
                 "title": "Pull Repository",
+                "category": "Docker Registries"
+            },
+            {
+                "command": "vscode-docker.registries.reconnectRegistry",
+                "title": "Re-enter credentials",
                 "category": "Docker Registries"
             },
             {

@@ -17,6 +17,11 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
     platform?: DockerPlatform;
 }
 
+export interface DockerAttachConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
+    processName?: string;
+    processId?: string | number;
+}
+
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     public constructor(
         private readonly dockerClient: DockerClient,
@@ -42,7 +47,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
         return callWithTelemetryAndErrorHandling(
-            'docker-launch',
+            debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
                 if (!folder) {
                     folder = workspace.workspaceFolders[0];
@@ -56,6 +61,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
                     // VSCode subsequently will call provideDebugConfigurations which will show an error message
                     return null;
+                }
+
+                if (!debugConfiguration.request) {
+                    throw new Error('The property "request" must be specified in the debug config.')
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);

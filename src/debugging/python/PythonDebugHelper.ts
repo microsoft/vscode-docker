@@ -5,14 +5,14 @@
 
 import * as fse from 'fs-extra';
 import * as os from 'os';
-import * as vscode from "vscode";
-import { PythonExtensionHelper } from "../../tasks/python/PythonExtensionHelper";
+import * as vscode from 'vscode';
+import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonDefaultDebugPort, PythonProjectType } from '../../utils/pythonUtils';
-import ChildProcessProvider from "../coreclr/ChildProcessProvider";
-import CliDockerClient from "../coreclr/CliDockerClient";
+import ChildProcessProvider from '../coreclr/ChildProcessProvider';
+import CliDockerClient from '../coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
-import { DockerDebugConfigurationBase } from "../DockerDebugConfigurationBase";
-import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
+import { DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
+import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { PythonScaffoldingOptions } from '../DockerDebugScaffoldingProvider';
 
 export interface PythonPathMapping {
@@ -40,9 +40,11 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
-        const configs : DockerDebugConfiguration[] =
-        [{
-            name: 'Docker Python Launch',
+        // Capitalize the first letter.
+        const projectType = options.projectType.charAt(0).toUpperCase() + options.projectType.slice(1);
+
+        return [{
+            name: `Docker: Python - ${projectType}`,
             type: 'docker',
             request: 'launch',
             preLaunchTask: 'docker-run: debug',
@@ -57,27 +59,6 @@ export class PythonDebugHelper implements DebugHelper {
                 projectType: options.projectType
             }
         }];
-
-        // If we generated compose files, then we should generate a Python attach configuration.
-        if (context.generateComposeTask) {
-            configs.push(
-                {
-                    name: 'Python Remote Attach',
-                    type: 'python',
-                    request: 'attach',
-                    host: 'localhost',
-                    port: PythonDefaultDebugPort,
-                    pathMappings: [
-                        {
-                            /* eslint-disable-next-line no-template-curly-in-string */
-                            localRoot: '${workspaceFolder}',
-                            remoteRoot: '/app'
-                        }
-                    ]
-                });
-        }
-
-        return configs;
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
