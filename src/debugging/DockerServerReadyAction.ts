@@ -25,28 +25,17 @@ const URI_FORMAT = 'http://localhost:%s';
 /* eslint-disable-next-line no-template-curly-in-string */
 const WEB_ROOT = '${workspaceFolder}';
 
-export class ServerReadyDetector extends vscode.Disposable implements DockerServerReadyManager {
+export class ServerReadyDetector implements DockerServerReadyDetector {
     private hasFired: boolean = false;
     private regexp: RegExp;
-    private disposables: vscode.Disposable[] = [];
 
     public constructor(private session: vscode.DebugSession) {
-        super(() => this.internalDispose());
-
         const configuration = <ResolvedDebugConfiguration>session.configuration;
 
         this.regexp = new RegExp(
-            (configuration
-                && configuration.dockerOptions
-                && configuration.dockerOptions.dockerServerReadyAction
-                && configuration.dockerOptions.dockerServerReadyAction.pattern)
+            (configuration?.dockerOptions?.dockerServerReadyAction?.pattern)
             || PATTERN,
             'i');
-    }
-
-    private internalDispose(): void {
-        this.disposables.forEach(d => { d.dispose(); });
-        this.disposables = [];
     }
 
     public detectPattern(s: string): boolean {
@@ -56,7 +45,6 @@ export class ServerReadyDetector extends vscode.Disposable implements DockerServ
                 /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                 this.openExternalWithString(this.session, matches.length > 1 ? matches[1] : '');
                 this.hasFired = true;
-                this.internalDispose();
             }
         }
 
@@ -199,7 +187,7 @@ type DebugAdapterMessage = {
     event?: string;
 };
 
-interface DockerServerReadyManager {
+interface DockerServerReadyDetector {
     detectPattern(output: string): void;
 }
 
@@ -208,10 +196,12 @@ type LogStream = NodeJS.ReadableStream & { destroy(): void; };
 class DockerLogsTracker extends vscode.Disposable {
     private logStream: LogStream;
 
-    public constructor(containerName: string, detector: DockerServerReadyManager) {
+    public constructor(containerName: string, detector: DockerServerReadyDetector) {
         super(
             () => {
-                this.disposeStream();
+                if (this.logStream) {
+                    this.logStream.destroy();
+                }
             });
 
         if (!detector) {
@@ -239,16 +229,10 @@ class DockerLogsTracker extends vscode.Disposable {
                 });
         } catch { }
     }
-
-    private disposeStream() : void {
-        if (this.logStream) {
-            this.logStream.destroy();
-        }
-    }
 }
 
 class DockerDebugAdapterTracker extends vscode.Disposable implements vscode.DebugAdapterTracker {
-    public constructor(private readonly detector: DockerServerReadyManager) {
+    public constructor(private readonly detector: DockerServerReadyDetector) {
         super(
             () => {
                 // Stop responding to messages...
@@ -259,9 +243,8 @@ class DockerDebugAdapterTracker extends vscode.Disposable implements vscode.Debu
     public onDidSendMessage (m: DebugAdapterMessage) : void {
         if (m.type === 'event'
             && m.event === 'output'
-            && m.body
-            && m.body.category
-            && m.body.output) {
+            && m.body?.category
+            && m.body?.output) {
             switch (m.body.category) {
                 case 'console':
                 case 'stderr':
@@ -274,7 +257,7 @@ class DockerDebugAdapterTracker extends vscode.Disposable implements vscode.Debu
     }
 }
 
-class MultiOutputDockerServerReadyManager extends vscode.Disposable implements DockerServerReadyManager {
+class MultiOutputDockerServerReadyManager extends vscode.Disposable implements DockerServerReadyDetector {
     private readonly detector: ServerReadyDetector;
     private readonly logsTracker: DockerLogsTracker;
     private readonly _tracker: DockerDebugAdapterTracker;
@@ -293,10 +276,7 @@ class MultiOutputDockerServerReadyManager extends vscode.Disposable implements D
 
         const configuration = <ResolvedDebugConfiguration>session.configuration;
 
-        if (configuration
-            && configuration.dockerOptions
-            && configuration.dockerOptions.dockerServerReadyAction
-            && configuration.dockerOptions.dockerServerReadyAction.containerName) {
+        if (configuration?.dockerOptions?.dockerServerReadyAction?.containerName) {
             this.logsTracker = new DockerLogsTracker(configuration.dockerOptions.dockerServerReadyAction.containerName, this);
         }
 
@@ -319,9 +299,7 @@ class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFact
 
     public static start(session: vscode.DebugSession): DockerDebugAdapterTracker | undefined {
         const configuration = <ResolvedDebugConfiguration>session.configuration;
-        if (configuration
-            && configuration.dockerOptions
-            && configuration.dockerOptions.dockerServerReadyAction) {
+        if (configuration?.dockerOptions?.dockerServerReadyAction) {
             let tracker = DockerDebugAdapterTrackerFactory.trackers.get(session);
             if (!tracker) {
                 tracker = new MultiOutputDockerServerReadyManager(session);
@@ -356,7 +334,7 @@ class DockerServerReadyDebugConfigurationProvider implements vscode.DebugConfigu
     }
 
     public resolveDebugConfiguration?(folder: vscode.WorkspaceFolder | undefined, debugConfiguration: ResolvedDebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        if (debugConfiguration && debugConfiguration.type && debugConfiguration.dockerOptions && debugConfiguration.dockerOptions.dockerServerReadyAction) {
+        if (debugConfiguration?.type && debugConfiguration?.dockerOptions?.dockerServerReadyAction) {
             if (!this.trackers.has(debugConfiguration.type)) {
                 this.context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory(debugConfiguration.type, this.trackerFactory));
                 this.trackers.add(debugConfiguration.type);
