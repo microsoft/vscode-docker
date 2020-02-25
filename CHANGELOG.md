@@ -9,7 +9,8 @@
 * Changes to selection logic of `docker-compose.yml` files [#370](https://github.com/microsoft/vscode-docker/issues/370) [#379](https://github.com/microsoft/vscode-docker/issues/379) [#569](https://github.com/microsoft/vscode-docker/issues/569)
 
 ### Fixed
-* Incorrect `WORKDIR paths should be absolute` message fixed [#1492](https://github.com/microsoft/vscode-docker/issues/1492)
+* Incorrect `WORKDIR paths should be absolute` message [#1492](https://github.com/microsoft/vscode-docker/issues/1492)
+* README not showing images in gallery [#1654](https://github.com/microsoft/vscode-docker/issues/1654)
 
 ## 0.10.0 - 23 January 2020
 ### Added
