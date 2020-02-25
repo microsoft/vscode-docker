@@ -20,7 +20,7 @@ import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { scaffoldPython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth, quickPickGenerateComposeFiles } from './configUtils';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
 import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
@@ -357,7 +357,7 @@ async function configureCore(context: ScaffolderContext, options: ConfigureApiOp
     let generateComposeFiles = true;
 
     if (platformType === 'Node.js') {
-        generateComposeFiles = await context.captureStep('compose', quickPickGenerateComposeFiles)();
+        generateComposeFiles = await context.promptForCompose();
         if (generateComposeFiles) {
             properties.orchestration = 'docker-compose';
         }

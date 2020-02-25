@@ -6,7 +6,7 @@ import assert = require("assert");
 import { DockerBuildImageOptions } from "../../../extension.bundle";
 import { compareBuildImageOptions } from "../../../extension.bundle";
 
-suite('debugging/coreclr/dockerManager', () => {
+suite('(unit) debugging/coreclr/dockerManager', () => {
     suite('compareBuildImageOptions', () => {
         function testComparison(name: string, options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined, expected: boolean, message: string) {
             test(name, () => assert.equal(compareBuildImageOptions(options1, options2), expected, message));

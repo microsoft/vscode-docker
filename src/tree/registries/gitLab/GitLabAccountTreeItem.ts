@@ -12,6 +12,7 @@ import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registry
 import { getIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
+import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { getRegistryPassword } from "../registryPasswords";
 import { GitLabProjectTreeItem } from "./GitLabProjectTreeItem";
@@ -57,7 +58,13 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
-            await this.refreshToken();
+
+            try {
+                await this.refreshToken();
+            } catch (err) {
+                // If creds are invalid, the above refreshToken will fail
+                return [new RegistryConnectErrorTreeItem(this, err, this.cachedProvider)];
+            }
         }
 
         const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;

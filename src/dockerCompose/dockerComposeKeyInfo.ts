@@ -137,7 +137,7 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
         localize('vscode-docker.dockerComposeKey.user', 'Username or UID (format: <name|uid>[:<group|gid>]).')
     ),
     'version': (
-        localize('vscode-docker.dockerComposeKey.version', 'Specify the compose format that this file conforms to. Omit this property to indicate v1, otherwise, set this to `2`.')
+        localize('vscode-docker.dockerComposeKey.version', 'Specify the compose format that this file conforms to.')
     ),
     'volumes': (
         localize('vscode-docker.dockerComposeKey.volumes', 'Mount paths as volumes, optionally specifying a path on the host machine (`HOST:CONTAINER`), or an access mode (`HOST:CONTAINER:ro`).')
