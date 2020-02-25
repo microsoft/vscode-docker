@@ -361,7 +361,7 @@ async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     }
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, isCompose: boolean, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'netCore',
@@ -369,6 +369,7 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
         // always use posix for debug config because it's committed to source control and works on all OS's
         /* eslint-disable-next-line no-template-curly-in-string */
         dockerfile: path.posix.join('${workspaceFolder}', workspaceRelativeDockerfileName),
+        isCompose: isCompose
     }
 
     const options: NetCoreScaffoldingOptions = {
@@ -442,7 +443,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
         const dockerFilePath = path.resolve(context.rootFolder, dockerFileName);
         const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerFilePath);
 
-        await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
+        await initializeForDebugging(context, context.folder, context.os, isCompose, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
     }
 
     return files;

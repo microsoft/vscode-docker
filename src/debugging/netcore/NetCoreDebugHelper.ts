@@ -88,18 +88,32 @@ export class NetCoreDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
-
-        return [
-            {
-                name: 'Docker .NET Core Launch',
-                type: 'docker',
-                request: 'launch',
-                preLaunchTask: 'docker-run: debug',
-                netCore: {
-                    appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
-                }
+        let debugConfigurations : DockerDebugConfiguration[] = [{
+            name: 'Docker .NET Core Launch',
+            type: 'docker',
+            request: 'launch',
+            preLaunchTask: 'docker-run: debug',
+            netCore: {
+                appProject: unresolveWorkspaceFolder(options.appProject, context.folder)
             }
-        ];
+        }];
+
+        if (context.isCompose) {
+            debugConfigurations.push(
+                {
+                    name: 'Docker .NET Core Attach (Preview)',
+                    type: 'docker',
+                    request: 'attach',
+                    platform: 'netCore',
+                    sourceFileMap: {
+                        // eslint-disable-next-line no-template-curly-in-string
+                        '/src': '${workspaceFolder}'
+                    }
+                }
+            );
+        }
+
+        return debugConfigurations;
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
