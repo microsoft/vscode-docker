@@ -9,7 +9,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { selectTemplate } from './selectTemplate';
+import { selectComposeCommand } from './selectCommandTemplate';
 
 async function getDockerComposeFileUris(folder: vscode.WorkspaceFolder): Promise<vscode.Uri[]> {
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, COMPOSE_FILE_GLOB_PATTERN), null, 9999, undefined);
@@ -40,7 +40,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
     return items;
 }
 
-async function compose(context: IActionContext, commands: ('composeUp' | 'composeDown')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To run Docker compose you must first open a folder or workspace in VS Code.');
 
     let commandParameterFileUris: vscode.Uri[];
@@ -74,29 +74,33 @@ async function compose(context: IActionContext, commands: ('composeUp' | 'compos
 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker Compose');
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    const build: string = configOptions.get('dockerComposeBuild', true) ? '--build' : '';
-    const detached: string = configOptions.get('dockerComposeDetached', true) ? '-d' : '';
-    const commandMatchContext = `${folder.name} ${selectedItems.join(' ')}`;
+    const build: boolean = configOptions.get('dockerComposeBuild', true);
+    const detached: boolean = configOptions.get('dockerComposeDetached', true);
+    const commandMatchContext = [folder.name, ...selectedItems.map(i => i.file)];
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (const command of commands) {
         if (selectedItems.length === 0) {
-            const terminalCommand = await selectTemplate(
+            const terminalCommand = await selectComposeCommand(
                 context,
-                command,
                 commandMatchContext,
                 folder,
-                { 'configurationFile': '', 'detached': detached, 'build': build }
+                command,
+                undefined,
+                detached,
+                build
             );
             terminal.sendText(terminalCommand);
         } else {
             for (const item of selectedItems) {
-                const terminalCommand = await selectTemplate(
+                const terminalCommand = await selectComposeCommand(
                     context,
-                    command,
                     commandMatchContext,
                     folder,
-                    { 'configurationFile': `-f \"${item.file}\"`, 'detached': detached, 'build': build }
+                    command,
+                    item.file,
+                    detached,
+                    build
                 );
                 terminal.sendText(terminalCommand);
             }
@@ -124,13 +128,13 @@ function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
 }
 
 export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['composeUp'], 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['up'], 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['composeDown'], 'to take down', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down'], 'to take down', dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['composeDown', 'composeUp'], 'to restart', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down', 'up'], 'to restart', dockerComposeFileUri, selectedComposeFileUris);
 }

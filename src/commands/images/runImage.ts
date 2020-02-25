@@ -6,7 +6,7 @@
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { selectTemplate } from '../selectTemplate';
+import { selectRunCommand } from '../selectCommandTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     return await runImageCore(context, node, false);
@@ -25,20 +25,13 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
     }
 
     const inspectInfo = await node.getImage().inspect();
-    let portsString: string | undefined;
 
-    if (inspectInfo?.Config?.ExposedPorts) {
-        portsString = Object.keys(inspectInfo.Config.ExposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
-            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
-        });
-    }
-
-    const terminalCommand = await selectTemplate(
+    const terminalCommand = await selectRunCommand(
         context,
-        interactive ? 'runInteractive' : 'run',
-        `${node.fullTag}`,
-        undefined,
-        { 'exposedPorts': portsString, 'tag': node.fullTag }
+        [node.fullTag],
+        node.fullTag,
+        interactive,
+        inspectInfo?.Config?.ExposedPorts
     );
 
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);

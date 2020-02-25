@@ -6,7 +6,7 @@
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { selectTemplate } from '../selectTemplate';
+import { selectLogsCommand } from '../selectCommandTemplate';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -16,12 +16,10 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         });
     }
 
-    const terminalCommand = await selectTemplate(
+    const terminalCommand = await selectLogsCommand(
         context,
-        'attach',
-        `${node.containerName} ${node.fullTag}`,
-        undefined,
-        { 'containerId': node.containerId }
+        [node.containerName, node.fullTag],
+        node.containerId
     );
 
     const terminal = ext.terminalProvider.createTerminal(node.fullTag);

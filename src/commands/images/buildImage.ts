@@ -12,7 +12,7 @@ import { delay } from "../../utils/delay";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
-import { selectTemplate } from "../selectTemplate";
+import { selectBuildCommand } from "../selectCommandTemplate";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
 
 const tagRegex: RegExp = /\$\{tag\}/i;
@@ -29,12 +29,12 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
     } else {
         const contextPath: string = defaultContextPath || dockerFileItem.relativeFolderPath;
 
-        let terminalCommand = await selectTemplate(
+        let terminalCommand = await selectBuildCommand(
             context,
-            'build',
-            `${rootFolder.name} ${dockerFileItem.relativeFilePath}`,
+            [rootFolder.name, dockerFileItem.relativeFilePath],
             rootFolder,
-            { 'dockerfile': dockerFileItem.relativeFilePath, 'context': contextPath }
+            dockerFileItem.relativeFilePath,
+            contextPath
         );
 
         // Replace '${tag}' if needed. Tag is a special case because we don't want to prompt unless necessary, so must manually replace it.
