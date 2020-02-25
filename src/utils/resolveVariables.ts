@@ -61,9 +61,11 @@ function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, addit
         const config = workspace.getConfiguration();
         const configValue = config.get(configName);
 
-        // If it's a string value we'll return it
+        // If it's a simple value we'll return it
         if (typeof (configValue) === 'string') {
             return configValue;
+        } else if (typeof (configValue) === 'number' || typeof (configValue) === 'boolean') {
+            return configValue.toString();
         }
     }
 

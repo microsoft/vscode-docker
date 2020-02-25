@@ -45,7 +45,7 @@ export async function selectRunCommand(context: IActionContext, matchContext: st
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
             return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
-        });
+        }, '');
     }
 
     return await selectCommandTemplate(
@@ -111,6 +111,8 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
             ext.ui.showWarningMessage(`No command template defined for template '${template.label}'. This template will be skipped.`);
             return false;
         }
+
+        return true;
     });
 
     // Look for settings-defined template(s) with explicit match, that matches the context

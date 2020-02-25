@@ -1518,7 +1518,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose up ${configurationFile} ${detached} ${build}",
+                    "default": "docker-compose ${configurationFile} up ${detached} ${build}",
                     "description": "Command templates for `docker-compose up` commands."
                 },
                 "docker.commands.composeDown": {
@@ -1549,7 +1549,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose down ${configurationFile}",
+                    "default": "docker-compose ${configurationFile} down",
                     "description": "Command templates for `docker-compose down` commands."
                 },
                 "docker.containers.groupBy": {
