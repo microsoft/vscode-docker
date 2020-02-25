@@ -1205,12 +1205,24 @@
                         },
                         "oneOf": [
                             {
-                                "required": ["file"],
-                                "not": {"enum": ["module"] }
+                                "required": [
+                                    "file"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "module"
+                                    ]
+                                }
                             },
                             {
-                                "required": ["module"],
-                                "not": {"enum": ["file"] }
+                                "required": [
+                                    "module"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "file"
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -1422,7 +1434,7 @@
                 },
                 "docker.networks.showBuiltInNetworks": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Show the built-in networks in the explorer."
                 },
                 "docker.networks.label": {

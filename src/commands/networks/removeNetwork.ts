@@ -19,7 +19,8 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
         nodes
     );
     if (nodes.some(n => builtInNetworks.includes(n.networkName))) {
-        await ext.ui.showWarningMessage("The built-in networks 'bridge', 'host', and 'none' cannot be removed.");
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        ext.ui.showWarningMessage('The built-in networks \'bridge\', \'host\', and \'none\' cannot be removed.');
         nodes = nodes.filter(n => !builtInNetworks.includes(n.networkName));
     }
     let confirmRemove: string;

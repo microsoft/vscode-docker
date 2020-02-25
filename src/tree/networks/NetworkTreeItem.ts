@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Network } from "dockerode";
-import { builtInNetworks } from "../../constants";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { builtInNetworks } from "../../constants";
 import { builtInNetworks } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
@@ -24,8 +24,7 @@ export class NetworkTreeItem extends AzExtTreeItem {
     }
 
     public get contextValue(): string {
-        const prefix = builtInNetworks.includes(this._item.networkName) ? 'default' : 'custom';
-        return prefix + 'Network';
+        return builtInNetworks.includes(this._item.networkName) ? 'defaultNetwork' : 'customNetwork';
     }
 
     public get id(): string {
