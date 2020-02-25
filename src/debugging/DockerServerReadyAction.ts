@@ -228,7 +228,6 @@ class DockerLogsTracker extends vscode.Disposable {
                 },
                 (err, stream) => {
                     if (err) {
-                        // TODO: Log error. Dispose of ourselves?
                         return;
                     }
 
@@ -238,10 +237,7 @@ class DockerLogsTracker extends vscode.Disposable {
                         detector.detectPattern(data.toString());
                     });
                 });
-        } catch {
-            // Failed to get the container logs.
-            this.disposeStream();
-        }
+        } catch { }
     }
 
     private disposeStream() : void {
