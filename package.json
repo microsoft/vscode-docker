@@ -1355,6 +1355,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1386,6 +1387,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1417,6 +1419,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1448,6 +1451,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1479,6 +1483,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1510,6 +1515,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }
@@ -1541,6 +1547,7 @@
                                     }
                                 },
                                 "required": [
+                                    "label",
                                     "template"
                                 ]
                             }

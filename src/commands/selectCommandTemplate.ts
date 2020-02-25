@@ -14,7 +14,7 @@ export type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'l
 
 type CommandTemplate = {
     template: string,
-    label?: string,
+    label: string,
     match?: string,
 };
 
@@ -99,21 +99,6 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
     } else {
         templates = templateSetting;
     }
-
-    // Make sure all templates have some sort of label and a templated command
-    templates.forEach(template => {
-        template.label = template.label ?? defaults[command].label;
-    });
-    templates = templates.filter(template => {
-        if (!template.template) {
-            // Don't wait
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ext.ui.showWarningMessage(`No command template defined for template '${template.label}'. This template will be skipped.`);
-            return false;
-        }
-
-        return true;
-    });
 
     // Look for settings-defined template(s) with explicit match, that matches the context
     const matchedTemplates = templates.filter(template => {
