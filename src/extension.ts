@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
@@ -24,9 +24,12 @@ import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProv
 import { ext } from './extensionVariables';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
+import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
+import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
+import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
+import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
-import { nps } from './utils/nps';
 import { refreshDockerode } from './utils/refreshDockerode';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 
@@ -51,13 +54,19 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     }
     ext.context = ctx;
 
-    ext.outputChannel = vscode.window.createOutputChannel("Docker");
+    ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
 
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
-    ext.reporter = createTelemetryReporter(ctx);
+
+    const publisher = new TelemetryPublisher();
+    ctx.subscriptions.push(publisher);
+
+    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
+
+    ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
@@ -125,9 +134,17 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerListeners(ctx);
 
+        // NOTE: Temporarily disabled.
         // Don't wait
-        // tslint:disable-next-line: no-floating-promises
-        nps(ctx.globalState);
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        // nps(ctx.globalState);
+    });
+}
+
+export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
+    await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
+        activateContext.telemetry.properties.isActivationEvent = 'true';
+        AzureAccountExtensionListener.dispose();
     });
 }
 
@@ -140,7 +157,7 @@ function validateOldPublisher(activateContext: IActionContext): void {
         let message: string = 'Please reload Visual Studio Code to complete updating the Docker extension.';
         let reload: vscode.MessageItem = { title: 'Reload Now' };
         // Don't wait
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage(message, reload).then(async result => {
             if (result === reload) {
                 await vscode.commands.executeCommand('workbench.action.reloadWindow');
@@ -193,6 +210,7 @@ namespace Configuration {
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
         let serverModule = ext.context.asAbsolutePath(
@@ -240,7 +258,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             serverOptions,
             clientOptions
         );
-        // tslint:disable-next-line:no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         client.onReady().then(() => {
             // attach the VS Code settings listener
             Configuration.initialize(ctx);

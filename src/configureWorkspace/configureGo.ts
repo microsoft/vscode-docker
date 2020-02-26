@@ -6,17 +6,17 @@
 import { getComposePorts, getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
 
 export let configureGo: IPlatformGeneratorInfo = {
-  genDockerFile,
-  genDockerCompose,
-  genDockerComposeDebug,
-  defaultPorts: [3000],
-  initializeForDebugging: undefined,
+    genDockerFile,
+    genDockerCompose,
+    genDockerComposeDebug,
+    defaultPorts: [3000],
+    initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  let exposeStatements = getExposeStatements(ports);
+    let exposeStatements = getExposeStatements(ports);
 
-  return `
+    return `
 #build stage
 FROM golang:alpine AS builder
 WORKDIR /go/src/app
@@ -36,7 +36,7 @@ ${exposeStatements}
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-  return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -46,7 +46,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-  return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:

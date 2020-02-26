@@ -10,6 +10,7 @@ import { ILocalImageInfo } from "../images/LocalImageInfo";
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
 export class LocalContainerInfo implements ILocalImageInfo {
+    private _containerName: string;
     public data: ContainerInfo;
     public constructor(data: ContainerInfo) {
         this.data = data;
@@ -24,7 +25,16 @@ export class LocalContainerInfo implements ILocalImageInfo {
     }
 
     public get containerName(): string {
-        return this.data.Names[0].substr(1); // Remove start '/'
+        if (!this._containerName) {
+            const names = this.data.Names.map(name => name.substr(1)); // Remove start '/'
+
+            // Linked containers may have names containing '/'; their one "canonical" names will not.
+            const canonicalName = names.find(name => name.indexOf('/') === -1);
+
+            this._containerName = canonicalName ?? names[0];
+        }
+
+        return this._containerName;
     }
 
     public get fullTag(): string {

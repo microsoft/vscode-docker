@@ -6,7 +6,7 @@
 import { WebSiteManagementClient } from 'azure-arm-website';
 import { Site, SiteConfig } from 'azure-arm-website/lib/models';
 import { NameValuePair } from 'request';
-import { Progress, window } from "vscode";
+import { env, Progress, Uri, window } from "vscode";
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
@@ -62,10 +62,19 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     await wizard.execute();
 
     const site: Site = nonNullProp(wizardContext, 'site');
-    const createdNewWebApp: string = `Successfully created web app "${site.name}": https://${site.defaultHostName}`;
+    const siteUri: string = `https://${site.defaultHostName}`;
+    const createdNewWebApp: string = `Successfully created web app "${site.name}": ${siteUri}`;
     ext.outputChannel.appendLine(createdNewWebApp);
+
+    const openSite: string = 'Open Site';
     // don't wait
-    window.showInformationMessage(createdNewWebApp);
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+    window.showInformationMessage(createdNewWebApp, ...[openSite]).then((selection) => {
+        if (selection === openSite) {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            env.openExternal(Uri.parse(siteUri));
+        }
+    });
 }
 
 async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {

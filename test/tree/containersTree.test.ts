@@ -11,7 +11,7 @@ import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validate
 const testContainers: Partial<ContainerInfo>[] = [
     {
         Id: "9330566c414439f4873edd95689b559466993681f7b9741005b5a74786134202",
-        Names: ["/vigorous_booth"],
+        Names: ["/containera/vba", "/vigorous_booth", "/containerb/vbb"],
         Image: "node:8.0",
         ImageID: "sha256:065e283f68bd5ef3b079aee76d3aa55b5e56e8f9ede991a97ff15fdc556f8cfd",
         Created: generateCreatedTimeInSec(1),

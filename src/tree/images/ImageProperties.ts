@@ -9,7 +9,6 @@ import { trimWithElipsis } from "../../utils/trimWithElipsis";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
-import { ImageProperty } from "./ImageProperties";
 import { ILocalImageInfo } from "./LocalImageInfo";
 
 export type ImageProperty = CommonProperty | 'FullTag' | 'ImageId' | 'Registry' | 'Repository' | 'RepositoryName' | 'RepositoryNameAndTag' | 'Tag';

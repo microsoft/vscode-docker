@@ -11,10 +11,13 @@ import { getDockerOSType } from '../../utils/osUtils';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, context);
+        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
+            ...context,
+            noItemFoundErrorMessage: 'No running containers are available to attach'
+        });
     }
 
-    let osType = await getDockerOSType();
+    let osType = await getDockerOSType(context);
     context.telemetry.properties.dockerOSType = osType;
 
     let shellCommand: string;
@@ -26,7 +29,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     }
     context.telemetry.properties.shellCommand = shellCommand;
 
-    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.fullTag}`);
+    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.containerName}`);
     terminal.sendText(`docker exec -it ${node.containerId} ${shellCommand}`);
     terminal.show();
 }

@@ -9,10 +9,11 @@ import * as vscode from 'vscode';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Suite } from 'mocha';
-import { PlatformOS, Platform, ext, configure, ConfigureTelemetryProperties, ConfigureApiOptions, globAsync } from '../extension.bundle';
-import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
+import { PlatformOS, Platform, ext, configure, ConfigureApiOptions, globAsync } from '../extension.bundle';
+import { IActionContext, TelemetryProperties, IAzExtOutputChannel, createAzExtOutputChannel } from 'vscode-azureextensionui';
 import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
 import { TestInput } from 'vscode-azureextensiondev';
+import { ConfigureTelemetryProperties } from '../src/configureWorkspace/configUtils';
 
 // Can be useful for testing
 const outputAllGeneratedFileContents = false;
@@ -66,7 +67,14 @@ async function readFile(pathRelativeToTestRootFolder: string): Promise<string> {
 
 async function testConfigureDockerViaApi(options: ConfigureApiOptions, inputs: (string | TestInput)[] = [], expectedOutputFiles?: string[]): Promise<void> {
     await testUserInput.runWithInputs(inputs, async () => {
-        await vscode.commands.executeCommand('vscode-docker.api.configure', options);
+        await vscode.commands.executeCommand(
+            'vscode-docker.api.configure',
+            {
+                // NOTE: Currently the tests do not comprehend adding debug tasks/configuration.
+                // TODO: Refactor tests to do so (and verify results).
+                initializeForDebugging: false,
+                ...options
+            });
     });
 
     if (expectedOutputFiles) {
@@ -121,7 +129,7 @@ async function testConfigureDocker(platform: Platform, expectedTelemetryProperti
     inputs.unshift(platform);
     let context: IActionContext = {
         telemetry: { properties: {}, measurements: {} },
-        errorHandling: {}
+        errorHandling: { issueProperties: {} }
     };
 
     await testUserInput.runWithInputs(inputs, async () => {
@@ -373,7 +381,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
 
     test('add tests for compose files');
 
-    const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Docker extension tests');
+    const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
     ext.outputChannel = outputChannel;
 
     async function testDotNetCoreConsole(os: PlatformOS, hostOs: PlatformOS, hostOsRelease: string, projectFolder: string, projectFileName: string, projectFileContents: string, expectedDockerFileContents?: string): Promise<void> {
@@ -388,18 +396,18 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile(projectFolder, 'Program.cs', dotnetCoreConsole_ProgramCsContents);
 
             await testConfigureDocker(
-                '.NET Core Console',
+                '.NET: Core Console',
                 {
-                    configurePlatform: '.NET Core Console',
+                    configurePlatform: '.NET: Core Console',
                     configureOs: os,
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: projectFolder.includes('/') ? '2' : '1'
                 },
-                [os /* it doesn't ask for a port, so we don't specify one here */],
-                ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
+                [os, 'No' /* it doesn't ask for a port, so we don't specify one here */],
+                [`${projectFolder}/Dockerfile`, '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
             );
 
-            let dockerFileContents = await readFile('Dockerfile');
+            let dockerFileContents = await readFile(`${projectFolder}/Dockerfile`);
             if (expectedDockerFileContents) {
                 assert.equal(dockerFileContents, expectedDockerFileContents);
             }
@@ -419,18 +427,18 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile(projectFolder, 'Program.cs', dotNetCoreConsole_10_ProjectFileContents);
 
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 {
-                    configurePlatform: 'ASP.NET Core',
+                    configurePlatform: '.NET: ASP.NET Core',
                     configureOs: os,
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
-                [os, '1234'],
-                ['Dockerfile', '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
+                [os, 'No', '1234'],
+                [`${projectFolder}/Dockerfile`, '.dockerignore', `${projectFolder}/Program.cs`, `${projectFolder}/${projectFileName}`]
             );
 
-            let dockerFileContents = await readFile('Dockerfile');
+            let dockerFileContents = await readFile(`${projectFolder}/Dockerfile`);
             if (expectedDockerFileContents) {
                 assert.equal(dockerFileContents, expectedDockerFileContents);
             }
@@ -458,13 +466,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
             assertFileContains('Dockerfile', 'CMD npm start');
 
-            assertFileContains('docker-compose.debug.yml', '1234:1234');
+            assertFileContains('docker-compose.debug.yml', '1234');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
             assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
 
-            assertFileContains('docker-compose.yml', '1234:1234');
+            assertFileContains('docker-compose.yml', '1234');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
@@ -529,13 +537,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
             assertFileContains('Dockerfile', 'CMD npm start');
 
-            assertFileContains('docker-compose.debug.yml', '4321:4321');
+            assertFileContains('docker-compose.debug.yml', '4321');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
             assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
 
-            assertFileContains('docker-compose.yml', '4321:4321');
+            assertFileContains('docker-compose.yml', '4321');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
@@ -617,21 +625,21 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("No project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () =>
                 testConfigureDocker(
-                    '.NET Core Console',
+                    '.NET: Core Console',
                     {
-                        configurePlatform: '.NET Core Console',
+                        configurePlatform: '.NET: Core Console',
                         configureOs: 'Windows',
                         packageFileType: undefined,
                         packageFileSubfolderDepth: undefined
                     },
-                    ['Windows']
+                    ['Windows', 'No']
                 ),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
         testInEmptyFolder("ASP.NET Core no project file", async () => {
-            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('ASP.NET Core', {}, ['Windows', '1234']),
+            await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('.NET: ASP.NET Core', {}, ['Windows', 'No', '1234']),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
@@ -640,21 +648,21 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await writeFile('projectFolder2', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                '.NET Core Console',
+                '.NET: Core Console',
                 {
-                    configurePlatform: '.NET Core Console',
+                    configurePlatform: '.NET: Core Console',
                     configureOs: 'Windows',
                     packageFileType: '.csproj',
                     packageFileSubfolderDepth: '1'
                 },
-                ['Windows', 'projectFolder2/aspnetapp.csproj'],
-                ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
+                ['Windows', 'No', 'projectFolder2/aspnetapp.csproj'],
+                ['projectFolder2/Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
             );
 
-            assertNotFileContains('Dockerfile', 'projectFolder1');
-            assertFileContains('Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
-            assertFileContains('Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
-            assertFileContains('Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
+            assertFileContains('projectFolder2/Dockerfile', 'projectFolder2');
+            assertFileContains('projectFolder2/Dockerfile', `COPY ["projectFolder2/aspnetapp.csproj", "projectFolder2/"]`);
+            assertFileContains('projectFolder2/Dockerfile', `RUN dotnet restore "projectFolder2/aspnetapp.csproj"`);
+            assertFileContains('projectFolder2/Dockerfile', `ENTRYPOINT ["dotnet", "aspnetapp.dll"]`);
         });
     });
 
@@ -691,7 +699,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('ConsoleApp1Folder/Dockerfile', 'EXPOSE');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -723,7 +731,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('ConsoleApp1Folder/Dockerfile', 'EXPOSE');
         });
     });
 
@@ -760,7 +768,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -792,7 +800,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     ENTRYPOINT ["dotnet", "ConsoleApp1.dll"]
                 `));
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
         });
     });
 
@@ -806,9 +814,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_11_ProjectFileContents);
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:1.1-runtime AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:1.1-sdk AS build');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM microsoft/dotnet:1.1-runtime AS base');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM microsoft/dotnet:1.1-sdk AS build');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -820,9 +828,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_11_ProjectFileContents);
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:1.1-runtime AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/dotnet:1.1-sdk AS build');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM microsoft/dotnet:1.1-runtime AS base');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM microsoft/dotnet:1.1-sdk AS build');
         });
     });
 
@@ -836,9 +844,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_22_ProjectFileContents);
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2-nanoserver-1809 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2-nanoserver-1809 AS base');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
         });
 
         testInEmptyFolder("Linux", async () => {
@@ -850,9 +858,9 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'ConsoleApp1.csproj',
                 dotNetCoreConsole_22_ProjectFileContents);
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build');
+            assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS base');
+            assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build');
         });
     });
 
@@ -862,23 +870,23 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         testInEmptyFolder("Default port (80)", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 undefined,
-                ['Windows', TestInput.UseDefaultValue]
+                ['Windows', 'No', TestInput.UseDefaultValue]
             );
 
-            assertFileContains('Dockerfile', 'EXPOSE 80');
+            assertFileContains('projectFolder1/Dockerfile', 'EXPOSE 80');
         });
 
         testInEmptyFolder("No port", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
-                'ASP.NET Core',
+                '.NET: ASP.NET Core',
                 undefined,
-                ['Windows', '']
+                ['Windows', 'No', '']
             );
 
-            assertNotFileContains('Dockerfile', 'EXPOSE');
+            assertNotFileContains('projectFolder1/Dockerfile', 'EXPOSE');
         });
 
         testInEmptyFolder("Windows 10 RS5", async () => {
@@ -955,8 +963,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1803 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1803 AS build');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1803 AS base');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1803 AS build');
         });
 
         testInEmptyFolder("Windows 10 RS3", async () => {
@@ -968,8 +976,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1709 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1709 AS build');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1709 AS base');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1709 AS build');
         });
 
         testInEmptyFolder("Windows Server 2016", async () => {
@@ -981,8 +989,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-sac2016 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-sac2016 AS build');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-sac2016 AS base');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-sac2016 AS build');
         });
 
         testInEmptyFolder("Host=Linux", async () => {
@@ -994,8 +1002,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_22_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1903 AS base');
-            assertFileContains('Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1903 AS build');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-nanoserver-1903 AS base');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1903 AS build');
         });
     });
 
@@ -1009,8 +1017,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project1.csproj',
                 aspNet_10_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore:1.1 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore-build:1.1 AS build');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM microsoft/aspnetcore:1.1 AS base');
+            assertFileContains('AspNetApp1/Dockerfile', 'FROM microsoft/aspnetcore-build:1.1 AS build');
         });
     });
 
@@ -1024,8 +1032,8 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 'project2.csproj',
                 aspNet_20_ProjectFileContents);
 
-            assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore:2.0 AS base');
-            assertFileContains('Dockerfile', 'FROM microsoft/aspnetcore-build:2.0 AS build');
+            assertFileContains('project2/Dockerfile', 'FROM microsoft/aspnetcore:2.0 AS base');
+            assertFileContains('project2/Dockerfile', 'FROM microsoft/aspnetcore-build:2.0 AS build');
         });
     });
 
@@ -1176,27 +1184,74 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
         });
 
     });
-
     // Python
 
     suite("Python", () => {
         testInEmptyFolder("Python", async () => {
             await testConfigureDocker(
-                'Python',
+                'Python: General',
                 {
-                    configurePlatform: 'Python',
+                    configurePlatform: 'Python: General',
                     configureOs: undefined,
                     packageFileType: undefined,
                     packageFileSubfolderDepth: undefined
                 },
-                [TestInput.UseDefaultValue /*port*/],
-                ['Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
+                ['No', 'app.py'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
             );
 
-            assertFileContains('Dockerfile', 'FROM python:alpine');
-            assertFileContains('Dockerfile', 'LABEL Name=testoutput Version=0.0.1');
-            assertFileContains('Dockerfile', 'EXPOSE 3000');
-            assertFileContains('Dockerfile', 'CMD ["python3", "-m", "testoutput"]');
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["python", "app.py"]');
+        });
+    });
+
+    suite("Python", () => {
+        testInEmptyFolder("Python", async () => {
+            await testConfigureDocker(
+                'Python: Django',
+                {
+                    configurePlatform: 'Python: Django',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                ['No', 'manage.py', '8000'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
+            );
+
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'EXPOSE 8000');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:8000", "testOutput.wsgi"]');
+            assertFileContains('requirements.txt', 'django');
+            assertFileContains('requirements.txt', 'gunicorn');
+        });
+    });
+
+    suite("Python", () => {
+        testInEmptyFolder("Python", async () => {
+            await testConfigureDocker(
+                'Python: Flask',
+                {
+                    configurePlatform: 'Python: Flask',
+                    configureOs: undefined,
+                    packageFileType: undefined,
+                    packageFileSubfolderDepth: undefined
+                },
+                ['No', 'flask_app.py', '5000'],
+                ['Dockerfile', '.dockerignore', 'requirements.txt']
+            );
+
+            assertFileContains('Dockerfile', 'FROM python');
+            assertFileContains('Dockerfile', 'EXPOSE 5000');
+            assertFileContains('Dockerfile', 'ADD requirements.txt .');
+            assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:5000", "flask_app:app"]');
+            assertFileContains('requirements.txt', 'flask');
+            assertFileContains('requirements.txt', 'gunicorn');
         });
     });
 
@@ -1304,16 +1359,16 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 CMD /usr/games/fortune -a | cowsay
                 `));
             assert.strictEqual(composeContents, removeIndentation(`
-                version: '2.1'
+                version: '3.4'
 
                 services:
                   testoutput:
                     image: testoutput
                     build: .
                     ports:
-                      - 3000:3000`));
+                      - 3000`));
             assert.strictEqual(debugComposeContents, removeIndentation(`
-                version: '2.1'
+                version: '3.4'
 
                 services:
                   testoutput:
@@ -1322,7 +1377,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                       context: .
                       dockerfile: Dockerfile
                     ports:
-                      - 3000:3000`));
+                      - 3000`));
         });
     });
 
@@ -1362,10 +1417,11 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     {
                         rootPath: testRootFolder,
                         outputFolder: testRootFolder,
-                        platform: '.NET Core Console',
+                        platform: '.NET: Core Console',
                         os: "Linux"
                     },
                     [
+                        'No',
                         'projectFolder2/aspnetapp.csproj'
                     ],
                     ['Dockerfile', '.dockerignore', 'projectFolder1/aspnetapp.csproj', 'projectFolder2/aspnetapp.csproj']
@@ -1408,7 +1464,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Linux",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET: Core Console', 'No'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/somefile1.cs', 'serviceFolder/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1427,7 +1483,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234]
                         },
-                        ['.NET Core Console'],
+                        ['.NET: Core Console', 'No'],
                         ['serviceFolder/Dockerfile', 'serviceFolder/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
@@ -1445,7 +1501,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                             os: "Windows",
                             ports: [1234, 5678]
                         },
-                        ['ASP.NET Core'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
+                        ['.NET: ASP.NET Core', 'No'], ['serviceFolder/subfolder1/Dockerfile', 'serviceFolder/subfolder1/.dockerignore', 'serviceFolder/subfolder1/somefile1.cs', 'serviceFolder/subfolder1/aspnetapp.csproj']
                     );
                     assertFileContains('serviceFolder/subfolder1/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });

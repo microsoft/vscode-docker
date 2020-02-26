@@ -10,28 +10,23 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import * as xml2js from 'xml2js';
-import { DockerOrchestration } from '../constants';
-import { ext } from '../extensionVariables';
-import { captureCancelStep } from '../utils/captureCancelStep';
-import { extractRegExGroups } from '../utils/extractRegExGroups';
-import { globAsync } from '../utils/globAsync';
 import { Platform, PlatformOS } from '../utils/platform';
-import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { configureCpp } from './configureCpp';
-import { configureAspDotNetCore, configureDotNetCoreConsole } from './configureDotNetCore';
+import { scaffoldNetCore } from './configureDotNetCore';
 import { configureGo } from './configureGo';
 import { configureJava } from './configureJava';
 import { configureNode } from './configureNode';
 import { configureOther } from './configureOther';
 import { configurePhp } from './configurePhp';
-import { configurePython } from './configurePython';
+import { scaffoldPython } from './configurePython';
 import { configureRuby } from './configureRuby';
-import { promptForPorts, quickPickGenerateComposeFiles, quickPickOS, quickPickPlatform } from './configUtils';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
+import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
-    npmStart: boolean; //has npm start
+    npmStart: boolean; // has npm start
     cmd: string;
-    fullCommand: string; //full command
+    fullCommand: string; // full command
     author: string;
     version: string;
     artifactName: string;
@@ -51,19 +46,6 @@ interface PomXmlContents {
     };
 }
 
-type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port';
-
-async function captureConfigureCancelStep<T>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    return await captureCancelStep(cancelStep, properties, prompt)
-}
-
-export type ConfigureTelemetryProperties = {
-    configurePlatform?: Platform;
-    configureOs?: PlatformOS;
-    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
-    packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
-};
-
 export interface IPlatformGeneratorInfo {
     genDockerFile: GeneratorFunction,
     genDockerCompose: GeneratorFunction,
@@ -76,18 +58,59 @@ export function getExposeStatements(ports: number[]): string {
     return ports ? ports.map(port => `EXPOSE ${port}`).join('\n') : '';
 }
 
-export function getComposePorts(ports: number[]): string {
-    return ports && ports.length > 0 ? '    ports:\n' + ports.map(port => `      - ${port}:${port}`).join('\n') : '';
+export function getComposePorts(ports: number[], debugPort?: number): string {
+    let portMappings: string[] = ports?.map(port => `      - ${port}`) ?? [];
+
+    if (debugPort) {
+        portMappings.push(`      - ${debugPort}:${debugPort}`);
+    }
+
+    return portMappings && portMappings.length > 0 ? '    ports:\n' + portMappings.join('\n') : '';
 }
 
+function configureScaffolder(generator: IPlatformGeneratorInfo): Scaffolder {
+    return async context => {
+        let files = await configureCore(
+            context,
+            {
+                folder: context.folder,
+                os: context.os,
+                outputFolder: context.outputFolder,
+                platform: context.platform,
+                ports: context.ports,
+                rootPath: context.rootFolder,
+            });
+
+        const updatedFiles = files.map(
+            file => {
+                return {
+                    fileName: file.fileName,
+                    contents: file.contents,
+                    open: path.basename(file.fileName).toLowerCase() === 'dockerfile'
+                };
+            });
+
+        return updatedFiles;
+    };
+}
+
+registerScaffolder('Node.js', configureScaffolder(configureNode));
+registerScaffolder('.NET: ASP.NET Core', scaffoldNetCore);
+registerScaffolder('.NET: Core Console', scaffoldNetCore);
+registerScaffolder('Python: Django', scaffoldPython);
+registerScaffolder('Python: Flask', scaffoldPython);
+registerScaffolder('Python: General', scaffoldPython);
+registerScaffolder('Java', configureScaffolder(configureJava));
+registerScaffolder('C++', configureScaffolder(configureCpp));
+registerScaffolder('Go', configureScaffolder(configureGo));
+registerScaffolder('Ruby', configureScaffolder(configureRuby));
+registerScaffolder('Other', configureScaffolder(configureOther));
+
 const generatorsByPlatform = new Map<Platform, IPlatformGeneratorInfo>();
-generatorsByPlatform.set('ASP.NET Core', configureAspDotNetCore);
 generatorsByPlatform.set('C++', configureCpp);
 generatorsByPlatform.set('Go', configureGo);
 generatorsByPlatform.set('Java', configureJava);
-generatorsByPlatform.set('.NET Core Console', configureDotNetCoreConsole);
 generatorsByPlatform.set('Node.js', configureNode);
-generatorsByPlatform.set('Python', configurePython);
 generatorsByPlatform.set('Ruby', configureRuby);
 generatorsByPlatform.set('PHP', configurePhp);
 generatorsByPlatform.set('Other', configureOther);
@@ -124,34 +147,7 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: Pla
 }
 
 function genDockerIgnoreFile(service: string, platformType: Platform, os: string, ports: number[]): string {
-    const ignoredItems = [
-        '**/.classpath',
-        '**/.dockerignore',
-        '**/.env',
-        '**/.git',
-        '**/.gitignore',
-        '**/.project',
-        '**/.settings',
-        '**/.toolstarget',
-        '**/.vs',
-        '**/.vscode',
-        '**/*.*proj.user',
-        '**/*.dbmdl',
-        '**/*.jfm',
-        '**/azds.yaml',
-        platformType !== 'Node.js' ? '**/bin' : undefined,
-        '**/charts',
-        '**/docker-compose*',
-        '**/Dockerfile*',
-        '**/node_modules',
-        '**/npm-debug.log',
-        '**/obj',
-        '**/secrets.dev.yaml',
-        '**/values.dev.yaml',
-        'README.md'
-    ];
-
-    return ignoredItems.filter(item => item !== undefined).join('\n');
+    return genCommonDockerIgnoreFile(platformType);
 }
 
 async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
@@ -172,7 +168,7 @@ function getDefaultPackageInfo(): PackageInfo {
 async function readPackageJson(folderPath: string): Promise<{ packagePath?: string, packageInfo: PackageInfo }> {
     // open package.json and look for main, scripts start
     const uris: vscode.Uri[] = await getPackageJson(folderPath);
-    let packageInfo: PackageInfo = getDefaultPackageInfo(); //default
+    let packageInfo: PackageInfo = getDefaultPackageInfo(); // default
     let packagePath: string | undefined;
 
     if (uris && uris.length > 0) {
@@ -207,7 +203,7 @@ async function readPackageJson(folderPath: string): Promise<{ packagePath?: stri
  * Looks for a pom.xml or build.gradle file, and returns its parsed contents, or else a default package contents if none path
  */
 async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string, packageInfo: PackageInfo }> {
-    let pkg: PackageInfo = getDefaultPackageInfo(); //default
+    let pkg: PackageInfo = getDefaultPackageInfo();  // default
     let foundPath: string | undefined;
 
     let pomPath = path.join(folderPath, 'pom.xml');
@@ -267,29 +263,6 @@ async function readPomOrGradle(folderPath: string): Promise<{ foundPath?: string
     return { foundPath, packageInfo: pkg };
 }
 
-// Returns the relative path of the project file without the extension
-async function findCSProjOrFSProjFile(folderPath: string): Promise<string> {
-    const opt: vscode.QuickPickOptions = {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: 'Select Project'
-    }
-
-    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
-
-    if (!projectFiles || !projectFiles.length) {
-        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
-    }
-
-    if (projectFiles.length > 1) {
-        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
-        let result = await ext.ui.showQuickPick(items, opt);
-        return result.label;
-    } else {
-        return projectFiles[0];
-    }
-}
-
 type GeneratorFunction = (serviceName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], packageJson?: Partial<PackageInfo>) => string;
 type DebugScaffoldFunction = (context: IActionContext, folder: vscode.WorkspaceFolder, os: PlatformOS, dockerfile: string, packageInfo: PackageInfo) => Promise<void>;
 
@@ -300,19 +273,12 @@ const DOCKER_FILE_TYPES: { [key: string]: { generator: GeneratorFunction, isComp
     '.dockerignore': { generator: genDockerIgnoreFile }
 };
 
-const YES_PROMPT: vscode.MessageItem = {
-    title: "Yes",
-    isCloseAffordance: false
-};
-const YES_OR_NO_PROMPTS: vscode.MessageItem[] = [
-    YES_PROMPT,
-    {
-        title: "No",
-        isCloseAffordance: true
-    }
-];
-
 export interface ConfigureApiOptions {
+    /**
+     * Determines whether to add debugging tasks/configuration during scaffolding.
+     */
+    initializeForDebugging?: boolean;
+
     /**
      * Root folder from which to search for .csproj, package.json, .pom or .gradle files
      */
@@ -321,7 +287,7 @@ export interface ConfigureApiOptions {
     /**
      * Output folder for the docker files. Relative paths in the Dockerfile we will calculated based on this folder
      */
-    outputFolder: string;
+    outputFolder?: string;
 
     /**
      * Platform
@@ -339,74 +305,68 @@ export interface ConfigureApiOptions {
     os?: PlatformOS;
 
     /**
-     * Open the Dockerfile that was generated
-     */
-    openDockerFile?: boolean;
-
-    /**
      * The workspace folder for configuring
      */
     folder?: vscode.WorkspaceFolder;
 }
 
 export async function configure(context: IActionContext, rootFolderPath: string | undefined): Promise<void> {
-    const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
-    let folder: vscode.WorkspaceFolder;
-    if (!rootFolderPath) {
-        folder = await captureConfigureCancelStep('folder', properties, () => quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.'));
-        rootFolderPath = folder.uri.fsPath;
-    }
+    const scaffoldContext = {
+        ...context,
+        // NOTE: Currently only tests use rootFolderPath and they do not function when debug tasks/configuration are added.
+        // TODO: Refactor tests to allow for (and verify) debug tasks/configuration.
+        initializeForDebugging: rootFolderPath === undefined,
+        rootFolder: rootFolderPath
+    };
 
-    let filesWritten = await configureCore(
-        context,
-        {
-            rootPath: rootFolderPath,
-            outputFolder: rootFolderPath,
-            openDockerFile: true,
-            folder: folder,
+    const files = await scaffold(scaffoldContext);
+
+    files.filter(file => file.open).forEach(
+        file => {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            vscode.window.showTextDocument(vscode.Uri.file(file.filePath), { preview: false });
         });
-
-    // Open the dockerfile (if written)
-    try {
-        let dockerfile = filesWritten.find(fp => path.basename(fp).toLowerCase() === 'dockerfile');
-        if (dockerfile) {
-            await vscode.window.showTextDocument(vscode.Uri.file(dockerfile));
-        }
-    } catch (err) {
-        // Ignore
-    }
 }
 
 export async function configureApi(context: IActionContext, options: ConfigureApiOptions): Promise<void> {
-    await configureCore(context, options);
+    const scaffoldContext = {
+        ...context,
+        folder: options?.folder,
+        initializeForDebugging: options?.initializeForDebugging,
+        os: options?.os,
+        outputFolder: options?.outputFolder,
+        platform: options?.platform,
+        ports: options?.ports,
+        rootFolder: options?.rootPath,
+    };
+
+    await scaffold(scaffoldContext);
 }
 
 // tslint:disable-next-line:max-func-body-length // Because of nested functions
-async function configureCore(context: IActionContext, options: ConfigureApiOptions): Promise<string[]> {
+async function configureCore(context: ScaffolderContext, options: ConfigureApiOptions): Promise<ScaffoldFile[]> {
     const properties: TelemetryProperties & ConfigureTelemetryProperties = context.telemetry.properties;
     const rootFolderPath: string = options.rootPath;
-    const outputFolder = options.outputFolder;
+    const outputFolder = options.outputFolder ?? rootFolderPath;
 
-    const platformType: Platform = options.platform || await captureConfigureCancelStep('platform', properties, quickPickPlatform);
-    properties.configurePlatform = platformType;
+    const platformType: Platform = options.platform;
     let generatorInfo = generatorsByPlatform.get(platformType);
 
     let os: PlatformOS | undefined = options.os;
-    if (!os && platformType.toLowerCase().includes('.net')) {
-        os = await captureConfigureCancelStep('os', properties, quickPickOS);
-    }
     properties.configureOs = os;
-    properties.orchestration = 'single' as DockerOrchestration;
 
     let generateComposeFiles = true;
 
     if (platformType === 'Node.js') {
-        generateComposeFiles = await captureConfigureCancelStep('compose', properties, quickPickGenerateComposeFiles);
+        generateComposeFiles = await context.promptForCompose();
+        if (generateComposeFiles) {
+            properties.orchestration = 'docker-compose';
+        }
     }
 
     let ports: number[] | undefined = options.ports;
     if (!ports && generatorInfo.defaultPorts !== undefined) {
-        ports = await captureConfigureCancelStep('port', properties, () => promptForPorts(generatorInfo.defaultPorts));
+        ports = await context.promptForPorts(generatorInfo.defaultPorts);
     }
 
     let targetFramework: string;
@@ -415,20 +375,7 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     {
         // Scope serviceNameAndPathRelativeToRoot only to this block of code
         let serviceNameAndPathRelativeToRoot: string;
-        if (platformType.toLowerCase().includes('.net')) {
-            let projFilePath = await findCSProjOrFSProjFile(rootFolderPath);
-            serviceNameAndPathRelativeToRoot = projFilePath.slice(0, -(path.extname(projFilePath).length));
-            let projFileContents = (await fse.readFile(path.join(rootFolderPath, projFilePath))).toString();
-
-            // Extract TargetFramework for version
-            [targetFramework] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
-            projFile = projFilePath;
-
-            properties.packageFileType = projFilePath.endsWith('.csproj') ? '.csproj' : '.fsproj';
-            properties.packageFileSubfolderDepth = getSubfolderDepth(serviceNameAndPathRelativeToRoot);
-        } else {
-            serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
-        }
+        serviceNameAndPathRelativeToRoot = path.basename(rootFolderPath).toLowerCase();
 
         // We need paths in the Dockerfile to be relative to the output folder, not the root
         serviceNameAndPathRelativeToOutput = path.relative(outputFolder, path.join(rootFolderPath, serviceNameAndPathRelativeToRoot));
@@ -441,14 +388,14 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
         ({ packageInfo, foundPath: foundPomOrGradlePath } = await readPomOrGradle(rootFolderPath));
         if (foundPomOrGradlePath) {
             properties.packageFileType = path.basename(foundPomOrGradlePath);
-            properties.packageFileSubfolderDepth = getSubfolderDepth(foundPomOrGradlePath);
+            properties.packageFileSubfolderDepth = getSubfolderDepth(outputFolder, foundPomOrGradlePath);
         }
     } else {
         let packagePath: string | undefined;
         ({ packagePath, packageInfo } = await readPackageJson(rootFolderPath));
         if (packagePath) {
             properties.packageFileType = 'package.json';
-            properties.packageFileSubfolderDepth = getSubfolderDepth(packagePath);
+            properties.packageFileSubfolderDepth = getSubfolderDepth(outputFolder, packagePath);
         }
     }
 
@@ -457,12 +404,12 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
         packageInfo.artifactName = projFile;
     }
 
-    let filesWritten: string[] = [];
+    let filesWritten: ScaffoldFile[] = [];
     await Promise.all(Object.keys(DOCKER_FILE_TYPES).map(async (fileName) => {
         const dockerFileType = DOCKER_FILE_TYPES[fileName];
 
         if (dockerFileType.isComposeGenerator && generateComposeFiles) {
-            properties.orchestration = 'docker-compose' as DockerOrchestration;
+            properties.orchestration = 'docker-compose';
         }
 
         return dockerFileType.isComposeGenerator !== true || generateComposeFiles
@@ -471,38 +418,17 @@ async function configureCore(context: IActionContext, options: ConfigureApiOptio
     }));
 
     // Can only configure for debugging if there's a workspace folder, and there's a scaffold function
-    if (options.folder && generatorInfo.initializeForDebugging) {
+    if (options.folder && context.initializeForDebugging && generatorInfo.initializeForDebugging) {
         await generatorInfo.initializeForDebugging(context, options.folder, os, path.join(outputFolder, 'Dockerfile'), packageInfo);
     }
 
     return filesWritten;
 
     async function createWorkspaceFileIfNotExists(fileName: string, generatorFunction: GeneratorFunction): Promise<void> {
-        const filePath = path.join(outputFolder, fileName);
-        let writeFile = false;
-        if (await fse.pathExists(filePath)) {
-            const response: vscode.MessageItem | undefined = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
-            if (response === YES_PROMPT) {
-                writeFile = true;
-            }
-        } else {
-            writeFile = true;
+        // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
+        let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, ports, packageInfo);
+        if (fileContents) {
+            filesWritten.push({ contents: fileContents, fileName });
         }
-
-        if (writeFile) {
-            // Paths in the docker files should be relative to the Dockerfile (which is in the output folder)
-            let fileContents = generatorFunction(serviceNameAndPathRelativeToOutput, platformType, os, ports, packageInfo);
-            if (fileContents) {
-                fse.writeFileSync(filePath, fileContents, { encoding: 'utf8' });
-                filesWritten.push(filePath);
-            }
-        }
-    }
-
-    function getSubfolderDepth(filePath: string): string {
-        let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
-        let matches = relativeToRoot.match(/[\/\\]/g);
-        let depth: number = matches ? matches.length : 0;
-        return String(depth);
     }
 }

@@ -32,7 +32,7 @@ function createItem(folder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
 
 function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscode.QuickPickItem[] {
     const items: vscode.QuickPickItem[] = [];
-    // tslint:disable-next-line:prefer-for-of // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/prefer-for-of */ // Grandfathered in
     for (let i = 0; i < uris.length; i++) {
         items.push(createItem(folder, uris[i]));
     }
@@ -55,12 +55,20 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
         // prompt for compose file
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length === 0) {
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage('Couldn\'t find any docker-compose files in your workspace.');
             return;
         }
 
         const items: vscode.QuickPickItem[] = computeItems(folder, uris);
-        selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
+
+        if ((items.length === 1 && isDefaultDockerComposeFile(items[0].label))
+            || (items.length === 2 && items.some(i => isDefaultDockerComposeFile(i.label)) && items.some(i => isDefaultDockerComposeOverrideFile(i.label)))) {
+            // if the current set of docker files contain only docker-compose.yml or docker-compose.yml with override file,
+            // don't ask user for a docker file and let docker-compose automatically pick these files.
+        } else {
+            selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
+        }
     }
 
     const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker Compose');
@@ -70,12 +78,33 @@ async function compose(commands: ('up' | 'down')[], message: string, dockerCompo
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (let command of commands) {
-        selectedItems.forEach((item: Item) => {
-            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
-        });
+        if (selectedItems.length === 0) {
+            terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose ${command} ${detached} ${build}` : `docker-compose ${command}`);
+        } else {
+            selectedItems.forEach((item: Item) => {
+                terminal.sendText(command.toLowerCase() === 'up' ? `docker-compose -f "${item.file}" ${command} ${detached} ${build}` : `docker-compose -f "${item.file}" ${command}`);
+            });
+        }
         terminal.show();
     }
+}
 
+function isDefaultDockerComposeFile(fileName: string): boolean {
+    if (fileName) {
+        const lowerCasefileName: string = fileName.toLowerCase();
+        return lowerCasefileName === 'docker-compose.yml' || lowerCasefileName === 'docker-compose.yaml'
+    }
+
+    return false;
+}
+
+function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
+    if (fileName) {
+        const lowerCasefileName: string = fileName.toLowerCase();
+        return lowerCasefileName === 'docker-compose.override.yml' || lowerCasefileName === 'docker-compose.override.yaml'
+    }
+
+    return false;
 }
 
 export async function composeUp(_context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {

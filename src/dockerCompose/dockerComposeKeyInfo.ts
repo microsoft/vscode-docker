@@ -152,7 +152,7 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
         "Username or UID (format: <name|uid>[:<group|gid>])."
     ),
     'version': (
-        "Specify the compose format that this file conforms to. Omit this property to indicate v1, otherwise, set this to `2`."
+        "Specify the compose format that this file conforms to."
     ),
     'volumes': (
         "Mount paths as volumes, optionally specifying a path on the host machine (`HOST:CONTAINER`), or an access mode (`HOST:CONTAINER:ro`)."

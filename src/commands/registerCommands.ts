@@ -18,8 +18,10 @@ import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
+import { help } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
+import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pushImage } from "./images/pushImage";
@@ -53,6 +55,7 @@ import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBr
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImage, pullRepository } from "./registries/pullImages";
+import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { setRegistryAsDefault } from "./registries/registrySettings";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
@@ -89,6 +92,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
     registerWorkspaceCommand('vscode-docker.images.runInteractive', runImageInteractive);
     registerCommand('vscode-docker.images.tag', tagImage);
+    registerCommand('vscode-docker.images.copyFullTag', copyFullTag);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
     registerCommand('vscode-docker.networks.create', createNetwork);
@@ -105,6 +109,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImage);
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
+    registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
     registerCommand('vscode-docker.registries.setAsDefault', setRegistryAsDefault);
 
     registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
@@ -125,4 +130,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);
+
+    registerCommand('vscode-docker.help', help);
 }

@@ -3,10 +3,27 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import vscode = require('vscode');
-import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, TelemetryProperties } from 'vscode-azureextensionui';
+import { DockerOrchestration } from '../constants';
 import { ext } from "../extensionVariables";
+import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from '../utils/platform';
+
+export type ConfigureTelemetryProperties = {
+    configurePlatform?: Platform;
+    configureOs?: PlatformOS;
+    orchestration?: DockerOrchestration;
+    packageFileType?: string; // 'build.gradle', 'pom.xml', 'package.json', '.csproj', '.fsproj'
+    packageFileSubfolderDepth?: string; // 0 = project/etc file in root folder, 1 = in subfolder, 2 = in subfolder of subfolder, etc.
+};
+
+export type ConfigureTelemetryCancelStep = 'folder' | 'platform' | 'os' | 'compose' | 'port' | 'project' | 'pythonFile';
+
+export async function captureConfigureCancelStep<TReturn, TPrompt extends (...args: []) => Promise<TReturn>>(cancelStep: ConfigureTelemetryCancelStep, properties: TelemetryProperties, prompt: TPrompt): Promise<TReturn> {
+    return await captureCancelStep(cancelStep, properties, prompt)();
+}
 
 /**
  * Prompts for port numbers
@@ -30,14 +47,19 @@ export async function promptForPorts(ports: number[]): Promise<number[]> {
     return splitPorts(await ext.ui.showInputBox(opt));
 }
 
-function splitPorts(value: string): number[] | undefined {
-    value = value ? value : '';
-    let matches = value.match(/\d+/g);
+/**
+ * Splits a comma separated string of port numbers
+ */
+export function splitPorts(value: string): number[] | undefined {
+    if (!value || value === '') {
+        return [];
+    }
 
-    if (!matches && value !== '') {
+    let elements = value.split(',').map(p => p.trim());
+    let matches = elements.filter(p => p.match(/^-*\d+$/));
+
+    if (matches.length < elements.length) {
         return undefined;
-    } else if (!matches) {
-        return []; // Empty list
     }
 
     let ports = matches.map(Number);
@@ -62,15 +84,17 @@ export async function quickPickPlatform(platforms?: Platform[]): Promise<Platfor
     }
 
     platforms = platforms || [
-        'Go',
-        'Java',
-        '.NET Core Console',
-        'ASP.NET Core',
         'Node.js',
-        'Python',
-        'Ruby',
+        '.NET: ASP.NET Core',
+        '.NET: Core Console',
+        'Python: Django',
+        'Python: Flask',
+        'Python: General',
+        'Java',
         'C++',
         'PHP',
+        'Go',
+        'Ruby',
         'Other'
     ];
 
@@ -110,4 +134,42 @@ export async function quickPickGenerateComposeFiles(): Promise<boolean> {
         opt);
 
     return response.data;
+}
+
+export function getSubfolderDepth(outputFolder: string, filePath: string): string {
+    let relativeToRoot = path.relative(outputFolder, path.resolve(outputFolder, filePath));
+    let matches = relativeToRoot.match(/[\/\\]/g);
+    let depth: number = matches ? matches.length : 0;
+    return String(depth);
+}
+
+export function genCommonDockerIgnoreFile(platformType: Platform): string {
+    const ignoredItems = [
+        '**/.classpath',
+        '**/.dockerignore',
+        '**/.env',
+        '**/.git',
+        '**/.gitignore',
+        '**/.project',
+        '**/.settings',
+        '**/.toolstarget',
+        '**/.vs',
+        '**/.vscode',
+        '**/*.*proj.user',
+        '**/*.dbmdl',
+        '**/*.jfm',
+        '**/azds.yaml',
+        platformType !== 'Node.js' ? '**/bin' : undefined,
+        '**/charts',
+        '**/docker-compose*',
+        '**/Dockerfile*',
+        '**/node_modules',
+        '**/npm-debug.log',
+        '**/obj',
+        '**/secrets.dev.yaml',
+        '**/values.dev.yaml',
+        'README.md'
+    ];
+
+    return ignoredItems.filter(item => item !== undefined).join('\n');
 }

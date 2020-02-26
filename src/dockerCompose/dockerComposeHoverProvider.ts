@@ -15,7 +15,7 @@ export class DockerComposeHoverProvider implements HoverProvider {
     public _keyInfo: KeyInfo;
 
     // Provide the parser you want to use as well as keyinfo dictionary.
-    constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
+    public constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
         this._parser = wordParser;
         this._keyInfo = keyInfo;
     }
@@ -31,11 +31,11 @@ export class DockerComposeHoverProvider implements HoverProvider {
         return this._computeInfoForLineWithTokens(line.text, tokens, position);
     }
 
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
     private _computeInfoForLineWithTokens(line: string, tokens: parser.IToken[], position: Position): Promise<Hover> {
         let possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
 
-        // tslint:disable-next-line:promise-function-async // Grandfathered in
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
         return Promise.all(possibleTokens.map(tokenIndex => this._computeInfoForToken(line, tokens, tokenIndex))).then((results) => {
             return possibleTokens.map((tokenIndex, arrayIndex) => {
                 return {
@@ -59,7 +59,7 @@ export class DockerComposeHoverProvider implements HoverProvider {
         });
     }
 
-    // tslint:disable-next-line:promise-function-async // Grandfathered in
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
     private _computeInfoForToken(line: string, tokens: parser.IToken[], tokenIndex: number): Promise<MarkedString[]> {
         // -------------
         // Detect hovering on a key

@@ -11,7 +11,11 @@ import { registryExpectedContextValues } from '../../tree/registries/registryCon
 
 export async function deleteRemoteImage(context: IActionContext, node?: DockerV2TagTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, { ...context, suppressCreatePick: true });
+        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, {
+            ...context,
+            suppressCreatePick: true,
+            noItemFoundErrorMessage: 'No remote images are available to delete'
+        });
     }
 
     const confirmDelete = `Are you sure you want to delete image "${node.repoNameAndTag}"? This will delete all images that have the same digest.`;
@@ -28,5 +32,6 @@ export async function deleteRemoteImage(context: IActionContext, node?: DockerV2
     await repoTI.refresh();
     const message = `Successfully deleted image "${node.repoNameAndTag}".`;
     // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(message);
 }

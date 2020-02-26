@@ -12,12 +12,21 @@ import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev
 
 const env = process.env;
 
-function test(): cp.ChildProcess {
+function test(mochaGrep: string = ''): cp.ChildProcess {
     env.DEBUGTELEMETRY = '1';
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
+    env.MOCHA_grep = mochaGrep;
     env.MOCHA_timeout = String(10 * 1000);
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
     return spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+}
+
+function allTest(): cp.ChildProcess {
+    return test();
+}
+
+function unitTest(): cp.ChildProcess {
+    return test('\\(unit\\)');
 }
 
 function spawn(command: string, args: string[], options: {}): cp.ChildProcess {
@@ -53,4 +62,5 @@ async function sortPackageJson(): Promise<void> {
 exports.sortPackageJson = sortPackageJson;
 exports['webpack-dev'] = () => gulp_webpack('development');
 exports['webpack-prod'] = () => gulp_webpack('production');
-exports.test = gulp.series(gulp_installAzureAccount, test);
+exports.test = gulp.series(gulp_installAzureAccount, allTest);
+exports['unit-test'] = gulp.series(gulp_installAzureAccount, unitTest);

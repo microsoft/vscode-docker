@@ -3,12 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { parseError } from "vscode-azureextensionui";
+/* eslint-disable unicorn/filename-case */
 
-export async function wrapDockerodeENOENT<T>(dockerodeCallback: () => Promise<T>): Promise<T> {
+import { IActionContext, parseError } from "vscode-azureextensionui";
+
+export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
     try {
         return await dockerodeCallback();
     } catch (err) {
+        context.errorHandling.suppressReportIssue = true;
+
         const error = parseError(err);
 
         if (error && error.errorType === 'ENOENT') {

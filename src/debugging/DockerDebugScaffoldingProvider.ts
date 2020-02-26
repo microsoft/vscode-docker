@@ -9,32 +9,54 @@ import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
+import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
+import { PythonProjectType, PythonTarget } from '../utils/pythonUtils';
 import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
 import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
+import { pythonDebugHelper } from './python/PythonDebugHelper';
 
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
+export interface PythonScaffoldingOptions {
+    projectType?: PythonProjectType;
+    target?: PythonTarget
+}
 
 export interface IDockerDebugScaffoldingProvider {
     initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void>;
     initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void>;
+    initializePythonForDebugging(context: DockerDebugScaffoldContext, options: PythonScaffoldingOptions): Promise<void>;
 }
 
 export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingProvider {
     public async initializeNetCoreForDebugging(context: DockerDebugScaffoldContext, options?: NetCoreScaffoldingOptions): Promise<void> {
         await this.initializeForDebugging(
+            /* eslint-disable @typescript-eslint/promise-function-async */
             () => netCoreDebugHelper.provideDebugConfigurations(context, options),
             () => netCoreTaskHelper.provideDockerBuildTasks(context, options),
             () => netCoreTaskHelper.provideDockerRunTasks(context, options));
+        /* eslint-enable @typescript-eslint/promise-function-async */
     }
 
     public async initializeNodeForDebugging(context: DockerDebugScaffoldContext): Promise<void> {
         await this.initializeForDebugging(
+            /* eslint-disable @typescript-eslint/promise-function-async */
             () => nodeDebugHelper.provideDebugConfigurations(context),
             () => nodeTaskHelper.provideDockerBuildTasks(context),
             () => nodeTaskHelper.provideDockerRunTasks(context));
+        /* eslint-enable @typescript-eslint/promise-function-async */
+    }
+
+    public async initializePythonForDebugging(context: DockerDebugScaffoldContext, options?: PythonScaffoldingOptions): Promise<void> {
+        await this.initializeForDebugging(
+            /* eslint-disable @typescript-eslint/promise-function-async */
+            () => pythonDebugHelper.provideDebugConfigurations(context, options),
+            () => pythonTaskHelper.provideDockerBuildTasks(context),
+            () => pythonTaskHelper.provideDockerRunTasks(context, options)
+        /* eslint-enable @typescript-eslint/promise-function-async */
+        );
     }
 
     private async initializeForDebugging(
@@ -48,14 +70,17 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
         const debugConfigurations = await provideDebugConfigurations();
 
         for (const buildTask of buildTasks) {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(buildTask, _overwrite), overwrite);
         }
 
         for (const runTask of runTasks) {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addTask(runTask, _overwrite), overwrite);
         }
 
         for (const debugConfiguration of debugConfigurations) {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             overwrite = await DockerDebugScaffoldingProvider.addObjectWithOverwritePrompt((_overwrite: boolean | undefined) => addDebugConfiguration(debugConfiguration, _overwrite), overwrite);
         }
     }

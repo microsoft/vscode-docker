@@ -14,7 +14,7 @@ export class OpnBrowserClient implements BrowserClient {
         const uri = Uri.parse(url);
 
         if (uri.scheme === 'http' || uri.scheme === 'https') {
-            // tslint:disable-next-line:no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             openExternal(url);
         }
     }

@@ -6,15 +6,15 @@
 import { getComposePorts, PackageInfo } from './configure';
 
 export let configureOther = {
-  genDockerFile,
-  genDockerCompose,
-  genDockerComposeDebug,
-  defaultPorts: [3000],
-  initializeForDebugging: undefined,
+    genDockerFile,
+    genDockerCompose,
+    genDockerComposeDebug,
+    defaultPorts: [3000],
+    initializeForDebugging: undefined,
 };
 
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
-  return `FROM docker/whalesay:latest
+    return `FROM docker/whalesay:latest
 LABEL Name=${serviceNameAndRelativePath} Version=${version}
 RUN apt-get -y update && apt-get install -y fortunes
 CMD /usr/games/fortune -a | cowsay
@@ -22,7 +22,7 @@ CMD /usr/games/fortune -a | cowsay
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-  return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -32,7 +32,7 @@ ${getComposePorts(ports)}`;
 }
 
 function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
-  return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:

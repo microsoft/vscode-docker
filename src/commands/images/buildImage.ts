@@ -10,7 +10,7 @@ import { ext } from "../../extensionVariables";
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
 import { delay } from "../../utils/delay";
 import { getValidImageName } from "../../utils/getValidImageName";
-import { quickPickDockerFileItem } from "../../utils/quick-pick-file";
+import { quickPickDockerFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
 

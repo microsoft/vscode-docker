@@ -32,7 +32,7 @@ CMD ${cmd}`;
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
-    return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -53,7 +53,7 @@ function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: str
         cmd = `## set your startup file here\n    command: node ${inspectConfig} index.js`;
     }
 
-    return `version: '2.1'
+    return `version: '3.4'
 
 services:
   ${serviceNameAndRelativePath}:
@@ -61,7 +61,7 @@ services:
     build: .
     environment:
       NODE_ENV: development
-${getComposePorts(ports.concat(9229))}
+${getComposePorts(ports, 9229)}
     ${cmd}`;
 }
 

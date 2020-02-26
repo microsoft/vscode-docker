@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as semver from 'semver';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { wrapDockerodeENOENT } from './wrapDockerodeENOENT';
+import { callDockerodeWithErrorHandling } from './callDockerodeWithErrorHandling';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';
@@ -65,13 +66,15 @@ export function isMac(): boolean {
 
 export type DockerOSType = "windows" | "linux";
 
-export async function getDockerOSType(): Promise<DockerOSType> {
+export async function getDockerOSType(context: IActionContext): Promise<DockerOSType> {
     if (!isWindows()) {
         // On Linux or macOS, this can only ever be linux,
         // so short-circuit the Docker call entirely.
         return "linux";
     } else {
-        const info = <{ OSType: DockerOSType }>await wrapDockerodeENOENT(() => ext.dockerode.info());
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+        const info = await callDockerodeWithErrorHandling(() => ext.dockerode.info(), context);
+        // eslint-disable-next-line @typescript-eslint/tslint/config
         return info.OSType;
     }
 }

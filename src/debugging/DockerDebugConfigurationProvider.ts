@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
@@ -17,8 +17,13 @@ export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguratio
     platform?: DockerPlatform;
 }
 
+export interface DockerAttachConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
+    processName?: string;
+    processId?: string | number;
+}
+
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
-    constructor(
+    public constructor(
         private readonly dockerClient: DockerClient,
         private readonly helpers: { [key in DockerPlatform]: DebugHelper }
     ) { }
@@ -27,29 +32,39 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const add: MessageItem = { title: 'Add Docker Files' };
 
         // Prompt them to add Docker files since they probably haven't
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
             'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
             ...[add]).then((result) => {
-                if (result === add) {
-                    commands.executeCommand('vscode-docker.configure');
-                }
-            });
+            if (result === add) {
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                commands.executeCommand('vscode-docker.configure');
+            }
+        });
 
         return [];
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
         return callWithTelemetryAndErrorHandling(
-            'docker-launch',
+            debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
                 if (!folder) {
-                    throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                    folder = workspace.workspaceFolders[0];
+
+                    if (!folder) {
+                        throw new Error('To debug with Docker you must first open a folder or workspace in VS Code.');
+                    }
                 }
 
                 if (debugConfiguration.type === undefined) {
                     // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
                     // VSCode subsequently will call provideDebugConfigurations which will show an error message
                     return null;
+                }
+
+                if (!debugConfiguration.request) {
+                    throw new Error('The property "request" must be specified in the debug config.')
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);
@@ -95,9 +110,16 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration.dockerOptions
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
             && resolvedConfiguration.dockerOptions.containerNameToKill) {
-            try {
-                await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
-            } catch { }
+
+            // Since Python is a special case as we handle waiting for the debugger to be ready while resolving
+            // the launch configuration, and since this method comes later then we shouldn't remove a container
+            // that we just created.
+            // TODO: this needs to be removed as soon as the Python extension adds a way to retry while connecting to a remote debugger.
+            if (resolvedConfiguration.type !== 'python') {
+                try {
+                    await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
+                } catch { }
+            }
 
             // Now register the container for removal after the debug session ends
             const disposable = debug.onDidTerminateDebugSession(async session => {

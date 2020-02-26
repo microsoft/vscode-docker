@@ -17,7 +17,9 @@ export class GitLabRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
     private _nextLink?: string;
 
     public constructor(parent: GitLabProjectTreeItem, id: string, name: string) {
-        super(parent, name);
+        // GitLab returns an empty repository name,
+        // if the project's namespace is the same as the repository
+        super(parent, name || parent.label);
         this.repoId = id;
     }
 
@@ -60,5 +62,6 @@ interface ITag {
 }
 
 interface ITagDetails {
+    /* eslint-disable-next-line camelcase */
     created_at: string;
 }

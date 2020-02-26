@@ -92,7 +92,7 @@ export interface DockerClient {
 }
 
 export class CliDockerClient implements DockerClient {
-    constructor(private readonly processProvider: ProcessProvider) {
+    public constructor(private readonly processProvider: ProcessProvider) {
         // CONSIDER: Use dockerode client as basis for debugging.
     }
 

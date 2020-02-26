@@ -39,7 +39,7 @@ export class NodeDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]> {
         return [
             {
-                name: 'Docker Node.js Launch and Attach',
+                name: 'Docker Node.js Launch',
                 type: 'docker',
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
@@ -82,7 +82,7 @@ export class NodeDebugHelper implements DebugHelper {
         };
 
         if (resolvedConfiguration.localRoot === undefined) {
-            // tslint:disable-next-line: no-invalid-template-strings
+            /* eslint-disable-next-line no-template-curly-in-string */
             resolvedConfiguration.localRoot = '${workspaceFolder}';
         }
 

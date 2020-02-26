@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Volume } from "dockerode";
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { LocalVolumeInfo } from "./LocalVolumeInfo";
 
@@ -47,7 +48,9 @@ export class VolumeTreeItem extends AzExtTreeItem {
         return ext.dockerode.getVolume(this.volumeName);
     }
 
-    public async deleteTreeItemImpl(): Promise<void> {
-        await this.getVolume().remove({ force: true });
+    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
+        const volume: Volume = this.getVolume();
+        // eslint-disable-next-line @typescript-eslint/promise-function-async
+        await callDockerodeWithErrorHandling(() => volume.remove({ force: true }), context);
     }
 }

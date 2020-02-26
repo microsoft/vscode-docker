@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import { Suite } from 'mocha';
 import { nonNullProp } from '../extension.bundle';
 
-suite("nonNull", async function (this: Suite): Promise<void> {
+suite("(unit) nonNull", async function (this: Suite): Promise<void> {
     type TestSubscription = {
         stringOrUndefined?: string;
         arrayOrUndefined?: number[];

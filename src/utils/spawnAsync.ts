@@ -11,7 +11,7 @@ const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size
 
 export type Progress = (content: string, process: cp.ChildProcess) => void;
 
-// tslint:disable-next-line: no-any
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 type ExecError = Error & { code: any, signal: any };
 
 export async function spawnAsync(

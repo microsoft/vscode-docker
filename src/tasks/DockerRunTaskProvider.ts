@@ -25,7 +25,7 @@ export interface DockerRunTask extends Task {
 }
 
 export class DockerRunTaskProvider extends DockerTaskProvider {
-    constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
+    public constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-run', helpers) }
 
     // TODO: Skip if container is freshly started, but probably depends on language
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {

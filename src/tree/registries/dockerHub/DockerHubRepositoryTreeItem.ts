@@ -47,5 +47,6 @@ interface ITags {
 
 interface ITag {
     name: string;
+    /* eslint-disable-next-line camelcase */
     last_updated: string;
 }

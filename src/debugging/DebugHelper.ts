@@ -16,6 +16,7 @@ import { DockerPlatform } from './DockerPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
 import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
+import { pythonDebugHelper } from './python/PythonDebugHelper';
 
 export interface DockerDebugContext { // Same as DockerTaskContext but intentionally does not extend it, since we never need to pass a DockerDebugContext to tasks
     folder: WorkspaceFolder;
@@ -25,7 +26,7 @@ export interface DockerDebugContext { // Same as DockerTaskContext but intention
     runDefinition?: DockerRunTaskDefinition;
 }
 
-// tslint:disable-next-line: no-empty-interface
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
 export interface DockerDebugScaffoldContext extends DockerTaskScaffoldContext {
 }
 
@@ -52,7 +53,8 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
                 new CliDockerClient(new ChildProcessProvider()),
                 {
                     netCore: netCoreDebugHelper,
-                    node: nodeDebugHelper
+                    node: nodeDebugHelper,
+                    python: pythonDebugHelper,
                 }
             )
         )

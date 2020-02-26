@@ -4,34 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as vscode from 'vscode';
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
+import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
-import { getExposeStatements, IPlatformGeneratorInfo, PackageInfo } from './configure';
+import { getComposePorts, getExposeStatements } from './configure';
+import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
+import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
-
-export const configureAspDotNetCore: IPlatformGeneratorInfo = {
-    genDockerFile,
-    genDockerCompose: undefined, // We don't generate compose files for .net core
-    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: [80, 443],
-    initializeForDebugging,
-};
-
-export const configureDotNetCoreConsole: IPlatformGeneratorInfo = {
-    genDockerFile,
-    genDockerCompose: undefined, // We don't generate compose files for .net core
-    genDockerComposeDebug: undefined, // We don't generate compose files for .net core
-    defaultPorts: undefined,
-    initializeForDebugging,
-};
 
 // .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
 const LegacyAspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
@@ -70,9 +60,9 @@ function formatVersion(format: string, version: string, tagForWindowsVersion: st
         .replace('{2}', tagForWindowsVersion);
 }
 
-//#region ASP.NET Core templates
+// #region ASP.NET Core templates
 
-//AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
+// AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/aspnetcore/Dockerfile
 const aspNetCoreWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
@@ -119,9 +109,9 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-//#endregion
+// #endregion
 
-//#region .NET Core Console templates
+// #region .NET Core Console templates
 
 // AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/windows/dotnetcore/console/Dockerfile
 const dotNetCoreConsoleWindowsTemplate = `#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
@@ -170,9 +160,22 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
 `;
 
-//#endregion
+const dotNetComposeTemplate = `version: '3.4'
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], { version, artifactName }: Partial<PackageInfo>): string {
+services:
+  $service_name$:
+    image: $image_name$
+    build:
+      context: .
+      dockerfile: $dockerfile$$ports$`;
+
+const dotNetComposeDebugTemplate = `${dotNetComposeTemplate}$environment$
+    volumes:
+$volumes_list$
+`;
+// #endregion
+
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -205,9 +208,9 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     // For .NET Core 2.1+ use mcr.microsoft.com/dotnet/core/[sdk|aspnet|runtime|runtime-deps] repository.
     // See details here: https://devblogs.microsoft.com/dotnet/net-core-container-images-now-published-to-microsoft-container-registry/
     if (semver.gte(netCoreAppVersion, '2.1.0')) {
-        if (platform === 'ASP.NET Core') {
+        if (platform === '.NET: ASP.NET Core') {
             baseImageFormat = AspNetCoreRuntimeImageFormat;
-        } else if (platform === '.NET Core Console') {
+        } else if (platform === '.NET: Core Console') {
             baseImageFormat = DotNetCoreRuntimeImageFormat;
         } else {
             assert.fail(`Unknown platform`);
@@ -215,10 +218,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
         sdkImageNameFormat = DotNetCoreSdkImageFormat;
     } else {
-        if (platform === 'ASP.NET Core') {
+        if (platform === '.NET: ASP.NET Core') {
             baseImageFormat = LegacyAspNetCoreRuntimeImageFormat;
             sdkImageNameFormat = LegacyAspNetCoreSdkImageFormat;
-        } else if (platform === '.NET Core Console') {
+        } else if (platform === '.NET: Core Console') {
 
             baseImageFormat = LegacyDotNetCoreRuntimeImageFormat;
             sdkImageNameFormat = LegacyDotNetCoreSdkImageFormat;
@@ -241,10 +244,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
 
     let template: string;
     switch (platform) {
-        case ".NET Core Console":
+        case ".NET: Core Console":
             template = os === "Linux" ? dotNetCoreConsoleLinuxTemplate : dotNetCoreConsoleWindowsTemplate;
             break;
-        case "ASP.NET Core":
+        case ".NET: ASP.NET Core":
             template = os === "Linux" ? aspNetCoreLinuxTemplate : aspNetCoreWindowsTemplate;
             break;
         default:
@@ -259,28 +262,188 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
 
-    let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
-    if (unreplacedToken[0]) {
-        assert.fail(`Unreplaced template token "${unreplacedToken}"`);
-    }
+    validateForUnresolvedToken(contents);
 
     return contents;
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, { artifactName }: Partial<PackageInfo>): Promise<void> {
+function validateForUnresolvedToken(contents: string): void {
+    let unreplacedToken = extractRegExGroups(contents, /(\$[a-z_]+\$)/, ['']);
+    if (unreplacedToken[0]) {
+        assert.fail(`Unreplaced template token "${unreplacedToken}"`);
+    }
+}
+
+function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
+    const serviceName = path.basename(artifactName, path.extname(artifactName)).toLowerCase();
+    const imageName = serviceName;
+    let jsonPorts: string = `${getComposePorts(ports)}`;
+    if (jsonPorts?.length > 0) {
+        jsonPorts = `\n${jsonPorts}`;
+    }
+
+    let environmentVariables: string = '';
+    if (platform === '.NET: ASP.NET Core') {
+        environmentVariables = `\n    environment:
+      - ASPNETCORE_ENVIRONMENT=Development`;
+        // For now assume the first port is http and the second is https. (default scaffolding behavior)
+        // TODO: This is not the perfect logic, this should be improved later.
+        if (ports && ports.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            let aspNetCoreUrl: string = `      - ASPNETCORE_URLS=http://+:${ports[0]}`;
+            if (ports.length >= 2) {
+                aspNetCoreUrl += `;https://+:${ports[1]}`;
+            }
+            environmentVariables += `\n${aspNetCoreUrl}`
+        }
+    }
+
+    let volumesList = '      - ~\\.vsdbg:/remote_debugger';
+    if (os === 'Linux') {
+        volumesList += ':rw'
+    }
+
+    // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
+    dockerfileName = dockerfileName.replace(/\\/g, '/');
+
+    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', serviceName)
+        .replace(/\$image_name\$/g, imageName)
+        .replace(/\$dockerfile\$/g, dockerfileName)
+        .replace(/\$ports\$/g, jsonPorts);
+    validateForUnresolvedToken(composeFileContent);
+
+    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', serviceName)
+        .replace(/\$image_name\$/g, imageName)
+        .replace(/\$dockerfile\$/g, dockerfileName)
+        .replace(/\$ports\$/g, jsonPorts)
+        .replace(/\$environment\$/g, environmentVariables)
+        .replace(/\$volumes_list\$/g, volumesList);
+    validateForUnresolvedToken(composeDebugFileContent);
+
+    return [
+        { fileName: 'docker-compose.yml', contents: composeFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } },
+        { fileName: 'docker-compose.debug.yml', contents: composeDebugFileContent, onConflict: async (filePath) => { return await generateNonConflictFileName(filePath) } }
+    ];
+}
+
+async function generateNonConflictFileName(filePath: string): Promise<string> {
+    let newFilepath = filePath;
+    let i = 1;
+    const extName = path.extname(filePath);
+    const extNameRegEx = new RegExp(`${extName}$`);
+
+    while (await fse.pathExists(newFilepath)) {
+        newFilepath = filePath.replace(extNameRegEx, i + extName);
+        i++;
+    }
+    return newFilepath;
+}
+// Returns the relative path of the project file without the extension
+async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
+    const opt: vscode.QuickPickOptions = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select Project'
+    }
+
+    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
+
+    if (!projectFiles || !projectFiles.length) {
+        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
+    }
+
+    if (projectFiles.length > 1) {
+        let items = projectFiles.map(p => <vscode.QuickPickItem>{ label: p });
+        let result = await ext.ui.showQuickPick(items, opt);
+        return result.label;
+    } else {
+        return projectFiles[0];
+    }
+}
+
+async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'netCore',
         actionContext: context,
-        dockerfile: dockerfile,
+        // always use posix for debug config because it's committed to source control and works on all OS's
+        /* eslint-disable-next-line no-template-curly-in-string */
+        dockerfile: path.posix.join('${workspaceFolder}', workspaceRelativeDockerfileName),
     }
 
     const options: NetCoreScaffoldingOptions = {
         // always use posix for debug config because it's committed to source control and works on all OS's
-        // tslint:disable-next-line: no-invalid-template-strings
-        appProject: path.posix.join('${workspaceFolder}', artifactName),
+        /* eslint-disable-next-line no-template-curly-in-string */
+        appProject: path.posix.join('${workspaceFolder}', workspaceRelativeProjectFileName),
         platformOS: platformOS,
     }
 
     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
+}
+
+// tslint:disable-next-line: export-name
+export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
+    const os = context.os ?? await context.promptForOS();
+    const isCompose = await context.promptForCompose();
+
+    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+
+    telemetryProperties.configureOs = os;
+    if (isCompose) {
+        telemetryProperties.orchestration = 'docker-compose';
+    }
+
+    const ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
+
+    const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
+    const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
+
+    telemetryProperties.packageFileType = path.extname(rootRelativeProjectFileName);
+    telemetryProperties.packageFileSubfolderDepth = getSubfolderDepth(context.rootFolder, rootRelativeProjectFileName);
+
+    const projectFilePath = path.posix.join(context.rootFolder, rootRelativeProjectFileName);
+    const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
+
+    let serviceNameAndPathRelative = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
+    const projFileContents = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
+
+    // Extract TargetFramework for version
+    const [version] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+
+    if (context.outputFolder) {
+        // We need paths in the Dockerfile to be relative to the output folder, not the root
+        serviceNameAndPathRelative = path.relative(context.outputFolder, path.join(context.rootFolder, serviceNameAndPathRelative));
+    }
+
+    // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
+    serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
+
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName);
+
+    // Remove multiple empty lines with single empty lines, as might be produced
+    // if $expose_statements$ or another template variable is an empty string
+    dockerFileContents = dockerFileContents
+        .replace(/(\r\n){3,4}/g, "\r\n\r\n")
+        .replace(/(\n){3,4}/g, "\n\n");
+
+    const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
+    const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
+
+    const composeFiles = isCompose ? generateComposeFiles(dockerFileName, context.platform, os, ports, workspaceRelativeProjectFileName) : [];
+
+    let files: ScaffoldFile[] = [
+        { fileName: dockerFileName, contents: dockerFileContents, open: true },
+        { fileName: dockerIgnoreFileName, contents: genCommonDockerIgnoreFile(context.platform) }
+    ];
+
+    files = files.concat(composeFiles);
+
+    if (context.initializeForDebugging) {
+        const dockerFilePath = path.resolve(context.rootFolder, dockerFileName);
+        const workspaceRelativeDockerfileName = path.relative(context.folder.uri.fsPath, dockerFilePath);
+
+        await initializeForDebugging(context, context.folder, context.os, workspaceRelativeDockerfileName, workspaceRelativeProjectFileName);
+    }
+
+    return files;
 }

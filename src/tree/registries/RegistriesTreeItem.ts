@@ -76,7 +76,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         return false;
     }
 
-    public async connectRegistry(context: IActionContext): Promise<void> {
+    public async connectRegistry(context: IActionContext, provider?: IRegistryProvider, url?: string): Promise<void> {
         let picks: IAzureQuickPickItem<IRegistryProvider | undefined>[] = getRegistryProviders().map(rp => {
             return {
                 label: rp.label,
@@ -92,14 +92,14 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         });
 
         let placeHolder: string = 'Select the provider for your registry';
-        const provider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
+        provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
             await openExternal('https://aka.ms/AA5g7n7');
             context.telemetry.properties.cancelStep = 'learnHowToContribute';
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
             // Don't wait, no input to wait for anyway
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(`The "${provider.label}" registry provider is already connected.`);
             context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
             throw new UserCancelledError();
@@ -115,7 +115,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
 
         if (provider.connectWizardOptions) {
             const existingProviders: ICachedRegistryProvider[] = this._cachedProviders.filter(rp => rp.id === provider.id);
-            const wizardContext: IConnectRegistryWizardContext = { ...context, ...provider.connectWizardOptions, existingProviders };
+            const wizardContext: IConnectRegistryWizardContext = { ...context, ...provider.connectWizardOptions, url, existingProviders };
             const wizard = new AzureWizard(wizardContext, {
                 title: provider.connectWizardOptions.wizardTitle,
                 promptSteps: [
@@ -166,7 +166,15 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         context.telemetry.properties.providerId = cachedProvider.id;
         context.telemetry.properties.providerApi = cachedProvider.api;
 
-        await deleteRegistryPassword(cachedProvider);
+        // NOTE: Do not let failure prevent removal of the tree item.
+
+        try {
+            await deleteRegistryPassword(cachedProvider);
+        } catch (err) {
+            // Don't wait, no input to wait for anyway
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            ext.ui.showWarningMessage(`The registry password could not be removed from the cache: ${err}`);
+        }
 
         const index = this._cachedProviders.findIndex(n => n === cachedProvider);
         if (index !== -1) {

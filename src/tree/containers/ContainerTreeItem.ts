@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Container } from "dockerode";
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { LocalContainerInfo } from "./LocalContainerInfo";
@@ -30,6 +31,10 @@ export class ContainerTreeItem extends AzExtTreeItem {
 
     public get containerId(): string {
         return this._item.containerId;
+    }
+
+    public get containerName(): string {
+        return this._item.containerName;
     }
 
     public get fullTag(): string {
@@ -69,7 +74,9 @@ export class ContainerTreeItem extends AzExtTreeItem {
         return ext.dockerode.getContainer(this.containerId);
     }
 
-    public async deleteTreeItemImpl(): Promise<void> {
-        await this.getContainer().remove({ force: true });
+    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
+        const container: Container = this.getContainer();
+        // eslint-disable-next-line @typescript-eslint/promise-function-async
+        await callDockerodeWithErrorHandling(() => container.remove({ force: true }), context);
     }
 }

@@ -6,29 +6,38 @@
 import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
-import { wrapDockerodeENOENT } from '../../utils/wrapDockerodeENOENT';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 
-export async function createNetwork(_context: IActionContext): Promise<void> {
+export async function createNetwork(context: IActionContext): Promise<void> {
 
     const name = await ext.ui.showInputBox({
         value: '',
         prompt: 'Name of the network'
     });
 
-    const driverSelection = await ext.ui.showQuickPick(
-        [
+    const engineVersion = await ext.dockerode.version();
+    const drivers = engineVersion.Os === 'windows'
+        ? [
+            { label: 'nat' },
+            { label: 'transparent' }
+        ]
+        : [
             { label: 'bridge' },
             { label: 'host' },
-            { label: 'overlay' },
             { label: 'macvlan' }
-        ],
+        ];
+
+    const driverSelection = await ext.ui.showQuickPick(
+        drivers,
         {
             canPickMany: false,
             placeHolder: 'Select the network driver to use (default is "bridge").'
         }
     );
 
-    const result = <{ id: string }>await wrapDockerodeENOENT(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }));
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+    const result = <{ id: string }>await callDockerodeWithErrorHandling(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }), context);
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(`Network Created with ID ${result.id.substr(0, 12)}`);
 }

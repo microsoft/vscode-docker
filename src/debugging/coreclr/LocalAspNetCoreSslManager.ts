@@ -8,7 +8,7 @@ import * as process from 'process';
 import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { PlatformOS } from '../../utils/platform';
-import { quickPickProjectFileItem } from '../../utils/quick-pick-file';
+import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DotNetClient, TrustState } from './CommandLineDotNetClient';
@@ -30,7 +30,7 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
     private static _KnownConfiguredProjects: Set<string> = new Set<string>();
     private static _CertificateTrustedOrSkipped: boolean = false;
 
-    constructor(
+    public constructor(
         private readonly dotNetClient: DotNetClient,
         private readonly netCoreProjectProvider: NetCoreProjectProvider,
         private readonly processProvider: ProcessProvider,
@@ -54,22 +54,21 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
             const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.';
 
             // Don't wait
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
                 trust).then(async selection => {
-                    if (selection === trust) {
-                        const trustCommand = `dotnet dev-certs https --trust`;
-                        await this.processProvider.exec(trustCommand, {});
-                        LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
-                    }
-                });
+                if (selection === trust) {
+                    const trustCommand = `dotnet dev-certs https --trust`;
+                    await this.processProvider.exec(trustCommand, {});
+                    LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
+                }});
         } else if (this.osProvider.isMac) {
             const message = 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.';
 
             // Don't wait
-            // tslint:disable-next-line: no-floating-promises
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             ext.ui.showWarningMessage(
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' });

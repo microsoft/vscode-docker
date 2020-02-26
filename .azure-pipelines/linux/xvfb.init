@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# COPIED FROM https://github.com/Microsoft/vscode/blob/e29c517386fe6f3a40e2f0ff00effae4919406aa/build/tfs/linux/x64/xvfb.init
+# COPIED FROM https://github.com/microsoft/vscode/blob/01e9903967417ba243cec705445eef9ecbfebfea/build/azure-pipelines/linux/xvfb.init
 #
 #
 # /etc/rc.d/init.d/xvfbd
@@ -22,7 +22,7 @@
 [ "${NETWORKING}" = "no" ] && exit 0
 
 PROG="/usr/bin/Xvfb"
-PROG_OPTIONS=":10 -ac"
+PROG_OPTIONS=":10 -ac -screen 0 1024x768x24"
 PROG_OUTPUT="/tmp/Xvfb.out"
 
 case "$1" in

@@ -18,6 +18,7 @@ export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardCon
         context.newRegistryName = (await ext.ui.showInputBox({
             placeHolder: "Registry name",
             prompt: "Provide a registry name",
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             validateInput: (name: string) => validateRegistryName(name, client)
         })).trim();
 

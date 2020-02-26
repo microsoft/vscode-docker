@@ -13,7 +13,7 @@ export interface TempFileProvider {
 export class OSTempFileProvider implements TempFileProvider {
     private count: number = 1;
 
-    constructor(
+    public constructor(
         private readonly osProvider: OSProvider,
         private readonly processProvider: ProcessProvider) {
     }

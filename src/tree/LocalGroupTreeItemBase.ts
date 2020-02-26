@@ -11,6 +11,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty
     public parent: LocalRootTreeItemBase<TItem, TProperty>;
     public group: string;
     private _items: TItem[];
+    private _childTreeItems: AzExtTreeItem[];
 
     public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);
@@ -31,7 +32,8 @@ export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean): Promise<AzExtTreeItem[]> {
-        return this._items.map(i => new this.parent.childType(this, i));
+        this._childTreeItems = this.getChildTreeItems();
+        return this._childTreeItems;
     }
 
     public hasMoreChildrenImpl(): boolean {
@@ -40,5 +42,16 @@ export abstract class LocalGroupTreeItemBase<TItem extends ILocalItem, TProperty
 
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
         return this.parent.compareChildrenImpl(ti1, ti2);
+    }
+
+    public get ChildTreeItems(): AzExtTreeItem[] {
+        if (!this._childTreeItems) {
+            this._childTreeItems = this.getChildTreeItems();
+        }
+        return this._childTreeItems;
+    }
+
+    private getChildTreeItems(): AzExtTreeItem[] {
+        return this._items.map(i => new this.parent.childType(this, i));
     }
 }

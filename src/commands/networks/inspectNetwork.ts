@@ -3,16 +3,22 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { Network } from "dockerode";
 import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.contextValue, context);
+        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: 'No images are availalbe to inspect'
+        });
     }
 
-    // tslint:disable-next-line: no-unsafe-any
-    const inspectInfo: {} = await node.getNetwork().inspect(); // inspect is missing type in @types/dockerode
+    const network: Network = node.getNetwork()
+    // eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/tslint/config
+    const inspectInfo: {} = await callDockerodeWithErrorHandling(() => network.inspect(), context); // inspect is missing type in @types/dockerode
     await openReadOnlyJson(node, inspectInfo);
 }

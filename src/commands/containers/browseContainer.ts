@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerInspectInfo } from 'dockerode';
 import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { captureCancelStep } from '../../utils/captureCancelStep';
 
 type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[], selectedPort?: number };
@@ -14,7 +16,7 @@ type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[
 type ConfigureBrowseCancelStep = 'node' | 'port';
 
 async function captureBrowseCancelStep<T>(cancelStep: ConfigureBrowseCancelStep, properties: BrowseTelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    return await captureCancelStep(cancelStep, properties, prompt)
+    return await captureCancelStep(cancelStep, properties, prompt)();
 }
 
 // NOTE: These ports are ordered in order of preference.
@@ -24,7 +26,8 @@ const commonWebPorts = [
     3000,   // (Node.js) Express.js
     3001,   // (Node.js) Sails.js
     5001,   // (.NET Core) ASP.NET SSL
-    5000,   // (.NET Core) ASP.NET HTTP
+    5000,   // (.NET Core) ASP.NET HTTP and (Python) Flask
+    8000,   // (Python) Django
     8080,   // (Node.js)
     8081    // (Node.js)
 ];
@@ -55,26 +58,33 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
-        node = await captureBrowseCancelStep('node', telemetryProperties, () => ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, context));
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+        node = await captureBrowseCancelStep('node', telemetryProperties, () =>
+            ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
+                ...context,
+                noItemFoundErrorMessage: 'No running containers are available to open in a browser'
+            }));
     }
 
-    const inspectInfo = await node.getContainer().inspect();
+    const container = node.getContainer();
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
 
     const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
         Object.keys(ports)
-              .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
-              // Exclude port designations we cannot recognize...
-              .filter(port => port.containerPort !== undefined)
-              // Exclude ports that are non-TCP-based (which should be the default)...
-              .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
-              // Exclude ports not mapped to the host...
-              .filter(port => port.mappings && port.mappings.length > 0);
+            .map(portAndProtocol => ({ mappings: ports[portAndProtocol], containerPort: parsePortAndProtocol(portAndProtocol) }))
+            // Exclude port designations we cannot recognize...
+            .filter(port => port.containerPort !== undefined)
+            // Exclude ports that are non-TCP-based (which should be the default)...
+            .filter(port => port.containerPort.protocol === undefined || port.containerPort.protocol === 'tcp')
+            // Exclude ports not mapped to the host...
+            .filter(port => port.mappings && port.mappings.length > 0);
 
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
 
     if (possiblePorts.length === 0) {
-        // tslint:disable-next-line: no-floating-promises
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
 
         return;
@@ -96,6 +106,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         // Sort ports in ascending order...
         items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
 
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
@@ -111,5 +122,6 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const host = mappedPort.HostIp === '0.0.0.0' ? 'localhost' : mappedPort.HostIp;
     const url = `${protocol}://${host}:${mappedPort.HostPort}`;
 
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
 }

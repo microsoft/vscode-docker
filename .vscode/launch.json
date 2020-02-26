@@ -64,6 +64,30 @@
 			}
 		},
 		{
+			"name": "Launch Tests (unit)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"${workspaceFolder}/test/test.code-workspace",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"preLaunchTask": "npm: compile",
+			"env": {
+				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
+				"MOCHA_grep": "\\(unit\\)", // RegExp of tests to run (empty means all)
+				"MOCHA_enableTimeouts": "0", // Disable time-outs
+				"DEBUGTELEMETRY": "1",
+				"NODE_DEBUG": ""
+			}
+		},
+		{
 			"name": "Launch Tests (webpack)",
 			"type": "extensionHost",
 			"request": "launch",
