@@ -1225,7 +1225,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('Dockerfile', 'EXPOSE 8000');
             assertFileContains('Dockerfile', 'ADD requirements.txt .');
             assertFileContains('Dockerfile', 'RUN python -m pip install -r requirements.txt');
-            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:8000", "testOutput.wsgi"]');
+            assertFileContains('Dockerfile', 'CMD ["gunicorn", "--bind", "0.0.0.0:8000", "pythonPath.to.wsgi"]');
             assertFileContains('requirements.txt', 'django');
             assertFileContains('requirements.txt', 'gunicorn');
         });
