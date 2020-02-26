@@ -30,17 +30,17 @@ const defaults: { [key in TemplateCommand]: CommandTemplate } = {
     'composeDown': { label: 'Compose Down', template: 'docker-compose down ${configurationFile}' },
 };
 
-export async function selectBuildCommand(context: IActionContext, matchContext: string[], folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
+export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
     return await selectCommandTemplate(
         context,
         'build',
-        matchContext,
+        [folder.name, dockerfile],
         folder,
         { 'dockerfile': dockerfile, 'context': buildContext }
     );
 }
 
-export async function selectRunCommand(context: IActionContext, matchContext: string[], tag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: {} }): Promise<string> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: {} }): Promise<string> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
@@ -51,37 +51,37 @@ export async function selectRunCommand(context: IActionContext, matchContext: st
     return await selectCommandTemplate(
         context,
         interactive ? 'runInteractive' : 'run',
-        matchContext,
+        [fullTag],
         undefined,
-        { 'tag': tag, 'exposedPorts': portsString }
+        { 'tag': fullTag, 'exposedPorts': portsString }
     );
 }
 
-export async function selectAttachCommand(context: IActionContext, matchContext: string[], containerId: string, shellCommand: string): Promise<string> {
+export async function selectAttachCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string, shellCommand: string): Promise<string> {
     return await selectCommandTemplate(
         context,
         'attach',
-        matchContext,
+        [containerName, fullTag],
         undefined,
         { 'containerId': containerId, 'shellCommand': shellCommand }
     );
 }
 
-export async function selectLogsCommand(context: IActionContext, matchContext: string[], containerId: string): Promise<string> {
+export async function selectLogsCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string): Promise<string> {
     return await selectCommandTemplate(
         context,
         'logs',
-        matchContext,
+        [containerName, fullTag],
         undefined,
         { 'containerId': containerId }
     );
 }
 
-export async function selectComposeCommand(context: IActionContext, matchContext: string[], folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down', configurationFile?: string, detached?: boolean, build?: boolean): Promise<string> {
+export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down', configurationFile?: string, detached?: boolean, build?: boolean): Promise<string> {
     return await selectCommandTemplate(
         context,
         composeCommand === 'up' ? 'composeUp' : 'composeDown',
-        matchContext,
+        [folder.name, configurationFile],
         folder,
         { 'configurationFile': configurationFile ? `-f \"${configurationFile}\"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
     );

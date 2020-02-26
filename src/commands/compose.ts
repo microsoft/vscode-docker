@@ -76,14 +76,12 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const build: boolean = configOptions.get('dockerComposeBuild', true);
     const detached: boolean = configOptions.get('dockerComposeDetached', true);
-    const commandMatchContext = [folder.name, ...selectedItems.map(i => i.file)];
 
     terminal.sendText(`cd "${folder.uri.fsPath}"`);
     for (const command of commands) {
         if (selectedItems.length === 0) {
             const terminalCommand = await selectComposeCommand(
                 context,
-                commandMatchContext,
                 folder,
                 command,
                 undefined,
@@ -95,7 +93,6 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
             for (const item of selectedItems) {
                 const terminalCommand = await selectComposeCommand(
                     context,
-                    commandMatchContext,
                     folder,
                     command,
                     item.file,

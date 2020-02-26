@@ -32,7 +32,8 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
 
     const terminalCommand = await selectAttachCommand(
         context,
-        [node.containerName, node.fullTag],
+        node.containerName,
+        node.fullTag,
         node.containerId,
         shellCommand
     );

@@ -31,7 +31,6 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
 
         let terminalCommand = await selectBuildCommand(
             context,
-            [rootFolder.name, dockerFileItem.relativeFilePath],
             rootFolder,
             dockerFileItem.relativeFilePath,
             contextPath

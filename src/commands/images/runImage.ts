@@ -28,7 +28,6 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
 
     const terminalCommand = await selectRunCommand(
         context,
-        [node.fullTag],
         node.fullTag,
         interactive,
         inspectInfo?.Config?.ExposedPorts
