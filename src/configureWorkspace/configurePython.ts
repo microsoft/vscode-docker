@@ -154,7 +154,7 @@ async function inferDjangoCommand(ports: number[], serviceName: string, outputFo
         return command.replace(/\$wsgi_path\$/g, `${serviceName}.wsgi`);
     } else {
         return `# File wsgi.py was not found in subfolder:${serviceName}. Please enter the Python path to wsgi file.`
-               .concat('\n', command.replace(/\$wsgi_path\$/g, 'pythonPath.to.wsgi'));
+            .concat('\n', command.replace(/\$wsgi_path\$/g, 'pythonPath.to.wsgi'));
     }
 }
 
