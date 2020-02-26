@@ -16,7 +16,7 @@ import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPic
 export async function multiSelectNodes<T extends AzExtTreeItem>(
     context: ITreeItemPickerContext,
     tree: AzExtTreeDataProvider,
-    expectedContextValue?: RegExp,
+    expectedContextValue?: string | RegExp,
     node?: T,
     nodes?: T[]): Promise<T[]> {
 
@@ -33,7 +33,11 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
         nodes = await tree.showTreeItemPicker<T>(expectedContextValue, { ...context, canPickMany: true });
     } else if (expectedContextValue) {
         // Otherwise if there's a filter, need to filter our selection to exclude ineligible nodes
-        nodes = nodes.filter(n => expectedContextValue.test(n.contextValue));
+        // This uses the same logic as AzExtTreeItem.matchesContextValue()
+        nodes = nodes.filter(n => {
+            return expectedContextValue === n.contextValue || // For strings, exact match comparison
+                (expectedContextValue instanceof RegExp && expectedContextValue.test(n.contextValue)); // For regexs, RegExp.test()
+        });
     }
 
     // Filter off parent items (i.e. group items), as it doesn't make sense to perform actions on them, when we don't allow actions to be performed on *only* them

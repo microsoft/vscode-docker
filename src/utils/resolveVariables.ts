@@ -4,44 +4,80 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { window, WorkspaceFolder } from 'vscode';
+import { window, workspace, WorkspaceFolder } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 
-export function resolveVariables<T>(target: T, folder: WorkspaceFolder): T {
+const variableMatcher: RegExp = /\$\{[a-z\.\-_:]+\}/ig;
+const configVariableMatcher: RegExp = /\$\{config:([a-z\.\-_]+)\}/i;
+
+export function resolveVariables<T>(target: T, folder?: WorkspaceFolder, additionalVariables?: { [key: string]: string }): T {
     if (!target) {
         return target;
     } else if (typeof (target) === 'string') {
-        return target.replace(/\$\{[a-z]+\}/ig, (match: string) => {
-            return resolveSingleVariable(match, folder);
+        return target.replace(variableMatcher, (match: string) => {
+            return resolveSingleVariable(match, folder, additionalVariables);
         }) as unknown as T;
     } else if (typeof (target) === 'number') {
         return target;
     } else if (Array.isArray(target)) {
         // tslint:disable-next-line: no-unsafe-any
-        return target.map(value => resolveVariables(value, folder)) as unknown as T;
+        return target.map(value => resolveVariables(value, folder, additionalVariables)) as unknown as T;
     } else {
         const result = cloneObject(target);
         for (const key of Object.keys(target)) {
-            result[key] = resolveVariables(target[key], folder);
+            result[key] = resolveVariables(target[key], folder, additionalVariables);
         }
 
         return result;
     }
 }
 
-function resolveSingleVariable(variable: string, folder: WorkspaceFolder): string {
+function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, additionalVariables?: { [key: string]: string }): string {
     /* eslint-disable no-template-curly-in-string */
+
+    // Replace workspace folder variables
+    if (folder) {
+        switch (variable) {
+            case '${workspaceFolder}':
+            case '${workspaceRoot}':
+                return path.normalize(folder.uri.fsPath);
+            case '${relativeFile}':
+                return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
+            default:
+        }
+    }
+
+    // Replace additional variables
+    const variableNameOnly = variable.replace(/[\$\{\}]/ig, '');
+    const replacement = additionalVariables?.[variable] ?? additionalVariables?.[variableNameOnly];
+    if (replacement !== undefined) {
+        return replacement;
+    }
+
+    // Replace config variables
+    const configMatch = configVariableMatcher.exec(variable);
+    if (configMatch && configMatch.length > 1) {
+        const configName: string = configMatch[1]; // Index 1 is the "something.something" group of "${config:something.something}"
+        const config = workspace.getConfiguration();
+        const configValue = config.get(configName);
+
+        // If it's a simple value we'll return it
+        if (typeof (configValue) === 'string') {
+            return configValue;
+        } else if (typeof (configValue) === 'number' || typeof (configValue) === 'boolean') {
+            return configValue.toString();
+        }
+    }
+
+    // Replace other variables
     switch (variable) {
-        case '${workspaceFolder}':
-        case '${workspaceRoot}':
-            return path.normalize(folder.uri.fsPath);
         case '${file}':
             return getActiveFilePath();
-        case '${relativeFile}':
-            return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
         default:
-            return variable; // Return as-is, we don't know what to do with it
     }
+
+    return variable; // Return as-is, we don't know what to do with it
+
     /* eslint-enable no-template-curly-in-string */
 }
 
