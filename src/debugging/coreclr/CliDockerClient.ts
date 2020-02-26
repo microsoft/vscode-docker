@@ -264,13 +264,13 @@ export class CliDockerClient implements DockerClient {
         return id.substring(0, 12);
     }
 
-    public async exec(containerNameOrId: string, args: string, dockerExecoptions?: DockerExecOptions, processExecOptions?: ProcessProviderExecOptions): Promise<string> {
-        dockerExecoptions = dockerExecoptions || {};
+    public async exec(containerNameOrId: string, args: string, dockerExecOptions?: DockerExecOptions, processExecOptions?: ProcessProviderExecOptions): Promise<string> {
+        dockerExecOptions = dockerExecOptions || {};
 
         const command = CommandLineBuilder
             .create('docker', 'exec')
-            .withFlagArg('-i', dockerExecoptions.interactive)
-            .withFlagArg('-t', dockerExecoptions.tty)
+            .withFlagArg('-i', dockerExecOptions.interactive)
+            .withFlagArg('-t', dockerExecOptions.tty)
             .withQuotedArg(containerNameOrId)
             .withArg(args)
             .build();
