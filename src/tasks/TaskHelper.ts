@@ -139,7 +139,8 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
     buildTasks =
         buildTasks.filter(buildTask => {
-            return buildTask.definition && buildTask.definition.dockerBuild && (pathNormalize(resolveVariables(buildTask.definition.dockerBuild.dockerfile, folder)) === resolvedDockerfile)
+            return pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? '', folder)) === resolvedDockerfile &&
+                buildTask.scope === folder;
         });
 
     if (buildTasks.length === 1) {
