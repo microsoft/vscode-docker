@@ -4,7 +4,7 @@
 
 import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { spawnAsync } from "../../utils/spawnAsync";
-import { ProcessProvider, ProcessProviderExecOptions } from "./ChildProcessProvider";
+import { ProcessProvider } from "./ChildProcessProvider";
 import { LineSplitter } from "./lineSplitter";
 
 export type DockerBuildImageOptions = {
@@ -66,6 +66,7 @@ export type DockerVersionOptions = {
 export type DockerExecOptions = {
     interactive?: boolean;
     tty?: boolean;
+    progress?(content: string) : void;
 }
 
 export interface IHostPort {
@@ -264,18 +265,18 @@ export class CliDockerClient implements DockerClient {
         return id.substring(0, 12);
     }
 
-    public async exec(containerNameOrId: string, args: string, dockerExecOptions?: DockerExecOptions, processExecOptions?: ProcessProviderExecOptions): Promise<string> {
-        dockerExecOptions = dockerExecOptions || {};
+    public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
+        options = options || {};
 
         const command = CommandLineBuilder
             .create('docker', 'exec')
-            .withFlagArg('-i', dockerExecOptions.interactive)
-            .withFlagArg('-t', dockerExecOptions.tty)
+            .withFlagArg('-i', options.interactive)
+            .withFlagArg('-t', options.tty)
             .withQuotedArg(containerNameOrId)
             .withArg(args)
             .build();
 
-        const result = await this.processProvider.exec(command, processExecOptions);
+        const result = await this.processProvider.exec(command, {progress: options.progress});
 
         return result.stdout;
     }
