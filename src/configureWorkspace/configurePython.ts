@@ -148,7 +148,7 @@ async function inferDjangoCommand(ports: number[], serviceName: string, outputFo
     // the correct python path to the wsgi module.
 
     const wsgiPath = path.join(outputFolder, path.join(serviceName, "wsgi.py"));
-    const command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts['django']}", "$wsgi_path$"]`;
+    const command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts.get('django')}", "$wsgi_path$"]`;
 
     if (await fse.pathExists(wsgiPath)) {
         return command.replace(/\$wsgi_path\$/g, `${serviceName}.wsgi`);
