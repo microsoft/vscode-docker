@@ -4,7 +4,7 @@
 
 import { CommandLineBuilder } from "../../utils/commandLineBuilder";
 import { spawnAsync } from "../../utils/spawnAsync";
-import { ProcessProvider } from "./ChildProcessProvider";
+import { ProcessProvider, ProcessProviderExecOptions } from "./ChildProcessProvider";
 import { LineSplitter } from "./lineSplitter";
 
 export type DockerBuildImageOptions = {
@@ -264,18 +264,18 @@ export class CliDockerClient implements DockerClient {
         return id.substring(0, 12);
     }
 
-    public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
-        options = options || {};
+    public async exec(containerNameOrId: string, args: string, dockerExecoptions?: DockerExecOptions, processExecOptions?: ProcessProviderExecOptions): Promise<string> {
+        dockerExecoptions = dockerExecoptions || {};
 
         const command = CommandLineBuilder
             .create('docker', 'exec')
-            .withFlagArg('-i', options.interactive)
-            .withFlagArg('-t', options.tty)
+            .withFlagArg('-i', dockerExecoptions.interactive)
+            .withFlagArg('-t', dockerExecoptions.tty)
             .withQuotedArg(containerNameOrId)
             .withArg(args)
             .build();
 
-        const result = await this.processProvider.exec(command, {});
+        const result = await this.processProvider.exec(command, processExecOptions);
 
         return result.stdout;
     }
