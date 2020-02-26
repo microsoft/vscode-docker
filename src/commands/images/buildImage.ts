@@ -18,7 +18,12 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 
-    let rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To build Docker files you must first open a folder or workspace in VS Code.');
+    let rootFolder: vscode.WorkspaceFolder;
+    if (dockerFileUri) {
+        rootFolder = vscode.workspace.getWorkspaceFolder(dockerFileUri);
+    }
+
+    rootFolder = rootFolder || await quickPickWorkspaceFolder('To build Docker files you must first open a folder or workspace in VS Code.');
 
     const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
 
