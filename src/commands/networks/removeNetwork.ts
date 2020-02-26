@@ -13,7 +13,7 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
     nodes = await multiSelectNodes(
         { ...context, suppressCreatePick: true, noItemFoundErrorMessage: 'No networks are available to remove' },
         ext.networksTree,
-        new RegExp(NetworkTreeItem.contextValue, 'i'),
+        NetworkTreeItem.contextValue,
         node,
         nodes
     );
