@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { localize } from '../../localize';
 import { getThemedIconPath, IconPath } from "../IconPath";
 
 export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
     public contextValue: string = 'connectedRegistries';
     public childTypeLabel: string = 'registry';
-    public label: string = 'Connected Registries';
+    public label: string = localize('vscode-docker.tree.registries.connectedRegistriesLabel', 'Connected Registries');
     public children: AzExtTreeItem[] = [];
 
     public get iconPath(): IconPath {

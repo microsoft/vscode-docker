@@ -5,6 +5,7 @@
 
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "vscode-azureextensionui";
+import { localize } from '../../../localize';
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
@@ -49,7 +50,7 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
             } catch (error) {
                 const errorType: string = parseError(error).errorType.toLowerCase();
                 if (errorType === "401" || errorType === "unauthorized") {
-                    const message = 'Incorrect login credentials, or this registry may not support basic authentication. Please note that OAuth support has not yet been implemented in this preview feature.';
+                    const message = localize('vscode-docker.tree.registries.v2.unauthorized', 'Incorrect login credentials, or this registry may not support basic authentication. Please note that OAuth support has not yet been implemented in this preview feature.');
                     return [new RegistryConnectErrorTreeItem(this, new Error(message), this.cachedProvider, this.baseUrl)];
                 } else {
                     throw error;

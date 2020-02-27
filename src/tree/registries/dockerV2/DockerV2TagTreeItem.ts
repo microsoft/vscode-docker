@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RequestPromiseOptions } from 'request-promise-native';
+import { localize } from '../../../localize';
 import { nonNullProp } from '../../../utils/nonNull';
 import { registryRequest } from '../../../utils/registryRequestUtils';
 import { RemoteTagTreeItem } from '../RemoteTagTreeItem';
@@ -22,7 +23,7 @@ export class DockerV2TagTreeItem extends RemoteTagTreeItem {
         const response = await registryRequest(this.parent, 'GET', url, digestOptions);
         const digest = nonNullProp(response.headers, 'docker-content-digest');
         if (digest instanceof Array) {
-            throw new Error('docker-content-digest should be a string not an array.');
+            throw new Error(localize('vscode-docker.tree.registries.v2.dockerContentDigestString', 'docker-content-digest should be a string not an array.'));
         }
         return digest;
     }

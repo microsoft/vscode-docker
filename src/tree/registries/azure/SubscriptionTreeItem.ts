@@ -6,6 +6,7 @@
 import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from 'azure-arm-containerregistry';
 import { window } from 'vscode';
 import { AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
+import { localize } from '../../../localize';
 import { nonNullProp } from '../../../utils/nonNull';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
@@ -65,7 +66,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
             executeSteps: [
                 new AzureRegistryCreateStep()
             ],
-            title: 'Create new Azure Container Registry'
+            title: localize('vscode-docker.tree.registries.azure.createNew', 'Create new Azure Container Registry')
         });
 
         await wizard.prompt();
