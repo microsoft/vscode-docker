@@ -9,6 +9,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getDockerOSType } from '../../utils/osUtils';
+import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -30,7 +31,15 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     }
     context.telemetry.properties.shellCommand = shellCommand;
 
+    const terminalCommand = await selectAttachCommand(
+        context,
+        node.containerName,
+        node.fullTag,
+        node.containerId,
+        shellCommand
+    );
+
     const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.containerName}`);
-    terminal.sendText(`docker exec -it ${node.containerId} ${shellCommand}`);
+    terminal.sendText(terminalCommand);
     terminal.show();
 }

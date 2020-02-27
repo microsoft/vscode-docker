@@ -14,7 +14,7 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
     nodes = await multiSelectNodes(
         { ...context, suppressCreatePick: true, noItemFoundErrorMessage: localize('vscode-docker.commands.networks.remove.noNetworks', 'No networks are available to remove') },
         ext.networksTree,
-        new RegExp(NetworkTreeItem.contextValue, 'i'),
+        NetworkTreeItem.contextValue,
         node,
         nodes
     );

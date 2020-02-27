@@ -14,7 +14,7 @@ export async function removeVolume(context: IActionContext, node?: VolumeTreeIte
     nodes = await multiSelectNodes(
         { ...context, suppressCreatePick: true, noItemFoundErrorMessage: localize('vscode-docker.commands.volumes.remove.noVolumes', 'No volumes are available to remove') },
         ext.volumesTree,
-        new RegExp(VolumeTreeItem.contextValue, 'i'),
+        VolumeTreeItem.contextValue,
         node,
         nodes
     );

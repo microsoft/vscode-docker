@@ -14,7 +14,7 @@ export async function removeImage(context: IActionContext, node?: ImageTreeItem,
     nodes = await multiSelectNodes(
         { ...context, suppressCreatePick: true, noItemFoundErrorMessage: localize('vscode-docker.commands.images.remove.noImages', 'No images are available to remove') },
         ext.imagesTree,
-        new RegExp(ImageTreeItem.contextValue, 'i'),
+        ImageTreeItem.contextValue,
         node,
         nodes
     );

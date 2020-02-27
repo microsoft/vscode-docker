@@ -27,9 +27,15 @@ const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<Pyth
 ]);
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python
+FROM python:3.8
 
 $expose_statements$
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
 
 # Install pip requirements
 ADD requirements.txt .
@@ -51,13 +57,13 @@ services:
       dockerfile: Dockerfile
 $ports$`;
 
-const djangoRequirements = `django
-gunicorn`;
+const djangoRequirements = `django==3.0.3
+gunicorn==20.0.4`;
 
-const flaskRequirements = `flask
-gunicorn`;
+const flaskRequirements = `flask==1.1.1
+gunicorn==20.0.4`;
 
-function genDockerFile(serviceName: string, target: PythonTarget, projectType: PythonProjectType, ports: number[]): string {
+async function genDockerFile(serviceName: string, target: PythonTarget, projectType: PythonProjectType, ports: number[], outputFolder: string): Promise<string> {
     const exposeStatements = getExposeStatements(ports);
     let command = '';
 
@@ -68,8 +74,7 @@ function genDockerFile(serviceName: string, target: PythonTarget, projectType: P
             command = `CMD ["python", "-m", "${(target as PythonModuleTarget).module}"]`;
         }
     } else if (projectType === 'django') {
-        // For Django apps, there **usually** exists a "wsgi" module, so our best guess is to use the folder name.
-        command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${serviceName}.wsgi"]`;
+        command = await inferDjangoCommand(ports, serviceName, outputFolder);
     } else if (projectType === 'flask') {
         // For Flask apps, our guess is to assume there is a callable "app" object in the file/module that the user provided.
         command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${inferPythonWsgiModule(target)}:app"]`;
@@ -137,6 +142,22 @@ function inferPythonWsgiModule(target: PythonTarget): string {
     return wsgiModule.replace(/\//g, '.');
 }
 
+async function inferDjangoCommand(ports: number[], serviceName: string, outputFolder: string) : Promise<string> {
+    // For Django apps, there **usually** exists a "wsgi" module in a sub-folder named the same as the project folder.
+    // So we check if that path exists, then use it. Else, we output the comment below instructing the user to enter
+    // the correct python path to the wsgi module.
+
+    const wsgiPath = path.join(outputFolder, path.join(serviceName, "wsgi.py"));
+    const command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts.get('django')}", "$wsgi_path$"]`;
+
+    if (await fse.pathExists(wsgiPath)) {
+        return command.replace(/\$wsgi_path\$/g, `${serviceName}.wsgi`);
+    } else {
+        return `# File wsgi.py was not found in subfolder:${serviceName}. Please enter the Python path to wsgi file.`
+            .concat('\n', command.replace(/\$wsgi_path\$/g, 'pythonPath.to.wsgi'));
+    }
+}
+
 export async function promptForLaunchFile(projectType?: PythonProjectType) : Promise<PythonTarget> {
     const launchFilePrompt = defaultLaunchFile.get(projectType);
 
@@ -176,7 +197,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
         ports = await context.promptForPorts([ defaultPort ]);
     }
 
-    const dockerFileContents = genDockerFile(serviceName, launchFile, projectType, ports);
+    const dockerFileContents = await genDockerFile(serviceName, launchFile, projectType, ports, outputFolder);
     const dockerIgnoreContents = '**/__pycache__\n'.concat(genCommonDockerIgnoreFile(context.platform));
 
     const files: ScaffoldFile[] = [
