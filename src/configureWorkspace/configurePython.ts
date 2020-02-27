@@ -10,6 +10,7 @@ import { TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from "../extensionVariables";
+import { localize } from '../localize';
 import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget } from "../utils/pythonUtils";
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, quickPickGenerateComposeFiles } from './configUtils';
@@ -21,9 +22,9 @@ interface LaunchFilePrompt {
 }
 
 const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<PythonProjectType, LaunchFilePrompt>([
-    ['django', { prompt: 'Enter the relative path to the app’s entry point (e.g. manage.py or subfolder_name/manage.py)', defaultFile: 'manage.py' }],
-    ['flask', { prompt: 'Enter the relative path to the app’s entry point (e.g. app.py or subfolder_name/app.py)', defaultFile: 'app.py' }],
-    ['general', { prompt: 'Enter the relative path to the app’s entry point (e.g. app.py or subfolder_name/app.py)', defaultFile: 'app.py' }],
+    ['django', { prompt: localize('vscode-docker.configurePython.djangoPrompt', 'Enter the relative path to the app’s entry point (e.g. manage.py or subfolder_name/manage.py)'), defaultFile: 'manage.py' }],
+    ['flask', { prompt: localize('vscode-docker.configurePython.flaskPrompt', 'Enter the relative path to the app’s entry point (e.g. app.py or subfolder_name/app.py)'), defaultFile: 'app.py' }],
+    ['general', { prompt: localize('vscode-docker.configurePython.generalPrompt', 'Enter the relative path to the app’s entry point (e.g. app.py or subfolder_name/app.py)'), defaultFile: 'app.py' }],
 ]);
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
@@ -80,7 +81,7 @@ async function genDockerFile(serviceName: string, target: PythonTarget, projectT
         command = `CMD ["gunicorn", "--bind", "0.0.0.0:${ports ? ports[0] : PythonDefaultPorts[projectType]}", "${inferPythonWsgiModule(target)}:app"]`;
     } else {
         // Unlikely
-        throw new Error(`Unknown project type: ${projectType}`);
+        throw new Error(localize('vscode-docker.configurePython.unknownProjectType', 'Unknown project type: {0}', projectType));
     }
 
     return pythonDockerfile
@@ -110,8 +111,7 @@ function genRequirementsFile(projectType: PythonProjectType): string {
     return contents;
 }
 
-async function initializeForDebugging(context: ScaffolderContext, dockerfile: string, ports: number[],
-                                      target: PythonTarget, projectType: PythonProjectType): Promise<void> {
+async function initializeForDebugging(context: ScaffolderContext, dockerfile: string, ports: number[], target: PythonTarget, projectType: PythonProjectType): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: context.folder,
         platform: 'python',
@@ -142,7 +142,7 @@ function inferPythonWsgiModule(target: PythonTarget): string {
     return wsgiModule.replace(/\//g, '.');
 }
 
-async function inferDjangoCommand(ports: number[], serviceName: string, outputFolder: string) : Promise<string> {
+async function inferDjangoCommand(ports: number[], serviceName: string, outputFolder: string): Promise<string> {
     // For Django apps, there **usually** exists a "wsgi" module in a sub-folder named the same as the project folder.
     // So we check if that path exists, then use it. Else, we output the comment below instructing the user to enter
     // the correct python path to the wsgi module.
@@ -158,14 +158,14 @@ async function inferDjangoCommand(ports: number[], serviceName: string, outputFo
     }
 }
 
-export async function promptForLaunchFile(projectType?: PythonProjectType) : Promise<PythonTarget> {
+export async function promptForLaunchFile(projectType?: PythonProjectType): Promise<PythonTarget> {
     const launchFilePrompt = defaultLaunchFile.get(projectType);
 
     const opt: vscode.InputBoxOptions = {
         placeHolder: launchFilePrompt.defaultFile,
         prompt: launchFilePrompt.prompt,
         value: launchFilePrompt.defaultFile,
-        validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : 'Enter a valid Python file path/module.' }
+        validateInput: (value: string): string | undefined => { return value && value.trim().length > 0 ? undefined : localize('vscode-docker.configurePython.enterValidPythonFile', 'Enter a valid Python file path/module.') }
     };
 
     // Ensure to change any \ to /.
@@ -176,7 +176,7 @@ export async function promptForLaunchFile(projectType?: PythonProjectType) : Pro
         file.indexOf('/') > 0) {
         return { file: file };
     } else {
-        return { module: file};
+        return { module: file };
     }
 }
 
@@ -194,7 +194,7 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     let ports = [];
 
     if (defaultPort) {
-        ports = await context.promptForPorts([ defaultPort ]);
+        ports = await context.promptForPorts([defaultPort]);
     }
 
     const dockerFileContents = await genDockerFile(serviceName, launchFile, projectType, ports, outputFolder);
@@ -220,8 +220,8 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
     }
 
     files.forEach(file => {
-    // Remove multiple empty lines with single empty lines, as might be produced
-    // if $expose_statements$ or another template variable is an empty string.
+        // Remove multiple empty lines with single empty lines, as might be produced
+        // if $expose_statements$ or another template variable is an empty string.
         file.contents = file.contents
             .replace(/(\r\n){3,4}/g, '\r\n\r\n')
             .replace(/(\n){3,4}/g, '\n\n');

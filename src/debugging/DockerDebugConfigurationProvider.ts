@@ -37,11 +37,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         window.showErrorMessage(
             localize('vscode-docker.debug.configProvider.toDebugAddDockerFiles', 'To debug in a Docker container on supported platforms, use the command "Docker: Add Docker Files to Workspace", or click "Add Docker Files".'),
             ...[add]).then((result) => {
-            if (result === add) {
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                commands.executeCommand('vscode-docker.configure');
-            }
-        });
+                if (result === add) {
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    commands.executeCommand('vscode-docker.configure');
+                }
+            });
 
         return [];
     }
@@ -65,7 +65,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
 
                 if (!debugConfiguration.request) {
-                    throw new Error('The property "request" must be specified in the debug config.')
+                    throw new Error(localize('vscode-docker.debug.configProvider.requestRequired', 'The property "request" must be specified in the debug config.'));
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);

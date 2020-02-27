@@ -186,7 +186,7 @@ export class DefaultDockerManager implements DockerManager {
 
     public async runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string> {
         if (options.containerName === undefined) {
-            throw new Error('No container name was provided.');
+            throw new Error(localize('vscode-docker.debug.coreclr.noContainer', 'No container name was provided.'));
         }
 
         const containerName = options.containerName;
@@ -204,7 +204,7 @@ export class DefaultDockerManager implements DockerManager {
         const additionalVolumes = this.getVolumes(debuggerFolder, options);
 
         const containerId = await this.dockerOutputManager.performOperation(
-            'Starting container...',
+            localize('vscode-docker.debug.coreclr.startingContainer', 'Starting container...'),
             async () => {
                 const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
 
@@ -228,8 +228,8 @@ export class DefaultDockerManager implements DockerManager {
                         volumes: [...(additionalVolumes || []), ...(options.volumes || [])]
                     });
             },
-            id => `Container ${this.dockerClient.trimId(id)} started.`,
-            err => `Unable to start container: ${err}`);
+            id => localize('vscode-docker.debug.coreclr.containerStarted', 'Container {0} started.', this.dockerClient.trimId(id)),
+            err => localize('vscode-docker.debug.coreclr.unableToStart', 'Unable to start container: {0}', parseError(err).message));
 
         return containerId;
     }
@@ -351,7 +351,7 @@ export class DefaultDockerManager implements DockerManager {
             programFilesEnvironmentVariable = this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable];
 
             if (programFilesEnvironmentVariable === undefined) {
-                throw new Error(`The environment variable '${DefaultDockerManager.ProgramFilesEnvironmentVariable}' is not defined. This variable is used to locate the NuGet fallback folder.`);
+                throw new Error(localize('vscode-docker.debug.coreclr.programFilesUndefined', 'The environment variable \'{0}\' is not defined. This variable is used to locate the NuGet fallback folder.', DefaultDockerManager.ProgramFilesEnvironmentVariable));
             }
         }
 
