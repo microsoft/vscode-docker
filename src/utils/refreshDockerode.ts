@@ -8,6 +8,7 @@ import { DockerOptions } from 'dockerode';
 import { Socket } from 'net';
 import { CancellationTokenSource } from 'vscode';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
 import { delay } from './delay';
@@ -65,7 +66,7 @@ async function getDockerodeOptions(newEnv: NodeJS.ProcessEnv): Promise<DockerOpt
             if (!await validateSshAuthSock(newEnv)) {
                 // Don't wait
                 /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                ext.ui.showWarningMessage('In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.', { learnMoreLink: 'https://aka.ms/AA7assy' });
+                ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
             }
 
             return undefined;

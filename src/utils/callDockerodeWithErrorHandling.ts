@@ -6,6 +6,7 @@
 /* eslint-disable unicorn/filename-case */
 
 import { IActionContext, parseError } from "vscode-azureextensionui";
+import { localize } from '../localize';
 
 export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
     try {
@@ -16,7 +17,7 @@ export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () =>
         const error = parseError(err);
 
         if (error && error.errorType === 'ENOENT') {
-            throw new Error(`Failed to connect. Is Docker installed and running? Error: ${error.message}`);
+            throw new Error(localize('vscode-docker.utils.dockerode.failedToConnect', 'Failed to connect. Is Docker installed and running? Error: {0}', error.message));
         }
 
         throw err;

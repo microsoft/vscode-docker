@@ -5,6 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { localize } from '../localize';
 
 export interface NodePackage {
     main?: string;
@@ -15,7 +16,7 @@ export interface NodePackage {
 export type InspectMode = 'default' | 'break';
 
 export async function readPackage(packagePath: string): Promise<NodePackage> {
-    return <NodePackage> await fse.readJson(packagePath);
+    return <NodePackage>await fse.readJson(packagePath);
 }
 
 export async function inferPackageName(nodePackage: NodePackage | undefined, packagePath: string): Promise<string> {
@@ -39,7 +40,7 @@ export async function inferCommand(nodePackage: NodePackage | undefined, inspect
 
                 if (result) {
                     const capturedString = result[1];
-                    const refactoredString  = `node ${inspectArgWithPort}`;
+                    const refactoredString = `node ${inspectArgWithPort}`;
 
                     return refactoredString + startScript.slice(result.index + capturedString.length);
                 }
@@ -51,5 +52,5 @@ export async function inferCommand(nodePackage: NodePackage | undefined, inspect
         }
     }
 
-    throw new Error(`Unable to infer the command to run the application within the container. Set the 'dockerRun.command' property and include the Node.js '${inspectArgWithPort}' argument.`);
+    throw new Error(localize('vscode-docker.utils.node.noCommand', 'Unable to infer the command to run the application within the container. Set the \'dockerRun.command\' property and include the Node.js \'{0}\' argument.', inspectArgWithPort));
 }

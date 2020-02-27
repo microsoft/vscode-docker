@@ -6,6 +6,7 @@
 import * as cp from 'child_process';
 import { CancellationToken, Disposable } from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
+import { localize } from '../localize';
 
 const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size is 1 MB, our actual usage is far less
 
@@ -51,10 +52,10 @@ export async function spawnAsync(
 
             if (token && token.isCancellationRequested) {
                 // If cancellation is requested we'll assume that's why it exited
-                return reject(new UserCancelledError('Canceled by user'));
+                return reject(new UserCancelledError());
             } else if (code) {
                 // Replicate the error object of child_process.exec().
-                const error = <ExecError>new Error(`Process exited with code ${code}`);
+                const error = <ExecError>new Error(localize('vscode-docker.utils.spawn.exited', 'Process exited with code {0}', code));
                 error.code = code;
                 error.signal = signal;
                 return reject(error);
