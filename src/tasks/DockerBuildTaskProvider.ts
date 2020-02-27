@@ -6,6 +6,7 @@
 import * as fse from 'fs-extra';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -70,19 +71,19 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
         if (!dockerBuild.tag) {
-            throw new Error('No Docker image name was provided or resolved.');
+            throw new Error(localize('vscode-docker.tasks.buildProvider.noDockerImage', 'No Docker image name was provided or resolved.'));
         }
 
         if (!dockerBuild.context) {
-            throw new Error('No Docker build context was provided or resolved.');
+            throw new Error(localize('vscode-docker.tasks.buildProvider.noBuildContext', 'No Docker build context was provided or resolved.'));
         } else if (!await fse.pathExists(resolveVariables(dockerBuild.context, context.folder))) {
-            throw new Error(`The Docker build context \'${dockerBuild.context}\' does not exist or could not be accessed.`);
+            throw new Error(localize('vscode-docker.tasks.buildProvider.invalidBuildContext', 'The Docker build context \'{0}\' does not exist or could not be accessed.', dockerBuild.context));
         }
 
         if (!dockerBuild.dockerfile) {
-            throw new Error('No Dockerfile was provided or resolved.');
+            throw new Error(localize('vscode-docker.tasks.buildProvider.noDockerfile', 'No Dockerfile was provided or resolved.'));
         } else if (!await fse.pathExists(resolveVariables(dockerBuild.dockerfile, context.folder))) {
-            throw new Error(`The Dockerfile \'${dockerBuild.dockerfile}\' does not exist or could not be accessed.`);
+            throw new Error(localize('vscode-docker.tasks.buildProvider.invalidDockerfile', 'The Dockerfile \'{0}\' does not exist or could not be accessed.', dockerBuild.dockerfile));
         }
     }
 

@@ -9,6 +9,7 @@ import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBas
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
@@ -155,7 +156,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
             return { label: t.name }
         });
 
-        const item = await ext.ui.showQuickPick(items, { placeHolder: 'Choose the Docker Build definition.' });
+        const item = await ext.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.tasks.helper.chooseBuildDefinition', 'Choose the Docker Build definition.') });
         return buildTasks.find(t => t.name === item.label);
     }
 

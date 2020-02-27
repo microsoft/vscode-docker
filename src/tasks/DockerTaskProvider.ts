@@ -7,6 +7,7 @@ import { CancellationToken, CustomExecution, ProviderResult, Task, TaskProvider 
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { localize } from '../localize';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
@@ -39,7 +40,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
                 if (!context.folder) {
-                    throw new Error(`Unable to determine task scope to execute ${this.telemetryName} task '${task.name}'. Please open a workspace folder.`);
+                    throw new Error(localize('vscode-docker.tasks.provider.noScope', 'Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));
                 }
 
                 context.actionContext = actionContext;

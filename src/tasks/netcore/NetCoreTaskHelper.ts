@@ -8,8 +8,10 @@ import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -173,8 +175,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 await updateBlazorManifest(context, runDefinition);
             }
         } catch (err) {
-            context.terminal.writeWarningLine('Failed to update Blazor static web assets manifest. Static web assets may not work.');
-            context.terminal.writeWarningLine(`The error was: ${err}`);
+            context.terminal.writeWarningLine(localize('vscode-docker.tasks.netCore.failedBlazorUpdate', 'Failed to update Blazor static web assets manifest. Static web assets may not work.\nThe error was: {0}', parseError(err).message));
         }
     }
 
@@ -185,7 +186,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             result = resolveVariables(helperOptions.appProject, folder);
         } else {
             // Find a .csproj or .fsproj in the folder
-            const item = await quickPickProjectFileItem(undefined, folder, 'No .NET Core project file (.csproj or .fsproj) could be found.');
+            const item = await quickPickProjectFileItem(undefined, folder, localize('vscode-docker.tasks.netCore.noCsproj', 'No .NET Core project file (.csproj or .fsproj) could be found.'));
             result = item.absoluteFilePath;
         }
 
@@ -264,7 +265,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 programFilesEnvironmentVariable = process.env.ProgramFiles;
 
                 if (programFilesEnvironmentVariable === undefined) {
-                    throw new Error('The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.');
+                    throw new Error(localize('vscode-docker.tasks.netCore.programFilesUndefined', 'The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.'));
                 }
             }
 
