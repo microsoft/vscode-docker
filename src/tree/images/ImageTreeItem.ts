@@ -7,6 +7,7 @@ import { Image } from 'dockerode';
 import { window } from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, IParsedError, parseError } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { ILocalImageInfo } from './LocalImageInfo';
@@ -72,7 +73,7 @@ export class ImageTreeItem extends AzExtTreeItem {
             // error code 409 is returned for conflicts like the image is used by a running container or another image.
             // Such errors are not really an error, it should be treated as warning.
             if (parsedError.errorType === '409') {
-                ext.outputChannel.appendLog('Warning: ' + parsedError.message);
+                ext.outputChannel.appendLog(localize('vscode-docker.tree.images.warning', 'Warning: {0}', parsedError.message));
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 window.showWarningMessage(parsedError.message);
             } else {

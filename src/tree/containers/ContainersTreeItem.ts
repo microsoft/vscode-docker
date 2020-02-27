@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
@@ -15,8 +16,8 @@ import { LocalContainerInfo } from "./LocalContainerInfo";
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo, ContainerProperty> {
     public treePrefix: string = 'containers';
-    public label: string = 'Containers';
-    public configureExplorerTitle: string = 'Configure containers explorer';
+    public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
+    public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
 
     public childType: LocalChildType<LocalContainerInfo> = ContainerTreeItem;
     public childGroupType: LocalChildGroupType<LocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;

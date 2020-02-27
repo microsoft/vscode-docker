@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -14,8 +15,8 @@ import { VolumeTreeItem } from "./VolumeTreeItem";
 
 export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, VolumeProperty> {
     public treePrefix: string = 'volumes';
-    public label: string = 'Volumes';
-    public configureExplorerTitle: string = 'Configure volumes explorer';
+    public label: string = localize('vscode-docker.tree.volumes.label', 'Volumes');
+    public configureExplorerTitle: string = localize('vscode-docker.tree.volumes.configure', 'Configure volumes explorer');
     public childType: LocalChildType<LocalVolumeInfo> = VolumeTreeItem;
     public childGroupType: LocalChildGroupType<LocalVolumeInfo, VolumeProperty> = VolumeGroupTreeItem;
 
