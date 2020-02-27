@@ -285,7 +285,11 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         const debuggerPath: string = '/remote_debugger';
-        const installDebugger: string = `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi"`
+        // Windows require double quotes and Mac and Linux require single quote.
+        const osProvider = new LocalOSProvider();
+        const installDebugger: string = osProvider.os === 'Windows' ?
+            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi"`
+            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi'`
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
