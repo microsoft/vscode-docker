@@ -15,7 +15,7 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
-import CliDockerClient from '../coreclr/CliDockerClient';
+import CliDockerClient, { DockerExecOptions } from '../coreclr/CliDockerClient';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
 import { LocalFileSystemProvider } from '../coreclr/fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
@@ -289,13 +289,16 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
-        const options = { interactive: true };
 
         await outputManager.performOperation(
             'Installing the latest .NET Core debugger...',
             async (output) => {
-                let result = await dockerClient.exec(containerName, installDebugger, options);
-                output.appendLine(result);
+                const installProgress = (content: string) => {
+                    output.appendLine(content);
+                };
+                const dockerExecOptions : DockerExecOptions = { interactive: true, progress: installProgress };
+
+                await dockerClient.exec(containerName, installDebugger, dockerExecOptions);
             },
             'Debugger installed',
             'Unable to install the .NET Core debugger.'
