@@ -80,7 +80,8 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
             localize('vscode-docker.debug.coreclr.addDockerFiles', 'To debug in a Docker container on supported platforms, use the command \'Docker: Add Docker Files to Workspace\', or click \'Add Docker Files\'.'),
-            ...[add]).then((result) => {
+            ...[add])
+            .then((result) => {
                 if (result === add) {
                     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                     commands.executeCommand('vscode-docker.configure');
