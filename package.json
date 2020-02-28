@@ -702,36 +702,36 @@
                         "properties": {
                             "containerName": {
                                 "type": "string",
-                                "description": "The container name to attach to. If not specified, then user will be prompted to pick a container."
+                                "description": "%vscode-docker.debug.attach.containerName%"
                             },
                             "processName": {
                                 "type": "string",
-                                "description": "The process name to attach to. If this is used, 'processId' should not be used."
+                                "description": "%vscode-docker.debug.attach.processName%"
                             },
                             "processId": {
                                 "anyOf": [
                                     {
                                         "type": "string",
-                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "description": "%vscode-docker.debug.attach.processIdString%",
                                         "default": "${command:pickProcess}"
                                     },
                                     {
                                         "type": "integer",
-                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "description": "%vscode-docker.debug.attach.processIdInteger%",
                                         "default": 0
                                     }
                                 ]
                             },
                             "platform": {
                                 "type": "string",
-                                "description": "The target plaform for the application.",
+                                "description": "%vscode-docker.debug.attach.platform%",
                                 "enum": [
                                     "netCore"
                                 ]
                             },
                             "sourceFileMap": {
                                 "type": "object",
-                                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
+                                "description": "%vscode-docker.debug.attach.sourceFileMap%",
                                 "additionalProperties": {
                                     "type": "string"
                                 },
@@ -740,11 +740,11 @@
                                 }
                             },
                             "netCore": {
-                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "description": "%vscode-docker.debug.attach.netCore.description%",
                                 "properties": {
                                     "debuggerPath": {
                                         "type": "string",
-                                        "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                                        "description": "%vscode-docker.debug.attach.netCore.debuggerPath%"
                                     }
                                 }
                             }
@@ -1342,15 +1342,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.build.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.build.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.build.match%"
                                     }
                                 },
                                 "required": [
@@ -1364,7 +1364,7 @@
                         }
                     ],
                     "default": "docker build --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
-                    "description": "Command template(s) for `docker build` commands."
+                    "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
                     "oneOf": [
@@ -1374,15 +1374,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.run.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.run.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                        "description": "%vscode-docker.config.template.run.match%"
                                     }
                                 },
                                 "required": [
@@ -1396,7 +1396,7 @@
                         }
                     ],
                     "default": "docker run --rm -d ${exposedPorts} ${tag}",
-                    "description": "Command templates for `docker run` commands."
+                    "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
                     "oneOf": [
@@ -1406,15 +1406,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.runInteractive.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.runInteractive.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                        "description": "%vscode-docker.config.template.runInteractive.match%"
                                     }
                                 },
                                 "required": [
@@ -1428,7 +1428,7 @@
                         }
                     ],
                     "default": "docker run --rm -it ${exposedPorts} ${tag}",
-                    "description": "Command templates for `docker run -it` (interactive) commands."
+                    "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
                     "oneOf": [
@@ -1438,15 +1438,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.attach.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.attach.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.attach.match%"
                                     }
                                 },
                                 "required": [
@@ -1460,7 +1460,7 @@
                         }
                     ],
                     "default": "docker exec -it ${containerId} ${shellCommand}",
-                    "description": "Command templates for `docker attach` / `docker exec -it` commands."
+                    "description": "%vscode-docker.config.template.attach.description%"
                 },
                 "docker.commands.logs": {
                     "oneOf": [
@@ -1470,15 +1470,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.logs.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.logs.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.logs.match%"
                                     }
                                 },
                                 "required": [
@@ -1492,7 +1492,7 @@
                         }
                     ],
                     "default": "docker logs -f ${containerId}",
-                    "description": "Command templates for `docker logs` commands."
+                    "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
                     "oneOf": [
@@ -1502,15 +1502,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.composeUp.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.composeUp.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                        "description": "%vscode-docker.config.template.composeUp.match%"
                                     }
                                 },
                                 "required": [
@@ -1524,7 +1524,7 @@
                         }
                     ],
                     "default": "docker-compose ${configurationFile} up ${detached} ${build}",
-                    "description": "Command templates for `docker-compose up` commands."
+                    "description": "%vscode-docker.config.template.composeUp.description%"
                 },
                 "docker.commands.composeDown": {
                     "oneOf": [
@@ -1534,15 +1534,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.composeDown.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.composeDown.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                        "description": "%vscode-docker.config.template.composeDown.match%"
                                     }
                                 },
                                 "required": [
@@ -1556,7 +1556,7 @@
                         }
                     ],
                     "default": "docker-compose ${configurationFile} down",
-                    "description": "Command templates for `docker-compose down` commands."
+                    "description": "%vscode-docker.config.template.composeDown.description%"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
@@ -2302,8 +2302,8 @@
             },
             {
                 "command": "vscode-docker.registries.reconnectRegistry",
-                "title": "Re-enter credentials",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.reconnectRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.refresh",
