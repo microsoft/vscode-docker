@@ -6,7 +6,7 @@ import * as assert from 'assert';
 import { CommandLineBuilder } from '../../../extension.bundle';
 import { ShellQuoting } from 'vscode';
 
-suite('debugging/coreclr/CommandLineBuilder', () => {
+suite('(unit) debugging/coreclr/CommandLineBuilder', () => {
     function testBuilder(name: string, builderInitializer: (CommandLineBuilder) => CommandLineBuilder, expected: string, message: string) {
         test(name, () => {
             let builder = CommandLineBuilder.create();

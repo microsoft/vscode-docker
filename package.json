@@ -1,7 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "0.10.1-alpha",
-    "preview": true,
+    "version": "1.0.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -90,6 +89,7 @@
         "onCommand:vscode-docker.registries.logOutOfDockerCli",
         "onCommand:vscode-docker.registries.pullImage",
         "onCommand:vscode-docker.registries.pullRepository",
+        "onCommand:vscode-docker.registries.reconnectRegistry",
         "onCommand:vscode-docker.registries.refresh",
         "onCommand:vscode-docker.registries.setAsDefault",
         "onCommand:vscode-docker.volumes.configureExplorer",
@@ -126,7 +126,7 @@
                     "when": "never"
                 },
                 {
-                    "command": "vscode-docker.help",
+                    "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
                 }
             ],
@@ -478,6 +478,11 @@
                     "group": "regs_zzz_common@2"
                 },
                 {
+                    "command": "vscode-docker.registries.reconnectRegistry",
+                    "when": "view == dockerRegistries && viewItem == registryConnectError",
+                    "group": "regs_zzz_common@8"
+                },
+                {
                     "command": "vscode-docker.registries.refresh",
                     "when": "view == dockerRegistries && viewItem == connectedRegistries",
                     "group": "regs_zzz_common@9"
@@ -692,6 +697,58 @@
                                 }
                             }
                         }
+                    },
+                    "attach": {
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "The container name to attach to. If not specified, then user will be prompted to pick a container."
+                            },
+                            "processName": {
+                                "type": "string",
+                                "description": "The process name to attach to. If this is used, 'processId' should not be used."
+                            },
+                            "processId": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": "${command:pickProcess}"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "default": 0
+                                    }
+                                ]
+                            },
+                            "platform": {
+                                "type": "string",
+                                "description": "The target plaform for the application.",
+                                "enum": [
+                                    "netCore"
+                                ]
+                            },
+                            "sourceFileMap": {
+                                "type": "object",
+                                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
+                                "additionalProperties": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "<insert-source-path-here>": "<insert-target-path-here>"
+                                }
+                            },
+                            "netCore": {
+                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "properties": {
+                                    "debuggerPath": {
+                                        "type": "string",
+                                        "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "configurationSnippets": [
@@ -703,6 +760,19 @@
                             "request": "attach",
                             "name": "Docker: Attach to Node",
                             "remoteRoot": "/usr/src/app"
+                        }
+                    },
+                    {
+                        "label": "Docker: .NET Core Attach (Preview)",
+                        "description": "Docker: Attach to a .NET Core process in a container",
+                        "body": {
+                            "name": "Docker .NET Core Attach (Preview)",
+                            "type": "docker",
+                            "request": "attach",
+                            "platform": "netCore",
+                            "sourceFileMap": {
+                                "/src": "^\"\\${workspaceFolder}\""
+                            }
                         }
                     }
                 ]
@@ -1263,6 +1333,230 @@
                     "type": "number",
                     "default": 2000,
                     "description": "Docker view refresh interval (milliseconds)"
+                },
+                "docker.commands.build": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker build --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+                    "description": "Command template(s) for `docker build` commands."
+                },
+                "docker.commands.run": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker run --rm -d ${exposedPorts} ${tag}",
+                    "description": "Command templates for `docker run` commands."
+                },
+                "docker.commands.runInteractive": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker run --rm -it ${exposedPorts} ${tag}",
+                    "description": "Command templates for `docker run -it` (interactive) commands."
+                },
+                "docker.commands.attach": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker exec -it ${containerId} ${shellCommand}",
+                    "description": "Command templates for `docker attach` / `docker exec -it` commands."
+                },
+                "docker.commands.logs": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker logs -f ${containerId}",
+                    "description": "Command templates for `docker logs` commands."
+                },
+                "docker.commands.composeUp": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker-compose ${configurationFile} up ${detached} ${build}",
+                    "description": "Command templates for `docker-compose up` commands."
+                },
+                "docker.commands.composeDown": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "The command template."
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "The label displayed to the user."
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "docker-compose ${configurationFile} down",
+                    "description": "Command templates for `docker-compose down` commands."
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
@@ -2012,6 +2306,11 @@
                 "category": "Docker Registries"
             },
             {
+                "command": "vscode-docker.registries.reconnectRegistry",
+                "title": "Re-enter credentials",
+                "category": "Docker Registries"
+            },
+            {
                 "command": "vscode-docker.registries.refresh",
                 "title": "Refresh",
                 "category": "Docker Registries",
@@ -2104,7 +2403,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.40.0"
+        "vscode": "^1.41.0"
     },
     "scripts": {
         "vscode:prepublish": "npm run webpack-prod",

@@ -1,3 +1,17 @@
+## 1.0.0 - 3 March 2020
+### Added
+* Debugging support for Python [#1255](https://github.com/microsoft/vscode-docker/issues/1255)
+* Improved support for common Python frameworks (e.g. Django, Flask, etc.) [#1546](https://github.com/microsoft/vscode-docker/issues/1546)
+* Multi-select support in Docker explorer, including multi-select for some commands [#331](https://github.com/microsoft/vscode-docker/issues/331)
+* Ability to right-click and re-enter incorrect registry credentials [#1122](https://github.com/microsoft/vscode-docker/issues/1122)
+* Most command lines can be fully customized [#1596](https://github.com/microsoft/vscode-docker/issues/1596) (and more)
+* docker-compose support for .NET Core, including attach config [#1543](https://github.com/microsoft/vscode-docker/issues/1543)
+* Changes to selection logic of `docker-compose.yml` files [#370](https://github.com/microsoft/vscode-docker/issues/370) [#379](https://github.com/microsoft/vscode-docker/issues/379) [#569](https://github.com/microsoft/vscode-docker/issues/569)
+
+### Fixed
+* Incorrect `WORKDIR paths should be absolute` message [#1492](https://github.com/microsoft/vscode-docker/issues/1492)
+* README not showing images in gallery [#1654](https://github.com/microsoft/vscode-docker/issues/1654)
+
 ## 0.10.0 - 23 January 2020
 ### Added
 * Better error handling in command execution [#1398](https://github.com/microsoft/vscode-docker/issues/1398), [#1528](https://github.com/microsoft/vscode-docker/issues/1528)

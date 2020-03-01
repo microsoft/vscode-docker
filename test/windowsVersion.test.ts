@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { ext, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer, isWindows1019H1OrNewer } from '../extension.bundle';
 
-suite("windowsVersion", () => {
+suite("(unit) windowsVersion", () => {
     function testIsWindows1019H1OrNewer(release: string, expectedResult: boolean): void {
         test(`isWindows1019H1OrNewer: ${release}`, () => {
             let previousOs = ext.os;

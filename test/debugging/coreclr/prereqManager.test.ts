@@ -13,7 +13,7 @@ import { DockerClient } from '../../../extension.bundle';
 import { DotNetClient } from '../../../extension.bundle';
 import { LaunchOptions } from '../../../extension.bundle';
 
-suite('debugging/coreclr/prereqManager', () => {
+suite('(unit) debugging/coreclr/prereqManager', () => {
     suite('DockerDaemonIsLinuxPrerequisite', () => {
         const generateTest = (name: string, result: boolean, os: PlatformOS) => {
             test(name, async () => {

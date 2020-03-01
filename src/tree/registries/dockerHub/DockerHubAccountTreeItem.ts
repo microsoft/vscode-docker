@@ -12,6 +12,7 @@ import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
+import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { getRegistryPassword } from "../registryPasswords";
 import { DockerHubNamespaceTreeItem } from "./DockerHubNamespaceTreeItem";
@@ -57,7 +58,13 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
-            await this.refreshToken();
+
+            try {
+                await this.refreshToken();
+            } catch (err) {
+                // If creds are invalid, the above refreshToken will fail
+                return [new RegistryConnectErrorTreeItem(this, err, this.cachedProvider)];
+            }
         }
 
         const url: string = this._nextLink ? this._nextLink : `v2/repositories/namespaces?page_size=${PAGE_SIZE}`;

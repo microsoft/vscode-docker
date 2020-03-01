@@ -66,6 +66,7 @@ export type DockerVersionOptions = {
 export type DockerExecOptions = {
     interactive?: boolean;
     tty?: boolean;
+    progress?(content: string) : void;
 }
 
 export interface IHostPort {
@@ -275,7 +276,7 @@ export class CliDockerClient implements DockerClient {
             .withArg(args)
             .build();
 
-        const result = await this.processProvider.exec(command, {});
+        const result = await this.processProvider.exec(command, {progress: options.progress});
 
         return result.stdout;
     }
