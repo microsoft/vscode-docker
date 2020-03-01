@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { builtInNetworks } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { NetworkTreeItem } from '../../tree/networks/NetworkTreeItem';

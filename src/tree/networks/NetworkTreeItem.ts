@@ -6,7 +6,6 @@
 import { Network } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
-import { builtInNetworks } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 import { getThemedIconPath, IconPath } from '../IconPath';
