@@ -3,7 +3,7 @@
     "version": "1.0.1-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
-    "description": "Makes it easy to create, manage, and debug containerized applications.",
+    "description": "%vscode-docker.description%",
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -518,14 +518,14 @@
                         "properties": {
                             "containerName": {
                                 "type": "string",
-                                "description": "Name of the container used for debugging."
+                                "description": "%vscode-docker.debug.containerName%"
                             },
                             "dockerServerReadyAction": {
-                                "description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
+                                "description": "%vscode-docker.debug.dockerServerReadyAction.description%",
                                 "properties": {
                                     "action": {
                                         "type": "string",
-                                        "description": "The action to take when the pattern is found.",
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.action%",
                                         "enum": [
                                             "debugWithChrome",
                                             "openExternally"
@@ -533,31 +533,31 @@
                                     },
                                     "containerName": {
                                         "type": "string",
-                                        "description": "The container name to match the host port."
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.containerName%"
                                     },
                                     "pattern": {
                                         "type": "string",
-                                        "description": "The regex pattern to look for in Debug console output."
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.pattern%"
                                     },
                                     "uriFormat": {
                                         "type": "string",
-                                        "description": "The URI format to launch.",
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.uriFormat%",
                                         "default": "http://localhost:%s"
                                     },
                                     "webRoot": {
                                         "type": "string",
-                                        "description": "The root folder from which web pages are served."
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.webRoot%"
                                     }
                                 }
                             },
                             "removeContainerAfterDebug": {
                                 "type": "boolean",
-                                "description": "Whether to remove the debug container after debugging.",
+                                "description": "%vscode-docker.debug.removeContainerAfterDebug%",
                                 "default": true
                             },
                             "platform": {
                                 "type": "string",
-                                "description": "The target plaform for the application.",
+                                "description": "%vscode-docker.debug.platform%",
                                 "enum": [
                                     "netCore",
                                     "node",
@@ -565,11 +565,11 @@
                                 ]
                             },
                             "netCore": {
-                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "description": "%vscode-docker.debug.netCore.description%",
                                 "properties": {
                                     "appProject": {
                                         "type": "string",
-                                        "description": "The .NET Core project (.csproj, .fsproj, etc.) to debug."
+                                        "description": "%vscode-docker.debug.netCore.appProject%"
                                     }
                                 },
                                 "required": [
@@ -577,54 +577,54 @@
                                 ]
                             },
                             "node": {
-                                "description": "Options for debugging Node.js projects in Docker.",
+                                "description": "%vscode-docker.debug.node.description%",
                                 "properties": {
                                     "port": {
                                         "type": "integer",
-                                        "description": "The debug port to use."
+                                        "description": "%vscode-docker.debug.node.port%"
                                     },
                                     "address": {
                                         "type": "string",
-                                        "description": "TCP/IP address of the debug port."
+                                        "description": "%vscode-docker.debug.node.address%"
                                     },
                                     "sourceMaps": {
                                         "type": "boolean",
-                                        "description": "Enable source maps by setting this to `true`."
+                                        "description": "%vscode-docker.debug.node.sourceMaps%"
                                     },
                                     "outFiles": {
                                         "type": "array",
-                                        "description": "Array of glob patterns for locating generated JavaScript files.",
+                                        "description": "%vscode-docker.debug.node.outFiles%",
                                         "items": {
                                             "type": "string"
                                         }
                                     },
                                     "autoAttachChildProcesses": {
                                         "type": "boolean",
-                                        "description": "Track all subprocesses of debuggee and automatically attach to those that are launched in debug mode."
+                                        "description": "%vscode-docker.debug.node.autoAttachChildProcesses%"
                                     },
                                     "timeout": {
                                         "type": "integer",
-                                        "description": "When restarting a session, give up after this number of milliseconds."
+                                        "description": "%vscode-docker.debug.node.timeout%"
                                     },
                                     "stopOnEntry": {
                                         "type": "boolean",
-                                        "description": "Break immediately when the program launches."
+                                        "description": "%vscode-docker.debug.node.stopOnEntry%"
                                     },
                                     "localRoot": {
                                         "type": "string",
-                                        "description": "VS Code's root directory."
+                                        "description": "%vscode-docker.debug.node.localRoot%"
                                     },
                                     "remoteRoot": {
                                         "type": "string",
-                                        "description": "Node's root directory within the Docker container."
+                                        "description": "%vscode-docker.debug.node.remoteRoot%"
                                     },
                                     "smartStep": {
                                         "type": "boolean",
-                                        "description": "Try to automatically step over code that doesn't map to source files."
+                                        "description": "%vscode-docker.debug.node.smartStep%"
                                     },
                                     "skipFiles": {
                                         "type": "array",
-                                        "description": "Automatically skip files covered by these glob patterns.",
+                                        "description": "%vscode-docker.debug.node.skipFiles%",
                                         "items": {
                                             "type": "string"
                                         }
@@ -634,7 +634,7 @@
                                             "boolean",
                                             "string"
                                         ],
-                                        "description": "Enable diagnostic output.",
+                                        "description": "%vscode-docker.debug.node.trace%",
                                         "enum": [
                                             "verbose",
                                             true
@@ -643,16 +643,16 @@
                                 }
                             },
                             "python": {
-                                "description": "Options for debugging Python applications in Docker.",
+                                "description": "%vscode-docker.debug.python.description%",
                                 "properties": {
                                     "host": {
                                         "type": "string",
-                                        "description": "The host for remote debugging.",
+                                        "description": "%vscode-docker.debug.python.host%",
                                         "default": "localhost"
                                     },
                                     "port": {
                                         "type": "number",
-                                        "description": "The port for remote debugging.",
+                                        "description": "%vscode-docker.debug.python.port%",
                                         "default": 5678
                                     },
                                     "pathMappings": {
@@ -662,32 +662,32 @@
                                             "properties": {
                                                 "localRoot": {
                                                     "type": "string",
-                                                    "description": "The host path."
+                                                    "description": "%vscode-docker.debug.python.pathMappings.localRoot%"
                                                 },
                                                 "remoteRoot": {
                                                     "type": "string",
-                                                    "description": "The container path."
+                                                    "description": "%vscode-docker.debug.python.pathMappings.remoteRoot%"
                                                 }
                                             }
                                         }
                                     },
                                     "justMyCode": {
                                         "type": "boolean",
-                                        "description": "Debug only user-written code."
+                                        "description": "%vscode-docker.debug.python.justMyCode%"
                                     },
                                     "django": {
                                         "type": "boolean",
-                                        "description": "Django debugging.",
+                                        "description": "%vscode-docker.debug.python.django%",
                                         "default": false
                                     },
                                     "jinja": {
                                         "type": "boolean",
-                                        "description": "Jinja template debugging (e.g. Flask).",
+                                        "description": "%vscode-docker.debug.python.jinja%",
                                         "default": false
                                     },
                                     "projectType": {
                                         "type": "string",
-                                        "description": "Type of the Python app.",
+                                        "description": "%vscode-docker.debug.python.projectType%",
                                         "enum": [
                                             "django",
                                             "flask",
@@ -702,36 +702,36 @@
                         "properties": {
                             "containerName": {
                                 "type": "string",
-                                "description": "The container name to attach to. If not specified, then user will be prompted to pick a container."
+                                "description": "%vscode-docker.debug.attach.containerName%"
                             },
                             "processName": {
                                 "type": "string",
-                                "description": "The process name to attach to. If this is used, 'processId' should not be used."
+                                "description": "%vscode-docker.debug.attach.processName%"
                             },
                             "processId": {
                                 "anyOf": [
                                     {
                                         "type": "string",
-                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "description": "%vscode-docker.debug.attach.processIdString%",
                                         "default": "${command:pickProcess}"
                                     },
                                     {
                                         "type": "integer",
-                                        "description": "The process id to attach to. Use \"${command:pickProcesss}\" to get a list of running processes to attach to. If 'processId' used, 'processName' should not be used.",
+                                        "description": "%vscode-docker.debug.attach.processIdInteger%",
                                         "default": 0
                                     }
                                 ]
                             },
                             "platform": {
                                 "type": "string",
-                                "description": "The target plaform for the application.",
+                                "description": "%vscode-docker.debug.attach.platform%",
                                 "enum": [
                                     "netCore"
                                 ]
                             },
                             "sourceFileMap": {
                                 "type": "object",
-                                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
+                                "description": "%vscode-docker.debug.attach.sourceFileMap%",
                                 "additionalProperties": {
                                     "type": "string"
                                 },
@@ -740,11 +740,11 @@
                                 }
                             },
                             "netCore": {
-                                "description": "Options for debugging .NET Core projects in Docker.",
+                                "description": "%vscode-docker.debug.attach.netCore.description%",
                                 "properties": {
                                     "debuggerPath": {
                                         "type": "string",
-                                        "description": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg."
+                                        "description": "%vscode-docker.debug.attach.netCore.debuggerPath%"
                                     }
                                 }
                             }
@@ -962,30 +962,30 @@
                 "type": "docker-build",
                 "properties": {
                     "dockerBuild": {
-                        "description": "Options for building the Docker image used for debugging.",
+                        "description": "%vscode-docker.tasks.docker-build.dockerBuild.description%",
                         "properties": {
                             "buildArgs": {
                                 "type": "object",
-                                "description": "Build arguments applied to the Docker image used for debugging.",
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.buildArgs%",
                                 "additionalProperties": {
                                     "type": "string"
                                 }
                             },
                             "context": {
                                 "type": "string",
-                                "description": "Path to the Docker build context."
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.context%"
                             },
                             "dockerfile": {
                                 "type": "string",
-                                "description": "Path to the Dockerfile used for the build."
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.dockerfile%"
                             },
                             "labels": {
                                 "type": "object",
-                                "description": "Labels applied to the Docker image used for debugging.",
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.labels.description%",
                                 "properties": {
                                     "includeDefaults": {
                                         "type": "boolean",
-                                        "description": "Whether to include the default set of labels defined by the Docker extension",
+                                        "description": "%vscode-docker.tasks.docker-build.dockerBuild.labels.includeDefaults%",
                                         "default": true
                                     }
                                 },
@@ -995,21 +995,21 @@
                             },
                             "tag": {
                                 "type": "string",
-                                "description": "Tag applied to the Docker image used for debugging."
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.tag%"
                             },
                             "target": {
                                 "type": "string",
-                                "description": "Docker build target (stage) used for debugging."
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.target%"
                             },
                             "pull": {
                                 "type": "boolean",
-                                "description": "Whether or not to pull new base images before building."
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.pull%"
                             }
                         }
                     },
                     "platform": {
                         "type": "string",
-                        "description": "The target plaform for the application.",
+                        "description": "%vscode-docker.tasks.docker-build.platform%",
                         "enum": [
                             "netCore",
                             "node",
@@ -1017,11 +1017,11 @@
                         ]
                     },
                     "netCore": {
-                        "description": "Options for building .NET Core projects in Docker.",
+                        "description": "%vscode-docker.tasks.docker-build.netCore.description%",
                         "properties": {
                             "appProject": {
                                 "type": "string",
-                                "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                                "description": "%vscode-docker.tasks.docker-build.netCore.appProject%"
                             }
                         },
                         "required": [
@@ -1029,16 +1029,16 @@
                         ]
                     },
                     "node": {
-                        "description": "Options for building Node.js applications in Docker.",
+                        "description": "%vscode-docker.tasks.docker-build.node.description%",
                         "properties": {
                             "package": {
                                 "type": "string",
-                                "description": "The path to the package.json for the application."
+                                "description": "%vscode-docker.tasks.docker-build.node.package%"
                             }
                         }
                     },
                     "python": {
-                        "description": "Options for building Python applications in Docker.",
+                        "description": "%vscode-docker.tasks.docker-build.python.description%",
                         "type": "object"
                     }
                 }
@@ -1047,41 +1047,41 @@
                 "type": "docker-run",
                 "properties": {
                     "dockerRun": {
-                        "description": "Options for running the Docker container used for debugging.",
+                        "description": "%vscode-docker.tasks.docker-run.dockerRun.description%",
                         "properties": {
                             "command": {
                                 "type": "string",
-                                "description": "The command to run upon starting the container."
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.command%"
                             },
                             "containerName": {
                                 "type": "string",
-                                "description": "Name of the container used for debugging."
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.containerName%"
                             },
                             "env": {
                                 "type": "object",
-                                "description": "Environment variables applied to the Docker container used for debugging.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.env%",
                                 "additionalProperties": {
                                     "type": "string"
                                 }
                             },
                             "envFiles": {
                                 "type": "array",
-                                "description": "Files of environment variables read in and applied to the Docker container used for debugging.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.envFiles%",
                                 "items": {
                                     "type": "string"
                                 }
                             },
                             "image": {
                                 "type": "string",
-                                "description": "The image to run."
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.image%"
                             },
                             "labels": {
                                 "type": "object",
-                                "description": "Labels applied to the Docker container used for debugging.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.labels.description%",
                                 "properties": {
                                     "includeDefaults": {
                                         "type": "boolean",
-                                        "description": "Whether to include the default set of labels defined by the Docker extension",
+                                        "description": "%vscode-docker.tasks.docker-run.dockerRun.labels.includeDefaults%",
                                         "default": true
                                     }
                                 },
@@ -1091,15 +1091,15 @@
                             },
                             "network": {
                                 "type": "string",
-                                "description": "The network to which the container will be connected."
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.network%"
                             },
                             "networkAlias": {
                                 "type": "string",
-                                "description": "The network-scoped alias to assign to the container."
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.networkAlias%"
                             },
                             "os": {
                                 "type": "string",
-                                "description": "The container operating system.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.os%",
                                 "default": "Linux",
                                 "enum": [
                                     "Linux",
@@ -1108,21 +1108,21 @@
                             },
                             "ports": {
                                 "type": "array",
-                                "description": "Ports that are going to be mapped on the host.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.ports.description%",
                                 "items": {
                                     "type": "object",
                                     "properties": {
                                         "hostPort": {
                                             "type": "integer",
-                                            "description": "Port number to be bound on the host."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.ports.hostPort%"
                                         },
                                         "containerPort": {
                                             "type": "integer",
-                                            "description": "Port number of the container to be bound."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.ports.containerPort%"
                                         },
                                         "protocol": {
                                             "type": "string",
-                                            "description": "Specific protocol for the binding (`tcp | udp`).",
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.ports.protocol%",
                                             "enum": [
                                                 "tcp",
                                                 "udp"
@@ -1136,22 +1136,22 @@
                             },
                             "portsPublishAll": {
                                 "type": "boolean",
-                                "description": "Whether to publish all exposed container ports to random ports on the host.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.portsPublishAll%",
                                 "default": true
                             },
                             "extraHosts": {
                                 "type": "array",
-                                "description": "Hosts to be added to the container's `hosts` file for DNS resolution.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.extraHosts.description%",
                                 "items": {
                                     "type": "object",
                                     "properties": {
                                         "hostname": {
                                             "type": "string",
-                                            "description": "Hostname for dns resolution."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.extraHosts.hostname%"
                                         },
                                         "ip": {
                                             "type": "string",
-                                            "description": "IP associated to the hostname."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.extraHosts.ip%"
                                         }
                                     },
                                     "required": [
@@ -1162,21 +1162,21 @@
                             },
                             "volumes": {
                                 "type": "array",
-                                "description": "Volumes that are going to be mapped to the container.",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.volumes.description%",
                                 "items": {
                                     "type": "object",
                                     "properties": {
                                         "localPath": {
                                             "type": "string",
-                                            "description": "Path on local machine that will be mapped. The folder will be created if it does not exist."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.volumes.localPath%"
                                         },
                                         "containerPath": {
                                             "type": "string",
-                                            "description": "Path where the volume will be mapped within the container. The folder will be created if it does not exist."
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.volumes.containerPath%"
                                         },
                                         "permissions": {
                                             "type": "string",
-                                            "description": "Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only.",
+                                            "description": "%vscode-docker.tasks.docker-run.dockerRun.volumes.permissions%",
                                             "enum": [
                                                 "rw",
                                                 "ro"
@@ -1193,7 +1193,7 @@
                     },
                     "platform": {
                         "type": "string",
-                        "description": "The target plaform for the application.",
+                        "description": "%vscode-docker.tasks.docker-run.platform%",
                         "enum": [
                             "netCore",
                             "node",
@@ -1201,19 +1201,19 @@
                         ]
                     },
                     "netCore": {
-                        "description": "Options for running .NET Core projects in Docker.",
+                        "description": "%vscode-docker.tasks.docker-run.netCore.description%",
                         "properties": {
                             "appProject": {
                                 "type": "string",
-                                "description": "The .NET Core project (.csproj, .fsproj, etc.) to build."
+                                "description": "%vscode-docker.tasks.docker-run.netCore.appProject%"
                             },
                             "enableDebugging": {
                                 "type": "boolean",
-                                "description": "Whether to enable debugging within the container."
+                                "description": "%vscode-docker.tasks.docker-run.netCore.enableDebugging%"
                             },
                             "configureSsl": {
                                 "type": "boolean",
-                                "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
+                                "description": "%vscode-docker.tasks.docker-run.netCore.configureSsl%"
                             }
                         },
                         "required": [
@@ -1221,55 +1221,55 @@
                         ]
                     },
                     "node": {
-                        "description": "Options for running Node.js applications in Docker.",
+                        "description": "%vscode-docker.tasks.docker-run.node.description%",
                         "properties": {
                             "enableDebugging": {
                                 "type": "boolean",
-                                "description": "Whether to enable debugging within the container."
+                                "description": "%vscode-docker.tasks.docker-run.node.enableDebugging%"
                             },
                             "inspectMode": {
                                 "type": "string",
-                                "description": "Whether debugging should break immediately upon application start."
+                                "description": "%vscode-docker.tasks.docker-run.node.inspectMode%"
                             },
                             "inspectPort": {
                                 "type": "integer",
-                                "description": "The port on which debugging should occur."
+                                "description": "%vscode-docker.tasks.docker-run.node.inspectPort%"
                             },
                             "package": {
                                 "type": "string",
-                                "description": "The path to the package.json for the application."
+                                "description": "%vscode-docker.tasks.docker-run.node.package%"
                             }
                         }
                     },
                     "python": {
                         "type": "object",
                         "additionalProperties": false,
-                        "description": "Options for running Python applications in Docker.",
+                        "description": "%vscode-docker.tasks.docker-run.python.description%",
                         "properties": {
                             "file": {
                                 "type": "string",
-                                "description": "The Python file to run.",
+                                "description": "%vscode-docker.tasks.docker-run.python.file%",
                                 "default": "${file}"
                             },
                             "module": {
                                 "type": "string",
-                                "description": "The Python module to run."
+                                "description": "%vscode-docker.tasks.docker-run.python.module%"
                             },
                             "args": {
                                 "type": "array",
-                                "description": "Arguments passed to the Python app.",
+                                "description": "%vscode-docker.tasks.docker-run.python.args%",
                                 "items": {
                                     "type": "string"
                                 }
                             },
                             "wait": {
                                 "type": "boolean",
-                                "description": "Whether to wait for debugger to attach.",
+                                "description": "%vscode-docker.tasks.docker-run.python.wait%",
                                 "default": true
                             },
                             "debugPort": {
                                 "type": "number",
-                                "description": "The port that the debugger will listen on.",
+                                "description": "%vscode-docker.tasks.docker-run.python.debugPort%",
                                 "default": 5678
                             }
                         },
@@ -1327,12 +1327,12 @@
                 "docker.defaultRegistryPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Default registry and path when tagging an image"
+                    "description": "%vscode-docker.config.docker.defaultRegistryPath%"
                 },
                 "docker.explorerRefreshInterval": {
                     "type": "number",
                     "default": 2000,
-                    "description": "Docker view refresh interval (milliseconds)"
+                    "description": "%vscode-docker.config.docker.explorerRefreshInterval%"
                 },
                 "docker.commands.build": {
                     "oneOf": [
@@ -1342,15 +1342,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.build.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.build.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.build.match%"
                                     }
                                 },
                                 "required": [
@@ -1364,7 +1364,7 @@
                         }
                     ],
                     "default": "docker build --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
-                    "description": "Command template(s) for `docker build` commands."
+                    "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
                     "oneOf": [
@@ -1374,15 +1374,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.run.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.run.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                        "description": "%vscode-docker.config.template.run.match%"
                                     }
                                 },
                                 "required": [
@@ -1396,7 +1396,7 @@
                         }
                     ],
                     "default": "docker run --rm -d ${exposedPorts} ${tag}",
-                    "description": "Command templates for `docker run` commands."
+                    "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
                     "oneOf": [
@@ -1406,15 +1406,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.runInteractive.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.runInteractive.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against image name, etc."
+                                        "description": "%vscode-docker.config.template.runInteractive.match%"
                                     }
                                 },
                                 "required": [
@@ -1428,7 +1428,7 @@
                         }
                     ],
                     "default": "docker run --rm -it ${exposedPorts} ${tag}",
-                    "description": "Command templates for `docker run -it` (interactive) commands."
+                    "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
                     "oneOf": [
@@ -1438,15 +1438,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.attach.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.attach.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.attach.match%"
                                     }
                                 },
                                 "required": [
@@ -1460,7 +1460,7 @@
                         }
                     ],
                     "default": "docker exec -it ${containerId} ${shellCommand}",
-                    "description": "Command templates for `docker attach` / `docker exec -it` commands."
+                    "description": "%vscode-docker.config.template.attach.description%"
                 },
                 "docker.commands.logs": {
                     "oneOf": [
@@ -1470,15 +1470,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.logs.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.logs.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against container name, container's image name, etc."
+                                        "description": "%vscode-docker.config.template.logs.match%"
                                     }
                                 },
                                 "required": [
@@ -1492,7 +1492,7 @@
                         }
                     ],
                     "default": "docker logs -f ${containerId}",
-                    "description": "Command templates for `docker logs` commands."
+                    "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
                     "oneOf": [
@@ -1502,15 +1502,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.composeUp.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.composeUp.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                        "description": "%vscode-docker.config.template.composeUp.match%"
                                     }
                                 },
                                 "required": [
@@ -1524,7 +1524,7 @@
                         }
                     ],
                     "default": "docker-compose ${configurationFile} up ${detached} ${build}",
-                    "description": "Command templates for `docker-compose up` commands."
+                    "description": "%vscode-docker.config.template.composeUp.description%"
                 },
                 "docker.commands.composeDown": {
                     "oneOf": [
@@ -1534,15 +1534,15 @@
                                 "properties": {
                                     "template": {
                                         "type": "string",
-                                        "description": "The command template."
+                                        "description": "%vscode-docker.config.template.composeDown.template%"
                                     },
                                     "label": {
                                         "type": "string",
-                                        "description": "The label displayed to the user."
+                                        "description": "%vscode-docker.config.template.composeDown.label%"
                                     },
                                     "match": {
                                         "type": "string",
-                                        "description": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc."
+                                        "description": "%vscode-docker.config.template.composeDown.match%"
                                     }
                                 },
                                 "required": [
@@ -1556,12 +1556,12 @@
                         }
                     ],
                     "default": "docker-compose ${configurationFile} down",
-                    "description": "Command templates for `docker-compose down` commands."
+                    "description": "%vscode-docker.config.template.composeDown.description%"
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use to group containers in Docker view: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, Tag, or None",
+                    "description": "%vscode-docker.config.docker.containers.groupBy%",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1586,7 +1586,7 @@
                         "ContainerName",
                         "Status"
                     ],
-                    "description": "Any secondary properties to display for a container (an array). Possible elements include: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, and Tag",
+                    "description": "%vscode-docker.config.docker.containers.description%",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1610,7 +1610,7 @@
                 "docker.containers.label": {
                     "type": "string",
                     "default": "FullTag",
-                    "description": "The primary property to display for a container: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, or Tag",
+                    "description": "%vscode-docker.config.docker.containers.label%",
                     "enum": [
                         "ContainerId",
                         "ContainerName",
@@ -1631,7 +1631,7 @@
                 "docker.containers.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use to sort containers in Docker view: CreatedTime or Label",
+                    "description": "%vscode-docker.config.docker.containers.sortBy%",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1640,7 +1640,7 @@
                 "docker.images.groupBy": {
                     "type": "string",
                     "default": "Repository",
-                    "description": "The property to use to group images in Docker view: CreatedTime, FullTag, ImageId, None, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
+                    "description": "%vscode-docker.config.docker.images.groupBy%",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1658,7 +1658,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a image (an array). Possible elements include: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, and Tag",
+                    "description": "%vscode-docker.config.docker.images.description%",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1676,7 +1676,7 @@
                 "docker.images.label": {
                     "type": "string",
                     "default": "Tag",
-                    "description": "The primary property to display for a image: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
+                    "description": "%vscode-docker.config.docker.images.label%",
                     "enum": [
                         "CreatedTime",
                         "FullTag",
@@ -1691,7 +1691,7 @@
                 "docker.images.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use to sort images in Docker view: CreatedTime or Label",
+                    "description": "%vscode-docker.config.docker.images.sortBy%",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1700,7 +1700,7 @@
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use to group networks in Docker view: CreatedTime, NetworkDriver, NetworkId, NetworkName, or None",
+                    "description": "%vscode-docker.config.docker.networks.groupBy%",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1715,7 +1715,7 @@
                         "NetworkDriver",
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a Docker network (an array). Possible elements include CreatedTime, NetworkDriver, NetworkId, and NetworkName",
+                    "description": "%vscode-docker.config.docker.networks.description%",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1729,12 +1729,12 @@
                 "docker.networks.showBuiltInNetworks": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Show the built-in networks in the explorer."
+                    "description": "%vscode-docker.config.docker.networks.showBuiltIn%"
                 },
                 "docker.networks.label": {
                     "type": "string",
                     "default": "NetworkName",
-                    "description": "The primary property to display for a Docker network: CreatedTime, NetworkDriver, NetworkId, or NetworkName",
+                    "description": "%vscode-docker.config.docker.networks.label%",
                     "enum": [
                         "CreatedTime",
                         "NetworkDriver",
@@ -1745,7 +1745,7 @@
                 "docker.networks.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use to sort networks in Docker view: CreatedTime or Label",
+                    "description": "%vscode-docker.config.docker.networks.sortBy%",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1754,7 +1754,7 @@
                 "docker.volumes.groupBy": {
                     "type": "string",
                     "default": "None",
-                    "description": "The property to use to group volumes in Docker view: CreatedTime, VolumeName, or None",
+                    "description": "%vscode-docker.config.docker.volumes.groupBy%",
                     "enum": [
                         "CreatedTime",
                         "VolumeName",
@@ -1766,7 +1766,7 @@
                     "default": [
                         "CreatedTime"
                     ],
-                    "description": "Any secondary properties to display for a Docker volume (an array). Possible values include CreatedTime and VolumeName",
+                    "description": "%vscode-docker.config.docker.volumes.description%",
                     "items": {
                         "type": "string",
                         "enum": [
@@ -1778,7 +1778,7 @@
                 "docker.volumes.label": {
                     "type": "string",
                     "default": "VolumeName",
-                    "description": "The primary property to display for a Docker volume: CreatedTime or VolumeName",
+                    "description": "%vscode-docker.config.docker.volumes.label%",
                     "enum": [
                         "CreatedTime",
                         "VolumeName"
@@ -1787,7 +1787,7 @@
                 "docker.volumes.sortBy": {
                     "type": "string",
                     "default": "CreatedTime",
-                    "description": "The property to use to sort volumes in Docker view: CreatedTime or Label",
+                    "description": "%vscode-docker.config.docker.volumes.sortBy%",
                     "enum": [
                         "CreatedTime",
                         "Label"
@@ -1796,37 +1796,37 @@
                 "docker.imageBuildContextPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Build context PATH to pass to Docker build command."
+                    "description": "%vscode-docker.config.docker.imageBuildContextPath%"
                 },
                 "docker.truncateLongRegistryPaths": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Set to true to truncate long image and container registry paths in Docker view"
+                    "description": "%vscode-docker.config.docker.truncateLongRegistryPaths%"
                 },
                 "docker.truncateMaxLength": {
                     "type": "number",
                     "default": 10,
-                    "description": "Maximum length of a registry paths displayed in Docker view, including elipsis. The truncateLongRegistryPaths setting must be set to true for truncateMaxLength setting to be effective."
+                    "description": "%vscode-docker.config.docker.truncateMaxLength%"
                 },
                 "docker.host": {
                     "type": "string",
                     "default": "",
-                    "description": "Equivalent to setting the DOCKER_HOST environment variable."
+                    "description": "%vscode-docker.config.docker.host%"
                 },
                 "docker.certPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Equivalent to setting the DOCKER_CERT_PATH environment variable."
+                    "description": "%vscode-docker.config.docker.certPath%"
                 },
                 "docker.tlsVerify": {
                     "type": "string",
                     "default": "",
-                    "description": "Equivalent to setting the DOCKER_TLS_VERIFY environment variable."
+                    "description": "%vscode-docker.config.docker.tlsVerify%"
                 },
                 "docker.machineName": {
                     "type": "string",
                     "default": "",
-                    "description": "Equivalent to setting the DOCKER_MACHINE_NAME environment variable."
+                    "description": "%vscode-docker.config.docker.machineName%"
                 },
                 "docker.languageserver.diagnostics.deprecatedMaintainer": {
                     "scope": "resource",
@@ -1837,7 +1837,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for the deprecated MAINTAINER instruction"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.deprecatedMaintainer%"
                 },
                 "docker.languageserver.diagnostics.emptyContinuationLine": {
                     "scope": "resource",
@@ -1848,7 +1848,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.emptyContinuationLine%"
                 },
                 "docker.languageserver.diagnostics.directiveCasing": {
                     "scope": "resource",
@@ -1859,7 +1859,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for parser directives that are not written in lowercase"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.directiveCasing%"
                 },
                 "docker.languageserver.diagnostics.instructionCasing": {
                     "scope": "resource",
@@ -1870,7 +1870,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for instructions that are not written in uppercase"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionCasing%"
                 },
                 "docker.languageserver.diagnostics.instructionCmdMultiple": {
                     "scope": "resource",
@@ -1881,7 +1881,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple CMD instructions"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionCmdMultiple%"
                 },
                 "docker.languageserver.diagnostics.instructionEntrypointMultiple": {
                     "scope": "resource",
@@ -1892,7 +1892,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple ENTRYPOINT instructions"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionEntrypointMultiple%"
                 },
                 "docker.languageserver.diagnostics.instructionHealthcheckMultiple": {
                     "scope": "resource",
@@ -1903,7 +1903,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionHealthcheckMultiple%"
                 },
                 "docker.languageserver.diagnostics.instructionJSONInSingleQuotes": {
                     "scope": "resource",
@@ -1914,7 +1914,7 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionJsonInSingleQuotes%"
                 },
                 "docker.languageserver.diagnostics.instructionWorkdirRelative": {
                     "scope": "resource",
@@ -1925,32 +1925,32 @@
                         "warning",
                         "error"
                     ],
-                    "description": "Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path"
+                    "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionWorkdirRelative%"
                 },
                 "docker.attachShellCommand.linuxContainer": {
                     "type": "string",
                     "default": "/bin/sh -c \"[ -e /bin/bash ] && /bin/bash || /bin/sh\"",
-                    "description": "Attach command to use for Linux containers"
+                    "description": "%vscode-docker.config.docker.attachShellCommand.linuxContainer%"
                 },
                 "docker.attachShellCommand.windowsContainer": {
                     "type": "string",
                     "default": "powershell",
-                    "description": "Attach command to use for Windows containers"
+                    "description": "%vscode-docker.config.docker.attachShellCommand.windowsContainer%"
                 },
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Set to true to include --build option when docker-compose command is invoked"
+                    "description": "%vscode-docker.config.docker.dockerComposeBuild%"
                 },
                 "docker.dockerComposeDetached": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Set to true to include --d (detached) option when docker-compose command is invoked"
+                    "description": "%vscode-docker.config.docker.dockerComposeDetached%"
                 },
                 "docker.showRemoteWorkspaceWarning": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Set to true to prompt to switch from \"UI\" extension mode to \"Workspace\" extension mode if an operation is not supported in UI mode."
+                    "description": "%vscode-docker.config.docker.showRemoteWorkspaceWarning%"
                 }
             }
         },
@@ -1966,43 +1966,43 @@
         "commands": [
             {
                 "command": "vscode-docker.api.configure",
-                "title": "Add Docker Files to Workspace (API)...",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.api.configure%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.compose.down",
-                "title": "Compose Down",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.compose.down%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.compose.restart",
-                "title": "Compose Restart",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.compose.restart%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.compose.up",
-                "title": "Compose Up",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.compose.up%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.configure",
-                "title": "Add Docker Files to Workspace...",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.configure%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.containers.attachShell",
-                "title": "Attach Shell",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.attachShell%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.browse",
-                "title": "Open in Browser",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.browse%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.configureExplorer",
-                "title": "Configure Explorer...",
-                "category": "Docker Containers",
+                "title": "%vscode-docker.commands.containers.configureExplorer%",
+                "category": "%vscode-docker.commands.category.dockerContainers%",
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
@@ -2010,13 +2010,13 @@
             },
             {
                 "command": "vscode-docker.containers.inspect",
-                "title": "Inspect",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.inspect%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.prune",
-                "title": "Prune...",
-                "category": "Docker Containers",
+                "title": "%vscode-docker.commands.containers.prune%",
+                "category": "%vscode-docker.commands.category.dockerContainers%",
                 "icon": {
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
@@ -2024,8 +2024,8 @@
             },
             {
                 "command": "vscode-docker.containers.refresh",
-                "title": "Refresh",
-                "category": "Docker Containers",
+                "title": "%vscode-docker.commands.containers.refresh%",
+                "category": "%vscode-docker.commands.category.dockerContainers%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -2033,48 +2033,48 @@
             },
             {
                 "command": "vscode-docker.containers.remove",
-                "title": "Remove...",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.remove%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.restart",
-                "title": "Restart",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.restart%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.select",
-                "title": "Select container",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.select%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.start",
-                "title": "Start",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.start%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.stop",
-                "title": "Stop",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.stop%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.viewLogs",
-                "title": "View Logs",
-                "category": "Docker Containers"
+                "title": "%vscode-docker.commands.containers.viewLogs%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.debugging.initializeForDebugging",
-                "title": "Initialize for Docker debugging",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.debugging.initializeForDebugging%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.images.build",
-                "title": "Build Image...",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.build%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.configureExplorer",
-                "title": "Configure Explorer...",
-                "category": "Docker Images",
+                "title": "%vscode-docker.commands.images.configureExplorer%",
+                "category": "%vscode-docker.commands.category.dockerImages%",
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
@@ -2082,13 +2082,13 @@
             },
             {
                 "command": "vscode-docker.images.inspect",
-                "title": "Inspect",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.inspect%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.prune",
-                "title": "Prune...",
-                "category": "Docker Images",
+                "title": "%vscode-docker.commands.images.prune%",
+                "category": "%vscode-docker.commands.category.dockerImages%",
                 "icon": {
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
@@ -2096,13 +2096,13 @@
             },
             {
                 "command": "vscode-docker.images.push",
-                "title": "Push",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.push%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.refresh",
-                "title": "Refresh",
-                "category": "Docker Images",
+                "title": "%vscode-docker.commands.images.refresh%",
+                "category": "%vscode-docker.commands.category.dockerImages%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -2110,38 +2110,38 @@
             },
             {
                 "command": "vscode-docker.images.remove",
-                "title": "Remove...",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.remove%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.run",
-                "title": "Run",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.run%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.runAzureCli",
-                "title": "Run Azure CLI",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.runAzureCli%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.runInteractive",
-                "title": "Run Interactive",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.runInteractive%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.tag",
-                "title": "Tag...",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.tag%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.copyFullTag",
-                "title": "Copy Full Tag",
-                "category": "Docker Images"
+                "title": "%vscode-docker.commands.images.copyFullTag%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.networks.configureExplorer",
-                "title": "Configure Explorer...",
-                "category": "Docker Networks",
+                "title": "%vscode-docker.commands.networks.configureExplorer%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%",
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
@@ -2149,8 +2149,8 @@
             },
             {
                 "command": "vscode-docker.networks.create",
-                "title": "Create...",
-                "category": "Docker Networks",
+                "title": "%vscode-docker.commands.networks.create%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%",
                 "icon": {
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
@@ -2158,13 +2158,13 @@
             },
             {
                 "command": "vscode-docker.networks.inspect",
-                "title": "Inspect",
-                "category": "Docker Networks"
+                "title": "%vscode-docker.commands.networks.inspect%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%"
             },
             {
                 "command": "vscode-docker.networks.prune",
-                "title": "Prune...",
-                "category": "Docker Networks",
+                "title": "%vscode-docker.commands.networks.prune%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%",
                 "icon": {
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
@@ -2172,8 +2172,8 @@
             },
             {
                 "command": "vscode-docker.networks.refresh",
-                "title": "Refresh",
-                "category": "Docker Networks",
+                "title": "%vscode-docker.commands.networks.refresh%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -2181,52 +2181,52 @@
             },
             {
                 "command": "vscode-docker.networks.remove",
-                "title": "Remove...",
-                "category": "Docker Networks"
+                "title": "%vscode-docker.commands.networks.remove%",
+                "category": "%vscode-docker.commands.category.dockerNetworks%"
             },
             {
                 "command": "vscode-docker.pruneSystem",
-                "title": "Prune System...",
-                "category": "Docker"
+                "title": "%vscode-docker.commands.pruneSystem%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.registries.azure.buildImage",
-                "title": "Build Image in Azure...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.buildImage%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.createRegistry",
-                "title": "Create Registry...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.createRegistry%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.deleteRegistry",
-                "title": "Delete Registry...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.deleteRegistry%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.deleteRepository",
-                "title": "Delete Repository...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.deleteRepository%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.openInPortal",
-                "title": "Open in Portal",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.openInPortal%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.runFileAsTask",
-                "title": "Run as Task in Azure...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.runFileAsTask%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.runTask",
-                "title": "Run Task",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.runTask%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.selectSubscriptions",
-                "title": "Select Subscriptions...",
+                "title": "%vscode-docker.commands.registries.azure.selectSubscriptions%",
                 "icon": {
                     "light": "resources/light/filter.svg",
                     "dark": "resources/dark/filter.svg"
@@ -2234,18 +2234,18 @@
             },
             {
                 "command": "vscode-docker.registries.azure.untagImage",
-                "title": "Untag Image...",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.untagImage%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.viewProperties",
-                "title": "View Properties",
-                "category": "Azure Container Registry"
+                "title": "%vscode-docker.commands.registries.azure.viewProperties%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
                 "command": "vscode-docker.registries.azure.viewTaskLogs",
-                "title": "View Logs",
-                "category": "Azure Container Registry",
+                "title": "%vscode-docker.commands.registries.azure.viewLogs%",
+                "category": "%vscode-docker.commands.category.azureContainerRegistry%",
                 "icon": {
                     "light": "resources/light/viewLogs.svg",
                     "dark": "resources/dark/viewLogs.svg"
@@ -2253,8 +2253,8 @@
             },
             {
                 "command": "vscode-docker.registries.connectRegistry",
-                "title": "Connect Registry...",
-                "category": "Docker Registries",
+                "title": "%vscode-docker.commands.registries.connect%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%",
                 "icon": {
                     "light": "resources/light/connect.svg",
                     "dark": "resources/dark/connect.svg"
@@ -2262,58 +2262,58 @@
             },
             {
                 "command": "vscode-docker.registries.copyImageDigest",
-                "title": "Copy Image Digest",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.copyImageDigest%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.deleteImage",
-                "title": "Delete Image...",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.deleteImage%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.deployImageToAzure",
-                "title": "Deploy Image to Azure App Service...",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.deployImageToAzure%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.disconnectRegistry",
-                "title": "Disconnect",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.disconnectRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.dockerHub.openInBrowser",
-                "title": "Open in Browser",
-                "category": "Docker Hub"
+                "title": "%vscode-docker.commands.registries.dockerHub.openInBrowser%",
+                "category": "%vscode-docker.commands.category.dockerHub%"
             },
             {
                 "command": "vscode-docker.registries.logInToDockerCli",
-                "title": "Log In to Docker CLI",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.logInToDockerCli%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.logOutOfDockerCli",
-                "title": "Log Out of Docker CLI",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.logOutOfDockerCli%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.pullImage",
-                "title": "Pull Image",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.pullImage%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.pullRepository",
-                "title": "Pull Repository",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.pullRepository%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.reconnectRegistry",
-                "title": "Re-enter credentials",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.reconnectRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.refresh",
-                "title": "Refresh",
-                "category": "Docker Registries",
+                "title": "%vscode-docker.commands.registries.refresh%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -2321,13 +2321,13 @@
             },
             {
                 "command": "vscode-docker.registries.setAsDefault",
-                "title": "Set as Default",
-                "category": "Docker Registries"
+                "title": "%vscode-docker.commands.registries.setAsDefault%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.volumes.configureExplorer",
-                "title": "Configure Explorer...",
-                "category": "Docker Volumes",
+                "title": "%vscode-docker.commands.volumes.configureExplorer%",
+                "category": "%vscode-docker.commands.category.dockerVolumes%",
                 "icon": {
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
@@ -2335,13 +2335,13 @@
             },
             {
                 "command": "vscode-docker.volumes.inspect",
-                "title": "Inspect",
-                "category": "Docker Volumes"
+                "title": "%vscode-docker.commands.volumes.inspect%",
+                "category": "%vscode-docker.commands.category.dockerVolumes%"
             },
             {
                 "command": "vscode-docker.volumes.prune",
-                "title": "Prune...",
-                "category": "Docker Volumes",
+                "title": "%vscode-docker.commands.volumes.prune%",
+                "category": "%vscode-docker.commands.category.dockerVolumes%",
                 "icon": {
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
@@ -2349,8 +2349,8 @@
             },
             {
                 "command": "vscode-docker.volumes.refresh",
-                "title": "Refresh",
-                "category": "Docker Volumes",
+                "title": "%vscode-docker.commands.volumes.refresh%",
+                "category": "%vscode-docker.commands.category.dockerVolumes%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -2358,13 +2358,13 @@
             },
             {
                 "command": "vscode-docker.volumes.remove",
-                "title": "Remove...",
-                "category": "Docker Volumes"
+                "title": "%vscode-docker.commands.volumes.remove%",
+                "category": "%vscode-docker.commands.category.dockerVolumes%"
             },
             {
                 "command": "vscode-docker.help",
-                "title": "Docker help...",
-                "category": "Docker",
+                "title": "%vscode-docker.commands.help%",
+                "category": "%vscode-docker.commands.category.docker%",
                 "icon": "$(question)"
             }
         ],
@@ -2372,23 +2372,23 @@
             "dockerView": [
                 {
                     "id": "dockerContainers",
-                    "name": "Containers"
+                    "name": "%vscode-docker.views.dockerContainers%"
                 },
                 {
                     "id": "dockerImages",
-                    "name": "Images"
+                    "name": "%vscode-docker.views.dockerImages%"
                 },
                 {
                     "id": "dockerRegistries",
-                    "name": "Registries"
+                    "name": "%vscode-docker.views.dockerRegistries%"
                 },
                 {
                     "id": "dockerNetworks",
-                    "name": "Networks"
+                    "name": "%vscode-docker.views.dockerNetworks%"
                 },
                 {
                     "id": "dockerVolumes",
-                    "name": "Volumes"
+                    "name": "%vscode-docker.views.dockerVolumes%"
                 }
             ]
         },
@@ -2397,7 +2397,7 @@
                 {
                     "icon": "resources/docker.svg",
                     "id": "dockerView",
-                    "title": "Docker"
+                    "title": "%vscode-docker.views.activityBar%"
                 }
             ]
         }
@@ -2460,6 +2460,7 @@
         "vsce": "^1.71.0",
         "vscode": "^1.1.36",
         "vscode-azureextensiondev": "^0.2.3",
+        "vscode-nls-dev": "^3.3.1",
         "webpack": "^4.41.2",
         "webpack-cli": "^3.3.10"
     },
@@ -2485,6 +2486,7 @@
         "vscode-azureappservice": "^0.54.0",
         "vscode-azureextensionui": "^0.29.5",
         "vscode-languageclient": "^6.1.0",
+        "vscode-nls": "^4.1.1",
         "xml2js": "^0.4.22"
     }
 }

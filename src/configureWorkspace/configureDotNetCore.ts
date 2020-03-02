@@ -13,6 +13,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
@@ -179,7 +180,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
-        throw new Error(`Unexpected OS "${os}"`);
+        throw new Error(localize('vscode-docker.configureDotNetCore.unexpectedOs', 'Unexpected OS "{0}"', os));
     }
 
     let serviceName = path.basename(serviceNameAndRelativePath);
@@ -251,7 +252,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
             template = os === "Linux" ? aspNetCoreLinuxTemplate : aspNetCoreWindowsTemplate;
             break;
         default:
-            throw new Error(`Unexpected platform "${platform}"`);
+            throw new Error(localize('vscode-docker.configureDotNetCore.unexpectedPlatform', 'Unexpected platform "{0}"', platform));
     }
 
     let contents = template.replace('$base_image_name$', baseImageName)
@@ -349,7 +350,7 @@ async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
 
     if (!projectFiles || !projectFiles.length) {
-        throw new Error("No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.");
+        throw new Error(localize('vscode-docker.configureDotNetCore.noCsproj', 'No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.'));
     }
 
     if (projectFiles.length > 1) {

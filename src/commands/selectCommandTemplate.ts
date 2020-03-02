@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
 
 export type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
@@ -109,7 +110,7 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
             } catch {
                 // Don't wait
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                ext.ui.showWarningMessage(`Invalid match expression for template '${template.label}'. This template will be skipped.`);
+                ext.ui.showWarningMessage(localize('vscode-docker.commands.selectCommandTemplate.invalidMatch', 'Invalid match expression for template \'{0}\'. This template will be skipped.', template.label));
             }
         }
 
@@ -150,7 +151,7 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
     });
 
     const selection = await ext.ui.showQuickPick(items, {
-        placeHolder: 'Choose a command template to execute'
+        placeHolder: localize('vscode-docker.commands.selectCommandTemplate.chooseTemplate', 'Choose a command template to execute')
     });
 
     return selection.data;

@@ -7,6 +7,7 @@ import { NetworkInspectInfo } from "dockerode";
 import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -17,8 +18,8 @@ import { NetworkTreeItem } from "./NetworkTreeItem";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, NetworkProperty> {
     public treePrefix: string = 'networks';
-    public label: string = 'Networks';
-    public configureExplorerTitle: string = 'Configure networks explorer';
+    public label: string = localize('vscode-docker.tree.networks.label', 'Networks');
+    public configureExplorerTitle: string = localize('vscode-docker.tree.networks.configure', 'Configure networks explorer');
     public childType: LocalChildType<LocalNetworkInfo> = NetworkTreeItem;
     public childGroupType: LocalChildGroupType<LocalNetworkInfo, NetworkProperty> = NetworkGroupTreeItem;
 

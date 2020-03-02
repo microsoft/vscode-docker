@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, UserCancelledError } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { openExternal } from "../../utils/openExternal";
 import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
@@ -24,7 +25,7 @@ const providersKey = 'docker.registryProviders';
 export class RegistriesTreeItem extends AzExtParentTreeItem {
     public static contextValue: string = 'registries';
     public contextValue: string = RegistriesTreeItem.contextValue;
-    public label: string = 'Registries';
+    public label: string = localize('vscode-docker.tree.registries.registriesLabel', 'Registries');
     public childTypeLabel: string = 'registry provider';
     public autoSelectInTreeItemPicker: boolean = true;
     public _connectedRegistriesTreeItem: ConnectedRegistriesTreeItem;
@@ -40,7 +41,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (this._cachedProviders.length === 0) {
             return [new GenericTreeItem(this, {
-                label: 'Connect Registry...',
+                label: localize('vscode-docker.tree.registries.connectRegistry', 'Connect Registry...'),
                 contextValue: 'connectRegistry',
                 iconPath: getThemedIconPath('connect'),
                 includeInTreeItemPicker: true,
@@ -54,7 +55,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 cachedProvider => {
                     const provider = getRegistryProviders().find(rp => rp.id === cachedProvider.id);
                     if (!provider) {
-                        throw new Error(`Failed to find registry provider with id "${cachedProvider.id}".`);
+                        throw new Error(localize('vscode-docker.tree.registries.noProvider', 'Failed to find registry provider with id "{0}".', cachedProvider.id));
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
@@ -87,11 +88,11 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         })
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
         picks.push({
-            label: "$(link-external) Don't see your provider? Learn how to contribute...",
+            label: localize('vscode-docker.tree.registries.contribute', '$(link-external) Don\'t see your provider? Learn how to contribute...'),
             data: undefined
         });
 
-        let placeHolder: string = 'Select the provider for your registry';
+        let placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
         provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
             await openExternal('https://aka.ms/AA5g7n7');
@@ -100,7 +101,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
             // Don't wait, no input to wait for anyway
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            ext.ui.showWarningMessage(`The "${provider.label}" registry provider is already connected.`);
+            ext.ui.showWarningMessage(localize('vscode-docker.tree.registries.providerConnected', 'The "{0}" registry provider is already connected.', provider.label));
             context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
             throw new UserCancelledError();
         }
@@ -147,10 +148,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 let label: string = (provider && provider.label) || crp.id;
                 let descriptions: string[] = [];
                 if (crp.username) {
-                    descriptions.push(`Username: "${crp.username}"`)
+                    descriptions.push(localize('vscode-docker.tree.registries.usernameDesc', 'Username: "{0}"', crp.username))
                 }
                 if (crp.url) {
-                    descriptions.push(`URL: "${crp.url}"`)
+                    descriptions.push(localize('vscode-docker.tree.registries.urlDesc', 'URL: "{0}"', crp.url))
                 }
                 return {
                     label,
@@ -159,7 +160,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     data: crp
                 }
             });
-            const placeHolder: string = 'Select the registry to disconnect';
+            const placeHolder: string = localize('vscode-docker.tree.registries.selectDisconnect', 'Select the registry to disconnect');
             cachedProvider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         }
 
@@ -173,7 +174,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         } catch (err) {
             // Don't wait, no input to wait for anyway
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            ext.ui.showWarningMessage(`The registry password could not be removed from the cache: ${err}`);
+            ext.ui.showWarningMessage(localize('vscode-docker.tree.registries.disconnectError', 'The registry password could not be removed from the cache: {0}', parseError(err).message));
         }
 
         const index = this._cachedProviders.findIndex(n => n === cachedProvider);

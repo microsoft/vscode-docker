@@ -9,6 +9,7 @@ import * as path from 'path';
 import { DebugConfiguration, MessageItem, window } from 'vscode';
 import { DialogResponses, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { pathNormalize } from '../../utils/pathNormalize';
@@ -111,7 +112,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 return this.resolveAttachDebugConfiguration(context, debugConfiguration);
                 break;
             default:
-                throw Error(`Unknown request ${debugConfiguration.request} specified in the debug config.`);
+                throw Error(localize('vscode-docker.debug.netcore.unknownDebugRequest', 'Unknown request {0} specified in the debug config.', debugConfiguration.request));
         }
     }
 
@@ -279,9 +280,9 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async installDebuggerInContainer(containerName: string): Promise<string> {
         const yesItem: MessageItem = DialogResponses.yes;
-        const install = (yesItem === await window.showInformationMessage('Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?', ...[DialogResponses.yes, DialogResponses.no]));
+        const install = (yesItem === await window.showInformationMessage(localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?'), ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
-            throw new UserCancelledError("User didn't grand permission to install .NET Core debugger.");
+            throw new UserCancelledError();
         }
 
         const debuggerPath: string = '/remote_debugger';
@@ -295,17 +296,17 @@ export class NetCoreDebugHelper implements DebugHelper {
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
 
         await outputManager.performOperation(
-            'Installing the latest .NET Core debugger...',
+            localize('vscode-docker.debug.netcore.installingDebugger', 'Installing the latest .NET Core debugger...'),
             async (output) => {
                 const installProgress = (content: string) => {
                     output.appendLine(content);
                 };
-                const dockerExecOptions : DockerExecOptions = { interactive: true, progress: installProgress };
+                const dockerExecOptions: DockerExecOptions = { interactive: true, progress: installProgress };
 
                 await dockerClient.exec(containerName, installDebugger, dockerExecOptions);
             },
-            'Debugger installed',
-            'Unable to install the .NET Core debugger.'
+            localize('vscode-docker.debug.netcore.debuggerInstalled', 'Debugger installed'),
+            localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to install the .NET Core debugger.')
         );
 
         return `${debuggerPath}/vsdbg`;
@@ -315,7 +316,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No running containers are available to attach'
+            noItemFoundErrorMessage: localize('vscode-docker.debug.netcore.noContainers', 'No running containers are available to attach.')
         });
         return containerItem.containerName;
     }

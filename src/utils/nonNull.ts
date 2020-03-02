@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { isNullOrUndefined } from 'util';
+import { localize } from '../localize';
 
 /**
  * Retrieves a property by name from an object and checks that it's not null and not undefined.  It is strongly typed
@@ -21,7 +22,7 @@ export function nonNullValue<T>(value: T | undefined, propertyNameOrMessage?: st
     if (isNullOrUndefined(value)) {
         throw new Error(
             // tslint:disable-next-line:prefer-template
-            "Internal error: Expected value to be neither null nor undefined"
+            localize('vscode-docker.utils.nonNull.expectedNull', 'Internal error: Expected value to be neither null nor undefined')
             + (propertyNameOrMessage ? `: ${propertyNameOrMessage}` : ''));
     }
 

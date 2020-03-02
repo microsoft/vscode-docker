@@ -5,6 +5,8 @@
 import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
+import { localize } from '../../localize';
 import { Lazy } from '../../utils/lazy';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
@@ -162,10 +164,10 @@ export class DefaultDockerManager implements DockerManager {
         }
 
         const imageId = await this.dockerOutputManager.performOperation(
-            'Building Docker image...',
+            localize('vscode-docker.debug.coreclr.buildingImage', 'Building Docker image...'),
             async outputManager => await this.dockerClient.buildImage(options, content => outputManager.append(content)),
-            id => `Docker image ${this.dockerClient.trimId(id)} built.`,
-            err => `Failed to build Docker image: ${err}`);
+            id => localize('vscode-docker.debug.coreclr.imageBuilt', 'Docker image {0} built.', this.dockerClient.trimId(id)),
+            err => localize('vscode-docker.debug.coreclr.buildError', 'Failed to build Docker image: {0}', parseError(err).message));
 
         const dockerfileHash = await dockerfileHasher.value;
         const dockerIgnoreHash = await dockerIgnoreHasher.value;
@@ -184,7 +186,7 @@ export class DefaultDockerManager implements DockerManager {
 
     public async runContainer(imageTagOrId: string, options: DockerManagerRunContainerOptions): Promise<string> {
         if (options.containerName === undefined) {
-            throw new Error('No container name was provided.');
+            throw new Error(localize('vscode-docker.debug.coreclr.noContainer', 'No container name was provided.'));
         }
 
         const containerName = options.containerName;
@@ -202,7 +204,7 @@ export class DefaultDockerManager implements DockerManager {
         const additionalVolumes = this.getVolumes(debuggerFolder, options);
 
         const containerId = await this.dockerOutputManager.performOperation(
-            'Starting container...',
+            localize('vscode-docker.debug.coreclr.startingContainer', 'Starting container...'),
             async () => {
                 const containers = (await this.dockerClient.listContainers({ format: '{{.Names}}' })).split('\n');
 
@@ -226,8 +228,8 @@ export class DefaultDockerManager implements DockerManager {
                         volumes: [...(additionalVolumes || []), ...(options.volumes || [])]
                     });
             },
-            id => `Container ${this.dockerClient.trimId(id)} started.`,
-            err => `Unable to start container: ${err}`);
+            id => localize('vscode-docker.debug.coreclr.containerStarted', 'Container {0} started.', this.dockerClient.trimId(id)),
+            err => localize('vscode-docker.debug.coreclr.unableToStart', 'Unable to start container: {0}', parseError(err).message));
 
         return containerId;
     }
@@ -349,7 +351,7 @@ export class DefaultDockerManager implements DockerManager {
             programFilesEnvironmentVariable = this.processProvider.env[DefaultDockerManager.ProgramFilesEnvironmentVariable];
 
             if (programFilesEnvironmentVariable === undefined) {
-                throw new Error(`The environment variable '${DefaultDockerManager.ProgramFilesEnvironmentVariable}' is not defined. This variable is used to locate the NuGet fallback folder.`);
+                throw new Error(localize('vscode-docker.debug.coreclr.programFilesUndefined', 'The environment variable \'{0}\' is not defined. This variable is used to locate the NuGet fallback folder.', DefaultDockerManager.ProgramFilesEnvironmentVariable));
             }
         }
 

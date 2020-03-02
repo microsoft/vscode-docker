@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
@@ -16,7 +17,7 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: 'No images are availalbe to tag'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.tag.noImages', 'No images are available to tag')
         });
     }
 
@@ -44,7 +45,7 @@ export async function getTagFromUserInput(fullTag: string, addDefaultRegistry: b
 
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
-        prompt: 'Tag image as...',
+        prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
     };
     if (addDefaultRegistry) {
         let registryLength: number = fullTag.indexOf('/');

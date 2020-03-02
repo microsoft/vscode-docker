@@ -5,6 +5,7 @@
 
 import { ImageInfo } from "dockerode";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -15,8 +16,8 @@ import { ILocalImageInfo, LocalImageInfo } from "./LocalImageInfo";
 
 export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, ImageProperty> {
     public treePrefix: string = 'images';
-    public label: string = 'Images';
-    public configureExplorerTitle: string = 'Configure images explorer';
+    public label: string = localize('vscode-docker.tree.images.label', 'Images');
+    public configureExplorerTitle: string = localize('vscode-docker.tree.images.configure', 'Configure images explorer');
 
     public childType: LocalChildType<ILocalImageInfo> = ImageTreeItem;
     public childGroupType: LocalChildGroupType<ILocalImageInfo, ImageProperty> = ImageGroupTreeItem;

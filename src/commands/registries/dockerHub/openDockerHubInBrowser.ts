@@ -6,6 +6,7 @@
 import { IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
+import { localize } from "../../../localize";
 import { DockerHubNamespaceTreeItem } from "../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem";
 import { DockerHubRepositoryTreeItem } from "../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem";
 import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
@@ -16,7 +17,7 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Doc
     if (!node) {
         node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, {
             ...context,
-            noItemFoundErrorMessage: 'No Docker Hub registries available to browse'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.registries.dockerHub.noRegistries', 'No Docker Hub registries available to browse')
         });
     }
 

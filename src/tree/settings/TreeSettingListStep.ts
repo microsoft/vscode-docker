@@ -5,22 +5,23 @@
 
 import { AzureWizardPromptStep, IAzureQuickPickItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./ITreeSettingsWizardContext";
 
 export class TreeSettingListStep extends AzureWizardPromptStep<ITreeSettingsWizardContext> {
     public async prompt(context: ITreeSettingsWizardContext): Promise<void> {
-        const placeHolder = "Select a setting to change."
+        const placeHolder = localize('vscode-docker.tree.settings.select', 'Select a setting to change.');
         const picks: IAzureQuickPickItem<ITreeSettingWizardInfo | undefined>[] = context.infoList.map(info => {
             return {
-                label: `$(gear) ${info.label}`,
-                description: `Current: "${info.currentValue}"`,
+                label: localize('vscode-docker.tree.settings.currentLabel', '$(gear) {0}', info.label),
+                description: localize('vscode-docker.tree.settings.currentValue', 'Current: "{0}"', info?.toString()),
                 detail: info.description,
                 data: info
             }
         });
         picks.push({
-            label: '$(history) Reset settings',
-            detail: 'Restore settings to their original defaults.',
+            label: localize('vscode-docker.tree.settings.resetLabel', '$(history) Reset settings'),
+            detail: localize('vscode-docker.tree.settings.resetDetail', 'Restore settings to their original defaults.'),
             data: undefined
         });
         context.info = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true, ignoreFocusOut: false })).data;

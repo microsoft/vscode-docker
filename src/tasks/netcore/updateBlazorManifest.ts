@@ -11,6 +11,7 @@ import { DockerContainerVolume } from '../../debugging/coreclr/CliDockerClient';
 import LocalOSProvider from "../../debugging/coreclr/LocalOSProvider";
 import { OSTempFileProvider } from "../../debugging/coreclr/tempFileProvider";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { execAsync } from '../../utils/spawnAsync';
@@ -50,12 +51,12 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
             const contents = (await fse.readFile(locationsFile)).toString().split(/\r?\n/ig);
 
             if (contents.length < 2) {
-                throw new Error('Unable to determine Blazor manifest locations from output file.');
+                throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest1', 'Unable to determine Blazor manifest locations from output file.'));
             }
 
             await transformBlazorManifest(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
         } else {
-            throw new Error('Unable to determine Blazor manifest locations from output file.')
+            throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest2', 'Unable to determine Blazor manifest locations from output file.'))
         }
     } finally {
         if (await fse.pathExists(locationsFile)) {
@@ -76,13 +77,13 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 
     os = os || 'Linux';
 
-    context.terminal.writeOutputLine('Attempting to containerize Blazor static web assets manifest...');
+    context.terminal.writeOutputLine(localize('vscode-docker.tasks.netCore.attemptingBlazorContainerize', 'Attempting to containerize Blazor static web assets manifest...'));
 
     const contents = (await fse.readFile(inputManifest)).toString();
     const manifest: Manifest = <Manifest>await xml2js.parseStringPromise(contents);
 
     if (!manifest || !manifest.StaticWebAssets) {
-        throw new Error('Failed to parse Blazor static web assets manifest.');
+        throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifest', 'Failed to parse Blazor static web assets manifest.'));
     }
 
     for (const contentRoot of manifest.StaticWebAssets.ContentRoot) {

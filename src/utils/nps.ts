@@ -7,6 +7,7 @@
 
 import { env, Memento, Uri, window } from "vscode";
 import { ext } from "vscode-azureappservice/out/src/extensionVariables";
+import { localize } from '../localize';
 
 const PROBABILITY = 0.15;
 const MIN_SESSION_COUNT = 10;
@@ -61,12 +62,12 @@ export async function nps(globalState: Memento): Promise<void> {
             return;
         }
 
-        const take = { title: 'Take Survey', telName: 'take' };
-        const remind = { title: 'Remind Me Later', telName: 'remind' };
-        const never = { title: 'Don\'t Show Again', telName: 'never' };
+        const take = { title: localize('vscode-docker.survey.take', 'Take Survey'), telName: 'take' };
+        const remind = { title: localize('vscode-docker.survey.remind', 'Remind Me Later'), telName: 'remind' };
+        const never = { title: localize('vscode-docker.survey.dontShow', 'Don\'t Show Again'), telName: 'never' };
 
         // Prompt, treating hitting X as Remind Me Later
-        const result = (await window.showInformationMessage('Do you mind taking a quick feedback survey about the Docker Extension for VS Code?', take, remind, never)) || remind;
+        const result = (await window.showInformationMessage(localize('vscode-docker.survey.prompt1', 'Do you mind taking a quick feedback survey about the Docker Extension for VS Code?'), take, remind, never)) || remind;
 
         ext.reporter.sendTelemetryEvent('nps', { survey: SURVEY_NAME, response: result.telName });
 

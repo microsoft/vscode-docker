@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getDockerOSType } from '../../utils/osUtils';
 import { selectAttachCommand } from '../selectCommandTemplate';
@@ -14,7 +15,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     if (!node) {
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No running containers are available to attach'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.attachShellContainer.noContainers', 'No running containers are available to attach')
         });
     }
 

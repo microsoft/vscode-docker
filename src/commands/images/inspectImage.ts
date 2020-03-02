@@ -6,6 +6,7 @@
 import { Image, ImageInspectInfo } from "dockerode";
 import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 
@@ -13,7 +14,7 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: 'No images are availalbe to inspect'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.inspect.noImages', 'No images are available to inspect')
         });
     }
 

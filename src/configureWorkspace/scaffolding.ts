@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem, } from "vscode-azureextensionui";
 import { ext } from "../extensionVariables";
+import { localize } from '../localize';
 import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from "../utils/platform";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
@@ -55,7 +56,7 @@ export type ScaffoldFile = {
 export type Scaffolder = (context: ScaffolderContext) => Promise<ScaffoldFile[]>;
 
 async function promptForFolder(): Promise<vscode.WorkspaceFolder> {
-    return await quickPickWorkspaceFolder('To generate Docker files you must first open a folder or workspace in VS Code.');
+    return await quickPickWorkspaceFolder(localize('vscode-docker.scaffolding.workspaceFolder', 'To generate Docker files you must first open a folder or workspace in VS Code.'));
 }
 
 async function promptForOS(): Promise<PlatformOS> {
@@ -75,7 +76,7 @@ async function promptForOverwrite(fileName: string): Promise<boolean> {
         }
     ];
 
-    const response = await vscode.window.showErrorMessage(`"${fileName}" already exists. Would you like to overwrite it?`, ...YES_OR_NO_PROMPTS);
+    const response = await vscode.window.showErrorMessage(localize('vscode-docker.scaffolding.fileExists', '"{0}" already exists. Would you like to overwrite it?', fileName), ...YES_OR_NO_PROMPTS);
 
     return response === YES_PROMPT;
 }
@@ -90,7 +91,7 @@ async function promptForPlatform(): Promise<Platform> {
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
-        placeHolder: 'Select Application Platform'
+        placeHolder: localize('vscode-docker.scaffolding.selectPlatform', 'Select Application Platform')
     }
 
     const items = Array.from(scaffolders.keys()).map(p => <IAzureQuickPickItem<Platform>>{ label: p, data: p });
@@ -127,7 +128,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
     const scaffolder = scaffolders.get(platform);
 
     if (!scaffolder) {
-        throw new Error(`No scaffolder is registered for platform '${context.platform}'.`);
+        throw new Error(localize('vscode-docker.scaffolding.noScaffolder', 'No scaffolder is registered for platform \'{0}\'.', context.platform));
     }
 
     telemetryProperties.orchestration = 'single';

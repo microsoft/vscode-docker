@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { localize } from '../../../localize';
 import { RegistryApi } from "../all/RegistryApi";
 import { IRegistryProvider } from "../IRegistryProvider";
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
@@ -14,9 +15,9 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
     id: dockerHubRegistryProviderId,
     api: RegistryApi.DockerHubV2,
     connectWizardOptions: {
-        wizardTitle: 'Sign in to Docker Hub',
+        wizardTitle: localize('vscode-docker.tree.registries.dockerHub.signIn', 'Sign in to Docker Hub'),
         includeUsername: true,
-        usernamePrompt: 'Enter your Docker ID',
+        usernamePrompt: localize('vscode-docker.tree.registries.dockerHub.enterID', 'Enter your Docker ID'),
         includePassword: true,
     },
     treeItemType: DockerHubAccountTreeItem

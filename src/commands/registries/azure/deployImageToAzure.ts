@@ -10,6 +10,7 @@ import { env, Progress, Uri, window } from "vscode";
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
+import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
 import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
@@ -63,7 +64,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
 
     const site: Site = nonNullProp(wizardContext, 'site');
     const siteUri: string = `https://${site.defaultHostName}`;
-    const createdNewWebApp: string = `Successfully created web app "${site.name}": ${siteUri}`;
+    const createdNewWebApp: string = localize('vscode-docker.commands.registries.azure.deployImage.created', 'Successfully created web app "{0}": {1}', site.name, siteUri);
     ext.outputChannel.appendLine(createdNewWebApp);
 
     const openSite: string = 'Open Site';
@@ -92,7 +93,7 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {
         if (registryTI instanceof AzureRegistryTreeItem) {
             const cred = await registryTI.tryGetAdminCredentials();
             if (!cred) {
-                throw new Error('Azure App service currently only supports running images from Azure Container Registries with admin enabled');
+                throw new Error(localize('vscode-docker.commands.registries.azure.deployImage.notAdminEnabled', 'Azure App service currently only supports running images from Azure Container Registries with admin enabled'));
             } else {
                 username = cred.username;
                 password = nonNullProp(cred, 'passwords')[0].value;
@@ -102,10 +103,10 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<SiteConfig> {
             username = registryTI.cachedProvider.username;
             password = await getRegistryPassword(registryTI.cachedProvider);
         } else {
-            throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
+            throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeA', 'Unrecognized node type "{0}"', registryTI.constructor.name));
         }
     } else {
-        throw new RangeError(`Unrecognized node type "${registryTI.constructor.name}"`);
+        throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeB', 'Unrecognized node type "{0}"', registryTI.constructor.name));
     }
 
     if (username && password) {
@@ -132,7 +133,7 @@ class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardConte
     }
 
     public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const creatingNewApp: string = `Creating web app "${context.newSiteName}"...`;
+        const creatingNewApp: string = localize('vscode-docker.commands.registries.azure.deployImage.creatingWebApp', 'Creating web app "{0}"...', context.newSiteName);
         ext.outputChannel.appendLine(creatingNewApp);
         progress.report({ message: creatingNewApp });
 

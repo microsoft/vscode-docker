@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
+import { localize } from "../localize";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from './selectCommandTemplate';
 
@@ -41,7 +42,7 @@ function computeItems(folder: vscode.WorkspaceFolder, uris: vscode.Uri[]): vscod
 }
 
 async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder('To run Docker compose you must first open a folder or workspace in VS Code.');
+    const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
 
     let commandParameterFileUris: vscode.Uri[];
     if (selectedComposeFileUris && selectedComposeFileUris.length) {
@@ -57,7 +58,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
         const uris: vscode.Uri[] = await getDockerComposeFileUris(folder);
         if (!uris || uris.length === 0) {
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showWarningMessage('Couldn\'t find any docker-compose files in your workspace.');
+            vscode.window.showWarningMessage(localize('vscode-docker.commands.compose.noComposeFiles', 'Couldn\'t find any docker-compose files in your workspace.'));
             return;
         }
 
@@ -68,7 +69,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
             // if the current set of docker files contain only docker-compose.yml or docker-compose.yml with override file,
             // don't ask user for a docker file and let docker-compose automatically pick these files.
         } else {
-            selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: `Choose Docker Compose file ${message}` })];
+            selectedItems = [<Item>await ext.ui.showQuickPick(items, { placeHolder: message })];
         }
     }
 
@@ -125,13 +126,13 @@ function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
 }
 
 export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['up'], 'to bring up', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['up'], localize('vscode-docker.commands.compose.chooseUp', 'Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['down'], 'to take down', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down'], localize('vscode-docker.commands.compose.chooseDown', 'Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['down', 'up'], 'to restart', dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
 }

@@ -7,6 +7,7 @@ import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { askToSaveRegistryPath } from '../registries/registrySettings';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
@@ -15,7 +16,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: 'No images are availalbe to push'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push')
         });
     }
 
@@ -31,10 +32,10 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         if (askToPushPrefix && defaultRegistryPath) {
             context.telemetry.properties.pushWithoutRepositoryAnswer = 'Cancel';
 
-            let tagFirst: vscode.MessageItem = { title: "Tag first" };
-            let pushAnyway: vscode.MessageItem = { title: "Push anyway" }
+            let tagFirst: vscode.MessageItem = { title: localize('vscode-docker.commands.images.push.tagFirst', 'Tag first') };
+            let pushAnyway: vscode.MessageItem = { title: localize('vscode-docker.commands.images.push.pushAnyway', 'Push anyway') }
             let options: vscode.MessageItem[] = [tagFirst, pushAnyway];
-            let response: vscode.MessageItem = await ext.ui.showWarningMessage(`This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image like <docker-id-or-registry-server>/<imagename>`, ...options);
+            let response: vscode.MessageItem = await ext.ui.showWarningMessage(localize('vscode-docker.commands.images.push.pushDockerHub', 'This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image like <docker-id-or-registry-server>/<imagename>'), ...options);
             context.telemetry.properties.pushWithoutRepositoryAnswer = response.title;
 
             if (response === tagFirst) {

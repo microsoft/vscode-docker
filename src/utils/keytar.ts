@@ -5,6 +5,7 @@
 
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import * as keytarType from 'keytar';
+import { localize } from '../localize';
 import { getCoreNodeModule } from './getCoreNodeModule';
 
 export interface IKeytar {
@@ -47,7 +48,7 @@ function getKeytarModule(): typeof keytarType {
     // tslint:disable-next-line: no-unsafe-any
     const keytar = getCoreNodeModule<typeof keytarType>('keytar');
     if (!keytar) {
-        throw new Error("Internal error: Could not find keytar module for reading and writing passwords");
+        throw new Error(localize('vscode-docker.utils.keytar.noKeytar', 'Internal error: Could not find keytar module for reading and writing passwords'));
     } else {
         return keytar;
     }

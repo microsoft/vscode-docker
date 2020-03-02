@@ -12,6 +12,7 @@ import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
+import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { getBlobInfo, streamLogs } from "../../../../utils/azureUtils";
@@ -29,20 +30,20 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     let fileItem: Item;
     let imageName: string;
     if (requestType === 'DockerBuildRequest') {
-        rootFolder = await quickPickWorkspaceFolder("To quick build Docker files you must first open a folder or workspace in VS Code.");
+        rootFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.registries.azure.tasks.buildFolder', 'To quick build Docker files you must first open a folder or workspace in VS Code.'));
         fileItem = await quickPickDockerFileItem(context, uri, rootFolder);
         imageName = await quickPickImageName(context, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
-        rootFolder = await quickPickWorkspaceFolder("To run a task from a .yaml file you must first open a folder or workspace in VS Code.");
-        fileItem = await quickPickYamlFileItem(uri, rootFolder, "To run a task from a .yaml file you must have yaml file in your VS Code workspace.");
+        rootFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.registries.azure.tasks.yamlFolder', 'To run a task from a .yaml file you must first open a folder or workspace in VS Code.'));
+        fileItem = await quickPickYamlFileItem(uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
     } else {
-        throw new Error("Run Request Type Currently not supported.");
+        throw new Error(localize('vscode-docker.commands.registries.azure.tasks.runTypeUnsupported', 'Run Request Type Currently not supported.'));
     }
 
     const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<string>>{ label: item, data: item });
-    const osType: string = (await ext.ui.showQuickPick(osPick, { 'placeHolder': 'Select image base OS' })).data;
+    const osType: string = (await ext.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
 
     const tarFilePath: string = getTempSourceArchivePath();
 
@@ -50,7 +51,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     ext.outputChannel.show();
 
     const uploadedSourceLocation: string = await uploadSourceCode(node.client, node.registryName, node.resourceGroup, rootFolder, tarFilePath);
-    ext.outputChannel.appendLine("Uploaded source code to " + tarFilePath);
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
 
     let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
     if (requestType === 'DockerBuildRequest') {
@@ -72,10 +73,10 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     }
 
     // Schedule the run and Clean up.
-    ext.outputChannel.appendLine("Set up run request");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
     const run = await node.client.registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
-    ext.outputChannel.appendLine("Scheduled run " + run.runId);
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
     await streamLogs(node, run);
     await fse.unlink(tarFilePath);
@@ -111,24 +112,24 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
-    ext.outputChannel.appendLine("   Sending source code to temp file");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
     let source: string = rootFolder.uri.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any
     tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
-    ext.outputChannel.appendLine("   Getting build source upload URL ");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.gettingBuildSourceUploadUrl', '   Getting build source upload URL'));
     let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
     let uploadUrl: string = sourceUploadLocation.uploadUrl;
     let relativePath: string = sourceUploadLocation.relativePath;
 
-    ext.outputChannel.appendLine("   Getting blob info from upload URL ");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.gettingBlobInfo', '   Getting blob info from upload URL'));
     // Right now, accountName and endpointSuffix are unused, but will be used for streaming logs later.
     let blobInfo = getBlobInfo(uploadUrl);
-    ext.outputChannel.appendLine("   Creating blob service ");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.creatingBlobService', '   Creating blob service'));
     let blob: BlobService = createBlobServiceWithSas(blobInfo.host, blobInfo.sasToken);
-    ext.outputChannel.appendLine("   Creating block blob ");
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.creatingBlockBlob', '   Creating block blob'));
     await new Promise((resolve, reject) => {
         blob.createBlockBlobFromLocalFile(blobInfo.containerName, blobInfo.blobName, tarFilePath, (error, result, response): void => {
             if (error) {
@@ -145,7 +146,7 @@ function getTempSourceArchivePath(): string {
     /* tslint:disable-next-line:insecure-random */
     const id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
     const archive = `sourceArchive${id}.tar.gz`;
-    ext.outputChannel.appendLine(`Setting up temp file with '${archive}'`);
+    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.settingUpTempFile', 'Setting up temp file with \'{0}\'', archive));
     const tarFilePath: string = path.join(os.tmpdir(), archive);
     return tarFilePath;
 }

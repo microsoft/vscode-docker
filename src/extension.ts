@@ -22,6 +22,7 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { localize } from './localize';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
@@ -154,8 +155,8 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
 function validateOldPublisher(activateContext: IActionContext): void {
     const extension = vscode.extensions.getExtension('PeterJausovec.vscode-docker');
     if (extension) {
-        let message: string = 'Please reload Visual Studio Code to complete updating the Docker extension.';
-        let reload: vscode.MessageItem = { title: 'Reload Now' };
+        let message: string = localize('vscode-docker.extension.pleaseReload', 'Please reload Visual Studio Code to complete updating the Docker extension.');
+        let reload: vscode.MessageItem = { title: localize('vscode-docker.extension.reloadNow', 'Reload Now') };
         // Don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage(message, reload).then(async result => {

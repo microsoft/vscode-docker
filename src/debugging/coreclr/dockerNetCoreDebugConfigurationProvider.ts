@@ -6,6 +6,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, commands, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';
 import { resolveVariables } from '../../utils/resolveVariables';
 import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './CliDockerClient';
@@ -78,12 +79,14 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         // Prompt them to add Docker files since they probably haven't
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
-            'To debug in a Docker container on supported platforms, use the command \"Docker: Add Docker Files to Workspace\", or click \"Add Docker Files\".',
-            ...[add]).then((result) => {
-            if (result === add) {
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                commands.executeCommand('vscode-docker.configure');
-            }});
+            localize('vscode-docker.debug.coreclr.addDockerFiles', 'To debug in a Docker container on supported platforms, use the command \'Docker: Add Docker Files to Workspace\', or click \'Add Docker Files\'.'),
+            ...[add])
+            .then((result) => {
+                if (result === add) {
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    commands.executeCommand('vscode-docker.configure');
+                }
+            });
 
         return [];
     }
@@ -96,7 +99,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
     private async resolveDockerDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration): Promise<DebugConfiguration | undefined> {
         if (!folder) {
-            throw new Error('No workspace folder is associated with debugging.');
+            throw new Error(localize('vscode-docker.debug.coreclr.noWorkspaceFolder', 'No workspace folder is associated with debugging.'));
         }
 
         if (debugConfiguration.type === undefined) {
@@ -233,7 +236,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         };
 
         if (!await this.fsProvider.dirExists(folders.resolvedAppFolder)) {
-            throw new Error(`The application folder '${folders.resolvedAppFolder}' does not exist. Ensure that the 'appFolder' or 'appProject' property is set correctly in the Docker debug configuration.`);
+            throw new Error(localize('vscode-docker.debug.coreclr.noAppFolder', 'The application folder \'{0}\' does not exist. Ensure that the \'appFolder\' or \'appProject\' property is set correctly in the Docker debug configuration.', folders.resolvedAppFolder));
         }
 
         return folders;
@@ -268,7 +271,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         }
 
         if (appProject === undefined) {
-            throw new Error('Unable to infer the application project file. Set either the \'appFolder\' or \'appProject\' property in the Docker debug configuration.');
+            throw new Error(localize('vscode-docker.debug.coreclr.noProjectFile', 'Unable to infer the application project file. Set either the \'appFolder\' or \'appProject\' property in the Docker debug configuration.'));
         }
 
         const projects = {
@@ -277,7 +280,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         };
 
         if (!await this.fsProvider.fileExists(projects.resolvedAppProject)) {
-            throw new Error(`The application project file '${projects.resolvedAppProject}' does not exist. Ensure that the 'appFolder' or 'appProject' property is set correctly in the Docker debug configuration.`);
+            throw new Error(localize('vscode-docker.debug.coreclr.projectFileNotExist', 'The application project file \'{0}\' does not exist. Ensure that the \'appFolder\' or \'appProject\' property is set correctly in the Docker debug configuration.', projects.resolvedAppProject));
         }
 
         return projects;
@@ -293,7 +296,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         const resolvedContext = resolveVariables(context, folder);
 
         if (!await this.fsProvider.dirExists(resolvedContext)) {
-            throw new Error(`The context folder '${resolvedContext}' does not exist. Ensure that the 'context' property is set correctly in the Docker debug configuration.`);
+            throw new Error(localize('vscode-docker.debug.coreclr.contextFolderNotExist', 'The context folder \'{0}\' does not exist. Ensure that the \'context\' property is set correctly in the Docker debug configuration.', resolvedContext));
         }
 
         return resolvedContext;
@@ -307,7 +310,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         dockerfile = resolveVariables(dockerfile, folder);
 
         if (!await this.fsProvider.fileExists(dockerfile)) {
-            throw new Error(`The Dockerfile '${dockerfile}' does not exist. Ensure that the 'dockerfile' property is set correctly in the Docker debug configuration.`);
+            throw new Error(localize('vscode-docker.debug.coreclr.dockerfileNotExist', 'The Dockerfile \'{0}\' does not exist. Ensure that the \'dockerfile\' property is set correctly in the Docker debug configuration.', dockerfile));
         }
 
         return dockerfile;
