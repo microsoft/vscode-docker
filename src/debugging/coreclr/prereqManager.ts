@@ -178,7 +178,7 @@ export class DockerfileExistsPrerequisite implements Prerequisite {
         }
 
         const addDockerFiles: vscode.MessageItem = {
-            title: localize('vscode-docker.debug.coreclr.addDockerFiles', 'Add Docker files')
+            title: localize('vscode-docker.debug.coreclr.addDockerFilesButton', 'Add Docker files')
         };
 
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
