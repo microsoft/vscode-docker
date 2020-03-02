@@ -21,7 +21,7 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
     );
     if (nodes.some(n => builtInNetworks.includes(n.networkName))) {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        ext.ui.showWarningMessage('The built-in networks \'bridge\', \'host\', and \'none\' cannot be removed.');
+        ext.ui.showWarningMessage(localize('vscode-docker.commands.networks.remove.noBuiltIn', 'The built-in networks \'bridge\', \'host\', and \'none\' cannot be removed.'));
         nodes = nodes.filter(n => !builtInNetworks.includes(n.networkName));
     }
     let confirmRemove: string;

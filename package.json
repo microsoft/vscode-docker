@@ -1729,7 +1729,7 @@
                 "docker.networks.showBuiltInNetworks": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Show the built-in networks in the explorer."
+                    "description": "%vscode-docker.config.docker.networks.showBuiltIn%"
                 },
                 "docker.networks.label": {
                     "type": "string",
