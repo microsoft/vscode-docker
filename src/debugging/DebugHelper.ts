@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ConfigurationTarget, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, registerCommand } from 'vscode-azureextensionui';
 import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
 import { localize } from '../localize';
@@ -67,9 +67,9 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
 }
 
 // TODO: This is stripping out a level of indentation, but the tasks one isn't
-export async function addDebugConfiguration(newConfig: DockerDebugConfiguration, overwrite: boolean | undefined): Promise<boolean> {
+export async function addDebugConfiguration(newConfig: DockerDebugConfiguration, folder: WorkspaceFolder, overwrite?: boolean): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
-    const workspaceLaunch = workspace.getConfiguration('launch');
+    const workspaceLaunch = workspace.getConfiguration('launch', folder.uri);
     const allConfigs = workspaceLaunch && workspaceLaunch.configurations as DebugConfiguration[] || [];
 
     const existingConfigIndex = allConfigs.findIndex(c => c.name === newConfig.name);
@@ -86,7 +86,7 @@ export async function addDebugConfiguration(newConfig: DockerDebugConfiguration,
         allConfigs.push(newConfig);
     }
 
-    await workspaceLaunch.update('configurations', allConfigs);
+    await workspaceLaunch.update('configurations', allConfigs, ConfigurationTarget.WorkspaceFolder);
     return true;
 }
 

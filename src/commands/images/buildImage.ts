@@ -21,7 +21,14 @@ const tagRegex: RegExp = /\$\{tag\}/i;
 export async function buildImage(context: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
-    const rootFolder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
+
+    let rootFolder: vscode.WorkspaceFolder;
+    if (dockerFileUri) {
+        rootFolder = vscode.workspace.getWorkspaceFolder(dockerFileUri);
+    }
+
+    rootFolder = rootFolder || await quickPickWorkspaceFolder(localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
+
     const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
     const task = await getOfficialBuildTaskForDockerfile(dockerFileItem.absoluteFilePath, rootFolder);
 

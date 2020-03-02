@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
@@ -91,9 +91,9 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
-export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, overwrite: boolean | undefined): Promise<boolean> {
+export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, folder: WorkspaceFolder, overwrite?: boolean): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
-    const workspaceTasks = workspace.getConfiguration('tasks');
+    const workspaceTasks = workspace.getConfiguration('tasks', folder.uri);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
     const existingTaskIndex = allTasks.findIndex(t => t.label === newTask.label);
@@ -110,7 +110,7 @@ export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTask
         allTasks.push(newTask);
     }
 
-    await workspaceTasks.update('tasks', allTasks);
+    await workspaceTasks.update('tasks', allTasks, ConfigurationTarget.WorkspaceFolder);
     return true;
 }
 
@@ -140,7 +140,8 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
     buildTasks =
         buildTasks.filter(buildTask => {
-            return buildTask.definition && buildTask.definition.dockerBuild && (pathNormalize(resolveVariables(buildTask.definition.dockerBuild.dockerfile, folder)) === resolvedDockerfile)
+            return pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? '', folder)) === resolvedDockerfile &&
+                buildTask.scope === folder;
         });
 
     if (buildTasks.length === 1) {
