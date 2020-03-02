@@ -11,9 +11,9 @@ import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErr
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.contextValue, {
+        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.allContextRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No images are availalbe to inspect'
+            noItemFoundErrorMessage: 'No networks are available to inspect'
         });
     }
 

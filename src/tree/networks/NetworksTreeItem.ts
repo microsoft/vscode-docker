@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { NetworkInspectInfo } from "dockerode";
+import { workspace } from "vscode";
+import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
@@ -40,7 +42,15 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, Ne
     }
 
     public async getItems(): Promise<LocalNetworkInfo[]> {
-        const networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+        let config = workspace.getConfiguration(configPrefix);
+        let showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
+
+        let networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+
+        if (!showBuiltInNetworks) {
+            networks = networks.filter(network => !builtInNetworks.includes(network.Name));
+        }
+
         return networks.map(n => new LocalNetworkInfo(n));
     }
 

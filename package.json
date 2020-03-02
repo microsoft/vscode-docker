@@ -379,12 +379,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.inspect",
-                    "when": "view == dockerNetworks && viewItem == network",
+                    "when": "view == dockerNetworks && viewItem =~ /network$/i",
                     "group": "networks_1_general@1"
                 },
                 {
                     "command": "vscode-docker.networks.remove",
-                    "when": "view == dockerNetworks && viewItem == network",
+                    "when": "view == dockerNetworks && viewItem =~ /^customNetwork$/i",
                     "group": "networks_2_destructive@1"
                 },
                 {
@@ -1725,6 +1725,11 @@
                             "NetworkName"
                         ]
                     }
+                },
+                "docker.networks.showBuiltInNetworks": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show the built-in networks in the explorer."
                 },
                 "docker.networks.label": {
                     "type": "string",
