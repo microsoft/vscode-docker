@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as process from 'process';
 import * as request from 'request-promise-native';
 import { Memento } from 'vscode';
+import { localize } from '../../localize';
 import { NetCoreDebugHelper } from '../netcore/NetCoreDebugHelper';
 import { ProcessProvider } from './ChildProcessProvider';
 import { FileSystemProvider } from './fsProvider';
@@ -79,7 +80,7 @@ export class RemoteVsDbgClient implements VsDbgClient {
         }
 
         return await this.dockerOutputManager.performOperation(
-            'Acquiring the latest .NET Core debugger...',
+            localize('vscode-docker.debug.coreclr.debugger.acquiring', 'Acquiring the latest .NET Core debugger...'),
             async () => {
 
                 await this.getVsDbgAcquisitionScript();
@@ -94,8 +95,8 @@ export class RemoteVsDbgClient implements VsDbgClient {
 
                 return vsdbgRelativeVersionPath;
             },
-            'Debugger acquired.',
-            'Unable to acquire the .NET Core debugger.');
+            localize('vscode-docker.debug.coreclr.debugger.acquired', 'Debugger acquired.'),
+            localize('vscode-docker.debug.coreclr.debugger.unableToAcquire', 'Unable to acquire the .NET Core debugger.'));
     }
 
     private async ensureVsDbgFolderExists(): Promise<void> {

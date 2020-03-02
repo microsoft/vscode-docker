@@ -7,6 +7,7 @@ import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibi
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
+import { localize } from "../localize";
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
@@ -113,7 +114,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         if (this._currentItems.length === 0) {
             context.telemetry.properties.noItems = 'true';
             return [new GenericTreeItem(this, {
-                label: "Successfully connected, but no items found.",
+                label: localize('vscode-docker.tree.noItemsFound', 'Successfully connected, but no items found.'),
                 iconPath: getThemedIconPath('info'),
                 contextValue: 'dockerNoItems'
             })];
@@ -227,31 +228,31 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     public getSettingWizardInfoList(): ITreeSettingWizardInfo[] {
         return [
             {
-                label: 'Label',
+                label: localize('vscode-docker.tree.config.label.label', 'Label'),
                 setting: labelKey,
                 currentValue: this.labelSetting,
-                description: 'The primary property to display.',
+                description: localize('vscode-docker.tree.config.label.description', 'The primary property to display.'),
                 settingInfo: this.labelSettingInfo
             },
             {
-                label: 'Description',
+                label: localize('vscode-docker.tree.config.description.label', 'Description'),
                 setting: descriptionKey,
                 currentValue: this.descriptionSetting,
-                description: 'Any secondary properties to display.',
+                description: localize('vscode-docker.tree.config.description.description', 'Any secondary properties to display.'),
                 settingInfo: this.descriptionSettingInfo
             },
             {
-                label: 'Group By',
+                label: localize('vscode-docker.tree.config.groupBy.label', 'Group By'),
                 setting: groupByKey,
                 currentValue: this.groupBySetting,
-                description: 'The property used for grouping.',
+                description: localize('vscode-docker.tree.config.groupBy.description', 'The property used for grouping.'),
                 settingInfo: this.groupBySettingInfo
             },
             {
-                label: 'Sort By',
+                label: localize('vscode-docker.tree.config.sortBy.label', 'Sort By'),
                 setting: sortByKey,
                 currentValue: this.sortBySetting,
-                description: 'The property used for sorting.',
+                description: localize('vscode-docker.tree.config.sortBy.description', 'The property used for sorting.'),
                 settingInfo: this.sortBySettingInfo
             },
         ]
@@ -286,17 +287,17 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     private getDockerErrorTreeItems(context: IActionContext, error: unknown): AzExtTreeItem[] {
-        const connectionMessage = 'Failed to connect. Is Docker installed and running?';
+        const connectionMessage = localize('vscode-docker.tree.failedToConnectMessage', 'Failed to connect. Is Docker installed and running?');
 
         const result: AzExtTreeItem[] = [
             new InvalidTreeItem(this, error, { label: connectionMessage, contextValue: 'dockerConnectionError', description: '' }),
-            new OpenUrlTreeItem(this, 'Install Docker...', 'https://aka.ms/AA37qtj'),
-            new OpenUrlTreeItem(this, 'Additional Troubleshooting...', 'https://aka.ms/AA37qt2'),
+            new OpenUrlTreeItem(this, localize('vscode-docker.tree.installDocker', 'Install Docker...'), 'https://aka.ms/AA37qtj'),
+            new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
         ];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
-            const ti = new OpenUrlTreeItem(this, 'Running Docker in a dev container...', 'https://aka.ms/AA5xva6');
+            const ti = new OpenUrlTreeItem(this, localize('vscode-docker.tree.runningInDevContainer', 'Running Docker in a dev container...'), 'https://aka.ms/AA5xva6');
             result.push(ti);
         }
 

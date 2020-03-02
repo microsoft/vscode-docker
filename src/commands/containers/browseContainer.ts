@@ -7,6 +7,7 @@ import { ContainerInspectInfo } from 'dockerode';
 import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { captureCancelStep } from '../../utils/captureCancelStep';
@@ -62,7 +63,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         node = await captureBrowseCancelStep('node', telemetryProperties, () =>
             ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
                 ...context,
-                noItemFoundErrorMessage: 'No running containers are available to open in a browser'
+                noItemFoundErrorMessage: localize('vscode-docker.commands.containers.browseContainer.noContainers', 'No running containers are available to open in a browser')
             }));
     }
 
@@ -85,7 +86,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     if (possiblePorts.length === 0) {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        ext.ui.showWarningMessage('No valid ports were mapped from the container to the host.');
+        ext.ui.showWarningMessage(localize('vscode-docker.commands.containers.browseContainer.noPorts', 'No valid ports were mapped from the container to the host.'));
 
         return;
     }
@@ -107,7 +108,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         items.sort((a, b) => a.port.containerPort.port - b.port.containerPort.port);
 
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: 'Select the container port to browse to.' }));
+        const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') }));
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 

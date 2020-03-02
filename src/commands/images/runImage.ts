@@ -5,6 +5,7 @@
 
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { selectRunCommand } from '../selectCommandTemplate';
 
@@ -20,7 +21,7 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: 'No images are available to run'
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.run.noImages', 'No images are available to run')
         });
     }
 

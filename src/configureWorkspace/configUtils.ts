@@ -8,6 +8,7 @@ import vscode = require('vscode');
 import { IAzureQuickPickItem, TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { ext } from "../extensionVariables";
+import { localize } from '../localize';
 import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from '../utils/platform';
 
@@ -32,12 +33,12 @@ export async function captureConfigureCancelStep<TReturn, TPrompt extends (...ar
 export async function promptForPorts(ports: number[]): Promise<number[]> {
     let opt: vscode.InputBoxOptions = {
         placeHolder: ports.join(', '),
-        prompt: 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.',
+        prompt: localize('vscode-docker.configUtils.whatPort', 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.'),
         value: ports.join(', '),
         validateInput: (value: string): string | undefined => {
             let result = splitPorts(value);
             if (!result) {
-                return 'Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.';
+                return localize('vscode-docker.configUtils.portsFormat', 'Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.');
             }
 
             return undefined;
@@ -80,7 +81,7 @@ export async function quickPickPlatform(platforms?: Platform[]): Promise<Platfor
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
-        placeHolder: 'Select Application Platform'
+        placeHolder: localize('vscode-docker.configUtils.selectPlatform', 'Select Application Platform')
     }
 
     platforms = platforms || [
@@ -110,7 +111,7 @@ export async function quickPickOS(): Promise<PlatformOS> {
     let opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
-        placeHolder: 'Select Operating System'
+        placeHolder: localize('vscode-docker.configUtils.selectOS', 'Select Operating System')
     }
 
     const OSes: PlatformOS[] = ['Windows', 'Linux'];
@@ -122,7 +123,7 @@ export async function quickPickOS(): Promise<PlatformOS> {
 
 export async function quickPickGenerateComposeFiles(): Promise<boolean> {
     let opt: vscode.QuickPickOptions = {
-        placeHolder: 'Include optional Docker Compose files?'
+        placeHolder: localize('vscode-docker.configUtils.includeCompose', 'Include optional Docker Compose files?')
     }
 
     let response = await ext.ui.showQuickPick(

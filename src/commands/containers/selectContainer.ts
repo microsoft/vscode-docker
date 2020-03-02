@@ -5,6 +5,7 @@
 
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function selectContainer(context: IActionContext): Promise<string> {
@@ -16,7 +17,7 @@ export async function selectContainer(context: IActionContext): Promise<string> 
 
     node = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
         ...context,
-        noItemFoundErrorMessage: 'No running containers are available'
+        noItemFoundErrorMessage: localize('vscode-docker.commands.containers.select.noContainers', 'No running containers are available')
     });
 
     return node.containerId;

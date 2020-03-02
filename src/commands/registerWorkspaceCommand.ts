@@ -7,6 +7,7 @@ import { commands, ConfigurationTarget, MessageItem, workspace, WorkspaceConfigu
 import { callWithTelemetryAndErrorHandling, IActionContext, registerCommand, UserCancelledError } from 'vscode-azureextensionui';
 import { extensionId } from '../constants';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from '../utils/getVSCodeRemoteInfo';
 
 /**
@@ -36,18 +37,18 @@ async function verifyIsRunningInWorkspace(context: IActionContext): Promise<void
             let learnMoreLink: string;
             switch (remoteInfo.remoteKind) {
                 case RemoteKind.ssh:
-                    message = 'This operation is not supported because the Docker extension is currently running on your local machine.';
-                    switchTitle = 'Switch to Remote SSH';
+                    message = localize('vscode-docker.commands.registerWorkspaceCommands.local', 'This operation is not supported because the Docker extension is currently running on your local machine.');
+                    switchTitle = localize('vscode-docker.commands.registerWorkspaceCommands.switchSsh', 'Switch to Remote SSH');
                     learnMoreLink = 'https://aka.ms/AA5y2rd';
                     break;
                 case RemoteKind.wsl:
-                    message = 'This operation is not supported because the Docker extension is currently running outside of WSL.';
-                    switchTitle = 'Switch to WSL';
+                    message = localize('vscode-docker.commands.registerWorkspaceCommands.outsideWsl', 'This operation is not supported because the Docker extension is currently running outside of WSL.');
+                    switchTitle = localize('vscode-docker.commands.registerWorkspaceCommands.switchWsl', 'Switch to WSL');
                     learnMoreLink = 'https://aka.ms/AA5xvjn';
                     break;
                 case RemoteKind.devContainer:
-                    message = 'This operation is not supported because the Docker extension is currently running outside of your container.';
-                    switchTitle = 'Switch to Container';
+                    message = localize('vscode-docker.commands.registerWorkspaceCommands.outsideContainer', 'This operation is not supported because the Docker extension is currently running outside of your container.');
+                    switchTitle = localize('vscode-docker.commands.registerWorkspaceCommands.switchContainer', 'Switch to Container');
                     learnMoreLink = 'https://aka.ms/AA5xva6';
                     break;
                 default:
@@ -61,8 +62,8 @@ async function verifyIsRunningInWorkspace(context: IActionContext): Promise<void
             updateExtensionKind('workspace');
 
             context.telemetry.properties.cancelStep = 'requiresReload';
-            let reloadMessage: string = 'This change to the Docker extension requires reloading VS Code to take effect.';
-            let reload: MessageItem = { title: 'Reload Now' };
+            let reloadMessage: string = localize('vscode-docker.commands.registerWorkspaceCommands.reloadRequired', 'This change to the Docker extension requires reloading VS Code to take effect.');
+            let reload: MessageItem = { title: localize('vscode-docker.commands.registerWorkspaceCommands.reload', 'Reload Now') };
             await ext.ui.showWarningMessage(reloadMessage, reload);
 
             // Add a one-off event here before reloading the window otherwise we'll lose telemetry for this code path

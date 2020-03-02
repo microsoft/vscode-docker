@@ -10,12 +10,13 @@ import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configU
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { DockerPlatform } from '../../debugging/DockerPlatformHelper';
+import { localize } from '../../localize';
 import { getPythonProjectType } from '../../utils/pythonUtils';
 import { quickPickDockerFileItem, quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 export async function initializeForDebugging(actionContext: IActionContext): Promise<void> {
-    const folder = await quickPickWorkspaceFolder('To configure Docker debugging you must first open a folder or workspace in VS Code.');
+    const folder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.debugging.initialize.workspaceFolder', 'To configure Docker debugging you must first open a folder or workspace in VS Code.'));
     const platform = await quickPickPlatform(['Node.js', '.NET: ASP.NET Core', '.NET: Core Console', 'Python: Django', 'Python: Flask', 'Python: General']);
 
     let debugPlatform: DockerPlatform;
@@ -33,7 +34,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             debugPlatform = 'python';
             break;
         default:
-            throw new Error('The selected platform is not yet supported for debugging.');
+            throw new Error(localize('vscode-docker.commands.debugging.initialize.platformNotSupported', 'The selected platform is not yet supported for debugging.'));
     }
 
     actionContext.telemetry.properties.platform = debugPlatform;
@@ -48,7 +49,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
     switch (context.platform) {
         case 'netCore':
             const options: NetCoreScaffoldingOptions = {
-                appProject: (await quickPickProjectFileItem(undefined, context.folder, 'No .NET Core project file (.csproj or .fsproj) could be found.')).absoluteFilePath,
+                appProject: (await quickPickProjectFileItem(undefined, context.folder, localize('vscode-docker.commands.debugging.initialize.noCsproj', 'No .NET Core project file (.csproj or .fsproj) could be found.'))).absoluteFilePath,
                 platformOS: os.platform() === 'win32' ? await quickPickOS() : 'Linux',
             }
             await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(context, options);

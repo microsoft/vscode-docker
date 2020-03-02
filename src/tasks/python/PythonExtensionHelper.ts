@@ -10,6 +10,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from "vscode";
 import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
+import { localize } from '../../localize';
 import { delay } from '../../utils/delay';
 import { PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
 
@@ -24,7 +25,7 @@ export namespace PythonExtensionHelper {
         return { 'PTVSD_LOG_DIR': '/dbglogs' };
     }
 
-    export function getDebuggerLogFilePath(folderName: string) : string {
+    export function getDebuggerLogFilePath(folderName: string): string {
         // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
         // So given that we run the debugger as the entry point, then the PID is guaranteed to be 1.
         return path.join(os.tmpdir(), folderName, 'ptvsd-1.log');
@@ -40,7 +41,7 @@ export namespace PythonExtensionHelper {
                         const containerRunning = await cliDockerClient.inspectObject(containerName, { format: '{{.State.Running}}' });
 
                         if (containerRunning === 'false') {
-                            reject('Failed to attach the debugger, please see the terminal output for more details.');
+                            reject(localize('vscode-docker.tasks.pythonExt.failedToAttach', 'Failed to attach the debugger, please see the terminal output for more details.'));
                         }
 
                         const maxRetriesCount = 20;
@@ -65,14 +66,15 @@ export namespace PythonExtensionHelper {
                         if (created) {
                             resolve();
                         } else {
-                            reject('Failed to attach the debugger within the alotted timeout.');
+                            reject(localize('vscode-docker.tasks.pythonExt.attachTimeout', 'Failed to attach the debugger within the alotted timeout.'));
                         }
                     } catch {
-                        reject('An unexpected error occurred while attempting to attach the debugger.');
+                        reject(localize('vscode-docker.tasks.pythonExt.unexpectedAttachError', 'An unexpected error occurred while attempting to attach the debugger.'));
                     } finally {
                         listener.dispose();
                     }
-                }});
+                }
+            });
         });
     }
 
@@ -84,7 +86,7 @@ export namespace PythonExtensionHelper {
         } else if ('module' in target) {
             fullTarget = `-m ${target.module}`;
         } else {
-            throw new Error('One of either module or file must be provided.');
+            throw new Error(localize('vscode-docker.tasks.pythonExt.moduleOrFile', 'One of either module or file must be provided.'));
         }
 
         options = options ?? {};
@@ -99,12 +101,12 @@ export namespace PythonExtensionHelper {
     export async function getLauncherFolderPath(): Promise<string> {
         const pyExtensionId = 'ms-python.python';
         const pyExt = vscode.extensions.getExtension(pyExtensionId);
+        const button = localize('vscode-docker.tasks.pythonExt.openExtension', 'Open Extension');
 
         if (!pyExt) {
-            const response = await vscode.window.showErrorMessage('For debugging Python apps in a container to work, the Python extension must be installed.',
-                                                                  "Open extension");
+            const response = await vscode.window.showErrorMessage(localize('vscode-docker.tasks.pythonExt.pythonExtensionNeeded', 'For debugging Python apps in a container to work, the Python extension must be installed.'), button);
 
-            if (response === "Open extension") {
+            if (response === button) {
                 await vscode.commands.executeCommand('extension.open', pyExtensionId);
             }
 
@@ -125,6 +127,6 @@ export namespace PythonExtensionHelper {
             return newDebugger;
         }
 
-        throw new Error('Unable to find the debugger in the Python extension.');
+        throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
     }
 }

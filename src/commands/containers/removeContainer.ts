@@ -6,12 +6,13 @@
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function removeContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: 'No containers are available to remove' },
+        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.remove.noContainers', 'No containers are available to remove') },
         ext.containersTree,
         ContainerTreeItem.allContextRegExp,
         node,
@@ -20,15 +21,15 @@ export async function removeContainer(context: IActionContext, node?: ContainerT
 
     let confirmRemove: string;
     if (nodes.length === 1) {
-        confirmRemove = `Are you sure you want to remove container "${nodes[0].label}"?`;
+        confirmRemove = localize('vscode-docker.commands.containers.remove.confirmSingle', 'Are you sure you want to remove container "{0}"?', nodes[0].label);
     } else {
-        confirmRemove = "Are you sure you want to remove selected containers?";
+        confirmRemove = localize('vscode-docker.commands.containers.remove.confirmMulti', 'Are you sure you want to remove selected containers?');
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: 'Remove' });
+    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.containers.remove.remove', 'Remove') });
 
-    let removing: string = "Removing container(s)...";
+    let removing: string = localize('vscode-docker.commands.containers.remove.removing', 'Removing container(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {
         await Promise.all(nodes.map(async n => await n.deleteTreeItem(context)));
     });

@@ -5,19 +5,25 @@
 
 import { Network } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { builtInNetworks } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { LocalNetworkInfo } from "./LocalNetworkInfo";
 
 export class NetworkTreeItem extends AzExtTreeItem {
-    public static contextValue: string = 'network';
-    public contextValue: string = NetworkTreeItem.contextValue;
+    public static allContextRegExp: RegExp = /Network$/;
+    public static customNetworkRegExp: RegExp = /^customNetwork$/i;
+
     private readonly _item: LocalNetworkInfo;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: LocalNetworkInfo) {
         super(parent);
         this._item = itemInfo;
+    }
+
+    public get contextValue(): string {
+        return builtInNetworks.includes(this._item.networkName) ? 'defaultNetwork' : 'customNetwork';
     }
 
     public get id(): string {
@@ -30,6 +36,10 @@ export class NetworkTreeItem extends AzExtTreeItem {
 
     public get createdTime(): number {
         return this._item.createdTime;
+    }
+
+    public get networkName(): string {
+        return this._item.networkName;
     }
 
     public get label(): string {

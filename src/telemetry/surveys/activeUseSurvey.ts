@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
+import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { ITelemetryPublisher } from '../TelemetryPublisher';
 
 const surveyUrl = 'https://aka.ms/vscodedockeractiveusesurvey';
@@ -35,9 +36,9 @@ function select25Percent(): boolean {
 }
 
 async function surveyPrompt(): Promise<boolean> {
-    const prompt = 'We noticed you haven’t used the Docker extension lately, would you take a quick survey?';
-    const yes = { title: 'Yes' };
-    const no = { title: 'No' };
+    const prompt = localize('vscode-docker.survey.active.prompt', 'We noticed you haven’t used the Docker extension lately, would you take a quick survey?');
+    const yes = { title: localize('vscode-docker.survey.active.yes', 'Yes') };
+    const no = { title: localize('vscode-docker.survey.active.no', 'No') };
 
     const result = (await vscode.window.showInformationMessage(prompt, yes, no)) ?? no;
 
@@ -49,7 +50,7 @@ async function surveyOpen(): Promise<void> {
 }
 
 function tryUpdate(state: vscode.Memento, key: string, value: unknown): void {
-    state.update(lastUseDateKey, value).then(() => {}, () => {});
+    state.update(lastUseDateKey, value).then(() => { }, () => { });
 }
 
 function sendSurveyTelemetryEvent(eventName: string, properties?: { [key: string]: string }): void {

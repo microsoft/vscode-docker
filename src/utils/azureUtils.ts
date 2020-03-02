@@ -11,12 +11,13 @@ import { TokenResponse } from 'ms-rest-azure';
 import * as request from 'request-promise-native';
 import { ISubscriptionContext, parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { AzureRegistryTreeItem } from '../tree/registries/azure/AzureRegistryTreeItem';
 
 function parseResourceId(id: string): RegExpMatchArray {
     const matches: RegExpMatchArray | null = id.match(/\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/(.*)\/(.*)/i);
     if (matches === null || matches.length < 3) {
-        throw new Error('Invalid Azure Resource Id');
+        throw new Error(localize('vscode-docker.utils.azure.invalidResourceId', 'Invalid Azure Resource Id'));
     }
     return matches;
 }
