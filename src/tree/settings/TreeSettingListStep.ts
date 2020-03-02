@@ -14,7 +14,7 @@ export class TreeSettingListStep extends AzureWizardPromptStep<ITreeSettingsWiza
         const picks: IAzureQuickPickItem<ITreeSettingWizardInfo | undefined>[] = context.infoList.map(info => {
             return {
                 label: localize('vscode-docker.tree.settings.currentLabel', '$(gear) {0}', info.label),
-                description: localize('vscode-docker.tree.settings.currentValue', 'Current: "{0}"', Array.isArray(info.currentValue) ? info.currentValue.join(', ') : info.currentValue),
+                description: localize('vscode-docker.tree.settings.currentValue', 'Current: "{0}"', info?.toString()),
                 detail: info.description,
                 data: info
             }
