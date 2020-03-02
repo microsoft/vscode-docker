@@ -86,6 +86,10 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
         throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifest', 'Failed to parse Blazor static web assets manifest.'));
     }
 
+    if (!Array.isArray(manifest.StaticWebAssets.ContentRoot)) {
+        return;
+    }
+
     for (const contentRoot of manifest.StaticWebAssets.ContentRoot) {
         if (contentRoot && contentRoot.$) {
             contentRoot.$.Path = containerizePath(contentRoot.$.Path, volumes, os);

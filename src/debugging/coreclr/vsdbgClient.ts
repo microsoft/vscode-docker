@@ -89,7 +89,12 @@ export class RemoteVsDbgClient implements VsDbgClient {
 
                 const acquisitionCommand = await this.options.getAcquisitionCommand(vsdbgAcquisitionScriptPath, version, runtime, vsdbgVersionPath);
 
-                await this.processProvider.exec(acquisitionCommand, { cwd: this.vsdbgPath });
+                this.dockerOutputManager.appendLine(localize('vscode-docker.debug.coreclr.debugger.command', '> Executing: {0} <', acquisitionCommand));
+                await this.processProvider.exec(acquisitionCommand, {
+                    cwd: this.vsdbgPath, progress: (content) => {
+                        this.dockerOutputManager.append(content);
+                    }
+                });
 
                 await this.updateDate(this.lastDebuggerAcquisitionKey(version, runtime), new Date());
 
