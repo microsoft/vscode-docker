@@ -12,7 +12,7 @@ import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErr
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.contextValue, {
+        node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.allContextRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.networks.inspect.noNetworks', 'No networks are available to inspect')
         });

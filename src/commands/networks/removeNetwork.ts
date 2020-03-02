@@ -5,6 +5,7 @@
 
 import vscode = require('vscode');
 import { IActionContext } from 'vscode-azureextensionui';
+import { builtInNetworks } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetworkTreeItem } from '../../tree/networks/NetworkTreeItem';
@@ -14,11 +15,15 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
     nodes = await multiSelectNodes(
         { ...context, suppressCreatePick: true, noItemFoundErrorMessage: localize('vscode-docker.commands.networks.remove.noNetworks', 'No networks are available to remove') },
         ext.networksTree,
-        NetworkTreeItem.contextValue,
+        NetworkTreeItem.customNetworkRegExp,
         node,
         nodes
     );
-
+    if (nodes.some(n => builtInNetworks.includes(n.networkName))) {
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        ext.ui.showWarningMessage('The built-in networks \'bridge\', \'host\', and \'none\' cannot be removed.');
+        nodes = nodes.filter(n => !builtInNetworks.includes(n.networkName));
+    }
     let confirmRemove: string;
     if (nodes.length === 1) {
         confirmRemove = localize('vscode-docker.commands.networks.remove.confirmSingle', 'Are you sure you want to remove network "{0}"?', nodes[0].label);
