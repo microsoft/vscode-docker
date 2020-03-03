@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 import { PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
-import { inferPythonArgs, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
+import { getTempDirectoryPath, inferPythonArgs, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
@@ -119,7 +118,8 @@ export class PythonTaskHelper implements TaskHelper {
 
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
 
-        const dbgLogsFolder = path.join(os.tmpdir(), context.folder.name);
+        const tempDir = await getTempDirectoryPath();
+        const dbgLogsFolder = path.join(tempDir, context.folder.name);
 
         // The debugger will complain if the logs directory does not exist.
         if (!(await fse.pathExists(dbgLogsFolder))) {
