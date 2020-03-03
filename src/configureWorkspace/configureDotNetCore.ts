@@ -14,6 +14,7 @@ import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from '../extensionVariables';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
@@ -306,14 +307,17 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
     dockerfileName = dockerfileName.replace(/\\/g, '/');
 
-    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', serviceName)
-        .replace(/\$image_name\$/g, imageName)
+    const normalizedServiceName = getValidImageName(serviceName);
+    const normalizedImageName = getValidImageName(imageName);
+
+    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', normalizedServiceName)
+        .replace(/\$image_name\$/g, normalizedImageName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts);
     validateForUnresolvedToken(composeFileContent);
 
-    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', serviceName)
-        .replace(/\$image_name\$/g, imageName)
+    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', normalizedServiceName)
+        .replace(/\$image_name\$/g, normalizedImageName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)
