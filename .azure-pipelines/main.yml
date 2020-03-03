@@ -22,3 +22,5 @@ jobs:
   - template: common/setup.yml
   - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/build.yml
+  parameters:
+    dockerUnavailable: 1 # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)
