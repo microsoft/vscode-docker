@@ -1,0 +1,21 @@
+steps:
+- task: Npm@1
+  displayName: 'Package'
+  inputs:
+    command: custom
+    customCommand: run ci-package
+  env:
+    DISPLAY: :10 # Only necessary for linux tests
+
+- task: CopyFiles@2
+  displayName: 'Copy vsix to staging directory'
+  inputs:
+    Contents: '**/*.vsix'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifacts: vsix'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: vsix
+  condition: ne(variables['System.PullRequest.IsFork'], 'True')
