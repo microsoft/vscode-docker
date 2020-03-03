@@ -2407,6 +2407,7 @@
     },
     "scripts": {
         "build": "gulp build",
+        "ci-build": "gulp ci-build",
         "watch": "tsc -watch -p ./",
         "package": "gulp package",
         "ci-package": "gulp ci-package",

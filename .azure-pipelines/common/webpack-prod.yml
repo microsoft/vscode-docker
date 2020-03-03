@@ -1,6 +1,0 @@
-steps:
-- task: Npm@1
-  displayName: 'Webpack (production)'
-  inputs:
-    command: custom
-    customCommand: run webpack-prod

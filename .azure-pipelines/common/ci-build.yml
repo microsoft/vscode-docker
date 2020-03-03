@@ -1,0 +1,35 @@
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node 10.x'
+  inputs:
+    versionSpec: 10.x
+
+- task: Npm@1
+  displayName: 'npm install'
+
+- script: |
+    sudo cp .azure-pipelines/linux/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+  displayName: 'Start X Virtual Frame Buffer'
+  condition: eq(variables['Agent.OS'], 'Linux')
+
+- task: Npm@1
+  displayName: 'CI-Build'
+  inputs:
+    command: custom
+    customCommand: run ci-build
+  env:
+    SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
+    SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
+    SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
+    DISPLAY: :10 # Only necessary for linux tests
+    DOCKER_UNAVAILABLE: ${{ parameters.dockerUnavailable }}
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFiles: '*-results.xml'
+    testRunTitle: '$(Agent.OS)'
+  condition: succeededOrFailed()

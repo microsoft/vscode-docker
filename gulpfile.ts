@@ -60,8 +60,10 @@ function vscePackageTask() {
 gulp.task('build', compileTask);
 gulp.task('lint', lintTaskFactory(true));
 gulp.task('package', gulp.series(compileTask, () => gulp_webpack('production'), vscePackageTask));
-gulp.task('ci-package', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(false), () => gulp_webpack('production'), vscePackageTask));
 gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(false)));
 gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(true)));
 gulp.task('webpack', gulp.series(compileTask, () => gulp_webpack('development')));
 gulp.task('webpack-prod', gulp.series(compileTask, () => gulp_webpack('production')));
+
+gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, () => gulp_webpack('production'), testTaskFactory(false)));
+gulp.task('ci-package', gulp.series('ci-build', vscePackageTask));
