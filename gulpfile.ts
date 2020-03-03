@@ -3,64 +3,65 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// tslint:disable:no-implicit-dependencies
 import * as cp from 'child_process';
-import * as fse from 'fs-extra';
 import * as gulp from 'gulp';
+import * as eslint from 'gulp-eslint';
+import * as sourcemaps from 'gulp-sourcemaps';
+import * as ts from 'gulp-typescript';
 import * as path from 'path';
+import * as vsce from 'vsce';
 import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
 
 const env = process.env;
+const tsProject = ts.createProject('./tsconfig.json');
 
-function test(mochaGrep: string = ''): cp.ChildProcess {
+function compileTask() {
+    return tsProject.src()
+        .pipe(sourcemaps.init())
+        .pipe(tsProject()).js
+        .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: './' }))
+        .pipe(gulp.dest(tsProject.options.outDir));
+}
+
+function lintTaskFactory(warningsAsErrors?: boolean) {
+    return function lintTask() {
+        let pipeline = gulp.src(['src/**/*.ts'])
+            .pipe(eslint())
+            .pipe(eslint.format())
+            .pipe(eslint.failAfterError());
+
+        if (warningsAsErrors) {
+            pipeline = pipeline
+                .pipe(eslint.results(
+                    results => {
+                        if (results.warningCount) {
+                            throw new Error('ESLint generated warnings.');
+                        }
+                    }));
+        }
+
+        return pipeline;
+    }
+}
+
+function testTaskFactory(unitTestsOnly: boolean) {
     env.DEBUGTELEMETRY = '1';
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
-    env.MOCHA_grep = mochaGrep;
+    env.MOCHA_grep = unitTestsOnly ? '\\(unit\\)' : '';
     env.MOCHA_timeout = String(10 * 1000);
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    return spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+    return () => cp.spawn('node.exe', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
 }
 
-function allTest(): cp.ChildProcess {
-    return test();
+function vscePackageTask() {
+    return vsce.createVSIX();
 }
 
-function unitTest(): cp.ChildProcess {
-    return test('\\(unit\\)');
-}
-
-function spawn(command: string, args: string[], options: {}): cp.ChildProcess {
-    if (process.platform === 'win32') {
-        if (fse.pathExistsSync(command + '.exe')) {
-            command = command + '.exe';
-        } else if (fse.pathExistsSync(command + '.cmd')) {
-            command = command + '.cmd';
-        }
-    }
-
-    return cp.spawn(command, args, options);
-}
-
-async function sortPackageJson(): Promise<void> {
-    const fsPath = path.join(__dirname, 'package.json');
-    console.log(fsPath);
-    // tslint:disable: no-any no-unsafe-any
-    const packageJson: any = await fse.readJSON(fsPath);
-    packageJson.activationEvents.sort();
-    packageJson.contributes.menus["view/item/context"].sort((a, b) => {
-        if (a.group === b.group) {
-            return a.command.localeCompare(b.command);
-        } else {
-            return a.group.localeCompare(b.group);
-        }
-    });
-    packageJson.contributes.commands.sort((a, b) => a.command.localeCompare(b.command));
-    await fse.writeFile(fsPath, JSON.stringify(packageJson, undefined, 4));
-    // tslint:enable: no-any no-unsafe-any
-}
-
-exports.sortPackageJson = sortPackageJson;
-exports['webpack-dev'] = () => gulp_webpack('development');
-exports['webpack-prod'] = () => gulp_webpack('production');
-exports.test = gulp.series(gulp_installAzureAccount, allTest);
-exports['unit-test'] = gulp.series(gulp_installAzureAccount, unitTest);
+gulp.task('build', compileTask);
+gulp.task('lint', lintTaskFactory(true));
+gulp.task('package', gulp.series(compileTask, () => gulp_webpack('production'), vscePackageTask));
+gulp.task('ci-package', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(false), () => gulp_webpack('production'), vscePackageTask));
+gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(false)));
+gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(true)));
+gulp.task('webpack', gulp.series(compileTask, () => gulp_webpack('development')));
+gulp.task('webpack-prod', gulp.series(compileTask, () => gulp_webpack('production')));

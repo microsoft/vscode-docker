@@ -19,7 +19,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm: compile"
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
 			"name": "Launch Extension (webpack)",
@@ -37,7 +37,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm: pretest"
+			"preLaunchTask": "npm: webpack"
 		},
 		{
 			"name": "Launch Tests",
@@ -54,7 +54,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm: compile",
+			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
 				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
@@ -78,7 +78,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm: compile",
+			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
 				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
 				"MOCHA_grep": "\\(unit\\)", // RegExp of tests to run (empty means all)
@@ -102,7 +102,7 @@
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: pretest",
+			"preLaunchTask": "npm: webpack",
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
 				"MOCHA_enableTimeouts": "0", // Disable time-outs

@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "compile",
+			"script": "watch",
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -13,11 +13,6 @@
 				"reveal": "never"
 			},
 			"problemMatcher": "$tsc-watch"
-		},
-		{
-			"type": "npm",
-			"script": "lint",
-			"problemMatcher": "$tslint5"
 		}
 	]
 }
