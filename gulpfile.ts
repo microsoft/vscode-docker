@@ -73,5 +73,5 @@ gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, webpac
 gulp.task('webpack', gulp.series(compileTask, webpackTask));
 gulp.task('webpack-prod', gulp.series(compileTask, webpackProdTask));
 
-gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, allTestsTask, webpackProdTask));
-gulp.task('ci-package', gulp.series(gulp_installAzureAccount, compileTask, allTestsTask, webpackProdTask, vscePackageTask));
+gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
+gulp.task('ci-package', gulp.series('ci-build', vscePackageTask));
