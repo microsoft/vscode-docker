@@ -2,7 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import deepEqual = require('deep-equal');
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -88,7 +87,7 @@ function compareDictionary<T>(obj1: T | undefined, obj2: T | undefined, getter: 
     const dict1 = (obj1 ? getter(obj1) : {}) || {};
     const dict2 = (obj2 ? getter(obj2) : {}) || {};
 
-    return deepEqual(dict1, dict2);
+    return Object.keys(dict1).every(k => dict1[k] === dict2[k]) && Object.keys(dict2).every(k => dict1[k] === dict2[k]);
 }
 
 export function compareBuildImageOptions(options1: DockerBuildImageOptions | undefined, options2: DockerBuildImageOptions | undefined): boolean {

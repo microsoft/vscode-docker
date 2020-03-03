@@ -50,17 +50,32 @@ export class PythonTaskHelper implements TaskHelper {
             args: inferPythonArgs(options.projectType, context.ports)
         };
 
+        let dockerRunOptions: DockerRunOptions | undefined;
+
         if ('file' in options.target) {
             runOptions.file = options.target.file;
         } else {
             runOptions.module = options.target.module;
         }
 
+        // If the projectType is flask, then we set the module to 'flask' and
+        // set whatever the user entered in an env variable named "FLASK_APP".
+        if (options.projectType === 'flask') {
+            dockerRunOptions = {
+                env: {
+                    "FLASK_APP": runOptions.file || runOptions.module
+                }
+            }
+            runOptions.module = 'flask';
+            runOptions.file = undefined;
+        }
+
         return [{
             type: 'docker-run',
             label: 'docker-run: debug',
             dependsOn: ['docker-build'],
-            python: runOptions
+            dockerRun: dockerRunOptions,
+            python: runOptions,
         }];
     }
 
