@@ -53,6 +53,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
         } catch (err) {
             // Errors will not be rethrown, rather it will simply return an error code or 1
             const error = parseError(err);
+            context.terminal.writeErrorLine(error.message);
             return parseInt(error.errorType, 10) || 1;
         }
 

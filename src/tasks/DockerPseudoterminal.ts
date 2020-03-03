@@ -66,7 +66,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
         // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
         await spawnAsync(
             commandLine,
-            {},
+            { cwd: folder.uri.fsPath },
             (stdout: string) => {
                 this.writeOutput(stdout);
             },
