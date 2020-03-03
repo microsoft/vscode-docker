@@ -23,25 +23,17 @@ function compileTask() {
         .pipe(gulp.dest(tsProject.options.outDir));
 }
 
-function lintTaskFactory(warningsAsErrors?: boolean) {
-    return function lintTask() {
-        let pipeline = gulp.src(['src/**/*.ts'])
-            .pipe(eslint())
-            .pipe(eslint.format())
-            .pipe(eslint.failAfterError());
-
-        if (warningsAsErrors) {
-            pipeline = pipeline
-                .pipe(eslint.results(
-                    results => {
-                        if (results.warningCount) {
-                            throw new Error('ESLint generated warnings.');
-                        }
-                    }));
-        }
-
-        return pipeline;
-    }
+function lintTask() {
+    return gulp.src(['src/**/*.ts'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError())
+        .pipe(eslint.results(
+            results => {
+                if (results.warningCount) {
+                    throw new Error('ESLint generated warnings.');
+                }
+            }));
 }
 
 function testTaskFactory(unitTestsOnly: boolean) {
@@ -50,7 +42,23 @@ function testTaskFactory(unitTestsOnly: boolean) {
     env.MOCHA_grep = unitTestsOnly ? '\\(unit\\)' : '';
     env.MOCHA_timeout = String(10 * 1000);
     env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    return () => cp.spawn('node.exe', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+    return cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+}
+
+function allTestsTask() {
+    return testTaskFactory(false);
+}
+
+function unitTestsTask() {
+    return testTaskFactory(true);
+}
+
+function webpackTask() {
+    return gulp_webpack('development');
+}
+
+function webpackProdTask() {
+    return gulp_webpack('production');
 }
 
 function vscePackageTask() {
@@ -58,12 +66,12 @@ function vscePackageTask() {
 }
 
 gulp.task('build', compileTask);
-gulp.task('lint', lintTaskFactory(true));
-gulp.task('package', gulp.series(compileTask, () => gulp_webpack('production'), vscePackageTask));
-gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(false)));
-gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, testTaskFactory(true)));
-gulp.task('webpack', gulp.series(compileTask, () => gulp_webpack('development')));
-gulp.task('webpack-prod', gulp.series(compileTask, () => gulp_webpack('production')));
+gulp.task('lint', lintTask);
+gulp.task('package', gulp.series(compileTask, webpackProdTask, vscePackageTask));
+gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
+gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, unitTestsTask));
+gulp.task('webpack', gulp.series(compileTask, webpackTask));
+gulp.task('webpack-prod', gulp.series(compileTask, webpackProdTask));
 
-gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, () => gulp_webpack('production'), testTaskFactory(false)));
-gulp.task('ci-package', gulp.series('ci-build', vscePackageTask));
+gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, allTestsTask, webpackProdTask));
+gulp.task('ci-package', gulp.series(gulp_installAzureAccount, compileTask, allTestsTask, webpackProdTask, vscePackageTask));
