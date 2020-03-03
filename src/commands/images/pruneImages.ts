@@ -23,7 +23,7 @@ export async function pruneImages(context: IActionContext): Promise<void> {
 
             const numDeleted = (result.ImagesDeleted || []).length;
             const mbReclaimed = convertToMB(result.SpaceReclaimed);
-            let message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} images(s) and reclaimed {1}MB of space.', numDeleted, mbReclaimed);
+            let message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} images(s) and reclaimed {1} MB of space.', numDeleted, mbReclaimed);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);
