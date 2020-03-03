@@ -3,21 +3,21 @@ jobs:
   pool:
     vmImage: windows-latest
   steps:
-    - template: common/lint.yml
-    - template: common/ci-build.yml
+  - template: common/lint.yml
+  - template: common/ci-build.yml
 
 - job: Linux
   pool:
     vmImage: ubuntu-latest
   steps:
-    - template: common/lint.yml
-    - template: common/ci-package.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
+  - template: common/lint.yml
+  - template: common/ci-package.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
 
 - job: macOS
   pool:
     vmImage: macOS-latest
   steps:
-    - template: common/lint.yml
-    - template: common/ci-build.yml
+  - template: common/lint.yml
+  - template: common/ci-build.yml
     parameters:
       dockerUnavailable: 1 # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)
