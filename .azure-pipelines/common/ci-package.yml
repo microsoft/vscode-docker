@@ -38,7 +38,7 @@ steps:
   displayName: 'Copy vsix to staging directory'
   inputs:
     Contents: '**/*.vsix'
-  TargetFolder: '$(build.artifactstagingdirectory)'
+    TargetFolder: '$(build.artifactstagingdirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifacts: vsix'
