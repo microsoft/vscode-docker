@@ -32,6 +32,14 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
                 '--nothreading',
                 '--noreload'
             ];
+        case 'flask':
+            return [
+                'run',
+                '--no-debugger',
+                '--no-reload',
+                '--host 0.0.0.0',
+                `--port ${ports !== undefined ? ports[0] : PythonDefaultPorts[projectType]}`,
+            ]
         default:
             return undefined;
     }
