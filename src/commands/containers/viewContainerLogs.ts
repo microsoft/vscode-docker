@@ -13,7 +13,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
     if (!node) {
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.viewLogs.noContainers', 'No continers are available to view logs')
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.viewLogs.noContainers', 'No containers are available to view logs')
         });
     }
 
