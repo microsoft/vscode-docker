@@ -291,7 +291,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const yesItem: MessageItem = DialogResponses.yes;
         const install = (yesItem === await window.showInformationMessage(localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?'), ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
-            throw new UserCancelledError("User didn't grant permission to install .NET Core debugger.");
+            throw new UserCancelledError();
         }
         // Windows require double quotes and Mac and Linux require single quote.
         const osProvider = new LocalOSProvider();
