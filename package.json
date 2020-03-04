@@ -2414,6 +2414,7 @@
         "ci-package": "gulp ci-package",
         "lint": "gulp lint",
         "test": "gulp test",
+        "test-only": "gulp test-only",
         "unit-test": "gulp unit-test",
         "webpack-dev": "gulp webpack-dev",
         "webpack-prod": "gulp webpack-prod"

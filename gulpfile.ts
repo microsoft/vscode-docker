@@ -81,3 +81,5 @@ gulp.task('webpack-prod', gulp.series(compileTask, webpackProdTask));
 
 gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
 gulp.task('ci-package', gulp.series('ci-build', vscePackageTask));
+
+gulp.task('test-only', gulp.series(gulp_installAzureAccount, allTestsTask));
