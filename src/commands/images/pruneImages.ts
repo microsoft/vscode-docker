@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
+import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
@@ -15,13 +15,18 @@ export async function pruneImages(context: IActionContext): Promise<void> {
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.images.prune.remove', 'Remove') });
 
-    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneImages(), context);
+    await vscode.window.withProgress(
+        { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.images.pruning', 'Pruning images...') },
+        async () => {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+            const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneImages(), context);
 
-    const numDeleted = (result.ImagesDeleted || []).length;
-    const mbReclaimed = convertToMB(result.SpaceReclaimed);
-    let message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} images(s) and reclaimed {1}MB of space.', numDeleted, mbReclaimed);
-    // don't wait
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(message);
+            const numDeleted = (result.ImagesDeleted || []).length;
+            const mbReclaimed = convertToMB(result.SpaceReclaimed);
+            let message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} images(s) and reclaimed {1} MB of space.', numDeleted, mbReclaimed);
+            // don't wait
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            vscode.window.showInformationMessage(message);
+        }
+    );
 }
