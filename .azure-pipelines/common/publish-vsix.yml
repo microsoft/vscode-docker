@@ -1,6 +1,6 @@
 steps:
 - task: Npm@1
-  displayName: 'Package'
+  displayName: 'Build, Test, and Package'
   inputs:
     command: custom
     customCommand: run ci-package
