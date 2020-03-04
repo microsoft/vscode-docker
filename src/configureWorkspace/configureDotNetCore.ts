@@ -287,14 +287,11 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     if (platform === '.NET: ASP.NET Core') {
         environmentVariables = `\n    environment:
       - ASPNETCORE_ENVIRONMENT=Development`;
-        // For now assume the first port is http and the second is https. (default scaffolding behavior)
+        // For now assume the first port is http. (default scaffolding behavior)
         // TODO: This is not the perfect logic, this should be improved later.
         if (ports && ports.length > 0) {
             // eslint-disable-next-line @typescript-eslint/tslint/config
             let aspNetCoreUrl: string = `      - ASPNETCORE_URLS=http://+:${ports[0]}`;
-            if (ports.length >= 2) {
-                aspNetCoreUrl += `;https://+:${ports[1]}`;
-            }
             environmentVariables += `\n${aspNetCoreUrl}`
         }
     }
