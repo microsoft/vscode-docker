@@ -295,7 +295,7 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
         }
     }
 
-    let volumesList = '      - ~\\.vsdbg:/remote_debugger';
+    let volumesList = '      - ~/.vsdbg:/remote_debugger';
     if (os === 'Linux') {
         volumesList += ':rw'
     }
