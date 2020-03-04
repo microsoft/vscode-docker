@@ -11,6 +11,7 @@ import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from "../extensionVariables";
 import { localize } from '../localize';
+import { getValidImageName } from '../utils/getValidImageName';
 import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget } from "../utils/pythonUtils";
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, quickPickGenerateComposeFiles } from './configUtils';
@@ -92,7 +93,7 @@ async function genDockerFile(serviceName: string, target: PythonTarget, projectT
 
 function genDockerCompose(serviceName: string, ports: number[]): string {
     return dockerComposefile
-        .replace(/\$service_name\$/g, serviceName)
+        .replace(/\$service_name\$/g, getValidImageName(serviceName))
         .replace(/\$ports\$/g, getComposePorts(ports));
 }
 

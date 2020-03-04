@@ -6,13 +6,12 @@
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
 import * as fse from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from "vscode";
 import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
 import { localize } from '../../localize';
 import { delay } from '../../utils/delay';
-import { PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
+import { getTempDirectoryPath, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
 
 export namespace PythonExtensionHelper {
     export interface DebugLaunchOptions {
@@ -25,10 +24,11 @@ export namespace PythonExtensionHelper {
         return { 'PTVSD_LOG_DIR': '/dbglogs' };
     }
 
-    export function getDebuggerLogFilePath(folderName: string): string {
+    export async function getDebuggerLogFilePath(folderName: string) : Promise<string> {
         // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
         // So given that we run the debugger as the entry point, then the PID is guaranteed to be 1.
-        return path.join(os.tmpdir(), folderName, 'ptvsd-1.log');
+        const tempDir = await getTempDirectoryPath();
+        return path.join(tempDir, folderName, 'ptvsd-1.log');
     }
 
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
