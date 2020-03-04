@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
+import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
@@ -15,13 +15,18 @@ export async function pruneContainers(context: IActionContext): Promise<void> {
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.containers.prune.remove', 'Remove') });
 
-    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneContainers(), context);
+    await vscode.window.withProgress(
+        { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.pruning', 'Pruning containers...') },
+        async () => {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+            const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneContainers(), context);
 
-    const numDeleted = (result.ContainersDeleted || []).length;
-    const mbReclaimed = convertToMB(result.SpaceReclaimed);
-    let message = localize('vscode-docker.commands.containers.prune.removed', 'Removed {0} container(s) and reclaimed {1}MB of space.', numDeleted, mbReclaimed);
-    // don't wait
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(message);
+            const numDeleted = (result.ContainersDeleted || []).length;
+            const mbReclaimed = convertToMB(result.SpaceReclaimed);
+            let message = localize('vscode-docker.commands.containers.prune.removed', 'Removed {0} container(s) and reclaimed {1} MB of space.', numDeleted, mbReclaimed);
+            // don't wait
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            vscode.window.showInformationMessage(message);
+        }
+    );
 }
