@@ -191,7 +191,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         let debuggerPath: string = debugConfiguration.netCore?.debuggerPath;
 
-        // If debugger path is not specified, install the debugger
+        // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
             const debuggerDirectory = '/remote_debugger';
             debuggerPath = `${debuggerDirectory}/vsdbg`;
@@ -290,7 +290,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const yesItem: MessageItem = DialogResponses.yes;
         const install = (yesItem === await window.showInformationMessage('Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?', ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
-            throw new UserCancelledError("User didn't grand permission to install .NET Core debugger.");
+            throw new UserCancelledError("User didn't grant permission to install .NET Core debugger.");
         }
         // Windows require double quotes and Mac and Linux require single quote.
         const osProvider = new LocalOSProvider();
