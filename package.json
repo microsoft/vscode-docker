@@ -2415,7 +2415,7 @@
         "lint": "gulp lint",
         "test": "gulp test",
         "unit-test": "gulp unit-test",
-        "webpack": "gulp webpack-dev",
+        "webpack-dev": "gulp webpack-dev",
         "webpack-prod": "gulp webpack-prod"
     },
     "extensionDependencies": [

@@ -8,6 +8,7 @@ import * as gulp from 'gulp';
 import * as eslint from 'gulp-eslint';
 import * as sourcemaps from 'gulp-sourcemaps';
 import * as ts from 'gulp-typescript';
+import * as os from 'os';
 import * as path from 'path';
 import * as vsce from 'vsce';
 import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
@@ -37,6 +38,11 @@ function lintTask() {
 }
 
 function testTaskFactory(unitTestsOnly: boolean) {
+    if (os.platform() === 'win32') {
+        // For some reason this is getting set to '--max-old-space-size=8192', which in turn for some reason causes the VSCode test process to instantly crash with error code 3 on Windows
+        // Which makes no sense because the default is 512 MB max
+        env.NODE_OPTIONS = '';
+    }
     env.DEBUGTELEMETRY = '1';
     env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.MOCHA_grep = unitTestsOnly ? '\\(unit\\)' : '';
@@ -53,7 +59,7 @@ function unitTestsTask() {
     return testTaskFactory(true);
 }
 
-function webpackTask() {
+function webpackDevTask() {
     return gulp_webpack('development');
 }
 
@@ -70,7 +76,7 @@ gulp.task('lint', lintTask);
 gulp.task('package', gulp.series(compileTask, webpackProdTask, vscePackageTask));
 gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
 gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, unitTestsTask));
-gulp.task('webpack', gulp.series(compileTask, webpackTask));
+gulp.task('webpack-dev', gulp.series(compileTask, webpackDevTask));
 gulp.task('webpack-prod', gulp.series(compileTask, webpackProdTask));
 
 gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
