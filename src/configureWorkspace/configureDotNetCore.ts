@@ -15,6 +15,7 @@ import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../de
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
+import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
@@ -276,8 +277,7 @@ function validateForUnresolvedToken(contents: string): void {
 }
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
-    const serviceName = path.basename(artifactName, path.extname(artifactName)).toLowerCase();
-    const imageName = serviceName;
+    const serviceName = path.basename(artifactName, path.extname(artifactName));
     let jsonPorts: string = `${getComposePorts(ports)}`;
     if (jsonPorts?.length > 0) {
         jsonPorts = `\n${jsonPorts}`;
@@ -307,14 +307,16 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
     dockerfileName = dockerfileName.replace(/\\/g, '/');
 
-    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', serviceName)
-        .replace(/\$image_name\$/g, imageName)
+    const normalizedServiceName = getValidImageName(serviceName);
+
+    let composeFileContent = dotNetComposeTemplate.replace('$service_name$', normalizedServiceName)
+        .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts);
     validateForUnresolvedToken(composeFileContent);
 
-    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', serviceName)
-        .replace(/\$image_name\$/g, imageName)
+    let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', normalizedServiceName)
+        .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)

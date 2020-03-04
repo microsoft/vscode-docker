@@ -71,7 +71,7 @@ export class PythonDebugHelper implements DebugHelper {
             await this.cliDockerClient.removeContainer(containerName, { force: true });
         } catch { }
 
-        const debuggerLogFilePath = PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
+        const debuggerLogFilePath = await PythonExtensionHelper.getDebuggerLogFilePath(context.folder.name);
         await fse.remove(debuggerLogFilePath);
 
         let debuggerReadyPromise = Promise.resolve();
