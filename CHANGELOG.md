@@ -1,4 +1,4 @@
-## 1.0.0 - 3 March 2020
+## 1.0.0 - 9 March 2020
 ### Added
 * Debugging support for Python [#1255](https://github.com/microsoft/vscode-docker/issues/1255)
 * Improved support for common Python frameworks (e.g. Django, Flask, etc.) [#1546](https://github.com/microsoft/vscode-docker/issues/1546)
