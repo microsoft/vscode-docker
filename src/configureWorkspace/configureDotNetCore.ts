@@ -276,8 +276,7 @@ function validateForUnresolvedToken(contents: string): void {
 }
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
-    const serviceName = path.basename(artifactName, path.extname(artifactName)).toLowerCase();
-    const imageName = serviceName;
+    const serviceName = path.basename(artifactName, path.extname(artifactName));
     let jsonPorts: string = `${getComposePorts(ports)}`;
     if (jsonPorts?.length > 0) {
         jsonPorts = `\n${jsonPorts}`;
@@ -308,16 +307,15 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     dockerfileName = dockerfileName.replace(/\\/g, '/');
 
     const normalizedServiceName = getValidImageName(serviceName);
-    const normalizedImageName = getValidImageName(imageName);
 
     let composeFileContent = dotNetComposeTemplate.replace('$service_name$', normalizedServiceName)
-        .replace(/\$image_name\$/g, normalizedImageName)
+        .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts);
     validateForUnresolvedToken(composeFileContent);
 
     let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', normalizedServiceName)
-        .replace(/\$image_name\$/g, normalizedImageName)
+        .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)
