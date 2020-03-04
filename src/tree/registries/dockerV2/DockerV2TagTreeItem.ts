@@ -38,7 +38,7 @@ export class DockerV2TagTreeItem extends RemoteTagTreeItem {
             await registryRequest(this.parent, 'DELETE', url);
         } catch (error) {
             const errorType: string = parseError(error).errorType.toLowerCase();
-            if (errorType === '405' || errorType === 'method not supported') { // TODO: is this error type right at all?
+            if (errorType === '405' || errorType === 'unsupported') {
                 // Don't wait
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 ext.ui.showWarningMessage('Deleting remote images is not supported on this registry. It may need to be enabled.', { learnMoreLink: 'https://aka.ms/AA7jsql' });
