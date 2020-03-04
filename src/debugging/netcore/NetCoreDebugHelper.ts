@@ -190,8 +190,17 @@ export class NetCoreDebugHelper implements DebugHelper {
         // Get Container Name if missing
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
 
-        // If debugger path is not specified, install the debugger
-        const debuggerPath: string = debugConfiguration.netCore?.debuggerPath ?? await this.installDebuggerInContainer(containerName);
+        let debuggerPath: string = debugConfiguration.netCore?.debuggerPath;
+
+        // If debugger path is not specified, then install the debugger if it doesn't exist in the container
+        if (!debuggerPath) {
+            const debuggerDirectory = '/remote_debugger';
+            debuggerPath = `${debuggerDirectory}/vsdbg`;
+            const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath);
+            if (!isDebuggerInstalled) {
+                await this.installDebuggerInContainer(containerName, debuggerDirectory);
+            }
+        }
 
         return {
             ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.
@@ -278,19 +287,17 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async installDebuggerInContainer(containerName: string): Promise<string> {
+    private async installDebuggerInContainer(containerName: string, installPath: string): Promise<string> {
         const yesItem: MessageItem = DialogResponses.yes;
         const install = (yesItem === await window.showInformationMessage(localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?'), ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
             throw new UserCancelledError();
         }
-
-        const debuggerPath: string = '/remote_debugger';
         // Windows require double quotes and Mac and Linux require single quote.
         const osProvider = new LocalOSProvider();
         const installDebugger: string = osProvider.os === 'Windows' ?
-            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi"`
-            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${debuggerPath}; fi'`
+            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi"`
+            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi'`
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
@@ -309,7 +316,17 @@ export class NetCoreDebugHelper implements DebugHelper {
             localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to install the .NET Core debugger.')
         );
 
-        return `${debuggerPath}/vsdbg`;
+        return `${installPath}/vsdbg`;
+    }
+
+    private async isDebuggerInstalled(containerName: string, debuggerPath: string): Promise<boolean> {
+        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+        const osProvider = new LocalOSProvider();
+        const command: string = osProvider.os === 'Windows' ?
+            `/bin/sh -c "if [ -f ${debuggerPath} ]; then echo true; fi;"`
+            : `/bin/sh -c 'if [ -f ${debuggerPath} ]; then echo true; fi;'`
+        const result: string = await dockerClient.exec(containerName, command, {});
+        return result === 'true';
     }
 
     private async getContainerNameToAttach(): Promise<string> {
