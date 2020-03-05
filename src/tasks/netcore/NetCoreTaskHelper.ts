@@ -280,7 +280,9 @@ export class NetCoreTaskHelper implements TaskHelper {
             addVolumeWithoutConflicts(volumes, srcVolume);
             addVolumeWithoutConflicts(volumes, debuggerVolume);
             addVolumeWithoutConflicts(volumes, nugetVolume);
-            addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
+            if (await fse.pathExists(nugetFallbackVolume.localPath)) {
+                addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
+            }
         }
 
         if (userSecrets || ssl) {
