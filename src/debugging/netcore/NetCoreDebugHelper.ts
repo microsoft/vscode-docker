@@ -295,9 +295,11 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
         // Windows require double quotes and Mac and Linux require single quote.
         const osProvider = new LocalOSProvider();
+        const installDebuggerOnAlpine = `apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
+        const installDebuggerOnNonAlpine = `curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
         const installDebugger: string = osProvider.os === 'Windows' ?
-            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi"`
-            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi'`
+            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi"`
+            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi'`
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
