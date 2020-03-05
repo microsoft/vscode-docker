@@ -278,10 +278,9 @@ function validateForUnresolvedToken(contents: string): void {
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
     const serviceName = path.basename(artifactName, path.extname(artifactName));
-    let jsonPorts: string = `${getComposePorts(ports)}`;
-    if (jsonPorts?.length > 0) {
-        jsonPorts = `\n${jsonPorts}`;
-    }
+    // Compose doesn't configure the https, so expose only the http port.
+    // Otherwise the 'Open in Browser' command will try to open https endpoint and will not work.
+    let jsonPorts: string = ports?.length > 0 ? `\n${getComposePorts([ports[0]])}` : '';
 
     let environmentVariables: string = '';
     if (platform === '.NET: ASP.NET Core') {
