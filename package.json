@@ -1929,7 +1929,7 @@
                 },
                 "docker.attachShellCommand.windowsContainer": {
                     "type": "string",
-                    "default": "powershell",
+                    "default": "cmd",
                     "description": "Attach command to use for Windows containers"
                 },
                 "docker.dockerComposeBuild": {
