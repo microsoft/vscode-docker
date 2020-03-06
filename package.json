@@ -1934,7 +1934,7 @@
                 },
                 "docker.attachShellCommand.windowsContainer": {
                     "type": "string",
-                    "default": "powershell",
+                    "default": "cmd",
                     "description": "%vscode-docker.config.docker.attachShellCommand.windowsContainer%"
                 },
                 "docker.dockerComposeBuild": {
