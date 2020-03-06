@@ -386,7 +386,7 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
-    const os = context.os ?? await context.promptForOS();
+    const os = context.os ?? (context.os = await context.promptForOS());
     const isCompose = await context.promptForCompose();
 
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
