@@ -292,11 +292,15 @@ export class NetCoreDebugHelper implements DebugHelper {
         if (!install) {
             throw new UserCancelledError("User didn't grant permission to install .NET Core debugger.");
         }
-        // Windows require double quotes and Mac and Linux require single quote.
+
         const osProvider = new LocalOSProvider();
+        const installDebuggerOnAlpine = `apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
+        const installDebuggerOnNonAlpine = `curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
+        const installDebuggerCmd = `ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi`
+        // Windows require double quotes and Mac and Linux require single quote.
         const installDebugger: string = osProvider.os === 'Windows' ?
-            `/bin/sh -c "ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi"`
-            : `/bin/sh -c 'ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath} ; else apt-get update && apt-get install unzip && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}; fi'`
+            `/bin/sh -c "${installDebuggerCmd}"`
+            : `/bin/sh -c '${installDebuggerCmd}'`
 
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
@@ -332,7 +336,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: 'No running containers are available to attach'
+            noItemFoundErrorMessage: 'No running containers are available to attach.'
         });
         return containerItem.containerName;
     }
