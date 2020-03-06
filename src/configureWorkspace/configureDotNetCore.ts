@@ -17,7 +17,7 @@ import { localize } from '../localize';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
-import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
+import { isWindows, isWindows1019H1OrNewer, isWindows1019H2OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
@@ -41,8 +41,12 @@ const DotNetCoreSdkImageFormat = "mcr.microsoft.com/dotnet/core/sdk:{0}.{1}{2}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
-    if (!isWindows() || isWindows1019H1OrNewer()) {
-        // If we're not on Windows (and therefore can't detect the version), assume a Windows 19H1 host
+    if (!isWindows()) {
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows 19H2 host
+        return "-nanoserver-1909";
+    } else if (isWindows1019H2OrNewer()) {
+        return "-nanoserver-1909";
+    } else if (isWindows1019H1OrNewer()) {
         return "-nanoserver-1903";
     } else if (isWindows10RS5OrNewer()) {
         return "-nanoserver-1809";
