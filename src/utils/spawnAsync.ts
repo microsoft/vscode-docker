@@ -55,7 +55,14 @@ export async function spawnAsync(
                 return reject(new UserCancelledError());
             } else if (code) {
                 // Replicate the error object of child_process.exec().
-                const error = <ExecError>new Error(localize('vscode-docker.utils.spawn.exited', 'Process exited with code {0}', code));
+                let errorMessage = localize('vscode-docker.utils.spawn.exited', 'Process \'{0}\' exited with code {1}', command, code);
+
+                if (stderrBuffer) {
+                    errorMessage += localize('vscode-docker.utils.spawn.exitedError', '\nError: {0}', bufferToString(stderrBuffer));
+                }
+
+                let error = <ExecError>new Error(errorMessage);
+
                 error.code = code;
                 error.signal = signal;
                 return reject(error);
