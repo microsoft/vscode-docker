@@ -10,6 +10,12 @@ import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { WorkspaceFolder } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
+import CommandLineDotNetClient from '../debugging/coreclr/CommandLineDotNetClient';
+import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
+import LocalOSProvider from '../debugging/coreclr/LocalOSProvider';
+import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../debugging/coreclr/netCoreProjectProvider';
+import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from '../extensionVariables';
@@ -17,7 +23,7 @@ import { localize } from '../localize';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
-import { isWindows, isWindows1019H1OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
+import { isWindows, isWindows1019H1OrNewer, isWindows1019H2OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
@@ -41,8 +47,12 @@ const DotNetCoreSdkImageFormat = "mcr.microsoft.com/dotnet/core/sdk:{0}.{1}{2}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
-    if (!isWindows() || isWindows1019H1OrNewer()) {
-        // If we're not on Windows (and therefore can't detect the version), assume a Windows 19H1 host
+    if (!isWindows()) {
+        // If we're not on Windows (and therefore can't detect the version), assume a Windows 19H2 host
+        return "-nanoserver-1909";
+    } else if (isWindows1019H2OrNewer()) {
+        return "-nanoserver-1909";
+    } else if (isWindows1019H1OrNewer()) {
         return "-nanoserver-1903";
     } else if (isWindows10RS5OrNewer()) {
         return "-nanoserver-1809";
@@ -86,7 +96,7 @@ RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
+ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
 // AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/aspnetcore/Dockerfile
@@ -108,7 +118,7 @@ RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
+ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
 // #endregion
@@ -137,7 +147,7 @@ RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
+ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
 // AT-Kube: /src/Containers.Tools/Containers.Tools.Package/Templates/linux/dotnetcore/console/Dockerfile
@@ -159,7 +169,7 @@ RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$.dll"]
+ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
 const dotNetComposeTemplate = `version: '3.4'
@@ -177,19 +187,16 @@ $volumes_list$
 `;
 // #endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string, assemblyName: string): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
         throw new Error(localize('vscode-docker.configureDotNetCore.unexpectedOs', 'Unexpected OS "{0}"', os));
     }
 
-    let serviceName = path.basename(serviceNameAndRelativePath);
     let projectDirectory = path.dirname(serviceNameAndRelativePath);
     let projectFileName = path.basename(artifactName);
 
-    // We don't want the project folder in $assembly_name$ because the assembly is in /app and WORKDIR has been set to that
-    let assemblyNameNoExtension = serviceName;
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
     let exposeStatements = getExposeStatements(ports);
@@ -261,7 +268,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
         .replace(/\$sdk_image_name\$/g, sdkImageName)
         .replace(/\$container_project_directory\$/g, projectDirectory)
         .replace(/\$project_file_name\$/g, projectFileName)
-        .replace(/\$assembly_name\$/g, assemblyNameNoExtension)
+        .replace(/\$assembly_name\$/g, assemblyName)
         .replace(/\$copy_project_commands\$/g, copyProjectCommands);
 
     validateForUnresolvedToken(contents);
@@ -380,9 +387,28 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
 }
 
+async function inferOutputAssemblyName(appProjectFilePath: string): Promise<string> {
+    const processProvider = new ChildProcessProvider();
+    const fsProvider = new LocalFileSystemProvider();
+    const osProvider = new LocalOSProvider();
+    const dotNetClient = new CommandLineDotNetClient(
+        processProvider,
+        fsProvider,
+        osProvider
+    );
+    const netCoreProjectProvider: NetCoreProjectProvider = new MsBuildNetCoreProjectProvider(
+        fsProvider,
+        dotNetClient,
+        new OSTempFileProvider(osProvider, processProvider)
+    );
+
+    const fullOutputPath = await netCoreProjectProvider.getTargetPath(appProjectFilePath);
+    return path.basename(fullOutputPath);
+}
+
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
-    const os = context.os ?? await context.promptForOS();
+    const os = context.os ?? (context.os = await context.promptForOS());
     const isCompose = await context.promptForCompose();
 
     const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
@@ -395,6 +421,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
     const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
+    const projectFullPath = path.join(context.rootFolder, rootRelativeProjectFileName);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
 
     telemetryProperties.packageFileType = path.extname(rootRelativeProjectFileName);
@@ -417,7 +444,8 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
     serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
 
-    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName);
+    const assemblyName = await inferOutputAssemblyName(projectFullPath);
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName, assemblyName);
 
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string

@@ -20,8 +20,19 @@ const windows10RS5MinVersion = "10.0.17763";
 // Minimum Windows 19H1 version number
 const windows1019H1MinVersion = "10.0.18362";
 
+// Minimum Windows 19H2 version number
+const windows1019H2MinVersion = "10.0.18363";
+
 export function isWindows(): boolean {
     return ext.os.platform === 'win32';
+}
+
+export function isWindows1019H2OrNewer(): boolean {
+    if (!isWindows()) {
+        return false;
+    }
+
+    return semver.gte(ext.os.release, windows1019H2MinVersion);
 }
 
 export function isWindows1019H1OrNewer(): boolean {
