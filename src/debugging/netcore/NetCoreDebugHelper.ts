@@ -297,7 +297,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const osProvider = new LocalOSProvider();
         const installDebuggerOnAlpine = `apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
         const installDebuggerOnNonAlpine = `curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
-        const installDebuggerCmd = `ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID == alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi`
+        const installDebuggerCmd = `ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID = alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi`
         // Windows require double quotes and Mac and Linux require single quote.
         const installDebugger: string = osProvider.os === 'Windows' ?
             `/bin/sh -c "${installDebuggerCmd}"`
