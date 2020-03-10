@@ -2469,7 +2469,6 @@
         "azure-arm-containerregistry": "^3.0.0",
         "azure-arm-website": "^5.3.0",
         "azure-storage": "^2.10.3",
-        "docker-modem": "^2.1.1",
         "dockerfile-language-server-nodejs": "^0.0.22",
         "dockerode": "^3.1.0",
         "fs-extra": "^8.1.0",
