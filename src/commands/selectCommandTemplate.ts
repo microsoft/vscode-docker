@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/* eslint-disable no-template-curly-in-string */
-
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
@@ -22,6 +20,7 @@ type CommandTemplate = {
 // NOTE: the default templates are duplicated in package.json, since VSCode offers no way of looking up extension-level default settings
 // So, when modifying them here, be sure to modify them there as well!
 const defaults: { [key in TemplateCommand]: CommandTemplate } = {
+    /* eslint-disable no-template-curly-in-string */
     'build': { label: 'Docker Build', template: 'docker build --rm -f "${dockerfile}" -t ${tag} "${context}"' },
     'run': { label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' },
     'runInteractive': { label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' },
@@ -29,6 +28,7 @@ const defaults: { [key in TemplateCommand]: CommandTemplate } = {
     'logs': { label: 'Docker Logs', template: 'docker logs -f ${containerId}' },
     'composeUp': { label: 'Compose Up', template: 'docker-compose up ${configurationFile} ${detached} ${build}' },
     'composeDown': { label: 'Compose Down', template: 'docker-compose down ${configurationFile}' },
+    /* eslint-enable no-template-curly-in-string */
 };
 
 export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
