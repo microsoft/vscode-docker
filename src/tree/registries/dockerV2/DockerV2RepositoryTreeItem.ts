@@ -3,19 +3,22 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2TagTreeItem } from "./DockerV2TagTreeItem";
+import { addAccessToken, OAuthContext } from "./oAuthUtils";
 
 export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase {
     public parent: DockerV2RegistryTreeItemBase;
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string) {
+    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, private readonly cachedProvider?: ICachedRegistryProvider, private readonly _oAuthContext?: OAuthContext) {
         super(parent, repoName);
     }
 
@@ -36,6 +39,14 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase {
             },
             t => t
         );
+    }
+
+    public async addAuth(options: RequestPromiseOptions): Promise<void> {
+        if (this._oAuthContext) {
+            await addAccessToken(this.cachedProvider, { ...this._oAuthContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` }, options);
+        } else if (this.parent.addAuth) {
+            await this.parent.addAuth(options);
+        }
     }
 
     public hasMoreChildrenImpl(): boolean {
