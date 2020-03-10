@@ -18,7 +18,7 @@ export const genericDockerV2RegistryProvider: IRegistryProvider = {
     connectWizardOptions: {
         wizardTitle: localize('vscode-docker.tree.registries.v2.title', 'Connect Docker Registry'),
         includeUrl: true,
-        urlPrompt: localize('vscode-docker.tree.registries.v2.urlPrompt', 'Enter the URL for the registry (OAuth not yet supported)'),
+        urlPrompt: localize('vscode-docker.tree.registries.v2.urlPrompt', 'Enter the URL for the registry'),
         includeUsername: true,
         isUsernameOptional: true,
         includePassword: true,
