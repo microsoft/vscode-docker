@@ -6,6 +6,7 @@
 import { ImageInfo } from "dockerode";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { callDockerodeAsync } from "../../utils/callDockerode";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -48,7 +49,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, Image
             }
         };
 
-        const images = await ext.dockerode.listImages(options) || [];
+        const images = await callDockerodeAsync(async () => ext.dockerode.listImages(options)) || [];
         let result: ILocalImageInfo[] = [];
         for (const image of images) {
             if (!image.RepoTags) {

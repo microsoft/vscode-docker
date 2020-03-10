@@ -7,10 +7,35 @@
 
 import { IActionContext, parseError } from "vscode-azureextensionui";
 import { localize } from '../localize';
+import { dockerContextManager } from './dockerContextManager';
+import { refreshDockerode } from './refreshDockerode';
+
+export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
+    const p = new Promise<T>((resolve, reject) => {
+        try {
+            const result: T = dockerodeCallback();
+            resolve(result);
+        } catch (err) {
+            reject(err);
+        }
+    });
+
+    return callDockerodeAsync(async () => p);
+}
+
+export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>): Promise<T> {
+    const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
+    if (contextChanged) {
+        dockerContextManager.contextChangeHandled();
+        await refreshDockerode();
+    }
+
+    return await dockerodeAsyncCallback();
+}
 
 export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
     try {
-        return await dockerodeCallback();
+        return await callDockerodeAsync(dockerodeCallback);
     } catch (err) {
         context.errorHandling.suppressReportIssue = true;
 

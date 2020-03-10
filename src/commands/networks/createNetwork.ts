@@ -7,7 +7,7 @@ import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerodeAsync, callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 
 export async function createNetwork(context: IActionContext): Promise<void> {
 
@@ -16,7 +16,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
     });
 
-    const engineVersion = await ext.dockerode.version();
+    const engineVersion = await callDockerodeAsync(async () => ext.dockerode.version());
     const drivers = engineVersion.Os === 'windows'
         ? [
             { label: 'nat' },
@@ -36,8 +36,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         }
     );
 
-    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const result = <{ id: string }>await callDockerodeWithErrorHandling(() => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }), context);
+    const result = <{ id: string }>await callDockerodeWithErrorHandling(async () => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }), context);
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(localize('vscode-docker.commands.networks.create.created', 'Network Created with ID {0}', result.id.substr(0, 12)));

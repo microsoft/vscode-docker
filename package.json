@@ -1329,6 +1329,11 @@
                     "default": 2000,
                     "description": "%vscode-docker.config.docker.explorerRefreshInterval%"
                 },
+                "docker.contextRefreshInterval": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "%vscode-docker.config.docker.contextRefreshInterval%"
+                },
                 "docker.commands.build": {
                     "oneOf": [
                         {

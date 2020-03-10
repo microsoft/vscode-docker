@@ -6,8 +6,8 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { pathNormalize } from '../../utils/pathNormalize';
-import { PlatformOS } from '../../utils/platform';
+import { pathNormalize } from './pathNormalize';
+import { PlatformOS } from './platform';
 
 export interface OSProvider {
     homedir: string;

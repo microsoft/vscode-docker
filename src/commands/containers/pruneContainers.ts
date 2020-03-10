@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneContainers(context: IActionContext): Promise<void> {
@@ -18,8 +18,7 @@ export async function pruneContainers(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.pruning', 'Pruning containers...') },
         async () => {
-            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-            const result = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneContainers(), context);
+            const result = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneContainers(), context);
 
             const numDeleted = (result.ContainersDeleted || []).length;
             const mbReclaimed = convertToMB(result.SpaceReclaimed);

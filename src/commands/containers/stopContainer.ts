@@ -9,7 +9,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function stopContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
@@ -23,10 +23,8 @@ export async function stopContainer(context: IActionContext, node?: ContainerTre
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.stop.stopping', 'Stopping Container(s)...') }, async () => {
         await Promise.all(nodes.map(async n => {
-            const container: Container = n.getContainer();
-            // eslint-disable-next-line @typescript-eslint/promise-function-async
-            await callDockerodeWithErrorHandling(() => container.stop(), context);
-
+            const container: Container = await n.getContainer();
+            await callDockerodeWithErrorHandling(async () => container.stop(), context);
         }));
     });
 }

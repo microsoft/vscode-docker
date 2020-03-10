@@ -8,7 +8,7 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
-import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
@@ -18,8 +18,8 @@ export async function inspectNetwork(context: IActionContext, node?: NetworkTree
         });
     }
 
-    const network: Network = node.getNetwork()
-    // eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/tslint/config
-    const inspectInfo: {} = await callDockerodeWithErrorHandling(() => network.inspect(), context); // inspect is missing type in @types/dockerode
+    const network: Network = await node.getNetwork()
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    const inspectInfo: {} = await callDockerodeWithErrorHandling(async () => network.inspect(), context); // inspect is missing type in @types/dockerode
     await openReadOnlyJson(node, inspectInfo);
 }

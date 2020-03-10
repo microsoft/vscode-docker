@@ -28,8 +28,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
             task.scope,
             task.name,
             task.source,
-            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-            new CustomExecution(() => Promise.resolve(new DockerPseudoterminal(this, task))),
+            new CustomExecution(async () => Promise.resolve(new DockerPseudoterminal(this, task))),
             task.problemMatchers
         );
     }

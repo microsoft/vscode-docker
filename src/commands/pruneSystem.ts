@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { callDockerodeWithErrorHandling } from '../utils/callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from '../utils/callDockerode';
 import { convertToMB } from '../utils/convertToMB';
 
 export async function pruneSystem(context: IActionContext): Promise<void> {
@@ -18,12 +18,10 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },
         async () => {
-            /* eslint-disable @typescript-eslint/promise-function-async */
-            const containersResult = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneContainers(), context);
-            const imagesResult = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneImages(), context);
-            const networksResult = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneNetworks(), context);
-            const volumesResult = await callDockerodeWithErrorHandling(() => ext.dockerode.pruneVolumes(), context);
-            /* eslint-enable @typescript-eslint/promise-function-async */
+            const containersResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneContainers(), context);
+            const imagesResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneImages(), context);
+            const networksResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneNetworks(), context);
+            const volumesResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneVolumes(), context);
 
             const numContainers = (containersResult.ContainersDeleted || []).length;
             const numImages = (imagesResult.ImagesDeleted || []).length;

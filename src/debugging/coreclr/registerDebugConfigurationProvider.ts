@@ -4,6 +4,7 @@
 
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
+import LocalOSProvider from '../../utils/LocalOSProvider';
 import { DefaultAppStorageProvider } from './appStorage';
 import ChildProcessProvider from './ChildProcessProvider';
 import CliDockerClient from './CliDockerClient';
@@ -14,7 +15,6 @@ import { DefaultDockerManager } from './dockerManager';
 import DockerNetCoreDebugConfigurationProvider from './dockerNetCoreDebugConfigurationProvider';
 import { LocalFileSystemProvider } from './fsProvider';
 import { LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
-import LocalOSProvider from './LocalOSProvider';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import OpnBrowserClient from './OpnBrowserClient';
 import { DefaultOutputManager } from './outputManager';

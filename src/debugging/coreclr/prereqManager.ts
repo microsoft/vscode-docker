@@ -5,12 +5,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { localize } from '../../localize';
+import { OSProvider } from '../../utils/LocalOSProvider';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DockerClient } from './CliDockerClient';
 import { DotNetClient } from './CommandLineDotNetClient';
 import { LaunchOptions, MacNuGetPackageFallbackFolderPath } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
-import { OSProvider } from './LocalOSProvider';
 import { BrowserClient } from './OpnBrowserClient';
 
 export interface Prerequisite {

@@ -151,7 +151,7 @@ export async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run
             // Makes sure that if item fails it does so due to network/azure errors not lack of new content
             if (available > start) {
                 text = await getBlobToText(blobInfo, blob, start);
-                let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
+                let utf8encoded = (Buffer.from(text, 'ascii')).toString('utf8');
                 utf8encoded = removeAnsiEscapeSequences(utf8encoded);
                 start += text.length;
                 ext.outputChannel.append(utf8encoded);

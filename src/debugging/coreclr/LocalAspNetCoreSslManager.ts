@@ -8,12 +8,12 @@ import * as process from 'process';
 import { MessageItem } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { OSProvider } from '../../utils/LocalOSProvider';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ProcessProvider } from './ChildProcessProvider';
 import { DotNetClient, TrustState } from './CommandLineDotNetClient';
-import { OSProvider } from './LocalOSProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 
 export type SecretsFolders = {
@@ -60,11 +60,12 @@ export class LocalAspNetCoreSslManager implements AspNetCoreSslManager {
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' },
                 trust).then(async selection => {
-                if (selection === trust) {
-                    const trustCommand = `dotnet dev-certs https --trust`;
-                    await this.processProvider.exec(trustCommand, {});
-                    LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
-                }});
+                    if (selection === trust) {
+                        const trustCommand = `dotnet dev-certs https --trust`;
+                        await this.processProvider.exec(trustCommand, {});
+                        LocalAspNetCoreSslManager._KnownConfiguredProjects.clear(); // Clear the cache so future F5's will not use an untrusted cert
+                    }
+                });
         } else if (this.osProvider.isMac) {
             const message = localize('vscode-docker.debug.coreclr.sslManager.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.');
 
