@@ -15,6 +15,10 @@ export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
 
     private _nextLink: string | undefined;
 
+    public constructor(parent: DockerHubNamespaceTreeItem, name: string) {
+        super(parent, name);
+    }
+
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
