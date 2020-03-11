@@ -6,7 +6,6 @@
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { RemoteTagTreeItem } from "../RemoteTagTreeItem";
 import { DockerHubNamespaceTreeItem } from "./DockerHubNamespaceTreeItem";
@@ -15,10 +14,6 @@ export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
     public parent: DockerHubNamespaceTreeItem;
 
     private _nextLink: string | undefined;
-
-    public constructor(parent: DockerHubNamespaceTreeItem, name: string, provider: IRegistryProvider) {
-        super(parent, name, provider);
-    }
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {

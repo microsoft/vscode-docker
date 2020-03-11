@@ -7,7 +7,6 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { GitLabAccountTreeItem } from "./GitLabAccountTreeItem";
 import { GitLabRepositoryTreeItem } from "./GitLabRepositoryTreeItem";
@@ -21,8 +20,8 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
 
     private _nextLink?: string;
 
-    public constructor(parent: GitLabAccountTreeItem, provider: IRegistryProvider, id: string, pathWithNamespace: string) {
-        super(parent, provider);
+    public constructor(parent: GitLabAccountTreeItem, id: string, pathWithNamespace: string) {
+        super(parent);
         this.projectId = id;
         this.pathWithNamespace = pathWithNamespace;
     }
@@ -54,7 +53,7 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         return await this.createTreeItemsWithErrorHandling(
             response.body,
             'invalidRepository',
-            r => new GitLabRepositoryTreeItem(this, this.provider, r.id.toString(), r.name),
+            r => new GitLabRepositoryTreeItem(this, r.id.toString(), r.name),
             r => r.name
         );
     }

@@ -26,7 +26,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     private _token?: string;
     private _nextLink?: string;
 
-    public constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
     }
 
@@ -72,7 +72,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return this.createTreeItemsWithErrorHandling(
             response.body,
             'invalidGitLabProject',
-            n => new GitLabProjectTreeItem(this, this.provider, n.id.toString(), n.path_with_namespace),
+            n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace),
             n => n.path_with_namespace
         );
     }

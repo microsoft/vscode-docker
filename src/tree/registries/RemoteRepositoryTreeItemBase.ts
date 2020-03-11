@@ -7,7 +7,6 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { IRepositoryAuthTreeItem } from "../../utils/registryRequestUtils";
 import { getThemedIconPath, IconPath } from "../IconPath";
-import { IRegistryProvider } from "./IRegistryProvider";
 import { getRegistryContextValue, repositorySuffix } from "./registryContextValues";
 import { RegistryTreeItemBase } from "./RegistryTreeItemBase";
 import { RemoteTagTreeItem } from "./RemoteTagTreeItem";
@@ -19,7 +18,7 @@ export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem i
     public childTypeLabel: string = 'tag';
     public parent: RegistryTreeItemBase;
 
-    public constructor(parent: RegistryTreeItemBase, public readonly repoName: string, protected readonly provider: IRegistryProvider) {
+    public constructor(parent: RegistryTreeItemBase, public readonly repoName: string) {
         super(parent);
     }
 
