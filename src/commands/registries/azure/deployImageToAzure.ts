@@ -13,7 +13,7 @@ import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
 import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
-import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
+import { azureRegistryProvider, azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
 import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
@@ -37,7 +37,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     };
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
     // Create a temporary azure account tree item since Azure might not be connected
-    const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
+    const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, azureRegistryProvider, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
     const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
     if (subscriptionStep) {
         promptSteps.push(subscriptionStep);

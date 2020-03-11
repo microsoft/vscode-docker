@@ -12,6 +12,7 @@ import { getIconPath, IconPath } from "../../IconPath";
 import { IAzureOAuthContext } from "../auth/AzureOAuthHelper";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
@@ -23,13 +24,14 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
 
     private _tasksTreeItem: AzureTasksTreeItem;
 
-    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly _registry: AcrModels.Registry) {
-        super(parent, cachedProvider);
+    public constructor(parent: SubscriptionTreeItem, provider: IRegistryProvider, cachedProvider: ICachedRegistryProvider, private readonly _registry: AcrModels.Registry) {
+        super(parent, provider, cachedProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
         this.authContext = {
             realm: new URL(`${this.baseUrl}/oauth2/token`),
             service: this.host,
             subscriptionContext: this.parent.root,
+            scope: 'registry:catalog:*',
         }
     }
 
@@ -74,7 +76,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public createRepositoryTreeItem(name: string): AzureRepositoryTreeItem {
-        return new AzureRepositoryTreeItem(this, name, this.cachedProvider, this.authContext);
+        return new AzureRepositoryTreeItem(this, name, this.provider, this.cachedProvider, this.authContext);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {

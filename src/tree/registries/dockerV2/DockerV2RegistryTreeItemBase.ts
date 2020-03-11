@@ -8,9 +8,10 @@ import { URL } from "url";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getRegistryProvider } from "../all/getRegistryProviders";
+// import { getRegistryProvider } from "../all/getRegistryProviders";
 import { IOAuthContext } from "../auth/IAuthHelper";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
@@ -20,8 +21,8 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     private _nextLink: string | undefined;
 
-    protected constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider) {
-        super(parent);
+    protected constructor(parent: AzExtParentTreeItem, provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+        super(parent, provider);
     }
 
     public get baseImagePath(): string {
@@ -55,18 +56,14 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
     }
 
     public async addAuth(options: request.RequestPromiseOptions): Promise<void> {
-        const authHelper = getRegistryProvider(this.cachedProvider.id)?.authHelper;
-
-        if (authHelper) {
-            await authHelper.addAuth(this.cachedProvider, options, { ...this.authContext, scope: 'registry:catalog:*' });
+        if (this.provider.authHelper) {
+            await this.provider.authHelper.addAuth(this.cachedProvider, options, this.authContext);
         }
     }
 
     public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
-        const authHelper = getRegistryProvider(this.cachedProvider.id)?.authHelper;
-
-        if (authHelper) {
-            return await authHelper.getDockerCliCredentials(this.cachedProvider, this.authContext);
+        if (this.provider.authHelper) {
+            return await this.provider.authHelper.getDockerCliCredentials(this.cachedProvider, this.authContext);
         }
 
         return undefined;

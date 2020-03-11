@@ -59,7 +59,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    return this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
+                    return this.initTreeItem(new provider.treeItemType(parent, provider, cachedProvider));
                 },
                 cachedInfo => cachedInfo.id
             );

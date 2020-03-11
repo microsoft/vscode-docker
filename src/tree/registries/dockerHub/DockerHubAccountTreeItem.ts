@@ -11,24 +11,24 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { getRegistryPassword } from "../registryPasswords";
 import { DockerHubNamespaceTreeItem } from "./DockerHubNamespaceTreeItem";
+import { dockerHubRegistryProvider } from "./dockerHubRegistryProvider";
 
 export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRegistryProviderTreeItem {
     public label: string = 'Docker Hub';
     public childTypeLabel: string = 'namespace';
     public baseUrl: string = dockerHubUrl;
-    public cachedProvider: ICachedRegistryProvider;
 
     private _token?: string;
     private _nextLink?: string;
 
-    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
-        this.cachedProvider = cachedProvider;
     }
 
     public get contextValue(): string {
@@ -73,7 +73,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return this.createTreeItemsWithErrorHandling(
             response.body.namespaces,
             'invalidDockerHubNamespace',
-            n => new DockerHubNamespaceTreeItem(this, n),
+            n => new DockerHubNamespaceTreeItem(this, dockerHubRegistryProvider, n),
             n => n
         );
     }

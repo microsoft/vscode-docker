@@ -5,10 +5,11 @@
 
 import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from 'azure-arm-containerregistry';
 import { window } from 'vscode';
-import { AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, ISubscriptionContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
 import { nonNullProp } from '../../../utils/nonNull';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from '../IRegistryProvider';
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { AzureAccountTreeItem } from './AzureAccountTreeItem';
 import { AzureRegistryTreeItem } from './AzureRegistryTreeItem';
@@ -23,8 +24,8 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
 
     private _nextLink: string | undefined;
 
-    public get cachedProvider(): ICachedRegistryProvider {
-        return this.parent.cachedProvider;
+    public constructor(parent: AzExtParentTreeItem, root: ISubscriptionContext, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+        super(parent, root);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
@@ -42,7 +43,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         return await this.createTreeItemsWithErrorHandling(
             registryListResult,
             'invalidAzureRegistry',
-            async r => new AzureRegistryTreeItem(this, this.cachedProvider, r),
+            async r => new AzureRegistryTreeItem(this, this.provider, this.cachedProvider, r),
             r => r.name
         );
     }
@@ -77,6 +78,6 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         // don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
-        return new AzureRegistryTreeItem(this, this.cachedProvider, nonNullProp(wizardContext, 'registry'));
+        return new AzureRegistryTreeItem(this, this.provider, this.cachedProvider, nonNullProp(wizardContext, 'registry'));
     }
 }

@@ -11,6 +11,7 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { getIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
@@ -21,14 +22,12 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public label: string = 'GitLab';
     public childTypeLabel: string = 'project';
     public baseUrl: string = 'https://gitlab.com/';
-    public cachedProvider: ICachedRegistryProvider;
 
     private _token?: string;
     private _nextLink?: string;
 
-    public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
-        this.cachedProvider = provider;
     }
 
     public get contextValue(): string {
@@ -73,7 +72,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return this.createTreeItemsWithErrorHandling(
             response.body,
             'invalidGitLabProject',
-            n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace),
+            n => new GitLabProjectTreeItem(this, this.provider, n.id.toString(), n.path_with_namespace),
             n => n.path_with_namespace
         );
     }

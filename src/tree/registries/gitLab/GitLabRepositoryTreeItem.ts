@@ -6,6 +6,7 @@
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { RemoteTagTreeItem } from "../RemoteTagTreeItem";
 import { GitLabProjectTreeItem } from "./GitLabProjectTreeItem";
@@ -16,10 +17,10 @@ export class GitLabRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
 
     private _nextLink?: string;
 
-    public constructor(parent: GitLabProjectTreeItem, id: string, name: string) {
+    public constructor(parent: GitLabProjectTreeItem, provider: IRegistryProvider, id: string, name: string) {
         // GitLab returns an empty repository name,
         // if the project's namespace is the same as the repository
-        super(parent, name || parent.label);
+        super(parent, name || parent.label, provider);
         this.repoId = id;
     }
 

@@ -55,7 +55,7 @@ export interface IRegistryProvider {
     /**
      * The tree item class to instantiate after a provider is connected
      */
-    treeItemType: new (parent: AzExtParentTreeItem, cached: ICachedRegistryProvider) => AzExtParentTreeItem & IRegistryProviderTreeItem;
+    treeItemType: new (parent: AzExtParentTreeItem, provider: IRegistryProvider, cachedProvider: ICachedRegistryProvider) => AzExtParentTreeItem & IRegistryProviderTreeItem;
 
     /**
      * The auth helper to use (for DockerV2 registries)

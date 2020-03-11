@@ -8,13 +8,14 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getWwwAuthenticateHeader } from "../auth/oAuthUtils";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2RepositoryTreeItem } from "./DockerV2RepositoryTreeItem";
 
 export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase {
-    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
-        super(parent, cachedProvider);
+    public constructor(parent: AzExtParentTreeItem, provider: IRegistryProvider, cachedProvider: ICachedRegistryProvider) {
+        super(parent, provider, cachedProvider);
     }
 
     public get contextValue(): string {
@@ -53,6 +54,6 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
     }
 
     public createRepositoryTreeItem(name: string): DockerV2RepositoryTreeItem {
-        return new DockerV2RepositoryTreeItem(this, name, this.cachedProvider, this.authContext);
+        return new DockerV2RepositoryTreeItem(this, name, this.provider, this.cachedProvider, this.authContext);
     }
 }

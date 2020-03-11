@@ -7,9 +7,10 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getRegistryProvider } from "../all/getRegistryProviders";
+// import { getRegistryProvider } from "../all/getRegistryProviders";
 import { IOAuthContext } from "../auth/IAuthHelper";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
@@ -20,8 +21,8 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authContext?: IOAuthContext) {
-        super(parent, repoName);
+    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authContext?: IOAuthContext) {
+        super(parent, repoName, provider);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
@@ -44,10 +45,8 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
     }
 
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        const authHelper = getRegistryProvider(this.cachedProvider.id)?.authHelper;
-
-        if (authHelper) {
-            await authHelper.addAuth(this.cachedProvider, options, { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` });
+        if (this.provider.authHelper) {
+            await this.provider.authHelper.addAuth(this.cachedProvider, options, { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` });
         }
     }
 

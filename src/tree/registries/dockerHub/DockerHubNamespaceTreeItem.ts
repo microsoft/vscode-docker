@@ -7,6 +7,7 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
 import { registryRequest } from "../../../utils/registryRequestUtils";
+import { IRegistryProvider } from "../IRegistryProvider";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
 import { DockerHubRepositoryTreeItem } from "./DockerHubRepositoryTreeItem";
@@ -18,8 +19,8 @@ export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerHubAccountTreeItem, namespace: string) {
-        super(parent);
+    public constructor(parent: DockerHubAccountTreeItem, provider: IRegistryProvider, namespace: string) {
+        super(parent, provider);
         this.namespace = namespace;
     }
 
@@ -42,7 +43,7 @@ export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
         return await this.createTreeItemsWithErrorHandling(
             response.body.results,
             'invalidRepository',
-            r => new DockerHubRepositoryTreeItem(this, r.name),
+            r => new DockerHubRepositoryTreeItem(this, r.name, this.provider),
             r => r.name
         );
     }
