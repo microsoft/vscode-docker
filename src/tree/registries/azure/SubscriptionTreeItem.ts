@@ -42,7 +42,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         return await this.createTreeItemsWithErrorHandling(
             registryListResult,
             'invalidAzureRegistry',
-            async r => new AzureRegistryTreeItem(this, r),
+            async r => new AzureRegistryTreeItem(this, this.cachedProvider, r),
             r => r.name
         );
     }
@@ -77,6 +77,6 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         // don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
-        return new AzureRegistryTreeItem(this, nonNullProp(wizardContext, 'registry'));
+        return new AzureRegistryTreeItem(this, this.cachedProvider, nonNullProp(wizardContext, 'registry'));
     }
 }

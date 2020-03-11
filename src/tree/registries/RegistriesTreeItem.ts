@@ -132,8 +132,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             cachedProvider.url = wizardContext.url;
             cachedProvider.username = wizardContext.username;
 
-            if (wizardContext.password) {
-                await setRegistryPassword(cachedProvider, wizardContext.password);
+            if (wizardContext.secret && provider.authHelper) {
+                await provider.authHelper.persistAuth(cachedProvider, wizardContext.secret);
+            } else if (wizardContext.secret) {
+                await setRegistryPassword(cachedProvider, wizardContext.secret);
             }
         }
 

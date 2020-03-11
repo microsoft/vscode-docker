@@ -11,6 +11,6 @@ export interface IConnectRegistryWizardContext extends IActionContext, IConnectR
     existingProviders: ICachedRegistryProvider[];
 
     username?: string;
-    password?: string;
+    secret?: string;
     url?: string;
 }

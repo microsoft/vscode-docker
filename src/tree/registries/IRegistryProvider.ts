@@ -5,6 +5,7 @@
 
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { RegistryApi } from "./all/RegistryApi";
+import { IAuthHelper } from "./auth/IAuthHelper";
 import { IConnectRegistryWizardOptions } from "./connectWizard/IConnectRegistryWizardOptions";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
@@ -55,4 +56,9 @@ export interface IRegistryProvider {
      * The tree item class to instantiate after a provider is connected
      */
     treeItemType: new (parent: AzExtParentTreeItem, cached: ICachedRegistryProvider) => AzExtParentTreeItem & IRegistryProviderTreeItem;
+
+    /**
+     * The auth helper to use (for DockerV2 registries)
+     */
+    authHelper?: IAuthHelper;
 }

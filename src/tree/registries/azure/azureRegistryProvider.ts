@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RegistryApi } from "../all/RegistryApi";
+import { azureOAuthHelper } from "../auth/AzureOAuthHelper";
 import { IRegistryProvider } from "../IRegistryProvider";
 import { AzureAccountTreeItem } from "./AzureAccountTreeItem";
 
@@ -15,5 +16,6 @@ export const azureRegistryProvider: IRegistryProvider = {
     api: RegistryApi.DockerV2,
     onlyOneAllowed: true,
     connectWizardOptions: undefined,
-    treeItemType: AzureAccountTreeItem
+    treeItemType: AzureAccountTreeItem,
+    authHelper: azureOAuthHelper,
 }
