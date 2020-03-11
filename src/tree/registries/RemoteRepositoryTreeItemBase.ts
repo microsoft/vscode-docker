@@ -17,9 +17,11 @@ import { RemoteTagTreeItem } from "./RemoteTagTreeItem";
 export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem implements IRepositoryAuthTreeItem {
     public childTypeLabel: string = 'tag';
     public parent: RegistryTreeItemBase;
+    public repoName: string;
 
-    public constructor(parent: RegistryTreeItemBase, public readonly repoName: string) {
+    public constructor(parent: RegistryTreeItemBase, repoName: string) {
         super(parent);
+        this.repoName = repoName;
     }
 
     public get label(): string {

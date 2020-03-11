@@ -15,7 +15,6 @@ import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
     public constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
-        this.cachedProvider = cachedProvider;
     }
 
     public get contextValue(): string {
