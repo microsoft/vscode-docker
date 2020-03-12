@@ -8,10 +8,9 @@ import { URL } from 'url';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
 
-export interface IAuthHelper {
+export interface IAuthProvider {
     addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext?: IOAuthContext): Promise<void>;
     getDockerCliCredentials(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<IDockerCliCredentials>;
-    persistAuth(cachedProvider: ICachedRegistryProvider, secret: string): Promise<void>;
 }
 
 export interface IOAuthContext {

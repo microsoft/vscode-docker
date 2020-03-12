@@ -8,13 +8,13 @@ import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { acquireAcrAccessToken, acquireAcrRefreshToken } from '../../../utils/azureUtils';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
-import { IAuthHelper, IOAuthContext } from './IAuthHelper';
+import { IAuthProvider, IOAuthContext } from './IAuthProvider';
 
 export interface IAzureOAuthContext extends IOAuthContext {
     subscriptionContext: ISubscriptionContext
 }
 
-class AzureOAuthHelper implements IAuthHelper {
+class AzureOAuthHelper implements IAuthProvider {
 
     public async addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext: IAzureOAuthContext): Promise<void> {
         options.auth = {
@@ -30,11 +30,6 @@ class AzureOAuthHelper implements IAuthHelper {
             },
         };
     }
-
-    public async persistAuth(cachedProvider: ICachedRegistryProvider, secret: string): Promise<void> {
-        // Not handled by us
-        return Promise.resolve();
-    }
 }
 
-export const azureOAuthHelper: IAuthHelper = new AzureOAuthHelper();
+export const azureOAuthHelper: IAuthProvider = new AzureOAuthHelper();

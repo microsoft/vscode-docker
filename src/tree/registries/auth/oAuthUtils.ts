@@ -5,14 +5,14 @@
 
 import { URL } from 'url';
 import { parseError } from 'vscode-azureextensionui';
-import { IOAuthContext } from './IAuthHelper';
+import { IOAuthContext } from './IAuthProvider';
 
 const realmRegExp = /realm=\"([^"]+)\"/i;
 const serviceRegExp = /service=\"([^"]+)\"/i;
 const scopeRegExp = /scope=\"([^"]+)\"/i;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/tslint/config
-export function getWwwAuthenticateHeader(error: any): IOAuthContext {
+export function getWwwAuthenticateContext(error: any): IOAuthContext | undefined {
     const errorType: string = parseError(error).errorType.toLowerCase();
     if (errorType === "401" || errorType === "unauthorized") {
         // eslint-disable-next-line @typescript-eslint/tslint/config

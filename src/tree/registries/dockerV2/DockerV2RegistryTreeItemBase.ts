@@ -8,7 +8,7 @@ import { URL } from "url";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IAuthHelper, IOAuthContext } from "../auth/IAuthHelper";
+import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
@@ -19,7 +19,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper) {
+    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthProvider) {
         super(parent);
     }
 

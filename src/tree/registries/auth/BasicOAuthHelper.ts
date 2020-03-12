@@ -6,14 +6,14 @@
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
-import { getRegistryPassword, setRegistryPassword } from '../registryPasswords';
+import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
-import { IAuthHelper, IOAuthContext } from './IAuthHelper';
+import { IAuthProvider, IOAuthContext } from './IAuthProvider';
 
 /**
  * Performs basic auth and password-grant-type OAuth
  */
-class BasicOAuthHelper implements IAuthHelper {
+class BasicOAuthHelper implements IAuthProvider {
 
     public async addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext?: IOAuthContext): Promise<void> {
         if (!authContext) {
@@ -60,10 +60,6 @@ class BasicOAuthHelper implements IAuthHelper {
 
         return creds;
     }
-
-    public async persistAuth(cachedProvider: ICachedRegistryProvider, secret: string): Promise<void> {
-        await setRegistryPassword(cachedProvider, secret);
-    }
 }
 
-export const basicOAuthHelper: IAuthHelper = new BasicOAuthHelper();
+export const basicOAuthHelper: IAuthProvider = new BasicOAuthHelper();

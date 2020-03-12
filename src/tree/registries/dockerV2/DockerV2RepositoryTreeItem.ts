@@ -7,7 +7,7 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IAuthHelper, IOAuthContext } from "../auth/IAuthHelper";
+import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
@@ -19,7 +19,7 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper, protected readonly authContext?: IOAuthContext) {
+    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthProvider, protected readonly authContext?: IOAuthContext) {
         super(parent, repoName);
     }
 
