@@ -45,7 +45,7 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
         if (this.authHelper) {
             const authContext: IOAuthContext | undefined = this.authContext ? { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` } : undefined;
-            await this.authHelper.addAuth(this.cachedProvider, options, authContext);
+            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, authContext);
         }
     }
 

@@ -55,7 +55,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     public async addAuth(options: request.RequestPromiseOptions): Promise<void> {
         if (this.authHelper) {
-            await this.authHelper.addAuth(this.cachedProvider, options, this.authContext);
+            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, this.authContext);
         }
     }
 

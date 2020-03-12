@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request-promise-native';
+import * as request from 'request';
+import * as rp from 'request-promise-native';
 import * as vscode from 'vscode';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
@@ -15,18 +16,16 @@ import { IAuthProvider, IOAuthContext } from './IAuthProvider';
  */
 class BasicOAuthHelper implements IAuthProvider {
 
-    public async addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext?: IOAuthContext): Promise<void> {
+    public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<request.AuthOptions> {
         if (!authContext) {
-            options.auth = {
+            return {
                 username: cachedProvider.username,
                 password: await getRegistryPassword(cachedProvider),
             };
-
-            return;
         }
 
         /* eslint-disable camelcase */
-        const response = <{ access_token: string }>await request.post(authContext.realm.toString(), {
+        const response = <{ access_token: string }>await rp.post(authContext.realm.toString(), {
             form: {
                 grant_type: 'password',
                 service: authContext.service,
@@ -41,7 +40,7 @@ class BasicOAuthHelper implements IAuthProvider {
         });
         /* eslint-enable camelcase */
 
-        options.auth = {
+        return {
             bearer: response.access_token,
         };
     }

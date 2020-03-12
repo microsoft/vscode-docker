@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request-promise-native';
+import * as request from 'request';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { acquireAcrAccessToken, acquireAcrRefreshToken } from '../../../utils/azureUtils';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
@@ -16,8 +16,8 @@ export interface IAzureOAuthContext extends IOAuthContext {
 
 class AzureOAuthHelper implements IAuthProvider {
 
-    public async addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext: IAzureOAuthContext): Promise<void> {
-        options.auth = {
+    public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext: IAzureOAuthContext): Promise<request.AuthOptions> {
+        return {
             bearer: await acquireAcrAccessToken(authContext.realm.host, authContext.subscriptionContext, authContext.scope),
         };
     }

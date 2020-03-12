@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request-promise-native';
+import * as request from 'request';
 import { URL } from 'url';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
 
 export interface IAuthProvider {
-    addAuth(cachedProvider: ICachedRegistryProvider, options: request.RequestPromiseOptions, authContext?: IOAuthContext): Promise<void>;
+    getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<request.AuthOptions>;
     getDockerCliCredentials(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<IDockerCliCredentials>;
 }
 
