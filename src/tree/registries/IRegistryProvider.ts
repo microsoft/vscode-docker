@@ -56,8 +56,13 @@ export interface IRegistryProvider {
      */
     treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): AzExtParentTreeItem & IRegistryProviderTreeItem;
 
-    /*
+    /**
      * Method to call for persisting auth secrets
      */
     persistAuth?(cachedProvider: ICachedRegistryProvider, secret: string): Promise<void>;
+
+    /**
+     * Method to call to remove auth secrets
+     */
+    removeAuth?(cachedProvider: ICachedRegistryProvider): Promise<void>;
 }

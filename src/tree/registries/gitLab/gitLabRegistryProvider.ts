@@ -6,7 +6,7 @@
 import { localize } from '../../../localize';
 import { RegistryApi } from "../all/RegistryApi";
 import { IRegistryProvider } from "../IRegistryProvider";
-import { setRegistryPassword } from '../registryPasswords';
+import { deleteRegistryPassword, setRegistryPassword } from '../registryPasswords';
 import { GitLabAccountTreeItem } from "./GitLabAccountTreeItem";
 
 export const gitLabRegistryProvider: IRegistryProvider = {
@@ -20,4 +20,5 @@ export const gitLabRegistryProvider: IRegistryProvider = {
     },
     treeItemFactory: (parent, cachedProvider) => new GitLabAccountTreeItem(parent, cachedProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
+    removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
 }

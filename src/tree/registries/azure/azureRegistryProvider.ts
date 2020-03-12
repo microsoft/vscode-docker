@@ -19,4 +19,5 @@ export const azureRegistryProvider: IRegistryProvider = {
     connectWizardOptions: undefined,
     treeItemFactory: (parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) => new AzureAccountTreeItem(parent, cachedProvider),
     persistAuth: undefined,
+    removeAuth: undefined,
 }

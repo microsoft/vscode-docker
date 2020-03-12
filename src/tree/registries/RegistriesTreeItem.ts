@@ -18,7 +18,6 @@ import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 import { anyContextValuePart, contextValueSeparator } from "./registryContextValues";
-import { deleteRegistryPassword } from "./registryPasswords";
 
 const providersKey = 'docker.registryProviders';
 
@@ -170,7 +169,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         // NOTE: Do not let failure prevent removal of the tree item.
 
         try {
-            await deleteRegistryPassword(cachedProvider);
+            const provider = getRegistryProviders().find(rp => rp.id === cachedProvider.id);
+            if (provider?.removeAuth) {
+                await provider.removeAuth(cachedProvider);
+            }
         } catch (err) {
             // Don't wait, no input to wait for anyway
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
