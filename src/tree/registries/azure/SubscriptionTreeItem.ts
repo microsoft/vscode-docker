@@ -9,7 +9,6 @@ import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, createAzureClient, IAc
 import { localize } from '../../../localize';
 import { nonNullProp } from '../../../utils/nonNull';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProvider } from '../IRegistryProvider';
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { AzureAccountTreeItem } from './AzureAccountTreeItem';
 import { AzureRegistryTreeItem } from './AzureRegistryTreeItem';
@@ -24,7 +23,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: AzExtParentTreeItem, root: ISubscriptionContext, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, root: ISubscriptionContext, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent, root);
     }
 
@@ -43,7 +42,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         return await this.createTreeItemsWithErrorHandling(
             registryListResult,
             'invalidAzureRegistry',
-            async r => new AzureRegistryTreeItem(this, this.provider, this.cachedProvider, r),
+            async r => new AzureRegistryTreeItem(this, this.cachedProvider, r),
             r => r.name
         );
     }
@@ -78,6 +77,6 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         // don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
-        return new AzureRegistryTreeItem(this, this.provider, this.cachedProvider, nonNullProp(wizardContext, 'registry'));
+        return new AzureRegistryTreeItem(this, this.cachedProvider, nonNullProp(wizardContext, 'registry'));
     }
 }

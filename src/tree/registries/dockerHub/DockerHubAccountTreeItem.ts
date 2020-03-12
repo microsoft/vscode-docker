@@ -11,7 +11,6 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
@@ -22,12 +21,14 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
     public label: string = 'Docker Hub';
     public childTypeLabel: string = 'namespace';
     public baseUrl: string = dockerHubUrl;
+    public cachedProvider: ICachedRegistryProvider;
 
     private _token?: string;
     private _nextLink?: string;
 
-    public constructor(parent: AzExtParentTreeItem, provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
         super(parent);
+        this.cachedProvider = cachedProvider;
     }
 
     public get contextValue(): string {

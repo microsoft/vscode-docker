@@ -7,9 +7,8 @@ import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IOAuthContext } from "../auth/IAuthHelper";
+import { IAuthHelper, IOAuthContext } from "../auth/IAuthHelper";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
@@ -20,7 +19,7 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authContext?: IOAuthContext) {
+    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper, protected readonly authContext?: IOAuthContext) {
         super(parent, repoName);
     }
 
@@ -44,9 +43,9 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
     }
 
     public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        if (this.provider.authHelper) {
+        if (this.authHelper) {
             const authContext: IOAuthContext | undefined = this.authContext ? { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` } : undefined;
-            await this.provider.authHelper.addAuth(this.cachedProvider, options, authContext);
+            await this.authHelper.addAuth(this.cachedProvider, options, authContext);
         }
     }
 

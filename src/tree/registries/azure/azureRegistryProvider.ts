@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { RegistryApi } from "../all/RegistryApi";
-import { azureOAuthHelper } from "../auth/AzureOAuthHelper";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProvider } from "../IRegistryProvider";
 import { AzureAccountTreeItem } from "./AzureAccountTreeItem";
 
@@ -16,6 +17,6 @@ export const azureRegistryProvider: IRegistryProvider = {
     api: RegistryApi.DockerV2,
     onlyOneAllowed: true,
     connectWizardOptions: undefined,
-    treeItemType: AzureAccountTreeItem,
-    authHelper: azureOAuthHelper,
+    treeItemFactory: (parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) => new AzureAccountTreeItem(parent, cachedProvider),
+    persistAuth: undefined,
 }

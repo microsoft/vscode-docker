@@ -7,13 +7,12 @@ import { Disposable } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
 import { AzureAccountExtensionListener } from "../../../utils/AzureAccountExtensionListener";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
 export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
-    public constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
     }
 
@@ -26,7 +25,7 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
     }
 
     public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {
-        return new SubscriptionTreeItem(this, subContext, this.provider, this.cachedProvider);
+        return new SubscriptionTreeItem(this, subContext, this.cachedProvider);
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {

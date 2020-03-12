@@ -8,9 +8,8 @@ import { URL } from "url";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IOAuthContext } from "../auth/IAuthHelper";
+import { IAuthHelper, IOAuthContext } from "../auth/IAuthHelper";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProvider } from "../IRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
@@ -20,7 +19,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     private _nextLink: string | undefined;
 
-    protected constructor(parent: AzExtParentTreeItem, protected readonly provider: IRegistryProvider, public readonly cachedProvider: ICachedRegistryProvider) {
+    protected constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper) {
         super(parent);
     }
 
@@ -55,14 +54,14 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
     }
 
     public async addAuth(options: request.RequestPromiseOptions): Promise<void> {
-        if (this.provider.authHelper) {
-            await this.provider.authHelper.addAuth(this.cachedProvider, options, this.authContext);
+        if (this.authHelper) {
+            await this.authHelper.addAuth(this.cachedProvider, options, this.authContext);
         }
     }
 
     public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
-        if (this.provider.authHelper) {
-            return await this.provider.authHelper.getDockerCliCredentials(this.cachedProvider, this.authContext);
+        if (this.authHelper) {
+            return await this.authHelper.getDockerCliCredentials(this.cachedProvider, this.authContext);
         }
 
         return undefined;
