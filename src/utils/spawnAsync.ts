@@ -54,8 +54,15 @@ export async function spawnAsync(
                 // If cancellation is requested we'll assume that's why it exited
                 return reject(new UserCancelledError());
             } else if (code) {
-                // Replicate the error object of child_process.exec().
-                const error = <ExecError>new Error(localize('vscode-docker.utils.spawn.exited', 'Process exited with code {0}', code));
+                let errorMessage = localize('vscode-docker.utils.spawn.exited', 'Process \'{0}\' exited with code {1}', command.length > 50 ? `${command.substring(0, 50)}...` : command, code);
+
+                if (!onStderr && stderrBuffer) {
+                    // If there was no progress handler for stderr, then the error output would be lost, so help mitigate that by putting the error output into the Error we throw
+                    errorMessage += localize('vscode-docker.utils.spawn.exitedError', '\nError: {0}', bufferToString(stderrBuffer));
+                }
+
+                const error = <ExecError>new Error(errorMessage);
+
                 error.code = code;
                 error.signal = signal;
                 return reject(error);
