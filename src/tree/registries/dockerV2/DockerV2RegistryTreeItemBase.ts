@@ -19,7 +19,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     private _nextLink: string | undefined;
 
-    protected constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper) {
+    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthHelper) {
         super(parent);
     }
 

@@ -3,21 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { IAuthHelper } from "../auth/IAuthHelper";
 import { getWwwAuthenticateHeader } from "../auth/oAuthUtils";
-import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2RepositoryTreeItem } from "./DockerV2RepositoryTreeItem";
 
 export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase {
-    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider, authHelper: IAuthHelper) {
-        super(parent, cachedProvider, authHelper);
-    }
-
     public get contextValue(): string {
         return getRegistryContextValue(this, registrySuffix, registryProviderSuffix);
     }
