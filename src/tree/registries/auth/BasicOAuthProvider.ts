@@ -14,7 +14,7 @@ import { IAuthProvider, IOAuthContext } from './IAuthProvider';
 /**
  * Performs basic auth and password-grant-type OAuth
  */
-class BasicOAuthHelper implements IAuthProvider {
+class BasicOAuthProvider implements IAuthProvider {
 
     public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<request.AuthOptions> {
         if (!authContext) {
@@ -61,4 +61,4 @@ class BasicOAuthHelper implements IAuthProvider {
     }
 }
 
-export const basicOAuthHelper: IAuthProvider = new BasicOAuthHelper();
+export const basicOAuthProvider: IAuthProvider = new BasicOAuthProvider();

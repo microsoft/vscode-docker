@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { IAzureOAuthContext } from "../auth/AzureOAuthHelper";
+import { IAzureOAuthContext } from "../auth/AzureOAuthProvider";
 import { DockerV2RepositoryTreeItem } from "../dockerV2/DockerV2RepositoryTreeItem";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 

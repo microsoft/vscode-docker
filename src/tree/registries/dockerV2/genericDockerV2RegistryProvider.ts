@@ -5,7 +5,7 @@
 
 import { localize } from '../../../localize';
 import { RegistryApi } from "../all/RegistryApi";
-import { basicOAuthHelper } from '../auth/BasicOAuthHelper';
+import { basicOAuthProvider } from '../auth/BasicOAuthProvider';
 import { IRegistryProvider } from "../IRegistryProvider";
 import { deleteRegistryPassword, setRegistryPassword } from '../registryPasswords';
 import { GenericDockerV2RegistryTreeItem } from "./GenericDockerV2RegistryTreeItem";
@@ -25,7 +25,7 @@ export const genericDockerV2RegistryProvider: IRegistryProvider = {
         isUsernameOptional: true,
         includePassword: true,
     },
-    treeItemFactory: (parent, cachedProvider) => new GenericDockerV2RegistryTreeItem(parent, cachedProvider, basicOAuthHelper),
+    treeItemFactory: (parent, cachedProvider) => new GenericDockerV2RegistryTreeItem(parent, cachedProvider, basicOAuthProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
     removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
 }

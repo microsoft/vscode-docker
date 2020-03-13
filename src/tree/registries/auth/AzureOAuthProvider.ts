@@ -14,7 +14,7 @@ export interface IAzureOAuthContext extends IOAuthContext {
     subscriptionContext: ISubscriptionContext
 }
 
-class AzureOAuthHelper implements IAuthProvider {
+class AzureOAuthProvider implements IAuthProvider {
 
     public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext: IAzureOAuthContext): Promise<request.AuthOptions> {
         return {
@@ -32,4 +32,4 @@ class AzureOAuthHelper implements IAuthProvider {
     }
 }
 
-export const azureOAuthHelper: IAuthProvider = new AzureOAuthHelper();
+export const azureOAuthProvider: IAuthProvider = new AzureOAuthProvider();

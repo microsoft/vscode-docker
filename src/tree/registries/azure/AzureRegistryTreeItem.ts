@@ -9,7 +9,7 @@ import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureex
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getIconPath, IconPath } from "../../IconPath";
-import { azureOAuthHelper, IAzureOAuthContext } from "../auth/AzureOAuthHelper";
+import { azureOAuthProvider, IAzureOAuthContext } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
@@ -24,7 +24,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     private _tasksTreeItem: AzureTasksTreeItem;
 
     public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly _registry: AcrModels.Registry) {
-        super(parent, cachedProvider, azureOAuthHelper);
+        super(parent, cachedProvider, azureOAuthProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
         this.authContext = {
             realm: new URL(`${this.baseUrl}/oauth2/token`),
