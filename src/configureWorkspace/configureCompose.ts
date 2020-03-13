@@ -30,6 +30,8 @@ export async function configureCompose(context: IActionContext): Promise<void> {
         return captureCancelStep(step, context.telemetry.properties, prompt);
     }
 
+    const telemetry = context.telemetry.properties;
+
     const uniqueServiceNames: string[] = [];
     let hasDuplicateService: boolean = false;
     function addToServiceNames(serviceName: string): void {
@@ -42,8 +44,11 @@ export async function configureCompose(context: IActionContext): Promise<void> {
 
     const rootFolder: vscode.WorkspaceFolder = await captureStep('folder', promptForFolder)();
     let composeFile: ScaffoldFile;
+
     // Get list of dockerfiles (services) to add to compose
     const dockerFiles: Item[] = await getDockerFilesInWorkspace(context, rootFolder);
+    telemetry.serviceCount = dockerFiles ? dockerFiles.length.toString() : '0';
+    telemetry.uniqueServiceCount = '0';
 
     // Add the services to docker-compose.yaml
     if (dockerFiles) {
@@ -60,6 +65,7 @@ export async function configureCompose(context: IActionContext): Promise<void> {
                 });
             })
         );
+        telemetry.uniqueServiceCount = uniqueServiceNames.length.toString();
         if (hasDuplicateService) {
             updateWithUniqueServiceName(composeScaffoldContexts, uniqueServiceNames);
         }
