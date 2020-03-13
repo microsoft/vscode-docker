@@ -57,7 +57,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         new DockerWebhookCreateStep(node)
     ];
 
-    const title = 'Create new web app';
+    const title = localize('vscode-docker.commands.registries.azure.deployImage.title', 'Create new web app');
     const wizard = new AzureWizard(wizardContext, { title, promptSteps, executeSteps });
     await wizard.prompt();
     await wizard.execute();
@@ -67,7 +67,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const createdNewWebApp: string = localize('vscode-docker.commands.registries.azure.deployImage.created', 'Successfully created web app "{0}": {1}', site.name, siteUri);
     ext.outputChannel.appendLine(createdNewWebApp);
 
-    const openSite: string = 'Open Site';
+    const openSite: string = localize('vscode-docker.commands.registries.azure.deployImage.openSite', 'Open Site');
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(createdNewWebApp, ...[openSite]).then((selection) => {
