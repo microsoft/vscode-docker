@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WorkspaceFolder } from 'vscode';
-import { IActionContext } from '../../extension.bundle';
+import { IActionContext } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider } from '../debugging/DockerDebugScaffoldingProvider';
 import { PlatformOS } from '../utils/platform';
