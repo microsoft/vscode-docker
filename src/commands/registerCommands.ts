@@ -69,7 +69,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.compose.restart', composeRestart);
     registerWorkspaceCommand('vscode-docker.compose.up', composeUp);
     registerWorkspaceCommand('vscode-docker.configure', configure);
-    registerWorkspaceCommand('vscode-docker.configureDocker', configureCompose);
+    registerWorkspaceCommand('vscode-docker.configureCompose', configureCompose);
     registerCommand('vscode-docker.pruneSystem', pruneSystem);
 
     registerWorkspaceCommand('vscode-docker.containers.attachShell', attachShellContainer);

@@ -4,20 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import * as path from "path";
-import * as vscode from "vscode";
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { dockerComposeHeader } from "../constants";
-import { ext } from "../extensionVariables";
-import { localize } from "../localize";
+import { dockerComposeHeader } from '../constants';
+import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { captureCancelStep } from '../utils/captureCancelStep';
-import { DockerfileInfo, parseDockerfile } from "../utils/dockerfileUtils";
-import { generateUniqueName } from '../utils/generateUniqueName';
-import { Item, quickPickDockerFileItems } from "../utils/quickPickFile";
-import { quickPickWorkspaceFolder } from "../utils/quickPickWorkspaceFolder";
-import { getComposePorts } from "./configure";
+import { DockerfileInfo, parseDockerfile } from '../utils/dockerfileUtils';
+import { getValidImageName } from '../utils/getValidImageName';
+import { Item, quickPickDockerFileItems } from '../utils/quickPickFile';
+import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
+import { generateUniqueName } from '../utils/uniqueNameUtils';
+import { getComposePorts } from './configure';
 import { ConfigureTelemetryCancelStep } from './configUtils';
-import { generateNonConflictFileNameWithPrompt, ScaffoldFile, writeFiles } from "./scaffolding";
+import { generateNonConflictFileNameWithPrompt, ScaffoldFile, writeFiles } from './scaffolding';
 
 export interface ComposeScaffoldContext extends DockerfileInfo {
     serviceName: string
@@ -29,13 +30,13 @@ export async function configureCompose(context: IActionContext): Promise<void> {
         return captureCancelStep(step, context.telemetry.properties, prompt);
     }
 
-    const serviceNames: string[] = [];
+    const uniqueServiceNames: string[] = [];
     let hasDuplicateService: boolean = false;
-    function AddToServiceNames(serviceName: string): void {
-        if (serviceNames.includes(serviceName)) {
+    function addToServiceNames(serviceName: string): void {
+        if (uniqueServiceNames.includes(serviceName)) {
             hasDuplicateService = true;
         } else {
-            serviceNames.push(serviceName);
+            uniqueServiceNames.push(serviceName);
         }
     }
 
@@ -49,9 +50,10 @@ export async function configureCompose(context: IActionContext): Promise<void> {
         const composeScaffoldContexts: ComposeScaffoldContext[] = [];
         await Promise.all(
             dockerFiles.map(async dockerfile => {
-                const serviceName = path.basename(path.dirname(dockerfile.absoluteFilePath));
+                let serviceName = path.basename(path.dirname(dockerfile.absoluteFilePath));
+                serviceName = getValidImageName(serviceName);
                 const dockerfileInfo: DockerfileInfo = await parseDockerfile(rootFolder.uri.fsPath, dockerfile.absoluteFilePath);
-                AddToServiceNames(serviceName);
+                addToServiceNames(serviceName);
                 composeScaffoldContexts.push({
                     ...dockerfileInfo,
                     serviceName: serviceName,
@@ -59,7 +61,7 @@ export async function configureCompose(context: IActionContext): Promise<void> {
             })
         );
         if (hasDuplicateService) {
-            updateWithUniqueServiceName(composeScaffoldContexts, serviceNames);
+            updateWithUniqueServiceName(composeScaffoldContexts, uniqueServiceNames);
         }
         composeFile = await generateComposeFiles(composeScaffoldContexts);
     } else {
@@ -76,7 +78,7 @@ function updateWithUniqueServiceName(contexts: ComposeScaffoldContext[], existin
     const processedServices: string[] = [];
     contexts.map(context => {
         if (processedServices.includes(context.serviceName)) {
-            context.serviceName = generateUniqueName(context.serviceName, existingNames, i => `.${i}`);
+            context.serviceName = generateUniqueName(context.serviceName, existingNames, i => `${i}`);
             existingNames.push(context.serviceName);
         }
         processedServices.push(context.serviceName);
@@ -84,7 +86,7 @@ function updateWithUniqueServiceName(contexts: ComposeScaffoldContext[], existin
 }
 
 async function promptForFolder(): Promise<vscode.WorkspaceFolder> {
-    return await quickPickWorkspaceFolder(localize('vscode-docker.scaffolding.dockerCompose', 'To generate docker-compose files you must first open a folder or workspace in VS Code.'));
+    return await quickPickWorkspaceFolder(localize('vscode-docker.scaffolding.dockerCompose.noWorkspaceFolder', 'To generate docker-compose files you must first open a folder or workspace in VS Code.'));
 }
 
 async function getDockerFilesInWorkspace(context: IActionContext, rootFolder: vscode.WorkspaceFolder): Promise<Item[]> {

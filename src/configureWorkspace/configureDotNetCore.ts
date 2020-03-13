@@ -25,9 +25,10 @@ import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows1019H2OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
+import { generateNonConflictFileName } from '../utils/uniqueNameUtils';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
-import { generateNonConflictFileName, ScaffolderContext, ScaffoldFile } from './scaffolding';
+import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
 

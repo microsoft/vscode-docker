@@ -59,11 +59,11 @@ async function resolveFileItemsInternal(rootFolder: vscode.WorkspaceFolder, file
     }
 }
 
-export async function resolveFileItems(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPatterns: string[], message: string): Promise<Item[] | undefined> {
+async function resolveFileItems(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPatterns: string[], message: string): Promise<Item[] | undefined> {
     return await resolveFileItemsInternal(rootFolder, fileUri, globPatterns, message, true);
 }
 
-export async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPatterns: string[], message: string): Promise<Item | undefined> {
+async function resolveFileItem(rootFolder: vscode.WorkspaceFolder, fileUri: vscode.Uri | undefined, globPatterns: string[], message: string): Promise<Item | undefined> {
     const res: Item[] | undefined = await resolveFileItemsInternal(rootFolder, fileUri, globPatterns, message, false);
     return res?.length > 0 ? res[0] : undefined;
 }
@@ -93,7 +93,7 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
     return dockerFileItem;
 }
 
-export function getDockerFileGlobPatterns(): string[] {
+function getDockerFileGlobPatterns(): string[] {
     const result: string[] = [DOCKERFILE_GLOB_PATTERN];
     try {
         const config = vscode.workspace.getConfiguration('files').get<{}>('associations');

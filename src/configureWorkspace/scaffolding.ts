@@ -12,6 +12,7 @@ import { localize } from '../localize';
 import { captureCancelStep } from '../utils/captureCancelStep';
 import { Platform, PlatformOS } from "../utils/platform";
 import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
+import { generateNonConflictFileName } from '../utils/uniqueNameUtils';
 import { ConfigureTelemetryCancelStep, ConfigureTelemetryProperties, promptForPorts as promptForPortsUtil, quickPickGenerateComposeFiles, quickPickOS } from './configUtils';
 
 /**
@@ -105,12 +106,12 @@ export async function generateNonConflictFileNameWithPrompt(filePath: string): P
         isCloseAffordance: false
     };
     const NEWFILE_PROMPT: vscode.MessageItem = {
-        title: localize('vscode-docker.scaffolding.Prompt.CreateNew', 'Create new'),
+        title: localize('vscode-docker.scaffolding.Prompt.CreateNew', 'Create file'),
         isCloseAffordance: false
     }
     const prompts: vscode.MessageItem[] = [OVERWRITE_PROMPT, NEWFILE_PROMPT];
 
-    const generateNewFile = await vscode.window.showErrorMessage(localize('vscode-docker.scaffolding.fileExists', '"{0}" already exists. Would you like to overwrite or create a new file?', filePath), ...prompts);
+    const generateNewFile = await vscode.window.showErrorMessage(localize('vscode-docker.scaffolding.fileExists', 'This file already exists: {0}. \r\n Do you want to overwrite it or create a new file?', filePath), ...prompts);
     switch (generateNewFile) {
         case OVERWRITE_PROMPT:
             return filePath;
@@ -119,19 +120,6 @@ export async function generateNonConflictFileNameWithPrompt(filePath: string): P
         default:
             return undefined;
     }
-}
-
-export async function generateNonConflictFileName(filePath: string): Promise<string> {
-    let newFilepath = filePath;
-    let i = 1;
-    const extName = path.extname(filePath);
-    const extNameRegEx = new RegExp(`${extName}$`);
-
-    while (await fse.pathExists(newFilepath)) {
-        newFilepath = filePath.replace(extNameRegEx, i + extName);
-        i++;
-    }
-    return newFilepath;
 }
 
 export function registerScaffolder(platform: Platform, scaffolder: Scaffolder): void {

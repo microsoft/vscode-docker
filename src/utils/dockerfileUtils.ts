@@ -7,6 +7,7 @@ import { Dockerfile, DockerfileParser, Keyword } from 'dockerfile-ast';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { localize } from '../localize';
+import { pathNormalize } from './pathNormalize';
 
 export interface DockerfileInfo {
     rootFolder?: string;
@@ -19,8 +20,7 @@ export async function parseDockerfile(rootFolderPath: string, dockerfilePath: st
     const dockerFile = DockerfileParser.parse(content);
     const ports: number[] = await getExposedPorts(dockerFile);
     let dockerFilenameRelativeToRoot = path.relative(rootFolderPath, dockerfilePath);
-    // Ensure the path uses POSIX separators (which work on both Linux and Windows).
-    dockerFilenameRelativeToRoot = dockerFilenameRelativeToRoot.replace(/\\/g, '/');
+    dockerFilenameRelativeToRoot = pathNormalize(dockerFilenameRelativeToRoot, 'Linux')
 
     return {
         rootFolder: rootFolderPath,
@@ -41,8 +41,8 @@ async function getExposedPorts(dockerFile: Dockerfile): Promise<number[]> {
 }
 
 async function readFileContent(dockerfilePath: string): Promise<string> {
-    if (dockerfilePath && fse.pathExists(dockerfilePath)) {
+    if (dockerfilePath && await fse.pathExists(dockerfilePath)) {
         return (await fse.readFile(dockerfilePath)).toString();
     }
-    throw new Error(localize('vscode-docker-utils.dockerfileUtils.invalidDockerfile', 'Either the dockerfile "{0}" is not provided or does not exist', dockerfilePath));
+    throw new Error(localize('vscode-docker-utils.dockerfileUtils.invalidDockerfile', 'The dockerfile "{0}" was not provided or does not exist', dockerfilePath));
 }
