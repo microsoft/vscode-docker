@@ -3,28 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "vscode-azureextensionui";
-import { localize } from '../../../localize';
+import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
-import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
-import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
+import { getWwwAuthenticateContext } from "../auth/oAuthUtils";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
-import { getRegistryPassword } from "../registryPasswords";
-import { IDockerCliCredentials } from "../RegistryTreeItemBase";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2RepositoryTreeItem } from "./DockerV2RepositoryTreeItem";
 
-export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase implements IRegistryProviderTreeItem {
-    public cachedProvider: ICachedRegistryProvider;
-
-    public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
-        super(parent);
-        this.cachedProvider = provider;
-    }
-
+export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase {
     public get contextValue(): string {
         return getRegistryContextValue(this, registrySuffix, registryProviderSuffix);
     }
@@ -48,10 +35,9 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
                 // NOTE: Trailing slash is necessary (https://github.com/microsoft/vscode-docker/issues/1142)
                 await registryRequest(this, 'GET', 'v2/');
             } catch (error) {
-                const errorType: string = parseError(error).errorType.toLowerCase();
-                if (errorType === "401" || errorType === "unauthorized") {
-                    const message = localize('vscode-docker.tree.registries.v2.unauthorized', 'Incorrect login credentials, or this registry may not support basic authentication. Please note that OAuth support has not yet been implemented in this preview feature.');
-                    return [new RegistryConnectErrorTreeItem(this, new Error(message), this.cachedProvider, this.baseUrl)];
+                if ((this.authContext = getWwwAuthenticateContext(error))) {
+                    // We got authentication context successfully--set scope and move on to requesting the items
+                    this.authContext.scope = 'registry:catalog:*';
                 } else {
                     throw error;
                 }
@@ -62,30 +48,6 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
     }
 
     public createRepositoryTreeItem(name: string): DockerV2RepositoryTreeItem {
-        return new DockerV2RepositoryTreeItem(this, name);
-    }
-
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        if (this.cachedProvider.username) {
-            options.auth = {
-                username: this.cachedProvider.username,
-                password: await getRegistryPassword(this.cachedProvider)
-            }
-        }
-    }
-
-    public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
-        const creds: IDockerCliCredentials = {
-            registryPath: this.baseUrl
-        };
-
-        if (this.cachedProvider.username) {
-            creds.auth = {
-                username: this.cachedProvider.username,
-                password: await getRegistryPassword(this.cachedProvider)
-            };
-        }
-
-        return creds;
+        return new DockerV2RepositoryTreeItem(this, name, this.cachedProvider, this.authHelper, this.authContext);
     }
 }

@@ -5,7 +5,9 @@
 
 import { localize } from '../../../localize';
 import { RegistryApi } from "../all/RegistryApi";
+import { basicOAuthProvider } from '../auth/BasicOAuthProvider';
 import { IRegistryProvider } from "../IRegistryProvider";
+import { deleteRegistryPassword, setRegistryPassword } from '../registryPasswords';
 import { GenericDockerV2RegistryTreeItem } from "./GenericDockerV2RegistryTreeItem";
 
 export const genericDockerV2RegistryProvider: IRegistryProvider = {
@@ -18,10 +20,12 @@ export const genericDockerV2RegistryProvider: IRegistryProvider = {
     connectWizardOptions: {
         wizardTitle: localize('vscode-docker.tree.registries.v2.title', 'Connect Docker Registry'),
         includeUrl: true,
-        urlPrompt: localize('vscode-docker.tree.registries.v2.urlPrompt', 'Enter the URL for the registry (OAuth not yet supported)'),
+        urlPrompt: localize('vscode-docker.tree.registries.v2.urlPrompt', 'Enter the URL for the registry'),
         includeUsername: true,
         isUsernameOptional: true,
         includePassword: true,
     },
-    treeItemType: GenericDockerV2RegistryTreeItem
+    treeItemFactory: (parent, cachedProvider) => new GenericDockerV2RegistryTreeItem(parent, cachedProvider, basicOAuthProvider),
+    persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
+    removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
 }

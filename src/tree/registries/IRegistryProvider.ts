@@ -52,7 +52,17 @@ export interface IRegistryProvider {
     connectWizardOptions?: IConnectRegistryWizardOptions;
 
     /**
-     * The tree item class to instantiate after a provider is connected
+     * The factory method for creating the root tree item
      */
-    treeItemType: new (parent: AzExtParentTreeItem, cached: ICachedRegistryProvider) => AzExtParentTreeItem & IRegistryProviderTreeItem;
+    treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): AzExtParentTreeItem & IRegistryProviderTreeItem;
+
+    /**
+     * Method to call for persisting auth secrets
+     */
+    persistAuth?(cachedProvider: ICachedRegistryProvider, secret: string): Promise<void>;
+
+    /**
+     * Method to call to remove auth secrets
+     */
+    removeAuth?(cachedProvider: ICachedRegistryProvider): Promise<void>;
 }

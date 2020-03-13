@@ -18,7 +18,6 @@ import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 import { anyContextValuePart, contextValueSeparator } from "./registryContextValues";
-import { deleteRegistryPassword, setRegistryPassword } from "./registryPasswords";
 
 const providersKey = 'docker.registryProviders';
 
@@ -59,7 +58,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    return this.initTreeItem(new provider.treeItemType(parent, cachedProvider));
+                    return this.initTreeItem(provider.treeItemFactory(parent, cachedProvider));
                 },
                 cachedInfo => cachedInfo.id
             );
@@ -132,8 +131,8 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             cachedProvider.url = wizardContext.url;
             cachedProvider.username = wizardContext.username;
 
-            if (wizardContext.password) {
-                await setRegistryPassword(cachedProvider, wizardContext.password);
+            if (wizardContext.secret && provider.persistAuth) {
+                await provider.persistAuth(cachedProvider, wizardContext.secret);
             }
         }
 
@@ -170,7 +169,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         // NOTE: Do not let failure prevent removal of the tree item.
 
         try {
-            await deleteRegistryPassword(cachedProvider);
+            const provider = getRegistryProviders().find(rp => rp.id === cachedProvider.id);
+            if (provider?.removeAuth) {
+                await provider.removeAuth(cachedProvider);
+            }
         } catch (err) {
             // Don't wait, no input to wait for anyway
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

@@ -12,11 +12,8 @@ import { getRegistryContextValue, registryProviderSuffix } from "../registryCont
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
 export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
-    public cachedProvider: ICachedRegistryProvider;
-
-    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
+    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
-        this.cachedProvider = cachedProvider;
     }
 
     public get contextValue(): string {
@@ -28,7 +25,7 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
     }
 
     public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {
-        return new SubscriptionTreeItem(this, subContext);
+        return new SubscriptionTreeItem(this, subContext, this.cachedProvider);
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
