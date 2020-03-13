@@ -27,7 +27,7 @@ import { isWindows, isWindows1019H1OrNewer, isWindows1019H2OrNewer, isWindows10R
 import { Platform, PlatformOS } from '../utils/platform';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
-import { ScaffolderContext, ScaffoldFile } from './scaffolding';
+import { generateNonConflictFileName, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 // This file handles both ASP.NET core and .NET Core Console
 
@@ -332,18 +332,6 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     ];
 }
 
-async function generateNonConflictFileName(filePath: string): Promise<string> {
-    let newFilepath = filePath;
-    let i = 1;
-    const extName = path.extname(filePath);
-    const extNameRegEx = new RegExp(`${extName}$`);
-
-    while (await fse.pathExists(newFilepath)) {
-        newFilepath = filePath.replace(extNameRegEx, i + extName);
-        i++;
-    }
-    return newFilepath;
-}
 // Returns the relative path of the project file without the extension
 async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {

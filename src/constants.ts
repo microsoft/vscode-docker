@@ -45,3 +45,7 @@ export const extensionId: string = 'ms-azuretools.vscode-docker';
 export type DockerOrchestration = 'single' | 'docker-compose';
 
 export const builtInNetworks: string[] = ['bridge', 'host', 'none']
+
+export const dockerComposeHeader = `version: '3.4'
+
+services:`;

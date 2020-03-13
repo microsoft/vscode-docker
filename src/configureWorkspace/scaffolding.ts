@@ -99,6 +99,41 @@ async function promptForPlatform(): Promise<Platform> {
     return response.data;
 }
 
+export async function generateNonConflictFileNameWithPrompt(filePath: string): Promise<string> {
+    const OVERWRITE_PROMPT: vscode.MessageItem = {
+        title: localize('vscode-docker.scaffolding.Prompt.Overwrite', 'Overwrite'),
+        isCloseAffordance: false
+    };
+    const NEWFILE_PROMPT: vscode.MessageItem = {
+        title: localize('vscode-docker.scaffolding.Prompt.CreateNew', 'Create new'),
+        isCloseAffordance: false
+    }
+    const prompts: vscode.MessageItem[] = [OVERWRITE_PROMPT, NEWFILE_PROMPT];
+
+    const generateNewFile = await vscode.window.showErrorMessage(localize('vscode-docker.scaffolding.fileExists', '"{0}" already exists. Would you like to overwrite or create a new file?', filePath), ...prompts);
+    switch (generateNewFile) {
+        case OVERWRITE_PROMPT:
+            return filePath;
+        case NEWFILE_PROMPT:
+            return await generateNonConflictFileName(filePath);
+        default:
+            return undefined;
+    }
+}
+
+export async function generateNonConflictFileName(filePath: string): Promise<string> {
+    let newFilepath = filePath;
+    let i = 1;
+    const extName = path.extname(filePath);
+    const extNameRegEx = new RegExp(`${extName}$`);
+
+    while (await fse.pathExists(newFilepath)) {
+        newFilepath = filePath.replace(extNameRegEx, i + extName);
+        i++;
+    }
+    return newFilepath;
+}
+
 export function registerScaffolder(platform: Platform, scaffolder: Scaffolder): void {
     scaffolders.set(platform, scaffolder);
 }
@@ -146,6 +181,10 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         rootFolder
     });
 
+    return await writeFiles(files, rootFolder);
+}
+
+export async function writeFiles(files: ScaffoldFile[], rootFolder: string): Promise<ScaffoldedFile[]> {
     const writtenFiles: ScaffoldedFile[] = [];
 
     await Promise.all(

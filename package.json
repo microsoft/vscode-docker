@@ -37,6 +37,7 @@
         "onCommand:vscode-docker.compose.restart",
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
+        "onCommand:vscode-docker.configureDocker",
         "onCommand:vscode-docker.containers.attachShell",
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
@@ -1990,6 +1991,11 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
+                "command": "vscode-docker.configureDocker",
+                "title": "%vscode-docker.commands.configureDocker%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
                 "command": "vscode-docker.containers.attachShell",
                 "title": "%vscode-docker.commands.containers.attachShell%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
@@ -2470,6 +2476,7 @@
         "azure-arm-website": "^5.3.0",
         "azure-storage": "^2.10.3",
         "docker-modem": "^2.1.1",
+        "dockerfile-ast": "^0.0.24",
         "dockerfile-language-server-nodejs": "^0.0.22",
         "dockerode": "^3.1.0",
         "fs-extra": "^8.1.0",
