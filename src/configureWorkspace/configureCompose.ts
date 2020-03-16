@@ -69,7 +69,7 @@ export async function configureCompose(context: IActionContext): Promise<void> {
         if (hasDuplicateService) {
             updateWithUniqueServiceName(composeScaffoldContexts, uniqueServiceNames);
         }
-        composeFile = await generateComposeFiles(composeScaffoldContexts);
+        composeFile = generateComposeFile(composeScaffoldContexts);
     } else {
         // No dockerfile is present in the workspace. Create a template docker-compose file.
         const templateComposeFile = path.join(ext.context.asAbsolutePath('resources'), 'template.docker-compose.yml');
@@ -101,7 +101,7 @@ async function getDockerFilesInWorkspace(context: IActionContext, rootFolder: vs
     return items;
 }
 
-async function generateComposeFiles(contexts: ComposeScaffoldContext[]): Promise<ScaffoldFile> {
+function generateComposeFile(contexts: ComposeScaffoldContext[]): ScaffoldFile {
     let services: string = '';
     contexts.forEach(context => {
         let ports: string = context.ports?.length > 0 ? `\n${getComposePorts(context.ports)}` : '';
