@@ -25,6 +25,7 @@ import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
 import { isWindows, isWindows1019H1OrNewer, isWindows1019H2OrNewer, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer } from '../utils/osUtils';
 import { Platform, PlatformOS } from '../utils/platform';
+import { generateNonConflictFileName } from '../utils/uniqueNameUtils';
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
@@ -332,18 +333,6 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     ];
 }
 
-async function generateNonConflictFileName(filePath: string): Promise<string> {
-    let newFilepath = filePath;
-    let i = 1;
-    const extName = path.extname(filePath);
-    const extNameRegEx = new RegExp(`${extName}$`);
-
-    while (await fse.pathExists(newFilepath)) {
-        newFilepath = filePath.replace(extNameRegEx, i + extName);
-        i++;
-    }
-    return newFilepath;
-}
 // Returns the relative path of the project file without the extension
 async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
     const opt: vscode.QuickPickOptions = {
