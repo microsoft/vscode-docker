@@ -4,13 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "azure-arm-containerregistry";
-import { RequestPromiseOptions } from "request-promise-native";
+import { URL } from "url";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
-import { acquireAcrAccessToken, acquireAcrRefreshToken, getResourceGroupFromId } from "../../../utils/azureUtils";
+import { getResourceGroupFromId } from "../../../utils/azureUtils";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getIconPath, IconPath } from "../../IconPath";
+import { azureOAuthProvider, IAzureOAuthContext } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
-import { IDockerCliCredentials } from "../RegistryTreeItemBase";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
 import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
@@ -18,13 +19,19 @@ import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     public parent: SubscriptionTreeItem;
 
-    private _tasksTreeItem: AzureTasksTreeItem;
-    private _registry: AcrModels.Registry;
+    protected authContext?: IAzureOAuthContext;
 
-    public constructor(parent: SubscriptionTreeItem, registry: AcrModels.Registry) {
-        super(parent);
-        this._registry = registry;
+    private _tasksTreeItem: AzureTasksTreeItem;
+
+    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly _registry: AcrModels.Registry) {
+        super(parent, cachedProvider, azureOAuthProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
+        this.authContext = {
+            realm: new URL(`${this.baseUrl}/oauth2/token`),
+            service: this.host,
+            subscriptionContext: this.parent.root,
+            scope: 'registry:catalog:*',
+        }
     }
 
     public get registryName(): string {
@@ -68,22 +75,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public createRepositoryTreeItem(name: string): AzureRepositoryTreeItem {
-        return new AzureRepositoryTreeItem(this, name);
-    }
-
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        options.auth = {
-            bearer: await acquireAcrAccessToken(this.host, this.parent.root, 'registry:catalog:*')
-        };
-    }
-
-    public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
-        return {
-            registryPath: this.baseUrl,
-            auth: {
-                token: await acquireAcrRefreshToken(this.host, this.parent.root)
-            }
-        };
+        return new AzureRepositoryTreeItem(this, name, this.cachedProvider, this.authHelper, this.authContext);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {

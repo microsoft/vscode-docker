@@ -3,15 +3,25 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as request from "request-promise-native";
 import { URL } from "url";
-import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { RegistryTreeItemBase } from "../RegistryTreeItemBase";
+import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
+import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 
-export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase {
+export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase implements IRegistryProviderTreeItem {
+    protected authContext?: IOAuthContext;
+
     private _nextLink: string | undefined;
+
+    public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthProvider) {
+        super(parent);
+    }
 
     public get baseImagePath(): string {
         return this.host;
@@ -41,6 +51,20 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     public hasMoreChildrenImpl(): boolean {
         return !!this._nextLink;
+    }
+
+    public async addAuth(options: request.RequestPromiseOptions): Promise<void> {
+        if (this.authHelper) {
+            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, this.authContext);
+        }
+    }
+
+    public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
+        if (this.authHelper) {
+            return await this.authHelper.getDockerCliCredentials(this.cachedProvider, this.authContext);
+        }
+
+        return undefined;
     }
 }
 

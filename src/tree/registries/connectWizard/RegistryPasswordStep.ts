@@ -11,11 +11,11 @@ import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 export class RegistryPasswordStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
     public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
         const prompt: string = context.passwordPrompt || localize('vscode-docker.tree.registries.connectWizard.enterPassword', 'Enter your password');
-        context.password = await ext.ui.showInputBox({ prompt, validateInput, password: true });
+        context.secret = await ext.ui.showInputBox({ prompt, validateInput, password: true });
     }
 
     public shouldPrompt(context: IConnectRegistryWizardContext): boolean {
-        return !!context.includePassword && !context.password;
+        return !!context.includePassword && !context.secret;
     }
 }
 

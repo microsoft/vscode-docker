@@ -14,6 +14,8 @@ import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AzureRegistryTreeItem } from '../tree/registries/azure/AzureRegistryTreeItem';
 
+const refreshTokens: { [key: string]: string } = {};
+
 function parseResourceId(id: string): RegExpMatchArray {
     const matches: RegExpMatchArray | null = id.match(/\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/(.*)\/(.*)/i);
     if (matches === null || matches.length < 3) {
@@ -27,22 +29,29 @@ export function getResourceGroupFromId(id: string): string {
 }
 
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
-    const acrRefreshToken = await acquireAcrRefreshToken(registryHost, subContext);
-
-    /* eslint-disable-next-line camelcase */
-    const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, {
+    /* eslint-disable camelcase */
+    const options = {
         form: {
-            /* eslint-disable-next-line camelcase */
-            grant_type: "refresh_token",
+            grant_type: 'refresh_token',
             service: registryHost,
             scope,
-            /* eslint-disable-next-line camelcase */
-            refresh_token: acrRefreshToken,
+            refresh_token: undefined
         },
         json: true
-    });
+    };
 
+    try {
+        if (refreshTokens[registryHost]) {
+            options.form.refresh_token = refreshTokens[registryHost];
+            const responseFromCachedToken = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
+            return responseFromCachedToken.access_token;
+        }
+    } catch { /* No-op, fall back to a new refresh token */ }
+
+    options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
+    const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
     return response.access_token;
+    /* eslint-enable camelcase */
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
@@ -52,7 +61,7 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
         form: {
             /* eslint-disable-next-line camelcase */
-            grant_type: "refresh_token",
+            grant_type: 'refresh_token',
             service: registryHost,
             tenant: subContext.tenantId,
             /* eslint-disable-next-line camelcase */
@@ -135,7 +144,7 @@ export async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run
             } catch (err) {
                 const error = parseError(err);
                 // Not found happens when the properties havent yet been set, blob is not ready. Wait 1 second and try again
-                if (error.errorType === "NotFound") { return; } else { throw error; }
+                if (error.errorType === 'NotFound') { return; } else { throw error; }
             }
             available = +props.contentLength;
             let text: string;

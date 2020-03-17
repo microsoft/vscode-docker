@@ -3,19 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
+import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
+import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2TagTreeItem } from "./DockerV2TagTreeItem";
 
-export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase {
+export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase implements IRegistryProviderTreeItem {
     public parent: DockerV2RegistryTreeItemBase;
 
     private _nextLink: string | undefined;
 
-    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string) {
+    public constructor(parent: DockerV2RegistryTreeItemBase, repoName: string, public readonly cachedProvider: ICachedRegistryProvider, protected readonly authHelper: IAuthProvider, protected readonly authContext?: IOAuthContext) {
         super(parent, repoName);
     }
 
@@ -36,6 +40,13 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase {
             },
             t => t
         );
+    }
+
+    public async addAuth(options: RequestPromiseOptions): Promise<void> {
+        if (this.authHelper) {
+            const authContext: IOAuthContext | undefined = this.authContext ? { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` } : undefined;
+            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, authContext);
+        }
     }
 
     public hasMoreChildrenImpl(): boolean {

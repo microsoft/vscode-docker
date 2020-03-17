@@ -6,6 +6,7 @@
 import { localize } from '../../../localize';
 import { RegistryApi } from "../all/RegistryApi";
 import { IRegistryProvider } from "../IRegistryProvider";
+import { deleteRegistryPassword, setRegistryPassword } from '../registryPasswords';
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
 
 export const dockerHubRegistryProviderId: string = 'dockerHub';
@@ -20,5 +21,7 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
         usernamePrompt: localize('vscode-docker.tree.registries.dockerHub.enterID', 'Enter your Docker ID'),
         includePassword: true,
     },
-    treeItemType: DockerHubAccountTreeItem
+    treeItemFactory: (parent, cachedProvider) => new DockerHubAccountTreeItem(parent, cachedProvider),
+    persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
+    removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
 }
