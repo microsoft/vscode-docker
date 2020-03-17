@@ -1,9 +1,15 @@
 steps:
 - task: Npm@1
-  displayName: 'Package'
+  displayName: 'Build, Test, and Package'
   inputs:
     command: custom
-    customCommand: run package
+    customCommand: run ci-package
+  env:
+    SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
+    SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
+    SERVICE_PRINCIPAL_DOMAIN: $(SERVICE_PRINCIPAL_DOMAIN)
+    DISPLAY: :10 # Only necessary for linux tests
+    DOCKER_UNAVAILABLE: ${{ parameters.dockerUnavailable }}
 
 - task: CopyFiles@2
   displayName: 'Copy vsix to staging directory'

@@ -3,28 +3,24 @@ jobs:
   pool:
     vmImage: windows-latest
   steps:
+  - template: common/setup.yml
+  - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/build.yml
-  - template: common/webpack-prod.yml
-  - template: common/lint.yml
-  - template: common/test.yml
 
 - job: Linux
   pool:
     vmImage: ubuntu-latest
   steps:
-  - template: common/build.yml
-  - template: common/webpack-prod.yml # This will also run during vsce package, but vscep pack doesn't show STDOUT so we won't see full errors there
+  - template: common/setup.yml
+  - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
-  - template: common/lint.yml
-  - template: common/test.yml
 
 - job: macOS
   pool:
     vmImage: macOS-latest
   steps:
+  - template: common/setup.yml
+  - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/build.yml
-  - template: common/webpack-prod.yml
-  - template: common/lint.yml
-  - template: common/test.yml
     parameters:
       dockerUnavailable: 1 # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)

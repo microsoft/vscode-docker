@@ -1,0 +1,16 @@
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node 12.x'
+  inputs:
+    versionSpec: 12.x
+
+- task: Npm@1
+  displayName: 'Install Dependencies'
+
+- script: |
+    sudo cp .azure-pipelines/linux/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+  displayName: 'Start X Virtual Frame Buffer'
+  condition: eq(variables['Agent.OS'], 'Linux')
