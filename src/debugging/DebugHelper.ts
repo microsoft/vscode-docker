@@ -32,7 +32,7 @@ export interface DockerDebugScaffoldContext extends DockerTaskScaffoldContext {
 }
 
 export interface ResolvedDebugConfigurationOptions {
-    containerNameToKill?: string;
+    containerName?: string;
     dockerServerReadyAction?: DockerServerReadyAction;
     removeContainerAfterDebug?: boolean;
 }

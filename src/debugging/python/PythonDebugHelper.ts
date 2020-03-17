@@ -132,7 +132,7 @@ export class PythonDebugHelper implements DebugHelper {
             django: debugConfiguration.python.django || projectType === 'django',
             jinja: debugConfiguration.python.jinja || projectType === 'flask',
             dockerOptions: {
-                containerNameToKill: containerName,
+                containerName: containerName,
                 dockerServerReadyAction: dockerServerReadyAction,
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
