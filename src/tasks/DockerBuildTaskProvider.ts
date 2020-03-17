@@ -58,7 +58,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             context.folder,
             false, // rejectOnStderr
             undefined, // stdoutBuffer
-            undefined, // stderrBuffer
+            Buffer.alloc(10 * 1024), // stderrBuffer
             context.cancellationToken
         );
         throwIfCancellationRequested(context);
