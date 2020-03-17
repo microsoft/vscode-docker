@@ -11,6 +11,7 @@ import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerRunTask } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
+import { ChildProcess } from 'child_process';
 
 const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
@@ -71,8 +72,12 @@ export class DockerPseudoterminal implements Pseudoterminal {
                 this.writeOutput(stdout);
             },
             stdoutBuffer,
-            (stderr: string) => {
-                this.writeError(stderr);
+            (stderr: string, process: ChildProcess) => {
+                // Only write stdErr if the process is alive.
+                // If the process is closed, then the error will be thrown in spawnAsync.
+                if (process.connected) {
+                    this.writeError(stderr);
+                }
 
                 if (rejectOnStderr) {
                     throw new Error(stderr);
