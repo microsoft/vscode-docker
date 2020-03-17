@@ -18,7 +18,7 @@ import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
 import { generateUniqueName } from '../utils/uniqueNameUtils';
 import { getComposePorts } from './configure';
 import { ConfigureTelemetryCancelStep } from './configUtils';
-import { generateNonConflictFileNameWithPrompt, ScaffoldFile, writeFiles } from './scaffolding';
+import { generateNonConflictFileNameWithPrompt, openFilesIfRequired, ScaffoldFile, writeFiles } from './scaffolding';
 
 export interface ComposeScaffoldContext extends DockerfileInfo {
     serviceName: string
@@ -76,8 +76,11 @@ export async function configureCompose(context: IActionContext): Promise<void> {
         const composeContent = (await fse.readFile(templateComposeFile)).toString();
         composeFile = { fileName: 'docker-compose.yml', contents: composeContent }
     }
+
     composeFile.onConflict = async (filePath) => { return await generateNonConflictFileNameWithPrompt(filePath) };
-    await writeFiles([composeFile], rootFolder.uri.fsPath);
+    composeFile.open = true;
+    let files = await writeFiles([composeFile], rootFolder.uri.fsPath);
+    openFilesIfRequired(files);
 }
 
 function updateWithUniqueServiceName(contexts: ComposeScaffoldContext[], existingNames: string[]): void {
