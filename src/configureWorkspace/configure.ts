@@ -21,7 +21,7 @@ import { configureOther } from './configureOther';
 import { scaffoldPython } from './configurePython';
 import { configureRuby } from './configureRuby';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDepth } from './configUtils';
-import { registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
+import { openFilesIfRequired, registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
     npmStart: boolean; // has npm start
@@ -319,12 +319,7 @@ export async function configure(context: IActionContext, rootFolderPath: string 
     };
 
     const files = await scaffold(scaffoldContext);
-
-    files.filter(file => file.open).forEach(
-        file => {
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showTextDocument(vscode.Uri.file(file.filePath), { preview: false });
-        });
+    openFilesIfRequired(files);
 }
 
 export async function configureApi(context: IActionContext, options: ConfigureApiOptions): Promise<void> {
