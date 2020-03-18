@@ -39,7 +39,8 @@ export class PythonTaskHelper implements TaskHelper {
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable no-template-curly-in-string */
                     context: '${workspaceFolder}'
-                }
+                },
+                pull: true,
             }
         ];
     }
@@ -91,14 +92,14 @@ export class PythonTaskHelper implements TaskHelper {
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
         // tslint:disable no-unsafe-any
-        const helperOptions : PythonTaskRunOptions = runDefinition.python || {};
-        const runOptions : DockerRunOptions = runDefinition.dockerRun;
+        const helperOptions: PythonTaskRunOptions = runDefinition.python || {};
+        const runOptions: DockerRunOptions = runDefinition.dockerRun;
 
         const target: PythonTarget = helperOptions.file
             ? { file: helperOptions.file, }
             : { module: helperOptions.module };
 
-        const launcherCommand : string = PythonExtensionHelper.getRemotePtvsdCommand(
+        const launcherCommand: string = PythonExtensionHelper.getRemotePtvsdCommand(
             target,
             helperOptions.args,
             {
