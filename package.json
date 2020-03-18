@@ -1364,7 +1364,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker build --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+                    "default": "docker build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
                     "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
