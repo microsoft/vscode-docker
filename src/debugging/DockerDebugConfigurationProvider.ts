@@ -6,6 +6,7 @@
 import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DockerClient } from './coreclr/CliDockerClient';
@@ -95,6 +96,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration) {
             await this.validateResolvedConfiguration(resolvedConfiguration);
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
+            await this.registerOutputPortsAtDebugging(resolvedConfiguration);
         }
 
         return resolvedConfiguration;
@@ -111,7 +113,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     private async registerRemoveContainerAfterDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
         if (resolvedConfiguration.dockerOptions
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
-            && resolvedConfiguration.dockerOptions.containerNameToKill) {
+            && resolvedConfiguration.dockerOptions.containerName) {
 
             // Since Python is a special case as we handle waiting for the debugger to be ready while resolving
             // the launch configuration, and since this method comes later then we shouldn't remove a container
@@ -119,7 +121,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             // TODO: this needs to be removed as soon as the Python extension adds a way to retry while connecting to a remote debugger.
             if (resolvedConfiguration.type !== 'python') {
                 try {
-                    await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
+                    await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
                 } catch { }
             }
 
@@ -127,16 +129,51 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
-                if (sessionConfiguration
-                    && sessionConfiguration.dockerOptions
-                    && sessionConfiguration.dockerOptions.containerNameToKill === resolvedConfiguration.dockerOptions.containerNameToKill) {
+                // Don't do anything if this isn't our debug session
+                if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
-                        await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerNameToKill, { force: true });
+                        await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
                     } finally {
                         disposable.dispose();
                     }
-                } else {
-                    return; // Return without disposing--this isn't our debug session
+                }
+            });
+        }
+    }
+
+    private async registerOutputPortsAtDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
+        if (resolvedConfiguration?.dockerOptions?.containerName) {
+            const disposable = debug.onDidStartDebugSession(async session => {
+                const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
+
+                // Don't do anything if this isn't our debug session
+                if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
+                    try {
+                        const inspectInfo = await ext.dockerode.getContainer(resolvedConfiguration.dockerOptions.containerName)?.inspect();
+                        const portMappings: string[] = [];
+
+                        if (inspectInfo?.NetworkSettings?.Ports) {
+                            for (const containerPort of Object.keys(inspectInfo.NetworkSettings.Ports)) {
+                                const mappings = inspectInfo.NetworkSettings.Ports[containerPort];
+
+                                if (mappings) {
+                                    for (const mapping of mappings) {
+                                        if (mapping?.HostPort) {
+                                            // TODO: if we ever do non-localhost debugging this would need to change
+                                            portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (portMappings.length > 0) {
+                            ext.outputChannel.appendLine(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
+                            ext.outputChannel.appendLine(portMappings.join('\n'));
+                        }
+                    } finally {
+                        disposable.dispose();
+                    }
                 }
             });
         }

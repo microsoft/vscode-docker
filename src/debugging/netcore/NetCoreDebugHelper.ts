@@ -164,7 +164,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             args: debugConfiguration.args || [additionalProbingPathsArgs, containerAppOutput].join(' '),
             cwd: debugConfiguration.cwd || platformOS === 'Windows' ? 'C:\\app' : '/app',
             dockerOptions: {
-                containerNameToKill: containerName,
+                containerName: containerName,
                 dockerServerReadyAction: dockerServerReadyAction,
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },

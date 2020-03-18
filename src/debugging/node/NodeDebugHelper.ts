@@ -67,7 +67,7 @@ export class NodeDebugHelper implements DebugHelper {
         );
 
         const dockerOptions: ResolvedDebugConfigurationOptions = {
-            containerNameToKill: containerName,
+            containerName: containerName,
             dockerServerReadyAction,
             removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
         };
