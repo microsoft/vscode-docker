@@ -5,7 +5,7 @@
 
 import { Image, ImageInfo } from 'dockerode';
 import { commands, window } from 'vscode';
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, IParsedError, parseError } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, IParsedError, parseError, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
@@ -62,7 +62,7 @@ export class ImageTreeItem extends AzExtTreeItem {
         return ext.dockerode.getImage(this.imageId);
     }
 
-    public async deleteTreeItemImpl(context: IActionContext): Promise<boolean> {
+    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         const image: Image = this.getImage();
         try {
             // eslint-disable-next-line @typescript-eslint/promise-function-async
@@ -76,7 +76,9 @@ export class ImageTreeItem extends AzExtTreeItem {
                 const childTags = await this.getChildImageTags();
 
                 if (childTags.length > 0) {
-                    const message = localize('vscode-docker.tree.images.dependentImages', 'Image {0} cannot be removed because the following images depend on it and must be removed first: {1}', this.fullTag, childTags.join(','));
+                    const message = localize('vscode-docker.tree.images.dependentImages', 'Image {0} cannot be removed because the following images depend on it and must be removed first: {1}', this.fullTag, childTags.join(', '));
+
+                    // TODO: button to remove these child images?
 
                     // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     window.showWarningMessage(message);
@@ -93,13 +95,12 @@ export class ImageTreeItem extends AzExtTreeItem {
                     });
                 }
 
-                return false;
+                // Throw a UserCancelledError instead since this isn't a real error
+                throw new UserCancelledError();
             } else {
                 throw error;
             }
         }
-
-        return true;
     }
 
     private async getChildImageTags(): Promise<string[]> {
