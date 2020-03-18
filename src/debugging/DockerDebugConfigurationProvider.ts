@@ -129,14 +129,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
+                // Don't do anything if this isn't our debug session
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
                         await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
                     } finally {
                         disposable.dispose();
                     }
-                } else {
-                    return; // Return without disposing--this isn't our debug session
                 }
             });
         }
@@ -147,6 +146,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidStartDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
+                // Don't do anything if this isn't our debug session
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
                         const inspectInfo = await ext.dockerode.getContainer(resolvedConfiguration.dockerOptions.containerName)?.inspect();
@@ -154,11 +154,15 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                         if (inspectInfo?.NetworkSettings?.Ports) {
                             for (const containerPort of Object.keys(inspectInfo.NetworkSettings.Ports)) {
-                                const mapping = inspectInfo.NetworkSettings.Ports[containerPort][0];
+                                const mappings = inspectInfo.NetworkSettings.Ports[containerPort];
 
-                                if (mapping?.HostPort) {
-                                    // TODO: if we ever do non-localhost debugging this would need to change
-                                    portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
+                                if (mappings) {
+                                    for (const mapping of mappings) {
+                                        if (mapping?.HostPort) {
+                                            // TODO: if we ever do non-localhost debugging this would need to change
+                                            portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -170,8 +174,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     } finally {
                         disposable.dispose();
                     }
-                } else {
-                    return; // Return without disposing--this isn't our debug session
                 }
             });
         }
