@@ -13,7 +13,7 @@ const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size
 export type Progress = (content: string, process: cp.ChildProcess) => void;
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type ExecError = Error & { code: any, signal: any };
+export type ExecError = Error & { code: any, signal: any, stdErrHandled: boolean };
 
 export async function spawnAsync(
     command: string,
@@ -56,8 +56,7 @@ export async function spawnAsync(
             } else if (code) {
                 let errorMessage = localize('vscode-docker.utils.spawn.exited', 'Process \'{0}\' exited with code {1}', command.length > 50 ? `${command.substring(0, 50)}...` : command, code);
 
-                if (!onStderr && stderrBuffer) {
-                    // If there was no progress handler for stderr, then the error output would be lost, so help mitigate that by putting the error output into the Error we throw
+                if (stderrBuffer) {
                     errorMessage += localize('vscode-docker.utils.spawn.exitedError', '\nError: {0}', bufferToString(stderrBuffer));
                 }
 
@@ -65,6 +64,8 @@ export async function spawnAsync(
 
                 error.code = code;
                 error.signal = signal;
+                error.stdErrHandled = onStderr != null;
+
                 return reject(error);
             }
 
