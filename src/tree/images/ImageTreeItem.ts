@@ -87,7 +87,7 @@ export class ImageTreeItem extends AzExtTreeItem {
         const childTags = await this.getChildImageTags();
 
         if (childTags.length > 0) {
-            const message = localize('vscode-docker.tree.images.dependentImages', 'Image {0} cannot be removed because the following images depend on it and must be removed first: {1}', this.fullTag, childTags.join(', '));
+            const message = localize('vscode-docker.tree.images.dependentImages', 'Image {0} cannot be removed because the following image(s) depend on it and must be removed first: {1}', this.fullTag, childTags.join(', '));
             const removeChildren = localize('vscode-docker.tree.images.removeDependentImages', 'Remove Dependent Images');
 
             const allImageNodes = await ext.imagesRoot.getFlattenedCachedChildren(context);
