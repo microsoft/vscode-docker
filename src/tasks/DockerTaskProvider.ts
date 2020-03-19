@@ -47,7 +47,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.actionContext = actionContext;
                 context.platform = getPlatform(task.definition);
 
-                context.actionContext.telemetry.properties.platform = context.platform;
+                context.actionContext.telemetry.properties.platform = context.platform.toString();
                 context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 await this.executeTaskInternal(context, task);
             });
