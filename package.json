@@ -3,7 +3,7 @@
     "version": "1.0.1-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
-    "description": "%vscode-docker.description%",
+    "description": "Makes it easy to create, manage, and debug containerized applications.",
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
