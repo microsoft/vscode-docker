@@ -1,5 +1,4 @@
 {
-    "vscode-docker.description": "Makes it easy to create, manage, and debug containerized applications.",
     "vscode-docker.debug.containerName": "Name of the container used for debugging.",
     "vscode-docker.debug.dockerServerReadyAction.description": "Options for launching a browser to the Docker container. Similar to serverReadyAction, but replaces container ports with host ports.",
     "vscode-docker.debug.dockerServerReadyAction.action": "The action to take when the pattern is found.",
