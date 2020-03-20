@@ -16,7 +16,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push')
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push'),
         });
     }
 
@@ -38,7 +38,12 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         // Registry path is everything up to the last slash.
         const baseImagePath = node.fullTag.substring(0, node.fullTag.lastIndexOf('/'));
 
-        connectedRegistry = await tryGetConnectedRegistryForPath(context, baseImagePath);
+        const progressOptions: vscode.ProgressOptions = {
+            location: vscode.ProgressLocation.Notification,
+            title: localize('vscode-docker.commands.images.push.fetchingCreds', 'Fetching login credentials...'),
+        };
+
+        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));
     }
 
     // Give the user a chance to modify the tag however they want
@@ -58,7 +63,6 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {
-    // TODO: This is horribly slow
     const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
 
     return allRegistries.find(r => r.baseImagePath === baseImagePath);
