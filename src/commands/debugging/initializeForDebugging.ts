@@ -5,6 +5,7 @@
 
 import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
+import { ensureDotNetCoreDependencies } from '../../configureWorkspace/configureDotNetCore';
 import { promptForLaunchFile } from '../../configureWorkspace/configurePython';
 import { quickPickOS, quickPickPlatform } from '../../configureWorkspace/configUtils';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
@@ -38,6 +39,9 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
     }
 
     actionContext.telemetry.properties.platform = debugPlatform;
+    if (debugPlatform === 'netCore') {
+        ensureDotNetCoreDependencies(folder, actionContext);
+    }
 
     const context: DockerDebugScaffoldContext = {
         folder: folder,
