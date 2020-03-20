@@ -18,6 +18,7 @@ import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";
 import { IRegistryProviderTreeItem } from "./IRegistryProviderTreeItem";
 import { anyContextValuePart, contextValueSeparator } from "./registryContextValues";
+import { RegistryTreeItemBase } from "./RegistryTreeItemBase";
 
 const providersKey = 'docker.registryProviders';
 
@@ -191,6 +192,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         return this._cachedProviders.filter(c => c.id === cachedProvider.id).length > 1;
     }
 
+    public async getAllConnectedRegistries(context: IActionContext): Promise<RegistryTreeItemBase[]> {
+        return await recursiveGetAllConnectedRegistries(context, ext.registriesRoot);
+    }
+
     private async saveCachedProviders(): Promise<void> {
         await ext.context.globalState.update(providersKey, this._cachedProviders);
         await this.refresh();
@@ -220,4 +225,18 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
 
         return node
     }
+}
+
+async function recursiveGetAllConnectedRegistries(context: IActionContext, node: AzExtParentTreeItem): Promise<RegistryTreeItemBase[]> {
+    let results: RegistryTreeItemBase[] = [];
+
+    for (const child of await node.getCachedChildren(context)) {
+        if (child instanceof RegistryTreeItemBase) {
+            results.push(child);
+        } else if (child instanceof AzExtParentTreeItem) {
+            results = results.concat(await recursiveGetAllConnectedRegistries(context, child));
+        }
+    }
+
+    return results;
 }

@@ -57,7 +57,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             await delay(500);
 
             addImageTaggingTelemetry(context, suggestedImageName, '.before');
-            const imageName: string = await getTagFromUserInput(suggestedImageName, !prevImageName);
+            const imageName: string = await getTagFromUserInput(suggestedImageName);
             addImageTaggingTelemetry(context, imageName, '.after');
 
             await ext.context.globalState.update(dockerFileKey, imageName);
