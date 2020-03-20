@@ -5,6 +5,7 @@
 
 import { AzureWizardPromptStep, IAzureQuickPickItem, IAzureQuickPickOptions } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from "../../localize";
 import { nonNullProp } from "../../utils/nonNull";
 import { ITreePropertyInfo } from "./ITreeSettingInfo";
 import { ITreeSettingsWizardContext } from "./ITreeSettingsWizardContext";
@@ -43,7 +44,7 @@ function convertPropertyInfoToPick(info: ITreePropertyInfo<string>): IAzureQuick
     let detail: string | undefined;
 
     if (info.exampleValue) {
-        description = `e.g. "${info.exampleValue}"`;
+        description = localize('vscode-docker.tree.settings.setting.description', 'e.g. "{0}"', info.exampleValue);
         detail = info.description;
     } else {
         description = info.description;

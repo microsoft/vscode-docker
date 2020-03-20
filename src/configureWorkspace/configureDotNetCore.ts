@@ -303,10 +303,9 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
         }
     }
 
-    let volumesList = '      - ~/.vsdbg:/remote_debugger';
-    if (os === 'Linux') {
-        volumesList += ':rw'
-    }
+    let volumesList = os === 'Windows' ?
+        '      - ~/.vsdbg:c:\\remote_debugger:rw'
+        : '      - ~/.vsdbg:/remote_debugger:rw';
 
     // Ensure the path scaffolded in the Dockerfile uses POSIX separators (which work on both Linux and Windows).
     dockerfileName = dockerfileName.replace(/\\/g, '/');

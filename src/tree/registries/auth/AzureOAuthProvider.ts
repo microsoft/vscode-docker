@@ -24,7 +24,7 @@ class AzureOAuthProvider implements IAuthProvider {
 
     public async getDockerCliCredentials(cachedProvider: ICachedRegistryProvider, authContext?: IAzureOAuthContext): Promise<IDockerCliCredentials> {
         return {
-            registryPath: cachedProvider.url,
+            registryPath: `https://${authContext.service}`,
             auth: {
                 token: await acquireAcrRefreshToken(authContext.realm.host, authContext.subscriptionContext),
             },

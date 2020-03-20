@@ -8,6 +8,7 @@ import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'v
 import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { localize } from '../localize';
+import { ExecError } from '../utils/spawnAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
@@ -53,7 +54,11 @@ export abstract class DockerTaskProvider implements TaskProvider {
         } catch (err) {
             // Errors will not be rethrown, rather it will simply return an error code or 1
             const error = parseError(err);
-            context.terminal.writeErrorLine(error.message);
+
+            if (!(err as ExecError)?.stdErrHandled) {
+                context.terminal.writeErrorLine(error.message);
+            }
+
             return parseInt(error.errorType, 10) || 1;
         }
 
