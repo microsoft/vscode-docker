@@ -57,6 +57,8 @@ export function getTestRootFolder(): string {
 export function testInEmptyFolderWithBuildTask(name: string, func?: mocha.AsyncFunc): void {
     // Ensure build task is created which is required for NetCore scaffolding.
     const workspacefolder = vscode.workspace.workspaceFolders[0];
+    console.log(`workspacefolder length=${vscode.workspace.workspaceFolders.length}`);
+    console.log(`Creating build task in workspace folder ${workspacefolder}`);
     createBuildTask(workspacefolder);
 
     testInEmptyFolder(name, func);
