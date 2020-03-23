@@ -468,7 +468,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 export function ensureDotNetCoreDependencies(workspaceFolder: WorkspaceFolder, context: IActionContext): void {
     if (!hasTask('build', workspaceFolder)) {
         context.errorHandling.suppressReportIssue = true;
-        const message = localize('vscode-docker.configureDotNetCore.missingDependencies', 'Dependency build task is missing. Please generate build task by running \'.NET: Generate Assets for Build an Debug\' before running this command');
+        const message = localize('vscode-docker.configureDotNetCore.missingDependencies', 'A build task is missing. Please generate build task by running \'.NET: Generate Assets for Build and Debug\' before running this command');
         throw new Error(message);
     }
 }
