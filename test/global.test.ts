@@ -55,13 +55,17 @@ export function getTestRootFolder(): string {
  * This is important since we can't open new folders in vscode while tests are running
  */
 export function testInEmptyFolderWithBuildTask(name: string, func?: mocha.AsyncFunc): void {
-    // Ensure build task is created which is required for NetCore scaffolding.
-    const workspacefolder = vscode.workspace.workspaceFolders[0];
-    console.log(`workspacefolder length=${vscode.workspace.workspaceFolders.length}`);
-    console.log(`Creating build task in workspace folder ${workspacefolder}`);
-    createBuildTask(workspacefolder);
+    test(name, !func ? undefined : async function (this: mocha.Context) {
+        // Ensure build task is created which is required for NetCore scaffolding.
+        const workspacefolder = vscode.workspace.workspaceFolders[0];
+        console.log(`Creating build task in workspace folder ${workspacefolder.uri}`);
+        await createBuildTask(workspacefolder);
 
-    testInEmptyFolder(name, func);
+        // Delete everything in the root testing folder
+        assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
+        await fse.emptyDir(testRootFolder);
+        await func.apply(this);
+    });
 }
 
 /**
@@ -80,8 +84,9 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
 export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<void> {
     const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
+    console.log(`allTasks length=${allTasks.length}`);
     const existingTaskIndex = allTasks.findIndex(t => t.label === 'build');
-
+    console.log(`existing build task index=${existingTaskIndex}`);
     if (existingTaskIndex == -1) {
         var buildTask = {
             label: 'build',
@@ -90,6 +95,7 @@ export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<v
         };
 
         allTasks.push(buildTask);
+        console.log(`allTasks length after update=${allTasks.length}`);
         await workspaceTasks.update('tasks', allTasks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
 }
