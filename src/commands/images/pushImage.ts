@@ -30,8 +30,8 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         if (prompt) {
             connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
         } else {
-            // Docker Hub is a singleton registry so this won't actually show a prompt--it'll return the node (if connected) or else undefined
-            connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.dockerHub.registry, context);
+            // Try to find a connected Docker Hub registry (primarily for login credentials)
+            connectedRegistry = await tryGetDockerHubRegistry(context);
         }
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
@@ -64,6 +64,10 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {
     const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
-
     return allRegistries.find(r => r.baseImagePath === baseImagePath);
+}
+
+async function tryGetDockerHubRegistry(context: IActionContext): Promise<RegistryTreeItemBase | undefined> {
+    const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
+    return allRegistries.find(r => r.contextValue.match(registryExpectedContextValues.dockerHub.registry));
 }
