@@ -369,7 +369,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
-                    "when": "view == dockerRegistries && viewItem == azureextensionui.azureSubscription",
+                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;RegistryProvider;",
                     "group": "inline"
                 },
                 {
