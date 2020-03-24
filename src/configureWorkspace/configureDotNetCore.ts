@@ -174,7 +174,7 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
-const dotNetComposeTemplate = `version: '3.4'
+const dotNetComposeTemplate = `$comment$version: '3.4'
 
 services:
   $service_name$:
@@ -287,12 +287,14 @@ function validateForUnresolvedToken(contents: string): void {
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
     const serviceName = path.basename(artifactName, path.extname(artifactName));
+    let comment = '';
     // Compose doesn't configure the https, so expose only the http port.
     // Otherwise the 'Open in Browser' command will try to open https endpoint and will not work.
     let jsonPorts: string = ports?.length > 0 ? `\n${getComposePorts([ports[0]])}` : '';
 
     let environmentVariables: string = '';
     if (platform === '.NET: ASP.NET Core') {
+        comment = '# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.\n';
         environmentVariables = `\n    environment:
       - ASPNETCORE_ENVIRONMENT=Development`;
         // For now assume the first port is http. (default scaffolding behavior)
@@ -316,7 +318,8 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     let composeFileContent = dotNetComposeTemplate.replace('$service_name$', normalizedServiceName)
         .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
-        .replace(/\$ports\$/g, jsonPorts);
+        .replace(/\$ports\$/g, jsonPorts)
+        .replace('$comment$', comment);
     validateForUnresolvedToken(composeFileContent);
 
     let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', normalizedServiceName)
@@ -324,7 +327,8 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)
-        .replace(/\$volumes_list\$/g, volumesList);
+        .replace(/\$volumes_list\$/g, volumesList)
+        .replace('$comment$', comment);
     validateForUnresolvedToken(composeDebugFileContent);
 
     return [
