@@ -58,7 +58,6 @@ export function testInEmptyFolderWithBuildTask(name: string, func?: mocha.AsyncF
     test(name, !func ? undefined : async function (this: mocha.Context) {
         // Ensure build task is created which is required for NetCore scaffolding.
         const workspacefolder = vscode.workspace.workspaceFolders[0];
-        console.log(`Creating build task in workspace folder ${workspacefolder.uri}`);
         await createBuildTask(workspacefolder);
 
         // Delete everything in the root testing folder
@@ -84,9 +83,7 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
 export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<void> {
     const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
-    console.log(`allTasks length=${allTasks.length}`);
     const existingTaskIndex = allTasks.findIndex(t => t.label === 'build');
-    console.log(`existing build task index=${existingTaskIndex}`);
     if (existingTaskIndex == -1) {
         var buildTask = {
             label: 'build',
@@ -95,7 +92,6 @@ export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<v
         };
 
         allTasks.push(buildTask);
-        console.log(`allTasks length after update=${allTasks.length}`);
         await workspaceTasks.update('tasks', allTasks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
 }

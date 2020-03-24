@@ -1403,7 +1403,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 assertFileContains('Dockerfile', 'EXPOSE 555');
             });
 
-            testInEmptyFolder("Only platform/OS specified, others come from user", async () => {
+            testInEmptyFolderWithBuildTask("Only platform/OS specified, others come from user", async () => {
                 await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
                 await writeFile('projectFolder2', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
 
@@ -1446,7 +1446,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 // The service folder will only have 0 or 1 csproj within them. So even though there are multiple service directories within the root, we will only be passed 1 service directory at a time, so that only 1 dockerFile generation happens at a time.
                 // So the command which is "Add DockerFile to this Workspace" now extends to "Add DockerFile to the directory", and we would do all the searching and processing only within the passed directory path.
 
-                testInEmptyFolder("All files in service folder, output to service folder", async () => {
+                testInEmptyFolderWithBuildTask("All files in service folder, output to service folder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(rootFolder, 'somefile1.cs', "// Some file");
                     await writeFile(rootFolder, 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
@@ -1465,7 +1465,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 });
 
 
-                testInEmptyFolder(".csproj file in subfolder, output to service folder", async () => {
+                testInEmptyFolderWithBuildTask(".csproj file in subfolder, output to service folder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'somefile1.cs', "// Some file");
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
@@ -1483,7 +1483,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });
 
-                testInEmptyFolder(".csproj file in subfolder, output to subfolder", async () => {
+                testInEmptyFolderWithBuildTask(".csproj file in subfolder, output to subfolder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'somefile1.cs', "// Some file");
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'aspnetapp.csproj', aspNet_21_ProjectFileContents);
