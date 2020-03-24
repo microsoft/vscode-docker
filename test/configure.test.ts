@@ -12,7 +12,7 @@ import * as path from 'path';
 import { Suite } from 'mocha';
 import { PlatformOS, Platform, ext, configure, ConfigureApiOptions, globAsync } from '../extension.bundle';
 import { IActionContext, TelemetryProperties, IAzExtOutputChannel, createAzExtOutputChannel } from 'vscode-azureextensionui';
-import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
+import { getTestRootFolder, testInEmptyFolder, testUserInput, testInEmptyFolderWithBuildTask } from './global.test';
 import { TestInput } from 'vscode-azureextensiondev';
 import { ConfigureTelemetryProperties } from '../src/configureWorkspace/configUtils';
 
@@ -623,7 +623,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // .NET Core Console
 
     suite(".NET Core General", () => {
-        testInEmptyFolder("No project file", async () => {
+        testInEmptyFolderWithBuildTask("No project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () =>
                 testConfigureDocker(
                     '.NET: Core Console',
@@ -639,13 +639,13 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
         });
 
-        testInEmptyFolder("ASP.NET Core no project file", async () => {
+        testInEmptyFolderWithBuildTask("ASP.NET Core no project file", async () => {
             await assertEx.throwsOrRejectsAsync(async () => testConfigureDocker('.NET: ASP.NET Core', {}, ['Windows', 'No', '1234']),
                 { message: "No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform." }
             );
         });
 
-        testInEmptyFolder("Multiple project files", async () => {
+        testInEmptyFolderWithBuildTask("Multiple project files", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await writeFile('projectFolder2', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
@@ -668,7 +668,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.1", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolderWithBuildTask("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
@@ -703,7 +703,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertNotFileContains('ConsoleApp1Folder/Dockerfile', 'EXPOSE');
         });
 
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
                 'Linux',
@@ -737,7 +737,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.0", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolderWithBuildTask("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
@@ -772,7 +772,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertNotFileContains('subfolder/projectFolder/Dockerfile', 'EXPOSE');
         });
 
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
                 'Linux',
@@ -806,7 +806,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 1.1", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolderWithBuildTask("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
@@ -820,7 +820,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM microsoft/dotnet:1.1-sdk AS build');
         });
 
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
                 'Linux',
@@ -836,7 +836,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite(".NET Core Console 2.2", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolderWithBuildTask("Windows", async () => {
             await testDotNetCoreConsole(
                 'Windows',
                 'Windows',
@@ -850,7 +850,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('subfolder/projectFolder/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1809 AS build');
         });
 
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testDotNetCoreConsole(
                 'Linux',
                 'Linux',
@@ -868,7 +868,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     // ASP.NET Core
 
     suite("ASP.NET Core 2.2", async () => {
-        testInEmptyFolder("Default port (80)", async () => {
+        testInEmptyFolderWithBuildTask("Default port (80)", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
                 '.NET: ASP.NET Core',
@@ -879,7 +879,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('projectFolder1/Dockerfile', 'EXPOSE 80');
         });
 
-        testInEmptyFolder("No port", async () => {
+        testInEmptyFolderWithBuildTask("No port", async () => {
             await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
             await testConfigureDocker(
                 '.NET: ASP.NET Core',
@@ -890,7 +890,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertNotFileContains('projectFolder1/Dockerfile', 'EXPOSE');
         });
 
-        testInEmptyFolder("Windows 10 RS5", async () => {
+        testInEmptyFolderWithBuildTask("Windows 10 RS5", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
@@ -924,7 +924,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 `));
         });
 
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testAspNetCore(
                 'Linux',
                 'Linux',
@@ -955,7 +955,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 `));
         });
 
-        testInEmptyFolder("Windows 10 RS4", async () => {
+        testInEmptyFolderWithBuildTask("Windows 10 RS4", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
@@ -968,7 +968,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1803 AS build');
         });
 
-        testInEmptyFolder("Windows 10 RS3", async () => {
+        testInEmptyFolderWithBuildTask("Windows 10 RS3", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
@@ -981,7 +981,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-1709 AS build');
         });
 
-        testInEmptyFolder("Windows Server 2016", async () => {
+        testInEmptyFolderWithBuildTask("Windows Server 2016", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
@@ -994,7 +994,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             assertFileContains('AspNetApp1/Dockerfile', 'FROM mcr.microsoft.com/dotnet/core/sdk:2.2-nanoserver-sac2016 AS build');
         });
 
-        testInEmptyFolder("Host=Linux", async () => {
+        testInEmptyFolderWithBuildTask("Host=Linux", async () => {
             await testAspNetCore(
                 'Windows',
                 'Linux',
@@ -1009,7 +1009,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite("ASP.NET Core 1.1", async () => {
-        testInEmptyFolder("Windows", async () => {
+        testInEmptyFolderWithBuildTask("Windows", async () => {
             await testAspNetCore(
                 'Windows',
                 'Windows',
@@ -1024,7 +1024,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
     });
 
     suite("ASP.NET Core 2.0", async () => {
-        testInEmptyFolder("Linux", async () => {
+        testInEmptyFolderWithBuildTask("Linux", async () => {
             await testAspNetCore(
                 'Linux',
                 'Linux',
@@ -1403,7 +1403,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 assertFileContains('Dockerfile', 'EXPOSE 555');
             });
 
-            testInEmptyFolder("Only platform/OS specified, others come from user", async () => {
+            testInEmptyFolderWithBuildTask("Only platform/OS specified, others come from user", async () => {
                 await writeFile('projectFolder1', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
                 await writeFile('projectFolder2', 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
 
@@ -1446,7 +1446,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 // The service folder will only have 0 or 1 csproj within them. So even though there are multiple service directories within the root, we will only be passed 1 service directory at a time, so that only 1 dockerFile generation happens at a time.
                 // So the command which is "Add DockerFile to this Workspace" now extends to "Add DockerFile to the directory", and we would do all the searching and processing only within the passed directory path.
 
-                testInEmptyFolder("All files in service folder, output to service folder", async () => {
+                testInEmptyFolderWithBuildTask("All files in service folder, output to service folder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(rootFolder, 'somefile1.cs', "// Some file");
                     await writeFile(rootFolder, 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
@@ -1465,7 +1465,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 });
 
 
-                testInEmptyFolder(".csproj file in subfolder, output to service folder", async () => {
+                testInEmptyFolderWithBuildTask(".csproj file in subfolder, output to service folder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'somefile1.cs', "// Some file");
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'aspnetapp.csproj', dotNetCoreConsole_21_ProjectFileContents);
@@ -1483,7 +1483,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                     assertFileContains('serviceFolder/Dockerfile', 'ENTRYPOINT ["dotnet", "aspnetapp.dll"]');
                 });
 
-                testInEmptyFolder(".csproj file in subfolder, output to subfolder", async () => {
+                testInEmptyFolderWithBuildTask(".csproj file in subfolder, output to subfolder", async () => {
                     let rootFolder = 'serviceFolder';
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'somefile1.cs', "// Some file");
                     await writeFile(path.join(rootFolder, 'subfolder1'), 'aspnetapp.csproj', aspNet_21_ProjectFileContents);
