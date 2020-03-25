@@ -8,7 +8,7 @@ import * as fse from "fs-extra";
 import * as mocha from 'mocha';
 import * as path from "path";
 import * as vscode from "vscode";
-import { ext } from "../extension.bundle";
+import { ext, TaskDefinitionBase } from "../extension.bundle";
 import { TestKeytar } from "../test/testKeytar";
 import { TestUserInput } from 'vscode-azureextensiondev';
 
@@ -54,6 +54,23 @@ export function getTestRootFolder(): string {
  * Run a test with an empty root testing folder (i.e. delete everything out of it before running the test).
  * This is important since we can't open new folders in vscode while tests are running
  */
+export function testInEmptyFolderWithBuildTask(name: string, func?: mocha.AsyncFunc): void {
+    test(name, !func ? undefined : async function (this: mocha.Context) {
+        // Ensure build task is created which is required for NetCore scaffolding.
+        const workspacefolder = vscode.workspace.workspaceFolders[0];
+        await createBuildTask(workspacefolder);
+
+        // Delete everything in the root testing folder
+        assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
+        await fse.emptyDir(testRootFolder);
+        await func.apply(this);
+    });
+}
+
+/**
+ * Run a test with an empty root testing folder (i.e. delete everything out of it before running the test).
+ * This is important since we can't open new folders in vscode while tests are running
+ */
 export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
     test(name, !func ? undefined : async function (this: mocha.Context) {
         // Delete everything in the root testing folder
@@ -61,6 +78,22 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
         await fse.emptyDir(testRootFolder);
         await func.apply(this);
     });
+}
+
+export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<void> {
+    const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
+    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
+    const existingTaskIndex = allTasks.findIndex(t => t.label === 'build');
+    if (existingTaskIndex == -1) {
+        var buildTask = {
+            label: 'build',
+            command: 'dotnet',
+            type: 'process'
+        };
+
+        allTasks.push(buildTask);
+        await workspaceTasks.update('tasks', allTasks, vscode.ConfigurationTarget.WorkspaceFolder);
+    }
 }
 
 // Runs before all tests

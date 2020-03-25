@@ -20,6 +20,7 @@ import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { hasTask } from '../tasks/TaskHelper';
 import { extractRegExGroups } from '../utils/extractRegExGroups';
 import { getValidImageName } from '../utils/getValidImageName';
 import { globAsync } from '../utils/globAsync';
@@ -173,7 +174,7 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "$assembly_name$"]
 `;
 
-const dotNetComposeTemplate = `version: '3.4'
+const dotNetComposeTemplate = `$comment$version: '3.4'
 
 services:
   $service_name$:
@@ -286,12 +287,14 @@ function validateForUnresolvedToken(contents: string): void {
 
 function generateComposeFiles(dockerfileName: string, platform: Platform, os: PlatformOS | undefined, ports: number[], artifactName: string): ScaffoldFile[] {
     const serviceName = path.basename(artifactName, path.extname(artifactName));
+    let comment = '';
     // Compose doesn't configure the https, so expose only the http port.
     // Otherwise the 'Open in Browser' command will try to open https endpoint and will not work.
     let jsonPorts: string = ports?.length > 0 ? `\n${getComposePorts([ports[0]])}` : '';
 
     let environmentVariables: string = '';
     if (platform === '.NET: ASP.NET Core') {
+        comment = '# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.\n';
         environmentVariables = `\n    environment:
       - ASPNETCORE_ENVIRONMENT=Development`;
         // For now assume the first port is http. (default scaffolding behavior)
@@ -315,7 +318,8 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
     let composeFileContent = dotNetComposeTemplate.replace('$service_name$', normalizedServiceName)
         .replace(/\$image_name\$/g, normalizedServiceName)
         .replace(/\$dockerfile\$/g, dockerfileName)
-        .replace(/\$ports\$/g, jsonPorts);
+        .replace(/\$ports\$/g, jsonPorts)
+        .replace('$comment$', comment);
     validateForUnresolvedToken(composeFileContent);
 
     let composeDebugFileContent = dotNetComposeDebugTemplate.replace('$service_name$', normalizedServiceName)
@@ -323,7 +327,8 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
         .replace(/\$dockerfile\$/g, dockerfileName)
         .replace(/\$ports\$/g, jsonPorts)
         .replace(/\$environment\$/g, environmentVariables)
-        .replace(/\$volumes_list\$/g, volumesList);
+        .replace(/\$volumes_list\$/g, volumesList)
+        .replace('$comment$', comment);
     validateForUnresolvedToken(composeDebugFileContent);
 
     return [
@@ -396,6 +401,7 @@ async function inferOutputAssemblyName(appProjectFilePath: string): Promise<stri
 
 // tslint:disable-next-line: export-name
 export async function scaffoldNetCore(context: ScaffolderContext): Promise<ScaffoldFile[]> {
+    ensureDotNetCoreDependencies(context.folder, context);
     const os = context.os ?? (context.os = await context.promptForOS());
     const isCompose = await context.promptForCompose();
 
@@ -461,4 +467,12 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     }
 
     return files;
+}
+
+export function ensureDotNetCoreDependencies(workspaceFolder: WorkspaceFolder, context: IActionContext): void {
+    if (!hasTask('build', workspaceFolder)) {
+        context.errorHandling.suppressReportIssue = true;
+        const message = localize('vscode-docker.configureDotNetCore.missingDependencies', 'A build task is missing. Please generate build task by running \'.NET: Generate Assets for Build and Debug\' before running this command');
+        throw new Error(message);
+    }
 }

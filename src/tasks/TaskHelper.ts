@@ -91,6 +91,12 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     );
 }
 
+export function hasTask(taskLabel: string, folder: WorkspaceFolder): boolean {
+    const workspaceTasks = workspace.getConfiguration('tasks', folder.uri);
+    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
+    return allTasks.findIndex(t => t.label === taskLabel) > -1;
+}
+
 export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, folder: WorkspaceFolder, overwrite?: boolean): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
     const workspaceTasks = workspace.getConfiguration('tasks', folder.uri);

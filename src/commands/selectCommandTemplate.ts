@@ -21,7 +21,7 @@ type CommandTemplate = {
 // So, when modifying them here, be sure to modify them there as well!
 const defaults: { [key in TemplateCommand]: CommandTemplate } = {
     /* eslint-disable no-template-curly-in-string */
-    'build': { label: 'Docker Build', template: 'docker build --rm -f "${dockerfile}" -t ${tag} "${context}"' },
+    'build': { label: 'Docker Build', template: 'docker build --pull --rm -f "${dockerfile}" -t ${tag} "${context}"' },
     'run': { label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' },
     'runInteractive': { label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' },
     'attach': { label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' },
