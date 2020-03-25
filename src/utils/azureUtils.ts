@@ -152,6 +152,7 @@ export async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run
             if (available > start) {
                 text = await getBlobToText(blobInfo, blob, start);
                 let utf8encoded = (new Buffer(text, 'ascii')).toString('utf8');
+                utf8encoded = removeAnsiEscapeSequences(utf8encoded);
                 start += text.length;
                 ext.outputChannel.append(utf8encoded);
             }
@@ -161,6 +162,17 @@ export async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run
         },
         1000
     );
+}
+
+function removeAnsiEscapeSequences(text: string): string {
+    // (^.*\x1B\[\d*;?\d*H)     - Esc[Line;ColumnH represents the cursor position. Remove any string before setting the cursore position.
+    // (\x1B\[[^A-Za-z]*[A-Za-z]) - Remove any control sequence for example "Esc[40m". This is the only regex required for linux container, the others are used by windows container log.
+    // (\x1B=)                    - "Esc=" enters the alternate keypad mode. So remove this, such sequences are present in windows container.
+    // (\x1B]0;.*\x07)            - "Esc]0;string/x07" operating system command.
+    // (\xEF\xBB\xBF)           - Removes the Byte Order Mark (BOM) of UTF-8.
+    // eslint-disable-next-line no-control-regex
+    const removeAnsiEscapeSequenceRegExp = new RegExp(/^.*\x1b\[\d*;?\d*H|\x1b\[[^A-Za-z]*[A-Za-z]|\x1b=|\x1b]0;.*\x07|\xEF\xBB\xBF/g);
+    return text.replace(removeAnsiEscapeSequenceRegExp, '');
 }
 
 // Promisify getBlobToText for readability and error handling purposes
