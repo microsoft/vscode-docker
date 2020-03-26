@@ -131,6 +131,10 @@ export class DockerContextManager {
                         resolve('');
                     }
                 });
+
+                dockerConfig.on('error', _ => {
+                    resolve('');
+                })
             } catch (ex) {
                 resolve('');
             }
