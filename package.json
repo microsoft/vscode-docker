@@ -1797,7 +1797,8 @@
                 "docker.imageBuildContextPath": {
                     "type": "string",
                     "default": "",
-                    "description": "%vscode-docker.config.docker.imageBuildContextPath%"
+                    "description": "%vscode-docker.config.docker.imageBuildContextPath%",
+                    "scope": "machine-overridable"
                 },
                 "docker.truncateLongRegistryPaths": {
                     "type": "boolean",
