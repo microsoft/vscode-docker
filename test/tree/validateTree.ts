@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import * as Dockerode from 'dockerode';
-import { AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext } from '../../extension.bundle';
+import { AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext, suspendDockerodeRefresh, resumeDockerodeRefresh } from '../../extension.bundle';
 import { runWithSetting } from '../runWithSetting';
 
 export function generateCreatedTimeInSec(days: number): number {
@@ -70,7 +70,9 @@ interface ITestDockerodeOptions {
 }
 
 async function runWithDockerode(options: ITestDockerodeOptions, callback: () => Promise<void>): Promise<void> {
+    suspendDockerodeRefresh();
     const oldDockerode = ext.dockerode;
+
     try {
         ext.dockerode = <Dockerode><any>{
             listContainers: async () => options.containers,
@@ -81,6 +83,7 @@ async function runWithDockerode(options: ITestDockerodeOptions, callback: () => 
         await callback();
     } finally {
         ext.dockerode = oldDockerode;
+        resumeDockerodeRefresh();
     }
 }
 

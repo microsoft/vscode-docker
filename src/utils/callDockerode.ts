@@ -10,6 +10,8 @@ import { localize } from '../localize';
 import { dockerContextManager } from './dockerContextManager';
 import { refreshDockerode } from './refreshDockerode';
 
+let dockerodeRefreshEnabled: boolean = true;
+
 export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
     const p = new Promise<T>((resolve, reject) => {
         try {
@@ -24,10 +26,12 @@ export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
 }
 
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>): Promise<T> {
-    const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
-    if (contextChanged) {
-        dockerContextManager.contextChangeHandled();
-        await refreshDockerode();
+    if (dockerodeRefreshEnabled) {
+        const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
+        if (contextChanged) {
+            dockerContextManager.contextChangeHandled();
+            await refreshDockerode();
+        }
     }
 
     return await dockerodeAsyncCallback();
@@ -47,4 +51,13 @@ export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () =>
 
         throw err;
     }
+}
+
+// The following functions are for test purposes only
+export function suspendDockerodeRefresh(): void {
+    dockerodeRefreshEnabled = false;
+}
+
+export function resumeDockerodeRefresh(): void {
+    dockerodeRefreshEnabled = true;
 }
