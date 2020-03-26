@@ -87,7 +87,7 @@ export class DockerContextManager {
                 } else {
                     const dockerConfigDigest: string = await this.getDockerConfigDigest();
 
-                    if (dockerConfigDigest !== this.lastDockerConfigDigest) {
+                    if (!dockerConfigDigest || dockerConfigDigest !== this.lastDockerConfigDigest) {
                         this.lastDockerConfigDigest = dockerConfigDigest;
                         // Config file will change when Docker context is changed, but opposite is not necessarily true
                         // (i.e. config file might change for other reasons).
@@ -111,6 +111,11 @@ export class DockerContextManager {
     }
 
     private async getDockerConfigDigest(): Promise<string> {
+        // Note: computing Docker config file digest may fail, typically because Docker is not installed,
+        // and there is no config file. We use falsy value (empty string) as a way to indicate that,
+        // as opposed to rejecting the promise with the captured error.
+        // This is a clue to the caller that they should go ahead and try to inspect the actual Docker context.
+
         return new Promise<string>((resolve, reject) => {
             try {
                 // tslint:disable-next-line: non-literal-fs-path
@@ -119,10 +124,15 @@ export class DockerContextManager {
                 hash = dockerConfig.pipe(hash, { end: false });
 
                 dockerConfig.on('end', () => {
-                    resolve(hash.digest('hex'));
+                    try {
+                        const digest = hash.digest('hex');
+                        resolve(digest);
+                    } catch (ex) {
+                        resolve('');
+                    }
                 });
             } catch (ex) {
-                reject(ex);
+                resolve('');
             }
         });
     }
