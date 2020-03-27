@@ -69,7 +69,6 @@ export class DockerContextManager {
     private lastContextCheckTimestamp: number;
     private cachedContext: IDockerContext;
     private lastDockerConfigDigest: string;
-    private contextChanged: boolean;
 
     public constructor() {
         this.lastContextCheckTimestamp = 0;
@@ -78,12 +77,14 @@ export class DockerContextManager {
     }
 
     public async getCurrentContext(): Promise<IDockerContextCheckResult> {
+        let contextChanged: boolean = false;
+
         if (!this.cachedContext || (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs)) {
             try {
                 if (!this.cachedContext) {
                     // First-time check
                     this.lastDockerConfigDigest = await this.getDockerConfigDigest();
-                    await this.refreshCachedDockerContext();
+                    contextChanged = await this.refreshCachedDockerContext();
                 } else {
                     const dockerConfigDigest: string = await this.getDockerConfigDigest();
 
@@ -91,7 +92,7 @@ export class DockerContextManager {
                         this.lastDockerConfigDigest = dockerConfigDigest;
                         // Config file will change when Docker context is changed, but opposite is not necessarily true
                         // (i.e. config file might change for other reasons).
-                        await this.refreshCachedDockerContext();
+                        contextChanged = await this.refreshCachedDockerContext();
                     }
                 }
             } finally {
@@ -102,12 +103,8 @@ export class DockerContextManager {
 
         return {
             Context: this.cachedContext,
-            Changed: this.contextChanged
+            Changed: contextChanged
         };
-    }
-
-    public contextChangeHandled(): void {
-        this.contextChanged = false;
     }
 
     private async getDockerConfigDigest(): Promise<string> {
@@ -141,15 +138,18 @@ export class DockerContextManager {
         });
     }
 
-    private async refreshCachedDockerContext(): Promise<void> {
+    private async refreshCachedDockerContext(): Promise<boolean> {
         const { Result: currentContext, DurationMs: duration } = await timeUtils.timeIt(async () => this.inspectCurrentContext());
 
-        if (!this.cachedContext || currentContext.FullSpec !== this.cachedContext.FullSpec) {
+        const contextChanged = !this.cachedContext || currentContext.FullSpec !== this.cachedContext.FullSpec;
+
+        if (contextChanged) {
             const previousContext = this.cachedContext;
-            this.contextChanged = true;
             this.cachedContext = currentContext;
             this.sendDockerContextEvent(currentContext, previousContext, duration);
         }
+
+        return contextChanged;
     }
 
     private async inspectCurrentContext(): Promise<IDockerContext> {

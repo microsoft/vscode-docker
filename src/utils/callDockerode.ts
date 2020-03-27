@@ -29,7 +29,6 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
     if (dockerodeRefreshEnabled) {
         const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
         if (contextChanged) {
-            dockerContextManager.contextChangeHandled();
             await refreshDockerode();
         }
     }
