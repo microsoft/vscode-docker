@@ -45,7 +45,7 @@ export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () =>
 
         const error = parseError(err);
 
-        if (error && error.errorType === 'ENOENT') {
+        if (error?.errorType === 'ENOENT') {
             throw new Error(localize('vscode-docker.utils.dockerode.failedToConnect', 'Failed to connect. Is Docker installed and running? Error: {0}', error.message));
         }
 
