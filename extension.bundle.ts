@@ -31,7 +31,6 @@ export { LineSplitter } from './src/debugging/coreclr/lineSplitter';
 export { OSProvider } from './src/utils/LocalOSProvider';
 export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './src/debugging/coreclr/prereqManager';
 export { ext } from './src/extensionVariables';
-export { suspendDockerodeRefresh, resumeDockerodeRefresh } from './src/utils/callDockerode';
 export { globAsync } from './src/utils/globAsync';
 export { httpsRequestBinary } from './src/utils/httpRequest';
 export { IKeytar } from './src/utils/keytar';

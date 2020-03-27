@@ -6,11 +6,10 @@
 /* eslint-disable unicorn/filename-case */
 
 import { IActionContext, parseError } from "vscode-azureextensionui";
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerContextManager } from './dockerContextManager';
 import { refreshDockerode } from './refreshDockerode';
-
-let dockerodeRefreshEnabled: boolean = true;
 
 export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
     const p = new Promise<T>((resolve, reject) => {
@@ -26,7 +25,8 @@ export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
 }
 
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>): Promise<T> {
-    if (dockerodeRefreshEnabled) {
+    // If running tests, don't refresh Dockerode (some tests override Dockerode)
+    if (!ext.runningTests) {
         const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
         if (contextChanged) {
             await refreshDockerode();
@@ -50,13 +50,4 @@ export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () =>
 
         throw err;
     }
-}
-
-// The following functions are for test purposes only
-export function suspendDockerodeRefresh(): void {
-    dockerodeRefreshEnabled = false;
-}
-
-export function resumeDockerodeRefresh(): void {
-    dockerodeRefreshEnabled = true;
 }
