@@ -192,7 +192,7 @@ type LogStream = NodeJS.ReadableStream & { destroy(): void; };
 class DockerLogsTracker extends vscode.Disposable {
     private logStream: LogStream;
 
-    public constructor(private containerName: string, private detector: DockerServerReadyDetector) {
+    public constructor(private readonly containerName: string, private readonly detector: DockerServerReadyDetector) {
         super(
             () => {
                 if (this.logStream) {
