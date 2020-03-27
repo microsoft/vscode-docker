@@ -243,5 +243,7 @@
     "vscode-docker.views.dockerRegistries": "Registries",
     "vscode-docker.views.dockerNetworks": "Networks",
     "vscode-docker.views.dockerVolumes": "Volumes",
-    "vscode-docker.views.activityBar": "Docker"
+    "vscode-docker.views.activityBar": "Docker",
+    "vscode-docker.utils.dockerode.sshAgent": "In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.",
+    "vscode-docker.utils.dockerode.dockerContextUnobtainable": "Docker context could not be retrieved."
 }

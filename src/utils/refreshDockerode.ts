@@ -6,12 +6,13 @@
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
 import { CancellationTokenSource } from 'vscode';
+import { parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
 import { delay } from './delay';
-import { dockerContextManager } from './dockerContextManager';
+import { dockerContextManager, IDockerContext } from './dockerContextManager';
 import { isWindows } from './osUtils';
 
 const SSH_URL_REGEX = /ssh:\/\//i;
@@ -41,28 +42,33 @@ export async function refreshDockerode(): Promise<void> {
 }
 
 async function addDockerHostToEnv(newEnv: NodeJS.ProcessEnv): Promise<void> {
+    let dockerContext: IDockerContext;
+
     try {
-        const { Context: dockerContext } = await dockerContextManager.getCurrentContext();
+        ({ Context: dockerContext } = await dockerContextManager.getCurrentContext());
 
         if (!newEnv.DOCKER_HOST) {
             newEnv.DOCKER_HOST = dockerContext.Endpoints.docker.Host;
-        }
-
-        if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
-            // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
-            // Other than that, we use default settings, so return undefined
-            if (!await validateSshAuthSock(newEnv)) {
-                // Don't wait
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
-            }
         }
 
         if (!newEnv.DOCKER_TLS_VERIFY && dockerContext.Endpoints.docker.SkipTLSVerify) {
             // https://docs.docker.com/compose/reference/envvars/#docker_tls_verify
             newEnv.DOCKER_TLS_VERIFY = "";
         }
-    } catch { } // Best effort only
+    } catch (error) {
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.dockerContextUnobtainable', 'Docker context could not be retrieved.') + ' ' + parseError(error).message);
+    }
+
+    if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
+        // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
+        // Other than that, we use default settings, so return undefined
+        if (!await validateSshAuthSock(newEnv)) {
+            // Don't wait
+            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+            ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
+        }
+    }
 }
 
 async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> {
