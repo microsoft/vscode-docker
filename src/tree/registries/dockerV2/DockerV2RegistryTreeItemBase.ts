@@ -24,7 +24,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
     }
 
     public get baseImagePath(): string {
-        return this.host;
+        return this.host.toLowerCase();
     }
 
     public get host(): string {
