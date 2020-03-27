@@ -156,17 +156,15 @@ export class DockerContextManager {
         let execResult: {
             stdout: string;
         };
-        let contextOverride: string = process.env[DOCKER_CONTEXT] || '';
-        if (contextOverride) {
-            contextOverride = ' ' + contextOverride;
-        }
-        const inspectCmd = 'docker context inspect' + contextOverride;
+        const inspectCmd = `docker context inspect ${process.env[DOCKER_CONTEXT] || ''}`.trim();
+
         try {
             execResult = await execAsync(inspectCmd, ContextInspectExecOptions);
         } catch (err) {
             const error = parseError(err);
             throw new Error(localize('vscode-docker.dockerContext.inspectCurrentFailed', 'Could not determine the current Docker context. Is Docker installed? Error: {0}', error.message));
         }
+
         const dockerContexts = <IDockerContext[]>JSON.parse(execResult.stdout);
         if (!dockerContexts?.[0]) {
             throw new Error(localize('vscode-docker.dockerContext.contextCouldNotBeParsed', 'Docker context could not be parsed: {0}', execResult.stdout));
