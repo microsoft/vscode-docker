@@ -1812,22 +1812,26 @@
                 "docker.host": {
                     "type": "string",
                     "default": "",
-                    "description": "%vscode-docker.config.docker.host%"
+                    "description": "%vscode-docker.config.docker.host%",
+                    "scope": "machine-overridable"
                 },
                 "docker.certPath": {
                     "type": "string",
                     "default": "",
-                    "description": "%vscode-docker.config.docker.certPath%"
+                    "description": "%vscode-docker.config.docker.certPath%",
+                    "scope": "machine-overridable"
                 },
                 "docker.tlsVerify": {
                     "type": "string",
                     "default": "",
-                    "description": "%vscode-docker.config.docker.tlsVerify%"
+                    "description": "%vscode-docker.config.docker.tlsVerify%",
+                    "scope": "machine-overridable"
                 },
                 "docker.machineName": {
                     "type": "string",
                     "default": "",
-                    "description": "%vscode-docker.config.docker.machineName%"
+                    "description": "%vscode-docker.config.docker.machineName%",
+                    "scope": "machine-overridable"
                 },
                 "docker.languageserver.diagnostics.deprecatedMaintainer": {
                     "scope": "resource",
