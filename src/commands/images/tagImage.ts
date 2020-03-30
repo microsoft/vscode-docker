@@ -6,14 +6,14 @@
 import { Image } from 'dockerode';
 import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
-import { configurationKeys } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
-export async function tagImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
+export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
@@ -22,7 +22,7 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    let newTaggedName: string = await getTagFromUserInput(node.fullTag, true);
+    let newTaggedName: string = await getTagFromUserInput(node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     let repo: string = newTaggedName;
@@ -39,27 +39,22 @@ export async function tagImage(context: IActionContext, node: ImageTreeItem | un
     return newTaggedName;
 }
 
-export async function getTagFromUserInput(fullTag: string, addDefaultRegistry: boolean): Promise<string> {
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
-    const defaultRegistryPath = configOptions.get(configurationKeys.defaultRegistryPath, '');
-
+export async function getTagFromUserInput(fullTag: string, baseImagePath?: string): Promise<string> {
     let opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
     };
-    if (addDefaultRegistry) {
-        let registryLength: number = fullTag.indexOf('/');
-        if (defaultRegistryPath.length > 0 && registryLength < 0) {
-            fullTag = defaultRegistryPath + '/' + fullTag;
-            registryLength = defaultRegistryPath.length;
-        }
-        opt.valueSelection = registryLength < 0 ? undefined : [0, registryLength + 1];  // include the '/'
+
+    if (fullTag.includes('/')) {
+        opt.valueSelection = [0, fullTag.lastIndexOf('/')];
+    } else if (baseImagePath) {
+        fullTag = `${baseImagePath}/${fullTag}`;
+        opt.valueSelection = [0, fullTag.lastIndexOf('/')];
     }
 
     opt.value = fullTag;
 
-    const nameWithTag: string = await ext.ui.showInputBox(opt);
-    return nameWithTag;
+    return await ext.ui.showInputBox(opt);
 }
 
 const KnownRegistries: { type: string, regex: RegExp }[] = [

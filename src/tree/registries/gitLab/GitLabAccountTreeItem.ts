@@ -73,7 +73,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return this.createTreeItemsWithErrorHandling(
             response.body,
             'invalidGitLabProject',
-            n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace),
+            n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace.toLowerCase()),
             n => n.path_with_namespace
         );
     }

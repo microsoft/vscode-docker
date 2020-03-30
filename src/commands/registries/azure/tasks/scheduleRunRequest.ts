@@ -104,7 +104,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     await delay(500);
 
     addImageTaggingTelemetry(context, suggestedImageName, '.before');
-    const imageName: string = await getTagFromUserInput(suggestedImageName, false);
+    const imageName: string = await getTagFromUserInput(suggestedImageName);
     addImageTaggingTelemetry(context, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);

@@ -4,49 +4,77 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
-import { configurationKeys } from '../../constants';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { askToSaveRegistryPath } from '../registries/registrySettings';
+import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
+import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
     if (!node) {
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push')
+            noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push'),
         });
     }
 
-    const defaultRegistryPath = vscode.workspace.getConfiguration('docker').get(configurationKeys.defaultRegistryPath);
+    let connectedRegistry: RegistryTreeItemBase | undefined;
 
-    let fullTag: string = node.fullTag;
-    if (fullTag.includes('/')) {
-        if (!defaultRegistryPath) {
-            await askToSaveRegistryPath(fullTag);
+    if (!node.fullTag.includes('/')) {
+        // The registry to push to is indeterminate--could be Docker Hub, or could need tagging.
+        const prompt: boolean = vscode.workspace.getConfiguration('docker').get('promptForRegistryWhenPushingImages', true);
+
+        // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
+        if (prompt) {
+            try {
+                connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+            } catch (error) {
+                if (error instanceof UserCancelledError) {
+                    // Rethrow UserCancelledError, otherwise, move on without a selected registry
+                    throw error;
+                }
+            }
+        } else {
+            // Try to find a connected Docker Hub registry (primarily for login credentials)
+            connectedRegistry = await tryGetDockerHubRegistry(context);
         }
     } else {
-        let askToPushPrefix: boolean = true;
-        if (askToPushPrefix && defaultRegistryPath) {
-            context.telemetry.properties.pushWithoutRepositoryAnswer = 'Cancel';
+        // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
+        // Registry path is everything up to the last slash.
+        const baseImagePath = node.fullTag.substring(0, node.fullTag.lastIndexOf('/'));
 
-            let tagFirst: vscode.MessageItem = { title: localize('vscode-docker.commands.images.push.tagFirst', 'Tag first') };
-            let pushAnyway: vscode.MessageItem = { title: localize('vscode-docker.commands.images.push.pushAnyway', 'Push anyway') }
-            let options: vscode.MessageItem[] = [tagFirst, pushAnyway];
-            let response: vscode.MessageItem = await ext.ui.showWarningMessage(localize('vscode-docker.commands.images.push.pushDockerHub', 'This will attempt to push to the official public Docker Hub library (docker.io/library), which you may not have permissions for. To push to your own repository, you must tag the image like <docker-id-or-registry-server>/<imagename>'), ...options);
-            context.telemetry.properties.pushWithoutRepositoryAnswer = response.title;
+        const progressOptions: vscode.ProgressOptions = {
+            location: vscode.ProgressLocation.Notification,
+            title: localize('vscode-docker.commands.images.push.fetchingCreds', 'Fetching login credentials...'),
+        };
 
-            if (response === tagFirst) {
-                fullTag = await tagImage(context, node);
-            }
-        }
+        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));
     }
 
-    addImageTaggingTelemetry(context, fullTag, '');
+    // Give the user a chance to modify the tag however they want
+    const finalTag = await tagImage(context, node, connectedRegistry);
 
-    const terminal = ext.terminalProvider.createTerminal(fullTag);
-    terminal.sendText(`docker push ${fullTag}`);
+    if (connectedRegistry && finalTag.startsWith(connectedRegistry.baseImagePath)) {
+        // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
+        await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
+    }
+
+    addImageTaggingTelemetry(context, finalTag, '');
+
+    // Finally push the image
+    const terminal = ext.terminalProvider.createTerminal(finalTag);
+    terminal.sendText(`docker push ${finalTag}`);
     terminal.show();
+}
+
+async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {
+    const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
+    return allRegistries.find(r => r.baseImagePath === baseImagePath);
+}
+
+async function tryGetDockerHubRegistry(context: IActionContext): Promise<RegistryTreeItemBase | undefined> {
+    const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
+    return allRegistries.find(r => r.contextValue.match(registryExpectedContextValues.dockerHub.registry));
 }

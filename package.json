@@ -92,7 +92,6 @@
         "onCommand:vscode-docker.registries.pullRepository",
         "onCommand:vscode-docker.registries.reconnectRegistry",
         "onCommand:vscode-docker.registries.refresh",
-        "onCommand:vscode-docker.registries.setAsDefault",
         "onCommand:vscode-docker.volumes.configureExplorer",
         "onCommand:vscode-docker.volumes.inspect",
         "onCommand:vscode-docker.volumes.prune",
@@ -370,7 +369,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
-                    "when": "view == dockerRegistries && viewItem == azureextensionui.azureSubscription",
+                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;RegistryProvider;",
                     "group": "inline"
                 },
                 {
@@ -392,11 +391,6 @@
                     "command": "vscode-docker.registries.azure.createRegistry",
                     "when": "view == dockerRegistries && viewItem == azureextensionui.azureSubscription",
                     "group": "regs_1_general@1"
-                },
-                {
-                    "command": "vscode-docker.registries.setAsDefault",
-                    "when": "view == dockerRegistries && viewItem =~ /Registry;/",
-                    "group": "regs_reg_1_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.deleteRegistry",
@@ -1325,10 +1319,10 @@
         "configuration": {
             "title": "Docker",
             "properties": {
-                "docker.defaultRegistryPath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.defaultRegistryPath%"
+                "docker.promptForRegistryWhenPushingImages": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.promptForRegistryWhenPushingImages%"
                 },
                 "docker.explorerRefreshInterval": {
                     "type": "number",
@@ -2325,11 +2319,6 @@
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
                 }
-            },
-            {
-                "command": "vscode-docker.registries.setAsDefault",
-                "title": "%vscode-docker.commands.registries.setAsDefault%",
-                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.volumes.configureExplorer",

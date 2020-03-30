@@ -73,7 +73,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return this.createTreeItemsWithErrorHandling(
             response.body.namespaces,
             'invalidDockerHubNamespace',
-            n => new DockerHubNamespaceTreeItem(this, n),
+            n => new DockerHubNamespaceTreeItem(this, n.toLowerCase()),
             n => n
         );
     }
