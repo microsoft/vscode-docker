@@ -338,16 +338,17 @@ function generateComposeFiles(dockerfileName: string, platform: Platform, os: Pl
 }
 
 // Returns the relative path of the project file without the extension
-async function findCSProjOrFSProjFile(folderPath?: string): Promise<string> {
+async function findCSProjOrFSProjFile(context?: ScaffolderContext): Promise<string> {
     const opt: vscode.QuickPickOptions = {
         matchOnDescription: true,
         matchOnDetail: true,
         placeHolder: 'Select Project'
     }
 
-    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: folderPath });
+    const projectFiles: string[] = await globAsync('**/*.@(c|f)sproj', { cwd: context?.rootFolder });
 
     if (!projectFiles || !projectFiles.length) {
+        context.errorHandling.suppressReportIssue = true;
         throw new Error(localize('vscode-docker.configureDotNetCore.noCsproj', 'No .csproj or .fsproj file could be found. You need a C# or F# project file in the workspace to generate Docker files for the selected platform.'));
     }
 
@@ -414,7 +415,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     const ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
-    const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context.rootFolder);
+    const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context);
     const projectFullPath = path.join(context.rootFolder, rootRelativeProjectFileName);
     const rootRelativeProjectDirectory = path.dirname(rootRelativeProjectFileName);
 
