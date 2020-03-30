@@ -115,7 +115,7 @@ function verifyBuildTask(testName: string, folder: vscode.WorkspaceFolder): void
 function isBuildTaskPresent(folder: vscode.WorkspaceFolder): boolean {
     const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
-    return allTasks.findIndex(t => t.label === 'build') !== -1
+    return allTasks.some(t => t.label === 'build');
 }
 
 // Runs before all tests
