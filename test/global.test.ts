@@ -58,7 +58,7 @@ export function testInEmptyFolderWithBuildTask(name: string, func?: mocha.AsyncF
     test(name, !func ? undefined : async function (this: mocha.Context) {
         // Ensure build task is created which is required for NetCore scaffolding.
         const workspacefolder = vscode.workspace.workspaceFolders[0];
-        await createBuildTask(workspacefolder);
+        await createBuildTask(name, workspacefolder);
 
         // Delete everything in the root testing folder
         assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
@@ -80,10 +80,11 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
     });
 }
 
-export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<void> {
+async function createBuildTask(testName: string, folder: vscode.WorkspaceFolder): Promise<void> {
     const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
     const existingTaskIndex = allTasks.findIndex(t => t.label === 'build');
+    console.log(`${testName}: existing task index: ${existingTaskIndex}`)
     if (existingTaskIndex == -1) {
         var buildTask = {
             label: 'build',
@@ -93,7 +94,28 @@ export async function createBuildTask(folder: vscode.WorkspaceFolder): Promise<v
 
         allTasks.push(buildTask);
         await workspaceTasks.update('tasks', allTasks, vscode.ConfigurationTarget.WorkspaceFolder);
+        console.log(`${testName}: Build task created`);
+        verifyBuildTask(testName, folder);
     }
+}
+
+function verifyBuildTask(testName: string, folder: vscode.WorkspaceFolder): void {
+    const maxTry = 5;
+    let i = 0;
+    let buildTaskPresent = isBuildTaskPresent(folder);
+
+    while (!buildTaskPresent && i < maxTry) {
+        buildTaskPresent = isBuildTaskPresent(folder);
+        i++;
+    }
+    assert.equal(buildTaskPresent, true);
+    console.log(`${testName}: Verified the build task is present in the workspace after ${i} tries`);
+}
+
+function isBuildTaskPresent(folder: vscode.WorkspaceFolder): boolean {
+    const workspaceTasks = vscode.workspace.getConfiguration('tasks', folder.uri);
+    const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
+    return allTasks.some(t => t.label === 'build');
 }
 
 // Runs before all tests
