@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
@@ -28,7 +28,14 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
         // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
         if (prompt) {
-            connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+            try {
+                connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+            } catch (error) {
+                if (error instanceof UserCancelledError) {
+                    // Rethrow UserCancelledError, otherwise, move on without a selected registry
+                    throw error;
+                }
+            }
         } else {
             // Try to find a connected Docker Hub registry (primarily for login credentials)
             connectedRegistry = await tryGetDockerHubRegistry(context);
