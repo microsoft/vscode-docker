@@ -71,6 +71,7 @@ interface ITestDockerodeOptions {
 
 async function runWithDockerode(options: ITestDockerodeOptions, callback: () => Promise<void>): Promise<void> {
     const oldDockerode = ext.dockerode;
+
     try {
         ext.dockerode = <Dockerode><any>{
             listContainers: async () => options.containers,

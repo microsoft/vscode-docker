@@ -10,7 +10,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
@@ -33,9 +33,8 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
         tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
     }
 
-    const image: Image = node.getImage();
-    // eslint-disable-next-line @typescript-eslint/promise-function-async
-    await callDockerodeWithErrorHandling(() => image.tag({ repo: repo, tag: tag }), context);
+    const image: Image = await node.getImage();
+    await callDockerodeWithErrorHandling(async () => image.tag({ repo: repo, tag: tag }), context);
     return newTaggedName;
 }
 

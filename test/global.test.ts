@@ -101,6 +101,7 @@ suiteSetup(async function (this: mocha.IHookCallbackContext): Promise<void> {
     this.timeout(60 * 1000);
     console.log('global.test.ts: suiteSetup');
 
+    ext.runningTests = true;
     // Otherwise the app can blocking asking for keychain access
     ext.keytar = new TestKeytar();
 

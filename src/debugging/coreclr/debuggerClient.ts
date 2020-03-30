@@ -2,9 +2,9 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
+import { OSProvider } from '../../utils/LocalOSProvider';
 import { PlatformOS } from '../../utils/platform';
 import { DockerClient } from './CliDockerClient';
-import { OSProvider } from './LocalOSProvider';
 import { VsDbgClient } from './vsdbgClient';
 
 export interface DebuggerClient {

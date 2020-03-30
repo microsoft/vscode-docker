@@ -5,6 +5,7 @@
 
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { callDockerodeAsync } from "../../utils/callDockerode";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -40,7 +41,7 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, Volu
     }
 
     public async getItems(): Promise<LocalVolumeInfo[]> {
-        const result = await ext.dockerode.listVolumes();
+        const result = await callDockerodeAsync(async () => ext.dockerode.listVolumes());
         const volumes = (result && result.Volumes) || [];
         return volumes.map(v => new LocalVolumeInfo(v));
     }

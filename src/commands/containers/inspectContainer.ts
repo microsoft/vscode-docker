@@ -8,7 +8,7 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
-import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -18,8 +18,7 @@ export async function inspectContainer(context: IActionContext, node?: Container
         });
     }
 
-    const container = node.getContainer();
-    // eslint-disable-next-line @typescript-eslint/promise-function-async
-    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
+    const container = await node.getContainer();
+    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(async () => container.inspect(), context);
     await openReadOnlyJson(node, inspectInfo);
 }

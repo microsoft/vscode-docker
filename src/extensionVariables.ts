@@ -59,4 +59,5 @@ export namespace ext {
         platform: osNode.platform(),
         release: osNode.release()
     };
+    export let runningTests: boolean = false;
 }

@@ -6,7 +6,7 @@
 import * as semver from 'semver';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { callDockerodeWithErrorHandling } from './callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from './callDockerode';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';
@@ -83,8 +83,7 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
         // so short-circuit the Docker call entirely.
         return "linux";
     } else {
-        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        const info = await callDockerodeWithErrorHandling(() => ext.dockerode.info(), context);
+        const info = await callDockerodeWithErrorHandling(async () => ext.dockerode.info(), context);
         // eslint-disable-next-line @typescript-eslint/tslint/config
         return info.OSType;
     }

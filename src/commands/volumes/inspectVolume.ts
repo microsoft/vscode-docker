@@ -8,15 +8,14 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from "../../localize";
 import { VolumeTreeItem } from "../../tree/volumes/VolumeTreeItem";
-import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectVolume(context: IActionContext, node?: VolumeTreeItem): Promise<void> {
     if (!node) {
         node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.volumes.inspect.noVolumes', 'No volumes are available to inspect') });
     }
 
-    const volume: Volume = node.getVolume();
-    // eslint-disable-next-line @typescript-eslint/promise-function-async
-    const inspectInfo = await callDockerodeWithErrorHandling(() => volume.inspect(), context);
+    const volume: Volume = await node.getVolume();
+    const inspectInfo = await callDockerodeWithErrorHandling(async () => volume.inspect(), context);
     await openReadOnlyJson(node, inspectInfo);
 }
