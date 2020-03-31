@@ -7,6 +7,7 @@ import * as path from 'path';
 import { CancellationToken, commands, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
+import { OSProvider } from '../../utils/LocalOSProvider';
 import { PlatformOS } from '../../utils/platform';
 import { resolveVariables } from '../../utils/resolveVariables';
 import { DockerContainerExtraHost, DockerContainerPort, DockerContainerVolume } from './CliDockerClient';
@@ -14,7 +15,6 @@ import { UserSecretsRegex } from './CommandLineDotNetClient';
 import { DebugSessionManager } from './debugSessionManager';
 import { DockerManager, LaunchBuildOptions, LaunchResult, LaunchRunOptions } from './dockerManager';
 import { FileSystemProvider } from './fsProvider';
-import { OSProvider } from './LocalOSProvider';
 import { NetCoreProjectProvider } from './netCoreProjectProvider';
 import { Prerequisite } from './prereqManager';
 

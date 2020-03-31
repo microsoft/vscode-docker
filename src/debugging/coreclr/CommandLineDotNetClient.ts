@@ -4,10 +4,10 @@
 
 import * as semver from 'semver';
 import { parseError } from 'vscode-azureextensionui';
+import { OSProvider } from "../../utils/LocalOSProvider";
 import { randomUtils } from '../../utils/randomUtils';
 import { ProcessProvider } from "./ChildProcessProvider";
 import { FileSystemProvider } from "./fsProvider";
-import { OSProvider } from "./LocalOSProvider";
 
 export type MSBuildExecOptions = {
     target?: string;

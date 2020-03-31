@@ -8,6 +8,7 @@ import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { callDockerodeAsync } from "../../utils/callDockerode";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -46,7 +47,7 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<LocalNetworkInfo, Ne
         let config = workspace.getConfiguration(configPrefix);
         let showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
-        let networks = <NetworkInspectInfo[]>await ext.dockerode.listNetworks() || [];
+        let networks = <NetworkInspectInfo[]>await callDockerodeAsync(async () => ext.dockerode.listNetworks()) || [];
 
         if (!showBuiltInNetworks) {
             networks = networks.filter(network => !builtInNetworks.includes(network.Name));

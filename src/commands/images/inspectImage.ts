@@ -8,7 +8,7 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
-import { callDockerodeWithErrorHandling } from "../../utils/callDockerodeWithErrorHandling";
+import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     if (!node) {
@@ -18,8 +18,7 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
         });
     }
 
-    const image: Image = node.getImage();
-    // eslint-disable-next-line @typescript-eslint/promise-function-async
-    const inspectInfo: ImageInspectInfo = await callDockerodeWithErrorHandling(() => image.inspect(), context);
+    const image: Image = await node.getImage();
+    const inspectInfo: ImageInspectInfo = await callDockerodeWithErrorHandling(async () => image.inspect(), context);
     await openReadOnlyJson(node, inspectInfo);
 }

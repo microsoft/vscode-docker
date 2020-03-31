@@ -11,7 +11,6 @@ import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
-import { consolidateDefaultRegistrySettings } from './commands/registries/registrySettings';
 import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
@@ -130,7 +129,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
 
-        await consolidateDefaultRegistrySettings();
         activateLanguageClient(ctx);
 
         registerListeners(ctx);

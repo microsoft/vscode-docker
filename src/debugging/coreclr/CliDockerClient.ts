@@ -266,6 +266,17 @@ export class CliDockerClient implements DockerClient {
         return id.substring(0, 12);
     }
 
+    public async copy(sourcePath: string, destinationPath: string): Promise<string> {
+        const command = CommandLineBuilder
+            .create('docker', 'cp')
+            .withQuotedArg(sourcePath)
+            .withQuotedArg(destinationPath)
+            .build();
+
+        const output = await this.processProvider.exec(command, {});
+        return output.stdout;
+    }
+
     public async exec(containerNameOrId: string, args: string, options?: DockerExecOptions): Promise<string> {
         options = options || {};
 

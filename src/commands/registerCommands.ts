@@ -57,7 +57,6 @@ import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImage, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
-import { setRegistryAsDefault } from "./registries/registrySettings";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
@@ -112,7 +111,6 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImage);
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
     registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
-    registerCommand('vscode-docker.registries.setAsDefault', setRegistryAsDefault);
 
     registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
 

@@ -17,7 +17,6 @@ export namespace keytarConstants {
 }
 
 export namespace configurationKeys {
-    export const defaultRegistryPath = "defaultRegistryPath";
     export const groupImagesBy = 'groupImagesBy';
 }
 

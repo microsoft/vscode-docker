@@ -25,7 +25,8 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         });
     }
 
-    const inspectInfo = await node.getImage().inspect();
+    const image = await node.getImage();
+    const inspectInfo = await image.inspect();
 
     const terminalCommand = await selectRunCommand(
         context,

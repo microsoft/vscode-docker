@@ -8,7 +8,7 @@ import { window } from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, IParsedError, parseError } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerode, callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { ILocalImageInfo } from './LocalImageInfo';
 
@@ -58,15 +58,14 @@ export class ImageTreeItem extends AzExtTreeItem {
         return getThemedIconPath(icon);
     }
 
-    public getImage(): Image {
-        return ext.dockerode.getImage(this.imageId);
+    public async getImage(): Promise<Image> {
+        return callDockerode(() => ext.dockerode.getImage(this.imageId));
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        const image: Image = this.getImage();
+        const image: Image = await this.getImage();
         try {
-            // eslint-disable-next-line @typescript-eslint/promise-function-async
-            await callDockerodeWithErrorHandling(() => image.remove({ force: true }), context);
+            await callDockerodeWithErrorHandling(async () => image.remove({ force: true }), context);
         } catch (error) {
             const parsedError: IParsedError = parseError(error);
 

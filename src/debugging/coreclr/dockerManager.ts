@@ -7,6 +7,7 @@ import { Memento } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { Lazy } from '../../utils/lazy';
+import { OSProvider } from '../../utils/LocalOSProvider';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
@@ -14,7 +15,6 @@ import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRun
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
-import { OSProvider } from './LocalOSProvider';
 import { OutputManager } from './outputManager';
 
 export type DockerManagerBuildImageOptions

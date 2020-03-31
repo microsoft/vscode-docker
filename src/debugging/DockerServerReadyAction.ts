@@ -11,6 +11,7 @@ import * as util from 'util';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { callDockerode } from '../utils/callDockerode';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
@@ -191,7 +192,7 @@ type LogStream = NodeJS.ReadableStream & { destroy(): void; };
 class DockerLogsTracker extends vscode.Disposable {
     private logStream: LogStream;
 
-    public constructor(containerName: string, detector: DockerServerReadyDetector) {
+    public constructor(private readonly containerName: string, private readonly detector: DockerServerReadyDetector) {
         super(
             () => {
                 if (this.logStream) {
@@ -199,12 +200,17 @@ class DockerLogsTracker extends vscode.Disposable {
                 }
             });
 
-        if (!detector) {
+        if (!this.detector) {
             return;
         }
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        this.startListening();
+    }
+
+    private async startListening(): Promise<void> {
         try {
-            const container = ext.dockerode.getContainer(containerName);
+            const container = await callDockerode(() => ext.dockerode.getContainer(this.containerName));
 
             container.logs(
                 {
@@ -219,7 +225,7 @@ class DockerLogsTracker extends vscode.Disposable {
                     this.logStream = <LogStream>stream;
                     this.logStream.on('data', (data) => {
                         // tslint:disable-next-line:no-unsafe-any
-                        detector.detectPattern(data.toString());
+                        this.detector.detectPattern(data.toString());
                     });
                 });
         } catch { }

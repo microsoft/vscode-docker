@@ -5,6 +5,7 @@
 
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { callDockerodeAsync } from "../../utils/callDockerode";
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
@@ -48,7 +49,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo
             }
         };
 
-        const items = await ext.dockerode.listContainers(options) || [];
+        const items = await callDockerodeAsync(async () => ext.dockerode.listContainers(options)) || [];
         return items.map(c => new LocalContainerInfo(c));
     }
 

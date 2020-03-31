@@ -9,7 +9,7 @@ import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerodeWithErrorHandling';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { captureCancelStep } from '../../utils/captureCancelStep';
 
 type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[], selectedPort?: number };
@@ -59,17 +59,15 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
-        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        node = await captureBrowseCancelStep('node', telemetryProperties, () =>
+        node = await captureBrowseCancelStep('node', telemetryProperties, async () =>
             ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
                 ...context,
                 noItemFoundErrorMessage: localize('vscode-docker.commands.containers.browseContainer.noContainers', 'No running containers are available to open in a browser')
             }));
     }
 
-    const container = node.getContainer();
-    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(() => container.inspect(), context);
+    const container = await node.getContainer();
+    const inspectInfo: ContainerInspectInfo = await callDockerodeWithErrorHandling(async () => container.inspect(), context);
 
     const ports = inspectInfo && inspectInfo.NetworkSettings && inspectInfo.NetworkSettings.Ports || {};
     const possiblePorts =
