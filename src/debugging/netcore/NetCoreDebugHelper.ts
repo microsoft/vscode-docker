@@ -198,7 +198,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             debuggerPath = `${debuggerDirectory}/vsdbg`;
             const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath);
             if (!isDebuggerInstalled) {
-                await this.copyDebuggerToContainer(containerName, debuggerDirectory);
+                debuggerPath = await this.copyDebuggerToContainer(containerName, debuggerDirectory);
             }
         }
 
