@@ -17,7 +17,7 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
-import CliDockerClient, { DockerExecOptions } from '../coreclr/CliDockerClient';
+import { CliDockerClient } from '../coreclr/CliDockerClient';
 import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
 import { LocalFileSystemProvider } from '../coreclr/fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
@@ -198,7 +198,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             debuggerPath = `${debuggerDirectory}/vsdbg`;
             const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath);
             if (!isDebuggerInstalled) {
-                await this.installDebuggerInContainer(containerName, debuggerDirectory);
+                debuggerPath = await this.copyDebuggerToContainer(containerName, debuggerDirectory);
             }
         }
 
@@ -287,40 +287,30 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async installDebuggerInContainer(containerName: string, installPath: string): Promise<string> {
+    private async copyDebuggerToContainer(containerName: string, containerDebuggerDirectory: string): Promise<string> {
         const yesItem: MessageItem = DialogResponses.yes;
-        const install = (yesItem === await window.showInformationMessage(localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to install debugger in the container?'), ...[DialogResponses.yes, DialogResponses.no]));
+        const message = localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to copy the debugger to the container?');
+        const install = (yesItem === await window.showInformationMessage(message, ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
             throw new UserCancelledError();
         }
 
-        const osProvider = new LocalOSProvider();
-        const installDebuggerOnAlpine = `apk --no-cache add curl && curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
-        const installDebuggerOnNonAlpine = `curl -sSL https://aka.ms/getvsdbgsh | /bin/sh /dev/stdin -v latest -l ${installPath}`;
-        const installDebuggerCmd = `ID=default; if [ -e /etc/os-release ]; then . /etc/os-release; fi; echo $ID; if [ $ID = alpine ]; then ${installDebuggerOnAlpine}; else ${installDebuggerOnNonAlpine}; fi`
-        // Windows require double quotes and Mac and Linux require single quote.
-        const installDebugger: string = osProvider.os === 'Windows' ?
-            `/bin/sh -c "${installDebuggerCmd}"`
-            : `/bin/sh -c '${installDebuggerCmd}'`
-
+        // TODO: Attach doesn't support Windows yet.
+        await this.acquireDebuggers('Linux');
+        const hostDebuggerPath = await this.vsDbgClientFactory().getVsDbgFolder();
+        const containerDebuggerPath = `${containerName}:${containerDebuggerDirectory}`;
         const outputManager = new DefaultOutputManager(ext.outputChannel);
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
 
         await outputManager.performOperation(
-            localize('vscode-docker.debug.netcore.installingDebugger', 'Installing the latest .NET Core debugger...'),
+            localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container...'),
             async (output) => {
-                const installProgress = (content: string) => {
-                    output.appendLine(content);
-                };
-                const dockerExecOptions: DockerExecOptions = { interactive: true, progress: installProgress };
-
-                await dockerClient.exec(containerName, installDebugger, dockerExecOptions);
+                await dockerClient.copy(hostDebuggerPath, containerDebuggerPath);
             },
-            localize('vscode-docker.debug.netcore.debuggerInstalled', 'Debugger installed'),
-            localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to install the .NET Core debugger.')
+            localize('vscode-docker.debug.netcore.debuggerInstalled', 'Debugger copied'),
+            localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to copy the .NET Core debugger.')
         );
-
-        return `${installPath}/vsdbg`;
+        return `${containerDebuggerDirectory}/vsdbg`;
     }
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string): Promise<boolean> {
