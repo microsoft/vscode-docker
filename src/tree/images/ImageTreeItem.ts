@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Image } from 'dockerode';
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { window } from 'vscode';
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, IParsedError, parseError } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { callDockerode, callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { ILocalImageInfo } from './LocalImageInfo';
@@ -57,11 +59,34 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public async getImage(): Promise<Image> {
-        return callDockerode(() => ext.dockerode.getImage(this.fullTag));
+        return callDockerode(() => ext.dockerode.getImage(this.imageId));
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        const image: Image = await this.getImage();
-        await callDockerodeWithErrorHandling(async () => image.remove({ force: true }), context);
+        let image: Image;
+
+        // Dangling images are not shown in the explorer. However, an image can end up with <none> tag, if a new version of that particular tag is pulled.
+        // For such cases, we need to delete by digest, not by tag.
+        if (this.fullTag.endsWith(':<none>') && this._item.repoDigests && this._item.repoDigests.length > 0) {
+            image = await callDockerode(() => ext.dockerode.getImage(this._item.repoDigests[0]));
+        } else {
+            image = await callDockerode(() => ext.dockerode.getImage(this.fullTag));
+        }
+
+        try {
+            await callDockerodeWithErrorHandling(async () => image.remove({ force: true }), context);
+        } catch (error) {
+            const parsedError: IParsedError = parseError(error);
+
+            // error code 409 is returned for conflicts like the image is used by a running container or another image.
+            // Such errors are not really an error, it should be treated as warning.
+            if (parsedError.errorType === '409') {
+                ext.outputChannel.appendLog(localize('vscode-docker.tree.images.warning', 'Warning: {0}', parsedError.message));
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                window.showWarningMessage(parsedError.message);
+            } else {
+                throw error;
+            }
+        }
     }
 }

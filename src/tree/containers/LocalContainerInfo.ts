@@ -4,12 +4,26 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerInfo } from "dockerode";
-import { ILocalImageInfo } from "../images/LocalImageInfo";
+import { ILocalItem } from "../LocalRootTreeItemBase";
+
+/**
+ * Interface implemented by `LocalContainerInfo`
+ */
+export interface ILocalContainerInfo extends ILocalItem {
+    fullTag: string;
+    imageId: string;
+    containerId: string;
+    containerName: string;
+    networks: string[];
+    ports: number[];
+    state: string;
+    status: string;
+}
 
 /**
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
-export class LocalContainerInfo implements ILocalImageInfo {
+export class LocalContainerInfo implements ILocalContainerInfo {
     private _containerName: string;
     public data: ContainerInfo;
     public constructor(data: ContainerInfo) {
