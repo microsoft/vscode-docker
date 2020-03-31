@@ -66,10 +66,11 @@ export class ImageTreeItem extends AzExtTreeItem {
         let image: Image;
 
         // Dangling images are not shown in the explorer. However, an image can end up with <none> tag, if a new version of that particular tag is pulled.
-        // For such cases, we need to delete by digest, not by tag.
         if (this.fullTag.endsWith(':<none>') && this._item.repoDigests && this._item.repoDigests.length > 0) {
+            // Image is tagged <none>. Need to delete by digest.
             image = await callDockerode(() => ext.dockerode.getImage(this._item.repoDigests[0]));
         } else {
+            // Image is normal. Delete by name.
             image = await callDockerode(() => ext.dockerode.getImage(this.fullTag));
         }
 
