@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { LineSplitter } from './lineSplitter';
+import { LineSplitter } from '../debugging/coreclr/lineSplitter';
 
 type outputCallback<T> = (result: T) => string;
 

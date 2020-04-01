@@ -8,6 +8,7 @@ import { parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { Lazy } from '../../utils/lazy';
 import { OSProvider } from '../../utils/LocalOSProvider';
+import { OutputManager } from '../../utils/outputManager';
 import { PlatformOS } from '../../utils/platform';
 import { AppStorageProvider } from './appStorage';
 import { ProcessProvider } from './ChildProcessProvider';
@@ -15,7 +16,6 @@ import { DockerBuildImageOptions, DockerClient, DockerContainerVolume, DockerRun
 import { DebuggerClient } from './debuggerClient';
 import { FileSystemProvider } from './fsProvider';
 import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
-import { OutputManager } from './outputManager';
 
 export type DockerManagerBuildImageOptions
     = DockerBuildImageOptions
