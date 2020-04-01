@@ -62,12 +62,15 @@ async function downloadInstaller(output: OutputManager): Promise<string> {
         output.appendLine("Download completed.");
         return fileName;
     }
-
-
 }
 
 async function Install(output: OutputManager, fileName: string): Promise<void> {
     const fsProvider = new LocalFileSystemProvider();
+    const osProvider = new LocalOSProvider();
+    let installCommand = osProvider.isMac
+        ? `Chmod +x '${fileName}' && hdiutil mount '${fileName}' && sudo cp -R "/Volumes/Docker/Docker.app" /Applications`
+        : `'${fileName}'`;
+
     try {
         const processProvider = new ChildProcessProvider();
         const execOptions = {
@@ -76,7 +79,7 @@ async function Install(output: OutputManager, fileName: string): Promise<void> {
                 output.appendLine(content);
             }
         };
-        await processProvider.exec(fileName, execOptions);
+        await processProvider.exec(installCommand, execOptions);
     } finally {
         if (await fsProvider.fileExists(fileName + 's')) {
             await fsProvider.unlinkFile(fileName + 's');
