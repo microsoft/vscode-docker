@@ -13,15 +13,15 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
 import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
-import { LocalContainerInfo } from "./LocalContainerInfo";
+import { ILocalContainerInfo, LocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo, ContainerProperty> {
+export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInfo, ContainerProperty> {
     public treePrefix: string = 'containers';
     public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
     public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
 
-    public childType: LocalChildType<LocalContainerInfo> = ContainerTreeItem;
-    public childGroupType: LocalChildGroupType<LocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
+    public childType: LocalChildType<ILocalContainerInfo> = ContainerTreeItem;
+    public childGroupType: LocalChildGroupType<ILocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
 
     public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
         properties: containerProperties,
@@ -42,7 +42,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo
         return this.groupBySetting === 'None' ? 'container' : 'container group';
     }
 
-    public async getItems(): Promise<LocalContainerInfo[]> {
+    public async getItems(): Promise<ILocalContainerInfo[]> {
         const options = {
             "filters": {
                 "status": ["created", "restarting", "running", "paused", "exited", "dead"]
@@ -53,7 +53,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<LocalContainerInfo
         return items.map(c => new LocalContainerInfo(c));
     }
 
-    public getPropertyValue(item: LocalContainerInfo, property: ContainerProperty): string {
+    public getPropertyValue(item: ILocalContainerInfo, property: ContainerProperty): string {
         switch (property) {
             case 'ContainerId':
                 return item.containerId.slice(0, 12);
