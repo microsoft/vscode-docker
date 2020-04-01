@@ -13,7 +13,7 @@ If something seems wrong with [the README file](README.md) or [the Docker extens
 ## Code
 To contribute bug fixes, features, or design changes:
   * Clone the repository locally and open in VS Code.
-  * Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin).
+  * Install [ESLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
   * Open the terminal (<kbd>CTRL</kbd>+ <kbd>\`</kbd> by default) and run `npm install`.
   * To build, open the Command Palette (<kbd>F1</kbd> by default) and type in `Tasks: Run Build Task`.
   * Debug: press <kbd>F5</kbd> (by default) to start debugging the extension.
