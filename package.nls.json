@@ -94,7 +94,7 @@
     "vscode-docker.tasks.docker-run.python.args": "Arguments passed to the Python app.",
     "vscode-docker.tasks.docker-run.python.wait": "Whether to wait for debugger to attach.",
     "vscode-docker.tasks.docker-run.python.debugPort": "The port that the debugger will listen on.",
-    "vscode-docker.config.docker.promptForRegistryWhenPushingImages": "Whether to prompt for the registry to push to if the image is not explicitly tagged.",
+    "vscode-docker.config.docker.promptForRegistryWhenPushingImages": "Prompt for registry selection if the image is not explicitly tagged.",
     "vscode-docker.config.template.build.template": "The command template.",
     "vscode-docker.config.template.build.label": "The label displayed to the user.",
     "vscode-docker.config.template.build.match": "The regular expression for choosing the right template. Checked against container name, container's image name, etc.",
