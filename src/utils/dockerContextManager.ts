@@ -107,6 +107,10 @@ export class DockerContextManager {
         };
     }
 
+    public expediteContextCheck(): void {
+        this.lastContextCheckTimestamp = 0;
+    }
+
     private async getDockerConfigDigest(): Promise<string> {
         // Note: computing Docker config file digest may fail, typically because Docker is not installed,
         // and there is no config file. We use falsy value (empty string) as a way to indicate that,
