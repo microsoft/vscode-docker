@@ -1183,6 +1183,11 @@
                                         "containerPath"
                                     ]
                                 }
+                            },
+                            "cleanUp": {
+                                "type": "boolean",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.cleanUp%",
+                                "default": false
                             }
                         }
                     },
