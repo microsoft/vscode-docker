@@ -71,7 +71,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);
-                actionContext.telemetry.properties.platform = debugPlatform;
+                actionContext.telemetry.properties.dockerPlatform = debugPlatform;
                 actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 
                 return await this.resolveDebugConfigurationInternal(

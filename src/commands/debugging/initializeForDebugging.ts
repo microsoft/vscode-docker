@@ -38,7 +38,7 @@ export async function initializeForDebugging(actionContext: IActionContext): Pro
             throw new Error(localize('vscode-docker.commands.debugging.initialize.platformNotSupported', 'The selected platform is not yet supported for debugging.'));
     }
 
-    actionContext.telemetry.properties.platform = debugPlatform;
+    actionContext.telemetry.properties.dockerPlatform = debugPlatform;
     if (debugPlatform === 'netCore') {
         ensureDotNetCoreDependencies(folder, actionContext);
     }
