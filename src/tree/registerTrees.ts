@@ -24,7 +24,7 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(containersLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.containersTree.loadMore(node, context));
     registerCommand('vscode-docker.containers.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => {
-        dockerContextManager.resetLastCheckedTimestamp();
+        dockerContextManager.expediteContextCheck();
         await ext.containersTree.refresh(node);
     });
 
@@ -37,7 +37,7 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(networksLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.networksTree.loadMore(node, context));
     registerCommand('vscode-docker.networks.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => {
-        dockerContextManager.resetLastCheckedTimestamp();
+        dockerContextManager.expediteContextCheck();
         await ext.networksTree.refresh(node);
     });
 
@@ -50,7 +50,7 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(imagesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.imagesTree.loadMore(node, context));
     registerCommand('vscode-docker.images.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => {
-        dockerContextManager.resetLastCheckedTimestamp();
+        dockerContextManager.expediteContextCheck();
         await ext.imagesTree.refresh(node);
     });
 
@@ -72,7 +72,7 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(volumesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.volumesTree.loadMore(node, context));
     registerCommand('vscode-docker.volumes.refresh', async (_context: IActionContext, node?: AzExtTreeItem) => {
-        dockerContextManager.resetLastCheckedTimestamp();
+        dockerContextManager.expediteContextCheck();
         await ext.volumesTree.refresh(node);
     });
 

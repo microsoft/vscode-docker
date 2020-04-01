@@ -107,7 +107,7 @@ export class DockerContextManager {
         };
     }
 
-    public resetLastCheckedTimestamp(): void {
+    public expediteContextCheck(): void {
         this.lastContextCheckTimestamp = 0;
     }
 
