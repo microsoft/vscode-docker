@@ -21,9 +21,9 @@ export async function removeImage(context: IActionContext, node?: ImageTreeItem,
 
     let confirmRemove: string;
     if (nodes.length === 1) {
-        confirmRemove = localize('vscode-docker.commands.images.remove.confirmSingle', 'Are you sure you want to remove image "{0}"? This will remove all matching and child images.', nodes[0].label);
+        confirmRemove = localize('vscode-docker.commands.images.remove.confirmSingle', 'Are you sure you want to remove image "{0}"? If there are other tags or child images for this image, only the tag will be removed.', nodes[0].fullTag);
     } else {
-        confirmRemove = localize('vscode-docker.commands.images.remove.confirmMulti', 'Are you sure you want to remove selected images? This will remove all matching and child images.');
+        confirmRemove = localize('vscode-docker.commands.images.remove.confirmMulti', 'Are you sure you want to remove the selected images? If there are other tags or child images for these images, only the tag will be removed.');
     }
 
     // no need to check result - cancel will throw a UserCancelledError

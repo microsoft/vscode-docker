@@ -9,14 +9,14 @@ import { ext } from "../../extensionVariables";
 import { callDockerode, callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getContainerStateIcon } from "./ContainerProperties";
-import { LocalContainerInfo } from "./LocalContainerInfo";
+import { ILocalContainerInfo } from "./LocalContainerInfo";
 
 export class ContainerTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
-    private readonly _item: LocalContainerInfo;
+    private readonly _item: ILocalContainerInfo;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalContainerInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: ILocalContainerInfo) {
         super(parent);
         this._item = itemInfo;
     }
