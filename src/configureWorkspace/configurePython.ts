@@ -67,14 +67,14 @@ const flaskRequirements = `flask==1.1.1
 gunicorn==20.0.4`;
 
 const lowRightsUser = `
-# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user
+# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 `;
 
 const rootUserWarning = `
 # Warning: A port below 1024 has been exposed. This requires the image to run as a root user which is not a best practice.
-# For more information, please refer to https://aka.ms/vscode-docker-python-ports`
+# For more information, please refer to https://aka.ms/vscode-docker-python-user-rights`
 
 async function genDockerFile(serviceName: string, target: PythonTarget, projectType: PythonProjectType, ports: number[], outputFolder: string): Promise<string> {
     const exposeStatements = getExposeStatements(ports);
