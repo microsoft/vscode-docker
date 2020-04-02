@@ -38,9 +38,9 @@ export class PythonTaskHelper implements TaskHelper {
                     tag: getDefaultImageName(context.folder.name),
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable no-template-curly-in-string */
-                    context: '${workspaceFolder}'
+                    context: '${workspaceFolder}',
+                    pull: true
                 },
-                pull: true,
             }
         ];
     }
