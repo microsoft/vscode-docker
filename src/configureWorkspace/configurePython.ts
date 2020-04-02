@@ -67,7 +67,7 @@ const flaskRequirements = `flask==1.1.1
 gunicorn==20.0.4`;
 
 const lowRightsUser = `
-# Switching to a low-rights user, please refer to https://aka.ms/vscode-docker-python-user
+# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 `;
@@ -96,18 +96,12 @@ async function genDockerFile(serviceName: string, target: PythonTarget, projectT
         throw new Error(localize('vscode-docker.configurePython.unknownProjectType', 'Unknown project type: {0}', projectType));
     }
 
-    let userSwitchLogic = lowRightsUser;
-    let userWarning = '';
-
-    if (ports?.find(p => p < 1024)) {
-        userSwitchLogic = '';
-        userWarning = rootUserWarning;
-    }
+    const rootPort: boolean = ports?.some(p => p < 1024) ?? false;
 
     return pythonDockerfile
-        .replace(/\$rootUserWarning\$/g, userWarning)
+        .replace(/\$rootUserWarning\$/g, rootPort ? rootUserWarning : '')
         .replace(/\$expose_statements\$/g, exposeStatements)
-        .replace(/\$user\$/g, userSwitchLogic)
+        .replace(/\$user\$/g, !rootPort ? lowRightsUser : '')
         .replace(/\$cmd\$/g, command);
 }
 
