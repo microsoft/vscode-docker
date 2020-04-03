@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands } from "vscode";
-import { registerCommand } from "vscode-azureextensionui";
+import { commands, window } from "vscode";
+import { IActionContext, registerCommand } from "vscode-azureextensionui";
 import { configure, configureApi } from "../configureWorkspace/configure";
 import { configureCompose } from "../configureWorkspace/configureCompose";
+import { RemoteTagTreeItem } from "../tree/registries/RemoteTagTreeItem";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
@@ -40,7 +41,6 @@ import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
-import { deployImageToAzure } from "./registries/azure/deployImageToAzure";
 import { openInAzurePortal } from "./registries/azure/openInAzurePortal";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
 import { runAzureTask } from "./registries/azure/tasks/runAzureTask";
@@ -104,7 +104,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.connectRegistry', connectRegistry);
     registerCommand('vscode-docker.registries.copyImageDigest', copyRemoteImageDigest);
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
-    registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
@@ -132,4 +131,17 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.remove', removeVolume);
 
     registerCommand('vscode-docker.help', help);
+
+    registerCommand('vscode-docker.registries.deployImageToAzure', async (context: IActionContext, node?: RemoteTagTreeItem) => {
+        const startTime = process.hrtime.bigint();
+        const deployImageToAzure = (await import(/* webpackChunkName: "deployImageToAzure" */'./registries/azure/deployImageToAzure')).deployImageToAzure;
+
+        const endTime = process.hrtime.bigint();
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        window.showInformationMessage(`Took ${(endTime - startTime) / BigInt(1000000)} ms to load`);
+
+        // eslint-disable-next-line @typescript-eslint/tslint/config
+        await deployImageToAzure(context, node);
+    });
 }
