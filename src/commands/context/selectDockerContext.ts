@@ -20,10 +20,10 @@ export async function selectDockerContext(prompt: string): Promise<IDockerContex
         data: ctx
     }));
 
-    const selectedContexItem = await ext.ui.showQuickPick(contextItems, {
+    const selectedContextItem = await ext.ui.showQuickPick(contextItems, {
         placeHolder: prompt,
         suppressPersistence: true
     });
 
-    return selectedContexItem.data;
+    return selectedContextItem.data;
 }
