@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ProgressLocation, window } from 'vscode';
+import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { dockerContextManager, IDockerContextListItem } from '../../utils/dockerContextManager';
@@ -14,9 +15,9 @@ export async function selectDockerContext(prompt: string): Promise<IDockerContex
         { location: ProgressLocation.Notification, title: fetchingContexts },
         async () => { return await dockerContextManager.listAll(); });
 
-    const contextItems = contexts.map(ctx => ({
+    const contextItems: IAzureQuickPickItem<IDockerContextListItem>[] = contexts.map(ctx => ({
         label: `${ctx.Name} ${ctx.Current ? '*' : ''}`.trim(),
-        context: ctx
+        data: ctx
     }));
 
     const selectedContexItem = await ext.ui.showQuickPick(contextItems, {
@@ -24,5 +25,5 @@ export async function selectDockerContext(prompt: string): Promise<IDockerContex
         suppressPersistence: true
     });
 
-    return selectedContexItem.context;
+    return selectedContexItem.data;
 }
