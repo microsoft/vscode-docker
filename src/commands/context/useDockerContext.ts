@@ -15,5 +15,5 @@ export async function useDockerContext(_context: IActionContext): Promise<void> 
     await dockerContextManager.use(selectedContext.Name);
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextInUse', 'Using Docker context {0}', selectedContext.Name));
+    vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextInUse', 'Using Docker context \'{0}\'', selectedContext.Name));
 }
