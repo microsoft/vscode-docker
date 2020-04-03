@@ -25,5 +25,5 @@ export async function removeDockerContext(context: IActionContext): Promise<void
 
     await dockerContextManager.remove(selectedContext.Name);
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextRemoved', 'Docker context {0} has been removed', selectedContext.Name));
+    vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextRemoved', 'Docker context \'{0}\' has been removed', selectedContext.Name));
 }
