@@ -97,6 +97,9 @@
         "onCommand:vscode-docker.volumes.prune",
         "onCommand:vscode-docker.volumes.refresh",
         "onCommand:vscode-docker.volumes.remove",
+        "onCommand:vscode-docker.context.use",
+        "onCommand:vscode-docker.context.remove",
+        "onCommand:vscode-docker.context.inspect",
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
@@ -2376,6 +2379,21 @@
                 "title": "%vscode-docker.commands.help%",
                 "category": "%vscode-docker.commands.category.docker%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.context.use",
+                "title": "%vscode-docker.commands.context.use%",
+                "category": "%vscode-docker.commands.category.context%"
+            },
+            {
+                "command": "vscode-docker.context.remove",
+                "title": "%vscode-docker.commands.context.remove%",
+                "category": "%vscode-docker.commands.category.context%"
+            },
+            {
+                "command": "vscode-docker.context.inspect",
+                "title": "%vscode-docker.commands.context.inspect%",
+                "category": "%vscode-docker.commands.category.context%"
             }
         ],
         "views": {

@@ -9,13 +9,21 @@ import * as fs from 'fs';
 import * as url from 'url';
 import { workspace, WorkspaceConfiguration } from 'vscode';
 import { parseError } from "vscode-azureextensionui";
+import LineSplitter from '../debugging/coreclr/lineSplitter';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { LocalOSProvider } from './LocalOSProvider';
-import { execAsync } from './spawnAsync';
+import { execAsync, spawnAsync } from './spawnAsync';
 import { timeUtils } from './timeUtils';
 
-const ContextInspectExecOptions: ExecOptions = { timeout: 5000 }
+// CONSIDER
+// Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
+// if the current context refers to a remote Docker engine that is unreachable (e.g. machine is shut down).
+// Consider having our own timeout for execution of any context-related Docker CLI commands.
+// The following timeout is for _starting_ the command only; in the current implementation there is no timeot
+// for command duration.
+const ContextCmdExecOptions: ExecOptions = { timeout: 5000 }
+
 const DOCKER_CONTEXT: string = 'DOCKER_CONTEXT';
 const DefaultRefreshIntervalSec: number = 20;
 const osp = new LocalOSProvider();
@@ -64,6 +72,11 @@ export interface IDockerContextCheckResult {
     Changed: boolean
 }
 
+export interface IDockerContextListItem {
+    Name: string,
+    Current: boolean
+}
+
 export class DockerContextManager {
     private readonly contextRefreshIntervalMs: number;
     private lastContextCheckTimestamp: number;
@@ -109,6 +122,46 @@ export class DockerContextManager {
 
     public expediteContextCheck(): void {
         this.lastContextCheckTimestamp = 0;
+    }
+
+    public async listAll(): Promise<IDockerContextListItem[]> {
+        let execResult: {
+            stdout: string;
+        };
+        const contextListCmd = "docker context ls --format '{{ .Name }} {{ .Current }}'";
+
+        execResult = await execAsync(contextListCmd, ContextCmdExecOptions);
+
+        const contextRecords = LineSplitter.splitLines(execResult.stdout);
+        if (!contextRecords || contextRecords.length === 0) {
+            throw new Error(localize('vscode-docker.dockerContext.contextListRetrievalFailed', 'Docker contexts could not be listed'));
+        }
+
+        const items = contextRecords.map(record => {
+            const parts = record.split(' ');
+            return { Name: parts[0], Current: parts[1] === 'true' };
+        });
+        return items;
+    }
+
+    public async inspect(contextName: string): Promise<string> {
+        let execResult: {
+            stdout: string;
+        };
+        const inspectCmd: string = `docker context inspect ${contextName}`;
+        execResult = await execAsync(inspectCmd, ContextCmdExecOptions);
+        return execResult.stdout;
+    }
+
+    public async use(contextName: string): Promise<void> {
+        const useCmd: string = `docker context use ${contextName}`;
+        await spawnAsync(useCmd, ContextCmdExecOptions);
+        this.expediteContextCheck();
+    }
+
+    public async remove(contextName: string): Promise<void> {
+        const removeCmd: string = `docker context rm ${contextName}`;
+        await spawnAsync(removeCmd, ContextCmdExecOptions);
     }
 
     private async getDockerConfigDigest(): Promise<string> {
@@ -163,7 +216,7 @@ export class DockerContextManager {
         const inspectCmd = `docker context inspect ${process.env[DOCKER_CONTEXT] || ''}`.trim();
 
         try {
-            execResult = await execAsync(inspectCmd, ContextInspectExecOptions);
+            execResult = await execAsync(inspectCmd, ContextCmdExecOptions);
         } catch (err) {
             const error = parseError(err);
             throw new Error(localize('vscode-docker.dockerContext.inspectCurrentFailed', 'Could not determine the current Docker context. Is Docker installed? Error: {0}', error.message));
