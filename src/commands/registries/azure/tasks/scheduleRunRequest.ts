@@ -15,7 +15,7 @@ import { ext } from '../../../../extensionVariables';
 import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
-import { getBlobInfo, streamLogs } from "../../../../utils/azureUtils";
+import { getBlobInfo, streamLogs } from "../../../../utils/azureBlobUtils";
 import { delay } from '../../../../utils/delay';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';

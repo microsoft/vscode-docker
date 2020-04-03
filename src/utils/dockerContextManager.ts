@@ -128,7 +128,7 @@ export class DockerContextManager {
         let execResult: {
             stdout: string;
         };
-        const contextListCmd = "docker context ls --format '{{ .Name }} {{ .Current }}'";
+        const contextListCmd = 'docker context ls --format="{{ .Name }} {{ .Current }}"';
 
         execResult = await execAsync(contextListCmd, ContextCmdExecOptions);
 

@@ -8,7 +8,7 @@ import { IActionContext, openReadOnlyContent } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
 import { AzureTaskRunTreeItem } from "../../../../tree/registries/azure/AzureTaskRunTreeItem";
-import { getBlobInfo, getBlobToText, IBlobInfo } from "../../../../utils/azureUtils";
+import { getBlobInfo, getBlobToText, IBlobInfo } from "../../../../utils/azureBlobUtils";
 import { nonNullProp } from "../../../../utils/nonNull";
 
 export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTaskRunTreeItem): Promise<void> {

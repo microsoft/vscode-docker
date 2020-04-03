@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
 const extensionPath = ignoreBundle ? "./out/src/extension" : "./dist/extension.bundle";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const extension = require(extensionPath);
 
 async function activate(ctx) {

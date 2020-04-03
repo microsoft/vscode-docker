@@ -5,7 +5,7 @@
 
 import { Uri } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
-import { scheduleRunRequest } from './scheduleRunRequest';
+import { scheduleRunRequest } from '../../../../utils/lazyLoad';
 
 export async function runFileAsAzureTask(context: IActionContext, uri?: Uri): Promise<void> {
     await scheduleRunRequest(context, "FileTaskRunRequest", uri);
