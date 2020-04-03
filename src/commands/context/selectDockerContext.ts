@@ -10,12 +10,9 @@ import { dockerContextManager, IDockerContextListItem } from '../../utils/docker
 
 export async function selectDockerContext(prompt: string): Promise<IDockerContextListItem> {
     const fetchingContexts = localize('vscode-docker.commands.context.fetchingContexts', 'Fetching Docker contexts...');
-    let contexts: IDockerContextListItem[];
-    await window.withProgress(
+    const contexts: IDockerContextListItem[] = await window.withProgress(
         { location: ProgressLocation.Notification, title: fetchingContexts },
-        async () => {
-            contexts = await dockerContextManager.listAll()
-        });
+        async () => { return await dockerContextManager.listAll(); });
 
     const contextItems = contexts.map(ctx => ({
         label: `${ctx.Name} ${ctx.Current ? '*' : ''}`.trim(),
