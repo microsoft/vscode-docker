@@ -30,7 +30,7 @@ const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<Pyth
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:3.8
-
+$rootUserWarning$
 $expose_statements$
 
 # Keeps Python from generating .pyc files in the container
@@ -45,8 +45,8 @@ RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
 ADD . /app
-
-# During debugging, this entry point will be overridden. For more information, refer to https://aka.ms/vscode-docker-python-debug
+$user$
+# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 $cmd$
 `;
 
@@ -65,6 +65,16 @@ gunicorn==20.0.4`;
 
 const flaskRequirements = `flask==1.1.1
 gunicorn==20.0.4`;
+
+const lowRightsUser = `
+# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
+RUN useradd appuser && chown -R appuser /app
+USER appuser
+`;
+
+const rootUserWarning = `
+# Warning: A port below 1024 has been exposed. This requires the image to run as a root user which is not a best practice.
+# For more information, please refer to https://aka.ms/vscode-docker-python-user-rights`
 
 async function genDockerFile(serviceName: string, target: PythonTarget, projectType: PythonProjectType, ports: number[], outputFolder: string): Promise<string> {
     const exposeStatements = getExposeStatements(ports);
@@ -86,8 +96,12 @@ async function genDockerFile(serviceName: string, target: PythonTarget, projectT
         throw new Error(localize('vscode-docker.configurePython.unknownProjectType', 'Unknown project type: {0}', projectType));
     }
 
+    const rootPort: boolean = ports?.some(p => p < 1024) ?? false;
+
     return pythonDockerfile
+        .replace(/\$rootUserWarning\$/g, rootPort ? rootUserWarning : '')
         .replace(/\$expose_statements\$/g, exposeStatements)
+        .replace(/\$user\$/g, !rootPort ? lowRightsUser : '')
         .replace(/\$cmd\$/g, command);
 }
 

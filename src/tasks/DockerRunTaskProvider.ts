@@ -93,6 +93,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
+            .withFlagArg('--rm', runOptions.remove)
             .withQuotedArg(runOptions.image)
             .withArgs(runOptions.command);
     }
