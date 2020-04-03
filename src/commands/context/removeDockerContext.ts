@@ -19,7 +19,7 @@ export async function removeDockerContext(context: IActionContext): Promise<void
 
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(
-        localize('vscode-docker.commands.context.confirmRemove', 'Are you sure you want to remove Docker context {0}?', selectedContext.Name),
+        localize('vscode-docker.commands.context.confirmRemove', 'Are you sure you want to remove Docker context \'{0}\'?', selectedContext.Name),
         { modal: true },
         { title: localize('vscode-docker.commands.context.remove', 'Remove') });
 
