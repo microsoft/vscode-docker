@@ -1184,9 +1184,9 @@
                                     ]
                                 }
                             },
-                            "cleanUp": {
+                            "remove": {
                                 "type": "boolean",
-                                "description": "%vscode-docker.tasks.docker-run.dockerRun.cleanUp%",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.remove%",
                                 "default": false
                             }
                         }
