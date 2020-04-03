@@ -16,7 +16,7 @@ export async function selectDockerContext(prompt: string): Promise<IDockerContex
         async () => { return await dockerContextManager.listAll(); });
 
     const contextItems: IAzureQuickPickItem<IDockerContextListItem>[] = contexts.map(ctx => ({
-        label: `${ctx.Name} ${ctx.Current ? '*' : ''}`.trim(),
+        label: `${ctx.Name} ${ctx.Current ? '(current)' : ''}`.trim(),
         data: ctx
     }));
 
