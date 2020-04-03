@@ -10,10 +10,10 @@ import { localize } from '../../localize';
 import { dockerContextManager } from '../../utils/dockerContextManager';
 import { selectDockerContext } from './selectDockerContext';
 
-export async function removeDockerContext(context: IActionContext): Promise<void> {
+export async function removeDockerContext(actionContext: IActionContext): Promise<void> {
     const selectedContext = await selectDockerContext(localize('vscode-docker.commands.context.selectContextToRemove', 'Select Docker context to remove'));
     if (selectedContext.Current) {
-        context.errorHandling.suppressReportIssue = true;
+        actionContext.errorHandling.suppressReportIssue = true;
         throw new Error(localize('vscode-docker.commands.context.cannotRemoveContextInUse', 'Docker context \'{0}\' is currently in use and cannot be removed', selectedContext.Name));
     }
 

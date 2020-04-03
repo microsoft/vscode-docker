@@ -8,7 +8,7 @@ import { localize } from '../../localize';
 import { dockerContextManager } from '../../utils/dockerContextManager';
 import { selectDockerContext } from './selectDockerContext';
 
-export async function inspectDockerContext(_context: IActionContext): Promise<void> {
+export async function inspectDockerContext(_actionContext: IActionContext): Promise<void> {
     const selectedContext = await selectDockerContext(localize('vscode-docker.commands.context.selectContextToInspect', 'Select Docker context to inspect'));
 
     const inspectResult = await dockerContextManager.inspect(selectedContext.Name);
