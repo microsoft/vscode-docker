@@ -5,7 +5,6 @@
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import LocalOSProvider from '../../utils/LocalOSProvider';
-import { DefaultOutputManager } from '../../utils/outputManager';
 import { DefaultAppStorageProvider } from './appStorage';
 import ChildProcessProvider from './ChildProcessProvider';
 import CliDockerClient from './CliDockerClient';
@@ -18,6 +17,7 @@ import { LocalFileSystemProvider } from './fsProvider';
 import { LocalAspNetCoreSslManager } from './LocalAspNetCoreSslManager';
 import { MsBuildNetCoreProjectProvider } from './netCoreProjectProvider';
 import OpnBrowserClient from './OpnBrowserClient';
+import { DefaultOutputManager } from './outputManager';
 import { AggregatePrerequisite, DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetExtensionInstalledPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './prereqManager';
 import { OSTempFileProvider } from './tempFileProvider';
 import { RemoteVsDbgClient } from './vsdbgClient';

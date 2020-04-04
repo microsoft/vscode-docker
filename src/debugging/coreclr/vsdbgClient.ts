@@ -8,10 +8,10 @@ import * as request from 'request-promise-native';
 import { Memento } from 'vscode';
 import { localize } from '../../localize';
 import { OSProvider } from '../../utils/LocalOSProvider';
-import { OutputManager } from '../../utils/outputManager';
 import { NetCoreDebugHelper } from '../netcore/NetCoreDebugHelper';
 import { ProcessProvider } from './ChildProcessProvider';
 import { FileSystemProvider } from './fsProvider';
+import { OutputManager } from './outputManager';
 
 export interface VsDbgClient {
     getVsDbgFolder(): Promise<string>;
