@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-//@ts-check
-
 // See https://github.com/Microsoft/vscode-azuretools/wiki/webpack for guidance
 
 'use strict';
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const process = require('process');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const StringReplacePlugin = require("string-replace-webpack-plugin");
 const dev = require("vscode-azureextensiondev");
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 let DEBUG_WEBPACK = !!process.env.DEBUG_WEBPACK;
 
@@ -53,7 +53,7 @@ let config = dev.getDefaultWebpackConfig({
                 replacements: [
                     {
                         pattern: /var WebSocketServer = \(this.wsEngine \? require\(this\.wsEngine\) : require\('ws'\)\)\.Server;/ig,
-                        replacement: function (match, offset, string) {
+                        replacement: function (match, offset, str) {
                             // Since we're not using the wsEngine option, we'll just require it to not be set and use only the `require('ws')` call.
                             return `if (!!this.wsEngine) {
                                             throw new Error('wsEngine option not supported with current webpack settings');
@@ -77,7 +77,7 @@ let config = dev.getDefaultWebpackConfig({
                 replacements: [
                     {
                         pattern: /cpSpawnSync = require\('spawn-sync'\);/ig,
-                        replacement: function (match, offset, string) {
+                        replacement: function (match, offset, str) {
                             // The code in question only applies to Node 0.10 or less (see comments in code), so just throw an error
                             return `throw new Error("This shouldn't happen"); // MODIFIED`;
                         }

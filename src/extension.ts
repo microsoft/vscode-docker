@@ -7,7 +7,6 @@ import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { registerAppServiceExtensionVariables } from 'vscode-azureappservice';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
@@ -72,7 +71,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     }
 
     registerUIExtensionVariables(ext);
-    registerAppServiceExtensionVariables(ext);
 }
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {

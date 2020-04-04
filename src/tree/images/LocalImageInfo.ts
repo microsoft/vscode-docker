@@ -7,11 +7,12 @@ import { ImageInfo } from "dockerode";
 import { ILocalItem } from "../LocalRootTreeItemBase";
 
 /**
- * Common interface that both `LocalImageInfo` and `LocalContainerInfo` implement
+ * Interface implemented by `LocalImageInfo`
  */
 export interface ILocalImageInfo extends ILocalItem {
     fullTag: string;
     imageId: string;
+    repoDigests?: string[];
 }
 
 /**
@@ -35,5 +36,9 @@ export class LocalImageInfo implements ILocalImageInfo {
 
     public get treeId(): string {
         return this.fullTag + this.imageId;
+    }
+
+    public get repoDigests(): string[] {
+        return this.data.RepoDigests;
     }
 }
