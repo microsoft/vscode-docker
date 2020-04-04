@@ -13,12 +13,12 @@ import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
 
 export abstract class DockerInstallerBase {
-    public abstract downloadUrl: string;
-    public abstract fileExtension: string;
-    public abstract installationMessage: string;
+    protected abstract downloadUrl: string;
+    protected abstract fileExtension: string;
+    protected abstract installationMessage: string;
     protected abstract getInstallCommand(fileName: string): string;
 
-    public async installDocker(): Promise<void> {
+    public async downloadAndInstallDocker(): Promise<void> {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install docker on this machine.');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
@@ -40,7 +40,7 @@ export abstract class DockerInstallerBase {
         const command = this.getInstallCommand(downlaodedFileName);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         vscode.window.showInformationMessage(this.installationMessage);
-        await this.Install(downlaodedFileName, command);
+        await this.install(downlaodedFileName, command);
     }
 
     private async downloadInstaller(): Promise<string> {
@@ -52,7 +52,7 @@ export abstract class DockerInstallerBase {
         return fileName;
     }
 
-    protected async Install(fileName: string, cmd: string): Promise<void> {
+    protected async install(fileName: string, cmd: string): Promise<void> {
         const fsProvider = new LocalFileSystemProvider();
         try {
             const processProvider = new ChildProcessProvider();
