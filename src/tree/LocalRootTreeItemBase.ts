@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// import { pathExists } from "fs-extra";
 import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
 import { localize } from "../localize";
@@ -105,9 +104,6 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();
             this._itemsFromPolling = undefined;
             this._failedToConnect = false;
-            // if (await pathExists('d:\\temp\\error.txt')) {
-            //     throw Error('test');
-            // }
         } catch (error) {
             this._currentItems = undefined;
             this._failedToConnect = true;
@@ -294,8 +290,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         const connectionMessage = localize('vscode-docker.tree.failedToConnectMessage', 'Failed to connect. Is Docker installed and running?');
 
         const result: AzExtTreeItem[] = [
-            new InvalidTreeItem(this, error, { label: connectionMessage, contextValue: 'dockerConnectionError', description: '' }),
-            new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('web') }),
+            new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('warning') }),
+            new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('docker') }),
             new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
         ];
 

@@ -4,85 +4,53 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from 'vscode-azureextensionui';
-import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
-import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
-import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
-import { DefaultOutputManager, OutputManager } from '../utils/outputManager';
+import { DockerInstallerBase } from './dockerInstallerBase';
+
+class WindowsDockerInstaller extends DockerInstallerBase {
+    public downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
+    public fileExtension: string = 'exe';
+    public installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompt and complet the installation and start the Docker Desktop.');
+    protected getInstallCommand(fileName: string): string {
+        // Windows require double quote.
+        return `"${fileName}"`;
+    }
+}
+
+class MacDockerInstaller extends DockerInstallerBase {
+    public downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
+    public fileExtension: string = 'dmg';
+    public installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompt and complete the installation and start the Docker Desktop.');
+    protected getInstallCommand(fileName: string): string {
+        return `Chmod +x '${fileName}' && open '${fileName}'`;
+    }
+}
+
+class LinuxDockerInstaller extends DockerInstallerBase {
+    public downloadUrl: string = 'https://aka.ms/download-docker-linux-vscode';
+    public fileExtension: string = 'sh';
+    public installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Please follow the prompt in terminal window and complete the installation and start the Docker.');
+    protected getInstallCommand(fileName: string): string {
+        return `chmod +x '${fileName}' && sh '${fileName}'`;
+    }
+
+    protected async Install(fileName: string): Promise<void> {
+        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.LinuxDockerInstaller.terminalTitle', 'Docker Install.'));
+        const command = this.getInstallCommand(fileName);
+        terminal.sendText(command);
+        terminal.show();
+        return;
+    }
+}
 
 export async function installDocker(context: IActionContext): Promise<void> {
-    const confirmInstall: string = localize('vscode-docker.commands.installDocker.confirm', 'Are you sure you want to install docker on this machine.');
-    // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: 'Install' });
-
-    // TODO: Block second installation while in progress.
-    const outputManager = new DefaultOutputManager(ext.outputChannel);
-
-    await outputManager.performOperation(
-        'Install Docker',
-        async (output) => {
-            const fileName = await downloadInstaller(output);
-            await Install(output, fileName);
-        },
-        'Installation is complete. Please start the docker for desktop.',
-        'something went wrong'
-    );
-
-    // await vscode.commands.executeCommand('.action.reloadWindow');
-}
-
-async function downloadInstaller(output: OutputManager): Promise<string> {
     const osProvider = new LocalOSProvider();
-    const processProvider = new ChildProcessProvider();
-    const tempFileProvider = new OSTempFileProvider(osProvider, processProvider);
-    let url = '';
-    let fileExt = '';
-
-    if (osProvider.isMac) {
-        url = 'https://aka.ms/download-docker-mac-vscode';
-        fileExt = 'dmg';
-    } else if (osProvider.os === 'Windows') {
-        url = 'https://aka.ms/download-docker-windows-vscode';
-        fileExt = 'exe';
-    } else {
-        url = 'https://aka.ms/download-docker-linux-vscode';
-        fileExt = '.sh';
-    }
-    let fileName = tempFileProvider.getTempFilename('docker', fileExt);
-
-    if (osProvider.os === 'Windows') {
-        fileName = 'c:\\temp\\docker_win.exe';
-        output.appendLine(`Reusing an existing installer ${fileName}`);
-    } else {
-        output.appendLine(`Downloading the installer to ${fileName}`);
-        await streamToFile(url, fileName);
-        output.appendLine("Download completed.");
-        return fileName;
-    }
-}
-
-async function Install(output: OutputManager, fileName: string): Promise<void> {
-    const fsProvider = new LocalFileSystemProvider();
-    const osProvider = new LocalOSProvider();
-    let installCommand = osProvider.isMac
-        ? `Chmod +x '${fileName}' && hdiutil mount '${fileName}' && sudo cp -R "/Volumes/Docker/Docker.app" /Applications`
-        : `'${fileName}'`;
-
-    try {
-        const processProvider = new ChildProcessProvider();
-        const execOptions = {
-            progress: (content) => {
-                // eslint-disable-next-line @typescript-eslint/tslint/config
-                output.appendLine(content);
-            }
-        };
-        await processProvider.exec(installCommand, execOptions);
-    } finally {
-        if (await fsProvider.fileExists(fileName + 's')) {
-            await fsProvider.unlinkFile(fileName + 's');
-        }
-    }
+    const dockerInstaller = osProvider.isMac
+        ? new MacDockerInstaller()
+        : osProvider.os === 'Windows'
+            ? new WindowsDockerInstaller()
+            : new LinuxDockerInstaller();
+    await dockerInstaller.installDocker();
 }
