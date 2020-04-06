@@ -24,14 +24,14 @@ class MacDockerInstaller extends DockerInstallerBase {
     protected fileExtension: string = 'dmg';
     protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
-        return `Chmod +x '${fileName}' && open '${fileName}'`;
+        return `chmod +x '${fileName}' && open '${fileName}'`;
     }
 }
 
 class LinuxDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-linux-vscode';
     protected fileExtension: string = 'sh';
-    protected installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Please follow the prompt in terminal window and complete the installation and start the Docker.');
+    protected installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Please follow the prompt in terminal window to complete the installation, and then start Docker.');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && sh '${fileName}'`;
     }
