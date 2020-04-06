@@ -95,16 +95,15 @@ export class DockerContextManager {
     public async getCurrentContext(): Promise<IDockerContextCheckResult> {
         let contextChanged: boolean = false;
 
+        // The first time this is called, this.lastContextCheckTimestamp will be 0 so this check will certainly pass
         if (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs) {
-            if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
-                return {
-                    Changed: false,
-                    Context: undefined,
-                };
-            }
-
             try {
-                if (!this.cachedContext) {
+                if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
+                    return {
+                        Changed: false,
+                        Context: undefined,
+                    };
+                } else if (!this.cachedContext) {
                     // First-time check
                     this.lastDockerConfigDigest = await this.getDockerConfigDigest();
                     contextChanged = await this.refreshCachedDockerContext();
