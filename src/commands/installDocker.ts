@@ -12,7 +12,7 @@ import { DockerInstallerBase } from './dockerInstallerBase';
 class WindowsDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
     protected fileExtension: string = 'exe';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompt and complet the installation and start the Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
         // Windows require double quote.
         return `"${fileName}"`;
