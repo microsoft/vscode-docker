@@ -85,7 +85,6 @@ export class DockerContextManager {
     private lastContextCheckTimestamp: number;
     private cachedContext: IDockerContext;
     private lastDockerConfigDigest: string;
-    private enabled: boolean | undefined;
 
     public constructor() {
         this.lastContextCheckTimestamp = 0;
@@ -94,20 +93,16 @@ export class DockerContextManager {
     }
 
     public async getCurrentContext(): Promise<IDockerContextCheckResult> {
-        if (this.enabled === undefined) {
-            this.enabled = await fse.pathExists(DockerContextMetasPath) && (await fse.readdir(DockerContextMetasPath)).length > 0;
-        }
-
-        if (!this.enabled) {
-            return {
-                Changed: false,
-                Context: undefined,
-            };
-        }
-
         let contextChanged: boolean = false;
 
-        if (!this.cachedContext || (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs)) {
+        if (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs) {
+            if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
+                return {
+                    Changed: false,
+                    Context: undefined,
+                };
+            }
+
             try {
                 if (!this.cachedContext) {
                     // First-time check
