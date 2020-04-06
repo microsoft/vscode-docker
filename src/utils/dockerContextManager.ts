@@ -99,9 +99,12 @@ export class DockerContextManager {
         if (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs) {
             try {
                 if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
+                    // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
+                    // Since DOCKER_HOST is handled in addDockerSettingsToEnv, it is unnecessary to call `docker context inspect`
+                    contextChanged = this.cachedContext !== undefined;
                     this.cachedContext = undefined;
-                    contextChanged = false;
                 } else {
+                    // More than the default context exists, so we'll check the config digest and do a `docker context inspect` call if needed
                     const dockerConfigDigest: string = await this.getDockerConfigDigest();
 
                     if (!dockerConfigDigest || dockerConfigDigest !== this.lastDockerConfigDigest) {
