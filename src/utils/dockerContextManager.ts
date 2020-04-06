@@ -6,6 +6,7 @@
 import { ExecOptions } from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import * as url from 'url';
 import { workspace, WorkspaceConfiguration } from 'vscode';
 import { parseError } from "vscode-azureextensionui";
@@ -27,7 +28,9 @@ const ContextCmdExecOptions: ExecOptions = { timeout: 5000 }
 const DOCKER_CONTEXT: string = 'DOCKER_CONTEXT';
 const DefaultRefreshIntervalSec: number = 20;
 const osp = new LocalOSProvider();
-const DockerConfigFilePath: string = osp.pathJoin(osp.os, osp.homedir, '.docker', 'config.json');
+const DockerConfigPath: string = osp.pathJoin(osp.os, osp.homedir, '.docker');
+const DockerConfigFilePath: string = osp.pathJoin(osp.os, DockerConfigPath, 'config.json');
+const DockerContextMetasPath: string = osp.pathJoin(osp.os, DockerConfigPath, 'contexts', 'meta');
 
 
 export interface IDockerEndpoint {
@@ -68,7 +71,7 @@ export interface IDockerContext {
 }
 
 export interface IDockerContextCheckResult {
-    Context: IDockerContext,
+    Context: IDockerContext | undefined,
     Changed: boolean
 }
 
@@ -82,6 +85,7 @@ export class DockerContextManager {
     private lastContextCheckTimestamp: number;
     private cachedContext: IDockerContext;
     private lastDockerConfigDigest: string;
+    private enabled: boolean | undefined;
 
     public constructor() {
         this.lastContextCheckTimestamp = 0;
@@ -90,6 +94,17 @@ export class DockerContextManager {
     }
 
     public async getCurrentContext(): Promise<IDockerContextCheckResult> {
+        if (this.enabled === undefined) {
+            this.enabled = await fse.pathExists(DockerContextMetasPath) && (await fse.readdir(DockerContextMetasPath)).length > 0;
+        }
+
+        if (!this.enabled) {
+            return {
+                Changed: false,
+                Context: undefined,
+            };
+        }
+
         let contextChanged: boolean = false;
 
         if (!this.cachedContext || (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs)) {
