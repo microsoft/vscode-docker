@@ -23,7 +23,6 @@ export abstract class DockerInstallerBase {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
-        const downloadCompleteMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Download completed');
         let downloadedFileName: string;
 
         // no need to check result - cancel will throw a UserCancelledError
@@ -33,8 +32,6 @@ export abstract class DockerInstallerBase {
             { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
             async () => {
                 downloadedFileName = await this.downloadInstaller();
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                vscode.window.showInformationMessage(downloadCompleteMessage);
             }
         );
 
