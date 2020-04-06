@@ -24,7 +24,7 @@ class MacDockerInstaller extends DockerInstallerBase {
     protected fileExtension: string = 'dmg';
     protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
-        return `Chmod +x '${fileName}' && open '${fileName}'`;
+        return `chmod +x '${fileName}' && open '${fileName}'`;
     }
 }
 
