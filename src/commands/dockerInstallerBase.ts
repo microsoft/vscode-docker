@@ -40,7 +40,7 @@ export abstract class DockerInstallerBase {
         const command = this.getInstallCommand(downloadedFileName);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         vscode.window.showInformationMessage(this.installationMessage);
-        await this.install(downlaodedFileName, command);
+        await this.install(downloadedFileName, command);
     }
 
     private async downloadInstaller(): Promise<string> {
