@@ -23,17 +23,14 @@ export abstract class DockerInstallerBase {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
-        let downloadedFileName: string;
 
         // no need to check result - cancel will throw a UserCancelledError
         await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: installTitle });
 
-        await vscode.window.withProgress(
+        const downloadedFileName: string = await vscode.window.withProgress(
             { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
-            async () => {
-                downloadedFileName = await this.downloadInstaller();
-            }
-        );
+            async () => this.downloadInstaller());
+
 
         const command = this.getInstallCommand(downloadedFileName);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -45,7 +42,7 @@ export abstract class DockerInstallerBase {
         const osProvider = new LocalOSProvider();
         const processProvider = new ChildProcessProvider();
         const tempFileProvider = new OSTempFileProvider(osProvider, processProvider);
-        let fileName = tempFileProvider.getTempFilename('docker', this.fileExtension);
+        const fileName = tempFileProvider.getTempFilename('docker', this.fileExtension);
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
     }
