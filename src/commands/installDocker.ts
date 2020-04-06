@@ -22,7 +22,7 @@ class WindowsDockerInstaller extends DockerInstallerBase {
 class MacDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
-    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompt and complete the installation and start the Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
         return `Chmod +x '${fileName}' && open '${fileName}'`;
     }
