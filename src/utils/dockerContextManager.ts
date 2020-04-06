@@ -99,14 +99,8 @@ export class DockerContextManager {
         if (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs) {
             try {
                 if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
-                    return {
-                        Changed: false,
-                        Context: undefined,
-                    };
-                } else if (!this.cachedContext) {
-                    // First-time check
-                    this.lastDockerConfigDigest = await this.getDockerConfigDigest();
-                    contextChanged = await this.refreshCachedDockerContext();
+                    this.cachedContext = undefined;
+                    contextChanged = false;
                 } else {
                     const dockerConfigDigest: string = await this.getDockerConfigDigest();
 
