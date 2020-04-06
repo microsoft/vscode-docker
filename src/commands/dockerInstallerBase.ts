@@ -19,7 +19,7 @@ export abstract class DockerInstallerBase {
     protected abstract getInstallCommand(fileName: string): string;
 
     public async downloadAndInstallDocker(): Promise<void> {
-        const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install docker on this machine.');
+        const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
         const downloadCompleteMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Download completed');
