@@ -290,7 +290,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         const connectionMessage = localize('vscode-docker.tree.failedToConnectMessage', 'Failed to connect. Is Docker installed and running?');
 
         const result: AzExtTreeItem[] = [
-            new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('warning') }),
+            new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
             new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('docker') }),
             new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
         ];
