@@ -69,7 +69,7 @@ export abstract class DockerInstallerBase {
 export class WindowsDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
     protected fileExtension: string = 'exe';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
         // Windows require double quote.
         return `"${fileName}"`;
@@ -79,7 +79,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
 export class MacDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
-    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start the Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start Docker Desktop.');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
