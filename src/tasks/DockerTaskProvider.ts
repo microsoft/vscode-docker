@@ -51,7 +51,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 await this.executeTaskInternal(context, task);
 
-                dockerTaskEndEventListener.emit({name: task.name, success: true});
+                dockerTaskEndEventListener.fire({name: task.name, success: true});
             });
         } catch (err) {
             // Errors will not be rethrown, rather it will simply return an error code or 1
@@ -61,7 +61,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.terminal.writeErrorLine(error.message);
             }
 
-            dockerTaskEndEventListener.emit({name: task.name, success: false, error: error.message});
+            dockerTaskEndEventListener.fire({name: task.name, success: false, error: error.message});
 
             return parseInt(error.errorType, 10) || 1;
         }

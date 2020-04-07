@@ -35,12 +35,12 @@ export namespace PythonExtensionHelper {
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
         // tslint:disable-next-line:promise-must-complete
         return new Promise((resolve, reject) => {
-            const dockerTaskListener = (taskEvent: DockerTaskEvent) => {
+            const dockerTaskListener = dockerTaskEndEventListener.event((taskEvent: DockerTaskEvent) => {
                 if (!taskEvent.success) {
                     cleanupListeners();
                     reject(localize('vscode-docker.tasks.pythonExt.failedToAttach', 'Failed to attach the debugger, please see the terminal output for more details.'));
                 }
-            }
+            });
 
             const listener = vscode.tasks.onDidEndTask(async e => {
                 if (e.execution.task.name === prelaunchTask.name) {
@@ -86,10 +86,8 @@ export namespace PythonExtensionHelper {
 
             const cleanupListeners = () => {
                 listener?.dispose();
-                dockerTaskEndEventListener.unsubscribe(dockerTaskListener);
+                dockerTaskListener?.dispose();
             };
-
-            dockerTaskEndEventListener.subscribe(dockerTaskListener);
         });
     }
 
