@@ -12,7 +12,7 @@ import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
 import { localize } from '../../localize';
 import { delay } from '../../utils/delay';
 import { getTempDirectoryPath, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
-import { dockerTaskEndEventHandler, DockerTaskEvent } from '../DockerTaskEvents';
+import { dockerTaskEndEventListener, DockerTaskEvent } from '../DockerTaskEndEventListener';
 
 export namespace PythonExtensionHelper {
     export interface DebugLaunchOptions {
@@ -35,17 +35,19 @@ export namespace PythonExtensionHelper {
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
         // tslint:disable-next-line:promise-must-complete
         return new Promise((resolve, reject) => {
+            let listener: vscode.Disposable;
+
             const handler = (data: DockerTaskEvent) => {
                 if (!data.success) {
-                    dockerTaskEndEventHandler.off(handler);
-                    listener.dispose();
+                    dockerTaskEndEventListener.unsubscribe(handler);
+                    listener?.dispose();
 
                     reject(localize('vscode-docker.tasks.pythonExt.failedToAttach', 'Failed to attach the debugger, please see the terminal output for more details.'));
                     return;
                 }
             }
 
-            const listener = vscode.tasks.onDidEndTask(async e => {
+            listener = vscode.tasks.onDidEndTask(async e => {
                 if (e.execution.task.name === prelaunchTask.name) {
                     try {
                         // There is no way to know the result of the completed task, so a best guess is to check if the container is running.
@@ -83,12 +85,12 @@ export namespace PythonExtensionHelper {
                         reject(localize('vscode-docker.tasks.pythonExt.unexpectedAttachError', 'An unexpected error occurred while attempting to attach the debugger.'));
                     } finally {
                         listener.dispose();
-                        dockerTaskEndEventHandler.off(handler);
+                        dockerTaskEndEventListener.unsubscribe(handler);
                     }
                 }
             });
 
-            dockerTaskEndEventHandler.on(handler);
+            dockerTaskEndEventListener.subscribe(handler);
         });
     }
 
