@@ -170,6 +170,7 @@
     "vscode-docker.commands.compose.up": "Compose Up",
     "vscode-docker.commands.configure": "Add Docker Files to Workspace...",
     "vscode-docker.commands.configureCompose": "Add Docker Compose Files to Workspace...",
+    "vscode-docker.commands.installDocker": "Install Docker",
     "vscode-docker.commands.containers.attachShell": "Attach Shell",
     "vscode-docker.commands.containers.browse": "Open in Browser",
     "vscode-docker.commands.containers.configureExplorer": "Configure Explorer...",

@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as https from 'https';
+import request = require('request');
 import url = require('url');
 import { addUserAgent } from './addUserAgent';
 
@@ -53,5 +55,31 @@ export async function httpsRequestBinary(opts: https.RequestOptions | string): P
         });
         req.end();
         req.on('error', reject);
+    });
+}
+
+export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        try {
+            // Prepare write stream to write to a file.
+            const writeStream = fse.createWriteStream(fileName);
+            writeStream.on('close', () => {
+                resolve();
+            });
+
+            writeStream.on('error', error => {
+                writeStream.close();
+                reject(error);
+            })
+
+            // Pipe the request to the writestream
+            const req = request
+                .get(downloadUrl)
+                .on('error', reject);
+            req.pipe(writeStream);
+
+        } catch (err) {
+            reject(err);
+        }
     });
 }

@@ -35,6 +35,7 @@ import { removeImage } from "./images/removeImage";
 import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { tagImage } from "./images/tagImage";
+import { installDocker } from "./installDocker";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
 import { createNetwork } from "./networks/createNetwork";
 import { inspectNetwork } from "./networks/inspectNetwork";
@@ -137,6 +138,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.context.use', useDockerContext);
     registerCommand('vscode-docker.context.inspect', inspectDockerContext);
     registerCommand('vscode-docker.context.remove', removeDockerContext);
+    registerCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
 }
