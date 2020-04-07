@@ -101,7 +101,7 @@ export async function quickPickDockerFileItems(context: IActionContext, dockerFi
         return [createFileItem(rootFolder, dockerFileUri)];
     }
     const globPatterns: string[] = getDockerFileGlobPatterns();
-    const dockerFiles: Item[] | undefined = await resolveFilePatterns(rootFolder, globPatterns);
+    const dockerFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
     return await quickPickFileItems(dockerFiles, message);
 }
 
@@ -114,7 +114,7 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
     const globPatterns: string[] = getDockerFileGlobPatterns();
 
     while (!selectedDockerFile) {
-        const dockerFiles: Item[] | undefined = await resolveFilePatterns(rootFolder, globPatterns);
+        const dockerFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
         const message = localize('vscode-docker.utils.quickPick.chooseDockerfile', 'Choose a Dockerfile to build.');
         selectedDockerFile = await quickPickFileItem(dockerFiles, message);
         if (!selectedDockerFile) {
@@ -134,7 +134,7 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
     const globPatterns: string[] = getDockerComposeFileGlobPatterns();
 
     while (!selectedComposeFile) {
-        const composeFiles: Item[] | undefined = await resolveFilePatterns(rootFolder, globPatterns);
+        const composeFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
         if (composeFiles) {
             if ((composeFiles.length === 1 && isDefaultDockerComposeFile(composeFiles[0].label))
                 || (composeFiles.length === 2 && composeFiles.some(i => isDefaultDockerComposeFile(i.label)) && composeFiles.some(i => isDefaultDockerComposeOverrideFile(i.label)))) {
@@ -179,7 +179,7 @@ export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vsc
         return createFileItem(rootFolder, fileUri);
     }
 
-    const items: Item[] = await resolveFilePatterns(rootFolder, [YAML_GLOB_PATTERN]);
+    const items: Item[] = await resolveFilesOfPattern(rootFolder, [YAML_GLOB_PATTERN]);
     const fileItem: Item = await quickPickFileItem(items, localize('vscode-docker.utils.quickPick.chooseYaml', 'Choose a .yaml file to run.'));
 
     if (!fileItem) {
@@ -193,7 +193,7 @@ export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: 
         return createFileItem(rootFolder, fileUri);
     }
 
-    const items: Item[] = await resolveFilePatterns(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
+    const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
     const fileItem: Item = await quickPickFileItem(items, localize('vscode-docker.utils.quickPick.chooseProject', 'Choose a project file.'));
 
     if (!fileItem) {
