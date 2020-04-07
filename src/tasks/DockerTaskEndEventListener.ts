@@ -9,19 +9,21 @@ export interface DockerTaskEvent {
     error?: string
 }
 
-export class DockerTaskEndEventListener {
-    private listeners: { (data?: DockerTaskEvent): void; }[] = [];
+type DockerTaskEventListener = { (taskEvent: DockerTaskEvent): void; };
 
-    public subscribe(listener: { (data?: DockerTaskEvent): void }) : void {
+export class DockerTaskEndEventListener {
+    private listeners: DockerTaskEventListener[] = [];
+
+    public subscribe(listener: DockerTaskEventListener) : void {
         this.listeners.push(listener);
     }
 
-    public unsubscribe(listener: { (data?: DockerTaskEvent): void }) : void {
-        this.listeners = this.listeners.filter(h => h !== listener);
+    public unsubscribe(listener: DockerTaskEventListener) : void {
+        this.listeners = this.listeners.filter(l => l !== listener);
     }
 
-    public trigger(data?: DockerTaskEvent) {
-        this.listeners.forEach(listener => listener(data));
+    public emit(taskEvent: DockerTaskEvent) {
+        this.listeners.forEach(listener => listener(taskEvent));
     }
 }
 

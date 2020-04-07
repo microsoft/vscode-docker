@@ -35,19 +35,14 @@ export namespace PythonExtensionHelper {
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
         // tslint:disable-next-line:promise-must-complete
         return new Promise((resolve, reject) => {
-            let listener: vscode.Disposable;
-
-            const handler = (data: DockerTaskEvent) => {
-                if (!data.success) {
-                    dockerTaskEndEventListener.unsubscribe(handler);
-                    listener?.dispose();
-
+            const dockerTaskListener = (taskEvent: DockerTaskEvent) => {
+                if (!taskEvent.success) {
+                    cleanupListeners();
                     reject(localize('vscode-docker.tasks.pythonExt.failedToAttach', 'Failed to attach the debugger, please see the terminal output for more details.'));
-                    return;
                 }
             }
 
-            listener = vscode.tasks.onDidEndTask(async e => {
+            const listener = vscode.tasks.onDidEndTask(async e => {
                 if (e.execution.task.name === prelaunchTask.name) {
                     try {
                         // There is no way to know the result of the completed task, so a best guess is to check if the container is running.
@@ -84,13 +79,17 @@ export namespace PythonExtensionHelper {
                     } catch {
                         reject(localize('vscode-docker.tasks.pythonExt.unexpectedAttachError', 'An unexpected error occurred while attempting to attach the debugger.'));
                     } finally {
-                        listener.dispose();
-                        dockerTaskEndEventListener.unsubscribe(handler);
+                        cleanupListeners();
                     }
                 }
             });
 
-            dockerTaskEndEventListener.subscribe(handler);
+            const cleanupListeners = () => {
+                listener?.dispose();
+                dockerTaskEndEventListener.unsubscribe(dockerTaskListener);
+            };
+
+            dockerTaskEndEventListener.subscribe(dockerTaskListener);
         });
     }
 
