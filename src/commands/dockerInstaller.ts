@@ -63,7 +63,7 @@ export abstract class DockerInstallerBase {
 export class WindowsDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
     protected fileExtension: string = 'exe';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
     protected getInstallCommand(fileName: string): string {
         // Windows require double quote.
         return `"${fileName}"`;
@@ -73,7 +73,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
 export class MacDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
-    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Installer is launched. Please follow the prompts to complete the installation, and then start Docker Desktop.');
+    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
@@ -82,7 +82,7 @@ export class MacDockerInstaller extends DockerInstallerBase {
 export class LinuxDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-linux-vscode';
     protected fileExtension: string = 'sh';
-    protected installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Please follow the prompt in terminal window to complete the installation, and then start Docker.');
+    protected installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Opening the Docker installer...');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && sh '${fileName}'`;
     }
