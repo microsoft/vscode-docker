@@ -7,6 +7,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { callDockerode } from '../../utils/callDockerode';
 import { selectRunCommand } from '../selectCommandTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -26,7 +27,7 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
     }
 
     const image = await node.getImage();
-    const inspectInfo = await image.inspect();
+    const inspectInfo = await callDockerode(async () => image.inspect());
 
     const terminalCommand = await selectRunCommand(
         context,

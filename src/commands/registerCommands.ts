@@ -7,6 +7,8 @@ import { commands } from "vscode";
 import { registerCommand } from "vscode-azureextensionui";
 import { configure, configureApi } from "../configureWorkspace/configure";
 import { configureCompose } from "../configureWorkspace/configureCompose";
+import { deployImageToAzure } from "../utils/lazyLoad";
+import { viewAzureTaskLogs } from "../utils/lazyLoad";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
@@ -19,6 +21,9 @@ import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
+import { inspectDockerContext } from "./context/inspectDockerContext";
+import { removeDockerContext } from "./context/removeDockerContext";
+import { useDockerContext } from "./context/useDockerContext";
 import { help } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
@@ -40,12 +45,10 @@ import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
-import { deployImageToAzure } from "./registries/azure/deployImageToAzure";
 import { openInAzurePortal } from "./registries/azure/openInAzurePortal";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
 import { runAzureTask } from "./registries/azure/tasks/runAzureTask";
 import { runFileAsAzureTask } from "./registries/azure/tasks/runFileAsAzureTask";
-import { viewAzureTaskLogs } from "./registries/azure/tasks/viewAzureTaskLogs";
 import { untagAzureImage } from "./registries/azure/untagAzureImage";
 import { viewAzureProperties } from "./registries/azure/viewAzureProperties";
 import { connectRegistry } from "./registries/connectRegistry";
@@ -130,6 +133,10 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);
+
+    registerCommand('vscode-docker.context.use', useDockerContext);
+    registerCommand('vscode-docker.context.inspect', inspectDockerContext);
+    registerCommand('vscode-docker.context.remove', removeDockerContext);
 
     registerCommand('vscode-docker.help', help);
 }

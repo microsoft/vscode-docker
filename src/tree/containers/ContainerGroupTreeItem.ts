@@ -8,9 +8,9 @@ import { getThemedIconPath, IconPath } from "../IconPath";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { ContainerProperty, getContainerStateIcon } from "./ContainerProperties";
-import { LocalContainerInfo } from "./LocalContainerInfo";
+import { ILocalContainerInfo } from "./LocalContainerInfo";
 
-export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<LocalContainerInfo, ContainerProperty> {
+export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<ILocalContainerInfo, ContainerProperty> {
     public static readonly contextValue: string = 'containerGroup';
     public readonly contextValue: string = ContainerGroupTreeItem.contextValue;
     public childTypeLabel: string = 'container';
