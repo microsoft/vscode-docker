@@ -60,7 +60,7 @@ function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[
     return result;
 }
 
-async function resolveFilePatterns(rootFolder: vscode.WorkspaceFolder, filePatterns: string[])
+async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePatterns: string[])
     : Promise<Item[] | undefined> {
     let uris: vscode.Uri[] = [];
     await Promise.all(filePatterns.map(async (pattern: string) => {
