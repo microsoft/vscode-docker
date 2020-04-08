@@ -7,7 +7,7 @@ import { OSProvider } from "../../utils/LocalOSProvider";
 import { ProcessProvider } from './ChildProcessProvider';
 
 export interface TempFileProvider {
-    getTempFilename(prefix?: string): string;
+    getTempFilename(prefix?: string, ext?: string): string;
 }
 
 export class OSTempFileProvider implements TempFileProvider {
@@ -18,7 +18,7 @@ export class OSTempFileProvider implements TempFileProvider {
         private readonly processProvider: ProcessProvider) {
     }
 
-    public getTempFilename(prefix: string = 'temp'): string {
-        return path.join(this.osProvider.tmpdir, `${prefix}_${new Date().valueOf()}_${this.processProvider.pid}_${this.count++}.tmp`);
+    public getTempFilename(prefix: string = 'temp', ext: string = 'tmp'): string {
+        return path.join(this.osProvider.tmpdir, `${prefix}_${new Date().valueOf()}_${this.processProvider.pid}_${this.count++}.${ext}`);
     }
 }

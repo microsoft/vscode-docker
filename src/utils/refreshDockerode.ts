@@ -48,10 +48,10 @@ async function addDockerHostToEnv(newEnv: NodeJS.ProcessEnv): Promise<void> {
         ({ Context: dockerContext } = await dockerContextManager.getCurrentContext());
 
         if (!newEnv.DOCKER_HOST) {
-            newEnv.DOCKER_HOST = dockerContext.Endpoints.docker.Host;
+            newEnv.DOCKER_HOST = dockerContext?.Endpoints.docker.Host;
         }
 
-        if (!newEnv.DOCKER_TLS_VERIFY && dockerContext.Endpoints.docker.SkipTLSVerify) {
+        if (!newEnv.DOCKER_TLS_VERIFY && dockerContext?.Endpoints.docker.SkipTLSVerify) {
             // https://docs.docker.com/compose/reference/envvars/#docker_tls_verify
             newEnv.DOCKER_TLS_VERIFY = "";
         }

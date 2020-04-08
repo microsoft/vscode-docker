@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, InvalidTreeItem, registerEvent } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, registerEvent } from "vscode-azureextensionui";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
 import { localize } from "../localize";
@@ -290,8 +290,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         const connectionMessage = localize('vscode-docker.tree.failedToConnectMessage', 'Failed to connect. Is Docker installed and running?');
 
         const result: AzExtTreeItem[] = [
-            new InvalidTreeItem(this, error, { label: connectionMessage, contextValue: 'dockerConnectionError', description: '' }),
-            new OpenUrlTreeItem(this, localize('vscode-docker.tree.installDocker', 'Install Docker...'), 'https://aka.ms/AA37qtj'),
+            new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
+            new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('docker') }),
             new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
         ];
 
