@@ -78,7 +78,7 @@ export class MacDockerInstaller extends DockerInstallerBase {
     }
 
     protected async install(fileName: string): Promise<void> {
-        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.UnixDockerInstaller.terminalTitle', 'Docker Install'));
+        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install'));
         const command = this.getInstallCommand(fileName);
         terminal.sendText(command);
         terminal.show();
