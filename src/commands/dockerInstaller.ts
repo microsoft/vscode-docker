@@ -16,13 +16,13 @@ import { execAsync } from '../utils/spawnAsync';
 export abstract class DockerInstallerBase {
     protected abstract downloadUrl: string;
     protected abstract fileExtension: string;
-    protected abstract installationMessage: string;
     protected abstract getInstallCommand(fileName: string): string;
 
     public async downloadAndInstallDocker(): Promise<void> {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
+        const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'Opening the Docker Desktop installer...');
 
         // no need to check result - cancel will throw a UserCancelledError
         await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: installTitle });
@@ -31,10 +31,9 @@ export abstract class DockerInstallerBase {
             { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
             async () => this.downloadInstaller());
 
-
         const command = this.getInstallCommand(downloadedFileName);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        vscode.window.showInformationMessage(this.installationMessage);
+        vscode.window.showInformationMessage(installationMessage);
         await this.install(downloadedFileName, command);
     }
 
@@ -53,7 +52,6 @@ export abstract class DockerInstallerBase {
 export class WindowsDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
     protected fileExtension: string = 'exe';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
     protected getInstallCommand(fileName: string): string {
         // Windows require double quote.
         return `"${fileName}"`;
@@ -75,7 +73,6 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
 export class MacDockerInstaller extends DockerInstallerBase {
     protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
-    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
