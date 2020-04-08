@@ -47,6 +47,18 @@ export abstract class DockerInstallerBase {
         return fileName;
     }
 
+    protected abstract install(fileName: string, cmd: string): Promise<void>;
+}
+
+export class WindowsDockerInstaller extends DockerInstallerBase {
+    protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
+    protected fileExtension: string = 'exe';
+    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
+    protected getInstallCommand(fileName: string): string {
+        // Windows require double quote.
+        return `"${fileName}"`;
+    }
+
     protected async install(fileName: string, cmd: string): Promise<void> {
         const fsProvider = new LocalFileSystemProvider();
         try {
@@ -60,38 +72,29 @@ export abstract class DockerInstallerBase {
     }
 }
 
-export class WindowsDockerInstaller extends DockerInstallerBase {
-    protected downloadUrl: string = 'https://aka.ms/download-docker-windows-vscode';
-    protected fileExtension: string = 'exe';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
-    protected getInstallCommand(fileName: string): string {
-        // Windows require double quote.
-        return `"${fileName}"`;
+abstract class UnixDockerInstaller extends DockerInstallerBase {
+    protected async install(fileName: string): Promise<void> {
+        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.UnixDockerInstaller.terminalTitle', 'Docker Install'));
+        const command = this.getInstallCommand(fileName);
+        terminal.sendText(command);
+        terminal.show();
     }
 }
 
-export class MacDockerInstaller extends DockerInstallerBase {
+export class MacDockerInstaller extends UnixDockerInstaller {
     protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
-    protected installationMessage: string = localize('vscode-docker.commands.WindowsDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
+    protected installationMessage: string = localize('vscode-docker.commands.MacDockerInstaller.installationMessage', 'Opening the Docker Desktop installer...');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
 }
 
-export class LinuxDockerInstaller extends DockerInstallerBase {
+export class LinuxDockerInstaller extends UnixDockerInstaller {
     protected downloadUrl: string = 'https://aka.ms/download-docker-linux-vscode';
     protected fileExtension: string = 'sh';
     protected installationMessage: string = localize('vscode-docker.commands.LinuxDockerInstaller.installationMessage', 'Opening the Docker installer...');
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && sh '${fileName}'`;
-    }
-
-    protected async install(fileName: string): Promise<void> {
-        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.LinuxDockerInstaller.terminalTitle', 'Docker Install.'));
-        const command = this.getInstallCommand(fileName);
-        terminal.sendText(command);
-        terminal.show();
-        return;
     }
 }
