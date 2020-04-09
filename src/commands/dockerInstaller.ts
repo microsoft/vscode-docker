@@ -22,7 +22,7 @@ export abstract class DockerInstallerBase {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
-        const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'Opening the Docker Desktop installer...');
+        const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
 
         // no need to check result - cancel will throw a UserCancelledError
         await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: installTitle });
