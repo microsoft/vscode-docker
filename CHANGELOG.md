@@ -10,6 +10,9 @@
 * Images are deleted by name instead of ID, which resolves several issues [#1529](https://github.com/microsoft/vscode-docker/issues/1529)
 * Error "Task to execute is undefined" when doing Docker build [#1647](https://github.com/microsoft/vscode-docker/issues/1647)
 
+### Removed
+* The `docker.defaultRegistryPath` setting has been removed, as part of the new image push experience.
+
 ## 1.0.0 - 9 March 2020
 ### Added
 * Debugging support for Python [#1255](https://github.com/microsoft/vscode-docker/issues/1255)
