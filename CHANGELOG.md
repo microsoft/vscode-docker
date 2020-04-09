@@ -1,3 +1,15 @@
+## 1.1.0 - 21 Apr 2020
+### Added
+* Custom file names for docker-compose files can be defined [#102](https://github.com/microsoft/vscode-docker/issues/102)
+* The experience for pushing Docker images has been revamped [#351](https://github.com/microsoft/vscode-docker/issues/351), [#1539](https://github.com/microsoft/vscode-docker/issues/1539), [#1595](https://github.com/microsoft/vscode-docker/issues/1595)
+* Extensibility model for registry providers has been improved [#147](https://github.com/microsoft/vscode-docker/issues/147)
+* Generic DockerV2 registries using OAuth can now be connected to in many cases [#869](https://github.com/microsoft/vscode-docker/issues/869)
+
+### Fixed
+* Improved extension activation performance [#1804](https://github.com/microsoft/vscode-docker/issues/1804)
+* Images are deleted by name instead of ID, which resolves several issues [#1529](https://github.com/microsoft/vscode-docker/issues/1529)
+* Error "Task to execute is undefined" when doing Docker build [#1647](https://github.com/microsoft/vscode-docker/issues/1647)
+
 ## 1.0.0 - 9 March 2020
 ### Added
 * Debugging support for Python [#1255](https://github.com/microsoft/vscode-docker/issues/1255)
