@@ -88,6 +88,8 @@ export class PythonDebugHelper implements DebugHelper {
             }
 
             debugConfiguration.preLaunchTask = undefined;
+            context.actionContext.errorHandling.suppressReportIssue = true;
+
             debuggerReadyPromise = PythonExtensionHelper.ensureDebuggerReady(task, debuggerLogFilePath, containerName, this.cliDockerClient);
 
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

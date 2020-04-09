@@ -38,6 +38,7 @@
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.configureCompose",
+        "onCommand:vscode-docker.installDocker",
         "onCommand:vscode-docker.containers.attachShell",
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
@@ -2005,6 +2006,11 @@
             {
                 "command": "vscode-docker.configureCompose",
                 "title": "%vscode-docker.commands.configureCompose%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.installDocker",
+                "title": "%vscode-docker.commands.installDocker%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {

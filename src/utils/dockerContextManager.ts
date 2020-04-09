@@ -6,6 +6,7 @@
 import { ExecOptions } from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import * as fse from 'fs-extra';
 import * as url from 'url';
 import { workspace, WorkspaceConfiguration } from 'vscode';
 import { parseError } from "vscode-azureextensionui";
@@ -27,7 +28,9 @@ const ContextCmdExecOptions: ExecOptions = { timeout: 5000 }
 const DOCKER_CONTEXT: string = 'DOCKER_CONTEXT';
 const DefaultRefreshIntervalSec: number = 20;
 const osp = new LocalOSProvider();
-const DockerConfigFilePath: string = osp.pathJoin(osp.os, osp.homedir, '.docker', 'config.json');
+const DockerConfigPath: string = osp.pathJoin(osp.os, osp.homedir, '.docker');
+const DockerConfigFilePath: string = osp.pathJoin(osp.os, DockerConfigPath, 'config.json');
+const DockerContextMetasPath: string = osp.pathJoin(osp.os, DockerConfigPath, 'contexts', 'meta');
 
 
 export interface IDockerEndpoint {
@@ -68,7 +71,7 @@ export interface IDockerContext {
 }
 
 export interface IDockerContextCheckResult {
-    Context: IDockerContext,
+    Context: IDockerContext | undefined,
     Changed: boolean
 }
 
@@ -92,13 +95,16 @@ export class DockerContextManager {
     public async getCurrentContext(): Promise<IDockerContextCheckResult> {
         let contextChanged: boolean = false;
 
-        if (!this.cachedContext || (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs)) {
+        // The first time this is called, this.lastContextCheckTimestamp will be 0 so this check will certainly pass
+        if (Date.now() - this.lastContextCheckTimestamp > this.contextRefreshIntervalMs) {
             try {
-                if (!this.cachedContext) {
-                    // First-time check
-                    this.lastDockerConfigDigest = await this.getDockerConfigDigest();
-                    contextChanged = await this.refreshCachedDockerContext();
+                if (!(await fse.pathExists(DockerContextMetasPath)) || (await fse.readdir(DockerContextMetasPath)).length === 0) {
+                    // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
+                    // Since DOCKER_HOST is handled in addDockerSettingsToEnv, it is unnecessary to call `docker context inspect`
+                    contextChanged = this.cachedContext !== undefined;
+                    this.cachedContext = undefined;
                 } else {
+                    // More than the default context exists, so we'll check the config digest and do a `docker context inspect` call if needed
                     const dockerConfigDigest: string = await this.getDockerConfigDigest();
 
                     if (!dockerConfigDigest || dockerConfigDigest !== this.lastDockerConfigDigest) {
