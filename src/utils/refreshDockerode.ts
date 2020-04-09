@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as url from 'url';
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
 import { CancellationTokenSource } from 'vscode';
@@ -25,7 +26,37 @@ export async function refreshDockerode(): Promise<void> {
     try {
         const oldEnv = process.env;
         const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
+        const dockerodeOptions: Dockerode.DockerOptions = {};
+
         addDockerSettingsToEnv(newEnv, oldEnv);
+
+        if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
+            // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
+            // Other than that, we use default settings, so return undefined
+            if (!await validateSshAuthSock(newEnv)) {
+                // Don't wait
+                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
+            }
+        }
+
+        if (!newEnv.DOCKER_HOST) {
+            const { Context: dockerContext } = await dockerContextManager.getCurrentContext();
+
+            const host = dockerContext?.Endpoints?.docker.Host;
+
+            if (host) {
+                const parsed = url.parse(host);
+
+                dockerodeOptions.host = parsed?.hostname;
+                dockerodeOptions.port = parsed?.port;
+                dockerodeOptions.protocol = parsed?.protocol;
+            }
+
+            dockerodeOptions.host = dockerContext?.Endpoints?.docker.Host;
+            dockerodeOptions.
+        }
+
         await addDockerHostToEnv(newEnv);
 
         ext.dockerodeInitError = undefined;
@@ -41,7 +72,7 @@ export async function refreshDockerode(): Promise<void> {
     }
 }
 
-async function addDockerHostToEnv(newEnv: NodeJS.ProcessEnv): Promise<void> {
+async function addDockerHostToEnv(newEnv: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): Promise<void> {
     let dockerContext: IDockerContext;
 
     try {
