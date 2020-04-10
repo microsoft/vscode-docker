@@ -5,9 +5,10 @@
 
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
+import * as os from 'os';
 import * as url from 'url';
 import { CancellationTokenSource } from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
@@ -15,6 +16,7 @@ import { cloneObject } from './cloneObject';
 import { delay } from './delay';
 import { dockerContextManager, IDockerContext } from './dockerContextManager';
 import { isWindows } from './osUtils';
+import { timeUtils } from './timeUtils';
 
 const SSH_URL_REGEX = /ssh:\/\//i;
 
@@ -23,78 +25,81 @@ const SSH_URL_REGEX = /ssh:\/\//i;
  * Thus we will temporarily update `process.env` and pass nothing to the constructor
  */
 export async function refreshDockerode(): Promise<void> {
-    try {
-        const oldEnv = process.env;
-        const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
-        const dockerodeOptions: Dockerode.DockerOptions = {};
+    await callWithTelemetryAndErrorHandling(
+        ext.dockerode ? 'docker-context.change' : 'docker-context.initialize',
+        async (actionContext: IActionContext) => {
 
-        addDockerSettingsToEnv(newEnv, oldEnv);
+            try {
+                // Set up environment variables
+                const oldEnv = process.env;
+                const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
+                addDockerSettingsToEnv(newEnv, oldEnv);
 
-        if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
-            // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
-            // Other than that, we use default settings, so return undefined
-            if (!await validateSshAuthSock(newEnv)) {
-                // Don't wait
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
+                let dockerContext: IDockerContext | undefined;
+                const dockerodeOptions: Dockerode.DockerOptions = {};
+
+                // If DOCKER_HOST is set in the process environment, the host source is environment
+                if (oldEnv.DOCKER_HOST) {
+                    actionContext.telemetry.properties.hostSource = 'env';
+                } else if (newEnv.DOCKER_HOST) { // If DOCKER_HOST is not set in the process environment, and it is set in the new environment (which includes settings), the host source is settings
+                    actionContext.telemetry.properties.hostSource = 'setting';
+                }
+
+                // If DOCKER_HOST is not set in either environment or settings, check docker context
+                if (!newEnv.DOCKER_HOST) {
+                    ({ DurationMs: actionContext.telemetry.measurements.contextRetrievalTimeMs, Result: { Context: dockerContext } } = await timeUtils.timeIt(async () => dockerContextManager.getCurrentContext()));
+
+                    if (dockerContext === undefined) { // Undefined context means "there's only the default context"
+                        actionContext.telemetry.properties.hostSource = 'default';
+                    } else if (/default/i.test(dockerContext.Name)) {
+                        actionContext.telemetry.properties.hostSource = 'defaultContext';
+                    } else {
+                        actionContext.telemetry.properties.hostSource = 'customContext';
+                    }
+
+                    const host = dockerContext?.Endpoints?.docker.Host;
+
+                    if (host) {
+                        const parsed = new url.URL(host);
+
+                        dockerodeOptions.host = host; // Intentionally the full URL (docker-modem can figure out the protocol and hostname from it)
+                        dockerodeOptions.port = parsed.port;
+                        // TODO dockerodeOptions.username = parsed.username;
+                        actionContext.telemetry.properties.hostProtocol = parsed.protocol;
+                    } else {
+                        actionContext.telemetry.properties.hostProtocol = os.platform() === 'win32' ? 'npipe:' : 'unix:';
+                    }
+                } else {
+                    const parsed = new url.URL(newEnv.DOCKER_HOST);
+                    actionContext.telemetry.properties.hostProtocol = parsed.protocol;
+                    actionContext.telemetry.measurements.retrievalTimeMs = 0;
+                }
+
+                // If Docker host is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
+                if (SSH_URL_REGEX.test(newEnv.DOCKER_HOST || dockerodeOptions.host)) {
+                    if (!await validateSshAuthSock(newEnv)) {
+                        // Don't wait
+                        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                        ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
+                    }
+                }
+
+                try {
+                    ext.dockerodeInitError = undefined;
+                    process.env = newEnv;
+                    ext.dockerode = new Dockerode(dockerodeOptions);
+                } finally {
+                    process.env = oldEnv;
+                }
+            } catch (error) {
+                // The error will be displayed in the tree
+                ext.dockerodeInitError = error;
+                actionContext.errorHandling.suppressReportIssue = true;
+                actionContext.errorHandling.suppressDisplay = true;
+                throw error;
             }
         }
-
-        if (!newEnv.DOCKER_HOST) {
-            const { Context: dockerContext } = await dockerContextManager.getCurrentContext();
-
-            const host = dockerContext?.Endpoints?.docker.Host;
-
-            if (host) {
-                const parsed = new url.URL(host);
-
-                dockerodeOptions.host = host; // Intentionally the full URL (docker-modem can figure out the protocol and hostname from it)
-                dockerodeOptions.port = parsed.port;
-                dockerodeOptions.username = parsed.username;
-            }
-        }
-
-        ext.dockerodeInitError = undefined;
-        process.env = newEnv;
-        try {
-            ext.dockerode = new Dockerode(dockerodeOptions);
-        } finally {
-            process.env = oldEnv;
-        }
-    } catch (error) {
-        // This will be displayed in the tree
-        ext.dockerodeInitError = error;
-    }
-}
-
-async function addDockerHostToEnv(newEnv: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): Promise<void> {
-    let dockerContext: IDockerContext;
-
-    try {
-        ({ Context: dockerContext } = await dockerContextManager.getCurrentContext());
-
-        if (!newEnv.DOCKER_HOST) {
-            newEnv.DOCKER_HOST = dockerContext?.Endpoints.docker.Host;
-        }
-
-        if (!newEnv.DOCKER_TLS_VERIFY && dockerContext?.Endpoints.docker.SkipTLSVerify) {
-            // https://docs.docker.com/compose/reference/envvars/#docker_tls_verify
-            newEnv.DOCKER_TLS_VERIFY = "";
-        }
-    } catch (error) {
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.dockerContextUnobtainable', 'Docker context could not be retrieved.') + ' ' + parseError(error).message);
-    }
-
-    if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
-        // If DOCKER_HOST is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
-        // Other than that, we use default settings, so return undefined
-        if (!await validateSshAuthSock(newEnv)) {
-            // Don't wait
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
-        }
-    }
+    );
 }
 
 async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> {
