@@ -5,6 +5,7 @@
 
 import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, registerEvent } from "vscode-azureextensionui";
+import { isDockerInstalled, showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
 import { localize } from "../localize";
@@ -31,6 +32,7 @@ const groupByKey: string = 'groupBy';
 const sortByKey: string = 'sortBy';
 const labelKey: string = 'label';
 const descriptionKey: string = 'description';
+let dockerInstallNotificationShownToUser: boolean = false;
 
 export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
     public abstract labelSettingInfo: ITreeSettingInfo<TProperty>;
@@ -108,7 +110,13 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this._currentItems = undefined;
             this._failedToConnect = true;
             context.telemetry.properties.failedToConnect = 'true';
-            return this.getDockerErrorTreeItems(context, error);
+            const dockerInstalled = await isDockerInstalled();
+            if (!dockerInstalled && !dockerInstallNotificationShownToUser) {
+                dockerInstallNotificationShownToUser = true;
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                showDockerInstallNotification();
+            }
+            return this.getDockerErrorTreeItems(context, error, dockerInstalled);
         }
 
         if (this._currentItems.length === 0) {
@@ -286,14 +294,13 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         }
     }
 
-    private getDockerErrorTreeItems(context: IActionContext, error: unknown): AzExtTreeItem[] {
-        const connectionMessage = localize('vscode-docker.tree.failedToConnectMessage', 'Failed to connect. Is Docker installed and running?');
-
-        const result: AzExtTreeItem[] = [
-            new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
-            new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('docker') }),
-            new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
-        ];
+    private getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): AzExtTreeItem[] {
+        const result: AzExtTreeItem[] = dockerInstalled
+            ? [
+                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is Docker running?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
+                new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
+            ]
+            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is Docker installed?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') })];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {

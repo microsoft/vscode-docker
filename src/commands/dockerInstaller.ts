@@ -19,13 +19,8 @@ export abstract class DockerInstallerBase {
     protected abstract getInstallCommand(fileName: string): string;
 
     public async downloadAndInstallDocker(): Promise<void> {
-        const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
-        const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
         const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
-
-        // no need to check result - cancel will throw a UserCancelledError
-        await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: installTitle });
 
         const downloadedFileName: string = await vscode.window.withProgress(
             { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
@@ -82,5 +77,28 @@ export class MacDockerInstaller extends DockerInstallerBase {
         const command = this.getInstallCommand(fileName);
         terminal.sendText(command);
         terminal.show();
+    }
+}
+
+export async function showDockerInstallNotification(): Promise<void> {
+    const dockerInstallMessage = ext.os.platform === 'linux'
+        ? localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to open a page with more information?')
+        : localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to Install Docker Desktop?');
+
+    const confirmationPrompt: vscode.MessageItem = ext.os.platform === 'linux' ? { title: 'Open' } : { title: 'Install' };
+    const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
+    if (response) {
+        await vscode.commands.executeCommand('vscode-docker.installDocker');
+    }
+}
+
+export async function isDockerInstalled(): Promise<boolean> {
+    try {
+        await execAsync('docker -v');
+        // As long as the docker command did't throw exception, assume it is installed.
+        return true;
+    } catch (error) {
+        return false;
+        // docker not installed
     }
 }
