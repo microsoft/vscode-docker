@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as url from 'url';
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
+import * as url from 'url';
 import { CancellationTokenSource } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
@@ -46,23 +46,18 @@ export async function refreshDockerode(): Promise<void> {
             const host = dockerContext?.Endpoints?.docker.Host;
 
             if (host) {
-                const parsed = url.parse(host);
+                const parsed = new url.URL(host);
 
-                dockerodeOptions.host = parsed?.hostname;
-                dockerodeOptions.port = parsed?.port;
-                dockerodeOptions.protocol = parsed?.protocol;
+                dockerodeOptions.host = host; // Intentionally the full URL (docker-modem can figure out the protocol and hostname from it)
+                dockerodeOptions.port = parsed.port;
+                dockerodeOptions.username = parsed.username;
             }
-
-            dockerodeOptions.host = dockerContext?.Endpoints?.docker.Host;
-            dockerodeOptions.
         }
-
-        await addDockerHostToEnv(newEnv);
 
         ext.dockerodeInitError = undefined;
         process.env = newEnv;
         try {
-            ext.dockerode = new Dockerode();
+            ext.dockerode = new Dockerode(dockerodeOptions);
         } finally {
             process.env = oldEnv;
         }
