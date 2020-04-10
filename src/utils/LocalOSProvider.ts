@@ -11,6 +11,7 @@ import { PlatformOS } from './platform';
 
 export interface OSProvider {
     homedir: string;
+    isMac: boolean;
     os: PlatformOS;
     tmpdir: string;
     pathJoin(os: PlatformOS, ...paths: string[]): string;
@@ -23,15 +24,12 @@ export class LocalOSProvider implements OSProvider {
         return os.homedir();
     }
 
+    public get isMac(): boolean {
+        return os.platform() === 'darwin';
+    }
+
     public get os(): PlatformOS {
-        switch (os.platform()) {
-            case 'win32':
-                return 'Windows';
-            case 'darwin':
-                return 'Mac';
-            default:
-                return 'Linux';
-        }
+        return os.platform() === 'win32' ? 'Windows' : 'Linux';
     }
 
     public get tmpdir(): string {
