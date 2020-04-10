@@ -12,6 +12,7 @@ import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
 import { localize } from '../../localize';
 import { delay } from '../../utils/delay';
 import { getTempDirectoryPath, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
+import { dockerTaskEndEventListener, DockerTaskEvent } from '../DockerTaskEndEventListener';
 
 export namespace PythonExtensionHelper {
     export interface DebugLaunchOptions {
@@ -34,8 +35,15 @@ export namespace PythonExtensionHelper {
     export async function ensureDebuggerReady(prelaunchTask: vscode.Task, debuggerSemaphorePath: string, containerName: string, cliDockerClient: CliDockerClient): Promise<void> {
         // tslint:disable-next-line:promise-must-complete
         return new Promise((resolve, reject) => {
+            const dockerTaskListener = dockerTaskEndEventListener.event((taskEvent: DockerTaskEvent) => {
+                if (!taskEvent.success) {
+                    cleanupListeners();
+                    reject(localize('vscode-docker.tasks.pythonExt.failedToAttach', 'Failed to attach the debugger, please see the terminal output for more details.'));
+                }
+            });
+
             const listener = vscode.tasks.onDidEndTask(async e => {
-                if (e.execution.task === prelaunchTask) {
+                if (e.execution.task.name === prelaunchTask.name) {
                     try {
                         // There is no way to know the result of the completed task, so a best guess is to check if the container is running.
                         const containerRunning = await cliDockerClient.inspectObject(containerName, { format: '{{.State.Running}}' });
@@ -71,10 +79,15 @@ export namespace PythonExtensionHelper {
                     } catch {
                         reject(localize('vscode-docker.tasks.pythonExt.unexpectedAttachError', 'An unexpected error occurred while attempting to attach the debugger.'));
                     } finally {
-                        listener.dispose();
+                        cleanupListeners();
                     }
                 }
             });
+
+            const cleanupListeners = () => {
+                listener?.dispose();
+                dockerTaskListener?.dispose();
+            };
         });
     }
 
