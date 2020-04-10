@@ -155,24 +155,28 @@ suite('(unit) telemetry/surveys/activeUseSurvey', () => {
 
     buildTest('Activation, no use, previous use within limits', { activationDate: '2020-01-24', lastUseDate: '2020-01-03' });
 
-    buildTest('Activation, no use, previous use within limits, with post non-activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build' } }, {date: '2020-01-22', event: { eventName: 'docker-build' } }] });
+    buildTest('Activation, no use, previous use within limits, with post non-activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{ date: '2020-01-21', event: { eventName: 'docker-build' } }, { date: '2020-01-22', event: { eventName: 'docker-build' } }] });
 
-    buildTest('Activation, no use, previous use within limits, with post activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{date: '2020-01-21', event: { eventName: 'docker-build', properties: { 'isActivationEvent': 'true' } } }] });
+    buildTest('Activation, no use, previous use within limits, with post activation events', { activationDate: '2020-01-20', lastUseDate: '2020-01-03', postActivationTelemetry: [{ date: '2020-01-21', event: { eventName: 'docker-build', properties: { 'isActivationEvent': 'true' } } }] });
 
     buildTest('Activation, no use, previous use outside limits, not candidate', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: false });
 
+    /* Temporarily disabled (the survey is disabled but counting isn't, response is not possible)
     buildTest('Activation, no use, previous use outside limits, candidate, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: true, promptResponse: false });
 
     buildTest('Activation, no use, previous use outside limits, candidate, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isCandidate: true, promptResponse: true });
+    */
 
     buildTest('Activation, no use, previous use outside limits, unknown candidate, not selected', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: false });
 
     buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, non-native language', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, isChosenLanguage: false });
 
+    /* Temporarily disabled (the survey is disabled but counting isn't, response is not possible)
     buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, negative response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: false });
 
     buildTest('Activation, no use, previous use outside limits, unknown candidate, selected, positive response', { activationDate: '2020-01-24', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
 
     buildTest('Activation, no use, previous use at limits, unknown candidate, selected, positive response', { activationDate: '2020-01-23', lastUseDate: '2020-01-01', isSelected: true, promptResponse: true });
+    */
 });
 
