@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export type PlatformOS = 'Windows' | 'Linux' | 'Mac';
+export type PlatformOS = 'Windows' | 'Linux';
 export type Platform =
     'Node.js' |
     '.NET: ASP.NET Core' |
