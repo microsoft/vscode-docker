@@ -23,7 +23,6 @@ import { ext } from './extensionVariables';
 import { localize } from './localize';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
-import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
 import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
 import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
@@ -63,7 +62,8 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     const publisher = new TelemetryPublisher();
     ctx.subscriptions.push(publisher);
 
-    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
+    // Temporarily disabled
+    // ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
     ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
