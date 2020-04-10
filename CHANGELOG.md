@@ -11,6 +11,7 @@
 * Improved extension activation performance. [#1804](https://github.com/microsoft/vscode-docker/issues/1804)
 * Images are deleted by name instead of ID, which resolves several issues. [#1529](https://github.com/microsoft/vscode-docker/issues/1529)
 * Error "Task to execute is undefined" when doing Docker build. [#1647](https://github.com/microsoft/vscode-docker/issues/1647)
+* .NET Core scaffolding will use assembly name in ENTRYPOINT [#1583](https://github.com/microsoft/vscode-docker/issues/1583)
 
 ### Removed
 * The `docker.defaultRegistryPath` setting has been removed, as part of the new image push experience.
