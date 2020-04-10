@@ -133,6 +133,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                 if (isCandidate) {
                                     sendSurveyTelemetryEvent('surveys.activeUseSurvey.eligibleCandidate');
 
+                                    /* Temporarily disabled
                                     const response = await promptForSurvey();
 
                                     // Regardless of the response, user is no longer a candidate.
@@ -147,6 +148,7 @@ export function activeUseSurvey(activationDelay: number, clock: () => Date, isCh
                                     }
 
                                     sendSurveyTelemetryEvent('surveys.activeUseSurvey.response', { response: response.toString() });
+                                    */
                                 }
                             }
                         } catch {
