@@ -356,7 +356,7 @@ export class DefaultDockerManager implements DockerManager {
 
         const nugetFallbackVolume: DockerContainerVolume = {
             localPath: this.osProvider.os === 'Windows' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
-                (this.osProvider.os === 'Mac' ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
+                (this.osProvider.isMac ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
             containerPath: options.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
             permissions: 'ro'
         };

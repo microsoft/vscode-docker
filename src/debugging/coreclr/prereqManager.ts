@@ -107,7 +107,7 @@ export class LinuxUserInDockerGroupPrerequisite implements Prerequisite {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
-        if (this.osProvider.os !== 'Linux') {
+        if (this.osProvider.os !== 'Linux' || this.osProvider.isMac) {
             return true;
         }
 
@@ -134,7 +134,7 @@ export class MacNuGetFallbackFolderSharedPrerequisite implements Prerequisite {
     }
 
     public async checkPrerequisite(): Promise<boolean> {
-        if (this.osProvider.os !== 'Mac') {
+        if (!this.osProvider.isMac) {
             // Only Mac requires this folder be specifically shared.
             return true;
         }
