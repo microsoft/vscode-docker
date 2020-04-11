@@ -83,7 +83,7 @@ export class MacDockerInstaller extends DockerInstallerBase {
 export async function showDockerInstallNotification(): Promise<void> {
     const dockerInstallMessage = ext.os.platform === 'linux'
         ? localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to open a page with more information?')
-        : localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to Install Docker Desktop?');
+        : localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to Install?');
 
     const confirmationPrompt: vscode.MessageItem = ext.os.platform === 'linux' ? { title: 'Open' } : { title: 'Install' };
     const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
