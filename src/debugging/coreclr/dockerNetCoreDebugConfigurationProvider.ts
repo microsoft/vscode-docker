@@ -414,14 +414,14 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
         this.deprecationWarningShown = true;
 
         const deprecationMessage = localize('vscode-docker.debug.coreclr.deprecationWarning', 'The `docker-coreclr` debug type has been deprecated. Do you want to upgrade your launch configuration?');
-        const update: MessageItem = {
-            title: localize('vscode-docker.debug.coreclr.update', 'Update'),
+        const upgrade: MessageItem = {
+            title: localize('vscode-docker.debug.coreclr.upgrade', 'Upgrade'),
         };
 
         // Don't wait
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         ext.ui.showWarningMessage(deprecationMessage).then(response => {
-            if (response === update) {
+            if (response === upgrade) {
                 // Don't wait
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 commands.executeCommand('vscode-docker.debugging.initializeForDebugging');
