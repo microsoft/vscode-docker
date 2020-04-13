@@ -81,11 +81,15 @@ export class MacDockerInstaller extends DockerInstallerBase {
 }
 
 export async function showDockerInstallNotification(): Promise<void> {
-    const dockerInstallMessage = ext.os.platform === 'linux'
-        ? localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to open a page with more information?')
-        : localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to Install?');
+    const installMessageLinux = localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing docker?');
+    const installMessageNonLinux = localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install?');
+    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more')
+    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install')
+    const osProvider: LocalOSProvider = new LocalOSProvider();
+    const isLinux = osProvider.os === 'Linux' && !osProvider.isMac;
 
-    const confirmationPrompt: vscode.MessageItem = ext.os.platform === 'linux' ? { title: 'Open' } : { title: 'Install' };
+    const dockerInstallMessage = isLinux ? installMessageLinux : installMessageNonLinux;
+    const confirmationPrompt: vscode.MessageItem = isLinux ? { title: learnMore } : { title: install };
     const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
     if (response) {
         await vscode.commands.executeCommand('vscode-docker.installDocker');
