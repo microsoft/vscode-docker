@@ -34,6 +34,8 @@ export async function refreshDockerode(): Promise<void> {
                 const config = workspace.getConfiguration('docker');
                 const overrideDockerodeOptions = config.get<{}>('dockerodeOptions');
                 if (overrideDockerodeOptions) {
+                    actionContext.telemetry.properties.hostSource = 'docker.dockerodeOptions';
+                    actionContext.telemetry.measurements.retrievalTimeMs = 0;
                     ext.dockerodeInitError = undefined;
                     ext.dockerode = new Dockerode(<Dockerode.DockerOptions>overrideDockerodeOptions);
                     return;
@@ -55,7 +57,7 @@ export async function refreshDockerode(): Promise<void> {
 
                 // If the old value is different from the new value, then the setting overrode it
                 if ((oldEnv.DOCKER_HOST ?? '') !== (newEnv.DOCKER_HOST ?? '')) {
-                    actionContext.telemetry.properties.hostSource = 'setting';
+                    actionContext.telemetry.properties.hostSource = 'docker.host';
                 }
 
                 // If DOCKER_HOST is set, do not use docker context (same behavior as the CLI)
@@ -107,11 +109,11 @@ async function getDockerOptionsFromDockerContext(actionContext: IActionContext, 
     ({ DurationMs: actionContext.telemetry.measurements.contextRetrievalTimeMs, Result: { Context: dockerContext } } = await timeUtils.timeIt(async () => dockerContextManager.getCurrentContext()));
 
     if (dockerContext === undefined) { // Undefined context means there's only the default context
-        actionContext.telemetry.properties.hostSource = 'defaultOnly';
+        actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
     } else if (/^default$/i.test(dockerContext.Name)) {
-        actionContext.telemetry.properties.hostSource = 'defaultSelected';
+        actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
     } else {
-        actionContext.telemetry.properties.hostSource = 'customSelected';
+        actionContext.telemetry.properties.hostSource = 'customContextSelected';
     }
 
     const host = dockerContext?.Endpoints?.docker?.Host;
