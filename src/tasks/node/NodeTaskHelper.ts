@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
-import Lazy from '../../utils/lazy';
+import { Lazy } from '../../utils/lazy';
 import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
