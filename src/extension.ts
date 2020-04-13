@@ -216,7 +216,8 @@ namespace Configuration {
                 if (e.affectsConfiguration('docker.host') ||
                     e.affectsConfiguration('docker.certPath') ||
                     e.affectsConfiguration('docker.tlsVerify') ||
-                    e.affectsConfiguration('docker.machineName')) {
+                    e.affectsConfiguration('docker.machineName') ||
+                    e.affectsConfiguration('docker.dockerodeOptions')) {
                     await refreshDockerode();
                 }
             }

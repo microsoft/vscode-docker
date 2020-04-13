@@ -1818,6 +1818,10 @@
                     "default": 10,
                     "description": "%vscode-docker.config.docker.truncateMaxLength%"
                 },
+                "docker.dockerodeOptions": {
+                    "type": "object",
+                    "description": "%vscode-docker.config.docker.dockerodeOptions%"
+                },
                 "docker.host": {
                     "type": "string",
                     "default": "",

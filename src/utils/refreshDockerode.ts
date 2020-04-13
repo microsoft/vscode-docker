@@ -7,7 +7,7 @@ import Dockerode = require('dockerode');
 import { Socket } from 'net';
 import * as os from 'os';
 import * as url from 'url';
-import { CancellationTokenSource } from 'vscode';
+import { CancellationTokenSource, workspace } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -30,6 +30,15 @@ export async function refreshDockerode(): Promise<void> {
         async (actionContext: IActionContext) => {
 
             try {
+                // If the docker.dockerodeOptions setting is present, use it only
+                const config = workspace.getConfiguration('docker');
+                const overrideDockerodeOptions = config.get<{}>('dockerodeOptions');
+                if (overrideDockerodeOptions) {
+                    ext.dockerodeInitError = undefined;
+                    ext.dockerode = new Dockerode(<Dockerode.DockerOptions>overrideDockerodeOptions);
+                    return;
+                }
+
                 // Set up environment variables
                 const oldEnv = process.env;
                 const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
