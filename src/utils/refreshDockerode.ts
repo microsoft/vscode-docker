@@ -65,6 +65,10 @@ export async function refreshDockerode(): Promise<void> {
                         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                         ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
                     }
+
+                    if (dockerodeOptions) {
+                        dockerodeOptions.sshAuthAgent = newEnv.SSH_AUTH_SOCK;
+                    }
                 }
 
                 try {
@@ -108,7 +112,7 @@ async function getDockerOptionsFromDockerContext(actionContext: IActionContext, 
 
         options.host = host; // Intentionally the full URL (docker-modem can figure out the protocol and hostname from it)
         options.port = parsed.port; // docker-modem can figure out the port if it is not explicit in the URL
-        // TODO dockerodeOptions.username = parsed.username;
+        options.username = parsed.username;
 
         actionContext.telemetry.properties.hostProtocol = parsed.protocol;
     } else {
