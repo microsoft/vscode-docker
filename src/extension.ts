@@ -30,7 +30,6 @@ import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
 import { refreshDockerode } from './utils/refreshDockerode';
-import { DefaultTerminalProvider } from './utils/TerminalProvider';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -55,10 +54,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
-
-    if (!ext.terminalProvider) {
-        ext.terminalProvider = new DefaultTerminalProvider();
-    }
 
     const publisher = new TelemetryPublisher();
     ctx.subscriptions.push(publisher);

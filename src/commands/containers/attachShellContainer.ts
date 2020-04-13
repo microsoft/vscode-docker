@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { executeAsTask } from '../../utils/executeAsTask';
 import { getDockerOSType } from '../../utils/osUtils';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
@@ -39,7 +40,5 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         shellCommand
     );
 
-    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.containerName}`);
-    terminal.sendText(terminalCommand);
-    terminal.show();
+    await executeAsTask(context, terminalCommand, `Shell: ${node.containerName}`, /* addDockerEnv: */ true);
 }

@@ -15,7 +15,6 @@ import { configure, ext, httpsRequestBinary, Platform } from '../extension.bundl
 import * as assertEx from './assertEx';
 import { shouldSkipDockerTest } from './dockerInfo';
 import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
-import { TestTerminalProvider } from './TestTerminalProvider';
 
 let testRootFolder: string = getTestRootFolder();
 
@@ -72,8 +71,6 @@ suite("Build Image", function (this: Suite): void {
     ): Promise<void> {
         // Set up simulated user input
         configureInputs.unshift(platform);
-        let testTerminalProvider = new TestTerminalProvider();
-        ext.terminalProvider = testTerminalProvider;
 
         let context: IActionContext = {
             telemetry: { properties: {}, measurements: {} },

@@ -4,11 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
 import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
 import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
 import { execAsync } from '../utils/spawnAsync';
@@ -18,7 +20,7 @@ export abstract class DockerInstallerBase {
     protected abstract fileExtension: string;
     protected abstract getInstallCommand(fileName: string): string;
 
-    public async downloadAndInstallDocker(): Promise<void> {
+    public async downloadAndInstallDocker(context: IActionContext): Promise<void> {
         const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
         const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
         const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
@@ -34,7 +36,7 @@ export abstract class DockerInstallerBase {
         const command = this.getInstallCommand(downloadedFileName);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         vscode.window.showInformationMessage(installationMessage);
-        await this.install(downloadedFileName, command);
+        await this.install(context, downloadedFileName, command);
     }
 
     private async downloadInstaller(): Promise<string> {
@@ -46,7 +48,7 @@ export abstract class DockerInstallerBase {
         return fileName;
     }
 
-    protected abstract install(fileName: string, cmd: string): Promise<void>;
+    protected abstract install(context: IActionContext, fileName: string, cmd: string): Promise<void>;
 }
 
 export class WindowsDockerInstaller extends DockerInstallerBase {
@@ -57,7 +59,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
         return `"${fileName}"`;
     }
 
-    protected async install(fileName: string, cmd: string): Promise<void> {
+    protected async install(context: IActionContext, fileName: string, cmd: string): Promise<void> {
         const fsProvider = new LocalFileSystemProvider();
         try {
             ext.outputChannel.appendLine(localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Executing command {0}', cmd));
@@ -77,10 +79,10 @@ export class MacDockerInstaller extends DockerInstallerBase {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
 
-    protected async install(fileName: string): Promise<void> {
-        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install'));
+    protected async install(context: IActionContext, fileName: string): Promise<void> {
+        const title = localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install');
         const command = this.getInstallCommand(fileName);
-        terminal.sendText(command);
-        terminal.show();
+
+        await executeAsTask(context, command, title);
     }
 }

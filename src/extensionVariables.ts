@@ -13,7 +13,6 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { IKeytar } from './utils/keytar';
-import { ITerminalProvider } from "./utils/TerminalProvider";
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -24,7 +23,6 @@ export namespace ext {
     export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
     export let reporter: ITelemetryReporter;
-    export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;
     export let dockerodeInitError: unknown;

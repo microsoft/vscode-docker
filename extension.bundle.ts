@@ -38,7 +38,6 @@ export { inferCommand, inferPackageName, InspectMode, NodePackage } from './src/
 export { nonNullProp } from './src/utils/nonNull';
 export { getDockerOSType, isWindows10RS3OrNewer, isWindows10RS4OrNewer, isWindows10RS5OrNewer, isWindows1019H1OrNewer } from "./src/utils/osUtils";
 export { Platform, PlatformOS } from './src/utils/platform';
-export { DefaultTerminalProvider } from './src/utils/TerminalProvider';
 export { trimWithElipsis } from './src/utils/trimWithElipsis';
 export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
 export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';

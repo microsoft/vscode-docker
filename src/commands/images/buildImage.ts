@@ -10,6 +10,7 @@ import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
 import { delay } from "../../utils/delay";
+import { executeAsTask } from "../../utils/executeAsTask";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
@@ -64,8 +65,6 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             terminalCommand = terminalCommand.replace(tagRegex, imageName);
         }
 
-        const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-        terminal.sendText(terminalCommand);
-        terminal.show();
+        await executeAsTask(context, terminalCommand, 'Docker', /* addDockerEnv: */ true, rootFolder);
     }
 }
