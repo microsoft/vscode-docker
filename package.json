@@ -536,7 +536,8 @@
                                     },
                                     "pattern": {
                                         "type": "string",
-                                        "description": "%vscode-docker.debug.dockerServerReadyAction.pattern%"
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.pattern%",
+                                        "default": "(https?://\\S+|[0-9]+)"
                                     },
                                     "uriFormat": {
                                         "type": "string",
