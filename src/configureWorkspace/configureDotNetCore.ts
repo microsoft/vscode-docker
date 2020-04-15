@@ -191,7 +191,7 @@ $volumes_list$
 
 function extractNetCoreVersion(projFileContent: string): string {
     // Parse version from TargetFramework or TargetFrameworks
-    // Example: netcoreapp1.0 or app5.0
+    // Example: netcoreapp1.0 or net5.0
     let [tfm] = extractRegExGroups(projFileContent, /<TargetFramework>(.+)<\/TargetFramework>/, [undefined]);
     if (!tfm) {
         [tfm] = extractRegExGroups(projFileContent, /<TargetFrameworks>(.+)<\/TargetFrameworks>/, ['']);
