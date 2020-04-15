@@ -42,19 +42,28 @@ export class AsyncLazy<T> {
     public constructor(private readonly valueFactory: () => Promise<T>, private readonly _valueLifetime?: number) {
     }
 
+    public get isValueCreated(): boolean {
+        return this._isValueCreated;
+    }
+
     public async getValue(): Promise<T> {
         if (this._isValueCreated) {
             return this._value;
         }
 
-        this._isValueCreated = false;
-
         const isPrimaryPromise = this._valuePromise === undefined; // The first caller is "primary"
-        const fnLocalPromiseRef = this._valuePromise = this._valuePromise ?? this.valueFactory(); // Await any currently-running Promise if there is one
-        this._value = await fnLocalPromiseRef;
-        this._valuePromise = undefined;
 
-        this._isValueCreated = true;
+        if (isPrimaryPromise) {
+            this._valuePromise = this.valueFactory();
+        }
+
+        const result = await this._valuePromise;
+
+        if (isPrimaryPromise) {
+            this._value = result;
+            this._valuePromise = undefined;
+            this._isValueCreated = true;
+        }
 
         if (this._valueLifetime && isPrimaryPromise) {
             const reset = setTimeout(() => {
@@ -69,6 +78,6 @@ export class AsyncLazy<T> {
             }, this._valueLifetime);
         }
 
-        return this._value;
+        return result;
     }
 }
