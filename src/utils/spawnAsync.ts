@@ -120,7 +120,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions, progr
     }
 }
 
-function bufferToString(buffer: Buffer): string {
+export function bufferToString(buffer: Buffer): string {
     // Node.js treats null bytes as part of the length, which makes everything mad
     // There's also a trailing newline everything hates, so we'll remove
     return buffer.toString().replace(/\0/g, '').replace(/\r?\n$/g, '');

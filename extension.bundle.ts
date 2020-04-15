@@ -29,6 +29,7 @@ export { compareBuildImageOptions, LaunchOptions } from './src/debugging/coreclr
 export { FileSystemProvider } from './src/debugging/coreclr/fsProvider';
 export { LineSplitter } from './src/debugging/coreclr/lineSplitter';
 export { OSProvider } from './src/utils/LocalOSProvider';
+export { bufferToString } from './src/utils/spawnAsync';
 export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './src/debugging/coreclr/prereqManager';
 export { ext } from './src/extensionVariables';
 export { globAsync } from './src/utils/globAsync';
