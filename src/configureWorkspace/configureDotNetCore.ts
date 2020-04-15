@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { WorkspaceFolder } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
 import CommandLineDotNetClient from '../debugging/coreclr/CommandLineDotNetClient';
 import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
@@ -208,7 +208,7 @@ function extractNetCoreVersion(projFileContent: string): string {
     return netCoreVersion;
 }
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], projFileContent: string, artifactName: string, assemblyName: string): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], netCoreAppVersion: string, artifactName: string, assemblyName: string): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -223,8 +223,6 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     let exposeStatements = getExposeStatements(ports);
     let baseImageFormat: string;
     let sdkImageNameFormat: string;
-
-    const netCoreAppVersion = extractNetCoreVersion(projFileContent);
 
     // For .NET Core 2.1+ use mcr.microsoft.com/dotnet/core/[sdk|aspnet|runtime|runtime-deps] repository.
     // See details here: https://devblogs.microsoft.com/dotnet/net-core-container-images-now-published-to-microsoft-container-registry/
@@ -416,7 +414,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const os = context.os ?? (context.os = await context.promptForOS());
     const isCompose = await context.promptForCompose();
 
-    const telemetryProperties = <ConfigureTelemetryProperties>context.telemetry.properties;
+    const telemetryProperties = <TelemetryProperties & ConfigureTelemetryProperties>context.telemetry.properties;
 
     telemetryProperties.configureOs = os;
     if (isCompose) {
@@ -437,6 +435,8 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
 
     let serviceNameAndPathRelative = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
     const projFileContent = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
+    const netCoreVersion = extractNetCoreVersion(projFileContent);
+    telemetryProperties.netCoreVersion = netCoreVersion;
 
     if (context.outputFolder) {
         // We need paths in the Dockerfile to be relative to the output folder, not the root
@@ -447,7 +447,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
 
     const assemblyName = await inferOutputAssemblyName(projectFullPath);
-    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, projFileContent, workspaceRelativeProjectFileName, assemblyName);
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, netCoreVersion, workspaceRelativeProjectFileName, assemblyName);
 
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string
