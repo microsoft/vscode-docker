@@ -189,7 +189,26 @@ $volumes_list$
 `;
 // #endregion
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], version: string, artifactName: string, assemblyName: string): string {
+function extractNetCoreVersion(projFileContent: string): string {
+    // Parse version from TargetFramework or TargetFrameworks
+    // Example: netcoreapp1.0 or net5.0
+    let [tfm] = extractRegExGroups(projFileContent, /<TargetFramework>(.+)<\/TargetFramework>/, [undefined]);
+    if (!tfm) {
+        [tfm] = extractRegExGroups(projFileContent, /<TargetFrameworks>(.+)<\/TargetFrameworks>/, ['']);
+    }
+
+    const defaultNetCoreVersion = '2.1';
+    let [netCoreVersion] = extractRegExGroups(tfm, /^netcoreapp([0-9.]+)|net([0-9.]+)$/, [defaultNetCoreVersion]);
+
+    // semver requires a patch in the version, so add it if only major.minor
+    if (netCoreVersion.match(/^[^.]+\.[^.]+$/)) {
+        netCoreVersion += '.0';
+    }
+
+    return netCoreVersion;
+}
+
+function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, os: PlatformOS | undefined, ports: number[], projFileContent: string, artifactName: string, assemblyName: string): string {
     // VS version of this function is in ResolveImageNames (src/Docker/Microsoft.VisualStudio.Docker.DotNetCore/DockerDotNetCoreScaffoldingProvider.cs)
 
     if (os !== 'Windows' && os !== 'Linux') {
@@ -202,19 +221,10 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: Platform, o
     // example: COPY Core2.0ConsoleAppWindows/Core2.0ConsoleAppWindows.csproj Core2.0ConsoleAppWindows/
     let copyProjectCommands = `COPY ["${artifactName}", "${projectDirectory}/"]`
     let exposeStatements = getExposeStatements(ports);
-
-    // Parse version from TargetFramework
-    // Example: netcoreapp1.0
-    const defaultNetCoreVersion = '2.1';
-    let [netCoreAppVersion] = extractRegExGroups(version, /^netcoreapp([0-9.]+)$/, [defaultNetCoreVersion]);
-
-    // semver requires a patch in the version, so add it if only major.minor
-    if (netCoreAppVersion.match(/^[^.]+\.[^.]+$/)) {
-        netCoreAppVersion += '.0';
-    }
-
     let baseImageFormat: string;
     let sdkImageNameFormat: string;
+
+    const netCoreAppVersion = extractNetCoreVersion(projFileContent);
 
     // For .NET Core 2.1+ use mcr.microsoft.com/dotnet/core/[sdk|aspnet|runtime|runtime-deps] repository.
     // See details here: https://devblogs.microsoft.com/dotnet/net-core-container-images-now-published-to-microsoft-container-registry/
@@ -426,10 +436,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const workspaceRelativeProjectFileName = path.posix.relative(context.folder.uri.fsPath, projectFilePath);
 
     let serviceNameAndPathRelative = rootRelativeProjectFileName.slice(0, -(path.extname(rootRelativeProjectFileName).length));
-    const projFileContents = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
-
-    // Extract TargetFramework for version
-    const [version] = extractRegExGroups(projFileContents, /<TargetFramework>(.+)<\/TargetFramework/, ['']);
+    const projFileContent = (await fse.readFile(path.join(context.rootFolder, rootRelativeProjectFileName))).toString();
 
     if (context.outputFolder) {
         // We need paths in the Dockerfile to be relative to the output folder, not the root
@@ -440,7 +447,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
 
     const assemblyName = await inferOutputAssemblyName(projectFullPath);
-    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, version, workspaceRelativeProjectFileName, assemblyName);
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, projFileContent, workspaceRelativeProjectFileName, assemblyName);
 
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string
