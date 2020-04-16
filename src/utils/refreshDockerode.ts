@@ -133,6 +133,8 @@ async function getDockerOptionsFromDockerContext(actionContext: IActionContext, 
 
     // Currently the environment variable is the only way to configure this in docker-modem
     if (dockerContext?.Endpoints?.docker?.SkipTLSVerify) {
+        // Disabling TLS specifically requires the value to be an empty string
+        // https://docs.docker.com/compose/reference/envvars/#docker_tls_verify
         newEnv.DOCKER_TLS_VERIFY = '';
     } else {
         newEnv.DOCKER_TLS_VERIFY = '1';
