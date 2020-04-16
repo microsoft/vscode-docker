@@ -3,11 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { callDockerodeAsync } from "../../utils/callDockerode";
+import { getThemedIconPath } from "../IconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
@@ -70,5 +73,11 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
             default:
                 return getImagePropertyValue(item, property);
         }
+    }
+
+    public getTreeItemForEmptyList(): AzExtTreeItem[] {
+        const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.conatiner.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
+        dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
+        return [dockerTutorialTreeItem];
     }
 }
