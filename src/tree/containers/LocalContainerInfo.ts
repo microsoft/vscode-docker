@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/tslint/config */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
@@ -18,8 +19,10 @@ export interface ILocalContainerInfo extends ILocalItem {
     ports: number[];
     state: string;
     status: string;
+    compose: string;
 }
 
+export const NonComposeGroupName = 'Other Containers';
 /**
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
@@ -73,6 +76,18 @@ export class LocalContainerInfo implements ILocalContainerInfo {
 
     public get status(): string {
         return this.data.Status;
+    }
+
+    public get compose(): string {
+        const labels = Object.keys(this.data.Labels)
+            .map(label => ({ label: label, value: this.data.Labels[label] }));
+
+        const composeProject = labels.find(l => l.label === 'com.docker.compose.project');
+        if (composeProject) {
+            return composeProject.value;
+        } else {
+            return NonComposeGroupName;
+        }
     }
 
     public get treeId(): string {

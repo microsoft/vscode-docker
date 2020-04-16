@@ -1572,6 +1572,7 @@
                     "default": "None",
                     "description": "%vscode-docker.config.docker.containers.groupBy%",
                     "enum": [
+                        "Compose Project Name",
                         "ContainerId",
                         "ContainerName",
                         "CreatedTime",
@@ -1599,6 +1600,7 @@
                     "items": {
                         "type": "string",
                         "enum": [
+                            "Compose Project Name",
                             "ContainerId",
                             "ContainerName",
                             "CreatedTime",
@@ -1621,6 +1623,7 @@
                     "default": "FullTag",
                     "description": "%vscode-docker.config.docker.containers.label%",
                     "enum": [
+                        "Compose Project Name",
                         "ContainerId",
                         "ContainerName",
                         "CreatedTime",

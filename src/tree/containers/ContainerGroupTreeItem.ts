@@ -25,6 +25,7 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<ILocalContain
                 break;
             case 'Ports':
             case 'Status':
+            case 'Compose Project Name':
                 icon = 'applicationGroup';
                 break;
             case 'State':

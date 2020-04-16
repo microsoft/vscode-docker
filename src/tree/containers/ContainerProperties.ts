@@ -7,7 +7,7 @@ import { getThemedIconPath, IconPath } from "../IconPath";
 import { imageProperties, ImageProperty } from "../images/ImageProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
-export type ContainerProperty = ImageProperty | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
+export type ContainerProperty = ImageProperty | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
 
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     ...imageProperties,
@@ -16,7 +16,8 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'Networks', exampleValue: 'mybridge_network' },
     { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },
-    { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' }
+    { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' },
+    { property: 'Compose Project Name', description: 'Value used to associate containers launched by a \'compose up\' command' },
 ];
 
 export function getContainerStateIcon(state: string): IconPath {
