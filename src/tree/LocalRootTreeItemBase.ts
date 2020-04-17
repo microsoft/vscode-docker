@@ -99,9 +99,9 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         });
     }
 
-    public getTreeItemForEmptyList(): AzExtTreeItem[] {
+    protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         return [new GenericTreeItem(this, {
-            label: localize('vscode-docker.tree.noItemsFound', 'Successfully connected, but no items found.'),
+            label: localize('vscode-docker.tree.noItemsFound', 'No items found'),
             iconPath: getThemedIconPath('info'),
             contextValue: 'dockerNoItems'
         })];

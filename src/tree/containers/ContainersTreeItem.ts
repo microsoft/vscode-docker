@@ -9,7 +9,7 @@ import { localize } from '../../localize';
 import { callDockerodeAsync } from "../../utils/callDockerode";
 import { getThemedIconPath } from "../IconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
-import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { ILocalItem, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -53,7 +53,10 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
         };
 
         const items = await callDockerodeAsync(async () => ext.dockerode.listContainers(options)) || [];
-        return items.map(c => new LocalContainerInfo(c));
+        const localItems = items.map(c => new LocalContainerInfo(c));
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.updateNewContainerUser(localItems);
+        return localItems;
     }
 
     public getPropertyValue(item: ILocalContainerInfo, property: ContainerProperty): string {
@@ -75,9 +78,22 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
         }
     }
 
-    public getTreeItemForEmptyList(): AzExtTreeItem[] {
-        const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.conatiner.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
-        dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
-        return [dockerTutorialTreeItem];
+    protected getTreeItemForEmptyList(): AzExtTreeItem[] {
+        if (this.isNewContainerUser()) {
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.conatiner.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
+            dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
+            return [dockerTutorialTreeItem];
+        }
+        return super.getTreeItemForEmptyList()
+    }
+
+    private isNewContainerUser(): boolean {
+        return ext.context.globalState.get<boolean>('vscode-docker.conatiner.newContainerUser', true);
+    }
+
+    private async updateNewContainerUser(items: ILocalItem[]): Promise<void> {
+        if (items && items.length > 0 && this.isNewContainerUser()) {
+            await ext.context.globalState.update('vscode-docker.conatiner.newContainerUser', false);
+        }
     }
 }
