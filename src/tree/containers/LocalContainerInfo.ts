@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/tslint/config */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerInfo } from "dockerode";
+import { localize } from "../../localize";
 import { ILocalItem } from "../LocalRootTreeItemBase";
 
 /**
@@ -19,10 +19,10 @@ export interface ILocalContainerInfo extends ILocalItem {
     ports: number[];
     state: string;
     status: string;
-    compose: string;
+    composeProjectName: string;
 }
 
-export const NonComposeGroupName = 'Other Containers';
+export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Other Containers');
 /**
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
@@ -78,7 +78,7 @@ export class LocalContainerInfo implements ILocalContainerInfo {
         return this.data.Status;
     }
 
-    public get compose(): string {
+    public get composeProjectName(): string {
         const labels = Object.keys(this.data.Labels)
             .map(label => ({ label: label, value: this.data.Labels[label] }));
 

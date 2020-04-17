@@ -68,13 +68,15 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
             case 'Status':
                 return item.status;
             case 'Compose Project Name':
-                return item.compose;
+                return item.composeProjectName;
             default:
                 return getImagePropertyValue(item, property);
         }
     }
 
     public compareChildrenImpl(ti1: ContainerTreeItem, ti2: ContainerTreeItem): number {
+        // Override the sorting behavior to keep the non compose group at the bottom when
+        // grouped by compose project name.
         if (this.failedToConnect) {
             return 0; // children are already sorted
         }
