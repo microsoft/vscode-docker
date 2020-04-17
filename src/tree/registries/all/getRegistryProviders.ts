@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { azureRegistryProvider } from "../azure/azureRegistryProvider";
+import { cloudsmithRegistryProvider } from "../cloudsmith/cloudsmithRegistryProvider";
 import { dockerHubRegistryProvider } from "../dockerHub/dockerHubRegistryProvider";
 import { genericDockerV2RegistryProvider } from "../dockerV2/genericDockerV2RegistryProvider";
 import { gitLabRegistryProvider } from "../gitLab/gitLabRegistryProvider";
@@ -12,6 +13,7 @@ import { IRegistryProvider } from "../IRegistryProvider";
 export function getRegistryProviders(): IRegistryProvider[] {
     return [
         azureRegistryProvider,
+        cloudsmithRegistryProvider,
         dockerHubRegistryProvider,
         gitLabRegistryProvider,
         genericDockerV2RegistryProvider
