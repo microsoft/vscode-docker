@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { callDockerodeAsync } from "../../utils/callDockerode";
@@ -25,6 +25,13 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
 
     public childType: LocalChildType<ILocalContainerInfo> = ContainerTreeItem;
     public childGroupType: LocalChildGroupType<ILocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
+
+    private newContainerUser: boolean = false;
+
+    public constructor(parent: AzExtParentTreeItem | undefined) {
+        super(parent);
+        this.newContainerUser = this.isNewContainerUser();
+    }
 
     public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
         properties: containerProperties,
@@ -79,8 +86,8 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
     }
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
-        if (this.isNewContainerUser()) {
-            const dockerTutorialTreeItem = new OpenUrlAzExtTreeItem(this, localize('vscode-docker.tree.conatiner.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
+        if (this.newContainerUser) {
+            const dockerTutorialTreeItem = new OpenUrlAzExtTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
             dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
             return [dockerTutorialTreeItem];
         }
@@ -88,12 +95,13 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
     }
 
     private isNewContainerUser(): boolean {
-        return ext.context.globalState.get<boolean>('vscode-docker.conatiner.newContainerUser', true);
+        return ext.context.globalState.get<boolean>('vscode-docker.container.newContainerUser', true);
     }
 
     private async updateNewContainerUser(items: ILocalItem[]): Promise<void> {
-        if (items && items.length > 0 && this.isNewContainerUser()) {
-            await ext.context.globalState.update('vscode-docker.conatiner.newContainerUser', false);
+        if (this.newContainerUser && items && items.length > 0) {
+            this.newContainerUser = false;
+            await ext.context.globalState.update('vscode-docker.container.newContainerUser', false);
         }
     }
 }

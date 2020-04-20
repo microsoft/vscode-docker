@@ -113,7 +113,7 @@
         "onView:dockerNetworks",
         "onView:dockerRegistries",
         "onView:dockerVolumes",
-        "vscode-docker.views.help"
+        "onView:vscode-docker.views.help"
     ],
     "main": "main",
     "contributes": {

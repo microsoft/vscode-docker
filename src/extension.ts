@@ -113,7 +113,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         await refreshDockerode();
 
-        registerTrees(ctx);
+        registerTrees();
         registerCommands();
 
         ctx.subscriptions.push(

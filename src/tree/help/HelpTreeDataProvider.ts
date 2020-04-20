@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import TreeNode from '../TreeItem';
-import GetStartedNode from './GetStartedNode';
 import ReadDocumentationNode from './readDocumentationNode';
 import ReportIssueNode from './ReportIssueNode';
 import ReviewIssuesNode from './ReviewIssuesNode';
@@ -17,7 +16,8 @@ export default class HelpTreeDataProvider implements vscode.TreeDataProvider<Tre
 
     public getChildren(element: TreeNode): vscode.ProviderResult<TreeNode[]> {
         return [
-            new GetStartedNode(),
+            // Hide the get started until Docker comes up with a tutorial page
+            // new GetStartedNode(),
             new ReadDocumentationNode(),
             new ReviewIssuesNode(),
             new ReportIssueNode()

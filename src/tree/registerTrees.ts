@@ -15,7 +15,7 @@ import { OpenUrl } from './OpenUrlTreeItem';
 import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
 import { VolumesTreeItem } from "./volumes/VolumesTreeItem";
 
-export function registerTrees(ctx: vscode.ExtensionContext): void {
+export function registerTrees(): void {
     ext.containersRoot = new ContainersTreeItem(undefined);
     const containersLoadMore = 'vscode-docker.containers.loadMore';
     ext.containersTree = new AzExtTreeDataProvider(ext.containersRoot, containersLoadMore);
@@ -77,7 +77,7 @@ export function registerTrees(ctx: vscode.ExtensionContext): void {
         await ext.volumesTree.refresh(node);
     });
 
-    ctx.subscriptions.push(
+    ext.context.subscriptions.push(
         vscode.window.registerTreeDataProvider('vscode-docker.views.help', new HelpTreeDataProvider()));
 
     registerCommand('vscode-docker.openUrl', async (_context: IActionContext, node: OpenUrl) => node.openUrl());
