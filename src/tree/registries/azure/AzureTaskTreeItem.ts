@@ -71,7 +71,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
 
         if (clearCache && runListResult.length === 0 && this._task) {
             const ti = new GenericTreeItem(this, {
-                label: localize('vscode-docker.tree.registries.azure.runTask', 'Run task...'),
+                label: localize('vscode-docker.tree.registries.azure.runTask', 'Run Task...'),
                 commandId: 'vscode-docker.registries.azure.runTask',
                 contextValue: 'runTask'
             });

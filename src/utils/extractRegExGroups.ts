@@ -15,6 +15,9 @@ export function extractRegExGroups(input: string, regex: RegExp, defaults: strin
         // Ignore first item, which is the text of the entire match
         let [, ...groups] = matches;
 
+        // Ignore the undefined matches
+        groups = groups.filter(g => g !== undefined);
+
         assert(groups.length === defaults.length, "extractRegExGroups: length of defaults array does not match length of actual match groups");
         return groups;
     }
