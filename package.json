@@ -1818,6 +1818,10 @@
                     "default": 10,
                     "description": "%vscode-docker.config.docker.truncateMaxLength%"
                 },
+                "docker.dockerodeOptions": {
+                    "type": "object",
+                    "description": "%vscode-docker.config.docker.dockerodeOptions%"
+                },
                 "docker.host": {
                     "type": "string",
                     "default": "",
@@ -2460,7 +2464,7 @@
     "devDependencies": {
         "@types/adm-zip": "^0.4.32",
         "@types/deep-equal": "^1.0.1",
-        "@types/dockerode": "^2.5.26",
+        "@types/dockerode": "^2.5.27",
         "@types/fs-extra": "^8.1.0",
         "@types/glob": "^7.1.1",
         "@types/keytar": "^4.4.2",
