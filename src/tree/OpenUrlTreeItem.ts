@@ -3,22 +3,26 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
+import * as vscode from 'vscode';
 import { openExternal } from "../utils/openExternal";
-import { getThemedIconPath } from "./IconPath";
 
-export class OpenUrlTreeItem extends GenericTreeItem {
+export interface OpenUrl {
+    openUrl(): Promise<void>
+}
+
+export class OpenUrlTreeItem extends vscode.TreeItem implements OpenUrl {
     private _url: string;
 
-    public constructor(parent: AzExtParentTreeItem, label: string, url: string) {
-        super(parent, {
-            commandId: 'vscode-docker.openUrl',
-            contextValue: 'openUrl',
-            iconPath: getThemedIconPath('web'),
-            includeInTreeItemPicker: true,
-            label
-        });
+    public constructor(label: string, url: string, iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon) {
+        super(label);
         this._url = url;
+        this.command = {
+            command: 'vscode-docker.openUrl',
+            arguments: [this],
+            title: ''
+        };
+
+        this.iconPath = iconPath ?? new vscode.ThemeIcon('globe');
     }
 
     public async openUrl(): Promise<void> {
