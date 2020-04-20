@@ -18,7 +18,7 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' },
-    { property: 'Compose Project Name', description: localize('vscode-docker.tree.containers.properties.composeProjectName', 'Value used to associate containers launched by a \'compose up\' command') },
+    { property: 'Compose Project Name', description: localize('vscode-docker.tree.containers.properties.composeProjectName', 'Value used to associate containers launched by a \'docker-compose up\' command') },
 ];
 
 export function getContainerStateIcon(state: string): IconPath {
