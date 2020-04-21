@@ -4,28 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
 import { openExternal } from "../utils/openExternal";
 
-export interface OpenUrl {
-    openUrl(): Promise<void>
-}
-
-export class OpenUrlTreeItem extends vscode.TreeItem implements OpenUrl {
+export class OpenUrlTreeItem extends GenericTreeItem {
     private _url: string;
 
-    public constructor(label: string, url: string, iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon) {
-        super(label);
+    public constructor(parent: AzExtParentTreeItem, label: string, url: string, iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon) {
+        super(parent, {
+            commandId: 'vscode-docker.openUrl',
+            contextValue: 'openUrl',
+            iconPath: iconPath ?? new vscode.ThemeIcon('globe'),
+            includeInTreeItemPicker: true,
+            label
+        });
         this._url = url;
-        this.command = {
-            command: 'vscode-docker.openUrl',
-            arguments: [this],
-            title: ''
-        };
-
-        this.iconPath = iconPath ?? new vscode.ThemeIcon('globe');
     }
 
     public async openUrl(): Promise<void> {
         await openExternal(this._url);
     }
 }
+

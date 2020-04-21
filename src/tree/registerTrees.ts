@@ -8,10 +8,10 @@ import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerCommand }
 import { ext } from '../extensionVariables';
 import { dockerContextManager } from "../utils/dockerContextManager";
 import { ContainersTreeItem } from './containers/ContainersTreeItem';
-import HelpTreeDataProvider from './help/HelpTreeDataProvider';
+import { HelpsTreeItem } from './help/HelpsTreeItem';
 import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { NetworksTreeItem } from "./networks/NetworksTreeItem";
-import { OpenUrl } from './OpenUrlTreeItem';
+import { OpenUrlTreeItem } from './OpenUrlTreeItem';
 import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
 import { VolumesTreeItem } from "./volumes/VolumesTreeItem";
 
@@ -77,8 +77,10 @@ export function registerTrees(): void {
         await ext.volumesTree.refresh(node);
     });
 
-    ext.context.subscriptions.push(
-        vscode.window.registerTreeDataProvider('vscode-docker.views.help', new HelpTreeDataProvider()));
+    const helpRoot = new HelpsTreeItem(undefined);
+    const helpTreeDataProvider = new AzExtTreeDataProvider(helpRoot, 'vscode-docker.help.loadMore');
+    const helpTreeView = vscode.window.createTreeView('vscode-docker.views.help', { treeDataProvider: helpTreeDataProvider, canSelectMany: true });
+    ext.context.subscriptions.push(helpTreeView);
 
-    registerCommand('vscode-docker.openUrl', async (_context: IActionContext, node: OpenUrl) => node.openUrl());
+    registerCommand('vscode-docker.openUrl', async (_context: IActionContext, node: OpenUrlTreeItem) => node.openUrl());
 }

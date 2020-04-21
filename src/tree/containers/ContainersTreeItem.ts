@@ -10,7 +10,7 @@ import { callDockerodeAsync } from "../../utils/callDockerode";
 import { getThemedIconPath } from "../IconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { ILocalItem, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
-import { OpenUrlAzExtTreeItem } from "../OpenUrlAzExtTreeItem";
+import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
@@ -87,7 +87,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         if (this.newContainerUser) {
-            const dockerTutorialTreeItem = new OpenUrlAzExtTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
             dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
             return [dockerTutorialTreeItem];
         }

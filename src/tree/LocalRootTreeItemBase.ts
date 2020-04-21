@@ -11,7 +11,7 @@ import { localize } from "../localize";
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
-import { OpenUrlAzExtTreeItem } from "./OpenUrlAzExtTreeItem";
+import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSettingInfo";
 import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./settings/ITreeSettingsWizardContext";
@@ -296,12 +296,12 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         const result: AzExtTreeItem[] = [
             new GenericTreeItem(this, { label: connectionMessage, contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
             new GenericTreeItem(this, { commandId: 'vscode-docker.installDocker', label: localize('vscode-docker.tree.installDocker', 'Install Docker...'), contextValue: 'installDocker', iconPath: getThemedIconPath('docker') }),
-            new OpenUrlAzExtTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
+            new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2'),
         ];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
-            const ti = new OpenUrlAzExtTreeItem(this, localize('vscode-docker.tree.runningInDevContainer', 'Running Docker in a dev container...'), 'https://aka.ms/AA5xva6');
+            const ti = new OpenUrlTreeItem(this, localize('vscode-docker.tree.runningInDevContainer', 'Running Docker in a dev container...'), 'https://aka.ms/AA5xva6');
             result.push(ti);
         }
 
