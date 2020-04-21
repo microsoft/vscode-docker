@@ -28,22 +28,6 @@ export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
     return callDockerodeAsync(async () => p);
 }
 
-export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
-    try {
-        return await callDockerodeAsync(dockerodeCallback);
-    } catch (err) {
-        context.errorHandling.suppressReportIssue = true;
-
-        const error = parseError(err);
-
-        if (error?.errorType === 'ENOENT') {
-            throw new Error(localize('vscode-docker.utils.dockerode.failedToConnect', 'Failed to connect. Is Docker installed and running? Error: {0}', error.message));
-        }
-
-        throw err;
-    }
-}
-
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>): Promise<T> {
     // If running tests, don't refresh Dockerode (some tests override Dockerode)
     if (!ext.runningTests) {
@@ -58,6 +42,22 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
     }
 
     return await Promise.race([dockerodeAsyncCallback(), getCancellationPromise()]);
+}
+
+export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
+    try {
+        return await callDockerodeAsync(dockerodeCallback);
+    } catch (err) {
+        context.errorHandling.suppressReportIssue = true;
+
+        const error = parseError(err);
+
+        if (error?.errorType === 'ENOENT') {
+            throw new Error(localize('vscode-docker.utils.dockerode.failedToConnect', 'Failed to connect. Is Docker installed and running? Error: {0}', error.message));
+        }
+
+        throw err;
+    }
 }
 
 async function getCancellationPromise(): Promise<never> {
