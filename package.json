@@ -2497,7 +2497,6 @@
         "eslint": "^6.8.0",
         "eslint-plugin-import": "^2.20.2",
         "eslint-plugin-unicorn": "^14.0.1",
-        "glob": "^7.1.6",
         "gulp": "^4.0.2",
         "gulp-eslint": "^6.0.0",
         "gulp-sourcemaps": "^2.6.5",
@@ -2516,7 +2515,7 @@
         "vscode": "^1.1.36",
         "vscode-azureextensiondev": "^0.3.1",
         "vscode-nls-dev": "^3.3.1",
-        "webpack": "^4.42.1",
+        "webpack": "^4.43.0",
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
