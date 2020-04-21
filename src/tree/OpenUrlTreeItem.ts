@@ -26,4 +26,3 @@ export class OpenUrlTreeItem extends GenericTreeItem {
         await openExternal(this._url);
     }
 }
-

@@ -31,6 +31,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         return item1.id.localeCompare(item2.id);
     }
 
+    // This Get Started item will be enabled once we have the right Docker Tutorial url
     // private get getStartedTreeItem(): AzExtTreeItem {
     //     const node = new OpenUrlTreeItem(
     //         this,
