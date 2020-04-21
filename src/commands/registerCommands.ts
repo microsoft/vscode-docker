@@ -61,7 +61,7 @@ import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImage, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
-import { reportIssue } from "./reportissue";
+import { reportIssue } from "./reportIssue";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
