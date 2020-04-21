@@ -18,7 +18,9 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         nodes
     );
 
+    const terminal = ext.terminalProvider.createTerminal("docker pull");
+    terminal.show();
     for (const n of nodes) {
-        await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', /* addDockerEnv: */ true);
+        terminal.sendText(`docker pull ${n.fullTag}`);
     }
 }
