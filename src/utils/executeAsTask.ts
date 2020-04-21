@@ -21,7 +21,7 @@ export async function executeAsTask(context: IActionContext, command: string, na
         workspaceFolder ?? vscode.TaskScope.Workspace,
         name,
         'Docker',
-        new vscode.ShellExecution(command, { cwd: cwd || workspaceFolder.uri.fsPath, env: newEnv }),
+        new vscode.ShellExecution(command, { cwd: cwd || workspaceFolder?.uri?.fsPath, env: newEnv }),
         [] // problemMatchers
     );
 
