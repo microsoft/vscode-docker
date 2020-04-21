@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.1.0",
+    "version": "1.1.1-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -1574,6 +1574,7 @@
                     "default": "None",
                     "description": "%vscode-docker.config.docker.containers.groupBy%",
                     "enum": [
+                        "Compose Project Name",
                         "ContainerId",
                         "ContainerName",
                         "CreatedTime",
@@ -1601,6 +1602,7 @@
                     "items": {
                         "type": "string",
                         "enum": [
+                            "Compose Project Name",
                             "ContainerId",
                             "ContainerName",
                             "CreatedTime",
@@ -1623,6 +1625,7 @@
                     "default": "FullTag",
                     "description": "%vscode-docker.config.docker.containers.label%",
                     "enum": [
+                        "Compose Project Name",
                         "ContainerId",
                         "ContainerName",
                         "CreatedTime",
@@ -1819,6 +1822,10 @@
                     "type": "number",
                     "default": 10,
                     "description": "%vscode-docker.config.docker.truncateMaxLength%"
+                },
+                "docker.dockerodeOptions": {
+                    "type": "object",
+                    "description": "%vscode-docker.config.docker.dockerodeOptions%"
                 },
                 "docker.host": {
                     "type": "string",

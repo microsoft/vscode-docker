@@ -11,11 +11,9 @@ import * as url from 'url';
 import { workspace, WorkspaceConfiguration } from 'vscode';
 import { parseError } from "vscode-azureextensionui";
 import LineSplitter from '../debugging/coreclr/lineSplitter';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { LocalOSProvider } from './LocalOSProvider';
 import { execAsync, spawnAsync } from './spawnAsync';
-import { timeUtils } from './timeUtils';
 
 // CONSIDER
 // Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
@@ -202,14 +200,12 @@ export class DockerContextManager {
     }
 
     private async refreshCachedDockerContext(): Promise<boolean> {
-        const { Result: currentContext, DurationMs: duration } = await timeUtils.timeIt(async () => this.inspectCurrentContext());
+        const currentContext = await this.inspectCurrentContext();
 
         const contextChanged = !this.cachedContext || currentContext.FullSpec !== this.cachedContext.FullSpec;
 
         if (contextChanged) {
-            const previousContext = this.cachedContext;
             this.cachedContext = currentContext;
-            this.sendDockerContextEvent(currentContext, previousContext, duration);
         }
 
         return contextChanged;
@@ -239,11 +235,6 @@ export class DockerContextManager {
             currentContext.HostProtocol = url.parse(currentContext.Endpoints.docker.Host).protocol?.replace(':', '')
         } catch { }
         return currentContext;
-    }
-
-    private sendDockerContextEvent(currentContext: IDockerContext, previousContext: IDockerContext, contextRetrievalTimeMs: number): void {
-        const eventName: string = previousContext ? 'docker-context.change' : 'docker-context.initialize';
-        ext.reporter.sendTelemetryEvent(eventName, { hostProtocol: currentContext.HostProtocol }, { contextRetrievalTimeMs: contextRetrievalTimeMs });
     }
 }
 

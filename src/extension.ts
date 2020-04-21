@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as fse from 'fs-extra';
+import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
@@ -30,6 +31,7 @@ import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
 import { refreshDockerode } from './utils/refreshDockerode';
+import { bufferToString } from './utils/spawnAsync';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -80,6 +82,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
+        activateContext.telemetry.properties.dockerInstallationID = await getDockerInstallationID();
 
         validateOldPublisher(activateContext);
 
@@ -145,6 +148,22 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
     });
 }
 
+async function getDockerInstallationID(): Promise<string> {
+    let result: string = 'unknown';
+    let installIdFilePath: string | undefined;
+    if (os.platform() === 'win32' && process.env.APPDATA) {
+        installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
+    } else if (os.platform() === 'darwin') {
+        installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
+    }
+
+    if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
+        result = bufferToString(await fse.readFile(installIdFilePath));
+    }
+
+    return result;
+}
+
 /**
  * Workaround for https://github.com/microsoft/vscode/issues/76211 (only necessary if people are on old versions of VS Code that don't have the fix)
  */
@@ -197,7 +216,8 @@ namespace Configuration {
                 if (e.affectsConfiguration('docker.host') ||
                     e.affectsConfiguration('docker.certPath') ||
                     e.affectsConfiguration('docker.tlsVerify') ||
-                    e.affectsConfiguration('docker.machineName')) {
+                    e.affectsConfiguration('docker.machineName') ||
+                    e.affectsConfiguration('docker.dockerodeOptions')) {
                     await refreshDockerode();
                 }
             }

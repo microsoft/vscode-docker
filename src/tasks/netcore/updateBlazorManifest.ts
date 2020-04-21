@@ -69,6 +69,7 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
     if (!inputManifest || // Input manifest can't be empty/undefined
         !outputManifest || // Output manifest can't be empty/undefined
         !(await fse.pathExists(inputManifest)) || // Input manifest must exist
+        !(await fse.stat(inputManifest)).isFile() || // Input manifest must be a file
         !volumes || // Volumes can't be undefined
         volumes.length === 0) { // Volumes can't be empty
         // This isn't considered an error case, we'll just return without doing anything

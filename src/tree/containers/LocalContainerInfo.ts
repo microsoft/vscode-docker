@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerInfo } from "dockerode";
+import { localize } from "../../localize";
 import { ILocalItem } from "../LocalRootTreeItemBase";
 
 /**
@@ -18,8 +19,10 @@ export interface ILocalContainerInfo extends ILocalItem {
     ports: number[];
     state: string;
     status: string;
+    composeProjectName: string;
 }
 
+export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Other Containers');
 /**
  * Wrapper class for Dockerode item, which has inconsistent names/types
  */
@@ -73,6 +76,18 @@ export class LocalContainerInfo implements ILocalContainerInfo {
 
     public get status(): string {
         return this.data.Status;
+    }
+
+    public get composeProjectName(): string {
+        const labels = Object.keys(this.data.Labels)
+            .map(label => ({ label: label, value: this.data.Labels[label] }));
+
+        const composeProject = labels.find(l => l.label === 'com.docker.compose.project');
+        if (composeProject) {
+            return composeProject.value;
+        } else {
+            return NonComposeGroupName;
+        }
     }
 
     public get treeId(): string {
