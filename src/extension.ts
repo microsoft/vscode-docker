@@ -275,6 +275,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             serverOptions,
             clientOptions
         );
+        client.registerProposedFeatures();
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         client.onReady().then(() => {
             // attach the VS Code settings listener
