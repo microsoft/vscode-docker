@@ -29,7 +29,7 @@ const defaultLaunchFile: Map<PythonProjectType, LaunchFilePrompt> = new Map<Pyth
 ]);
 
 const pythonDockerfile = `# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8
+FROM python:3.8-slim-buster
 $rootUserWarning$
 $expose_statements$
 
