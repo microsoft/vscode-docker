@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from "../../localize";
+import { getThemedIconPath } from '../IconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
 export class HelpsTreeItem extends AzExtParentTreeItem {
@@ -36,7 +36,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     //         this,
     //         localize('views.help.getStarted', 'Get Started'),
     //         'https://aka.ms/helppanel_getstarted',
-    //         new vscode.ThemeIcon('star-empty'));
+    //         getThemedIconPath('star-empty'));
     //     node.id = '1';
 
     //     return node;
@@ -47,7 +47,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.readDocumentation', 'Read Documentation'),
             'https://aka.ms/helppanel_docs',
-            new vscode.ThemeIcon('book'));
+            getThemedIconPath('book'));
         node.id = '2';
 
         return node;
@@ -58,7 +58,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.reviewIssues', 'Review Issues'),
             'https://aka.ms/helppanel_reviewissues',
-            new vscode.ThemeIcon('issues'));
+            getThemedIconPath('issues'));
         node.id = '3';
 
         return node;
@@ -71,7 +71,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
                 label: localize('views.help.reportIssue', 'Report Issue'),
                 contextValue: 'Report Issue',
                 commandId: 'vscode-docker.help.reportIssue',
-                iconPath: new vscode.ThemeIcon('comment'),
+                iconPath: getThemedIconPath('comment'),
                 includeInTreeItemPicker: true,
             })
         node.id = '4';

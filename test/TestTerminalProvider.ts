@@ -52,8 +52,6 @@ class TestTerminal implements vscode.Terminal {
         this._errFilePath = path.join(root, `.err${this._suffix}`);
         this._semaphorePath = path.join(root, `.sem${this._suffix}`);
     }
-    creationOptions: Readonly<vscode.TerminalOptions> | Readonly<vscode.ExtensionTerminalOptions>;
-    exitStatus: vscode.TerminalExitStatus;
 
     /**
      * Causes the terminal to exit after completing the current commands, and returns the
