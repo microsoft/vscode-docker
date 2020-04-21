@@ -42,8 +42,6 @@ class TestTerminal implements vscode.Terminal {
     private _suffix: number;
     private _disposed: boolean = false;
 
-    readonly dimensions = undefined;
-
     constructor(private _terminal: vscode.Terminal) {
         let root = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0 && vscode.workspace.workspaceFolders[0].uri.fsPath) || os.tmpdir();
         this._suffix = TestTerminal._lastSuffix++;
@@ -51,6 +49,14 @@ class TestTerminal implements vscode.Terminal {
         this._outputFilePath = path.join(root, `.out${this._suffix}`);
         this._errFilePath = path.join(root, `.err${this._suffix}`);
         this._semaphorePath = path.join(root, `.sem${this._suffix}`);
+    }
+
+    public get exitStatus(): vscode.TerminalExitStatus | undefined {
+        return this._terminal.exitStatus;
+    }
+
+    public get creationOptions(): vscode.TerminalOptions | vscode.ExtensionTerminalOptions {
+        return this._terminal.creationOptions;
     }
 
     /**
