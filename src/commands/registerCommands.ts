@@ -140,7 +140,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.context.use', useDockerContext);
     registerCommand('vscode-docker.context.inspect', inspectDockerContext);
     registerCommand('vscode-docker.context.remove', removeDockerContext);
-    registerWorkspaceCommand('vscode-docker.installDocker', installDocker);
+    registerCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
 }
