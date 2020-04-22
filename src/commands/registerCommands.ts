@@ -62,6 +62,7 @@ import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
+import { reportIssue } from "./reportIssue";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
@@ -143,4 +144,5 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
+    registerCommand('vscode-docker.help.reportIssue', reportIssue);
 }

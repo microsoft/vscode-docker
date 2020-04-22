@@ -3,11 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { callDockerodeAsync } from "../../utils/callDockerode";
+import { getThemedIconPath } from "../IconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
-import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { ILocalItem, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
@@ -22,6 +25,13 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
 
     public childType: LocalChildType<ILocalContainerInfo> = ContainerTreeItem;
     public childGroupType: LocalChildGroupType<ILocalContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
+
+    private newContainerUser: boolean = false;
+
+    public constructor(parent: AzExtParentTreeItem | undefined) {
+        super(parent);
+        this.newContainerUser = this.isNewContainerUser();
+    }
 
     public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
         properties: containerProperties,
@@ -50,7 +60,10 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
         };
 
         const items = await callDockerodeAsync(async () => ext.dockerode.listContainers(options)) || [];
-        return items.map(c => new LocalContainerInfo(c));
+        const localItems = items.map(c => new LocalContainerInfo(c));
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.updateNewContainerUser(localItems);
+        return localItems;
     }
 
     public getPropertyValue(item: ILocalContainerInfo, property: ContainerProperty): string {
@@ -90,5 +103,25 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<ILocalContainerInf
             }
         }
         return super.compareChildrenImpl(ti1, ti2);
+    }
+
+    protected getTreeItemForEmptyList(): AzExtTreeItem[] {
+        if (this.newContainerUser) {
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
+            dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
+            return [dockerTutorialTreeItem];
+        }
+        return super.getTreeItemForEmptyList()
+    }
+
+    private isNewContainerUser(): boolean {
+        return ext.context.globalState.get<boolean>('vscode-docker.container.newContainerUser', true);
+    }
+
+    private async updateNewContainerUser(items: ILocalItem[]): Promise<void> {
+        if (this.newContainerUser && items && items.length > 0) {
+            this.newContainerUser = false;
+            await ext.context.globalState.update('vscode-docker.container.newContainerUser', false);
+        }
     }
 }
