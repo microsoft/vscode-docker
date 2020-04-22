@@ -94,17 +94,13 @@ suite('(unit) debugging/coreclr/prereqManager', () => {
     });
 
     suite('LinuxUserInDockerGroupPrerequisite', () => {
-        const generateTest = (name: string, result: boolean, os: PlatformOS, isMac?: boolean, inGroup?: boolean) => {
+        const generateTest = (name: string, result: boolean, os: PlatformOS, inGroup?: boolean) => {
             test(name, async () => {
-                const osProvider = <OSProvider>{
-                    os,
-                    isMac
-                }
-
+                const osProvider = <OSProvider>{ os }
                 let processProvider = <ProcessProvider>{};
                 let listed = false;
 
-                if (os === 'Linux' && !isMac) {
+                if (os === 'Linux') {
                     processProvider = <ProcessProvider>{
                         exec: (command: string, _) => {
                             listed = true;
@@ -129,7 +125,7 @@ suite('(unit) debugging/coreclr/prereqManager', () => {
 
                 const prereqResult = await prerequisite.checkPrerequisite();
 
-                if (os === 'Linux' && !isMac) {
+                if (os === 'Linux') {
                     assert.equal(listed, true, 'The user\'s groups should have been listed.');
                 }
 
@@ -139,9 +135,9 @@ suite('(unit) debugging/coreclr/prereqManager', () => {
         };
 
         generateTest('Windows: No-op', true, 'Windows');
-        generateTest('Mac: No-op', true, 'Linux', true);
-        generateTest('Linux: In group', true, 'Linux', false, true);
-        generateTest('Linux: Not in group', false, 'Linux', false, false);
+        generateTest('Mac: No-op', true, 'Mac');
+        generateTest('Linux: In group', true, 'Linux', true);
+        generateTest('Linux: Not in group', false, 'Linux', false);
     });
 
     suite('MacNuGetFallbackFolderSharedPrerequisite', () => {
@@ -168,7 +164,7 @@ suite('(unit) debugging/coreclr/prereqManager', () => {
 
                 const osProvider = <OSProvider>{
                     homedir: '/Users/User',
-                    isMac: true
+                    os: 'Mac'
                 };
 
                 let shown = false;
@@ -194,7 +190,7 @@ suite('(unit) debugging/coreclr/prereqManager', () => {
 
         test('Non-Mac: No-op', async () => {
             const osProvider = <OSProvider>{
-                isMac: false
+                os: 'Linux'
             };
 
             const showErrorMessage = (message: string, ...items: vscode.MessageItem[]): Thenable<vscode.MessageItem | undefined> => {

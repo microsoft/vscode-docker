@@ -68,7 +68,7 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     public async isCertificateTrusted(): Promise<TrustState> {
-        if (this.osProvider.os !== 'Windows' && !this.osProvider.isMac) {
+        if (this.osProvider.os === 'Linux') {
             // No centralized notion of trust on Linux
             return TrustState.NotApplicable;
         }
