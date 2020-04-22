@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { UserCancelledError } from 'vscode-azureextensionui';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -23,4 +24,13 @@ export async function delay(ms: number, token?: vscode.CancellationToken): Promi
             });
         }
     });
+}
+
+export async function getCancelPromise(token: vscode.CancellationToken, message?: string): Promise<never> {
+    return new Promise((resolve, reject) => {
+        const disposable = token.onCancellationRequested(() => {
+            disposable.dispose();
+            reject(new UserCancelledError(message));
+        })
+    })
 }

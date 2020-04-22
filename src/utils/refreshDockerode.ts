@@ -13,9 +13,9 @@ import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
-import { delay } from './delay';
 import { dockerContextManager, IDockerContext } from './dockerContextManager';
 import { isWindows } from './osUtils';
+import { delay } from './promiseUtils';
 import { timeUtils } from './timeUtils';
 
 const SSH_URL_REGEX = /ssh:\/\//i;

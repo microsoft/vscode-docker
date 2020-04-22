@@ -6,10 +6,12 @@
 /* eslint-disable unicorn/filename-case */
 
 import * as vscode from 'vscode';
-import { IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { CancellationTokenSource } from 'vscode-languageclient';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerContextManager } from './dockerContextManager';
+import { getCancelPromise } from './promiseUtils';
 import { refreshDockerode } from './refreshDockerode';
 
 let cts: vscode.CancellationTokenSource | undefined;
@@ -33,15 +35,22 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
     if (!ext.runningTests) {
         const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
         if (contextChanged) {
-            cts.cancel(); // This will cause any still-awaiting promises to reject with UserCancelledError
-            cts.dispose();
+            /* eslint-disable no-unused-expressions */
+            // This will cause any still-awaiting promises to reject with UserCancelledError
+            cts?.cancel();
+            cts?.dispose();
+            /* eslint-enable no-unused-expressions */
+
+            // Reinitialize
             cts = cancellationPromise = undefined;
 
             await refreshDockerode();
         }
     }
 
-    return await Promise.race([dockerodeAsyncCallback(), getCancellationPromise()]);
+    cts = cts ?? new CancellationTokenSource();
+    cancellationPromise = cancellationPromise ?? getCancelPromise(cts.token, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
+    return await Promise.race([dockerodeAsyncCallback(), cancellationPromise]);
 }
 
 export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
@@ -58,21 +67,4 @@ export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () =>
 
         throw err;
     }
-}
-
-async function getCancellationPromise(): Promise<never> {
-    if (cancellationPromise) {
-        return cancellationPromise;
-    }
-
-    if (!cts) {
-        cts = new vscode.CancellationTokenSource();
-    }
-
-    return cancellationPromise = new Promise((resolve, reject) => {
-        const disposable = cts.token.onCancellationRequested(() => {
-            disposable.dispose();
-            reject(new UserCancelledError());
-        });
-    });
 }
