@@ -38,7 +38,7 @@ export async function getCancelPromise(token: vscode.CancellationToken, errorCon
                 reject(new UserCancelledError());
             }
         });
-    })
+    });
 }
 
 export class CancellationPromiseSource extends vscode.CancellationTokenSource {
