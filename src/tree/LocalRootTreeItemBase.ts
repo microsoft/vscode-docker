@@ -9,7 +9,7 @@ import { showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
 import { localize } from "../localize";
-import { DockerInstallStatusProvider } from "../utils/DockerInstallStatusProvider";
+import { dockerInstallStatusProvider } from "../utils/DockerInstallStatusProvider";
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
 import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
@@ -63,7 +63,6 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     private _currentItems: TItem[] | undefined;
     private _itemsFromPolling: TItem[] | undefined;
     private _currentDockerStatus: DockerStatus;
-    private _dockerStatusProvider: DockerInstallStatusProvider;
 
     public get contextValue(): string {
         return this.treePrefix;
@@ -71,11 +70,6 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
     public get config(): WorkspaceConfiguration {
         return workspace.getConfiguration(`${configPrefix}.${this.treePrefix}`);
-    }
-
-    public constructor(parent: AzExtParentTreeItem | undefined) {
-        super(parent);
-        this._dockerStatusProvider = DockerInstallStatusProvider.getInstance();
     }
 
     public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
@@ -131,7 +125,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             context.telemetry.properties.failedToConnect = 'true';
 
             if (!this._currentDockerStatus) {
-                this._currentDockerStatus = await this._dockerStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
+                this._currentDockerStatus = await dockerInstallStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
             }
 
             this.showDockerInstallNotificationIfNeeded();
@@ -344,7 +338,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             pollingDockerStatus = 'Running';
         } catch (error) {
             this._itemsFromPolling = undefined;
-            pollingDockerStatus = await this._dockerStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
+            pollingDockerStatus = await dockerInstallStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
             isDockerStatusChanged = pollingDockerStatus !== this._currentDockerStatus;
         }
 

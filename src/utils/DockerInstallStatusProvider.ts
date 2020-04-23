@@ -6,12 +6,15 @@
 import { AsyncLazy } from "./lazy";
 import { execAsync } from "./spawnAsync";
 
-export class DockerInstallStatusProvider {
-    private static instance: DockerInstallStatusProvider;
+export interface IDockerInstallStatusProvider {
+    isDockerInstalled(): Promise<boolean>
+}
+
+class DockerInstallStatusProvider implements IDockerInstallStatusProvider {
     private maxCacheTime: number = 5000;
     private isDockerInstalledLazy: AsyncLazy<boolean>;
 
-    private constructor() {
+    public constructor() {
         this.isDockerInstalledLazy = new AsyncLazy<boolean>(async () => {
             try {
                 await execAsync('docker -v');
@@ -22,15 +25,9 @@ export class DockerInstallStatusProvider {
         }, this.maxCacheTime);
     }
 
-    public static getInstance(): DockerInstallStatusProvider {
-        if (!DockerInstallStatusProvider.instance) {
-            DockerInstallStatusProvider.instance = new DockerInstallStatusProvider();
-        }
-
-        return DockerInstallStatusProvider.instance;
-    }
-
     public async isDockerInstalled(): Promise<boolean> {
         return await this.isDockerInstalledLazy.getValue();
     }
 }
+
+export const dockerInstallStatusProvider = new DockerInstallStatusProvider();
