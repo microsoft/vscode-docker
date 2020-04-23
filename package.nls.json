@@ -171,7 +171,6 @@
     "vscode-docker.commands.compose.up": "Compose Up",
     "vscode-docker.commands.configure": "Add Docker Files to Workspace...",
     "vscode-docker.commands.configureCompose": "Add Docker Compose Files to Workspace...",
-    "vscode-docker.commands.installDocker": "Install Docker",
     "vscode-docker.commands.containers.attachShell": "Attach Shell",
     "vscode-docker.commands.containers.browse": "Open in Browser",
     "vscode-docker.commands.containers.configureExplorer": "Configure Explorer...",
@@ -185,6 +184,7 @@
     "vscode-docker.commands.containers.stop": "Stop",
     "vscode-docker.commands.containers.viewLogs": "View Logs",
     "vscode-docker.commands.debugging.initializeForDebugging": "Initialize for Docker debugging",
+    "vscode-docker.commands.help.reportIssue": "Report Issue",
     "vscode-docker.commands.images.build": "Build Image...",
     "vscode-docker.commands.images.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.images.inspect": "Inspect",
@@ -197,6 +197,7 @@
     "vscode-docker.commands.images.runInteractive": "Run Interactive",
     "vscode-docker.commands.images.tag": "Tag...",
     "vscode-docker.commands.images.copyFullTag": "Copy Full Tag",
+    "vscode-docker.commands.installDocker": "Install Docker",
     "vscode-docker.commands.networks.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.networks.create": "Create...",
     "vscode-docker.commands.networks.inspect": "Inspect",
@@ -246,9 +247,10 @@
     "vscode-docker.commands.category.dockerVolumes": "Docker Volumes",
     "vscode-docker.commands.category.context": "Docker Context",
     "vscode-docker.views.dockerContainers": "Containers",
+    "vscode-docker.views.activityBar": "Docker",
     "vscode-docker.views.dockerImages": "Images",
     "vscode-docker.views.dockerRegistries": "Registries",
     "vscode-docker.views.dockerNetworks": "Networks",
     "vscode-docker.views.dockerVolumes": "Volumes",
-    "vscode-docker.views.activityBar": "Docker"
+    "vscode-docker.views.help": "Help and Feedback"
 }
