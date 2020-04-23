@@ -2525,7 +2525,7 @@
         "azure-arm-website": "^5.3.0",
         "azure-storage": "^2.10.3",
         "dockerfile-ast": "^0.0.24",
-        "dockerfile-language-server-nodejs": "^0.0.23",
+        "dockerfile-language-server-nodejs": "^0.0.24",
         "dockerode": "^3.2.0",
         "fs-extra": "^8.1.0",
         "glob": "^7.1.6",
