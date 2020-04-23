@@ -10,9 +10,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
+import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
-import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN, extensionId } from './constants';
 import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -67,7 +68,28 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
     ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
-    ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
+    const telemetryReporterProxy = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
+    ext.reporter = telemetryReporterProxy;
+
+    const extensionVersion = getExtensionVersion() ?? '1';
+    let targetPopulation: tas.TargetPopulation;
+
+    if (ext.runningTests) {
+        targetPopulation = tas.TargetPopulation.Team;
+    } else if (/alpha/ig.test(extensionVersion)) {
+        targetPopulation = tas.TargetPopulation.Insiders;
+    } else {
+        targetPopulation = tas.TargetPopulation.Public;
+    }
+
+    ext.experimentationService = tas.getExperimentationService(
+        extensionId,
+        extensionVersion,
+        targetPopulation,
+        telemetryReporterProxy,
+        ctx.globalState
+    );
+
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
@@ -162,6 +184,12 @@ async function getDockerInstallationID(): Promise<string> {
     }
 
     return result;
+}
+
+function getExtensionVersion(): string | undefined {
+    const extension = vscode.extensions.getExtension(extensionId);
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    return extension?.packageJSON?.version;
 }
 
 /**

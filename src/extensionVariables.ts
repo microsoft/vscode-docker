@@ -5,6 +5,7 @@
 
 import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
+import { IExperimentationService } from 'tas-client';
 import { ExtensionContext, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
@@ -24,6 +25,7 @@ export namespace ext {
     export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
     export let reporter: ITelemetryReporter;
+    export let experimentationService: IExperimentationService;
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;
