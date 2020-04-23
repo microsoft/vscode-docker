@@ -43,6 +43,7 @@ import { inspectNetwork } from "./networks/inspectNetwork";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
 import { pruneSystem } from "./pruneSystem";
+import { registerLocalCommand } from "./registerLocalCommand";
 import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
@@ -141,7 +142,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.context.use', useDockerContext);
     registerCommand('vscode-docker.context.inspect', inspectDockerContext);
     registerCommand('vscode-docker.context.remove', removeDockerContext);
-    registerCommand('vscode-docker.installDocker', installDocker);
+    registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.reportIssue', reportIssue);
