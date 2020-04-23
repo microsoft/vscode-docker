@@ -5,17 +5,14 @@
 
 /* eslint-disable unicorn/filename-case */
 
-import * as vscode from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
-import { CancellationTokenSource } from 'vscode-languageclient';
+import { IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerContextManager } from './dockerContextManager';
-import { getCancelPromise } from './promiseUtils';
+import { CancellationPromiseSource } from './promiseUtils';
 import { refreshDockerode } from './refreshDockerode';
 
-let cts: vscode.CancellationTokenSource | undefined;
-let cancellationPromise: Promise<never> | undefined;
+let cps: CancellationPromiseSource | undefined;
 
 export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
     const p = new Promise<T>((resolve, reject) => {
@@ -36,21 +33,18 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
         const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
         if (contextChanged) {
             /* eslint-disable no-unused-expressions */
-            // This will cause any still-awaiting promises to reject with UserCancelledError
-            cts?.cancel();
-            cts?.dispose();
+            // This will cause any still-awaiting promises to reject with UserCancelledError, and then cps will be recreated
+            cps?.cancel();
+            cps?.dispose();
+            cps = undefined;
             /* eslint-enable no-unused-expressions */
-
-            // Reinitialize
-            cts = cancellationPromise = undefined;
 
             await refreshDockerode();
         }
     }
 
-    cts = cts ?? new CancellationTokenSource();
-    cancellationPromise = cancellationPromise ?? getCancelPromise(cts.token, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
-    return await Promise.race([dockerodeAsyncCallback(), cancellationPromise]);
+    cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
+    return await Promise.race([dockerodeAsyncCallback(), cps.promise]);
 }
 
 export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
