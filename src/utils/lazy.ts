@@ -14,7 +14,7 @@ export class Lazy<T> {
         return this._isValueCreated;
     }
 
-    public clearLifeTime(): void {
+    public cacheForever(): void {
         this._valueLifetime = undefined;
     }
 
@@ -53,7 +53,7 @@ export class AsyncLazy<T> {
         return this._isValueCreated;
     }
 
-    public clearLifeTime(): void {
+    public cacheForever(): void {
         this._valueLifetime = undefined;
     }
 

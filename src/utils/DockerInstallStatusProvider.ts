@@ -20,7 +20,7 @@ class DockerInstallStatusProvider implements IDockerInstallStatusProvider {
             if (dockerInstalled) {
                 // once docker is installed, lets assume that it will not be uninstalled.
                 // It is unlikely user will uninstall the docker, in which case user has open a new workspace to get the updated status.
-                this.isDockerInstalledLazy.clearLifeTime();
+                this.isDockerInstalledLazy.cacheForever();
             }
             return dockerInstalled;
         }, this.maxCacheTime);

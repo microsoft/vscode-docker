@@ -53,7 +53,7 @@ suite('(unit) Lazy tests', () => {
 
             assert.equal(factoryCallCount, 1, 'Incorrect number of value factory calls.');
 
-            lazy.clearLifeTime();
+            lazy.cacheForever();
 
             await delay(10);
             lazy.value;
@@ -149,7 +149,7 @@ suite('(unit) Lazy tests', () => {
 
             assert.equal(factoryCallCount, 1, 'Incorrect number of value factory calls.');
 
-            lazy.clearLifeTime();
+            lazy.cacheForever();
             await delay(15);
 
             const p3 = lazy.getValue();
