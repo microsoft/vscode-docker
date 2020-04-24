@@ -1,4 +1,4 @@
-## 1.1.0 - 21 Apr 2020
+## 1.1.0 - 20 April 2020
 ### Added
 * Custom file names for docker-compose files can be defined. [#102](https://github.com/microsoft/vscode-docker/issues/102)
 * The experience for pushing Docker images has been revamped. [#351](https://github.com/microsoft/vscode-docker/issues/351), [#1539](https://github.com/microsoft/vscode-docker/issues/1539), [#1595](https://github.com/microsoft/vscode-docker/issues/1595)

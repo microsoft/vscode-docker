@@ -53,10 +53,10 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     public sortBySetting: CommonSortBy;
     public labelSetting: TProperty;
     public descriptionSetting: TProperty[];
+    protected failedToConnect: boolean = false;
 
     private _currentItems: TItem[] | undefined;
     private _itemsFromPolling: TItem[] | undefined;
-    private _failedToConnect: boolean = false;
 
     public get contextValue(): string {
         return this.treePrefix;
@@ -99,25 +99,29 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         });
     }
 
+    protected getTreeItemForEmptyList(): AzExtTreeItem[] {
+        return [new GenericTreeItem(this, {
+            label: localize('vscode-docker.tree.noItemsFound', 'No items found'),
+            iconPath: getThemedIconPath('info'),
+            contextValue: 'dockerNoItems'
+        })];
+    }
+
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();
             this._itemsFromPolling = undefined;
-            this._failedToConnect = false;
+            this.failedToConnect = false;
         } catch (error) {
             this._currentItems = undefined;
-            this._failedToConnect = true;
+            this.failedToConnect = true;
             context.telemetry.properties.failedToConnect = 'true';
             return this.getDockerErrorTreeItems(context, error);
         }
 
         if (this._currentItems.length === 0) {
             context.telemetry.properties.noItems = 'true';
-            return [new GenericTreeItem(this, {
-                label: localize('vscode-docker.tree.noItemsFound', 'Successfully connected, but no items found.'),
-                iconPath: getThemedIconPath('info'),
-                contextValue: 'dockerNoItems'
-            })];
+            return this.getTreeItemForEmptyList();
         } else {
             this.groupBySetting = this.getTreeSetting(groupByKey, this.groupBySettingInfo);
             context.telemetry.properties.groupBySetting = this.groupBySetting;
@@ -137,7 +141,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
-        if (this._failedToConnect) {
+        if (this.failedToConnect) {
             return 0; // children are already sorted
         } else {
             if (ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType) {
