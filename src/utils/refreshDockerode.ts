@@ -32,8 +32,9 @@ export async function refreshDockerode(): Promise<void> {
             try {
                 // If the docker.dockerodeOptions setting is present, use it only
                 const config = workspace.getConfiguration('docker');
-                const overrideDockerodeOptions = config.get<{}>('dockerodeOptions');
-                if (overrideDockerodeOptions) {
+                const overrideDockerodeOptions = config.get('dockerodeOptions');
+                // eslint-disable-next-line @typescript-eslint/tslint/config
+                if (overrideDockerodeOptions && Object.keys(overrideDockerodeOptions).length > 0) {
                     actionContext.telemetry.properties.hostSource = 'docker.dockerodeOptions';
                     actionContext.telemetry.measurements.retrievalTimeMs = 0;
                     ext.dockerodeInitError = undefined;

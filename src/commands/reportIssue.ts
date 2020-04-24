@@ -2,17 +2,10 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
+import { extensionId } from '../constants';
 
-export type PlatformOS = 'Windows' | 'Linux' | 'Mac';
-export type Platform =
-    'Node.js' |
-    '.NET: ASP.NET Core' |
-    '.NET: Core Console' |
-    'Python: Django' |
-    'Python: Flask' |
-    'Python: General' |
-    'Java' |
-    'C++' |
-    'Go' |
-    'Ruby' |
-    'Other';
+export async function reportIssue(context: IActionContext): Promise<void> {
+    return vscode.commands.executeCommand('vscode.openIssueReporter', `${extensionId}`);
+}

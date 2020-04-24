@@ -20,7 +20,7 @@ export async function pullRepository(context: IActionContext, node?: RemoteRepos
     await pullImages(context, node.parent, node.repoName + ' -a');
 }
 
-export async function pullImage(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
+export async function pullImageFromRepository(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.all.tag, context);
     }

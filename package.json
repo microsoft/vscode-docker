@@ -38,7 +38,6 @@
         "onCommand:vscode-docker.compose.up",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.configureCompose",
-        "onCommand:vscode-docker.installDocker",
         "onCommand:vscode-docker.containers.attachShell",
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
@@ -52,10 +51,12 @@
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
+        "onCommand:vscode-docker.help.reportIssue",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
         "onCommand:vscode-docker.images.prune",
+        "onCommand:vscode-docker.images.pull",
         "onCommand:vscode-docker.images.push",
         "onCommand:vscode-docker.images.refresh",
         "onCommand:vscode-docker.images.remove",
@@ -64,6 +65,7 @@
         "onCommand:vscode-docker.images.runInteractive",
         "onCommand:vscode-docker.images.tag",
         "onCommand:vscode-docker.images.copyFullTag",
+        "onCommand:vscode-docker.installDocker",
         "onCommand:vscode-docker.networks.configureExplorer",
         "onCommand:vscode-docker.networks.create",
         "onCommand:vscode-docker.networks.inspect",
@@ -111,7 +113,8 @@
         "onView:dockerImages",
         "onView:dockerNetworks",
         "onView:dockerRegistries",
-        "onView:dockerVolumes"
+        "onView:dockerVolumes",
+        "onView:vscode-docker.views.help"
     ],
     "main": "main",
     "contributes": {
@@ -352,19 +355,24 @@
                     "group": "images_2_general@1"
                 },
                 {
-                    "command": "vscode-docker.images.push",
+                    "command": "vscode-docker.images.pull",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@2"
                 },
                 {
-                    "command": "vscode-docker.images.tag",
+                    "command": "vscode-docker.images.push",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
                 },
                 {
-                    "command": "vscode-docker.images.copyFullTag",
+                    "command": "vscode-docker.images.tag",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@4"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@5"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -536,7 +544,8 @@
                                     },
                                     "pattern": {
                                         "type": "string",
-                                        "description": "%vscode-docker.debug.dockerServerReadyAction.pattern%"
+                                        "description": "%vscode-docker.debug.dockerServerReadyAction.pattern%",
+                                        "default": "(https?://\\S+|[0-9]+)"
                                     },
                                     "uriFormat": {
                                         "type": "string",
@@ -1312,10 +1321,7 @@
                 "filenamePatterns": [
                     "*.dockerfile",
                     "Dockerfile",
-                    "Dockerfile.debug",
-                    "Dockerfile.dev",
-                    "Dockerfile.develop",
-                    "Dockerfile.prod"
+                    "Dockerfile.*"
                 ]
             },
             {
@@ -2098,6 +2104,11 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
+                "command": "vscode-docker.help.reportIssue",
+                "title": "%vscode-docker.commands.help.reportIssue%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
                 "command": "vscode-docker.images.build",
                 "title": "%vscode-docker.commands.images.build%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
@@ -2124,6 +2135,11 @@
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
                 }
+            },
+            {
+                "command": "vscode-docker.images.pull",
+                "title": "%vscode-docker.commands.images.pull%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.push",
@@ -2430,6 +2446,10 @@
                 {
                     "id": "dockerVolumes",
                     "name": "%vscode-docker.views.dockerVolumes%"
+                },
+                {
+                    "id": "vscode-docker.views.help",
+                    "name": "%vscode-docker.views.help%"
                 }
             ]
         },
@@ -2444,7 +2464,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.41.0"
+        "vscode": "^1.44.0"
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
@@ -2495,7 +2515,7 @@
         "mocha-multi-reporters": "^1.1.7",
         "string-replace-webpack-plugin": "^0.1.3",
         "terser-webpack-plugin": "^1.4.3",
-        "ts-node": "^8.8.2",
+        "ts-node": "^8.9.0",
         "tslint": "^5.20.1",
         "tslint-microsoft-contrib": "^6.2.0",
         "typescript": "^3.8.3",
@@ -2504,7 +2524,7 @@
         "vscode": "^1.1.36",
         "vscode-azureextensiondev": "^0.3.1",
         "vscode-nls-dev": "^3.3.1",
-        "webpack": "^4.42.1",
+        "webpack": "^4.43.0",
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
@@ -2513,7 +2533,7 @@
         "azure-arm-website": "^5.3.0",
         "azure-storage": "^2.10.3",
         "dockerfile-ast": "^0.0.24",
-        "dockerfile-language-server-nodejs": "^0.0.23",
+        "dockerfile-language-server-nodejs": "^0.0.24",
         "dockerode": "^3.2.0",
         "fs-extra": "^8.1.0",
         "glob": "^7.1.6",
@@ -2526,7 +2546,7 @@
         "semver": "^6.3.0",
         "tar": "^6.0.1",
         "vscode-azureappservice": "^0.57.6",
-        "vscode-azureextensionui": "^0.29.12",
+        "vscode-azureextensionui": "^0.29.13",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^4.1.2",
         "xml2js": "^0.4.23"
