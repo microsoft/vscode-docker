@@ -13,9 +13,9 @@ import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 import { cloneObject } from './cloneObject';
-import { delay } from './delay';
 import { dockerContextManager, IDockerContext } from './dockerContextManager';
 import { isWindows } from './osUtils';
+import { delay } from './promiseUtils';
 import { timeUtils } from './timeUtils';
 
 const SSH_URL_REGEX = /ssh:\/\//i;
@@ -46,14 +46,12 @@ export async function refreshDockerode(): Promise<void> {
                 const oldEnv = process.env;
                 const newEnv: NodeJS.ProcessEnv = cloneObject(process.env); // make a clone before we change anything
 
-                let dockerodeOptions: Dockerode.DockerOptions | undefined;
-
                 // If DOCKER_HOST is set in the process environment, the host source is environment
                 if (oldEnv.DOCKER_HOST) {
                     actionContext.telemetry.properties.hostSource = 'env';
                 }
 
-                // Override with settings
+                // Override with VSCode settings
                 addDockerSettingsToEnv(newEnv, oldEnv);
 
                 // If the old value is different from the new value, then the setting overrode it
@@ -61,32 +59,33 @@ export async function refreshDockerode(): Promise<void> {
                     actionContext.telemetry.properties.hostSource = 'docker.host';
                 }
 
-                // If DOCKER_HOST is set, do not use docker context (same behavior as the CLI)
+                // Only use Docker Context if DOCKER_HOST is not defined (same behavior as CLI)
+                if (!newEnv.DOCKER_HOST) {
+                    await addDockerContextHostToEnv(actionContext, newEnv);
+                } else {
+                    actionContext.telemetry.measurements.retrievalTimeMs = 0;
+                }
+
                 if (newEnv.DOCKER_HOST) {
                     const parsed = new url.URL(newEnv.DOCKER_HOST);
                     actionContext.telemetry.properties.hostProtocol = parsed.protocol;
-                    actionContext.telemetry.measurements.retrievalTimeMs = 0;
                 } else {
-                    dockerodeOptions = await getDockerOptionsFromDockerContext(actionContext, newEnv);
+                    actionContext.telemetry.properties.hostProtocol = os.platform() === 'win32' ? 'npipe:' : 'unix:';
                 }
 
                 // If host is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
-                if (SSH_URL_REGEX.test(newEnv.DOCKER_HOST || dockerodeOptions?.host)) {
+                if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
                     if (!await validateSshAuthSock(newEnv)) {
                         // Don't wait
                         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
                         ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
-                    }
-
-                    if (dockerodeOptions) {
-                        dockerodeOptions.sshAuthAgent = newEnv.SSH_AUTH_SOCK;
                     }
                 }
 
                 try {
                     ext.dockerodeInitError = undefined;
                     process.env = newEnv;
-                    ext.dockerode = new Dockerode(dockerodeOptions);
+                    ext.dockerode = new Dockerode();
                 } finally {
                     process.env = oldEnv;
                 }
@@ -103,10 +102,8 @@ export async function refreshDockerode(): Promise<void> {
     );
 }
 
-async function getDockerOptionsFromDockerContext(actionContext: IActionContext, newEnv: NodeJS.ProcessEnv): Promise<Dockerode.DockerOptions> {
-    const options: Dockerode.DockerOptions = {};
+async function addDockerContextHostToEnv(actionContext: IActionContext, newEnv: NodeJS.ProcessEnv): Promise<void> {
     let dockerContext: IDockerContext;
-
     ({ DurationMs: actionContext.telemetry.measurements.contextRetrievalTimeMs, Result: { Context: dockerContext } } = await timeUtils.timeIt(async () => dockerContextManager.getCurrentContext()));
 
     if (dockerContext === undefined) { // Undefined context means there's only the default context
@@ -117,33 +114,13 @@ async function getDockerOptionsFromDockerContext(actionContext: IActionContext, 
         actionContext.telemetry.properties.hostSource = 'customContextSelected';
     }
 
-    const host = dockerContext?.Endpoints?.docker?.Host;
+    newEnv.DOCKER_HOST = dockerContext?.Endpoints?.docker?.Host;
 
-    if (host) {
-        const parsed = new url.URL(host);
-
-        options.host = host; // Intentionally the full URL (docker-modem can figure out the protocol and hostname from it)
-        options.port = parsed.port; // docker-modem can figure out the port if it is not explicit in the URL
-        options.username = parsed.username;
-
-        actionContext.telemetry.properties.hostProtocol = parsed.protocol;
-    } else {
-        // If the context doesn't have a Docker host, Dockerode will assume the default npipe://... or unix://...
-        actionContext.telemetry.properties.hostProtocol = os.platform() === 'win32' ? 'npipe:' : 'unix:';
-    }
-
-    // Currently the environment variable is the only way to configure this in docker-modem
     if (dockerContext?.Endpoints?.docker?.SkipTLSVerify) {
         // Disabling TLS specifically requires the value to be an empty string
         // https://docs.docker.com/compose/reference/envvars/#docker_tls_verify
         newEnv.DOCKER_TLS_VERIFY = '';
-    } else {
-        newEnv.DOCKER_TLS_VERIFY = '1';
     }
-
-    // TODO: Attach the TLS material to the options
-
-    return options;
 }
 
 async function validateSshAuthSock(newEnv: NodeJS.ProcessEnv): Promise<boolean> {

@@ -28,7 +28,7 @@ export { DotNetClient } from './src/debugging/coreclr/CommandLineDotNetClient';
 export { compareBuildImageOptions, LaunchOptions } from './src/debugging/coreclr/dockerManager';
 export { FileSystemProvider } from './src/debugging/coreclr/fsProvider';
 export { LineSplitter } from './src/debugging/coreclr/lineSplitter';
-export { delay } from './src/utils/delay';
+export { delay } from './src/utils/promiseUtils';
 export { Lazy, AsyncLazy } from './src/utils/lazy';
 export { OSProvider } from './src/utils/LocalOSProvider';
 export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './src/debugging/coreclr/prereqManager';
