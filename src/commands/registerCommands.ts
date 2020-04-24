@@ -30,6 +30,7 @@ import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
+import { pullImage } from "./images/pullImage";
 import { pushImage } from "./images/pushImage";
 import { removeImage } from "./images/removeImage";
 import { runAzureCliImage } from "./images/runAzureCliImage";
@@ -42,6 +43,7 @@ import { inspectNetwork } from "./networks/inspectNetwork";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
 import { pruneSystem } from "./pruneSystem";
+import { registerLocalCommand } from "./registerLocalCommand";
 import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
@@ -59,7 +61,7 @@ import { disconnectRegistry } from "./registries/disconnectRegistry";
 import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
-import { pullImage, pullRepository } from "./registries/pullImages";
+import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { reportIssue } from "./reportIssue";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
@@ -92,6 +94,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.configureExplorer', configureImagesExplorer);
     registerCommand('vscode-docker.images.inspect', inspectImage);
     registerCommand('vscode-docker.images.prune', pruneImages);
+    registerWorkspaceCommand('vscode-docker.images.pull', pullImage);
     registerWorkspaceCommand('vscode-docker.images.push', pushImage);
     registerCommand('vscode-docker.images.remove', removeImage);
     registerWorkspaceCommand('vscode-docker.images.run', runImage);
@@ -113,7 +116,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
-    registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImage);
+    registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImageFromRepository);
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
     registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
 
@@ -139,7 +142,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.context.use', useDockerContext);
     registerCommand('vscode-docker.context.inspect', inspectDockerContext);
     registerCommand('vscode-docker.context.remove', removeDockerContext);
-    registerCommand('vscode-docker.installDocker', installDocker);
+    registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.reportIssue', reportIssue);

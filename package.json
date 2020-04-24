@@ -56,6 +56,7 @@
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
         "onCommand:vscode-docker.images.prune",
+        "onCommand:vscode-docker.images.pull",
         "onCommand:vscode-docker.images.push",
         "onCommand:vscode-docker.images.refresh",
         "onCommand:vscode-docker.images.remove",
@@ -354,19 +355,24 @@
                     "group": "images_2_general@1"
                 },
                 {
-                    "command": "vscode-docker.images.push",
+                    "command": "vscode-docker.images.pull",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@2"
                 },
                 {
-                    "command": "vscode-docker.images.tag",
+                    "command": "vscode-docker.images.push",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
                 },
                 {
-                    "command": "vscode-docker.images.copyFullTag",
+                    "command": "vscode-docker.images.tag",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@4"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@5"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -2129,6 +2135,11 @@
                     "light": "resources/light/prune.svg",
                     "dark": "resources/dark/prune.svg"
                 }
+            },
+            {
+                "command": "vscode-docker.images.pull",
+                "title": "%vscode-docker.commands.images.pull%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
                 "command": "vscode-docker.images.push",
