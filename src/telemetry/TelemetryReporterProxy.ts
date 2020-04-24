@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { IExperimentationTelemetry } from 'tas-client';
 import { ITelemetryReporter } from 'vscode-azureextensionui';
 import { ITelemetryPublisher } from './TelemetryPublisher';
 
-export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentationTelemetry {
+export class TelemetryReporterProxy implements ITelemetryReporter {
     private readonly sharedProperties: { [key: string]: string } = {};
 
     public constructor(
