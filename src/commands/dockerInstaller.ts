@@ -9,6 +9,7 @@ import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
 import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
 import { execAsync } from '../utils/spawnAsync';
@@ -19,22 +20,32 @@ export abstract class DockerInstallerBase {
     protected abstract getInstallCommand(fileName: string): string;
 
     public async downloadAndInstallDocker(): Promise<void> {
-        const confirmInstall: string = localize('vscode-docker.commands.DockerInstallerBase.confirm', 'Are you sure you want to install Docker on this machine?');
-        const installTitle: string = localize('vscode-docker.commands.DockerInstallerBase.install', 'Install');
-        const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
-        const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
+        const shouldInstall: boolean = await this.preInstallCheck();
+        if (shouldInstall) {
+            const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
+            const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
 
-        // no need to check result - cancel will throw a UserCancelledError
-        await ext.ui.showWarningMessage(confirmInstall, { modal: true }, { title: installTitle });
+            const downloadedFileName: string = await vscode.window.withProgress(
+                { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
+                async () => this.downloadInstaller());
 
-        const downloadedFileName: string = await vscode.window.withProgress(
-            { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
-            async () => this.downloadInstaller());
+            const command = this.getInstallCommand(downloadedFileName);
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            vscode.window.showInformationMessage(installationMessage);
+            await this.install(downloadedFileName, command);
+        }
+    }
 
-        const command = this.getInstallCommand(downloadedFileName);
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        vscode.window.showInformationMessage(installationMessage);
-        await this.install(downloadedFileName, command);
+    private async preInstallCheck(): Promise<boolean> {
+        let proceedInstall = true;
+        if (await dockerInstallStatusProvider.isDockerInstalledRealTimeCheck()) {
+            const reinstallMessage = localize('vscode-docker.commands.DockerInstallerBase.reInstall', 'Docker Desktop is already installed. Would you like to reinstall?');
+            const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall')
+            const response = await vscode.window.showInformationMessage(reinstallMessage, ...[install]);
+            proceedInstall = response !== undefined;
+        }
+
+        return proceedInstall;
     }
 
     private async downloadInstaller(): Promise<string> {
@@ -82,5 +93,19 @@ export class MacDockerInstaller extends DockerInstallerBase {
         const command = this.getInstallCommand(fileName);
         terminal.sendText(command);
         terminal.show();
+    }
+}
+
+export async function showDockerInstallNotification(): Promise<void> {
+    const installMessageLinux = localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?');
+    const installMessageNonLinux = localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
+    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more')
+    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install')
+    const osProvider: LocalOSProvider = new LocalOSProvider();
+    const dockerInstallMessage = osProvider.os === 'Linux' ? installMessageLinux : installMessageNonLinux;
+    const confirmationPrompt: vscode.MessageItem = osProvider.os === 'Linux' ? { title: learnMore } : { title: install };
+    const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
+    if (response) {
+        await vscode.commands.executeCommand('vscode-docker.installDocker');
     }
 }
