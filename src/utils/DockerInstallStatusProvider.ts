@@ -16,20 +16,27 @@ class DockerInstallStatusProvider implements IDockerInstallStatusProvider {
 
     public constructor() {
         this.isDockerInstalledLazy = new AsyncLazy<boolean>(async () => {
-            try {
-                await execAsync('docker -v');
+            const dockerInstalled = await this.isDockerInstalledRealTimeCheck();
+            if (dockerInstalled) {
                 // once docker is installed, lets assume that it will not be uninstalled.
                 // It is unlikely user will uninstall the docker, in which case user has open a new workspace to get the updated status.
                 this.isDockerInstalledLazy.clearLifeTime();
-                return true; // As long as the docker command did't throw exception, assume it is installed.
-            } catch (error) {
-                return false; // docker not installed
             }
+            return dockerInstalled;
         }, this.maxCacheTime);
     }
 
     public async isDockerInstalled(): Promise<boolean> {
         return await this.isDockerInstalledLazy.getValue();
+    }
+
+    public async isDockerInstalledRealTimeCheck(): Promise<boolean> {
+        try {
+            await execAsync('docker -v');
+            return true; // As long as the docker command did't throw exception, assume it is installed.
+        } catch (error) {
+            return false; // docker not installed
+        }
     }
 }
 
