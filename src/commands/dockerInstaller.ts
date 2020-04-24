@@ -38,7 +38,7 @@ export abstract class DockerInstallerBase {
 
     private async preInstallCheck(): Promise<boolean> {
         let proceedInstall = true;
-        if (await dockerInstallStatusProvider.isDockerInstalled()) {
+        if (await dockerInstallStatusProvider.isDockerInstalledRealTimeCheck()) {
             const reinstallMessage = localize('vscode-docker.commands.DockerInstallerBase.reInstall', 'Docker Desktop is already installed. Would you like to reinstall?');
             const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall')
             const response = await vscode.window.showInformationMessage(reinstallMessage, ...[install]);
