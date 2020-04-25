@@ -63,6 +63,7 @@ import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
+import { registryHelp } from "./registries/registryHelp";
 import { reportIssue } from "./reportIssue";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
@@ -114,6 +115,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
+    registerCommand('vscode-docker.registries.help', registryHelp);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImageFromRepository);
