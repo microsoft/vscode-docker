@@ -89,6 +89,7 @@
         "onCommand:vscode-docker.registries.deployImageToAzure",
         "onCommand:vscode-docker.registries.disconnectRegistry",
         "onCommand:vscode-docker.registries.dockerHub.openInBrowser",
+        "onCommand:vscode-docker.registries.help",
         "onCommand:vscode-docker.registries.logInToDockerCli",
         "onCommand:vscode-docker.registries.logOutOfDockerCli",
         "onCommand:vscode-docker.registries.pullImage",
@@ -278,6 +279,11 @@
                     "group": "navigation@1"
                 },
                 {
+                    "command": "vscode-docker.registries.help",
+                    "when": "view == dockerRegistries",
+                    "group": "navigation@10"
+                },
+                {
                     "command": "vscode-docker.volumes.prune",
                     "when": "view == dockerVolumes",
                     "group": "navigation@1"
@@ -294,7 +300,7 @@
                 },
                 {
                     "command": "vscode-docker.help",
-                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerRegistries || view == dockerNetworks",
+                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerNetworks",
                     "group": "navigation@10"
                 }
             ],
@@ -2331,6 +2337,12 @@
                 "command": "vscode-docker.registries.dockerHub.openInBrowser",
                 "title": "%vscode-docker.commands.registries.dockerHub.openInBrowser%",
                 "category": "%vscode-docker.commands.category.dockerHub%"
+            },
+            {
+                "command": "vscode-docker.registries.help",
+                "title": "%vscode-docker.commands.registries.help%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%",
+                "icon": "$(question)"
             },
             {
                 "command": "vscode-docker.registries.logInToDockerCli",

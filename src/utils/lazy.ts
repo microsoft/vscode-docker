@@ -7,11 +7,15 @@ export class Lazy<T> {
     private _isValueCreated: boolean = false;
     private _value: T | undefined;
 
-    public constructor(private readonly valueFactory: () => T, private readonly _valueLifetime?: number) {
+    public constructor(private readonly valueFactory: () => T, private _valueLifetime?: number) {
     }
 
     public get isValueCreated(): boolean {
         return this._isValueCreated;
+    }
+
+    public cacheForever(): void {
+        this._valueLifetime = undefined;
     }
 
     public get value(): T {
@@ -24,8 +28,11 @@ export class Lazy<T> {
 
         if (this._valueLifetime) {
             const reset = setTimeout(() => {
-                this._isValueCreated = false;
-                this._value = undefined;
+                // If caller cleared the valueLifeTime, then continue to use the cached value.
+                if (this._valueLifetime) {
+                    this._isValueCreated = false;
+                    this._value = undefined;
+                }
                 clearTimeout(reset);
             }, this._valueLifetime);
         }
@@ -39,11 +46,15 @@ export class AsyncLazy<T> {
     private _value: T | undefined;
     private _valuePromise: Promise<T> | undefined;
 
-    public constructor(private readonly valueFactory: () => Promise<T>, private readonly _valueLifetime?: number) {
+    public constructor(private readonly valueFactory: () => Promise<T>, private _valueLifetime?: number) {
     }
 
     public get isValueCreated(): boolean {
         return this._isValueCreated;
+    }
+
+    public cacheForever(): void {
+        this._valueLifetime = undefined;
     }
 
     public async getValue(): Promise<T> {
@@ -67,9 +78,10 @@ export class AsyncLazy<T> {
 
         if (this._valueLifetime && isPrimaryPromise) {
             const reset = setTimeout(() => {
+                // If caller cleared the valueLifeTime, then continue to use the cached value.
                 // Will only clear out values if there isn't a currently-running Promise
                 // If there is, this timer will skip, but when that Promise finishes it will go through this code and register a new timer
-                if (this._valuePromise === undefined) {
+                if (this._valueLifetime && this._valuePromise === undefined) {
                     this._isValueCreated = false;
                     this._value = undefined;
                 }

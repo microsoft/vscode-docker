@@ -224,6 +224,7 @@
     "vscode-docker.commands.registries.deployImageToAzure": "Deploy Image to Azure App Service...",
     "vscode-docker.commands.registries.disconnectRegistry": "Disconnect",
     "vscode-docker.commands.registries.dockerHub.openInBrowser": "Open in Browser",
+    "vscode-docker.commands.registries.help": "Registries Help...",
     "vscode-docker.commands.registries.logInToDockerCli": "Log In to Docker CLI",
     "vscode-docker.commands.registries.logOutOfDockerCli": "Log Out of Docker CLI",
     "vscode-docker.commands.registries.pullImage": "Pull Image",
