@@ -46,7 +46,7 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
     public async isFlightEnabled(flight: string): Promise<boolean> {
         if (!this.flightMap.has(flight)) {
             this.flightMap[flight] = new AsyncLazy<boolean>(async () => {
-                return await this.wrappedExperimentationService.isFlightEnabledAsync(flight);
+                return await this.wrappedExperimentationService.isCachedFlightEnabled(flight);
             }, lazyLifetime);
         }
 
