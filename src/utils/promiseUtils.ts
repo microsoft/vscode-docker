@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { UserCancelledError } from 'vscode-azureextensionui';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -23,4 +24,29 @@ export async function delay(ms: number, token?: vscode.CancellationToken): Promi
             });
         }
     });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getCancelPromise(token: vscode.CancellationToken, errorConstructor?: new (...args: any[]) => Error, ...args: any[]): Promise<never> {
+    return new Promise((resolve, reject) => {
+        const disposable = token.onCancellationRequested(() => {
+            disposable.dispose();
+
+            if (errorConstructor) {
+                reject(new errorConstructor(args));
+            } else {
+                reject(new UserCancelledError());
+            }
+        });
+    });
+}
+
+export class CancellationPromiseSource extends vscode.CancellationTokenSource {
+    public readonly promise: Promise<never>;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(errorConstructor?: new (...args: any[]) => Error, ...args: any[]) {
+        super();
+        this.promise = getCancelPromise(this.token, errorConstructor, args);
+    }
 }

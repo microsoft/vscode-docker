@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as vscode from "vscode";
 import CliDockerClient from '../../debugging/coreclr/CliDockerClient';
 import { localize } from '../../localize';
-import { delay } from '../../utils/delay';
+import { delay } from '../../utils/promiseUtils';
 import { getTempDirectoryPath, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
 import { dockerTaskEndEventListener, DockerTaskEvent } from '../DockerTaskEndEventListener';
 
@@ -25,7 +25,7 @@ export namespace PythonExtensionHelper {
         return { 'PTVSD_LOG_DIR': '/dbglogs' };
     }
 
-    export async function getDebuggerLogFilePath(folderName: string) : Promise<string> {
+    export async function getDebuggerLogFilePath(folderName: string): Promise<string> {
         // The debugger generates the log file with the name in this format: ptvsd-{pid}.log,
         // So given that we run the debugger as the entry point, then the PID is guaranteed to be 1.
         const tempDir = await getTempDirectoryPath();
