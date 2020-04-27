@@ -32,7 +32,7 @@ export async function removeDockerContext(actionContext: IActionContext, node?: 
         if (nodes.length === nonCurrentNodes.length) {
             removeConfirmationMessage = localize('vscode-docker.commands.context.remove.confirmMultiple', 'Are you sure you want to remove the selected contexts?');
         } else {
-            removeConfirmationMessage = localize('vscode-docker.commands.context.remove.confirmSingleFiltered', 'The selected context includes an in use context, which can not be removed. Do you want to remove the rest of the contexts?');
+            removeConfirmationMessage = localize('vscode-docker.commands.context.remove.confirmSingleFiltered', 'One of the selected context is being used, which can not be removed. Do you want to remove the rest of the contexts?');
         }
     }
 

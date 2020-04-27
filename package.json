@@ -1695,6 +1695,31 @@
                         "Label"
                     ]
                 },
+                "docker.contexts.description": {
+                    "type": "array",
+                    "default": [
+                        "Description"
+                    ],
+                    "description": "%vscode-docker.config.docker.contexts.description%",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "Name",
+                            "Description",
+                            "DockerEndpoint"
+                        ]
+                    }
+                },
+                "docker.contexts.label": {
+                    "type": "string",
+                    "default": "Name",
+                    "description": "%vscode-docker.config.docker.contexts.label%",
+                    "enum": [
+                        "Name",
+                        "Description",
+                        "DockerEndpoint"
+                    ]
+                },
                 "docker.images.groupBy": {
                     "type": "string",
                     "default": "Repository",

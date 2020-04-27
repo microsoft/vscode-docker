@@ -6,15 +6,16 @@
 import { AzExtTreeItem } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { dockerContextManager } from "../../utils/dockerContextManager";
-import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
 import { contextProperties, ContextProperty } from "./ContextProperties";
 import { ContextGroupTreeItem, ContextTreeItem } from './ContextTreeItem';
 import { LocalContextInfo } from "./LocalContextInfo";
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, ContextProperty> {
-    public treePrefix: string = 'Contexts';
+    public treePrefix: string = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Contexts explorer');
     public childType: LocalChildType<LocalContextInfo> = ContextTreeItem;
@@ -59,5 +60,24 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, Co
 
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
         return ti1.label.localeCompare(ti2.label);
+    }
+
+    public getSettingWizardInfoList(): ITreeSettingWizardInfo[] {
+        return [
+            {
+                label: localize('vscode-docker.tree.contextConfig.label.label', 'Label'),
+                setting: labelKey,
+                currentValue: this.labelSetting,
+                description: localize('vscode-docker.tree.contextConfig.label.description', 'The primary property to display.'),
+                settingInfo: this.labelSettingInfo
+            },
+            {
+                label: localize('vscode-docker.tree.contextConfig.description.label', 'Description'),
+                setting: descriptionKey,
+                currentValue: this.descriptionSetting,
+                description: localize('vscode-docker.tree.contextConfig.description.description', 'Any secondary properties to display.'),
+                settingInfo: this.descriptionSettingInfo
+            }
+        ]
     }
 }

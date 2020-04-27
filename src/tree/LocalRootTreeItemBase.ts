@@ -33,8 +33,8 @@ export type LocalChildGroupType<TItem extends ILocalItem, TProperty extends stri
 
 const groupByKey: string = 'groupBy';
 const sortByKey: string = 'sortBy';
-const labelKey: string = 'label';
-const descriptionKey: string = 'description';
+export const labelKey: string = 'label';
+export const descriptionKey: string = 'description';
 let dockerInstallNotificationShownToUser: boolean = false;
 
 export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
@@ -367,6 +367,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         if (!dockerInstallNotificationShownToUser && this._currentDockerStatus === 'NotInstalled') {
             dockerInstallNotificationShownToUser = true;
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            // eslint-disable-next-line @typescript-eslint/tslint/config
             showDockerInstallNotification();
         }
     }
