@@ -9,6 +9,7 @@ import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
+import { callDockerodeAsync } from '../utils/callDockerode';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
@@ -149,7 +150,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 // Don't do anything if this isn't our debug session
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
-                        const inspectInfo = await ext.dockerode.getContainer(resolvedConfiguration.dockerOptions.containerName)?.inspect();
+                        const inspectInfo = await callDockerodeAsync(async () => ext.dockerode.getContainer(resolvedConfiguration.dockerOptions.containerName)?.inspect());
                         const portMappings: string[] = [];
 
                         if (inspectInfo?.NetworkSettings?.Ports) {
