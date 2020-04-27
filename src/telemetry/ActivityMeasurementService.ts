@@ -95,7 +95,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
 
 function sameDate(a: number | undefined, b: number | undefined, precision: 'day' | 'month'): boolean {
     // If either are undefined always return false
-    if (!a || !b) {
+    if (a === undefined || b === undefined) {
         return false;
     }
 
