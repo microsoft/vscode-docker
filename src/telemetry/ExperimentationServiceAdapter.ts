@@ -3,11 +3,8 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// This is only being used for type safety so it's fine to import
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { IExperimentationService } from 'tas-client';
-
 import * as vscode from 'vscode';
+import { IExperimentationService } from 'vscode-tas-client';
 import * as tas from 'vscode-tas-client';
 import { extensionId } from '../constants';
 import { ext } from '../extensionVariables';
