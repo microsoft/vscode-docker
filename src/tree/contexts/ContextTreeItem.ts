@@ -7,8 +7,6 @@ import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azure
 import { ext } from "../../extensionVariables";
 import { dockerContextManager } from "../../utils/dockerContextManager";
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
-import { ContextProperty } from "./ContextProperties";
 import { LocalContextInfo } from "./LocalContextInfo";
 
 export class ContextTreeItem extends AzExtTreeItem {
@@ -23,10 +21,6 @@ export class ContextTreeItem extends AzExtTreeItem {
 
     public get createdTime(): number {
         return this._item.createdTime;
-    }
-
-    public get id(): string {
-        return this._item.treeId;
     }
 
     public get label(): string {
@@ -63,15 +57,5 @@ export class ContextTreeItem extends AzExtTreeItem {
 
     public async use(context: IActionContext): Promise<void> {
         return await dockerContextManager.use(this.name);
-    }
-}
-
-export class ContextGroupTreeItem extends LocalGroupTreeItemBase<LocalContextInfo, ContextProperty> {
-    public static readonly contextValue: string = 'contextGroup';
-    public readonly contextValue: string = ContextGroupTreeItem.contextValue;
-    public childTypeLabel: string = 'context';
-
-    public get iconPath(): IconPath {
-        return getThemedIconPath('none');
     }
 }

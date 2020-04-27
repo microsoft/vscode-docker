@@ -12,7 +12,6 @@ export async function configureDockerContextsExplorer(context: IActionContext): 
 }
 
 export async function refreshDockerContexts(_context: IActionContext, node?: AzExtTreeItem): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     await ext.contextsTree.refresh(node)
 }
 

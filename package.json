@@ -101,9 +101,9 @@
         "onCommand:vscode-docker.volumes.prune",
         "onCommand:vscode-docker.volumes.refresh",
         "onCommand:vscode-docker.volumes.remove",
-        "onCommand:vscode-docker.context.use",
-        "onCommand:vscode-docker.context.remove",
-        "onCommand:vscode-docker.context.inspect",
+        "onCommand:vscode-docker.contexts.use",
+        "onCommand:vscode-docker.contexts.remove",
+        "onCommand:vscode-docker.contexts.inspect",
         "onCommand:vscode-docker.contexts.configureExplorer",
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
@@ -540,17 +540,17 @@
                     "group": "volumes_2_destructive@1"
                 },
                 {
-                    "command": "vscode-docker.context.inspect",
+                    "command": "vscode-docker.contexts.inspect",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
                     "group": "contexts_1_general@1"
                 },
                 {
-                    "command": "vscode-docker.context.use",
+                    "command": "vscode-docker.contexts.use",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
                     "group": "contexts_1_general@2"
                 },
                 {
-                    "command": "vscode-docker.context.remove",
+                    "command": "vscode-docker.contexts.remove",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
                     "group": "contexts_2_destructive@1"
                 }
@@ -2481,18 +2481,18 @@
                 "icon": "$(question)"
             },
             {
-                "command": "vscode-docker.context.use",
-                "title": "%vscode-docker.commands.context.use%",
+                "command": "vscode-docker.contexts.use",
+                "title": "%vscode-docker.commands.contexts.use%",
                 "category": "%vscode-docker.commands.category.contexts%"
             },
             {
-                "command": "vscode-docker.context.remove",
-                "title": "%vscode-docker.commands.context.remove%",
+                "command": "vscode-docker.contexts.remove",
+                "title": "%vscode-docker.commands.contexts.remove%",
                 "category": "%vscode-docker.commands.category.contexts%"
             },
             {
-                "command": "vscode-docker.context.inspect",
-                "title": "%vscode-docker.commands.context.inspect%",
+                "command": "vscode-docker.contexts.inspect",
+                "title": "%vscode-docker.commands.contexts.inspect%",
                 "category": "%vscode-docker.commands.category.contexts%"
             },
             {

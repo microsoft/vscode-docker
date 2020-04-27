@@ -10,8 +10,9 @@ import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRoo
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
+import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { contextProperties, ContextProperty } from "./ContextProperties";
-import { ContextGroupTreeItem, ContextTreeItem } from './ContextTreeItem';
+import { ContextTreeItem } from './ContextTreeItem';
 import { LocalContextInfo } from "./LocalContextInfo";
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, ContextProperty> {

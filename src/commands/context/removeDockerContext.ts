@@ -43,8 +43,4 @@ export async function removeDockerContext(actionContext: IActionContext, node?: 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removingMessage }, async () => {
         await Promise.all(nodes.map(async n => await n.deleteTreeItem(actionContext)));
     });
-
-    // TODO: Do we need to show notification after remove or the above progress is sufficient.
-    // rest of the remove commands like remove image doesn't show notification after remove.
-
 }

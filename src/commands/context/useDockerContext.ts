@@ -8,19 +8,24 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
+import { dockerContextManager } from '../../utils/dockerContextManager';
 
 export async function useDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
+    let invokedFromCommandPalette = false;
     if (!node) {
         node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.contextValue, {
             ...actionContext,
             noItemFoundErrorMessage: localize('vscode-docker.commands.contexts.use.noContexts', 'No contexts are available to use')
         });
+        invokedFromCommandPalette = true;
     }
 
     await node.use(actionContext);
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ext.contextsRoot.refresh();
+    await ext.contextsRoot.refresh();
+    dockerContextManager.expediteContextCheck();
 
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextInUse', 'Using Docker context \'{0}\'', node.name));
+    if (invokedFromCommandPalette) {
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        vscode.window.showInformationMessage(localize('vscode-docker.commands.context.contextInUse', 'Using Docker context \'{0}\'', node.name));
+    }
 }

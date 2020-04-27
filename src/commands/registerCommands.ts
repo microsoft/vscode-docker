@@ -142,12 +142,12 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.volumes.prune', pruneVolumes);
     registerCommand('vscode-docker.volumes.remove', removeVolume);
 
-    registerCommand('vscode-docker.context.use', useDockerContext);
-    registerCommand('vscode-docker.context.inspect', inspectDockerContext);
-    registerCommand('vscode-docker.context.remove', removeDockerContext);
     registerCommand('vscode-docker.contexts.configureExplorer', configureDockerContextsExplorer);
-    registerCommand('vscode-docker.contexts.refresh', refreshDockerContexts);
     registerCommand('vscode-docker.contexts.help', dockerContextsHelp);
+    registerCommand('vscode-docker.contexts.inspect', inspectDockerContext);
+    registerCommand('vscode-docker.contexts.refresh', refreshDockerContexts);
+    registerCommand('vscode-docker.contexts.remove', removeDockerContext);
+    registerCommand('vscode-docker.contexts.use', useDockerContext);
 
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 
