@@ -56,6 +56,7 @@
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
         "onCommand:vscode-docker.images.prune",
+        "onCommand:vscode-docker.images.pull",
         "onCommand:vscode-docker.images.push",
         "onCommand:vscode-docker.images.refresh",
         "onCommand:vscode-docker.images.remove",
@@ -88,6 +89,7 @@
         "onCommand:vscode-docker.registries.deployImageToAzure",
         "onCommand:vscode-docker.registries.disconnectRegistry",
         "onCommand:vscode-docker.registries.dockerHub.openInBrowser",
+        "onCommand:vscode-docker.registries.help",
         "onCommand:vscode-docker.registries.logInToDockerCli",
         "onCommand:vscode-docker.registries.logOutOfDockerCli",
         "onCommand:vscode-docker.registries.pullImage",
@@ -277,6 +279,11 @@
                     "group": "navigation@1"
                 },
                 {
+                    "command": "vscode-docker.registries.help",
+                    "when": "view == dockerRegistries",
+                    "group": "navigation@10"
+                },
+                {
                     "command": "vscode-docker.volumes.prune",
                     "when": "view == dockerVolumes",
                     "group": "navigation@1"
@@ -293,7 +300,7 @@
                 },
                 {
                     "command": "vscode-docker.help",
-                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerRegistries || view == dockerNetworks",
+                    "when": "view == dockerContainers || view == dockerImages || view == dockerVolumes || view == dockerNetworks",
                     "group": "navigation@10"
                 }
             ],
@@ -354,19 +361,24 @@
                     "group": "images_2_general@1"
                 },
                 {
-                    "command": "vscode-docker.images.push",
+                    "command": "vscode-docker.images.pull",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@2"
                 },
                 {
-                    "command": "vscode-docker.images.tag",
+                    "command": "vscode-docker.images.push",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
                 },
                 {
-                    "command": "vscode-docker.images.copyFullTag",
+                    "command": "vscode-docker.images.tag",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@4"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@5"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -1315,10 +1327,7 @@
                 "filenamePatterns": [
                     "*.dockerfile",
                     "Dockerfile",
-                    "Dockerfile.debug",
-                    "Dockerfile.dev",
-                    "Dockerfile.develop",
-                    "Dockerfile.prod"
+                    "Dockerfile.*"
                 ]
             },
             {
@@ -2134,6 +2143,11 @@
                 }
             },
             {
+                "command": "vscode-docker.images.pull",
+                "title": "%vscode-docker.commands.images.pull%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
+            },
+            {
                 "command": "vscode-docker.images.push",
                 "title": "%vscode-docker.commands.images.push%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
@@ -2323,6 +2337,12 @@
                 "command": "vscode-docker.registries.dockerHub.openInBrowser",
                 "title": "%vscode-docker.commands.registries.dockerHub.openInBrowser%",
                 "category": "%vscode-docker.commands.category.dockerHub%"
+            },
+            {
+                "command": "vscode-docker.registries.help",
+                "title": "%vscode-docker.commands.registries.help%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%",
+                "icon": "$(question)"
             },
             {
                 "command": "vscode-docker.registries.logInToDockerCli",
