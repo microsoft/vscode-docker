@@ -79,7 +79,9 @@ function registerCommandWithActivity(commandId: string, callback: (context: IAct
         async (context, ...args: any[]) => {
             await ext.ams.recordActivity('command');
             return callback(context, ...args);
-        });
+        },
+        debounce
+    );
 }
 
 export function registerCommands(): void {
