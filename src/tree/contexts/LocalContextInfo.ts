@@ -7,7 +7,7 @@ import { IDockerContextListItem } from "../../utils/dockerContextManager";
 import { ILocalItem } from "../LocalRootTreeItemBase";
 
 /**
- * Wrapper class for Dockerode item, which has inconsistent names/types
+ * Wrapper class to provide Docker context information.
  */
 export class LocalContextInfo implements ILocalItem {
     public data: IDockerContextListItem;

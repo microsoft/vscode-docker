@@ -8,7 +8,6 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
-import { dockerContextManager } from '../../utils/dockerContextManager';
 
 export async function useDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
     let invokedFromCommandPalette = false;
@@ -22,7 +21,6 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
 
     await node.use(actionContext);
     await ext.contextsRoot.refresh();
-    dockerContextManager.expediteContextCheck();
 
     if (invokedFromCommandPalette) {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

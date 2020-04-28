@@ -10,5 +10,5 @@ export type ContextProperty = 'Name' | 'Description' | 'DockerEndpoint';
 export const contextProperties: ITreePropertyInfo<ContextProperty>[] = [
     { property: 'Name', exampleValue: 'my-context' },
     { property: 'Description', exampleValue: 'remote linux VM on Azure' },
-    { property: 'DockerEndpoint', exampleValue: 'my-ssh://user1@55.55.5.555' }
+    { property: 'DockerEndpoint', exampleValue: 'ssh://user1@55.55.5.222' }
 ];
