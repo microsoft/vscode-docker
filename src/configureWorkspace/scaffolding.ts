@@ -131,6 +131,8 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         return captureCancelStep(step, context.telemetry.properties, prompt);
     }
 
+    await ext.ams.recordActivity('scaffold');
+
     let folder: vscode.WorkspaceFolder;
 
     try {

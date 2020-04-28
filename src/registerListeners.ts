@@ -21,4 +21,5 @@ function onDidSaveTextDocument(doc: TextDocument): void {
 
     lastUploadTime = Date.now();
     ext.reporter.sendTelemetryEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
+    ext.ams.recordActivity('edit').then(() => { }, () => { }); // Best effort
 }

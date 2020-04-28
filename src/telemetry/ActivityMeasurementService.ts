@@ -12,7 +12,7 @@ const defaultMeasurement: ActivityMeasurement = {
     totalSessions: 0,
 };
 
-export type ActivityType = 'edit' | 'command' | 'explorer' | 'debug' | 'overall';
+export type ActivityType = 'scaffold' | 'edit' | 'command' | 'explorer' | 'debug' | 'task' | 'overall' | 'overallnoedit';
 
 export interface IActivityMeasurementService {
     recordActivity(type: ActivityType): Promise<void>;
@@ -34,7 +34,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
 
     /**
      * Records activity. Once per session (max 1 per day), it will increment the monthly and total session counts and set the date of the last session to now.
-     * Calling with any type will also result in 'overall' activity being incremented.
+     * Calling with any type will also result in 'overall' activity being incremented, and any except 'edit' will increment 'overallnoedit'.
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
@@ -65,9 +65,13 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
         // Use of a lazy results in a max of one recording per session
         await this.lazySetterMap.get(type).getValue();
 
-        // Additionally, do an overall activity recording
+        // Additionally, do overall activity recording
         if (type !== 'overall') {
             await this.recordActivity('overall');
+        }
+
+        if (type !== 'overallnoedit' && type !== 'edit') {
+            await this.recordActivity('overallnoedit');
         }
     }
 

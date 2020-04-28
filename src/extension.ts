@@ -24,6 +24,7 @@ import { ext } from './extensionVariables';
 import { localize } from './localize';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
+import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
 import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
 import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
@@ -66,11 +67,12 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     const publisher = new TelemetryPublisher();
     ctx.subscriptions.push(publisher);
 
-    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
-
     const telemetryReporterProxy = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
     ext.reporter = telemetryReporterProxy;
+    ext.ams = new ActivityMeasurementService(ctx.globalState);
+
+    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
