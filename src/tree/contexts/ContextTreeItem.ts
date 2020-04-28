@@ -52,10 +52,10 @@ export class ContextTreeItem extends AzExtTreeItem {
     }
 
     public async inspect(context: IActionContext): Promise<string> {
-        return await dockerContextManager.inspect(this.name)
+        return dockerContextManager.inspect(this.name)
     }
 
     public async use(context: IActionContext): Promise<void> {
-        return await dockerContextManager.use(this.name);
+        return dockerContextManager.use(this.name);
     }
 }
