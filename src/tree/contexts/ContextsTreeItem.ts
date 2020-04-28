@@ -18,7 +18,7 @@ import { LocalContextInfo } from "./LocalContextInfo";
 export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, ContextProperty> {
     public treePrefix: string = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Contexts explorer');
+    public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
     public childType: LocalChildType<LocalContextInfo> = ContextTreeItem;
     public childGroupType: LocalChildGroupType<LocalContextInfo, ContextProperty> = ContextGroupTreeItem;
 
