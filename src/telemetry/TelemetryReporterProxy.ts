@@ -21,4 +21,15 @@ export class TelemetryReporterProxy implements ITelemetryReporter {
             properties
         });
     }
+
+    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }): void {
+        // eslint-disable-next-line @typescript-eslint/tslint/config
+        this.wrappedReporter.sendTelemetryErrorEvent(eventName, properties, measurements);
+
+        this.publisher.publishEvent({
+            eventName,
+            measurements,
+            properties
+        });
+    }
 }
