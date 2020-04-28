@@ -8,6 +8,7 @@ import * as osNode from 'os';
 import { ExtensionContext, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
+import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
@@ -52,6 +53,9 @@ export namespace ext {
     export let volumesTreeView: TreeView<AzExtTreeItem>;
     export let volumesRoot: VolumesTreeItem;
 
+    export let contextsTree: AzExtTreeDataProvider;
+    export let contextsTreeView: TreeView<AzExtTreeItem>;
+    export let contextsRoot: ContextsTreeItem;
     /**
      * A test-injectable structure defining the current operating system and version
      */

@@ -8,6 +8,7 @@ import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerCommand }
 import { ext } from '../extensionVariables';
 import { dockerContextManager } from "../utils/dockerContextManager";
 import { ContainersTreeItem } from './containers/ContainersTreeItem';
+import { ContextsTreeItem } from './contexts/ContextsTreeItem';
 import { HelpsTreeItem } from './help/HelpsTreeItem';
 import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { NetworksTreeItem } from "./networks/NetworksTreeItem";
@@ -76,6 +77,15 @@ export function registerTrees(): void {
         dockerContextManager.expediteContextCheck();
         await ext.volumesTree.refresh(node);
     });
+
+    ext.contextsRoot = new ContextsTreeItem(undefined);
+    const contextsLoadMore = 'vscode-docker.contexts.loadMore';
+    ext.contextsTree = new AzExtTreeDataProvider(ext.contextsRoot, contextsLoadMore);
+    ext.contextsTreeView = vscode.window.createTreeView('vscode-docker.views.dockerContexts', { treeDataProvider: ext.contextsTree, canSelectMany: true });
+    ext.context.subscriptions.push(ext.contextsTreeView);
+    ext.contextsRoot.registerRefreshEvents(ext.contextsTreeView);
+    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+    registerCommand(contextsLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.contextsTree.loadMore(node, context));
 
     const helpRoot = new HelpsTreeItem(undefined);
     const helpTreeDataProvider = new AzExtTreeDataProvider(helpRoot, 'vscode-docker.help.loadMore');
