@@ -131,7 +131,8 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
         return captureCancelStep(step, context.telemetry.properties, prompt);
     }
 
-    await ext.ams.recordActivity('scaffold');
+    // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+    ext.ams?.recordActivity('overallnoedit');
 
     let folder: vscode.WorkspaceFolder;
 

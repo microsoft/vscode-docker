@@ -53,7 +53,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return callWithTelemetryAndErrorHandling(
             debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
-                await ext.ams.recordActivity('debug');
+                // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+                ext.ams?.recordActivity('overallnoedit');
 
                 if (!folder) {
                     folder = workspace.workspaceFolders[0];

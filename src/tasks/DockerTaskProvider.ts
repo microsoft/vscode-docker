@@ -41,7 +41,8 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
-                await ext.ams.recordActivity('task');
+                // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+                ext.ams?.recordActivity('overallnoedit');
 
                 if (!context.folder) {
                     throw new Error(localize('vscode-docker.tasks.provider.noScope', 'Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));

@@ -20,7 +20,9 @@ export function registerWorkspaceCommand(commandId: string, callback: (context: 
         commandId,
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         async (context, ...args: any[]) => {
-            await ext.ams.recordActivity('command');
+            // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+            ext.ams?.recordActivity('overallnoedit');
+
             await verifyIsRunningInWorkspace(context);
             return callback(context, ...args);
         },

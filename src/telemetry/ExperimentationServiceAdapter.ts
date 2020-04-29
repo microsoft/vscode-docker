@@ -39,7 +39,7 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
                 extensionVersion,
                 targetPopulation,
                 reporter,
-                globalState
+                globalState,
             );
         } catch { } // Best effort
     }

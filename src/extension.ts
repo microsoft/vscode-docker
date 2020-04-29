@@ -57,6 +57,8 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     }
     ext.context = ctx;
 
+    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false);
+
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
 
@@ -70,7 +72,10 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     const telemetryReporterProxy = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     ext.reporter = telemetryReporterProxy;
 
-    ext.ams = new ActivityMeasurementService(ctx.globalState);
+    if (ext.telemetryOptIn) {
+        ext.ams = new ActivityMeasurementService(ctx.globalState);
+    }
+
     ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
 
     ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));

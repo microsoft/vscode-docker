@@ -26,9 +26,12 @@ export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
+
+    export let telemetryOptIn: boolean;
     export let reporter: ITelemetryReporter;
     export let experimentationService: IExperimentationServiceAdapter;
     export let ams: IActivityMeasurementService;
+
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;

@@ -10,7 +10,9 @@ let lastUploadTime: number = 0;
 const hourInMilliseconds = 1000 * 60 * 60;
 
 export function registerListeners(ctx: ExtensionContext): void {
-    ctx.subscriptions.push(workspace.onDidSaveTextDocument(onDidSaveTextDocument));
+    if (ext.telemetryOptIn) {
+        ctx.subscriptions.push(workspace.onDidSaveTextDocument(onDidSaveTextDocument));
+    }
 }
 
 function onDidSaveTextDocument(doc: TextDocument): void {
@@ -21,5 +23,7 @@ function onDidSaveTextDocument(doc: TextDocument): void {
 
     lastUploadTime = Date.now();
     ext.reporter.sendTelemetryEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
-    ext.ams.recordActivity('edit').then(() => { }, () => { }); // Best effort
+
+    // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+    ext.ams?.recordActivity('overall');
 }
