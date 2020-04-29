@@ -135,7 +135,7 @@ function genDockerComposeDebug(serviceName: string, ports: number[], target: Pyt
     return dockerComposeDebugfile
         .replace(/\$service_name\$/g, getValidImageName(serviceName))
         .replace(/\$ports\$/g, getComposePorts(ports, 5678))
-        .replace(/\$cmd\$/g, cmd)
+        .replace(/\$cmd\$/g, cmd.trimRight())
         .replace(/\$env\$/g, env);
 }
 
