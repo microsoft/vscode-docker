@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import { ITelemetryReporter } from 'vscode-azureextensionui';
 import { IExperimentationTelemetry } from 'vscode-tas-client';
 import { ITelemetryPublisher } from './TelemetryPublisher';
@@ -18,7 +17,10 @@ export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentat
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }): void {
         for (const key of Object.keys(this.sharedProperties)) {
-            assert(!properties[key], 'Local telemetry property will be overwritten by shared property.');
+            if (properties[key]) {
+                console.error('Local telemetry property will be overwritten by shared property.');
+            }
+
             properties[key] = this.sharedProperties[key];
         }
 
