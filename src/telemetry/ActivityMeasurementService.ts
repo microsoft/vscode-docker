@@ -38,41 +38,43 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
-        if (!this.lazySetterMap.has(type)) {
-            this.lazySetterMap[type] = new AsyncLazy(async () => {
-                const currentValue = this.getActivity(type);
-                const now = Date.now();
+        try {
+            if (!this.lazySetterMap.has(type)) {
+                this.lazySetterMap[type] = new AsyncLazy(async () => {
+                    const currentValue = this.getActivity(type);
+                    const now = Date.now();
 
-                // No need to increment if it's been done already today
-                if (sameDate(currentValue.lastSession, now, 'day')) {
-                    return;
-                }
+                    // No need to increment if it's been done already today
+                    if (sameDate(currentValue.lastSession, now, 'day')) {
+                        return;
+                    }
 
-                const newValue: ActivityMeasurement = {
-                    lastSession: now,
-                    monthlySessions: currentValue.monthlySessions + 1,
-                    totalSessions: currentValue.totalSessions + 1,
-                };
+                    const newValue: ActivityMeasurement = {
+                        lastSession: now,
+                        monthlySessions: currentValue.monthlySessions + 1,
+                        totalSessions: currentValue.totalSessions + 1,
+                    };
 
-                // Update memory
-                this.values[type] = newValue;
+                    // Update memory
+                    this.values[type] = newValue;
 
-                // Update long-term storage
-                await this.memento.update(`vscode-docker.activity.${type}`, newValue);
-            });
-        }
+                    // Update long-term storage
+                    await this.memento.update(`vscode-docker.activity.${type}`, newValue);
+                });
+            }
 
-        // Use of a lazy results in a max of one recording per session
-        await this.lazySetterMap.get(type).getValue();
+            // Use of a lazy results in a max of one recording per session
+            await this.lazySetterMap.get(type).getValue();
 
-        // Additionally, do overall activity recording
-        if (type !== 'overall') {
-            await this.recordActivity('overall');
-        }
+            // Additionally, do overall activity recording
+            if (type !== 'overall') {
+                await this.recordActivity('overall');
+            }
 
-        if (type !== 'overallnoedit' && type !== 'edit') {
-            await this.recordActivity('overallnoedit');
-        }
+            if (type !== 'overallnoedit' && type !== 'edit') {
+                await this.recordActivity('overallnoedit');
+            }
+        } catch { } // Best effort only
     }
 
     /**
