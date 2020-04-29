@@ -9,7 +9,6 @@ import * as tas from 'vscode-tas-client';
 import { extensionId } from '../constants';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
-import { TelemetryReporterProxy } from "./TelemetryReporterProxy";
 
 // Use a lazy lifetime of 30 minutes which matches what TAS does
 const lazyLifetime: number = 30 * 60 * 1000;
@@ -22,7 +21,7 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
     private readonly wrappedExperimentationService: IExperimentationService;
     private readonly flightMap: Map<string, AsyncLazy<boolean>> = new Map<string, AsyncLazy<boolean>>();
 
-    public constructor(globalState: vscode.Memento, reporter: TelemetryReporterProxy) {
+    public constructor(globalState: vscode.Memento, reporter: tas.IExperimentationTelemetry) {
         try {
             const extensionVersion = this.getExtensionVersion();
             let targetPopulation: tas.TargetPopulation;

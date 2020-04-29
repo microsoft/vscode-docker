@@ -68,9 +68,10 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(publisher);
 
     const telemetryReporterProxy = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
-    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
     ext.reporter = telemetryReporterProxy;
+
     ext.ams = new ActivityMeasurementService(ctx.globalState);
+    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
 
     ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
