@@ -22,6 +22,7 @@ import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
+import { configureDockerContextsExplorer, dockerContextsHelp, refreshDockerContexts } from "./context/DockerContextsViewCommands";
 import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
 import { useDockerContext } from "./context/useDockerContext";
@@ -155,9 +156,13 @@ export function registerCommands(): void {
     registerCommandWithActivity('vscode-docker.volumes.prune', pruneVolumes);
     registerCommandWithActivity('vscode-docker.volumes.remove', removeVolume);
 
-    registerCommandWithActivity('vscode-docker.context.use', useDockerContext);
-    registerCommandWithActivity('vscode-docker.context.inspect', inspectDockerContext);
-    registerCommandWithActivity('vscode-docker.context.remove', removeDockerContext);
+    registerCommandWithActivity('vscode-docker.contexts.configureExplorer', configureDockerContextsExplorer);
+    registerCommandWithActivity('vscode-docker.contexts.help', dockerContextsHelp);
+    registerCommandWithActivity('vscode-docker.contexts.inspect', inspectDockerContext);
+    registerCommandWithActivity('vscode-docker.contexts.refresh', refreshDockerContexts);
+    registerCommandWithActivity('vscode-docker.contexts.remove', removeDockerContext);
+    registerCommandWithActivity('vscode-docker.contexts.use', useDockerContext);
+
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommandWithActivity('vscode-docker.help', help);
