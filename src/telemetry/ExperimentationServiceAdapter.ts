@@ -23,27 +23,33 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
     private readonly flightMap: Map<string, AsyncLazy<boolean>> = new Map<string, AsyncLazy<boolean>>();
 
     public constructor(globalState: vscode.Memento, reporter: TelemetryReporterProxy) {
-        const extensionVersion = this.getExtensionVersion();
-        let targetPopulation: tas.TargetPopulation;
+        try {
+            const extensionVersion = this.getExtensionVersion();
+            let targetPopulation: tas.TargetPopulation;
 
-        if (ext.runningTests || process.env.DEBUGTELEMETRY) {
-            targetPopulation = tas.TargetPopulation.Team;
-        } else if (/alpha/ig.test(extensionVersion)) {
-            targetPopulation = tas.TargetPopulation.Insiders;
-        } else {
-            targetPopulation = tas.TargetPopulation.Public;
-        }
+            if (ext.runningTests || process.env.DEBUGTELEMETRY) {
+                targetPopulation = tas.TargetPopulation.Team;
+            } else if (/alpha/ig.test(extensionVersion)) {
+                targetPopulation = tas.TargetPopulation.Insiders;
+            } else {
+                targetPopulation = tas.TargetPopulation.Public;
+            }
 
-        this.wrappedExperimentationService = tas.getExperimentationService(
-            extensionId,
-            extensionVersion,
-            targetPopulation,
-            reporter,
-            globalState
-        );
+            this.wrappedExperimentationService = tas.getExperimentationService(
+                extensionId,
+                extensionVersion,
+                targetPopulation,
+                reporter,
+                globalState
+            );
+        } catch { } // Best effort
     }
 
     public async isFlightEnabled(flight: string): Promise<boolean> {
+        if (!this.wrappedExperimentationService) {
+            return false;
+        }
+
         if (!this.flightMap.has(flight)) {
             this.flightMap[flight] = new AsyncLazy<boolean>(async () => {
                 return await this.wrappedExperimentationService.isCachedFlightEnabled(flight);
