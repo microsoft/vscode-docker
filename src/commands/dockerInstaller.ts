@@ -36,12 +36,7 @@ export abstract class DockerInstallerBase {
             } catch (error) {
                 const message = localize('vscode-docker.commands.DockerInstallerBase.downloadFailed', 'Downloading the Docker Desktop installer failed. Do you want to manually download and install?');
                 const title = localize('vscode-docker.commands.DockerInstallerBase.download', 'Download');
-                const response = await vscode.window.showErrorMessage(message, { title: title });
-                if (response) {
-                    await openExternal(this.downloadUrl);
-                }
-                context.errorHandling.suppressReportIssue = true;
-                context.errorHandling.suppressDisplay = true;
+                this.handleError(context, message, title, this.downloadUrl);
                 throw error;
             }
 
@@ -51,8 +46,11 @@ export abstract class DockerInstallerBase {
             vscode.window.showInformationMessage(installationMessage);
             try {
                 await this.install(downloadedFileName, command);
-            } catch {
-                context.errorHandling.suppressReportIssue = true;
+            } catch (error) {
+                const message = `${localize('vscode-docker.commands.DockerInstallerBase.installFailed', 'Docker Desktop installation failed')}. ${error}`;
+                const title = localize('vscode-docker.commands.DockerInstallerBase.openInstallLink', 'Install Instruction');
+                this.handleError(context, message, title, 'https://aka.ms/AA37qtj');
+                throw error;
             }
         }
     }
@@ -76,6 +74,13 @@ export abstract class DockerInstallerBase {
         const fileName = tempFileProvider.getTempFilename('docker', this.fileExtension);
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
+    }
+
+    private handleError(context: IActionContext, message: string, title: string, url: string): void {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        vscode.window.showErrorMessage(message, { title: title }).then(response => { if (response) { openExternal(url); } });
+        context.errorHandling.suppressReportIssue = true;
+        context.errorHandling.suppressDisplay = true;
     }
 
     protected abstract install(fileName: string, cmd: string): Promise<void>;
