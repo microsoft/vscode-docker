@@ -15,9 +15,8 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
         const measurements = {};
         const properties = {};
 
-        let publishedCount = 0;
+        let eventPublished = false;
         let eventSent = false;
-        let errorEventSent = false;
 
         const publisher: ITelemetryPublisher = {
             onEvent: undefined,
@@ -26,7 +25,7 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
                 assert.equal(e.measurements, measurements);
                 assert.equal(e.properties, properties);
 
-                publishedCount++;
+                eventPublished = true;
             }
         };
 
@@ -37,23 +36,14 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
                 assert.equal(p, properties);
 
                 eventSent = true;
-            },
-            sendTelemetryErrorEvent: (e, p, m) => {
-                assert.equal(e, eventName);
-                assert.equal(m, measurements);
-                assert.equal(p, properties);
-
-                errorEventSent = true;
             }
         };
 
         const proxy = new TelemetryReporterProxy(publisher, wrappedReporter);
 
         proxy.sendTelemetryEvent(eventName, properties, measurements);
-        proxy.sendTelemetryErrorEvent(eventName, properties, measurements);
 
-        assert.equal(publishedCount, 2);
+        assert(eventPublished);
         assert(eventSent);
-        assert(errorEventSent);
     });
 });

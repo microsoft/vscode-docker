@@ -12,9 +12,9 @@ export async function installDocker(context: IActionContext): Promise<void> {
     const osProvider = new LocalOSProvider();
 
     if (osProvider.os === 'Windows') {
-        await (new WindowsDockerInstaller()).downloadAndInstallDocker();
+        await (new WindowsDockerInstaller()).downloadAndInstallDocker(context);
     } else if (osProvider.os === 'Mac') {
-        await (new MacDockerInstaller()).downloadAndInstallDocker();
+        await (new MacDockerInstaller()).downloadAndInstallDocker(context);
     } else {
         await openExternal('https://aka.ms/download-docker-linux-vscode');
     }
