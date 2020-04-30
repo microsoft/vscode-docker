@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
 import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
 import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
@@ -12,6 +13,7 @@ import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
+import { openExternal } from '../utils/openExternal';
 import { execAsync } from '../utils/spawnAsync';
 
 export abstract class DockerInstallerBase {
@@ -19,20 +21,37 @@ export abstract class DockerInstallerBase {
     protected abstract fileExtension: string;
     protected abstract getInstallCommand(fileName: string): string;
 
-    public async downloadAndInstallDocker(): Promise<void> {
+    public async downloadAndInstallDocker(context: IActionContext): Promise<void> {
         const shouldInstall: boolean = await this.preInstallCheck();
         if (shouldInstall) {
             const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
             const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
+            let downloadedFileName: string;
 
-            const downloadedFileName: string = await vscode.window.withProgress(
-                { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
-                async () => this.downloadInstaller());
+            context.telemetry.properties.stage = 'download';
+            try {
+                downloadedFileName = await vscode.window.withProgress(
+                    { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
+                    async () => this.downloadInstaller());
+            } catch (error) {
+                const message = localize('vscode-docker.commands.DockerInstallerBase.downloadFailed', 'Downloading the Docker Desktop installer failed. Do you want to manually download and install?');
+                const title = localize('vscode-docker.commands.DockerInstallerBase.download', 'Download');
+                this.handleError(context, message, title, this.downloadUrl);
+                throw error;
+            }
 
+            context.telemetry.properties.stage = 'install';
             const command = this.getInstallCommand(downloadedFileName);
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             vscode.window.showInformationMessage(installationMessage);
-            await this.install(downloadedFileName, command);
+            try {
+                await this.install(downloadedFileName, command);
+            } catch (error) {
+                const message = `${localize('vscode-docker.commands.DockerInstallerBase.installFailed', 'Docker Desktop installation failed')}. ${error}`;
+                const title = localize('vscode-docker.commands.DockerInstallerBase.openInstallLink', 'Install Instruction');
+                this.handleError(context, message, title, 'https://aka.ms/AA37qtj');
+                throw error;
+            }
         }
     }
 
@@ -55,6 +74,13 @@ export abstract class DockerInstallerBase {
         const fileName = tempFileProvider.getTempFilename('docker', this.fileExtension);
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
+    }
+
+    private handleError(context: IActionContext, message: string, title: string, url: string): void {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        vscode.window.showErrorMessage(message, { title: title }).then(response => { if (response) { openExternal(url); } });
+        context.errorHandling.suppressReportIssue = true;
+        context.errorHandling.suppressDisplay = true;
     }
 
     protected abstract install(fileName: string, cmd: string): Promise<void>;
@@ -109,3 +135,4 @@ export async function showDockerInstallNotification(): Promise<void> {
         await vscode.commands.executeCommand('vscode-docker.installDocker');
     }
 }
+

@@ -33,16 +33,6 @@ export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentat
         });
     }
 
-    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }): void {
-        this.wrappedReporter.sendTelemetryErrorEvent(eventName, properties, measurements);
-
-        this.publisher.publishEvent({
-            eventName,
-            measurements,
-            properties
-        });
-    }
-
     public postEvent(eventName: string, props: Map<string, string>): void {
         const properties: { [key: string]: string } = {};
 
