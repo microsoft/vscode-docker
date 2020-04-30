@@ -22,7 +22,7 @@ function onDidSaveTextDocument(doc: TextDocument): void {
     }
 
     lastUploadTime = Date.now();
-    ext.reporter.sendTelemetryEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
+    ext.reporter.sendTelemetryErrorEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
 
     // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
     ext.ams?.recordActivity('overall');

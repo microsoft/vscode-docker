@@ -17,7 +17,7 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
         let eventSent = false;
 
         const wrappedReporter: ITelemetryReporter = {
-            sendTelemetryEvent: (e, p, m) => {
+            sendTelemetryErrorEvent: (e, p, m) => {
                 assert.equal(e, eventName);
                 assert.equal(m, measurements);
                 assert.equal(p, properties);
@@ -28,7 +28,7 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
 
         const proxy = new TelemetryReporterProxy(wrappedReporter);
 
-        proxy.sendTelemetryEvent(eventName, properties, measurements);
+        proxy.sendTelemetryErrorEvent(eventName, properties, measurements);
 
         assert(eventSent);
     });
