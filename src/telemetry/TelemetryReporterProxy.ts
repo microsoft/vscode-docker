@@ -14,6 +14,8 @@ export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentat
     }
 
     public sendTelemetryEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }): void {
+        properties = properties ?? {};
+
         for (const key of Object.keys(this.sharedProperties)) {
             if (properties[key]) {
                 console.error('Local telemetry property will be overwritten by shared property.');
