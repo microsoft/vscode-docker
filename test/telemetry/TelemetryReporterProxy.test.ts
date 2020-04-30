@@ -14,7 +14,6 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
         const measurements = {};
         const properties = {};
 
-        let eventPublished = false;
         let eventSent = false;
 
         const wrappedReporter: ITelemetryReporter = {
@@ -31,7 +30,6 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
 
         proxy.sendTelemetryEvent(eventName, properties, measurements);
 
-        assert(eventPublished);
         assert(eventSent);
     });
 });

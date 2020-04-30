@@ -49,14 +49,13 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 ];
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
-    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false);
+    ext.context = ctx;
+    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false) || ext.runningTests;
 
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
-
-    ext.context = ctx;
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
