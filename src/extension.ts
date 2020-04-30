@@ -26,8 +26,6 @@ import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
-import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
-import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
 import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
@@ -66,10 +64,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
-    const publisher = new TelemetryPublisher();
-    ctx.subscriptions.push(publisher);
-
-    const telemetryReporterProxy = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
+    const telemetryReporterProxy = new TelemetryReporterProxy(createTelemetryReporter(ctx));
     ext.reporter = telemetryReporterProxy;
 
     if (ext.telemetryOptIn) {
@@ -77,8 +72,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     }
 
     ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
-
-    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();

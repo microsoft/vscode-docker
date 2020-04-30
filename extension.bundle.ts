@@ -45,9 +45,6 @@ export { trimWithElipsis } from './src/utils/trimWithElipsis';
 export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
 export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
 export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
-export { TelemetryPublisher } from './src/telemetry/TelemetryPublisher';
 export { TelemetryReporterProxy } from './src/telemetry/TelemetryReporterProxy';
-export { ITelemetryPublisher, TelemetryEvent } from './src/telemetry/TelemetryPublisher';
-export { activeUseSurvey } from './src/telemetry/surveys/activeUseSurvey';
 
 export * from 'vscode-azureextensionui';

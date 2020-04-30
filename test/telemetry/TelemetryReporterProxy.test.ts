@@ -7,7 +7,6 @@ import * as assert from 'assert';
 
 import { TelemetryReporterProxy } from '../../extension.bundle';
 import { ITelemetryReporter } from 'vscode-azureextensionui';
-import { ITelemetryPublisher } from '../../extension.bundle';
 
 suite('(unit) telemetry/TelemetryReporterProxy', () => {
     test('Events sent to both reporter and publisher', () => {
@@ -17,17 +16,6 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
 
         let eventPublished = false;
         let eventSent = false;
-
-        const publisher: ITelemetryPublisher = {
-            onEvent: undefined,
-            publishEvent: e => {
-                assert.equal(e.eventName, eventName);
-                assert.equal(e.measurements, measurements);
-                assert.equal(e.properties, properties);
-
-                eventPublished = true;
-            }
-        };
 
         const wrappedReporter: ITelemetryReporter = {
             sendTelemetryEvent: (e, p, m) => {
@@ -39,7 +27,7 @@ suite('(unit) telemetry/TelemetryReporterProxy', () => {
             }
         };
 
-        const proxy = new TelemetryReporterProxy(publisher, wrappedReporter);
+        const proxy = new TelemetryReporterProxy(wrappedReporter);
 
         proxy.sendTelemetryEvent(eventName, properties, measurements);
 
