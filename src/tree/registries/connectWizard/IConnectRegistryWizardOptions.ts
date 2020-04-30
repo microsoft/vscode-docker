@@ -25,9 +25,14 @@ export interface IConnectRegistryWizardOptions {
     includeUsername?: boolean;
 
     /**
-     * Optional value to overwrite the default text displayed underneath the username input box
+     * Optional value to overwrite the default prompt text displayed underneath the username input box
      */
     usernamePrompt?: string;
+
+    /**
+     * Optional value to overwrite the default "ghost" text displayed within the username input box
+     */
+    usernamePlaceholder?: string;
 
     /**
      * Set to true if the username is optional

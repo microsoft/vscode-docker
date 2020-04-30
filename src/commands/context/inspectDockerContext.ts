@@ -4,17 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyContent } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { dockerContextManager } from '../../utils/dockerContextManager';
-import { selectDockerContext } from './selectDockerContext';
+import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
 
-export async function inspectDockerContext(_actionContext: IActionContext): Promise<void> {
-    const selectedContext = await selectDockerContext(localize('vscode-docker.commands.context.selectContextToInspect', 'Select Docker context to inspect'));
+export async function inspectDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
+    if (!node) {
+        node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.contextValue, {
+            ...actionContext,
+            noItemFoundErrorMessage: localize('vscode-docker.commands.contexts.inspect.noContexts', 'No Docker contexts are available to inspect')
+        });
+    }
 
-    const inspectResult = await dockerContextManager.inspect(selectedContext.Name);
-
-    await openReadOnlyContent({
-        label: `Docker context ${selectedContext.Name}`,
-        fullId: `vscode-docker.dockerContext.${selectedContext.Name}`
-    }, inspectResult, '');
+    const inspectResult = await node.inspect(actionContext);
+    await openReadOnlyContent(node, inspectResult, '.json');
 }

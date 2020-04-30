@@ -75,7 +75,9 @@ export interface IDockerContextCheckResult {
 
 export interface IDockerContextListItem {
     Name: string,
-    Current: boolean
+    Current: boolean,
+    Description: string,
+    DockerEndpoint: string
 }
 
 export class DockerContextManager {
@@ -132,18 +134,16 @@ export class DockerContextManager {
         let execResult: {
             stdout: string;
         };
-        const contextListCmd = 'docker context ls --format="{{ .Name }} {{ .Current }}"';
+        const contextListCmd = 'docker context ls --format="{{json .}}"';
 
         execResult = await execAsync(contextListCmd, ContextCmdExecOptions);
-
         const contextRecords = LineSplitter.splitLines(execResult.stdout);
         if (!contextRecords || contextRecords.length === 0) {
             throw new Error(localize('vscode-docker.dockerContext.contextListRetrievalFailed', 'Docker contexts could not be listed'));
         }
 
         const items = contextRecords.map(record => {
-            const parts = record.split(' ');
-            return { Name: parts[0], Current: parts[1] === 'true' };
+            return JSON.parse(record);
         });
         return items;
     }

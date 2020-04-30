@@ -18,7 +18,8 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
     connectWizardOptions: {
         wizardTitle: localize('vscode-docker.tree.registries.dockerHub.signIn', 'Sign in to Docker Hub'),
         includeUsername: true,
-        usernamePrompt: localize('vscode-docker.tree.registries.dockerHub.enterID', 'Enter your Docker ID'),
+        usernamePrompt: localize('vscode-docker.tree.registries.dockerHub.dockerID', 'Visit hub.docker.com to sign up for a Docker ID'),
+        usernamePlaceholder: localize('vscode-docker.tree.registries.dockerHub.enterID', 'Enter your Docker ID'),
         includePassword: true,
     },
     treeItemFactory: (parent, cachedProvider) => new DockerHubAccountTreeItem(parent, cachedProvider),

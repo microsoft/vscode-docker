@@ -33,8 +33,8 @@ export type LocalChildGroupType<TItem extends ILocalItem, TProperty extends stri
 
 const groupByKey: string = 'groupBy';
 const sortByKey: string = 'sortBy';
-const labelKey: string = 'label';
-const descriptionKey: string = 'description';
+export const labelKey: string = 'label';
+export const descriptionKey: string = 'description';
 let dockerInstallNotificationShownToUser: boolean = false;
 
 export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
@@ -72,6 +72,11 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         return workspace.getConfiguration(`${configPrefix}.${this.treePrefix}`);
     }
 
+    protected getRefreshInterval(): number {
+        const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
+        return configOptions.get<number>('explorerRefreshInterval', 2000)
+    }
+
     public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
         let intervalId: NodeJS.Timeout;
         registerEvent('treeView.onDidChangeVisibility', treeView.onDidChangeVisibility, (context: IActionContext, e: TreeViewVisibilityChangeEvent) => {
@@ -80,8 +85,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             context.telemetry.properties.isActivationEvent = 'true';
 
             if (e.visible) {
-                const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-                const refreshInterval: number = configOptions.get<number>('explorerRefreshInterval', 2000);
+
+                const refreshInterval: number = this.getRefreshInterval();
                 intervalId = setInterval(
                     async () => {
                         if (window.state.focused && await this.hasChanged()) {

@@ -14,6 +14,7 @@ export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistry
         let prompt: string = context.usernamePrompt || (context.isUsernameOptional ? localize('vscode-docker.tree.registries.connectWizard.enterUsernameOptional', 'Enter your username, or press \'Enter\' for none') : localize('vscode-docker.tree.registries.connectWizard.enterUsernameRequired', 'Enter your username'));
         const options: InputBoxOptions = {
             prompt,
+            placeHolder: context.usernamePlaceholder,
             validateInput: (value: string | undefined) => this.validateInput(context, value)
         };
 
