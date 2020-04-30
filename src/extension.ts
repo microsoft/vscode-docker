@@ -49,13 +49,14 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 ];
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
+    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false);
+
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
-    ext.context = ctx;
 
-    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false);
+    ext.context = ctx;
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
@@ -64,14 +65,14 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
+    // Telemetry reporter internally handles opt in
     const telemetryReporterProxy = new TelemetryReporterProxy(createTelemetryReporter(ctx));
     ext.reporter = telemetryReporterProxy;
 
     if (ext.telemetryOptIn) {
         ext.ams = new ActivityMeasurementService(ctx.globalState);
+        ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
     }
-
-    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();

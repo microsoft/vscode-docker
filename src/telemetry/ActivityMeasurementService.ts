@@ -70,10 +70,6 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
             if (type !== 'overall') {
                 await this.recordActivity('overall');
             }
-
-            if (type !== 'overallnoedit') {
-                await this.recordActivity('overallnoedit');
-            }
         } catch { } // Best effort only
     }
 
