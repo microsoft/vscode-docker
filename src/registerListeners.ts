@@ -25,5 +25,5 @@ function onDidSaveTextDocument(doc: TextDocument): void {
     ext.reporter.sendTelemetryErrorEvent('dockerfilesave', { "lineCount": doc.lineCount.toString() }, {});
 
     // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
-    ext.ams?.recordActivity('overall');
+    ext.activityMeasurementService.recordActivity('overall');
 }

@@ -13,7 +13,7 @@ export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentat
         private readonly wrappedReporter: ITelemetryReporter) {
     }
 
-    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }): void {
+    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }, errorProps?: string[]): void {
         properties = properties ?? {};
 
         for (const key of Object.keys(this.sharedProperties)) {
@@ -24,7 +24,7 @@ export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentat
             properties[key] = this.sharedProperties[key];
         }
 
-        this.wrappedReporter.sendTelemetryErrorEvent(eventName, properties, measurements);
+        this.wrappedReporter.sendTelemetryErrorEvent(eventName, properties, measurements, errorProps);
     }
 
     public postEvent(eventName: string, props: Map<string, string>): void {

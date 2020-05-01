@@ -42,7 +42,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
                 // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
-                ext.ams?.recordActivity('overallnoedit');
+                ext.activityMeasurementService.recordActivity('overallnoedit');
 
                 if (!context.folder) {
                     throw new Error(localize('vscode-docker.tasks.provider.noScope', 'Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));

@@ -22,6 +22,10 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
     private readonly flightMap: Map<string, AsyncLazy<boolean>> = new Map<string, AsyncLazy<boolean>>();
 
     public constructor(globalState: vscode.Memento, reporter: tas.IExperimentationTelemetry) {
+        if (!ext.telemetryOptIn) {
+            return;
+        }
+
         try {
             const extensionVersion = this.getExtensionVersion();
             let targetPopulation: tas.TargetPopulation;

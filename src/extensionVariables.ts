@@ -29,8 +29,8 @@ export namespace ext {
 
     export let telemetryOptIn: boolean;
     export let reporter: ITelemetryReporter;
-    export let experimentationService: IExperimentationServiceAdapter | undefined;
-    export let ams: IActivityMeasurementService | undefined;
+    export let experimentationService: IExperimentationServiceAdapter;
+    export let activityMeasurementService: IActivityMeasurementService;
 
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;

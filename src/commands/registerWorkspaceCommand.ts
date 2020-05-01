@@ -21,7 +21,7 @@ export function registerWorkspaceCommand(commandId: string, callback: (context: 
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         async (context, ...args: any[]) => {
             // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
-            ext.ams?.recordActivity('overallnoedit');
+            ext.activityMeasurementService.recordActivity('overallnoedit');
 
             await verifyIsRunningInWorkspace(context);
             return callback(context, ...args);

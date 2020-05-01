@@ -64,14 +64,11 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
-    // Telemetry reporter internally handles opt in
+    // Telemetry reporter, activity measurement service, and experimentation service internally handle opt in
     const telemetryReporterProxy = new TelemetryReporterProxy(createTelemetryReporter(ctx));
     ext.reporter = telemetryReporterProxy;
-
-    if (ext.telemetryOptIn) {
-        ext.ams = new ActivityMeasurementService(ctx.globalState);
-        ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
-    }
+    ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
+    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();

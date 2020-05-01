@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 
 const defaultMeasurement: ActivityMeasurement = {
@@ -38,6 +39,10 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
+        if (!ext.telemetryOptIn) {
+            return;
+        }
+
         try {
             if (!this.lazySetterMap.has(type)) {
                 this.lazySetterMap[type] = new AsyncLazy(async () => {
@@ -79,6 +84,10 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to get measurements for
      */
     public getActivity(type: ActivityType): ActivityMeasurement {
+        if (!ext.telemetryOptIn) {
+            return defaultMeasurement;
+        }
+
         if (!this.values.has(type)) {
             const currentValue = this.memento.get<ActivityMeasurement>(`vscode-docker.activity.${type}`, defaultMeasurement);
             const now = Date.now();

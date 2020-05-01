@@ -132,7 +132,7 @@ export async function scaffold(context: ScaffoldContext): Promise<ScaffoldedFile
     }
 
     // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
-    ext.ams?.recordActivity('overallnoedit');
+    ext.activityMeasurementService.recordActivity('overallnoedit');
 
     let folder: vscode.WorkspaceFolder;
 
