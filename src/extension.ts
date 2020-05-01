@@ -81,6 +81,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     perfStats.loadEndTime = Date.now();
 
     initializeExtensionVariables(ctx);
+
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
@@ -135,11 +136,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateLanguageClient(ctx);
 
         registerListeners();
-
-        // NOTE: Temporarily disabled.
-        // Don't wait
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        // nps(ctx.globalState);
     });
 }
 
