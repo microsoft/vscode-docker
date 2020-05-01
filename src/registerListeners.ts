@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, TextDocument, workspace } from 'vscode';
+import { TextDocument, workspace } from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
 import { ext } from './extensionVariables';
 
 let lastUploadTime: number = 0;
 const hourInMilliseconds = 1000 * 60 * 60;
 
-export function registerListeners(ctx: ExtensionContext): void {
+export function registerListeners(): void {
     if (ext.telemetryOptIn) {
         registerEvent('dockerfilesave', workspace.onDidSaveTextDocument, async (context: IActionContext, doc: TextDocument) => {
             // If it's not a Dockerfile, or last upload time is within an hour, skip

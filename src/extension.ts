@@ -134,7 +134,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         activateLanguageClient(ctx);
 
-        registerListeners(ctx);
+        registerListeners();
 
         // NOTE: Temporarily disabled.
         // Don't wait
