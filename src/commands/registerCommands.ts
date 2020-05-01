@@ -79,7 +79,7 @@ function registerCommandWithActivity(commandId: string, callback: (context: IAct
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (context, ...args: any[]) => {
             // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
-            ext.ams?.recordActivity('overallnoedit');
+            ext.activityMeasurementService.recordActivity('overallnoedit');
 
             return callback(context, ...args);
         },
