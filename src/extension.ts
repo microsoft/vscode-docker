@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
@@ -26,7 +26,7 @@ import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
-import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
+import { ExperimentationTelemetry } from './telemetry/ExperimentationTelemetry';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
@@ -65,10 +65,8 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     }
 
     // Telemetry reporter, activity measurement service, and experimentation service internally handle opt in
-    const telemetryReporterProxy = new TelemetryReporterProxy(createTelemetryReporter(ctx));
-    ext.reporter = telemetryReporterProxy;
     ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
-    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, telemetryReporterProxy);
+    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, new ExperimentationTelemetry());
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();

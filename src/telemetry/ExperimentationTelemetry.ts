@@ -3,28 +3,11 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { callWithTelemetryAndErrorHandling, IActionContext, ITelemetryReporter } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { IExperimentationTelemetry } from 'vscode-tas-client';
 
-export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentationTelemetry {
+export class ExperimentationTelemetry implements IExperimentationTelemetry {
     private readonly sharedProperties: { [key: string]: string } = {};
-
-    public constructor(private readonly wrappedReporter: ITelemetryReporter) {
-    }
-
-    public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }, errorProps?: string[]): void {
-        properties = properties ?? {};
-
-        for (const key of Object.keys(this.sharedProperties)) {
-            if (properties[key]) {
-                console.error('Local telemetry property will be overwritten by shared property.');
-            }
-
-            properties[key] = this.sharedProperties[key];
-        }
-
-        this.wrappedReporter.sendTelemetryErrorEvent(eventName, properties, measurements, errorProps);
-    }
 
     /**
      * "Handles" telemetry events by adding the shared properties to them
