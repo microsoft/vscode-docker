@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext } from '../../extension.bundle';
-import { ActivityMeasurementService } from '../../src/telemetry/ActivityMeasurementService';
+import { ext, ActivityMeasurementService } from '../../extension.bundle';
 
 suite('(unit) telemetry/ActivityMeasurementService', async () => {
     await test('Default data returned', async () => {
