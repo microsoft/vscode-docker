@@ -8,10 +8,6 @@ import { IExperimentationService } from 'vscode-tas-client';
 import * as tas from 'vscode-tas-client';
 import { extensionId, extensionVersion } from '../constants';
 import { ext } from '../extensionVariables';
-import { AsyncLazy } from '../utils/lazy';
-
-// Use a lazy lifetime of 30 minutes which matches what TAS does
-const lazyLifetime: number = 30 * 60 * 1000;
 
 export interface IExperimentationServiceAdapter {
     isFlightEnabled(flight: string): Promise<boolean>;
@@ -19,7 +15,6 @@ export interface IExperimentationServiceAdapter {
 
 export class ExperimentationServiceAdapter implements IExperimentationServiceAdapter {
     private readonly wrappedExperimentationService: IExperimentationService;
-    private readonly flightMap: Map<string, AsyncLazy<boolean>> = new Map<string, AsyncLazy<boolean>>();
 
     public constructor(globalState: vscode.Memento, reporter: tas.IExperimentationTelemetry) {
         if (!ext.telemetryOptIn) {
@@ -53,12 +48,6 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
             return false;
         }
 
-        if (!this.flightMap.has(flight)) {
-            this.flightMap.set(flight, new AsyncLazy<boolean>(async () => {
-                return await this.wrappedExperimentationService.isCachedFlightEnabled(flight);
-            }, lazyLifetime));
-        }
-
-        return await this.flightMap.get(flight).getValue();
+        return this.wrappedExperimentationService.isCachedFlightEnabled(flight);
     }
 }
