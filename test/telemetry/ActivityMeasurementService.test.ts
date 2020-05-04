@@ -5,9 +5,10 @@
 
 import * as assert from 'assert';
 import { ext } from '../../extension.bundle';
+import { ActivityMeasurementService } from '../../src/telemetry/ActivityMeasurementService';
 
 suite('(unit) telemetry/ActivityMeasurementService', async () => {
-    test('Default data returned', async () => {
+    await test('Default data returned', async () => {
         // Clear existing data
         await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
         await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
@@ -15,14 +16,14 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         const overallData = ext.activityMeasurementService.getActivity('overall');
         const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
 
-        assert.deepStrictEqual(overallData, overallNoEditData);
+        assert.deepEqual(overallData, overallNoEditData);
 
         assert.equal(overallData.lastSession, undefined);
         assert.equal(overallData.totalSessions, 0);
         assert.equal(overallData.monthlySessions, 0);
     });
 
-    test('overall increments overall only', async () => {
+    await test('overall increments overall only', async () => {
         // Clear existing data
         await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
         await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
@@ -32,14 +33,14 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         const overallData = ext.activityMeasurementService.getActivity('overall');
         const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
 
-        assert.notDeepStrictEqual(overallData, overallNoEditData);
+        assert.notDeepEqual(overallData, overallNoEditData);
 
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.monthlySessions, 1);
     });
 
-    test('overallnoedit increments both', async () => {
+    await test('overallnoedit increments both', async () => {
         // Clear existing data
         await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
         await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
@@ -49,14 +50,16 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         const overallData = ext.activityMeasurementService.getActivity('overall');
         const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
 
-        assert.deepStrictEqual(overallData, overallNoEditData);
-
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.monthlySessions, 1);
+
+        assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assert.equal(overallNoEditData.totalSessions, 1);
+        assert.equal(overallNoEditData.monthlySessions, 1);
     });
 
-    test('Record is once per day', async () => {
+    await test('Record is once per day', async () => {
         // Clear existing data
         await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
         await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
@@ -69,5 +72,23 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.monthlySessions, 1);
+    });
+
+    await test('Loading from storage', async () => {
+        ext.activityMeasurementService.recordActivity('overallnoedit');
+
+        // Get a new object to wipe its memory
+        ext.activityMeasurementService = new ActivityMeasurementService(ext.context.globalState);
+
+        const overallData = ext.activityMeasurementService.getActivity('overall');
+        const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
+
+        assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assert.equal(overallData.totalSessions, 1);
+        assert.equal(overallData.monthlySessions, 1);
+
+        assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assert.equal(overallNoEditData.totalSessions, 1);
+        assert.equal(overallNoEditData.monthlySessions, 1);
     });
 });
