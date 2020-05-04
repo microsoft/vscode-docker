@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, ActivityMeasurementService } from '../../extension.bundle';
+import { ActivityMeasurementService } from '../../extension.bundle';
+import { TestMemento } from '../TestMemento';
+import { assertSameDate } from '../assertEx';
 
 suite('(unit) telemetry/ActivityMeasurementService', async () => {
-    await test('Default data returned', async () => {
-        // Clear existing data
-        await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
-        await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
+    test('Default data returned', async () => {
+        const ams = new ActivityMeasurementService(new TestMemento());
 
-        const overallData = ext.activityMeasurementService.getActivity('overall');
-        const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
+        const overallData = ams.getActivity('overall');
+        const overallNoEditData = ams.getActivity('overallnoedit');
 
         assert.deepEqual(overallData, overallNoEditData);
 
@@ -22,71 +22,67 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         assert.equal(overallData.currentMonthSessions, 0);
     });
 
-    await test('overall increments overall only', async () => {
-        // Clear existing data
-        await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
-        await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
+    test('overall increments overall only', async () => {
+        const ams = new ActivityMeasurementService(new TestMemento());
 
-        await ext.activityMeasurementService.recordActivity('overall');
+        await ams.recordActivity('overall');
 
-        const overallData = ext.activityMeasurementService.getActivity('overall');
-        const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
+        const overallData = ams.getActivity('overall');
+        const overallNoEditData = ams.getActivity('overallnoedit');
 
         assert.notDeepEqual(overallData, overallNoEditData);
 
-        assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.currentMonthSessions, 1);
     });
 
-    await test('overallnoedit increments both', async () => {
-        // Clear existing data
-        await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
-        await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
+    test('overallnoedit increments both', async () => {
+        const ams = new ActivityMeasurementService(new TestMemento());
 
-        await ext.activityMeasurementService.recordActivity('overallnoedit');
+        await ams.recordActivity('overallnoedit');
 
-        const overallData = ext.activityMeasurementService.getActivity('overall');
-        const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
+        const overallData = ams.getActivity('overall');
+        const overallNoEditData = ams.getActivity('overallnoedit');
 
-        assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.currentMonthSessions, 1);
 
-        assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallNoEditData.lastSession, Date.now());
         assert.equal(overallNoEditData.totalSessions, 1);
         assert.equal(overallNoEditData.currentMonthSessions, 1);
     });
 
-    await test('Record is once per day', async () => {
-        // Clear existing data
-        await ext.context.globalState.update('vscode-docker.activity.overall', undefined);
-        await ext.context.globalState.update('vscode-docker.activity.overallnoedit', undefined);
+    test('Record is once per day', async () => {
+        const ams = new ActivityMeasurementService(new TestMemento());
 
-        await ext.activityMeasurementService.recordActivity('overall');
-        await ext.activityMeasurementService.recordActivity('overall');
+        await ams.recordActivity('overall');
+        await ams.recordActivity('overall');
 
-        const overallData = ext.activityMeasurementService.getActivity('overall');
+        const overallData = ams.getActivity('overall');
 
-        assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.currentMonthSessions, 1);
     });
 
-    await test('Loading from storage', async () => {
-        ext.activityMeasurementService.recordActivity('overallnoedit');
+    test('Loading from storage', async () => {
+        const memento = new TestMemento();
+        const ams1 = new ActivityMeasurementService(memento);
+        await ams1.recordActivity('overallnoedit');
 
-        // Get a new object to wipe its memory
-        ext.activityMeasurementService = new ActivityMeasurementService(ext.context.globalState);
+        // Get a new object without memory
+        const ams2 = new ActivityMeasurementService(memento);
 
-        const overallData = ext.activityMeasurementService.getActivity('overall');
-        const overallNoEditData = ext.activityMeasurementService.getActivity('overallnoedit');
+        const overallData = ams2.getActivity('overall');
+        const overallNoEditData = ams2.getActivity('overallnoedit');
 
-        assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
         assert.equal(overallData.currentMonthSessions, 1);
 
-        assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
+        assertSameDate(overallNoEditData.lastSession, Date.now());
         assert.equal(overallNoEditData.totalSessions, 1);
         assert.equal(overallNoEditData.currentMonthSessions, 1);
     });
