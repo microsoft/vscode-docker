@@ -9,8 +9,7 @@ import { IExperimentationTelemetry } from 'vscode-tas-client';
 export class TelemetryReporterProxy implements ITelemetryReporter, IExperimentationTelemetry {
     private readonly sharedProperties: { [key: string]: string } = {};
 
-    public constructor(
-        private readonly wrappedReporter: ITelemetryReporter) {
+    public constructor(private readonly wrappedReporter: ITelemetryReporter) {
     }
 
     public sendTelemetryErrorEvent(eventName: string, properties?: { [key: string]: string; }, measurements?: { [key: string]: number; }, errorProps?: string[]): void {
