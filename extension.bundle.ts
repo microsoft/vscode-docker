@@ -46,5 +46,6 @@ export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
 export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
 export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
 export { TelemetryReporterProxy } from './src/telemetry/TelemetryReporterProxy';
+export { ActivityMeasurementService } from './src/telemetry/ActivityMeasurementService';
 
 export * from 'vscode-azureextensionui';

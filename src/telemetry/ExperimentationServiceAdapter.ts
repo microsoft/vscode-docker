@@ -54,9 +54,9 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
         }
 
         if (!this.flightMap.has(flight)) {
-            this.flightMap[flight] = new AsyncLazy<boolean>(async () => {
+            this.flightMap.set(flight, new AsyncLazy<boolean>(async () => {
                 return await this.wrappedExperimentationService.isCachedFlightEnabled(flight);
-            }, lazyLifetime);
+            }, lazyLifetime));
         }
 
         return await this.flightMap.get(flight).getValue();

@@ -45,7 +45,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
 
         try {
             if (!this.lazySetterMap.has(type)) {
-                this.lazySetterMap[type] = new AsyncLazy(async () => {
+                this.lazySetterMap.set(type, new AsyncLazy(async () => {
                     const currentValue = this.getActivity(type);
                     const now = Date.now();
 
@@ -61,11 +61,11 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
                     };
 
                     // Update memory
-                    this.values[type] = newValue;
+                    this.values.set(type, newValue);
 
                     // Update long-term storage
                     await this.memento.update(`vscode-docker.activity.${type}`, newValue);
-                });
+                }));
             }
 
             // Use of a lazy results in a max of one recording per session
@@ -97,7 +97,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
                 currentValue.monthlySessions = 0;
             }
 
-            this.values[type] = currentValue;
+            this.values.set(type, currentValue);
         }
 
         return this.values.get(type);
