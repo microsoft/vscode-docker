@@ -20,7 +20,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         assert.equal(overallData.lastSession, undefined);
         assert.equal(overallData.totalSessions, 0);
-        assert.equal(overallData.monthlySessions, 0);
+        assert.equal(overallData.currentMonthSessions, 0);
     });
 
     await test('overall increments overall only', async () => {
@@ -37,7 +37,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
-        assert.equal(overallData.monthlySessions, 1);
+        assert.equal(overallData.currentMonthSessions, 1);
     });
 
     await test('overallnoedit increments both', async () => {
@@ -52,11 +52,11 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
-        assert.equal(overallData.monthlySessions, 1);
+        assert.equal(overallData.currentMonthSessions, 1);
 
         assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallNoEditData.totalSessions, 1);
-        assert.equal(overallNoEditData.monthlySessions, 1);
+        assert.equal(overallNoEditData.currentMonthSessions, 1);
     });
 
     await test('Record is once per day', async () => {
@@ -71,7 +71,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
-        assert.equal(overallData.monthlySessions, 1);
+        assert.equal(overallData.currentMonthSessions, 1);
     });
 
     await test('Loading from storage', async () => {
@@ -85,10 +85,10 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         assert.equal(new Date(overallData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallData.totalSessions, 1);
-        assert.equal(overallData.monthlySessions, 1);
+        assert.equal(overallData.currentMonthSessions, 1);
 
         assert.equal(new Date(overallNoEditData.lastSession).getDate(), new Date(Date.now()).getDate());
         assert.equal(overallNoEditData.totalSessions, 1);
-        assert.equal(overallNoEditData.monthlySessions, 1);
+        assert.equal(overallNoEditData.currentMonthSessions, 1);
     });
 });

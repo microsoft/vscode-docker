@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { IExperimentationService } from 'vscode-tas-client';
 import * as tas from 'vscode-tas-client';
-import { extensionId } from '../constants';
+import { extensionId, extensionVersion } from '../constants';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 
@@ -27,12 +27,12 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
         }
 
         try {
-            const extensionVersion = this.getExtensionVersion();
+            const version = extensionVersion.value ?? '1';
             let targetPopulation: tas.TargetPopulation;
 
             if (ext.runningTests || process.env.DEBUGTELEMETRY) {
                 targetPopulation = tas.TargetPopulation.Team;
-            } else if (/alpha/ig.test(extensionVersion)) {
+            } else if (/alpha/ig.test(version)) {
                 targetPopulation = tas.TargetPopulation.Insiders;
             } else {
                 targetPopulation = tas.TargetPopulation.Public;
@@ -40,7 +40,7 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
 
             this.wrappedExperimentationService = tas.getExperimentationService(
                 extensionId,
-                extensionVersion,
+                version,
                 targetPopulation,
                 reporter,
                 globalState,
@@ -60,11 +60,5 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
         }
 
         return await this.flightMap.get(flight).getValue();
-    }
-
-    private getExtensionVersion(): string {
-        const extension = vscode.extensions.getExtension(extensionId);
-        // eslint-disable-next-line @typescript-eslint/tslint/config
-        return extension?.packageJSON?.version ?? '1';
     }
 }

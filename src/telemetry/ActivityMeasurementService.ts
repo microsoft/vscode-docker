@@ -7,12 +7,6 @@ import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 
-const defaultMeasurement: ActivityMeasurement = {
-    lastSession: undefined,
-    monthlySessions: 0,
-    totalSessions: 0,
-};
-
 export type ActivityType = 'overall' | 'overallnoedit';
 
 export interface IActivityMeasurementService {
@@ -22,9 +16,15 @@ export interface IActivityMeasurementService {
 
 export interface ActivityMeasurement {
     lastSession: number | undefined;
-    monthlySessions: number;
+    currentMonthSessions: number;
     totalSessions: number;
 }
+
+const defaultMeasurement: ActivityMeasurement = {
+    lastSession: undefined,
+    currentMonthSessions: 0,
+    totalSessions: 0,
+};
 
 export class ActivityMeasurementService implements IActivityMeasurementService {
     private readonly lazySetterMap: Map<ActivityType, AsyncLazy<void>> = new Map<ActivityType, AsyncLazy<void>>();
@@ -56,7 +56,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
 
                     const newValue: ActivityMeasurement = {
                         lastSession: now,
-                        monthlySessions: currentValue.monthlySessions + 1,
+                        currentMonthSessions: currentValue.currentMonthSessions + 1,
                         totalSessions: currentValue.totalSessions + 1,
                     };
 
@@ -94,7 +94,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
 
             // If the last session was not in this month, reset the monthly session count
             if (!sameDate(currentValue.lastSession, now, 'month')) {
-                currentValue.monthlySessions = 0;
+                currentValue.currentMonthSessions = 0;
             }
 
             this.values.set(type, currentValue);

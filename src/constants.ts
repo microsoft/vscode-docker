@@ -3,6 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as vscode from 'vscode';
+import { Lazy } from "./utils/lazy";
+
 export const configPrefix: string = 'docker';
 
 // Consider downloading multiple pages (images, tags, etc)
@@ -41,9 +44,15 @@ export const dockerHubUrl: string = 'https://hub.docker.com/';
 
 export const extensionId: string = 'ms-azuretools.vscode-docker';
 
+export const extensionVersion = new Lazy<string | undefined>(() => {
+    const extension = vscode.extensions.getExtension(extensionId);
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    return extension?.packageJSON?.version;
+});
+
 export type DockerOrchestration = 'single' | 'docker-compose';
 
-export const builtInNetworks: string[] = ['bridge', 'host', 'none']
+export const builtInNetworks: string[] = ['bridge', 'host', 'none'];
 
 export const dockerComposeHeader = `version: '3.4'
 
