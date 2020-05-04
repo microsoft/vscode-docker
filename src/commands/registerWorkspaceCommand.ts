@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { commands, ConfigurationTarget, MessageItem, workspace, WorkspaceConfiguration } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext, registerCommand, UserCancelledError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { extensionId } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from '../utils/getVSCodeRemoteInfo';
+import { registerCommand } from './registerCommands';
 
 /**
  * Registers a command that requires running in the "workspace" environment (as opposed to a "ui" extension).
