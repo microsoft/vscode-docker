@@ -6,7 +6,9 @@
 import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
 import { ExtensionContext, TreeView } from "vscode";
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput } from "vscode-azureextensionui";
+import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
+import { IExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
@@ -24,7 +26,11 @@ export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
-    export let reporter: ITelemetryReporter;
+
+    export let telemetryOptIn: boolean;
+    export let experimentationService: IExperimentationServiceAdapter;
+    export let activityMeasurementService: IActivityMeasurementService;
+
     export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerode: Dockerode;

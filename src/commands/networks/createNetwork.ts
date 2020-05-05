@@ -7,7 +7,7 @@ import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeAsync, callDockerodeWithErrorHandling } from '../../utils/callDockerode';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 
 export async function createNetwork(context: IActionContext): Promise<void> {
 
@@ -16,7 +16,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
     });
 
-    const engineVersion = await callDockerodeAsync(async () => ext.dockerode.version());
+    const engineVersion = await callDockerodeWithErrorHandling(async () => ext.dockerode.version(), context);
     const drivers = engineVersion.Os === 'windows'
         ? [
             { label: 'nat' },
