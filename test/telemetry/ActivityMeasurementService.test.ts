@@ -12,8 +12,8 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
     test('Default data returned', async () => {
         const ams = new ActivityMeasurementService(new TestMemento());
 
-        const overallData = ams.getActivity('overall');
-        const overallNoEditData = ams.getActivity('overallnoedit');
+        const overallData = ams.getActivityMeasurement('overall');
+        const overallNoEditData = ams.getActivityMeasurement('overallnoedit');
 
         assert.deepEqual(overallData, overallNoEditData);
 
@@ -27,8 +27,8 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         await ams.recordActivity('overall');
 
-        const overallData = ams.getActivity('overall');
-        const overallNoEditData = ams.getActivity('overallnoedit');
+        const overallData = ams.getActivityMeasurement('overall');
+        const overallNoEditData = ams.getActivityMeasurement('overallnoedit');
 
         assert.notDeepEqual(overallData, overallNoEditData);
 
@@ -42,8 +42,8 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
         await ams.recordActivity('overallnoedit');
 
-        const overallData = ams.getActivity('overall');
-        const overallNoEditData = ams.getActivity('overallnoedit');
+        const overallData = ams.getActivityMeasurement('overall');
+        const overallNoEditData = ams.getActivityMeasurement('overallnoedit');
 
         assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
@@ -60,7 +60,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         await ams.recordActivity('overall');
         await ams.recordActivity('overall');
 
-        const overallData = ams.getActivity('overall');
+        const overallData = ams.getActivityMeasurement('overall');
 
         assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);
@@ -75,8 +75,8 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
         // Get a new object without memory
         const ams2 = new ActivityMeasurementService(memento);
 
-        const overallData = ams2.getActivity('overall');
-        const overallNoEditData = ams2.getActivity('overallnoedit');
+        const overallData = ams2.getActivityMeasurement('overall');
+        const overallNoEditData = ams2.getActivityMeasurement('overallnoedit');
 
         assertSameDate(overallData.lastSession, Date.now());
         assert.equal(overallData.totalSessions, 1);

@@ -17,7 +17,7 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
         // Copy shared properties into event properties
         for (const key of Object.keys(this.sharedProperties)) {
             if (context.telemetry.properties[key]) {
-                console.error('Local telemetry property will be overwritten by shared property.');
+                console.warn(`Local telemetry property '${key}' will be overwritten by shared property!`);
             }
 
             context.telemetry.properties[key] = this.sharedProperties[key];
@@ -25,7 +25,7 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
     }
 
     /**
-     * Implements `postEvent` for `IExperimentationTelemetry`. This implementation is admittedly strange, but necessary since `ITelemetryReporter` is no longer public.
+     * Implements `postEvent` for `IExperimentationTelemetry`.
      * @param eventName The name of the event
      * @param props The properties to attach to the event
      */

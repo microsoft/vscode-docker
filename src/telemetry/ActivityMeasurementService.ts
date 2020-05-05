@@ -11,7 +11,7 @@ export type ActivityType = 'overall' | 'overallnoedit';
 
 export interface IActivityMeasurementService {
     recordActivity(type: ActivityType): Promise<void>;
-    getActivity(type: ActivityType): ActivityMeasurement;
+    getActivityMeasurement(type: ActivityType): ActivityMeasurement;
 }
 
 export interface ActivityMeasurement {
@@ -46,7 +46,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
         try {
             if (!this.lazySetterMap.has(type)) {
                 this.lazySetterMap.set(type, new AsyncLazy(async () => {
-                    const currentValue = this.getActivity(type);
+                    const currentValue = this.getActivityMeasurement(type);
                     const now = Date.now();
 
                     // No need to increment if it's been done already today
@@ -83,7 +83,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * If the current month is not the same as the last session, the monthly session count is reset.
      * @param type The activity type to get measurements for
      */
-    public getActivity(type: ActivityType): ActivityMeasurement {
+    public getActivityMeasurement(type: ActivityType): ActivityMeasurement {
         if (!ext.telemetryOptIn) {
             return defaultMeasurement;
         }
