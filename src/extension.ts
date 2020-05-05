@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerTelemetryHandler, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
@@ -64,9 +64,13 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
-    // Telemetry reporter, activity measurement service, and experimentation service internally handle opt in
+    // Activity measurement service internally handles telemetry opt-in
     ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
-    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, new ExperimentationTelemetry());
+
+    // Experimentation service internally handles telemetry opt-in
+    const experimentationTelemetry = new ExperimentationTelemetry();
+    ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
+    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, experimentationTelemetry);
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();

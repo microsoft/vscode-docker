@@ -6,7 +6,7 @@
 import * as Dockerode from 'dockerode';
 import * as osNode from 'os';
 import { ExtensionContext, TreeView } from "vscode";
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, ITelemetryReporter } from "vscode-azureextensionui";
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput } from "vscode-azureextensionui";
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { IExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
@@ -28,7 +28,6 @@ export namespace ext {
     export let ui: IAzureUserInput;
 
     export let telemetryOptIn: boolean;
-    export let reporter: ITelemetryReporter;
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
 

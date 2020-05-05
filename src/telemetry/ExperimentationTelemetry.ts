@@ -11,10 +11,9 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
 
     /**
      * "Handles" telemetry events by adding the shared properties to them
-     * @param eventName The name of the event
      * @param context The action context
      */
-    public async handleTelemetry(eventName: string, context: IActionContext): Promise<void> {
+    public async handleTelemetry(context: IActionContext): Promise<void> {
         // Copy shared properties into event properties
         for (const key of Object.keys(this.sharedProperties)) {
             if (context.telemetry.properties[key]) {
