@@ -50,6 +50,7 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
+    // When running tests, DEBUGTELEMETRY=1 is used, so nothing is actually sent. Having this be `true` allows us to test `ActivityMeasurementService` and `ExperimentationTelemetry`.
     ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false) || ext.runningTests;
 
     if (!ext.ui) {
