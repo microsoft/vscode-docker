@@ -22,7 +22,7 @@ export function registerListeners(): void {
             lastUploadTime = Date.now();
             context.telemetry.properties.lineCount = doc.lineCount.toString();
 
-            // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ext.activityMeasurementService.recordActivity('overall');
         });
     }

@@ -120,7 +120,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
-            // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ext.activityMeasurementService.recordActivity('overallnoedit');
 
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();

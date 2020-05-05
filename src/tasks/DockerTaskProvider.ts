@@ -41,7 +41,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
-                // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-floating-promises
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 ext.activityMeasurementService.recordActivity('overallnoedit');
 
                 if (!context.folder) {
