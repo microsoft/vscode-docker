@@ -1,4 +1,6 @@
 ## 1.2.0 - 11 May 2020
+Requires Visual Studio Code 1.44 or higher.
+
 ### Added
 * Semantic highlighting support. [#1840](https://github.com/microsoft/vscode-docker/issues/1840)
 * Help and Feedback pane in explorer view. [#1893](https://github.com/microsoft/vscode-docker/issues/1893)
