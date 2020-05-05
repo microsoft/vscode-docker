@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, registerCommand } from 'vscode-azureextensionui';
+import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { DockerExtensionKind, getVSCodeRemoteInfo } from '../utils/getVSCodeRemoteInfo';
+import { registerCommand } from './registerCommands';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function registerLocalCommand(commandId: string, callback: (context: IActionContext, ...args: any[]) => any, debounce?: number): void {

@@ -30,7 +30,7 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
         case 'django':
             return [
                 'runserver',
-                `0.0.0.0:${ports !== undefined ? ports[0] : PythonDefaultPorts[projectType]}`,
+                `0.0.0.0:${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
                 '--nothreading',
                 '--noreload'
             ];
@@ -40,7 +40,7 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
                 '--no-debugger',
                 '--no-reload',
                 '--host 0.0.0.0',
-                `--port ${ports !== undefined ? ports[0] : PythonDefaultPorts[projectType]}`,
+                `--port ${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
             ]
         default:
             return undefined;
