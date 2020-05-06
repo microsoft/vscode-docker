@@ -12,7 +12,7 @@ import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { captureCancelStep } from '../../utils/captureCancelStep';
 
-type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: number[], selectedPort?: number };
+type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: string, selectedPort?: number };
 
 type ConfigureBrowseCancelStep = 'node' | 'port';
 
@@ -80,7 +80,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
             // Exclude ports not mapped to the host...
             .filter(port => port.mappings && port.mappings.length > 0);
 
-    telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port);
+    telemetryProperties.possiblePorts = possiblePorts.map(port => port.containerPort.port).toString();
 
     if (possiblePorts.length === 0) {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
