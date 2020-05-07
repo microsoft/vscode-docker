@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { commands } from "vscode";
-import { registerCommand } from "vscode-azureextensionui";
+import { IActionContext, registerCommand as registerCommandAzUI } from "vscode-azureextensionui";
 import { configure, configureApi } from "../configureWorkspace/configure";
 import { configureCompose } from "../configureWorkspace/configureCompose";
+import { ext } from "../extensionVariables";
 import { deployImageToAzure } from "../utils/lazyLoad";
 import { viewAzureTaskLogs } from "../utils/lazyLoad";
 import { composeDown, composeRestart, composeUp } from "./compose";
@@ -70,6 +71,21 @@ import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function registerCommand(commandId: string, callback: (context: IActionContext, ...args: any[]) => any, debounce?: number): void {
+    registerCommandAzUI(
+        commandId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async (context, ...args: any[]) => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            ext.activityMeasurementService.recordActivity('overallnoedit');
+
+            return callback(context, ...args);
+        },
+        debounce
+    );
+}
 
 export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.api.configure', configureApi);

@@ -23,6 +23,10 @@ export class ContextTreeItem extends AzExtTreeItem {
         return this._item.createdTime;
     }
 
+    public get id(): string {
+        return this._item.treeId;
+    }
+
     public get label(): string {
         return ext.contextsRoot.getTreeItemLabel(this._item);
     }

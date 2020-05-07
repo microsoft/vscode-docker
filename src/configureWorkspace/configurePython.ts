@@ -12,7 +12,7 @@ import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../deb
 import { ext } from "../extensionVariables";
 import { localize } from '../localize';
 import { getValidImageName } from '../utils/getValidImageName';
-import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget } from "../utils/pythonUtils";
+import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget, inferPythonArgs } from "../utils/pythonUtils";
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, quickPickGenerateComposeFiles } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
@@ -59,6 +59,20 @@ services:
       context: .
       dockerfile: Dockerfile
 $ports$`;
+
+const dockerComposeDebugfile = `version: '3.4'
+
+services:
+  $service_name$:
+    image: $service_name$
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /bin/bash
+    command: -c "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 $cmd$"
+$ports$
+$env$
+`
 
 const djangoRequirements = `django==3.0.3
 gunicorn==20.0.4`;
@@ -109,6 +123,20 @@ function genDockerCompose(serviceName: string, ports: number[]): string {
     return dockerComposefile
         .replace(/\$service_name\$/g, getValidImageName(serviceName))
         .replace(/\$ports\$/g, getComposePorts(ports));
+}
+
+function genDockerComposeDebug(serviceName: string, ports: number[], target: PythonTarget, projectType: PythonProjectType): string {
+    const args: string = (inferPythonArgs(projectType, ports) || []).join(' ');
+    const app: string = 'module' in target ? `-m ${target.module}` : target.file;
+
+    const cmd: string = projectType === "flask" ? `-m flask ${args}` : `${app} ${args}`;
+    const env: string = projectType === "flask" ? `    environment:\n      - FLASK_APP=${app}` : '';
+
+    return dockerComposeDebugfile
+        .replace(/\$service_name\$/g, getValidImageName(serviceName))
+        .replace(/\$ports\$/g, getComposePorts(ports, 5678))
+        .replace(/\$cmd\$/g, cmd.trimRight())
+        .replace(/\$env\$/g, env);
 }
 
 function genRequirementsFile(projectType: PythonProjectType): string {
@@ -231,8 +259,10 @@ export async function scaffoldPython(context: ScaffolderContext): Promise<Scaffo
         properties.orchestration = 'docker-compose';
 
         const dockerComposeFile = genDockerCompose(serviceName, ports);
+        const dockerComposeDebugFile = genDockerComposeDebug(serviceName, ports, launchFile, projectType);
 
         files.push({ fileName: 'docker-compose.yml', contents: dockerComposeFile });
+        files.push({ fileName: 'docker-compose.debug.yml', contents: dockerComposeDebugFile });
     }
 
     files.forEach(file => {
