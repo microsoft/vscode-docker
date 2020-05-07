@@ -298,7 +298,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             const isolation = await dockerClient.inspectObject(containerName, { format: '{{ .HostConfig.Isolation}}' });
             if (isolation && isolation === 'hyperv') {
                 context.actionContext.errorHandling.suppressReportIssue = true;
-                throw new Error(localize('vscode-docker.debug.netcore.isolationNotSupported', 'Unable to copy debugger. This operation is not supported on Hyper-V container.'));
+                throw new Error(localize('vscode-docker.debug.netcore.isolationNotSupported', 'Attaching a debugger to a Hyper-V container is not supported.'));
             }
         }
 
