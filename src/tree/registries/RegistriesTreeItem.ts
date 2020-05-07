@@ -87,10 +87,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             };
         })
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
-        picks.push({
+        /* picks.push({
             label: localize('vscode-docker.tree.registries.contribute', '$(link-external) Don\'t see your provider? Learn how to contribute...'),
             data: undefined
-        });
+        }); */
 
         let placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
         provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
