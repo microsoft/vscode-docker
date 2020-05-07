@@ -91,7 +91,7 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
     }
 }
 
-export async function getConatinerOSType(containerId: string): Promise<ContainerOSType> {
+export async function getContainerOSType(containerId: string): Promise<ContainerOSType> {
     const inspectCmd: string = `docker inspect --format="{{ .Platform}}" ${containerId}`;
     const execResult = await execAsync(inspectCmd);
     return execResult.stdout.trim().toLowerCase() === 'windows' ? 'windows' : 'linux';

@@ -13,7 +13,7 @@ import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { LocalOSProvider } from '../../utils/LocalOSProvider';
-import { ContainerOSType, getConatinerOSType } from '../../utils/osUtils';
+import { ContainerOSType, getContainerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -195,15 +195,15 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
-            const conatinerOS = await getConatinerOSType(containerName);
+            const containerOS = await getContainerOSType(containerName);
             const osProvider = new LocalOSProvider();
-            const debuggerDirectory = conatinerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
-            debuggerPath = conatinerOS === 'windows'
+            const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
+            debuggerPath = containerOS === 'windows'
                 ? osProvider.pathJoin(osProvider.os, debuggerDirectory, 'win7-x64', 'latest', 'vsdbg.exe')
                 : osProvider.pathJoin(osProvider.os, debuggerDirectory, 'vsdbg');
-            const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath, conatinerOS);
+            const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath, containerOS);
             if (!isDebuggerInstalled) {
-                await this.copyDebuggerToContainer(context, containerName, debuggerDirectory, conatinerOS);
+                await this.copyDebuggerToContainer(context, containerName, debuggerDirectory, containerOS);
             }
         }
 
