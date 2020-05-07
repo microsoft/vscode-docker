@@ -6,7 +6,6 @@
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { openExternal } from "../../utils/openExternal";
 import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";
@@ -87,16 +86,10 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             };
         })
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
-        picks.push({
-            label: localize('vscode-docker.tree.registries.contribute', '$(link-external) Don\'t see your provider? Learn how to contribute...'),
-            data: undefined
-        });
 
         let placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
         provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
-            await openExternal('https://aka.ms/AA5g7n7');
-            context.telemetry.properties.cancelStep = 'learnHowToContribute';
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
             // Don't wait, no input to wait for anyway
