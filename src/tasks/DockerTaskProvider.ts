@@ -7,13 +7,14 @@ import { CancellationToken, CustomExecution, ProviderResult, Task, TaskProvider 
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { ExecError } from '../utils/spawnAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
-import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 import { dockerTaskEndEventListener } from './DockerTaskEndEventListener';
+import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 
 export abstract class DockerTaskProvider implements TaskProvider {
 
@@ -40,6 +41,9 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                ext.activityMeasurementService.recordActivity('overallnoedit');
+
                 if (!context.folder) {
                     throw new Error(localize('vscode-docker.tasks.provider.noScope', 'Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));
                 }
@@ -51,7 +55,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 await this.executeTaskInternal(context, task);
 
-                dockerTaskEndEventListener.fire({name: task.name, success: true});
+                dockerTaskEndEventListener.fire({ name: task.name, success: true });
             });
         } catch (err) {
             // Errors will not be rethrown, rather it will simply return an error code or 1
@@ -61,7 +65,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.terminal.writeErrorLine(error.message);
             }
 
-            dockerTaskEndEventListener.fire({name: task.name, success: false, error: error.message});
+            dockerTaskEndEventListener.fire({ name: task.name, success: false, error: error.message });
 
             return parseInt(error.errorType, 10) || 1;
         }

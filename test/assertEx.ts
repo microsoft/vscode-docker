@@ -85,3 +85,12 @@ export function assertNotFileContains(filePath: string, text: string): void {
     let contents = fse.readFileSync(filePath).toString();
     assert(contents.indexOf(text) < 0, `Unexpected text '${text}' found in file ${filePath}`);
 }
+
+export function assertSameDate(a: number, b: number): void {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+
+    assert(dateA.getFullYear() === dateB.getFullYear());
+    assert(dateA.getMonth() === dateB.getMonth());
+    assert(dateA.getDate() === dateB.getDate());
+}

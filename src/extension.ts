@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createTelemetryReporter, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerTelemetryHandler, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { LegacyDockerDebugConfigProvider } from './configureWorkspace/LegacyDockerDebugConfigProvider';
@@ -24,9 +24,9 @@ import { ext } from './extensionVariables';
 import { localize } from './localize';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
-import { registerActiveUseSurvey } from './telemetry/surveys/activeUseSurvey';
-import { TelemetryPublisher } from './telemetry/TelemetryPublisher';
-import { TelemetryReporterProxy } from './telemetry/TelemetryReporterProxy';
+import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
+import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
+import { ExperimentationTelemetry } from './telemetry/ExperimentationTelemetry';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
@@ -49,11 +49,14 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 ];
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
+    ext.context = ctx;
+    // When running tests, DEBUGTELEMETRY=1 is used, so nothing is actually sent. Having this be `true` allows us to test `ActivityMeasurementService` and `ExperimentationTelemetry`.
+    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false) || ext.runningTests;
+
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
         ext.ui = new AzureUserInput(ctx.globalState);
     }
-    ext.context = ctx;
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
@@ -62,12 +65,14 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
-    const publisher = new TelemetryPublisher();
-    ctx.subscriptions.push(publisher);
+    // Activity measurement service internally handles telemetry opt-in
+    ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
 
-    ctx.subscriptions.push(registerActiveUseSurvey(publisher, ctx.globalState));
+    // Experimentation service internally handles telemetry opt-in
+    const experimentationTelemetry = new ExperimentationTelemetry();
+    ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
+    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, experimentationTelemetry);
 
-    ext.reporter = new TelemetryReporterProxy(publisher, createTelemetryReporter(ctx));
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
@@ -79,6 +84,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     perfStats.loadEndTime = Date.now();
 
     initializeExtensionVariables(ctx);
+
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
@@ -132,12 +138,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         activateLanguageClient(ctx);
 
-        registerListeners(ctx);
-
-        // NOTE: Temporarily disabled.
-        // Don't wait
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        // nps(ctx.globalState);
+        registerListeners();
     });
 }
 

@@ -85,8 +85,10 @@ export namespace PythonExtensionHelper {
             });
 
             const cleanupListeners = () => {
+                /* eslint-disable no-unused-expressions */
                 listener?.dispose();
                 dockerTaskListener?.dispose();
+                /* eslint-enable no-unused-expressions */
             };
         });
     }
