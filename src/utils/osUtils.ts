@@ -7,7 +7,6 @@ import * as semver from 'semver';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { callDockerodeWithErrorHandling } from './callDockerode';
-import { execAsync } from './spawnAsync';
 
 // Minimum Windows RS3 version number
 const windows10RS3MinVersion = '10.0.16299';
@@ -91,8 +90,14 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
     }
 }
 
-export async function getContainerOSType(containerId: string): Promise<ContainerOSType> {
-    const inspectCmd: string = `docker inspect --format="{{ .Platform}}" ${containerId}`;
-    const execResult = await execAsync(inspectCmd);
-    return execResult.stdout.trim().toLowerCase() === 'windows' ? 'windows' : 'linux';
+export async function getContainerOSType(containerId: string, context: IActionContext): Promise<ContainerOSType> {
+    if (!isWindows()) {
+        // On Linux or macOS, this can only ever be linux,
+        // so short-circuit the Docker call entirely.
+        return "linux";
+    } else {
+        const info = await callDockerodeWithErrorHandling(async () => ext.dockerode.getContainer(containerId).inspect(), context);
+        // eslint-disable-next-line @typescript-eslint/tslint/config
+        return info.Platform === 'windows' ? 'windows' : 'linux'
+    }
 }

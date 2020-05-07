@@ -12,6 +12,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { LocalOSProvider } from '../../utils/LocalOSProvider';
 import { ContainerOSType, getContainerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
@@ -195,7 +196,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
-            const containerOS = await getContainerOSType(containerName);
+            const containerOS = await getContainerOSType(containerName, context.actionContext);
             const osProvider = new LocalOSProvider();
             const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
             debuggerPath = containerOS === 'windows'
@@ -203,7 +204,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 : osProvider.pathJoin(osProvider.os, debuggerDirectory, 'vsdbg');
             const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath, containerOS);
             if (!isDebuggerInstalled) {
-                await this.copyDebuggerToContainer(context, containerName, debuggerDirectory, containerOS);
+                await this.copyDebuggerToContainer(context.actionContext, containerName, debuggerDirectory, containerOS);
             }
         }
 
@@ -292,12 +293,13 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async copyDebuggerToContainer(context: DockerDebugContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOSType): Promise<void> {
+    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOSType): Promise<void> {
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
         if (containerOS === 'windows') {
-            const isolation = await dockerClient.inspectObject(containerName, { format: '{{ .HostConfig.Isolation}}' });
+            const containerInfo = await callDockerodeWithErrorHandling(async () => ext.dockerode.getContainer(containerName).inspect(), context);
+            const isolation = containerInfo.HostConfig.Isolation;
             if (isolation && isolation === 'hyperv') {
-                context.actionContext.errorHandling.suppressReportIssue = true;
+                context.errorHandling.suppressReportIssue = true;
                 throw new Error(localize('vscode-docker.debug.netcore.isolationNotSupported', 'Attaching a debugger to a Hyper-V container is not supported.'));
             }
         }
