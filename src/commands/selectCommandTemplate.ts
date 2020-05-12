@@ -26,8 +26,8 @@ const defaults: { [key in TemplateCommand]: CommandTemplate } = {
     'runInteractive': { label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' },
     'attach': { label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' },
     'logs': { label: 'Docker Logs', template: 'docker logs -f ${containerId}' },
-    'composeUp': { label: 'Compose Up', template: 'docker-compose up ${configurationFile} ${detached} ${build}' },
-    'composeDown': { label: 'Compose Down', template: 'docker-compose down ${configurationFile}' },
+    'composeUp': { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}' },
+    'composeDown': { label: 'Compose Down', template: 'docker-compose ${configurationFile} down' },
     /* eslint-enable no-template-curly-in-string */
 };
 
