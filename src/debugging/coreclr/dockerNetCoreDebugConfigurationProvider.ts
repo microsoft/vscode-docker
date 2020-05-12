@@ -6,6 +6,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { CancellationToken, commands, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, WorkspaceFolder } from 'vscode';
 import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { OSProvider } from '../../utils/LocalOSProvider';
 import { PlatformOS } from '../../utils/platform';
@@ -64,6 +65,8 @@ interface DockerDebugConfiguration extends DebugConfiguration {
 export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurationProvider {
     private static readonly defaultLabels: { [key: string]: string } = { 'com.microsoft.created-by': 'visual-studio-code' };
 
+    private deprecationWarningShown: boolean = false;
+
     public constructor(
         private readonly debugSessionManager: DebugSessionManager,
         private readonly dockerManager: DockerManager,
@@ -107,6 +110,8 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
             // VSCode subsequently will call provideDebugConfigurations which will show an error message
             return null;
         }
+
+        this.deprecationWarning();
 
         const { appFolder, resolvedAppFolder } = await this.inferAppFolder(folder, debugConfiguration);
 
@@ -400,6 +405,28 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
                 '/app/Views': path.join(appFolder, 'Views')
             }
         };
+    }
+
+    private deprecationWarning(): void {
+        if (this.deprecationWarningShown) {
+            return;
+        }
+        this.deprecationWarningShown = true;
+
+        const deprecationMessage = localize('vscode-docker.debug.coreclr.deprecationWarning', 'The `docker-coreclr` debug type has been deprecated. Do you want to upgrade your launch configuration?');
+        const upgrade: MessageItem = {
+            title: localize('vscode-docker.debug.coreclr.upgrade', 'Upgrade'),
+        };
+
+        // Don't wait
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        ext.ui.showWarningMessage(deprecationMessage).then(response => {
+            if (response === upgrade) {
+                // Don't wait
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                commands.executeCommand('vscode-docker.debugging.initializeForDebugging');
+            }
+        });
     }
 }
 
