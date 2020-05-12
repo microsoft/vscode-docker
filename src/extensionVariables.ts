@@ -62,6 +62,7 @@ export namespace ext {
     export let contextsTree: AzExtTreeDataProvider;
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
+    export let isContextSwitchInProgress: boolean = false;
     /**
      * A test-injectable structure defining the current operating system and version
      */

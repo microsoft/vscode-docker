@@ -89,7 +89,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
                 const refreshInterval: number = this.getRefreshInterval();
                 intervalId = setInterval(
                     async () => {
-                        if (window.state.focused && await this.hasChanged()) {
+                        if (window.state.focused && ext.isContextSwitchInProgress !== true && await this.hasChanged()) {
                             await this.refresh();
                         }
                     },
@@ -116,6 +116,10 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             iconPath: getThemedIconPath('info'),
             contextValue: 'dockerNoItems'
         })];
+    }
+
+    public clearPollingCache(): void {
+        this._itemsFromPolling = undefined;
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
@@ -342,7 +346,12 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         let isDockerStatusChanged = false;
 
         try {
-            this._itemsFromPolling = await this.getSortedItems();
+            const pollingItems = await this.getSortedItems();
+            if (ext.isContextSwitchInProgress === true) {
+                this._itemsFromPolling = undefined;
+                return false;
+            }
+            this._itemsFromPolling = pollingItems;
             pollingDockerStatus = 'Running';
         } catch (error) {
             this._itemsFromPolling = undefined;

@@ -5,6 +5,7 @@
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
+import { localize } from "../../localize";
 import { dockerContextManager } from "../../utils/dockerContextManager";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { LocalContextInfo } from "./LocalContextInfo";
@@ -60,6 +61,18 @@ export class ContextTreeItem extends AzExtTreeItem {
     }
 
     public async use(context: IActionContext): Promise<void> {
-        return dockerContextManager.use(this.name);
+        try {
+            ext.isContextSwitchInProgress = true;
+            return this.runWithTemporaryDescription(
+                localize('vscode-docker.tree.context.using', 'Using...'),
+                async () => {
+                    await dockerContextManager.use(this.name);
+                    // The refresh logic will use the cached contexts retrieved by polling (auto refresh logic)
+                    // Since the context is changed, clear the cached contexts, otherwise the old context will be shown as active
+                    ext.contextsRoot.clearPollingCache();
+                });
+        } finally {
+            ext.isContextSwitchInProgress = false;
+        }
     }
 }
