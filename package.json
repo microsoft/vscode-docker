@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.2.0",
+    "version": "1.2.2-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
