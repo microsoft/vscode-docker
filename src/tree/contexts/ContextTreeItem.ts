@@ -8,6 +8,7 @@ import { ext } from "../../extensionVariables";
 import { localize } from "../../localize";
 import { dockerContextManager } from "../../utils/dockerContextManager";
 import { getThemedIconPath, IconPath } from '../IconPath';
+import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { LocalContextInfo } from "./LocalContextInfo";
 
 export class ContextTreeItem extends AzExtTreeItem {
@@ -62,8 +63,8 @@ export class ContextTreeItem extends AzExtTreeItem {
 
     public async use(context: IActionContext): Promise<void> {
         try {
-            ext.isContextSwitchInProgress = true;
-            return this.runWithTemporaryDescription(
+            LocalRootTreeItemBase.autoRefreshViews = false;
+            await this.runWithTemporaryDescription(
                 localize('vscode-docker.tree.context.using', 'Using...'),
                 async () => {
                     await dockerContextManager.use(this.name);
@@ -72,7 +73,7 @@ export class ContextTreeItem extends AzExtTreeItem {
                     ext.contextsRoot.clearPollingCache();
                 });
         } finally {
-            ext.isContextSwitchInProgress = false;
+            LocalRootTreeItemBase.autoRefreshViews = true;
         }
     }
 }

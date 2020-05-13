@@ -54,6 +54,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     public abstract getItems(): Promise<TItem[] | undefined>;
     public abstract getPropertyValue(item: TItem, property: TProperty): string;
 
+    public static autoRefreshViews: boolean = true;
+
     public groupBySetting: TProperty | CommonGroupBy;
     public sortBySetting: CommonSortBy;
     public labelSetting: TProperty;
@@ -70,6 +72,10 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
     public get config(): WorkspaceConfiguration {
         return workspace.getConfiguration(`${configPrefix}.${this.treePrefix}`);
+    }
+
+    private get autoRefreshEnabled(): boolean {
+        return window.state.focused && LocalRootTreeItemBase.autoRefreshViews === true;
     }
 
     protected getRefreshInterval(): number {
@@ -89,8 +95,15 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
                 const refreshInterval: number = this.getRefreshInterval();
                 intervalId = setInterval(
                     async () => {
-                        if (window.state.focused && ext.isContextSwitchInProgress !== true && await this.hasChanged()) {
-                            await this.refresh();
+                        if (this.autoRefreshEnabled && await this.hasChanged()) {
+                            // Auto refresh could be disabled while invoking the hasChaged()
+                            // So check again before starting the refresh.
+                            if (this.autoRefreshEnabled) {
+                                await this.refresh();
+                            } else {
+                                // clear the cache if the this.autoRefreshEnabled is disabled, so the refresh will not use old cached data.
+                                this._itemsFromPolling = undefined;
+                            }
                         }
                     },
                     refreshInterval);
@@ -346,12 +359,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         let isDockerStatusChanged = false;
 
         try {
-            const pollingItems = await this.getSortedItems();
-            if (ext.isContextSwitchInProgress === true) {
-                this._itemsFromPolling = undefined;
-                return false;
-            }
-            this._itemsFromPolling = pollingItems;
+            this._itemsFromPolling = await this.getSortedItems();
             pollingDockerStatus = 'Running';
         } catch (error) {
             this._itemsFromPolling = undefined;
