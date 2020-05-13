@@ -54,6 +54,8 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     public abstract getItems(): Promise<TItem[] | undefined>;
     public abstract getPropertyValue(item: TItem, property: TProperty): string;
 
+    public static autoRefreshViews: boolean = true;
+
     public groupBySetting: TProperty | CommonGroupBy;
     public sortBySetting: CommonSortBy;
     public labelSetting: TProperty;
@@ -70,6 +72,10 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
 
     public get config(): WorkspaceConfiguration {
         return workspace.getConfiguration(`${configPrefix}.${this.treePrefix}`);
+    }
+
+    private get autoRefreshEnabled(): boolean {
+        return window.state.focused && LocalRootTreeItemBase.autoRefreshViews;
     }
 
     protected getRefreshInterval(): number {
@@ -89,8 +95,12 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
                 const refreshInterval: number = this.getRefreshInterval();
                 intervalId = setInterval(
                     async () => {
-                        if (window.state.focused && await this.hasChanged()) {
-                            await this.refresh();
+                        if (this.autoRefreshEnabled && await this.hasChanged()) {
+                            // Auto refresh could be disabled while invoking the hasChanged()
+                            // So check again before starting the refresh.
+                            if (this.autoRefreshEnabled) {
+                                await this.refresh();
+                            }
                         }
                     },
                     refreshInterval);
@@ -118,13 +128,17 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         })];
     }
 
+    public clearPollingCache(): void {
+        this._itemsFromPolling = undefined;
+    }
+
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ext.activityMeasurementService.recordActivity('overallnoedit');
 
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();
-            this._itemsFromPolling = undefined;
+            this.clearPollingCache();
             this.failedToConnect = false;
             this._currentDockerStatus = 'Running';
         } catch (error) {
@@ -345,7 +359,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this._itemsFromPolling = await this.getSortedItems();
             pollingDockerStatus = 'Running';
         } catch (error) {
-            this._itemsFromPolling = undefined;
+            this.clearPollingCache();
             pollingDockerStatus = await dockerInstallStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
             isDockerStatusChanged = pollingDockerStatus !== this._currentDockerStatus;
         }
