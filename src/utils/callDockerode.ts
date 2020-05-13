@@ -12,9 +12,12 @@ import { dockerContextManager } from './dockerContextManager';
 import { CancellationPromiseSource } from './promiseUtils';
 import { refreshDockerode } from './refreshDockerode';
 
+// 20 s timeout for all calls (enough time for a possible Dockerode refresh + the call, but short enough to be UX-reasonable)
+const timeout = 20 * 1000;
+
 let cps: CancellationPromiseSource | undefined;
 
-export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
+export async function callDockerode<T>(dockerodeCallback: () => T, context?: IActionContext): Promise<T> {
     const p = new Promise<T>((resolve, reject) => {
         try {
             const result: T = dockerodeCallback();
@@ -24,32 +27,48 @@ export async function callDockerode<T>(dockerodeCallback: () => T): Promise<T> {
         }
     });
 
-    return callDockerodeAsync(async () => p);
+    return callDockerodeAsync(async () => p, context);
 }
 
-export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>): Promise<T> {
-    // If running tests, don't refresh Dockerode (some tests override Dockerode)
-    if (!ext.runningTests) {
-        const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
-        if (contextChanged) {
-            /* eslint-disable no-unused-expressions */
-            // This will cause any still-awaiting promises to reject with UserCancelledError, and then cps will be recreated
-            cps?.cancel();
-            cps?.dispose();
-            cps = undefined;
-            /* eslint-enable no-unused-expressions */
+export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>, context?: IActionContext): Promise<T> {
+    const timeoutPromise = new CancellationPromiseSource(Error, localize('vscode-docker.utils.dockerode.timeout', 'Request timed out.'));
+    const timer = setTimeout(() => {
+        clearTimeout(timer);
 
-            await refreshDockerode();
+        if (context) {
+            context.errorHandling.suppressReportIssue = true;
         }
-    }
 
-    cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
-    return await Promise.race([dockerodeAsyncCallback(), cps.promise]);
+        timeoutPromise.cancel();
+    }, timeout);
+
+    try {
+        // If running tests, don't refresh Dockerode (some tests override Dockerode)
+        if (!ext.runningTests) {
+            const { Changed: contextChanged } = await dockerContextManager.getCurrentContext();
+            if (contextChanged) {
+                /* eslint-disable no-unused-expressions */
+                // This will cause any still-awaiting promises to reject with UserCancelledError, and then cps will be recreated
+                cps?.cancel();
+                cps?.dispose();
+                cps = undefined;
+                /* eslint-enable no-unused-expressions */
+
+                await refreshDockerode();
+            }
+        }
+
+        cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
+        return await Promise.race([dockerodeAsyncCallback(), cps.promise, timeoutPromise.promise]);
+    } finally {
+        clearTimeout(timer);
+        timeoutPromise.dispose();
+    }
 }
 
 export async function callDockerodeWithErrorHandling<T>(dockerodeCallback: () => Promise<T>, context: IActionContext): Promise<T> {
     try {
-        return await callDockerodeAsync(dockerodeCallback);
+        return await callDockerodeAsync(dockerodeCallback, context);
     } catch (err) {
         context.errorHandling.suppressReportIssue = true;
 
