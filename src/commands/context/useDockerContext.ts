@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
+import { LocalRootTreeItemBase } from '../../tree/LocalRootTreeItemBase';
 
 export async function useDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
     let invokedFromCommandPalette = false;
@@ -19,7 +20,20 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
         invokedFromCommandPalette = true;
     }
 
-    await node.use(actionContext);
+    try {
+        LocalRootTreeItemBase.autoRefreshViews = false;
+        await node.runWithTemporaryDescription(
+            localize('vscode-docker.tree.context.switching', 'Switching...'),
+            async () => {
+                await node.use(actionContext);
+                // The refresh logic will use the cached contexts retrieved by polling (auto refresh logic)
+                // Since the context is changed, clear the cached contexts, otherwise the old context will be shown as active
+                ext.contextsRoot.clearPollingCache();
+            });
+    } finally {
+        LocalRootTreeItemBase.autoRefreshViews = true;
+    }
+
     await ext.contextsRoot.refresh();
 
     if (invokedFromCommandPalette) {
