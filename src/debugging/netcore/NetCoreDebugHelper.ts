@@ -188,7 +188,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     public async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         // TODO: Validate the target container OS and fail debugging
         // Get Container Name if missing
-        const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
+        const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach(context.actionContext);
 
         let debuggerPath: string = debugConfiguration.netCore?.debuggerPath;
 
@@ -323,8 +323,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         return result === 'true';
     }
 
-    private async getContainerNameToAttach(): Promise<string> {
-        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
+    private async getContainerNameToAttach(context: IActionContext): Promise<string> {
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.debug.netcore.noContainers', 'No running containers are available to attach.')
