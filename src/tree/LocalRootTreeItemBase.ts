@@ -100,9 +100,6 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
                             // So check again before starting the refresh.
                             if (this.autoRefreshEnabled) {
                                 await this.refresh();
-                            } else {
-                                // clear the cache if the this.autoRefreshEnabled is disabled, so the refresh will not use old cached data.
-                                this._itemsFromPolling = undefined;
                             }
                         }
                     },
@@ -141,7 +138,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             ext.activityMeasurementService.recordActivity('overallnoedit');
 
             this._currentItems = this._itemsFromPolling || await this.getSortedItems();
-            this._itemsFromPolling = undefined;
+            this.clearPollingCache();
             this.failedToConnect = false;
             this._currentDockerStatus = 'Running';
         } catch (error) {
@@ -362,7 +359,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this._itemsFromPolling = await this.getSortedItems();
             pollingDockerStatus = 'Running';
         } catch (error) {
-            this._itemsFromPolling = undefined;
+            this.clearPollingCache();
             pollingDockerStatus = await dockerInstallStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
             isDockerStatusChanged = pollingDockerStatus !== this._currentDockerStatus;
         }
