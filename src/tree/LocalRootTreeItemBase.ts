@@ -75,7 +75,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
     }
 
     private get autoRefreshEnabled(): boolean {
-        return window.state.focused && LocalRootTreeItemBase.autoRefreshViews === true;
+        return window.state.focused && LocalRootTreeItemBase.autoRefreshViews;
     }
 
     protected getRefreshInterval(): number {
@@ -96,7 +96,7 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
                 intervalId = setInterval(
                     async () => {
                         if (this.autoRefreshEnabled && await this.hasChanged()) {
-                            // Auto refresh could be disabled while invoking the hasChaged()
+                            // Auto refresh could be disabled while invoking the hasChanged()
                             // So check again before starting the refresh.
                             if (this.autoRefreshEnabled) {
                                 await this.refresh();
