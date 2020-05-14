@@ -121,7 +121,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions, progr
 }
 
 export function bufferToString(buffer: Buffer): string {
-    // Node.js treats null bytes as part of the length, which makes everything mad
-    // There's also a trailing newline everything hates, so we'll remove
-    return buffer.toString().replace(/\0/g, '').replace(/\r?\n$/g, '');
+    // Remove non-printing control characters and trailing newlines
+    // eslint-disable-next-line no-control-regex
+    return buffer.toString().replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F]|\r?\n$/g, '');
 }
