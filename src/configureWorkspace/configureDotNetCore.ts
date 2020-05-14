@@ -34,10 +34,10 @@ import { ScaffolderContext, ScaffoldFile } from './scaffolding';
 // This file handles both ASP.NET core and .NET Core Console
 
 // .NET Core 1.0 - 2.0 images are published to Docker Hub Registry.
-const LegacyAspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{0}.{1}{2}";
-const LegacyAspNetCoreSdkImageFormat = "microsoft/aspnetcore-build:{0}.{1}{2}";
-const LegacyDotNetCoreRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-runtime{2}";
-const LegacyDotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
+const LegacyAspNetCoreRuntimeImageFormat = "microsoft/aspnetcore:{1}.{2}{3}";
+const LegacyAspNetCoreSdkImageFormat = "microsoft/aspnetcore-build:{1}.{2}{3}";
+const LegacyDotNetCoreRuntimeImageFormat = "microsoft/dotnet:{1}.{2}-runtime{3}";
+const LegacyDotNetCoreSdkImageFormat = "microsoft/dotnet:{1}.{2}-sdk{3}";
 
 // .NET Core 2.1+ images are now published to Microsoft Container Registry (MCR).
 // .NET Core 5.0+ images do not have "core/" in the name.
