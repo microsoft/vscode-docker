@@ -14,7 +14,7 @@ import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCo
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { LocalOSProvider } from '../../utils/LocalOSProvider';
-import { ContainerOSType, getContainerOSType } from '../../utils/osUtils';
+import { DockerOSType, getDockerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -188,7 +188,6 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     public async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
-        // TODO: Validate the target container OS and fail debugging
         // Get Container Name if missing
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach();
 
@@ -196,7 +195,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
-            const containerOS = await getContainerOSType(containerName, context.actionContext);
+            const containerOS = await getDockerOSType(context.actionContext);
             const osProvider = new LocalOSProvider();
             const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
             debuggerPath = containerOS === 'windows'
@@ -293,7 +292,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOSType): Promise<void> {
+    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: DockerOSType): Promise<void> {
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
         if (containerOS === 'windows') {
             const containerInfo = await callDockerodeWithErrorHandling(async () => ext.dockerode.getContainer(containerName).inspect(), context);
@@ -331,7 +330,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         );
     }
 
-    private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: ContainerOSType): Promise<boolean> {
+    private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
         const osProvider = new LocalOSProvider();
         let command: string;

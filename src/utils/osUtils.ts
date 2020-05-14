@@ -76,7 +76,6 @@ export function isMac(): boolean {
 }
 
 export type DockerOSType = "windows" | "linux";
-export type ContainerOSType = "windows" | "linux";
 
 export async function getDockerOSType(context: IActionContext): Promise<DockerOSType> {
     if (!isWindows()) {
@@ -87,17 +86,5 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
         const info = await callDockerodeWithErrorHandling(async () => ext.dockerode.info(), context);
         // eslint-disable-next-line @typescript-eslint/tslint/config
         return info.OSType;
-    }
-}
-
-export async function getContainerOSType(containerId: string, context: IActionContext): Promise<ContainerOSType> {
-    if (!isWindows()) {
-        // On Linux or macOS, this can only ever be linux,
-        // so short-circuit the Docker call entirely.
-        return "linux";
-    } else {
-        const info = await callDockerodeWithErrorHandling(async () => ext.dockerode.getContainer(containerId).inspect(), context);
-        // eslint-disable-next-line @typescript-eslint/tslint/config
-        return info.Platform === 'windows' ? 'windows' : 'linux'
     }
 }
