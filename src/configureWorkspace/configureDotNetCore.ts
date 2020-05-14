@@ -40,12 +40,13 @@ const LegacyDotNetCoreRuntimeImageFormat = "microsoft/dotnet:{0}.{1}-runtime{2}"
 const LegacyDotNetCoreSdkImageFormat = "microsoft/dotnet:{0}.{1}-sdk{2}";
 
 // .NET Core 2.1+ images are now published to Microsoft Container Registry (MCR).
+// .NET Core 5.0+ images do not have "core/" in the name.
 // https://hub.docker.com/_/microsoft-dotnet-core-runtime/
-const DotNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/core/runtime:{0}.{1}{2}";
+const DotNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/{0}runtime:{1}.{2}{3}";
 // https://hub.docker.com/_/microsoft-dotnet-core-aspnet/
-const AspNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/core/aspnet:{0}.{1}{2}";
+const AspNetCoreRuntimeImageFormat = "mcr.microsoft.com/dotnet/{0}aspnet:{1}.{2}{3}";
 // https://hub.docker.com/_/microsoft-dotnet-core-sdk/
-const DotNetCoreSdkImageFormat = "mcr.microsoft.com/dotnet/core/sdk:{0}.{1}{2}";
+const DotNetCoreSdkImageFormat = "mcr.microsoft.com/dotnet/{0}sdk:{1}.{2}{3}";
 
 function GetWindowsImageTag(): string {
     // The host OS version needs to match the version of .NET core images being created
@@ -69,9 +70,10 @@ function GetWindowsImageTag(): string {
 
 function formatVersion(format: string, version: string, tagForWindowsVersion: string): string {
     let asSemVer = new semver.SemVer(version);
-    return format.replace('{0}', asSemVer.major.toString())
-        .replace('{1}', asSemVer.minor.toString())
-        .replace('{2}', tagForWindowsVersion);
+    return format.replace('{0}', asSemVer.major >= 5 ? '' : 'core/')
+        .replace('{1}', asSemVer.major.toString())
+        .replace('{2}', asSemVer.minor.toString())
+        .replace('{3}', tagForWindowsVersion);
 }
 
 // #region ASP.NET Core templates
