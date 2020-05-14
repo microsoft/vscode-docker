@@ -1,13 +1,13 @@
 
-The Docker extension makes it easy to build, manage, and deploy containerized applications from Visual Studio Code. It also provides one-click debugging for Node.js, Python, and .NET Core.
+## Docker for Visual Studio Code
 
-**Check out the [Working with containers](https://aka.ms/AA7arez) topic on the Visual Studio Code documentation site to get started**.
+[![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/Nightly/vscode-docker-nightly-2?branchName=master)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=22&branchName=master)
+
+The Docker extension makes it easy to build, manage, and deploy containerized applications from Visual Studio Code. It also provides one-click debugging for Node.js, Python, and .NET Core.
 
 ![Docker extension overview](resources/readme/overview.gif)
 
-## Extension info
-
-[![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/Nightly/vscode-docker-nightly-2?branchName=master)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=22&branchName=master)
+**Check out the [Working with containers](https://aka.ms/AA7arez) topic on the Visual Studio Code documentation site to get started**.
 
 [The Docker extension wiki](https://github.com/Microsoft/vscode-docker/wiki) has troubleshooting tips and additional technical information.
 
