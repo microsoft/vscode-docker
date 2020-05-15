@@ -56,11 +56,6 @@ export class PythonDebugHelper implements DebugHelper {
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         const containerName = inferContainerName(debugConfiguration, context, context.folder.name);
-
-        return this.resolveDebugConfigurationInternal(debugConfiguration, containerName, context);
-    }
-
-    private resolveDebugConfigurationInternal(debugConfiguration: PythonDockerDebugConfiguration, containerName: string, context: DockerDebugContext): ResolvedDebugConfiguration {
         const projectType = debugConfiguration.python.projectType;
         const pythonRunTaskOptions = (context.runDefinition as PythonRunTaskDefinition).python;
 

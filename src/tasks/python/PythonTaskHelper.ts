@@ -103,7 +103,7 @@ export class PythonTaskHelper implements TaskHelper {
 
         // User input is honored in all of the below.
         runOptions.volumes = this.inferVolumes(runOptions, launcherFolder);
-        runOptions.entrypoint = runOptions.entrypoint || 'bash';
+        runOptions.entrypoint = runOptions.entrypoint || 'python';
         runOptions.portsPublishAll = runOptions.portsPublishAll || true;
 
         return runOptions;

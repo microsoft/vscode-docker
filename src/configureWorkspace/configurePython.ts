@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import vscode = require('vscode');
 import * as fse from 'fs-extra';
 import * as path from "path";
+import vscode = require('vscode');
 import { TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
