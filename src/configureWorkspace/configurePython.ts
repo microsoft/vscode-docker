@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import vscode = require('vscode');
 import * as fse from 'fs-extra';
 import * as path from "path";
-import vscode = require('vscode');
 import { TelemetryProperties } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../debugging/DockerDebugScaffoldingProvider';
 import { ext } from "../extensionVariables";
 import { localize } from '../localize';
 import { getValidImageName } from '../utils/getValidImageName';
-import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget, inferPythonArgs } from "../utils/pythonUtils";
+import { getPythonProjectType, inferPythonArgs, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget } from "../utils/pythonUtils";
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, quickPickGenerateComposeFiles } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';
