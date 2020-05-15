@@ -12,7 +12,9 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { LocalOSProvider } from '../../utils/LocalOSProvider';
+import { DockerOSType, getDockerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -186,7 +188,6 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     public async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
-        // TODO: Validate the target container OS and fail debugging
         // Get Container Name if missing
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach(context.actionContext);
 
@@ -194,11 +195,15 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
-            const debuggerDirectory = '/remote_debugger';
-            debuggerPath = `${debuggerDirectory}/vsdbg`;
-            const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath);
+            const containerOS = await getDockerOSType(context.actionContext);
+            const osProvider = new LocalOSProvider();
+            const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
+            debuggerPath = containerOS === 'windows'
+                ? osProvider.pathJoin(osProvider.os, debuggerDirectory, 'win7-x64', 'latest', 'vsdbg.exe')
+                : osProvider.pathJoin(osProvider.os, debuggerDirectory, 'vsdbg');
+            const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath, containerOS);
             if (!isDebuggerInstalled) {
-                debuggerPath = await this.copyDebuggerToContainer(containerName, debuggerDirectory);
+                await this.copyDebuggerToContainer(context.actionContext, containerName, debuggerDirectory, containerOS);
             }
         }
 
@@ -287,7 +292,17 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async copyDebuggerToContainer(containerName: string, containerDebuggerDirectory: string): Promise<string> {
+    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: DockerOSType): Promise<void> {
+        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+        if (containerOS === 'windows') {
+            const containerInfo = await callDockerodeWithErrorHandling(async () => ext.dockerode.getContainer(containerName).inspect(), context);
+            const isolation = containerInfo.HostConfig.Isolation;
+            if (isolation && isolation === 'hyperv') {
+                context.errorHandling.suppressReportIssue = true;
+                throw new Error(localize('vscode-docker.debug.netcore.isolationNotSupported', 'Attaching a debugger to a Hyper-V container is not supported.'));
+            }
+        }
+
         const yesItem: MessageItem = DialogResponses.yes;
         const message = localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to copy the debugger to the container?');
         const install = (yesItem === await window.showInformationMessage(message, ...[DialogResponses.yes, DialogResponses.no]));
@@ -295,12 +310,15 @@ export class NetCoreDebugHelper implements DebugHelper {
             throw new UserCancelledError();
         }
 
-        // TODO: Attach doesn't support Windows yet.
-        await this.acquireDebuggers('Linux');
+        if (containerOS === 'windows') {
+            await this.acquireDebuggers('Windows');
+        } else {
+            await this.acquireDebuggers('Linux');
+        }
+
         const hostDebuggerPath = await this.vsDbgClientFactory().getVsDbgFolder();
         const containerDebuggerPath = `${containerName}:${containerDebuggerDirectory}`;
         const outputManager = new DefaultOutputManager(ext.outputChannel);
-        const dockerClient = new CliDockerClient(new ChildProcessProvider());
 
         await outputManager.performOperation(
             localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container...'),
@@ -310,15 +328,20 @@ export class NetCoreDebugHelper implements DebugHelper {
             localize('vscode-docker.debug.netcore.debuggerInstalled', 'Debugger copied'),
             localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to copy the .NET Core debugger.')
         );
-        return `${containerDebuggerDirectory}/vsdbg`;
     }
 
-    private async isDebuggerInstalled(containerName: string, debuggerPath: string): Promise<boolean> {
+    private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
         const osProvider = new LocalOSProvider();
-        const command: string = osProvider.os === 'Windows' ?
-            `/bin/sh -c "if [ -f ${debuggerPath} ]; then echo true; fi;"`
-            : `/bin/sh -c 'if [ -f ${debuggerPath} ]; then echo true; fi;'`
+        let command: string;
+
+        if (containerOS === 'windows') {
+            command = `cmd /C "IF EXIST "${debuggerPath}" (echo true) else (echo false)"`;
+        } else {
+            command = osProvider.os === 'Windows' ?
+                `/bin/sh -c "if [ -f ${debuggerPath} ]; then echo true; fi;"`
+                : `/bin/sh -c 'if [ -f ${debuggerPath} ]; then echo true; fi;'`
+        }
         const result: string = await dockerClient.exec(containerName, command, {});
         return result === 'true';
     }
