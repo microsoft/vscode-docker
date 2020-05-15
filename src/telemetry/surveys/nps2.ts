@@ -12,7 +12,7 @@ const nps2: Survey = {
     url: 'https://microsoft.com', // TODO
     prompt: localize('vscode-docker.survey.nps.prompt', 'Do you mind taking a quick feedback survey about the Docker Extension for VS Code?'),
     activationDelay: 60 * 1000,
-    isEligible: isNPSEligible
+    isEligible: isNPSEligible,
 }
 
 async function isNPSEligible(): Promise<boolean> {
