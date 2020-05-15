@@ -4,13 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-// import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-// import { ActivityType } from '../ActivityMeasurementService';
 import { Survey } from './SurveyManager';
-
-// const sessionThreshold = 10;
-// const sessionType: ActivityType = 'overall';
 
 const nps2: Survey = {
     id: 'nps2',
@@ -21,8 +16,7 @@ const nps2: Survey = {
 }
 
 async function isNPSEligible(): Promise<boolean> {
-    return (vscode.env.language === 'en' || vscode.env.language.startsWith('en-')) /* &&
-        ext.activityMeasurementService.getActivityMeasurement(sessionType).totalSessions >= sessionThreshold */;
+    return vscode.env.language === 'en' || vscode.env.language.startsWith('en-');
 }
 
 export default nps2;
