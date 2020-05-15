@@ -31,15 +31,15 @@ export async function callDockerode<T>(dockerodeCallback: () => T, context?: IAc
 }
 
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>, context?: IActionContext): Promise<T> {
-    const timeoutPromise = new CancellationPromiseSource(Error, localize('vscode-docker.utils.dockerode.timeout', 'Request timed out.'));
-    const timer = setTimeout(() => {
-        clearTimeout(timer);
+    const timeoutPromiseSource = new CancellationPromiseSource(Error, localize('vscode-docker.utils.dockerode.timeout', 'Request timed out.'));
+    const timeoutTimer = setTimeout(() => {
+        clearTimeout(timeoutTimer);
 
         if (context) {
             context.errorHandling.suppressReportIssue = true;
         }
 
-        timeoutPromise.cancel();
+        timeoutPromiseSource.cancel();
     }, timeout);
 
     try {
@@ -59,10 +59,10 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
         }
 
         cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
-        return await Promise.race([dockerodeAsyncCallback(), cps.promise, timeoutPromise.promise]);
+        return await Promise.race([dockerodeAsyncCallback(), cps.promise, timeoutPromiseSource.promise]);
     } finally {
-        clearTimeout(timer);
-        timeoutPromise.dispose();
+        clearTimeout(timeoutTimer);
+        timeoutPromiseSource.dispose();
     }
 }
 
