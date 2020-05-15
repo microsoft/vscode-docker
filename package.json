@@ -2027,12 +2027,14 @@
                 "docker.attachShellCommand.linuxContainer": {
                     "type": "string",
                     "default": "/bin/sh -c \"[ -e /bin/bash ] && /bin/bash || /bin/sh\"",
-                    "description": "%vscode-docker.config.docker.attachShellCommand.linuxContainer%"
+                    "description": "%vscode-docker.config.docker.attachShellCommand.linuxContainer%",
+                    "deprecationMessage": "%vscode-docker.config.deprecated%"
                 },
                 "docker.attachShellCommand.windowsContainer": {
                     "type": "string",
                     "default": "cmd",
-                    "description": "%vscode-docker.config.docker.attachShellCommand.windowsContainer%"
+                    "description": "%vscode-docker.config.docker.attachShellCommand.windowsContainer%",
+                    "deprecationMessage": "%vscode-docker.config.deprecated%"
                 },
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
