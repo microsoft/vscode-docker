@@ -9,11 +9,11 @@ import { IActionContext, parseError, UserCancelledError } from 'vscode-azureexte
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerContextManager } from './dockerContextManager';
-import { CancellationPromiseSource } from './promiseUtils';
+import { CancellationPromiseSource, TimeoutPromiseSource } from './promiseUtils';
 import { refreshDockerode } from './refreshDockerode';
 
 // 20 s timeout for all calls (enough time for a possible Dockerode refresh + the call, but short enough to be UX-reasonable)
-const timeout = 20 * 1000;
+const dockerodeCallTimeout = 20 * 1000;
 
 let cps: CancellationPromiseSource | undefined;
 
@@ -31,16 +31,7 @@ export async function callDockerode<T>(dockerodeCallback: () => T, context?: IAc
 }
 
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>, context?: IActionContext): Promise<T> {
-    const timeoutPromiseSource = new CancellationPromiseSource(Error, localize('vscode-docker.utils.dockerode.timeout', 'Request timed out.'));
-    const timeoutTimer = setTimeout(() => {
-        clearTimeout(timeoutTimer);
-
-        if (context) {
-            context.errorHandling.suppressReportIssue = true;
-        }
-
-        timeoutPromiseSource.cancel();
-    }, timeout);
+    const tps = new TimeoutPromiseSource(dockerodeCallTimeout, context);
 
     try {
         // If running tests, don't refresh Dockerode (some tests override Dockerode)
@@ -59,10 +50,9 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
         }
 
         cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
-        return await Promise.race([dockerodeAsyncCallback(), cps.promise, timeoutPromiseSource.promise]);
+        return await Promise.race([dockerodeAsyncCallback(), cps.promise, tps.promise]);
     } finally {
-        clearTimeout(timeoutTimer);
-        timeoutPromiseSource.dispose();
+        tps.dispose();
     }
 }
 

@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { localize } from '../localize';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -47,5 +48,34 @@ export class CancellationPromiseSource extends vscode.CancellationTokenSource {
     public constructor(errorConstructor?: new (...args: any[]) => Error, ...args: unknown[]) {
         super();
         this.promise = getCancelPromise(this.token, errorConstructor, args);
+    }
+}
+
+export class TimeoutPromiseSource implements vscode.Disposable {
+    private timeoutTimer: NodeJS.Timeout | undefined;
+    private readonly cps: CancellationPromiseSource;
+
+    public constructor(private readonly timeoutMs: number, private readonly context?: IActionContext) {
+        this.cps = new CancellationPromiseSource(Error, localize('vscode-docker.utils.promiseUtils.timeout', 'Request timed out.'));
+    }
+
+    public get promise(): Promise<never> {
+        this.timeoutTimer = setTimeout(() => {
+            if (this.context) {
+                this.context.errorHandling.suppressReportIssue = true;
+            }
+
+            this.cps.cancel();
+        }, this.timeoutMs);
+
+        return this.cps.promise;
+    }
+
+    public dispose(): void {
+        if (this.timeoutTimer) {
+            clearTimeout(this.timeoutTimer);
+        }
+
+        this.cps.dispose();
     }
 }
