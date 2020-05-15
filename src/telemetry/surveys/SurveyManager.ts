@@ -42,7 +42,7 @@ export class SurveyManager {
 
     private async executeSurvey(survey: Survey): Promise<void> {
         try {
-            if (this.showPrompt(survey)) {
+            if (await this.shouldShowPrompt(survey)) {
                 await callWithTelemetryAndErrorHandling('surveyResponse', async (context: IActionContext) => {
                     context.telemetry.properties.surveyId = survey.id;
 
@@ -71,7 +71,7 @@ export class SurveyManager {
         return result === take;
     }
 
-    private async showPrompt(survey: Survey): Promise<boolean> {
+    private async shouldShowPrompt(survey: Survey): Promise<boolean> {
         return ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false) !== true &&
             await survey.isEligible() &&
             await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
