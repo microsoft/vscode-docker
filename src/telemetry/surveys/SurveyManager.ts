@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import nps2 from './nps2';
+import { nps2 } from './nps2';
 
 // Currently-active surveys should be registered here
 const currentSurveys = [nps2];
