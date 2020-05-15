@@ -9,7 +9,7 @@ import { Survey } from './SurveyManager';
 
 export const nps2: Survey = {
     id: 'nps2',
-    url: 'https://microsoft.com', // TODO
+    url: 'https://aka.ms/vscodedockernpsinproduct',
     prompt: localize('vscode-docker.survey.nps.prompt', 'Do you mind taking a quick feedback survey about the Docker Extension for VS Code?'),
     activationDelay: 60 * 1000,
     isEligible: isNPSEligible,
