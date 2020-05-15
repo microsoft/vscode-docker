@@ -11,7 +11,7 @@ export const nps2: Survey = {
     id: 'nps2',
     url: 'https://aka.ms/vscodedockernpsinproduct',
     prompt: localize('vscode-docker.survey.nps.prompt', 'Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
-    activationDelay: 60 * 1000,
+    activationDelayMs: 60 * 1000,
     isEligible: isNPSEligible,
 }
 

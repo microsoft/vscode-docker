@@ -19,7 +19,7 @@ export interface Survey {
     id: string;
     url: string;
     prompt: string;
-    activationDelay: number;
+    activationDelayMs: number;
     isEligible(): Promise<boolean>;
 }
 
@@ -35,7 +35,7 @@ export class SurveyManager {
                     clearTimeout(timer);
                     await this.executeSurvey(survey);
                 },
-                survey.activationDelay
+                survey.activationDelayMs
             );
         }
     }
