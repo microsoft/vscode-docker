@@ -31,7 +31,12 @@ export async function callDockerode<T>(dockerodeCallback: () => T, context?: IAc
 }
 
 export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promise<T>, context?: IActionContext): Promise<T> {
-    const tps = new TimeoutPromiseSource(dockerodeCallTimeout, context);
+    const tps = new TimeoutPromiseSource(dockerodeCallTimeout);
+    const evt = tps.onTimeout(() => {
+        if (context) {
+            context.errorHandling.suppressReportIssue = true;
+        }
+    });
 
     try {
         // If running tests, don't refresh Dockerode (some tests override Dockerode)
@@ -52,6 +57,7 @@ export async function callDockerodeAsync<T>(dockerodeAsyncCallback: () => Promis
         cps = cps ?? new CancellationPromiseSource(UserCancelledError, localize('vscode-docker.utils.dockerode.contextChanged', 'The Docker context has changed.'));
         return await Promise.race([dockerodeAsyncCallback(), cps.promise, tps.promise]);
     } finally {
+        evt.dispose();
         tps.dispose();
     }
 }
