@@ -3,10 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as os from 'os';
-import { DockerContainerExtraHost } from '../../debugging/coreclr/CliDockerClient';
 import { PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
-import LocalOSProvider from '../../utils/LocalOSProvider';
 import { inferPythonArgs } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
@@ -108,7 +105,6 @@ export class PythonTaskHelper implements TaskHelper {
         runOptions.volumes = this.inferVolumes(runOptions, launcherFolder);
         runOptions.entrypoint = runOptions.entrypoint || 'python';
         runOptions.portsPublishAll = runOptions.portsPublishAll || true;
-        runOptions.extraHosts = this.addInternalHostForLinuxHosts(runOptions.extraHosts);
 
         return runOptions;
     }
@@ -129,28 +125,6 @@ export class PythonTaskHelper implements TaskHelper {
         dbgVolumes.map(dbgVol => { addVolumeWithoutConflicts(volumes, dbgVol) });
 
         return volumes;
-    }
-
-    private addInternalHostForLinuxHosts(extraHosts: DockerContainerExtraHost[]) : DockerContainerExtraHost[] {
-        const osProvider = new LocalOSProvider();
-
-        if (osProvider.os != 'Linux') return [];
-
-        const hosts = extraHosts ? [...extraHosts] : [];
-        if (!hosts.find(h => h.hostname == 'host.docker.internal')) {
-            const interfaces = os.networkInterfaces() || [];
-            const dockerBridgeIp = 'docker0' in interfaces &&
-                                   interfaces['docker0'].length > 0 ? interfaces['docker0'][0].address : undefined;
-
-            if (dockerBridgeIp) {
-                hosts.push({
-                    hostname: 'host.docker.internal',
-                    ip: dockerBridgeIp
-                });
-            }
-        }
-
-        return hosts;
     }
 }
 

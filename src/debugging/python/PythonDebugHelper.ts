@@ -6,7 +6,10 @@
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
+import LocalOSProvider from '../../utils/LocalOSProvider';
 import { PythonProjectType } from '../../utils/pythonUtils';
+import ChildProcessProvider from '../coreclr/ChildProcessProvider';
+import CliDockerClient from '../coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
@@ -87,10 +90,10 @@ export class PythonDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             debugLauncherPath: debugConfiguration.debugLauncherPath || launcherPath,
-            debugAdapterHost: debugConfiguration.debugAdapterHost || 'localhost',
+            debugAdapterHost: debugConfiguration.debugAdapterHost || await this.getDebugAdapterHost(),
             console: debugConfiguration.console || "integratedTerminal",
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
-            module: debugConfiguration.module ||  pythonRunTaskOptions.module,
+            module: debugConfiguration.module || pythonRunTaskOptions.module,
             program: debugConfiguration.file || pythonRunTaskOptions.file,
             redirectOutput: debugConfiguration.redirectOutput || true,
             args: args,
@@ -107,6 +110,23 @@ export class PythonDebugHelper implements DebugHelper {
             default:
                 return undefined;
         }
+    }
+
+    private async getDebugAdapterHost(): Promise<string> {
+        const osProvider = new LocalOSProvider();
+
+        if (osProvider.os != 'Linux') return 'localhost';
+
+        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+        const dockerBridgeIp = await dockerClient.inspectObject('bridge', {
+            format: '{{(index .IPAM.Config 0).Gateway}}'
+        });
+
+        if (dockerBridgeIp) {
+            return dockerBridgeIp;
+        }
+
+        return undefined;
     }
 }
 
