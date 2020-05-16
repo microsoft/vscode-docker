@@ -87,7 +87,7 @@ export class PythonDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             debugLauncherPath: debugConfiguration.debugLauncherPath || launcherPath,
-            debugAdapterHost: debugConfiguration.debugAdapterHost || "host.docker.internal",
+            debugAdapterHost: debugConfiguration.debugAdapterHost || 'localhost',
             console: debugConfiguration.console || "integratedTerminal",
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
             module: debugConfiguration.module ||  pythonRunTaskOptions.module,

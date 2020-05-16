@@ -8,6 +8,8 @@ import os, sys
 containerId = sys.argv[-1]
 args = sys.argv[1:-1]
 
-print("docker exec -d " + containerId + " python /pydbg/debugpy/launcher " + ' '.join(args))
+launcherPort = args[0]
+args[0] = 'host.docker.internal:' + launcherPort
 
+print("docker exec -d " + containerId + " python /pydbg/debugpy/launcher " + ' '.join(args))
 os.execvp('docker', ['docker', 'exec', '-d', containerId, 'python', '/pydbg/debugpy/launcher'] + args)

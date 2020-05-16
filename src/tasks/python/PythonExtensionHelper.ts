@@ -7,6 +7,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import * as semver from 'semver';
 import * as vscode from "vscode";
 import { localize } from '../../localize';
 
@@ -19,6 +20,8 @@ export namespace PythonExtensionHelper {
 
     export async function getLauncherFolderPath(): Promise<string> {
         const pyExtensionId = 'ms-python.python';
+        const minPyExtensionVersion = new semver.SemVer('2020.5.78807');
+
         const pyExt = vscode.extensions.getExtension(pyExtensionId);
         const button = localize('vscode-docker.tasks.pythonExt.openExtension', 'Open Extension');
 
@@ -29,6 +32,13 @@ export namespace PythonExtensionHelper {
                 await vscode.commands.executeCommand('extension.open', pyExtensionId);
             }
 
+            return undefined;
+        }
+
+        const version = new semver.SemVer(pyExt.packageJSON.version);
+
+        if (version.compare(minPyExtensionVersion) == -1) {
+            await vscode.window.showErrorMessage(localize('vscode-docker.tasks.pythonExt.pythonExtensionNotSupported', 'The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
             return undefined;
         }
 
