@@ -27,6 +27,7 @@ import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
 import { ExperimentationTelemetry } from './telemetry/ExperimentationTelemetry';
+import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { Keytar } from './utils/keytar';
@@ -72,6 +73,9 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     const experimentationTelemetry = new ExperimentationTelemetry();
     ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
     ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, experimentationTelemetry);
+
+    // Survey manager internally handles telemetry opt-in
+    (new SurveyManager()).activate();
 
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
