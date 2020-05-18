@@ -194,7 +194,7 @@
     "vscode-docker.commands.images.inspect": "Inspect",
     "vscode-docker.commands.images.prune": "Prune...",
     "vscode-docker.commands.images.pull": "Pull",
-    "vscode-docker.commands.images.push": "Push",
+    "vscode-docker.commands.images.push": "Push...",
     "vscode-docker.commands.images.refresh": "Refresh",
     "vscode-docker.commands.images.remove": "Remove...",
     "vscode-docker.commands.images.run": "Run",
