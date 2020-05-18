@@ -115,18 +115,20 @@ export class PythonDebugHelper implements DebugHelper {
     private async getDebugAdapterHost(): Promise<string> {
         const osProvider = new LocalOSProvider();
 
-        if (osProvider.os != 'Linux') return 'localhost';
+        // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
+        // we use 'host.docker.internal' in the launcher to get the host's ip address.
+        if (osProvider.os != 'Linux') {
+            return 'localhost';
+        }
 
+        // For Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
+        // on the bridge network's ip address (predefined network).
         const dockerClient = new CliDockerClient(new ChildProcessProvider());
         const dockerBridgeIp = await dockerClient.inspectObject('bridge', {
             format: '{{(index .IPAM.Config 0).Gateway}}'
         });
 
-        if (dockerBridgeIp) {
-            return dockerBridgeIp;
-        }
-
-        return undefined;
+        return dockerBridgeIp;
     }
 }
 

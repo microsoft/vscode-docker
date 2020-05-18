@@ -8,10 +8,13 @@ import os, sys
 containerId = sys.argv[-1]
 args = sys.argv[1:-1]
 
+# If the adapterHost is only a port number, then append the default DNS name 'host.docker.internal'
 adapterHost = args[0]
 
-if ':' not in adapterHost:
+if adapterHost.isnumeric():
     args[0] = 'host.docker.internal:' + adapterHost
 
-print("docker exec -d " + containerId + " python /pydbg/debugpy/launcher " + ' '.join(args))
-os.execvp('docker', ['docker', 'exec', '-d', containerId, 'python', '/pydbg/debugpy/launcher'] + args)
+dockerExecArgs = ['docker', 'exec', '-d', containerId, 'python', '/pydbg/debugpy/launcher'] + args
+
+print(' '.join(dockerExecArgs))
+os.execvp('docker', dockerExecArgs)
