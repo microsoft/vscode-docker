@@ -115,14 +115,13 @@ export class PythonTaskHelper implements TaskHelper {
         }
 
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];
-        const dbgVolumes: DockerContainerVolume[] = [
-            {
+        const dbgVolume: DockerContainerVolume = {
                 localPath: launcherFolder,
                 containerPath: '/pydbg',
                 permissions: 'ro'
-            }];
+        };
 
-        dbgVolumes.map(dbgVol => { addVolumeWithoutConflicts(volumes, dbgVol) });
+        addVolumeWithoutConflicts(volumes, dbgVolume);
 
         return volumes;
     }
