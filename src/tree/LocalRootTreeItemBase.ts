@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, registerEvent } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IParsedError, parseError, registerEvent } from "vscode-azureextensionui";
 import { showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
@@ -146,12 +146,14 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
             this.failedToConnect = true;
             context.telemetry.properties.failedToConnect = 'true';
 
+            const parsedError = parseError(error);
+
             if (!this._currentDockerStatus) {
                 this._currentDockerStatus = await dockerInstallStatusProvider.isDockerInstalled() ? 'Installed' : 'NotInstalled';
             }
 
             this.showDockerInstallNotificationIfNeeded();
-            return this.getDockerErrorTreeItems(context, error, this._currentDockerStatus === 'Installed');
+            return this.getDockerErrorTreeItems(context, parsedError, this._currentDockerStatus === 'Installed');
         }
 
         if (this._currentItems.length === 0) {
@@ -325,10 +327,11 @@ export abstract class LocalRootTreeItemBase<TItem extends ILocalItem, TProperty 
         }
     }
 
-    private getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): AzExtTreeItem[] {
+    private getDockerErrorTreeItems(context: IActionContext, error: IParsedError, dockerInstalled: boolean): AzExtTreeItem[] {
         const result: AzExtTreeItem[] = dockerInstalled
             ? [
                 new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is Docker running?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
+                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunningError', '  Error: {0}', error.message), contextValue: 'dockerConnectionError' }),
                 new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
             ]
             : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is Docker installed?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') })];

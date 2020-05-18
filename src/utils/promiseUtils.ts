@@ -5,6 +5,8 @@
 
 import * as vscode from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
+import { Disposable } from 'vscode-languageclient';
+import { localize } from '../localize';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -26,8 +28,7 @@ export async function delay(ms: number, token?: vscode.CancellationToken): Promi
     });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getCancelPromise(token: vscode.CancellationToken, errorConstructor?: new (...args: any[]) => Error, ...args: any[]): Promise<never> {
+export async function getCancelPromise(token: vscode.CancellationToken, errorConstructor?: new (...args: unknown[]) => Error, ...args: unknown[]): Promise<never> {
     return new Promise((resolve, reject) => {
         const disposable = token.onCancellationRequested(() => {
             disposable.dispose();
@@ -45,8 +46,41 @@ export class CancellationPromiseSource extends vscode.CancellationTokenSource {
     public readonly promise: Promise<never>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public constructor(errorConstructor?: new (...args: any[]) => Error, ...args: any[]) {
+    public constructor(errorConstructor?: new (...args: any[]) => Error, ...args: unknown[]) {
         super();
         this.promise = getCancelPromise(this.token, errorConstructor, args);
+    }
+}
+
+export class TimeoutPromiseSource implements vscode.Disposable {
+    private timeoutTimer: NodeJS.Timeout | undefined;
+    private readonly cps: CancellationPromiseSource;
+    private readonly emitter: vscode.EventEmitter<void>
+
+    public constructor(private readonly timeoutMs: number) {
+        this.cps = new CancellationPromiseSource(Error, localize('vscode-docker.utils.promiseUtils.timeout', 'Request timed out.'));
+        this.emitter = new vscode.EventEmitter<void>();
+    }
+
+    public onTimeout(callback: () => void): Disposable {
+        return this.emitter.event(callback);
+    }
+
+    public get promise(): Promise<never> {
+        this.timeoutTimer = setTimeout(() => {
+            this.emitter.fire();
+            this.cps.cancel();
+        }, this.timeoutMs);
+
+        return this.cps.promise;
+    }
+
+    public dispose(): void {
+        if (this.timeoutTimer) {
+            clearTimeout(this.timeoutTimer);
+        }
+
+        this.cps.dispose();
+        this.emitter.dispose();
     }
 }
