@@ -25,7 +25,7 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
             const version = extensionVersion.value ?? '1';
             let targetPopulation: tas.TargetPopulation;
 
-            if (ext.runningTests || process.env.DEBUGTELEMETRY) {
+            if (ext.runningTests || process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
                 targetPopulation = tas.TargetPopulation.Team;
             } else if (/alpha/ig.test(version)) {
                 targetPopulation = tas.TargetPopulation.Insiders;
