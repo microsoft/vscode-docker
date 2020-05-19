@@ -199,8 +199,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             const osProvider = new LocalOSProvider();
             const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
             debuggerPath = containerOS === 'windows'
-                ? osProvider.pathJoin(osProvider.os, debuggerDirectory, 'win7-x64', 'latest', 'vsdbg.exe')
-                : osProvider.pathJoin(osProvider.os, debuggerDirectory, 'vsdbg');
+                ? osProvider.pathJoin('Windows', debuggerDirectory, 'win7-x64', 'latest', 'vsdbg.exe')
+                : osProvider.pathJoin('Linux', debuggerDirectory, 'vsdbg');
             const isDebuggerInstalled: boolean = await this.isDebuggerInstalled(containerName, debuggerPath, containerOS);
             if (!isDebuggerInstalled) {
                 await this.copyDebuggerToContainer(context.actionContext, containerName, debuggerDirectory, containerOS);
