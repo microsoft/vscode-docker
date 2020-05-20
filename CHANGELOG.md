@@ -1,3 +1,8 @@
+## 1.2.1 - 26 May 2020
+### Fixed
+* When changing contexts, UI is more responsive and clear. [#1965](https://github.com/microsoft/vscode-docker/issues/1965)
+* .NET 5 images are published in a new repository. [#1973](https://github.com/microsoft/vscode-docker/issues/1973)
+
 ## 1.2.0 - 11 May 2020
 Requires Visual Studio Code 1.44 or higher.
 

@@ -52,7 +52,7 @@ export class ContextTreeItem extends AzExtTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await dockerContextManager.remove(this.name);
+        return dockerContextManager.remove(this.name);
     }
 
     public async inspect(context: IActionContext): Promise<string> {

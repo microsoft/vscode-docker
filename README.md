@@ -1,10 +1,10 @@
-## Docker for Visual Studio Code
+## Docker for Visual Studio Code  [![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/Nightly/vscode-docker-nightly-2?branchName=master)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=22&branchName=master)
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/ms-azuretools.vscode-docker.svg)](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) [![Build Status](https://dev.azure.com/ms-azuretools/AzCode/_apis/build/status/Nightly/vscode-docker-nightly-2?branchName=master)](https://dev.azure.com/ms-azuretools/AzCode/_build/latest?definitionId=22&branchName=master)
+The Docker extension makes it easy to build, manage, and deploy containerized applications from Visual Studio Code. It also provides one-click debugging of Node.js, Python, and .NET Core inside a container.
 
-The Docker extension makes it easy to build, manage and deploy containerized applications from Visual Studio Code.
+![Docker extension overview](resources/readme/overview.gif)
 
-**Check out [Working with containers](https://aka.ms/AA7arez) topic on Visual Studio Code documentation site to get started**.
+**Check out the [Working with containers](https://aka.ms/AA7arez) topic on the Visual Studio Code documentation site to get started**.
 
 [The Docker extension wiki](https://github.com/Microsoft/vscode-docker/wiki) has troubleshooting tips and additional technical information.
 
@@ -78,7 +78,7 @@ An image in an Azure Container Registry can be deployed to Azure App Service dir
 
 ### Debugging services running inside a container
 
-You can debug services built using .NET (C#) and Node.js that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://aka.ms/AA7arfb)  and [Extension Properties and Tasks](https://aka.ms/AA7ay8l) pages.
+You can debug services built using Node.js, Python, or .NET (C#) that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://aka.ms/AA7arfb)  and [Extension Properties and Tasks](https://aka.ms/AA7ay8l) pages.
 
 ### Azure CLI integration
 
