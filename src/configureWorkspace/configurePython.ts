@@ -12,7 +12,7 @@ import { dockerDebugScaffoldingProvider, PythonScaffoldingOptions } from '../deb
 import { ext } from "../extensionVariables";
 import { localize } from '../localize';
 import { getValidImageName } from '../utils/getValidImageName';
-import { getPythonProjectType, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget, inferPythonArgs } from "../utils/pythonUtils";
+import { getPythonProjectType, inferPythonArgs, PythonDefaultPorts, PythonFileExtension, PythonFileTarget, PythonModuleTarget, PythonProjectType, PythonTarget } from "../utils/pythonUtils";
 import { getComposePorts, getExposeStatements } from './configure';
 import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, quickPickGenerateComposeFiles } from './configUtils';
 import { ScaffolderContext, ScaffoldFile } from './scaffolding';

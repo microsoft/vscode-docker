@@ -118,16 +118,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration.dockerOptions
             && (resolvedConfiguration.dockerOptions.removeContainerAfterDebug === undefined || resolvedConfiguration.dockerOptions.removeContainerAfterDebug)
             && resolvedConfiguration.dockerOptions.containerName) {
-
-            // Since Python is a special case as we handle waiting for the debugger to be ready while resolving
-            // the launch configuration, and since this method comes later then we shouldn't remove a container
-            // that we just created.
-            // TODO: this needs to be removed as soon as the Python extension adds a way to retry while connecting to a remote debugger.
-            if (resolvedConfiguration.type !== 'python') {
-                try {
-                    await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
-                } catch { }
-            }
+            try {
+                await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
+            } catch { }
 
             // Now register the container for removal after the debug session ends
             const disposable = debug.onDidTerminateDebugSession(async session => {
