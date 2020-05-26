@@ -154,19 +154,28 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
 }
 
 async function getDockerInstallationID(): Promise<string> {
-    let result: string = 'unknown';
-    let installIdFilePath: string | undefined;
-    if (os.platform() === 'win32' && process.env.APPDATA) {
-        installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
-    } else if (os.platform() === 'darwin') {
-        installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
+    if (os.platform() === 'win32' || os.platform() === 'darwin') {
+        const cached = ext.context.globalState.get<string | undefined>('docker.installId', undefined);
+
+        if (cached) {
+            return cached;
+        }
+
+        let installIdFilePath: string | undefined;
+        if (os.platform() === 'win32' && process.env.APPDATA) {
+            installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
+        } else if (os.platform() === 'darwin') {
+            installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
+        }
+
+        if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
+            const result = bufferToString(await fse.readFile(installIdFilePath));
+            await ext.context.globalState.update('docker.installId', result);
+            return result;
+        }
     }
 
-    if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
-        result = bufferToString(await fse.readFile(installIdFilePath));
-    }
-
-    return result;
+    return 'unknown';
 }
 
 /**
