@@ -85,6 +85,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)
             .withNamedArg('--network', runOptions.network)
+            .withNamedArg('--user', runOptions.user)
             .withNamedArg('--network-alias', runOptions.networkAlias)
             .withKeyValueArgs('-e', runOptions.env)
             .withArrayArgs('--env-file', runOptions.envFiles)
