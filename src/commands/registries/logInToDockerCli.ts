@@ -47,7 +47,8 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                     if (err && err.message.match(/error storing credentials.*The stub received bad data/)) {
                         // Temporary work-around for this error- same as Azure CLI
                         // See https://github.com/Azure/azure-cli/issues/4843
-                        reject(new Error(localize('vscode-docker.commands.registries.logIn.dockerCliTokens', 'In order to log in to the Docker CLI using tokens, you currently need to go to \nOpen your Docker config file and remove "credsStore": "wincred" from the config.json file, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be effectly logged out.')));
+                        context.errorHandling.suppressReportIssue = true;
+                        reject(new Error(localize('vscode-docker.commands.registries.logIn.dockerCliTokens', 'In order to log in to the Docker CLI using tokens, you currently need to go to your Docker config file and remove `"credsStore": "wincred"`, then try again. \nDoing this will disable wincred and cause Docker to store credentials directly in the .docker/config.json file. All registries that are currently logged in will be logged out.')));
                     } else if (err) {
                         reject(err);
                     } else {
