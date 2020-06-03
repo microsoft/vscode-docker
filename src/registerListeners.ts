@@ -6,6 +6,7 @@
 import { TextDocument, workspace } from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
 import { ext } from './extensionVariables';
+import { awarenessToast } from './telemetry/awarenessToast';
 
 let lastUploadTime: number = 0;
 const hourInMilliseconds = 1000 * 60 * 60;
@@ -22,8 +23,11 @@ export function registerListeners(): void {
             lastUploadTime = Date.now();
             context.telemetry.properties.lineCount = doc.lineCount.toString();
 
+            await ext.activityMeasurementService.recordActivity('overall');
+
+            // Don't wait
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ext.activityMeasurementService.recordActivity('overall');
+            awarenessToast();
         });
     }
 }
