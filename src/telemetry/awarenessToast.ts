@@ -34,10 +34,10 @@ export async function awarenessToast(): Promise<void> {
             const response = await vscode.window.showInformationMessage(message, button);
 
             if (response === button) {
-                context.telemetry.properties.toastResponse = 'true';
+                context.telemetry.properties.awarenessToastResponse = 'true';
                 await vscode.env.openExternal(link);
             } else {
-                context.telemetry.properties.toastResponse = 'false';
+                context.telemetry.properties.awarenessToastResponse = 'false';
             }
         }
     });
