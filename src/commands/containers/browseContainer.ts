@@ -59,6 +59,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
     if (!node) {
+        await ext.containersTree.refresh();
         node = await captureBrowseCancelStep('node', telemetryProperties, async () =>
             ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
                 ...context,

@@ -20,6 +20,7 @@ export async function runImageInteractive(context: IActionContext, node?: ImageT
 
 async function runImageCore(context: IActionContext, node: ImageTreeItem | undefined, interactive: boolean): Promise<void> {
     if (!node) {
+        await ext.imagesTree.refresh();
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.images.run.noImages', 'No images are available to run')
