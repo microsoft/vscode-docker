@@ -9,6 +9,8 @@ import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
 const awarenessToastShownKey = 'vscode-docker.awarenessToast.shown';
+const minimumOverallSessions = 3;
+const maximumNotEditOnlySessions = 0;
 
 // TODO: text and link
 const message = localize('vscode-docker.telemetry.awarenessToast.message', 'Do you want to learn more about the capabilities of the Docker extension?');
@@ -22,9 +24,7 @@ export async function awarenessToast(): Promise<void> {
     }
 
     await callWithTelemetryAndErrorHandling('awarenessToast', async (context: IActionContext) => {
-        const overallActivity = ext.activityMeasurementService.getActivityMeasurement('overall');
-        const noEditActivity = ext.activityMeasurementService.getActivityMeasurement('overallnoedit');
-        const eligible = overallActivity.totalSessions >= 3 && noEditActivity.totalSessions === 0;
+        const eligible = isEligible();
 
         context.telemetry.properties.awarenessToastEligible = eligible.toString();
 
@@ -41,4 +41,11 @@ export async function awarenessToast(): Promise<void> {
             }
         }
     });
+}
+
+function isEligible(): boolean {
+    const overallActivity = ext.activityMeasurementService.getActivityMeasurement('overall');
+    const noEditActivity = ext.activityMeasurementService.getActivityMeasurement('overallnoedit');
+
+    return overallActivity.totalSessions >= minimumOverallSessions && noEditActivity.totalSessions <= maximumNotEditOnlySessions;
 }
