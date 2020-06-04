@@ -36,6 +36,11 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
             for (const key of props.keys()) {
                 context.telemetry.properties[key] = props.get(key);
             }
+
+            // Treat the TAS query event as activation
+            if (/query-expfeature/i.test(eventName)) {
+                context.telemetry.properties.isActivationEvent = 'true';
+            }
         }).then(() => { }, () => { }); // Best effort
     }
 
