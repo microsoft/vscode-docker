@@ -11,6 +11,7 @@ import { selectLogsCommand } from '../selectCommandTemplate';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
+        await ext.containersTree.refresh();
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.containers.viewLogs.noContainers', 'No containers are available to view logs')
