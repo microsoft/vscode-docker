@@ -21,7 +21,7 @@ export let configureNode: IPlatformGeneratorInfo = {
 function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
     let exposeStatements = getExposeStatements(ports);
 
-    return `FROM node:10.13-alpine
+    return `FROM node:12.18-alpine
 ENV NODE_ENV production
 WORKDIR /usr/src/app
 COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]

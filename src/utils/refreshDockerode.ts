@@ -30,6 +30,10 @@ export async function refreshDockerode(): Promise<void> {
         async (actionContext: IActionContext) => {
 
             try {
+                // docker-context.initialize should be treated as an activation event
+                // So, if ext.dockerode is defined, it's docker-context.change (not activation); else docker-context.initialize (activation)
+                actionContext.telemetry.properties.isActivationEvent = ext.dockerode ? 'false' : 'true';
+
                 // If the docker.dockerodeOptions setting is present, use it only
                 const config = workspace.getConfiguration('docker');
                 const overrideDockerodeOptions = config.get('dockerodeOptions');

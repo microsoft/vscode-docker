@@ -420,7 +420,7 @@ export class DockerNetCoreDebugConfigurationProvider implements DebugConfigurati
 
         // Don't wait
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        ext.ui.showWarningMessage(deprecationMessage).then(response => {
+        ext.ui.showWarningMessage(deprecationMessage, upgrade).then(response => {
             if (response === upgrade) {
                 // Don't wait
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises

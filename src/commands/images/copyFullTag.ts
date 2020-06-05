@@ -11,6 +11,7 @@ import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 
 export async function copyFullTag(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
     if (!node) {
+        await ext.imagesTree.refresh();
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.images.copyFullTag.noImages', 'No images are available to copy tag')

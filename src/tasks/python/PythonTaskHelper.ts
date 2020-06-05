@@ -3,14 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
-import * as path from 'path';
 import { PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
-import { getTempDirectoryPath, inferPythonArgs, PythonDefaultDebugPort, PythonTarget } from '../../utils/pythonUtils';
+import { inferPythonArgs } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
-import { DockerContainerPort, DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
+import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from "../TaskHelper";
 import { PythonExtensionHelper } from "./PythonExtensionHelper";
@@ -92,23 +90,7 @@ export class PythonTaskHelper implements TaskHelper {
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
         // tslint:disable no-unsafe-any
-        const helperOptions: PythonTaskRunOptions = runDefinition.python || {};
         const runOptions: DockerRunOptions = runDefinition.dockerRun;
-
-        const target: PythonTarget = helperOptions.file
-            ? { file: helperOptions.file, }
-            : { module: helperOptions.module };
-
-        const launcherCommand: string = PythonExtensionHelper.getRemotePtvsdCommand(
-            target,
-            helperOptions.args,
-            {
-                host: '0.0.0.0',
-                port: helperOptions.debugPort || PythonDefaultDebugPort,
-                wait: helperOptions.wait === undefined ? true : helperOptions.wait
-            }
-        );
-
         const launcherFolder: string = await PythonExtensionHelper.getLauncherFolderPath();
 
         runOptions.image = inferImageName(
@@ -119,72 +101,29 @@ export class PythonTaskHelper implements TaskHelper {
 
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
 
-        const tempDir = await getTempDirectoryPath();
-        const dbgLogsFolder = path.join(tempDir, context.folder.name);
-
-        // The debugger will complain if the logs directory does not exist.
-        if (!(await fse.pathExists(dbgLogsFolder))) {
-            await fse.emptyDir(dbgLogsFolder);
-        }
-
         // User input is honored in all of the below.
-        runOptions.volumes = this.inferVolumes(runOptions, launcherFolder, dbgLogsFolder);
-        runOptions.ports = this.inferPorts(runOptions, helperOptions);
+        runOptions.volumes = this.inferVolumes(runOptions, launcherFolder);
         runOptions.entrypoint = runOptions.entrypoint || 'python';
-        runOptions.command = runOptions.command || launcherCommand;
-
-        runOptions.env = this.addDebuggerEnvironmentVars(runOptions.env);
         runOptions.portsPublishAll = runOptions.portsPublishAll || true;
 
         return runOptions;
     }
 
-    private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string, dbgLogsFolder: string): DockerContainerVolume[] {
-        if (!launcherFolder || !dbgLogsFolder) {
+    private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
+        if (!launcherFolder) {
             return;
         }
 
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];
-        const dbgVolumes: DockerContainerVolume[] = [
-            {
+        const dbgVolume: DockerContainerVolume = {
                 localPath: launcherFolder,
                 containerPath: '/pydbg',
                 permissions: 'ro'
-            },
-            {
-                localPath: dbgLogsFolder,
-                containerPath: '/dbglogs',
-                permissions: 'rw'
-            }];
+        };
 
-        dbgVolumes.map(dbgVol => { addVolumeWithoutConflicts(volumes, dbgVol) });
+        addVolumeWithoutConflicts(volumes, dbgVolume);
 
         return volumes;
-    }
-
-    private inferPorts(runOptions: DockerRunOptions, pythonOptions: PythonTaskRunOptions): DockerContainerPort[] {
-        const ports: DockerContainerPort[] = runOptions?.ports ? [...runOptions.ports] : [];
-        const debugPort = pythonOptions.debugPort || PythonDefaultDebugPort;
-
-        if (ports.find(port => port.containerPort === debugPort) === undefined) {
-            ports.push({
-                containerPort: debugPort,
-                hostPort: debugPort
-            });
-        }
-
-        return ports;
-    }
-
-    private addDebuggerEnvironmentVars(env: { [key: string]: string }): { [key: string]: string } {
-        env = env ?? {};
-        const debuggerVars = PythonExtensionHelper.getDebuggerEnvironmentVars();
-
-        Object.keys(debuggerVars).map(varName => {
-            env[varName] = debuggerVars[varName];
-        });
-
-        return env;
     }
 }
 

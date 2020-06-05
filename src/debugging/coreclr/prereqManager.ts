@@ -52,7 +52,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
         //       As this extension targets Docker in general and not .NET Core in particular, we don't want the
         //       extension as a whole to depend on it.  Hence, we only check for its existence if/when asked to
         //       debug .NET Core in Docker containers.
-        const dependenciesSatisfied = this.getExtension('ms-vscode.csharp') !== undefined;
+        const dependenciesSatisfied = this.getExtension('ms-vscode.csharp') !== undefined || this.getExtension('ms-dotnettools.csharp') !== undefined;
 
         if (!dependenciesSatisfied) {
             const openExtensionInGallery: vscode.MessageItem = {
@@ -66,7 +66,7 @@ export class DotNetExtensionInstalledPrerequisite implements Prerequisite {
                     openExtensionInGallery)
                 .then(result => {
                     if (result === openExtensionInGallery) {
-                        this.browserClient.openBrowser('https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp');
+                        this.browserClient.openBrowser('https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp');
                     }
                 });
         }
