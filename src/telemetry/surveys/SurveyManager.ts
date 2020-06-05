@@ -47,6 +47,7 @@ export class SurveyManager {
             if (await this.shouldShowPrompt(survey)) {
                 await callWithTelemetryAndErrorHandling('surveyResponse', async (context: IActionContext) => {
                     context.telemetry.properties.surveyId = survey.id;
+                    context.telemetry.properties.isActivationEvent = 'true';
 
                     const response = await this.surveyPrompt(survey);
                     context.telemetry.properties.surveyResponse = response.toString();
