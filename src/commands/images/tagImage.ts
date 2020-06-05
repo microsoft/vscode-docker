@@ -15,6 +15,7 @@ import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
     if (!node) {
+        await ext.imagesTree.refresh();
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.images.tag.noImages', 'No images are available to tag')
