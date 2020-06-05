@@ -67,8 +67,8 @@ export class SurveyManager {
     private async surveyPrompt(survey: Survey): Promise<boolean> {
         await ext.context.globalState.update(`${surveyRespondedKeyPrefix}.${survey.id}`, true);
 
-        const take = survey.buttons?.[0] || localize('vscode-docker.survey.nps.take', 'Take Survey');
-        const never = survey.buttons?.[1] || localize('vscode-docker.survey.nps.never', 'Don\'t Ask Again');
+        const take = survey.buttons?.[0] || localize('vscode-docker.survey.nps.take', 'Take survey');
+        const never = survey.buttons?.[1] || localize('vscode-docker.survey.nps.never', 'Don\'t ask again');
         const result = await vscode.window.showInformationMessage(survey.prompt, take, never);
 
         return result === take;
