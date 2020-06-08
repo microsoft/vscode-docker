@@ -741,6 +741,13 @@
                                             "flask",
                                             "general"
                                         ]
+                                    },
+                                    "args": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.debug.python.args%",
+                                        "items": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
