@@ -28,6 +28,7 @@ export interface PythonDebugOptions {
     projectType?: PythonProjectType;
     django?: boolean;
     jinja?: boolean;
+    args?: string[];
 }
 
 export interface PythonDockerDebugConfiguration extends DockerDebugConfigurationBase {
@@ -72,7 +73,7 @@ export class PythonDebugHelper implements DebugHelper {
                 },
                 true);
 
-        const args = [...debugConfiguration.args || pythonRunTaskOptions.args || [], containerName];
+        const args = [...debugConfiguration.python.args || pythonRunTaskOptions.args || [], containerName];
         const launcherPath = path.join(ext.context.asAbsolutePath('resources'), 'python', 'launcher.py');
 
         return {
@@ -117,7 +118,7 @@ export class PythonDebugHelper implements DebugHelper {
 
         // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
         // we use 'host.docker.internal' in the launcher to get the host's ip address.
-        if (osProvider.os != 'Linux') {
+        if (osProvider.os !== 'Linux') {
             return 'localhost';
         }
 

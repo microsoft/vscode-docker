@@ -35,6 +35,7 @@ export namespace PythonExtensionHelper {
             return undefined;
         }
 
+        // eslint-disable-next-line @typescript-eslint/tslint/config
         const version = new semver.SemVer(pyExt.packageJSON.version);
 
         if (version.compare(minPyExtensionVersion) < 0) {
