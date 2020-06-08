@@ -1,3 +1,18 @@
+## 1.3.0 - 15 June 2020
+### Added
+* .NET Core attach support added for Windows containers. [#1662](https://github.com/microsoft/vscode-docker/issues/1662)
+
+### Fixed
+* Explorer no longer needs to be opened for palette commands to work. [#2029](https://github.com/microsoft/vscode-docker/issues/2029)
+* Node base image scaffolded has been updated to latest LTS. [#2037](https://github.com/microsoft/vscode-docker/pull/2037)
+* Python debugging now uses debugpy instead of ptvsd, fixing several issues and improving reliability. [#1831](https://github.com/microsoft/vscode-docker/issues/1831), [#1879](https://github.com/microsoft/vscode-docker/issues/1879)
+* A custom `docker-compose up` command with no match no longer produces incorrect commands. [#1954](https://github.com/microsoft/vscode-docker/issues/1954)
+* Explorer is more responsive when trying to connect to an unreachable SSH host. [#1947](https://github.com/microsoft/vscode-docker/issues/1947)
+
+### Deprecated
+* The `docker.attachShellCommand.Windows` and `docker.attachShellCommand.Linux` settings have been deprecated and will be removed in the future. [Command customization](https://code.visualstudio.com/docs/containers/reference#_command-customization) replaces this functionality. [#1980](https://github.com/microsoft/vscode-docker/issues/1980)
+* The `docker-coreclr` launch configuration has been deprecated and will be removed in the future. [The `docker` configuration replaces this](https://code.visualstudio.com/docs/containers/debug-common). [#1380](https://github.com/microsoft/vscode-docker/issues/1380)
+
 ## 1.2.1 - 26 May 2020
 ### Fixed
 * When changing contexts, UI is more responsive and clear. [#1965](https://github.com/microsoft/vscode-docker/issues/1965)
