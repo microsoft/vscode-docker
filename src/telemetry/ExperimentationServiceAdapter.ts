@@ -40,6 +40,11 @@ export class ExperimentationServiceAdapter implements IExperimentationServiceAda
                 reporter,
                 globalState,
             );
+
+            // Calling this will ensure the TAS web request is made and a telemetry event with flighting info is fired for (nearly) every session
+            // Don't wait on it though
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.wrappedExperimentationService.isFlightEnabledAsync('vscode-docker.dummy');
         } catch { } // Best effort
     }
 
