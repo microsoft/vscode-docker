@@ -2662,7 +2662,7 @@
         "vscode-azureextensionui": "^0.31.2",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^4.1.2",
-        "vscode-tas-client": "^0.0.757",
+        "vscode-tas-client": "^0.0.864",
         "xml2js": "^0.4.23"
     }
 }

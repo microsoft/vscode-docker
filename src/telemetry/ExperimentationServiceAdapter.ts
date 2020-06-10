@@ -14,38 +14,37 @@ export interface IExperimentationServiceAdapter {
 }
 
 export class ExperimentationServiceAdapter implements IExperimentationServiceAdapter {
-    private readonly wrappedExperimentationService: IExperimentationService;
+    private wrappedExperimentationService: IExperimentationService;
 
-    public constructor(globalState: vscode.Memento, reporter: tas.IExperimentationTelemetry) {
-        if (!ext.telemetryOptIn) {
-            return;
+    private constructor() { }
+
+    public static async create(globalState: vscode.Memento, reporter: tas.IExperimentationTelemetry): Promise<IExperimentationServiceAdapter> {
+        const result = new ExperimentationServiceAdapter();
+
+        if (ext.telemetryOptIn) {
+            try {
+                const version = extensionVersion.value ?? '1';
+                let targetPopulation: tas.TargetPopulation;
+
+                if (ext.runningTests || process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
+                    targetPopulation = tas.TargetPopulation.Team;
+                } else if (/alpha/ig.test(version)) {
+                    targetPopulation = tas.TargetPopulation.Insiders;
+                } else {
+                    targetPopulation = tas.TargetPopulation.Public;
+                }
+
+                result.wrappedExperimentationService = await tas.getExperimentationServiceAsync(
+                    extensionId,
+                    version,
+                    targetPopulation,
+                    reporter,
+                    globalState,
+                );
+            } catch { } // Best effort
         }
 
-        try {
-            const version = extensionVersion.value ?? '1';
-            let targetPopulation: tas.TargetPopulation;
-
-            if (ext.runningTests || process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
-                targetPopulation = tas.TargetPopulation.Team;
-            } else if (/alpha/ig.test(version)) {
-                targetPopulation = tas.TargetPopulation.Insiders;
-            } else {
-                targetPopulation = tas.TargetPopulation.Public;
-            }
-
-            this.wrappedExperimentationService = tas.getExperimentationService(
-                extensionId,
-                version,
-                targetPopulation,
-                reporter,
-                globalState,
-            );
-
-            // Calling this will ensure the TAS web request is made and a telemetry event with flighting info is fired for (nearly) every session
-            // Don't wait on it though
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.wrappedExperimentationService.isFlightEnabledAsync('vscode-docker.dummy');
-        } catch { } // Best effort
+        return result;
     }
 
     public async isFlightEnabled(flight: string): Promise<boolean> {
