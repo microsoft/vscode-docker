@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.2.2-alpha",
+    "version": "1.3.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -741,6 +741,13 @@
                                             "flask",
                                             "general"
                                         ]
+                                    },
+                                    "args": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.debug.python.args%",
+                                        "items": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
@@ -2655,7 +2662,7 @@
         "vscode-azureextensionui": "^0.31.2",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^4.1.2",
-        "vscode-tas-client": "^0.0.757",
+        "vscode-tas-client": "^0.0.864",
         "xml2js": "^0.4.23"
     }
 }

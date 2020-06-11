@@ -16,5 +16,7 @@ if adapterHost.isnumeric():
 
 dockerExecArgs = ['docker', 'exec', '-d', containerId, 'python', '/pydbg/debugpy/launcher'] + args
 
-print(' '.join(dockerExecArgs))
-os.execvp('docker', dockerExecArgs)
+command = ' '.join(dockerExecArgs)
+
+print(command)
+os.system(command)

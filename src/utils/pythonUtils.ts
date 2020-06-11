@@ -39,8 +39,8 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
                 'run',
                 '--no-debugger',
                 '--no-reload',
-                '--host 0.0.0.0',
-                `--port ${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
+                '--host', '0.0.0.0',
+                '--port', `${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
             ]
         default:
             return undefined;

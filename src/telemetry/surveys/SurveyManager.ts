@@ -7,10 +7,11 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { awareness } from './awareness';
 import { nps2 } from './nps2';
 
 // Currently-active surveys should be registered here
-const currentSurveys = [nps2];
+const currentSurveys = [nps2, awareness];
 
 const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
 const surveyFlightPrefix = 'vscode-docker.surveys';
@@ -19,6 +20,7 @@ export interface Survey {
     id: string;
     url: string;
     prompt: string;
+    buttons?: string[];
     activationDelayMs: number;
     isEligible(): Promise<boolean>;
 }
@@ -45,6 +47,7 @@ export class SurveyManager {
             if (await this.shouldShowPrompt(survey)) {
                 await callWithTelemetryAndErrorHandling('surveyResponse', async (context: IActionContext) => {
                     context.telemetry.properties.surveyId = survey.id;
+                    context.telemetry.properties.isActivationEvent = 'true';
 
                     const response = await this.surveyPrompt(survey);
                     context.telemetry.properties.surveyResponse = response.toString();
@@ -64,8 +67,8 @@ export class SurveyManager {
     private async surveyPrompt(survey: Survey): Promise<boolean> {
         await ext.context.globalState.update(`${surveyRespondedKeyPrefix}.${survey.id}`, true);
 
-        const take = localize('vscode-docker.survey.nps.take', 'Take Survey');
-        const never = localize('vscode-docker.survey.nps.never', 'Don\'t Ask Again');
+        const take = survey.buttons?.[0] || localize('vscode-docker.survey.nps.take', 'Take survey');
+        const never = survey.buttons?.[1] || localize('vscode-docker.survey.nps.never', 'Don\'t ask again');
         const result = await vscode.window.showInformationMessage(survey.prompt, take, never);
 
         return result === take;
