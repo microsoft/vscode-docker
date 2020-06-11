@@ -9,7 +9,7 @@ import * as eslint from 'gulp-eslint';
 import * as sourcemaps from 'gulp-sourcemaps';
 import * as ts from 'gulp-typescript';
 import * as os from 'os';
-import * as path from 'path';
+//import * as path from 'path';
 import * as vsce from 'vsce';
 import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
 
@@ -44,11 +44,11 @@ function testTaskFactory(unitTestsOnly: boolean) {
         env.NODE_OPTIONS = '';
     }
     env.DEBUGTELEMETRY = '1';
-    env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
+    //env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.MOCHA_grep = unitTestsOnly ? '\\(unit\\)' : '';
     env.MOCHA_timeout = String(10 * 1000);
-    env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    return cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+    //env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
+    return cp.spawn('node', ['./dist/test/runTests.js'], { stdio: 'inherit', env });
 }
 
 function allTestsTask() {
