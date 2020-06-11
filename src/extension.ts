@@ -83,15 +83,11 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
         activateContext.telemetry.properties.dockerInstallationID = await getDockerInstallationID();
 
-        // Activity measurement service internally handles telemetry opt-in
+        // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
-
-        // Experimentation service internally handles telemetry opt-in
         const experimentationTelemetry = new ExperimentationTelemetry();
         ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
         ext.experimentationService = await ExperimentationServiceAdapter.create(ctx.globalState, experimentationTelemetry);
-
-        // Survey manager internally handles telemetry opt-in
         (new SurveyManager()).activate();
 
         validateOldPublisher(activateContext);
