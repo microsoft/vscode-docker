@@ -48,10 +48,15 @@ export class SurveyManager {
                 context.telemetry.properties.surveyId = survey.id;
                 context.telemetry.properties.isActivationEvent = 'true';
 
-                const eligibility = await this.eligibilityCheck(survey);
-                context.telemetry.properties.surveyEligibility = eligibility;
+                const responded = ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false);
+                const eligible = await survey.isEligible();
+                const flighted = await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
 
-                return eligibility === 'eligible';
+                context.telemetry.properties.surveyResponded = responded.toString();
+                context.telemetry.properties.surveyEligible = eligible.toString();
+                context.telemetry.properties.surveyFlighted = flighted.toString();
+
+                return !responded && eligible && flighted;
             });
 
             if (shouldShowPrompt) {
@@ -82,17 +87,5 @@ export class SurveyManager {
         const result = await vscode.window.showInformationMessage(survey.prompt, take, never);
 
         return result === take;
-    }
-
-    private async eligibilityCheck(survey: Survey): Promise<'responded' | 'ineligible' | 'notflighted' | 'eligible'> {
-        if (ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false)) {
-            return 'responded';
-        } else if (await survey.isEligible() === false) {
-            return 'ineligible';
-        } else if (await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`) === false) {
-            return 'notflighted';
-        }
-
-        return 'eligible';
     }
 }
