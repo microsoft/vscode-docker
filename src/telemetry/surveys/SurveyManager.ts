@@ -44,7 +44,17 @@ export class SurveyManager {
 
     private async executeSurvey(survey: Survey): Promise<void> {
         try {
-            if (await this.shouldShowPrompt(survey)) {
+            const shouldShowPrompt: boolean = await callWithTelemetryAndErrorHandling('surveyCheck', async (context: IActionContext) => {
+                context.telemetry.properties.surveyId = survey.id;
+                context.telemetry.properties.isActivationEvent = 'true';
+
+                const eligibility = await this.eligibilityCheck(survey);
+                context.telemetry.properties.surveyEligibility = eligibility;
+
+                return eligibility === 'eligible';
+            });
+
+            if (shouldShowPrompt) {
                 await callWithTelemetryAndErrorHandling('surveyResponse', async (context: IActionContext) => {
                     context.telemetry.properties.surveyId = survey.id;
                     context.telemetry.properties.isActivationEvent = 'true';
@@ -74,9 +84,15 @@ export class SurveyManager {
         return result === take;
     }
 
-    private async shouldShowPrompt(survey: Survey): Promise<boolean> {
-        return ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false) !== true &&
-            await survey.isEligible() &&
-            await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
+    private async eligibilityCheck(survey: Survey): Promise<'responded' | 'ineligible' | 'notflighted' | 'eligible'> {
+        if (ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false)) {
+            return 'responded';
+        } else if (await survey.isEligible() === false) {
+            return 'ineligible';
+        } else if (await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`) === false) {
+            return 'notflighted';
+        }
+
+        return 'eligible';
     }
 }
