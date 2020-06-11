@@ -30,6 +30,9 @@ export async function refreshDockerode(): Promise<void> {
         async (actionContext: IActionContext) => {
 
             try {
+                // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
+                actionContext.telemetry.properties.isActivationEvent = 'true';
+
                 // If the docker.dockerodeOptions setting is present, use it only
                 const config = workspace.getConfiguration('docker');
                 const overrideDockerodeOptions = config.get('dockerodeOptions');

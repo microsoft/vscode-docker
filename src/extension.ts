@@ -66,17 +66,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.terminalProvider = new DefaultTerminalProvider();
     }
 
-    // Activity measurement service internally handles telemetry opt-in
-    ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
-
-    // Experimentation service internally handles telemetry opt-in
-    const experimentationTelemetry = new ExperimentationTelemetry();
-    ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
-    ext.experimentationService = new ExperimentationServiceAdapter(ctx.globalState, experimentationTelemetry);
-
-    // Survey manager internally handles telemetry opt-in
-    (new SurveyManager()).activate();
-
     if (!ext.keytar) {
         ext.keytar = Keytar.tryCreate();
     }
@@ -93,6 +82,13 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
         activateContext.telemetry.properties.dockerInstallationID = await getDockerInstallationID();
+
+        // All of these internally handle telemetry opt-in
+        ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
+        const experimentationTelemetry = new ExperimentationTelemetry();
+        ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
+        ext.experimentationService = await ExperimentationServiceAdapter.create(ctx.globalState, experimentationTelemetry);
+        (new SurveyManager()).activate();
 
         validateOldPublisher(activateContext);
 

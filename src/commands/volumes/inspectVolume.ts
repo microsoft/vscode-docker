@@ -12,6 +12,7 @@ import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectVolume(context: IActionContext, node?: VolumeTreeItem): Promise<void> {
     if (!node) {
+        await ext.volumesTree.refresh();
         node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.volumes.inspect.noVolumes', 'No volumes are available to inspect') });
     }
 
