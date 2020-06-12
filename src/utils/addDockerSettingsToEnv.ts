@@ -8,14 +8,14 @@ import { configPrefix } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
-export function addDockerSettingsToEnv(env: {}, oldEnv: {}): void {
+export function addDockerSettingsToEnv(env: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
     addDockerSettingToEnv("host", 'DOCKER_HOST', env, oldEnv);
     addDockerSettingToEnv("certPath", 'DOCKER_CERT_PATH', env, oldEnv);
     addDockerSettingToEnv("tlsVerify", 'DOCKER_TLS_VERIFY', env, oldEnv);
     addDockerSettingToEnv("machineName", 'DOCKER_MACHINE_NAME', env, oldEnv);
 }
 
-function addDockerSettingToEnv(settingKey: string, envVar: string, env: {}, oldEnv: {}): void {
+function addDockerSettingToEnv(settingKey: string, envVar: string, env: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
     const value = workspace.getConfiguration(configPrefix).get<string>(settingKey, '');
 
     const expectedType = "string";

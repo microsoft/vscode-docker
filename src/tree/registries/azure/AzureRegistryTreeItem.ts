@@ -62,7 +62,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         return this.registryId;
     }
 
-    public get properties(): {} {
+    public get properties(): unknown {
         return this._registry;
     }
 

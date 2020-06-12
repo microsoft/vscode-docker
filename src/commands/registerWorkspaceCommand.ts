@@ -86,7 +86,7 @@ function updateExtensionKind(newKind: string): void {
     const config: WorkspaceConfiguration = workspace.getConfiguration();
     const values = config.inspect(settingKey);
     let target: ConfigurationTarget;
-    let value: {};
+    let value: unknown;
 
     // If the setting is already defined as a workspace setting - overwrite that
     if (typeof values.workspaceValue === 'object' && values.workspaceValue !== null && values.workspaceValue[extensionId]) {
