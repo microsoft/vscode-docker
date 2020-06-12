@@ -58,7 +58,7 @@ export class ContainerTreeItem extends AzExtTreeItem {
      * They add a context menu item "Attach Visual Studio Code" to our container nodes that relies on containerDesc
      * https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
      */
-    public get containerDesc(): {} {
+    public get containerDesc(): unknown {
         return this._item.data;
     }
 

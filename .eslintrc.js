@@ -19,7 +19,6 @@ module.exports = {
         "@typescript-eslint/array-type": "error",
         "@typescript-eslint/await-thenable": "error",
         "@typescript-eslint/ban-types": "error",
-        "@typescript-eslint/class-name-casing": "error",
         "@typescript-eslint/consistent-type-assertions": "off",
         "@typescript-eslint/consistent-type-definitions": "off",
         "@typescript-eslint/explicit-member-accessibility": [

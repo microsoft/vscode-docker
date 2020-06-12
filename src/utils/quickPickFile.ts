@@ -45,7 +45,7 @@ function getDockerComposeFileGlobPatterns(): string[] {
 function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[] {
     const result: string[] = globPatterns;
     try {
-        const config = vscode.workspace.getConfiguration('files').get<{}>('associations');
+        const config = vscode.workspace.getConfiguration('files').get<unknown>('associations');
         if (config) {
             for (const globPattern of Object.keys(config)) {
                 const fileType = <string | undefined>config[globPattern];

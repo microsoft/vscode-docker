@@ -50,7 +50,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         return !!this._nextLink;
     }
 
-    public get properties(): {} {
+    public get properties(): unknown {
         return nonNullValue(this._task, '_task');
     }
 
