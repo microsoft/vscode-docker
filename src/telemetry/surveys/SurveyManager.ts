@@ -27,7 +27,7 @@ export interface Survey {
 
 export class SurveyManager {
     public activate(): void {
-        if (!ext.telemetryOptIn) {
+        if (!ext.telemetryOptIn || ext.runningTests) {
             return;
         }
 
@@ -44,7 +44,22 @@ export class SurveyManager {
 
     private async executeSurvey(survey: Survey): Promise<void> {
         try {
-            if (await this.shouldShowPrompt(survey)) {
+            const shouldShowPrompt: boolean = await callWithTelemetryAndErrorHandling('surveyCheck', async (context: IActionContext) => {
+                context.telemetry.properties.surveyId = survey.id;
+                context.telemetry.properties.isActivationEvent = 'true';
+
+                const responded = ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false);
+                const eligible = await survey.isEligible();
+                const flighted = await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
+
+                context.telemetry.properties.surveyResponded = responded.toString();
+                context.telemetry.properties.surveyEligible = eligible.toString();
+                context.telemetry.properties.surveyFlighted = flighted.toString();
+
+                return !responded && eligible && flighted;
+            });
+
+            if (shouldShowPrompt) {
                 await callWithTelemetryAndErrorHandling('surveyResponse', async (context: IActionContext) => {
                     context.telemetry.properties.surveyId = survey.id;
                     context.telemetry.properties.isActivationEvent = 'true';
@@ -72,11 +87,5 @@ export class SurveyManager {
         const result = await vscode.window.showInformationMessage(survey.prompt, take, never);
 
         return result === take;
-    }
-
-    private async shouldShowPrompt(survey: Survey): Promise<boolean> {
-        return ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false) !== true &&
-            await survey.isEligible() &&
-            await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
     }
 }
