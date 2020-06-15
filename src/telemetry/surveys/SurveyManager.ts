@@ -15,6 +15,7 @@ const currentSurveys = [nps2, awareness];
 
 const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
 const surveyFlightPrefix = 'vscode-docker.surveys';
+const lastToastedSessionKey = 'vscode-docker.surveys.lastSession';
 
 export interface Survey {
     id: string;
@@ -48,15 +49,17 @@ export class SurveyManager {
                 context.telemetry.properties.surveyId = survey.id;
                 context.telemetry.properties.isActivationEvent = 'true';
 
+                const alreadyToasted = ext.context.globalState.get<string>(lastToastedSessionKey) === vscode.env.sessionId;
                 const responded = ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false);
                 const eligible = await survey.isEligible();
                 const flighted = await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
 
+                context.telemetry.properties.surveyAlreadyToasted = alreadyToasted.toString();
                 context.telemetry.properties.surveyResponded = responded.toString();
                 context.telemetry.properties.surveyEligible = eligible.toString();
                 context.telemetry.properties.surveyFlighted = flighted.toString();
 
-                return !responded && eligible && flighted;
+                return !alreadyToasted && !responded && eligible && flighted;
             });
 
             if (shouldShowPrompt) {
@@ -81,6 +84,7 @@ export class SurveyManager {
 
     private async surveyPrompt(survey: Survey): Promise<boolean> {
         await ext.context.globalState.update(`${surveyRespondedKeyPrefix}.${survey.id}`, true);
+        await ext.context.globalState.update(lastToastedSessionKey, vscode.env.sessionId);
 
         const take = survey.buttons?.[0] || localize('vscode-docker.survey.nps.take', 'Take survey');
         const never = survey.buttons?.[1] || localize('vscode-docker.survey.nps.never', 'Don\'t ask again');
