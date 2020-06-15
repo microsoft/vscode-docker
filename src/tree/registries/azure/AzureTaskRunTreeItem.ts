@@ -64,7 +64,7 @@ export class AzureTaskRunTreeItem extends AzExtTreeItem {
         return getThemedIconPath(icon);
     }
 
-    public get properties(): {} {
+    public get properties(): unknown {
         return this._run;
     }
 

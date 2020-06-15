@@ -21,6 +21,6 @@ export async function inspectNetwork(context: IActionContext, node?: NetworkTree
 
     const network: Network = await node.getNetwork()
     // eslint-disable-next-line @typescript-eslint/tslint/config
-    const inspectInfo: {} = await callDockerodeWithErrorHandling(async () => network.inspect(), context); // inspect is missing type in @types/dockerode
+    const inspectInfo: unknown = await callDockerodeWithErrorHandling(async () => network.inspect(), context); // inspect is missing type in @types/dockerode
     await openReadOnlyJson(node, inspectInfo);
 }
