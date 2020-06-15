@@ -7,8 +7,8 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
-export async function executeAsTask(context: IActionContext, command: string, name: string, addDockerEnv?: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string): Promise<vscode.TaskExecution> {
-    let newEnv: { [key: string]: string } | undefined;
+export async function executeAsTask(context: IActionContext, command: string, name: string, addDockerEnv: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string): Promise<vscode.TaskExecution> {
+    let newEnv: NodeJS.ProcessEnv | undefined;
 
     if (addDockerEnv) {
         // We don't need to merge process.env into newEnv, since ShellExecution does that automatically via ShellExecutionOptions
