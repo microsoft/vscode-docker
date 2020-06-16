@@ -2057,6 +2057,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.showRemoteWorkspaceWarning%"
+                },
+                "docker.checkForOutdatedImages": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.checkForOutdatedImages%"
                 }
             }
         },

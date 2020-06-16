@@ -6,6 +6,7 @@
 import { Image } from 'dockerode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
+import { localize } from '../../localize';
 import { callDockerode, callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { ILocalImageInfo } from './LocalImageInfo';
@@ -41,10 +42,14 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public get description(): string | undefined {
-        return ext.imagesRoot.getTreeItemDescription(this._item);
+        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
     }
 
     public get iconPath(): IconPath {
+        if (this._item.outdated) {
+            return getThemedIconPath('statusWarning');
+        }
+
         let icon: string;
         switch (ext.imagesRoot.labelSetting) {
             case 'Tag':

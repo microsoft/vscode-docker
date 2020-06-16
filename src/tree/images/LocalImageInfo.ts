@@ -13,6 +13,7 @@ export interface ILocalImageInfo extends ILocalItem {
     fullTag: string;
     imageId: string;
     repoDigests?: string[];
+    outdated?: boolean;
 }
 
 /**
@@ -21,6 +22,7 @@ export interface ILocalImageInfo extends ILocalItem {
 export class LocalImageInfo implements ILocalImageInfo {
     public data: ImageInfo;
     public fullTag: string;
+    public outdated: boolean = false;
     public constructor(data: ImageInfo, fullTag: string) {
         this.data = data;
         this.fullTag = fullTag;

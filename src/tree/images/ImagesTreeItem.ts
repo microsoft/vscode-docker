@@ -14,8 +14,11 @@ import { ImageGroupTreeItem } from './ImageGroupTreeItem';
 import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
 import { ILocalImageInfo, LocalImageInfo } from "./LocalImageInfo";
+import { OutdatedImageChecker } from "./OutdatedImageChecker";
 
 export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, ImageProperty> {
+    private readonly outdatedImageChecker: OutdatedImageChecker = new OutdatedImageChecker();
+
     public treePrefix: string = 'images';
     public label: string = localize('vscode-docker.tree.images.label', 'Images');
     public configureExplorerTitle: string = localize('vscode-docker.tree.images.configure', 'Configure images explorer');
@@ -60,6 +63,8 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, Image
                 }
             }
         }
+
+        await this.outdatedImageChecker.markOutdatedImages(result);
 
         return result;
     }
