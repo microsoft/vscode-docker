@@ -12,7 +12,7 @@
 			],
 			"env": {
 				"AZCODE_DOCKER_IGNORE_BUNDLE": "1",
-				"DEBUGTELEMETRY": "1"
+				"DEBUGTELEMETRY": "v"
 			},
 			"stopOnEntry": false,
 			"sourceMaps": true,

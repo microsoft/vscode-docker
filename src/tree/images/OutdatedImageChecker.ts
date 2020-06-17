@@ -6,6 +6,7 @@
 import { Response } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { callDockerodeAsync } from '../../utils/callDockerode';
@@ -14,6 +15,8 @@ import { IOAuthContext } from '../registries/auth/IAuthProvider';
 import { getWwwAuthenticateContext } from '../registries/auth/oAuthUtils';
 import { getImagePropertyValue } from './ImageProperties';
 import { ILocalImageInfo } from './LocalImageInfo';
+
+const noneRegex = /<none>/i;
 
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
@@ -32,9 +35,15 @@ export class OutdatedImageChecker {
     public async markOutdatedImages(images: ILocalImageInfo[]): Promise<void> {
         if (this.shouldLoad) {
             this.shouldLoad = false;
-            try {
+
+            // Don't wait
+            void callWithTelemetryAndErrorHandling('outdatedImageCheck', async (context: IActionContext) => {
+                context.errorHandling.suppressReportIssue = true;
+                context.errorHandling.suppressDisplay = true;
+
                 const imageCheckPromises = images
                     .filter(image => {
+                        // Only include images that are potentially in docker.io/library (no private or other public registries are supported)
                         return /docker[.]io\/library/i.test(getImagePropertyValue(image, 'Registry'));
                     })
                     .map(async (image) => {
@@ -43,10 +52,16 @@ export class OutdatedImageChecker {
                         }
                     });
 
+                context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
+
                 // Load the data for all images then force the tree to refresh
-                // By then, this.shouldLoad will be false so this path won't happen again
-                Promise.all(imageCheckPromises).then(() => { void ext.imagesRoot.refresh(); }, () => { });
-            } catch { }
+                await Promise.all(imageCheckPromises);
+
+                context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
+
+                // Don't wait
+                void ext.imagesRoot.refresh();
+            });
         }
 
         for (const image of images) {
@@ -57,6 +72,10 @@ export class OutdatedImageChecker {
     private async checkImage(image: ILocalImageInfo): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
             const [repo, tag] = image.fullTag.split(':');
+
+            if (noneRegex.test(repo) || noneRegex.test(tag)) {
+                return 'outdated';
+            }
 
             // 1. Get an OAuth token to access the resource. No Authorization header is required for public scopes.
             const token = await this.getToken(`repository:library/${repo}:pull`);
