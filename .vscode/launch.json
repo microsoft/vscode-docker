@@ -97,7 +97,7 @@
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			//"preLaunchTask": "npm: webpack-prod",
+			"preLaunchTask": "npm: webpack-prod",
 			"env": {
 				"AZCODE_DOCKER_IGNORE_BUNDLE": "",
 				"MOCHA_grep": "", // RegExp of tests to run (empty means all)
