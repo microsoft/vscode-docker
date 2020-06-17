@@ -64,7 +64,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<ILocalImageInfo, Image
             }
         }
 
-        await this.outdatedImageChecker.markOutdatedImages(result);
+        this.outdatedImageChecker.markOutdatedImages(result);
 
         return result;
     }

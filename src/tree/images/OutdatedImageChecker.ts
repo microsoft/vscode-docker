@@ -32,7 +32,7 @@ export class OutdatedImageChecker {
         this.authContext = new AsyncLazy(async () => this.getAuthContext());
     }
 
-    public async markOutdatedImages(images: ILocalImageInfo[]): Promise<void> {
+    public markOutdatedImages(images: ILocalImageInfo[]): void {
         if (this.shouldLoad) {
             this.shouldLoad = false;
 
