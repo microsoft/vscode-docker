@@ -19,6 +19,7 @@ export namespace PythonExtensionHelper {
     export async function getLauncherFolderPath(): Promise<string> {
         const pyExt = await getPythonExtension();
 
+        // tslint:disable:no-unsafe-any no-any
         if (pyExt?.exports?.debug) {
             const debuggerPath = await pyExt.exports.debug.getDebuggerPackagePath();
 
@@ -26,10 +27,12 @@ export namespace PythonExtensionHelper {
                 return debuggerPath;
             }
         }
+        // tslint:enable:no-unsafe-any no-any
 
         throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
     }
 
+    // eslint-disable-next-line
     export async function getPythonExtension() : Promise<vscode.Extension<any>> | undefined {
         const pyExtensionId = 'ms-python.python';
         const minPyExtensionVersion = new semver.SemVer('2020.5.78807');
