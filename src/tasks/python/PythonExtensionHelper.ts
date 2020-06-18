@@ -5,7 +5,6 @@
 
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
-import * as path from 'path';
 import * as semver from 'semver';
 import * as vscode from "vscode";
 import { localize } from '../../localize';
