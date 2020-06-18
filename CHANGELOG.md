@@ -1,3 +1,7 @@
+## 1.3.1 - 18 June 2020
+### Fixed
+* Python debugging fails due to new debugger location. [#TODO](TODO)
+
 ## 1.3.0 - 15 June 2020
 ### Added
 * .NET Core attach support added for Windows containers. [#1662](https://github.com/microsoft/vscode-docker/issues/1662)
