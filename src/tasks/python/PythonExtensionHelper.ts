@@ -5,7 +5,6 @@
 
 // This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
 
-import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as vscode from "vscode";
@@ -19,6 +18,20 @@ export namespace PythonExtensionHelper {
     }
 
     export async function getLauncherFolderPath(): Promise<string> {
+        const pyExt = await getPythonExtension();
+
+        if (pyExt?.exports?.debug) {
+            const debuggerPath = await pyExt.exports.debug.getDebuggerPackagePath();
+
+            if (debuggerPath) {
+                return debuggerPath;
+            }
+        }
+
+        throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
+    }
+
+    export async function getPythonExtension() : Promise<vscode.Extension<any>> | undefined {
         const pyExtensionId = 'ms-python.python';
         const minPyExtensionVersion = new semver.SemVer('2020.5.78807');
 
@@ -43,14 +56,10 @@ export namespace PythonExtensionHelper {
             return undefined;
         }
 
-        await pyExt.activate();
-
-        const debuggerPath = path.join(pyExt.extensionPath, 'pythonFiles', 'lib', 'python', 'debugpy', 'no_wheels');
-
-        if ((await fse.pathExists(debuggerPath))) {
-            return debuggerPath;
+        if (!pyExt.isActive) {
+            await pyExt.activate();
         }
 
-        throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
+        return pyExt;
     }
 }
