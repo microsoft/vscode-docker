@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
+import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
 import LocalOSProvider from '../../utils/LocalOSProvider';
 import { PythonProjectType } from '../../utils/pythonUtils';
@@ -59,6 +60,11 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+        const pyExt = await PythonExtensionHelper.getPythonExtension();
+        if (!pyExt) {
+            return undefined;
+        }
+
         const containerName = inferContainerName(debugConfiguration, context, context.folder.name);
         const projectType = debugConfiguration.python.projectType;
         const pythonRunTaskOptions = (context.runDefinition as PythonRunTaskDefinition).python;
