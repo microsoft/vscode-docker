@@ -35,7 +35,7 @@ export class PythonTaskHelper implements TaskHelper {
                 dockerBuild: {
                     tag: getDefaultImageName(context.folder.name),
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
-                    /* eslint-disable no-template-curly-in-string */
+                    // eslint-disable-next-line no-template-curly-in-string
                     context: '${workspaceFolder}',
                     pull: true
                 },
@@ -83,13 +83,14 @@ export class PythonTaskHelper implements TaskHelper {
         /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || '${workspaceFolder}/Dockerfile';
+        /* eslint-enable no-template-curly-in-string */
+
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
 
         return buildOptions;
     }
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
-        // tslint:disable no-unsafe-any
         const runOptions: DockerRunOptions = runDefinition.dockerRun;
         const launcherFolder: string = await PythonExtensionHelper.getLauncherFolderPath();
 
@@ -117,7 +118,7 @@ export class PythonTaskHelper implements TaskHelper {
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];
         const dbgVolume: DockerContainerVolume = {
             localPath: launcherFolder,
-            containerPath: '/pydbg',
+            containerPath: '/debugpy',
             permissions: 'ro'
         };
 
