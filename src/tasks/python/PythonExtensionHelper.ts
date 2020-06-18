@@ -9,6 +9,13 @@ import * as semver from 'semver';
 import * as vscode from "vscode";
 import { localize } from '../../localize';
 
+// Adapted from https://github.com/microsoft/vscode-python/blob/master/src/client/api.ts
+interface PythonExtensionAPI {
+    debug: {
+        getDebuggerPackagePath(): Promise<string | undefined>;
+    }
+}
+
 export namespace PythonExtensionHelper {
     export interface DebugLaunchOptions {
         host?: string;
@@ -18,22 +25,16 @@ export namespace PythonExtensionHelper {
 
     export async function getLauncherFolderPath(): Promise<string> {
         const pyExt = await getPythonExtension();
+        const debuggerPath = await pyExt?.exports?.debug?.getDebuggerPackagePath();
 
-        /* eslint-disable @typescript-eslint/tslint/config */
-        if (pyExt?.exports?.debug) {
-            const debuggerPath = await pyExt.exports.debug.getDebuggerPackagePath();
-
-            if (debuggerPath) {
-                return debuggerPath;
-            }
+        if (debuggerPath) {
+            return debuggerPath;
         }
-        /* eslint-enable @typescript-eslint/tslint/config */
 
         throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    export async function getPythonExtension(): Promise<vscode.Extension<any>> | undefined {
+    export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
         const pyExtensionId = 'ms-python.python';
         const minPyExtensionVersion = new semver.SemVer('2020.5.78807');
 
