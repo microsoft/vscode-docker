@@ -28,7 +28,7 @@ COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
 RUN npm install --production --silent && mv node_modules ../
 COPY . .
 ${exposeStatements}
-CMD ${cmd}`;
+CMD exec ${cmd}`;
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
