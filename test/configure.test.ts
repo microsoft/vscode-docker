@@ -465,7 +465,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD exec npm start');
 
             assertFileContains('docker-compose.debug.yml', '1234');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
@@ -496,7 +496,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD exec npm start');
 
             assertFileContains('.dockerignore', '.vscode');
         });
@@ -536,7 +536,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD exec npm start');
 
             assertFileContains('docker-compose.debug.yml', '4321');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
@@ -616,7 +616,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
-            assertFileContains('Dockerfile', 'CMD node ./out/dockerExtension');
+            assertFileContains('Dockerfile', 'CMD exec node ./out/dockerExtension');
         });
     });
 
