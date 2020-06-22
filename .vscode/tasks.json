@@ -13,6 +13,14 @@
 				"reveal": "never"
 			},
 			"problemMatcher": "$tsc-watch"
+		},
+		{
+			"type": "npm",
+			"script": "webpack-prod",
+			"presentation": {
+				"reveal": "never"
+			},
+			"problemMatcher": "$tsc-watch"
 		}
 	]
 }
