@@ -99,6 +99,9 @@ export class NetCoreTaskHelper implements TaskHelper {
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
         options.platformOS = options.platformOS || 'Linux';
 
+        // If there's exactly one port and it's 80, then set configureSsl to false, otherwise leave it undefined
+        const configureSsl: false | undefined = context.ports?.length === 1 && context.ports?.[0] === 80 ? false : undefined;
+
         return [
             {
                 type: 'docker-run',
@@ -109,7 +112,8 @@ export class NetCoreTaskHelper implements TaskHelper {
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
-                    enableDebugging: true
+                    enableDebugging: true,
+                    configureSsl: configureSsl,
                 }
             },
             {
