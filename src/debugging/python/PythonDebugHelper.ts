@@ -83,8 +83,7 @@ export class PythonDebugHelper implements DebugHelper {
         const launcherPath = path.join(ext.context.asAbsolutePath('resources'), 'python', 'launcher.py');
 
         return {
-            name: debugConfiguration.name,
-            preLaunchTask: debugConfiguration.preLaunchTask,
+            ...debugConfiguration,
             type: 'python',
             request: 'launch',
             pathMappings: debugConfiguration.python.pathMappings,
