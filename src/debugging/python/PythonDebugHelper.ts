@@ -67,7 +67,7 @@ export class PythonDebugHelper implements DebugHelper {
 
         const containerName = inferContainerName(debugConfiguration, context, context.folder.name);
         const projectType = debugConfiguration.python.projectType;
-        const pythonRunTaskOptions = (context.runDefinition as PythonRunTaskDefinition).python;
+        const pythonRunTaskOptions = (context.runDefinition as PythonRunTaskDefinition)?.python || {};
 
         const dockerServerReadyAction =
             resolveDockerServerReadyAction(
