@@ -22,7 +22,7 @@ import { pythonDebugHelper } from './python/PythonDebugHelper';
 export type NetCoreScaffoldingOptions = NetCoreDebugScaffoldingOptions | NetCoreTaskScaffoldingOptions;
 export interface PythonScaffoldingOptions {
     projectType?: PythonProjectType;
-    target?: PythonTarget
+    target?: PythonTarget;
 }
 
 export interface IDockerDebugScaffoldingProvider {
