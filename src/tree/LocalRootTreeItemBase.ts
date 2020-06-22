@@ -25,7 +25,7 @@ type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 export interface ILocalItem {
     createdTime: number;
     treeId: string;
-    data: {};
+    data: unknown;
 }
 
 export type LocalChildType<T extends ILocalItem> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; };

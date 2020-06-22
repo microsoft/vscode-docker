@@ -41,7 +41,7 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: {} }): Promise<string> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: unknown }): Promise<string> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {

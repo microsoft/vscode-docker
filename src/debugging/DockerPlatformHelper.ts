@@ -7,9 +7,9 @@ export type DockerPlatform = 'netCore' | 'node' | 'python';
 
 interface DockerPlatformConfiguration {
     platform?: DockerPlatform;
-    netCore?: {};
-    node?: {};
-    python?: {};
+    netCore?: unknown;
+    node?: unknown;
+    python?: unknown;
 }
 
 export function getPlatform<T extends DockerPlatformConfiguration>(configuration: T): DockerPlatform | undefined {
