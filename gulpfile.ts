@@ -8,10 +8,8 @@ import * as gulp from 'gulp';
 import * as eslint from 'gulp-eslint';
 import * as sourcemaps from 'gulp-sourcemaps';
 import * as ts from 'gulp-typescript';
-import * as os from 'os';
-import * as path from 'path';
 import * as vsce from 'vsce';
-import { gulp_installAzureAccount, gulp_webpack } from 'vscode-azureextensiondev';
+import { gulp_webpack } from 'vscode-azureextensiondev';
 
 const env = process.env;
 const tsProject = ts.createProject('./tsconfig.json');
@@ -38,17 +36,8 @@ function lintTask() {
 }
 
 function testTaskFactory(unitTestsOnly: boolean) {
-    if (os.platform() === 'win32') {
-        // For some reason this is getting set to '--max-old-space-size=8192', which in turn for some reason causes the VSCode test process to instantly crash with error code 3 on Windows
-        // Which makes no sense because the default is 512 MB max
-        env.NODE_OPTIONS = '';
-    }
-    env.DEBUGTELEMETRY = '1';
-    env.CODE_TESTS_WORKSPACE = path.join(__dirname, 'test/test.code-workspace');
     env.MOCHA_grep = unitTestsOnly ? '\\(unit\\)' : '';
-    env.MOCHA_timeout = String(10 * 1000);
-    env.CODE_TESTS_PATH = path.join(__dirname, 'dist/test');
-    return cp.spawn('node', ['./node_modules/vscode/bin/test'], { stdio: 'inherit', env });
+    return cp.spawn('node', ['./dist/test/runTest.js'], { stdio: 'inherit', env });
 }
 
 function allTestsTask() {
@@ -74,12 +63,12 @@ function vscePackageTask() {
 gulp.task('build', compileTask);
 gulp.task('lint', lintTask);
 gulp.task('package', gulp.series(compileTask, webpackProdTask, vscePackageTask));
-gulp.task('test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, allTestsTask));
-gulp.task('unit-test', gulp.series(gulp_installAzureAccount, compileTask, webpackProdTask, unitTestsTask));
+gulp.task('test', gulp.series(compileTask, webpackProdTask, allTestsTask));
+gulp.task('unit-test', gulp.series(compileTask, webpackProdTask, unitTestsTask));
 gulp.task('webpack-dev', gulp.series(compileTask, webpackDevTask));
 gulp.task('webpack-prod', gulp.series(compileTask, webpackProdTask));
 
-gulp.task('ci-build', gulp.series(gulp_installAzureAccount, compileTask, lintTask, webpackProdTask, allTestsTask));
+gulp.task('ci-build', gulp.series(compileTask, lintTask, webpackProdTask, allTestsTask));
 gulp.task('ci-package', gulp.series('ci-build', vscePackageTask));
 
-gulp.task('test-only', gulp.series(gulp_installAzureAccount, allTestsTask));
+gulp.task('test-only', gulp.series(allTestsTask));
