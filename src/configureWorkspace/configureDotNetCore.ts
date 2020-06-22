@@ -371,7 +371,7 @@ async function findCSProjOrFSProjFile(context?: ScaffolderContext): Promise<stri
     }
 }
 
-async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
+async function initializeForDebugging(context: ScaffolderContext, folder: WorkspaceFolder, platformOS: PlatformOS, workspaceRelativeDockerfileName: string, workspaceRelativeProjectFileName: string): Promise<void> {
     const scaffoldContext: DockerDebugScaffoldContext = {
         folder: folder,
         platform: 'netCore',
@@ -379,14 +379,15 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
         // always use posix for debug config because it's committed to source control and works on all OS's
         /* eslint-disable-next-line no-template-curly-in-string */
         dockerfile: path.posix.join('${workspaceFolder}', workspaceRelativeDockerfileName),
-    }
+        ports: context.ports,
+    };
 
     const options: NetCoreScaffoldingOptions = {
         // always use posix for debug config because it's committed to source control and works on all OS's
         /* eslint-disable-next-line no-template-curly-in-string */
         appProject: path.posix.join('${workspaceFolder}', workspaceRelativeProjectFileName),
         platformOS: platformOS,
-    }
+    };
 
     await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, options);
 }
@@ -423,7 +424,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
         telemetryProperties.orchestration = 'docker-compose';
     }
 
-    const ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
+    context.ports = context.ports ?? (context.platform === '.NET: ASP.NET Core' ? await context.promptForPorts([80, 443]) : undefined);
 
     const rootRelativeProjectFileName = await context.captureStep('project', findCSProjOrFSProjFile)(context);
     const projectFullPath = path.join(context.rootFolder, rootRelativeProjectFileName);
@@ -449,7 +450,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     serviceNameAndPathRelative = serviceNameAndPathRelative.replace(/\\/g, '/');
 
     const assemblyName = await inferOutputAssemblyName(projectFullPath);
-    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, ports, netCoreVersion, workspaceRelativeProjectFileName, assemblyName);
+    let dockerFileContents = genDockerFile(serviceNameAndPathRelative, context.platform, os, context.ports, netCoreVersion, workspaceRelativeProjectFileName, assemblyName);
 
     // Remove multiple empty lines with single empty lines, as might be produced
     // if $expose_statements$ or another template variable is an empty string
@@ -460,7 +461,7 @@ export async function scaffoldNetCore(context: ScaffolderContext): Promise<Scaff
     const dockerFileName = path.join(context.outputFolder ?? rootRelativeProjectDirectory, 'Dockerfile');
     const dockerIgnoreFileName = path.join(context.outputFolder ?? '', '.dockerignore');
 
-    const composeFiles = isCompose ? generateComposeFiles(dockerFileName, context.platform, os, ports, workspaceRelativeProjectFileName) : [];
+    const composeFiles = isCompose ? generateComposeFiles(dockerFileName, context.platform, os, context.ports, workspaceRelativeProjectFileName) : [];
 
     let files: ScaffoldFile[] = [
         { fileName: dockerFileName, contents: dockerFileContents, open: true },
