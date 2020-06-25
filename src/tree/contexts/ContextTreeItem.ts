@@ -21,7 +21,7 @@ export class ContextTreeItem extends AzExtTreeItem {
     }
 
     public get contextValue(): string {
-        if (/^default$/i.test(this.name)) {
+        if (this.name === 'default') {
             return 'defaultContext';
         } else if (this.current) {
             return 'currentCustomContext';
