@@ -541,17 +541,17 @@
                 },
                 {
                     "command": "vscode-docker.contexts.inspect",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
                     "group": "contexts_1_general@1"
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
                     "group": "contexts_1_general@2"
                 },
                 {
                     "command": "vscode-docker.contexts.remove",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem == context",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext$/i",
                     "group": "contexts_2_destructive@1"
                 }
             ]
