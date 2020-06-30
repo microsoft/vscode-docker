@@ -93,6 +93,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
         context.runDefinition = await getAssociatedDockerRunTask(originalConfiguration);
+        context.actionContext.telemetry.properties.runTaskFound = context.runDefinition ? 'true' : 'false';
 
         const helper = this.getHelper(context.platform);
         const resolvedConfiguration = await helper.resolveDebugConfiguration(context, originalConfiguration);
