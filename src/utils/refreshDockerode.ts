@@ -111,7 +111,7 @@ async function addDockerContextHostToEnv(actionContext: IActionContext, newEnv: 
 
     if (dockerContext === undefined) { // Undefined context means there's only the default context
         actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
-    } else if (/^default$/i.test(dockerContext.Name)) {
+    } else if (dockerContext.Name === 'default') {
         actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
     } else {
         actionContext.telemetry.properties.hostSource = 'customContextSelected';

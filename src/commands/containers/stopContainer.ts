@@ -14,7 +14,7 @@ import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function stopContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.stop.noContainers', 'No containers are availble to stop') },
+        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.stop.noContainers', 'No containers are available to stop') },
         ext.containersTree,
         /^(paused|restarting|running)Container$/i,
         node,

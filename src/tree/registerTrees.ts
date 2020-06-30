@@ -82,7 +82,7 @@ export function registerTrees(): void {
     ext.contextsRoot = new ContextsTreeItem(undefined);
     const contextsLoadMore = 'vscode-docker.contexts.loadMore';
     ext.contextsTree = new AzExtTreeDataProvider(ext.contextsRoot, contextsLoadMore);
-    ext.contextsTreeView = vscode.window.createTreeView('vscode-docker.views.dockerContexts', { treeDataProvider: ext.contextsTree, canSelectMany: true });
+    ext.contextsTreeView = vscode.window.createTreeView('vscode-docker.views.dockerContexts', { treeDataProvider: ext.contextsTree, canSelectMany: false });
     ext.context.subscriptions.push(ext.contextsTreeView);
     ext.contextsRoot.registerRefreshEvents(ext.contextsTreeView);
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
@@ -90,7 +90,7 @@ export function registerTrees(): void {
 
     const helpRoot = new HelpsTreeItem(undefined);
     const helpTreeDataProvider = new AzExtTreeDataProvider(helpRoot, 'vscode-docker.help.loadMore');
-    const helpTreeView = vscode.window.createTreeView('vscode-docker.views.help', { treeDataProvider: helpTreeDataProvider, canSelectMany: true });
+    const helpTreeView = vscode.window.createTreeView('vscode-docker.views.help', { treeDataProvider: helpTreeDataProvider, canSelectMany: false });
     ext.context.subscriptions.push(helpTreeView);
 
     registerCommand('vscode-docker.openUrl', async (_context: IActionContext, node: OpenUrlTreeItem) => node.openUrl());

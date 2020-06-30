@@ -97,6 +97,9 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
     // Get template(s) from settings
     if (typeof (templateSetting) === 'string') {
         templates = [{ template: templateSetting }] as CommandTemplate[];
+    } else if (!templateSetting) {
+        // If templateSetting is some falsy value, make this an empty array so the hardcoded default above gets used
+        templates = [];
     } else {
         templates = templateSetting;
     }
