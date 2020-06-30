@@ -14,9 +14,6 @@ import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks'
 import { NotSupportedError } from '../NotSupportedError';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 
-// 20 s timeout for all calls (enough time for a possible Dockerode refresh + the call, but short enough to be UX-reasonable)
-const dockerServeCallTimeout = 20 * 1000;
-
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     public async info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo> {
         throw new NotSupportedError(context);
