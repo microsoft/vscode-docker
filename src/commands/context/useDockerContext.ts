@@ -25,16 +25,20 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
         await node.runWithTemporaryDescription(
             localize('vscode-docker.tree.context.switching', 'Switching...'),
             async () => {
+                // Await the `docker context use` command
                 await node.use(actionContext);
-                // The refresh logic will use the cached contexts retrieved by polling (auto refresh logic)
-                // Since the context is changed, clear the cached contexts, otherwise the old context will be shown as active
-                ext.contextsRoot.clearPollingCache();
+
+                // Await the tree receiving the event which happens after the context manager refreshes
+                await new Promise((resolve) => {
+                    const disposable = ext.dockerContextManager.onContextChanged(() => {
+                        disposable.dispose();
+                        resolve();
+                    });
+                });
             });
     } finally {
         LocalRootTreeItemBase.autoRefreshViews = true;
     }
-
-    await ext.contextsRoot.refresh();
 
     if (invokedFromCommandPalette) {
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

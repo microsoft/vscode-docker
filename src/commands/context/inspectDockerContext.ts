@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, openReadOnlyContent } from 'vscode-azureextensionui';
+import { IActionContext, openReadOnlyJson } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
@@ -17,5 +17,5 @@ export async function inspectDockerContext(actionContext: IActionContext, node?:
     }
 
     const inspectResult = await node.inspect(actionContext);
-    await openReadOnlyContent(node, inspectResult, '.json');
+    await openReadOnlyJson(node, inspectResult);
 }

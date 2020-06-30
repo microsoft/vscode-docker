@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Image, ImageInspectInfo } from "dockerode";
 import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
-import { callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     if (!node) {
@@ -19,7 +17,6 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
         });
     }
 
-    const image: Image = await node.getImage();
-    const inspectInfo: ImageInspectInfo = await callDockerodeWithErrorHandling(async () => image.inspect(), context);
+    const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
     await openReadOnlyJson(node, inspectInfo);
 }

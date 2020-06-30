@@ -9,7 +9,6 @@ import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
-import { callDockerodeAsync } from '../utils/callDockerode';
 import { DockerClient } from './coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
@@ -100,7 +99,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         if (resolvedConfiguration) {
             await this.validateResolvedConfiguration(resolvedConfiguration);
             await this.registerRemoveContainerAfterDebugging(resolvedConfiguration);
-            await this.registerOutputPortsAtDebugging(resolvedConfiguration);
+            await this.registerOutputPortsAtDebugging(context.actionContext, resolvedConfiguration);
         }
 
         return resolvedConfiguration;
@@ -138,7 +137,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    private async registerOutputPortsAtDebugging(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
+    private async registerOutputPortsAtDebugging(context: IActionContext, resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
         if (resolvedConfiguration?.dockerOptions?.containerName) {
             const disposable = debug.onDidStartDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
@@ -146,7 +145,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 // Don't do anything if this isn't our debug session
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
-                        const inspectInfo = await callDockerodeAsync(async () => ext.dockerode.getContainer(resolvedConfiguration.dockerOptions.containerName)?.inspect());
+                        const inspectInfo = await ext.dockerClient.inspectContainer(context, resolvedConfiguration.dockerOptions.containerName);
                         const portMappings: string[] = [];
 
                         if (inspectInfo?.NetworkSettings?.Ports) {

@@ -95,7 +95,7 @@ export interface DockerClient {
 
 export class CliDockerClient implements DockerClient {
     public constructor(private readonly processProvider: ProcessProvider) {
-        // CONSIDER: Use dockerode client as basis for debugging.
+        // CONSIDER: Use API client as basis for debugging.
     }
 
     public async buildImage(options?: DockerBuildImageOptions, progress?: (content: string) => void): Promise<string> {

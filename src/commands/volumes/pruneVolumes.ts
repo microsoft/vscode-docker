@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneVolumes(context: IActionContext): Promise<void> {
@@ -18,11 +17,10 @@ export async function pruneVolumes(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.volumes.pruning', 'Pruning volumes...') },
         async () => {
-            const result = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneVolumes(), context);
+            const result = await ext.dockerClient.pruneVolumes(context);
 
-            const numDeleted = (result.VolumesDeleted || []).length;
             const mbReclaimed = convertToMB(result.SpaceReclaimed);
-            let message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} volumes(s) and reclaimed {1} MB of space.', numDeleted, mbReclaimed);
+            let message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} volumes(s) and reclaimed {1} MB of space.', result.ObjectsDeleted, mbReclaimed);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);

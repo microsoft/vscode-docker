@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DockerVolume } from "../../docker/Volumes";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getCommonGroupIcon } from "../settings/CommonProperties";
-import { LocalVolumeInfo } from "./LocalVolumeInfo";
 import { VolumeProperty } from "./VolumeProperties";
 
-export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<LocalVolumeInfo, VolumeProperty> {
+export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<DockerVolume, VolumeProperty> {
     public static readonly contextValue: string = 'volumeGroup';
     public readonly contextValue: string = VolumeGroupTreeItem.contextValue;
     public childTypeLabel: string = 'volume';
