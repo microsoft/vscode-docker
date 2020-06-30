@@ -13,7 +13,7 @@ import { LocalRootTreeItemBase } from '../../tree/LocalRootTreeItemBase';
 export async function useDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
     let invokedFromCommandPalette = false;
     if (!node) {
-        node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.contextValue, {
+        node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.allContextRegExp, {
             ...actionContext,
             noItemFoundErrorMessage: localize('vscode-docker.commands.contexts.use.noContexts', 'No Docker contexts are available to use')
         });

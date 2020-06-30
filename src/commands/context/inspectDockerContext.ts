@@ -10,7 +10,7 @@ import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
 
 export async function inspectDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {
     if (!node) {
-        node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.contextValue, {
+        node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.allContextRegExp, {
             ...actionContext,
             noItemFoundErrorMessage: localize('vscode-docker.commands.contexts.inspect.noContexts', 'No Docker contexts are available to inspect')
         });
