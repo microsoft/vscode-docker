@@ -3,84 +3,85 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ImageInfo } from 'dockerode';
-import { ext } from '../../extension.bundle';
+import { ext, DockerImage } from '../../extension.bundle';
 import { runWithSetting } from '../runWithSetting';
 import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
-const testImages: Partial<ImageInfo>[] = [
+const testImages: DockerImage[] = [
     {
-        RepoTags: ['a'],
+        Name: 'a',
         Id: 'sha256:b0648d86f18e6141a8bfa98d4d17d5180aa2699af7f27eac5491fd1f950f6f05',
-        Created: generateCreatedTimeInSec(2)
+        CreatedTime: generateCreatedTimeInSec(2)
     },
     {
-        RepoTags: ['abcdefghijklmnopqrstuvwxyz'],
+        Name: 'abcdefghijklmnopqrstuvwxyz',
         Id: 'sha256:678090bb0827fecbee9eb0bbc65200022bbc09c91a8bf4acf136f5e633260a93',
-        Created: generateCreatedTimeInSec(3)
+        CreatedTime: generateCreatedTimeInSec(3)
     },
     {
-        RepoTags: ['abcdefghijklmnopqrstuvwxyz:version1.0.test'],
+        Name: 'abcdefghijklmnopqrstuvwxyz:version1.0.test',
         Id: 'sha256:0dbb0aabc7476292f98610d094a1bbc7f3012fd65cccc823e719a44267075bc7',
-        Created: generateCreatedTimeInSec(4)
+        CreatedTime: generateCreatedTimeInSec(4)
     },
     {
-        RepoTags: ['a.b/abcdefghijklmnopqrstuvwxyz:latest'],
+        Name: 'a.b/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:28bd20772f5203d07fdbfa38438f17cf720aaf01f7b53c205ac7e25b0795b718',
-        Created: generateCreatedTimeInSec(5)
+        CreatedTime: generateCreatedTimeInSec(5)
     },
     {
-        RepoTags: ['abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest'],
+        Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:38e8467493f68c24a78dafbe49587c07e78b0f84ec8cdc19a509ce3536f334fa',
-        Created: generateCreatedTimeInSec(6)
+        CreatedTime: generateCreatedTimeInSec(6)
     },
     {
-        RepoTags: ['abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest'],
+        Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:1e6d05ff19d567a103b3d134aa793841b51345a45fb59fd0287fb9d96e55c51b',
-        Created: generateCreatedTimeInSec(7)
+        CreatedTime: generateCreatedTimeInSec(7)
     },
     {
-        RepoTags: ['abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest'],
+        Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:16bba3882d727858afbb6dee098c5b5c9671bce8d347b995091f558afbdb18a5',
-        Created: generateCreatedTimeInSec(8)
+        CreatedTime: generateCreatedTimeInSec(8)
     },
     {
-        RepoTags: ['registry.gitlab.com/sweatherford/hello-world/sub:latest'],
+        Name: 'registry.gitlab.com/sweatherford/hello-world/sub:latest',
         Id: 'sha256:a3f7187fcd572b4c2065f96abd87b759b9ab9ed58bf7ea3755714bcc8795cf8a',
-        Created: generateCreatedTimeInSec(9)
+        CreatedTime: generateCreatedTimeInSec(9)
     },
     {
-        RepoTags: ['127.0.0.1:5443/registry:v2'],
+        Name: '127.0.0.1:5443/registry:v2',
         Id: 'sha256:ad8fe06eeca42a64aa28ca767b0f3fbe8713c087a6dcc66be949cefbe2131287',
-        Created: generateCreatedTimeInSec(58)
+        CreatedTime: generateCreatedTimeInSec(58)
     },
     {
-        RepoTags: ['127.0.0.1:5443/hello-world/sub:latest'],
+        Name: '127.0.0.1:5443/hello-world/sub:latest',
         Id: 'sha256:c8b4e4c47a8e6cc5e9c4f9cc9858f83d1d3e79c6ab4d890f7fb190a599d29903',
-        Created: generateCreatedTimeInSec(59)
+        CreatedTime: generateCreatedTimeInSec(59)
     },
     {
-        RepoTags: [
-            'hello-world:latest',
-            'hello-world:v1'
-        ],
+        Name: 'hello-world:latest',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
-        Created: generateCreatedTimeInSec(60)
+        CreatedTime: generateCreatedTimeInSec(60)
     },
     {
-        RepoTags: ['namespace1/abc:v3'],
+        Name: 'hello-world:v1',
+        Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
+        CreatedTime: generateCreatedTimeInSec(60)
+    },
+    {
+        Name: 'namespace1/abc:v3',
         Id: 'sha256:d0eed8dad114db55d81c870efb8c148026da4a0f61dc7710c053da55f9604849',
-        Created: generateCreatedTimeInSec(366)
+        CreatedTime: generateCreatedTimeInSec(366)
     },
     {
-        RepoTags: ['localhost/abc:v4'],
+        Name: 'localhost/abc:v4',
         Id: 'sha256:f61138f385d368484da055ecb085201ec06a524e92a10c64e6535bf6c32d15a4',
-        Created: generateCreatedTimeInSec(367)
+        CreatedTime: generateCreatedTimeInSec(367)
     },
     {
-        RepoTags: ['localhost:8080/abc'],
+        Name: 'localhost:8080/abc',
         Id: 'sha256:e05f39ada67afbe24e68a22eeb9a45c59d0aab31f0a1585870a75893981fae75',
-        Created: generateCreatedTimeInSec(368)
+        CreatedTime: generateCreatedTimeInSec(368)
     },
 ];
 

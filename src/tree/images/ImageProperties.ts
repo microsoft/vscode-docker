@@ -5,11 +5,11 @@
 
 import { workspace } from "vscode";
 import { configPrefix } from "../../constants";
+import { DockerImage } from "../../docker/Images";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
-import { ILocalImageInfo } from "./LocalImageInfo";
 
 export type ImageProperty = CommonProperty | 'FullTag' | 'ImageId' | 'Registry' | 'Repository' | 'RepositoryName' | 'RepositoryNameAndTag' | 'Tag';
 
@@ -49,18 +49,18 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Icon
     return getThemedIconPath(icon);
 }
 
-export function getImagePropertyValue(item: ILocalImageInfo, property: ImageProperty): string {
-    const parsedFullTag = parseFullTag(item.fullTag);
+export function getImagePropertyValue(item: DockerImage, property: ImageProperty): string {
+    const parsedFullTag = parseFullTag(item.Name);
     let registry: string | undefined;
     switch (property) {
         case 'FullTag':
             if (parsedFullTag.registry) {
-                return item.fullTag.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
+                return item.Name.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
             } else {
-                return item.fullTag;
+                return item.Name;
             }
         case 'ImageId':
-            return item.imageId.replace('sha256:', '').slice(0, 12);
+            return item.Id.replace('sha256:', '').slice(0, 12);
         case 'Registry':
             registry = parsedFullTag.registry;
             if (!registry) {
