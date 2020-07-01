@@ -54,6 +54,8 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
             case 'DockerEndpoint':
                 return item.DockerEndpoint;
             default:
+                // No other properties exist for DockerContext but all case statements must have a default
+                // So return empty string
                 return '';
         }
     }

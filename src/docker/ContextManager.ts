@@ -37,7 +37,6 @@ const UnixLocalPipe = 'unix:///var/run/docker.sock';
 const defaultContext: Partial<DockerContext> = {
     Name: 'default',
     Description: 'Current DOCKER_HOST based configuration',
-    CreatedTime: undefined, // Not defined for contexts
 };
 
 export interface ContextManager {
