@@ -7,14 +7,14 @@ import { Response } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { DockerImage } from '../../docker/Images';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeAsync } from '../../utils/callDockerode';
 import { AsyncLazy, Lazy } from '../../utils/lazy';
 import { IOAuthContext } from '../registries/auth/IAuthProvider';
 import { getWwwAuthenticateContext } from '../registries/auth/oAuthUtils';
 import { getImagePropertyValue } from './ImageProperties';
-import { ILocalImageInfo } from './LocalImageInfo';
+import { DatedDockerImage } from './ImagesTreeItem';
 
 const noneRegex = /<none>/i;
 
@@ -32,7 +32,7 @@ export class OutdatedImageChecker {
         this.authContext = new AsyncLazy(async () => this.getAuthContext());
     }
 
-    public markOutdatedImages(images: ILocalImageInfo[]): void {
+    public markOutdatedImages(images: DatedDockerImage[]): void {
         if (this.shouldLoad) {
             this.shouldLoad = false;
 
@@ -47,8 +47,8 @@ export class OutdatedImageChecker {
                         return /docker[.]io\/library/i.test(getImagePropertyValue(image, 'Registry'));
                     })
                     .map(async (image) => {
-                        if (await this.checkImage(image) === 'outdated') {
-                            this.outdatedImageIds.push(image.imageId);
+                        if (await this.checkImage(context, image) === 'outdated') {
+                            this.outdatedImageIds.push(image.Id);
                         }
                     });
 
@@ -65,13 +65,13 @@ export class OutdatedImageChecker {
         }
 
         for (const image of images) {
-            image.outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.imageId.toLowerCase());
+            image.Outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.Id.toLowerCase());
         }
     }
 
-    private async checkImage(image: ILocalImageInfo): Promise<'latest' | 'outdated' | 'unknown'> {
+    private async checkImage(context: IActionContext, image: DockerImage): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
-            const [repo, tag] = image.fullTag.split(':');
+            const [repo, tag] = image.Name.split(':');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
                 return 'outdated';
@@ -84,10 +84,9 @@ export class OutdatedImageChecker {
             const latestConfigImageId = await this.getLatestConfigImageId(repo, tag, token);
 
             // 3. Compare it with the current image's value
-            const dockerodeImage = ext.dockerode.getImage(image.fullTag);
-            const imageInspectInfo = await callDockerodeAsync(async () => dockerodeImage.inspect());
+            const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
 
-            if (latestConfigImageId.toLowerCase() !== imageInspectInfo.Config.Image.toLowerCase()) {
+            if (latestConfigImageId.toLowerCase() !== imageInspectInfo?.Config?.Image?.toLowerCase()) {
                 return 'outdated';
             }
 
