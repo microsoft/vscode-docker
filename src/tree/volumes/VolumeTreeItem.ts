@@ -44,6 +44,6 @@ export class VolumeTreeItem extends AzExtTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeVolume(context, this._item.Id);
+        return ext.dockerClient.removeVolume(context, this._item.Name);
     }
 }
