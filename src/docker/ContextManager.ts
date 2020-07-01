@@ -92,14 +92,16 @@ export class DockerContextManager implements ContextManager, Disposable {
             const contexts = await this.contextsCache.getValue();
             const currentContext = contexts.find(c => c.Current);
 
+            void ext.dockerClient?.dispose();
+
             // Create a new client
             if (currentContext.Type === 'aci') {
-                ext.dockerClient = new DockerServeClient(this);
+                ext.dockerClient = new DockerServeClient();
             } else {
-                ext.dockerClient = new DockerodeApiClient(this, currentContext);
+                ext.dockerClient = new DockerodeApiClient(currentContext);
             }
 
-            // This will dispose the old client and refresh the tree
+            // This will refresh the tree
             this.emitter.fire(currentContext);
         } finally {
             this.refreshing = false;
@@ -163,7 +165,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
                 // No value for DOCKER_HOST, and multiple contexts exist, so check them
                 const result: DockerContext[] = [];
-                const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { timeout: 10000 });
+                const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
                 const lines = LineSplitter.splitLines(stdout);
 
                 for (const line of lines) {
@@ -171,7 +173,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                     result.push({
                         ...context,
                         Id: context.Name,
-                        Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no endpoint == aci
+                        Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
                     });
                 }
 

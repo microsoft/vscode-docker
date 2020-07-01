@@ -7,22 +7,13 @@ import { Disposable } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { CancellationPromiseSource, getCancelPromise, TimeoutPromiseSource } from '../utils/promiseUtils';
-import { ContextManager } from './ContextManager';
-import { DockerContext } from './Contexts';
 
 export abstract class ContextChangeCancelClient implements Disposable {
-    private readonly contextChangedDisposable: Disposable;
-    protected contextChangeCps: CancellationPromiseSource;
-
-    public constructor(private readonly contextManager: ContextManager) {
-        this.contextChangeCps = new CancellationPromiseSource();
-        this.contextChangedDisposable = this.contextManager.onContextChanged((currentContext: DockerContext) => this.dispose())
-    }
+    protected contextChangeCps: CancellationPromiseSource = new CancellationPromiseSource();
 
     public dispose(): void {
         this.contextChangeCps.cancel();
         this.contextChangeCps.dispose();
-        this.contextChangedDisposable.dispose();
     }
 
     protected async withTimeoutAndCancellations<T>(context: IActionContext, callPromise: () => Promise<T>, timeout: number, token?: CancellationToken): Promise<T> {

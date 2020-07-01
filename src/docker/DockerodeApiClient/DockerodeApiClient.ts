@@ -10,7 +10,6 @@ import { localize } from '../../localize';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
-import { ContextManager } from '../ContextManager';
 import { DockerContext } from '../Contexts';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
@@ -25,8 +24,8 @@ const dockerodeCallTimeout = 20 * 1000;
 export class DockerodeApiClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly dockerodeClient: Dockerode;
 
-    public constructor(contextManager: ContextManager, currentContext: DockerContext) {
-        super(contextManager);
+    public constructor(currentContext: DockerContext) {
+        super();
         this.dockerodeClient = refreshDockerode(currentContext);
     }
 
