@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as Dockerode from 'dockerode';
-import { AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext } from '../../extension.bundle';
+import { DockerApiClient, DockerContainer, DockerVolume, DockerNetwork, DockerImage, AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext } from '../../extension.bundle';
 import { runWithSetting } from '../runWithSetting';
 
 export function generateCreatedTimeInSec(days: number): number {
@@ -31,13 +30,13 @@ export interface ITestTreeItem {
     children?: ITestTreeItem[];
 }
 
-export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix: string, treeOptions: IValidateTreeOptions, dockerodeOptions: ITestDockerodeOptions, expectedNodes: ITestTreeItem[]): Promise<AzExtTreeItem[]> {
+export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix: string, treeOptions: IValidateTreeOptions, mockClientOptions: IMockClientOptions, expectedNodes: ITestTreeItem[]): Promise<AzExtTreeItem[]> {
     let actualNodes: AzExtTreeItem[] = [];
     await runWithSetting(`${treePrefix}.sortBy`, treeOptions.sortBy, async () => {
         await runWithSetting(`${treePrefix}.groupBy`, treeOptions.groupBy, async () => {
             await runWithSetting(`${treePrefix}.label`, treeOptions.label, async () => {
                 await runWithSetting(`${treePrefix}.description`, treeOptions.description, async () => {
-                    await runWithDockerode(dockerodeOptions, async () => {
+                    await runWithMockClient(mockClientOptions, async () => {
                         await rootTreeItem.refresh();
 
                         const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
@@ -62,26 +61,28 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
     return actualNodes;
 }
 
-interface ITestDockerodeOptions {
-    containers?: Partial<Dockerode.ContainerInfo>[],
-    images?: Partial<Dockerode.ImageInfo>[],
-    volumes?: Partial<Dockerode.VolumeInspectInfo>[],
-    networks?: Partial<Dockerode.NetworkInspectInfo>[]
+interface IMockClientOptions {
+    containers?: DockerContainer[],
+    images?: DockerImage[],
+    volumes?: DockerVolume[],
+    networks?: DockerNetwork[]
 }
 
-async function runWithDockerode(options: ITestDockerodeOptions, callback: () => Promise<void>): Promise<void> {
-    const oldDockerode = ext.dockerode;
+async function runWithMockClient(options: IMockClientOptions, callback: () => Promise<void>): Promise<void> {
+    const oldClient = ext.dockerClient;
 
     try {
-        ext.dockerode = <Dockerode><any>{
-            listContainers: async () => options.containers,
-            listImages: async () => options.images,
-            listVolumes: async () => { return { Volumes: options.volumes } },
-            listNetworks: async () => options.networks
+        const mockClient: Partial<DockerApiClient> = {
+            getContainers: async () => options.containers,
+            getImages: async () => options.images,
+            getVolumes: async () => options.volumes,
+            getNetworks: async () => options.networks
         };
+
+        ext.dockerClient = mockClient as DockerApiClient;
         await callback();
     } finally {
-        ext.dockerode = oldDockerode;
+        ext.dockerClient = oldClient;
     }
 }
 

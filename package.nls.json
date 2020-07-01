@@ -126,8 +126,6 @@
     "vscode-docker.config.template.composeDown.match": "The regular expression for choosing the right template. Checked against docker-compose YAML files, folder name, etc.",
     "vscode-docker.config.template.composeDown.description": "Command templates for `docker-compose down` commands.",
     "vscode-docker.config.docker.explorerRefreshInterval": "Docker view refresh interval (milliseconds)",
-    "vscode-docker.config.docker.explorerContextsRefreshInterval": "Docker context view refresh interval (seconds)",
-    "vscode-docker.config.docker.contextRefreshInterval": "How often Docker context is checked for changes (seconds)",
     "vscode-docker.config.docker.containers.groupBy": "The property to use to group containers in Docker view: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, Tag, or None",
     "vscode-docker.config.docker.containers.description": "Any secondary properties to display for a container (an array). Possible elements include: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, and Tag",
     "vscode-docker.config.docker.containers.label": "The primary property to display for a container: ContainerId, ContainerName, CreatedTime, FullTag, ImageId, Networks, Ports, Registry, Repository, RepositoryName, RepositoryNameAndTag, State, Status, or Tag",

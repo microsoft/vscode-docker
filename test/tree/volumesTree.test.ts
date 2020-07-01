@@ -3,26 +3,33 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VolumeInspectInfo } from 'dockerode';
-import { ext } from '../../extension.bundle';
-import { generateCreatedTimeISOString, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
+import { ext, DockerVolume } from '../../extension.bundle';
+import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 // TODO: Update the test to validate the '1 month ago' description Issue #1758
-const testVolumes: Partial<VolumeInspectInfo & { CreatedAt: string }>[] = [
+const testVolumes: DockerVolume[] = [
     {
-        CreatedAt: generateCreatedTimeISOString(1),
+        CreatedTime: generateCreatedTimeInSec(1),
         Name: "nginxVol",
+        Driver: 'test',
+        Id: undefined,
     },
     {
-        CreatedAt: generateCreatedTimeISOString(2),
+        CreatedTime: generateCreatedTimeInSec(2),
         Name: "my-vol",
+        Driver: 'test',
+        Id: undefined,
     },
     {
-        CreatedAt: generateCreatedTimeISOString(2),
+        CreatedTime: generateCreatedTimeInSec(2),
         Name: "zz",
+        Driver: 'test',
+        Id: undefined,
     },
     {
-        CreatedAt: generateCreatedTimeISOString(90),
+        CreatedTime: generateCreatedTimeInSec(90),
         Name: "83c3eaffa92c0caf9ab34df3931f37b094464cb0daaab274c482010129fc7c73",
+        Driver: 'test',
+        Id: undefined,
     }
 ];
 

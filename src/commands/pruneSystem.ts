@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { callDockerodeWithErrorHandling } from '../utils/callDockerode';
 import { convertToMB } from '../utils/convertToMB';
 
 export async function pruneSystem(context: IActionContext): Promise<void> {
@@ -18,18 +17,13 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },
         async () => {
-            const containersResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneContainers(), context);
-            const imagesResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneImages(), context);
-            const networksResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneNetworks(), context);
-            const volumesResult = await callDockerodeWithErrorHandling(async () => ext.dockerode.pruneVolumes(), context);
-
-            const numContainers = (containersResult.ContainersDeleted || []).length;
-            const numImages = (imagesResult.ImagesDeleted || []).length;
-            const numNetworks = (networksResult.NetworksDeleted || []).length;
-            const numVolumes = (volumesResult.VolumesDeleted || []).length;
+            const containersResult = await ext.dockerClient.pruneContainers(context);
+            const imagesResult = await ext.dockerClient.pruneImages(context);
+            const networksResult = await ext.dockerClient.pruneNetworks(context);
+            const volumesResult = await ext.dockerClient.pruneVolumes(context);
 
             const mbReclaimed = convertToMB(containersResult.SpaceReclaimed + imagesResult.SpaceReclaimed + volumesResult.SpaceReclaimed);
-            let message = localize('vscode-docker.commands.pruneSystem.removed', 'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.', numContainers, numImages, numNetworks, numVolumes, mbReclaimed);
+            let message = localize('vscode-docker.commands.pruneSystem.removed', 'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.', containersResult.ObjectsDeleted, imagesResult.ObjectsDeleted, networksResult.ObjectsDeleted, volumesResult.ObjectsDeleted, mbReclaimed);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);

@@ -23,11 +23,13 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
 
 export function getContainerStateIcon(state: string): IconPath {
     let icon: string;
-    switch (state) {
+    switch (state.toLowerCase()) {
         case 'created':
         case 'dead':
         case 'exited':
         case 'removing':
+        case 'terminated':
+        case 'waiting':
             icon = 'statusStop';
             break;
         case 'paused':

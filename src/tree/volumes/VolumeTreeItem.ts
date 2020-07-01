@@ -3,33 +3,32 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Volume } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
-import { callDockerode, callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 import { getThemedIconPath, IconPath } from "../IconPath";
-import { LocalVolumeInfo } from "./LocalVolumeInfo";
+import { getTreeId } from "../LocalRootTreeItemBase";
 
 export class VolumeTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
-    private readonly _item: LocalVolumeInfo;
+    private readonly _item: DockerVolume;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalVolumeInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerVolume) {
         super(parent);
         this._item = itemInfo;
     }
 
     public get id(): string {
-        return this._item.treeId;
+        return getTreeId(this._item);
     }
 
     public get createdTime(): number {
-        return this._item.createdTime;
+        return this._item.CreatedTime;
     }
 
     public get volumeName(): string {
-        return this._item.volumeName;
+        return this._item.Name;
     }
 
     public get label(): string {
@@ -44,12 +43,7 @@ export class VolumeTreeItem extends AzExtTreeItem {
         return getThemedIconPath('volume');
     }
 
-    public async getVolume(): Promise<Volume> {
-        return callDockerode(() => ext.dockerode.getVolume(this.volumeName));
-    }
-
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        const volume: Volume = await this.getVolume();
-        await callDockerodeWithErrorHandling(async () => volume.remove({ force: true }), context);
+        return ext.dockerClient.removeVolume(context, this.volumeName);
     }
 }

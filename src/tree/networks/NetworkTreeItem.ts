@@ -3,43 +3,42 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Network } from "dockerode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
+import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
-import { callDockerode, callDockerodeWithErrorHandling } from "../../utils/callDockerode";
 import { getThemedIconPath, IconPath } from '../IconPath';
-import { LocalNetworkInfo } from "./LocalNetworkInfo";
+import { getTreeId } from "../LocalRootTreeItemBase";
 
 export class NetworkTreeItem extends AzExtTreeItem {
     public static allContextRegExp: RegExp = /Network$/;
     public static customNetworkRegExp: RegExp = /^customNetwork$/i;
 
-    private readonly _item: LocalNetworkInfo;
+    private readonly _item: DockerNetwork;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: LocalNetworkInfo) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerNetwork) {
         super(parent);
         this._item = itemInfo;
     }
 
     public get contextValue(): string {
-        return builtInNetworks.includes(this._item.networkName) ? 'defaultNetwork' : 'customNetwork';
+        return builtInNetworks.includes(this._item.Name) ? 'defaultNetwork' : 'customNetwork';
     }
 
     public get id(): string {
-        return this._item.treeId;
+        return getTreeId(this._item);
     }
 
     public get networkId(): string {
-        return this._item.networkId;
+        return this._item.Id;
     }
 
     public get createdTime(): number {
-        return this._item.createdTime;
+        return this._item.CreatedTime;
     }
 
     public get networkName(): string {
-        return this._item.networkName;
+        return this._item.Name;
     }
 
     public get label(): string {
@@ -54,12 +53,7 @@ export class NetworkTreeItem extends AzExtTreeItem {
         return getThemedIconPath('network');
     }
 
-    public async getNetwork(): Promise<Network> {
-        return callDockerode(() => ext.dockerode.getNetwork(this.networkId));
-    }
-
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        const network: Network = await this.getNetwork();
-        await callDockerodeWithErrorHandling(async () => network.remove({ force: true }), context);
+        return ext.dockerClient.removeNetwork(context, this.networkId);
     }
 }

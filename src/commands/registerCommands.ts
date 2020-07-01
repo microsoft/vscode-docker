@@ -22,7 +22,7 @@ import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
-import { configureDockerContextsExplorer, dockerContextsHelp, refreshDockerContexts } from "./context/DockerContextsViewCommands";
+import { configureDockerContextsExplorer, dockerContextsHelp } from "./context/DockerContextsViewCommands";
 import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
 import { useDockerContext } from "./context/useDockerContext";
@@ -161,7 +161,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.contexts.configureExplorer', configureDockerContextsExplorer);
     registerCommand('vscode-docker.contexts.help', dockerContextsHelp);
     registerCommand('vscode-docker.contexts.inspect', inspectDockerContext);
-    registerCommand('vscode-docker.contexts.refresh', refreshDockerContexts);
     registerCommand('vscode-docker.contexts.remove', removeDockerContext);
     registerCommand('vscode-docker.contexts.use', useDockerContext);
 

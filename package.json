@@ -346,7 +346,7 @@
                 },
                 {
                     "command": "vscode-docker.containers.start",
-                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused)Container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
                     "group": "containers_1_general@5"
                 },
                 {
@@ -1390,16 +1390,6 @@
                     "type": "number",
                     "default": 2000,
                     "description": "%vscode-docker.config.docker.explorerRefreshInterval%"
-                },
-                "docker.explorerContextsRefreshInterval": {
-                    "type": "number",
-                    "default": 20,
-                    "description": "%vscode-docker.config.docker.explorerContextsRefreshInterval%"
-                },
-                "docker.contextRefreshInterval": {
-                    "type": "number",
-                    "default": 20,
-                    "description": "%vscode-docker.config.docker.contextRefreshInterval%"
                 },
                 "docker.commands.build": {
                     "oneOf": [

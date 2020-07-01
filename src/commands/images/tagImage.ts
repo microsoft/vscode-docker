@@ -3,14 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Image } from 'dockerode';
 import * as vscode from 'vscode';
 import { IActionContext, TelemetryProperties } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
 import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
@@ -23,19 +21,10 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    let newTaggedName: string = await getTagFromUserInput(node.fullTag, registry?.baseImagePath);
+    const newTaggedName: string = await getTagFromUserInput(node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
-    let repo: string = newTaggedName;
-    let tag: string = 'latest';
-
-    if (newTaggedName.lastIndexOf(':') > 0) {
-        repo = newTaggedName.slice(0, newTaggedName.lastIndexOf(':'));
-        tag = newTaggedName.slice(newTaggedName.lastIndexOf(':') + 1);
-    }
-
-    const image: Image = await node.getImage();
-    await callDockerodeWithErrorHandling(async () => image.tag({ repo: repo, tag: tag }), context);
+    await ext.dockerClient.tagImage(context, node.imageId, newTaggedName);
     return newTaggedName;
 }
 
