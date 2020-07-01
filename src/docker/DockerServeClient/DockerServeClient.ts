@@ -11,7 +11,6 @@ import { localize } from "../../localize";
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection, InspectionPort } from '../Containers';
 import { ContextChangeCancelClient } from "../ContextChangeCancelClient";
-import { ContextManager } from "../ContextManager";
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -24,8 +23,8 @@ const dockerServeCallTimeout = 20 * 1000;
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
 
-    public constructor(contextManager: ContextManager) {
-        super(contextManager);
+    public constructor() {
+        super();
         this.containersClient = new ContainersClient();
     }
 
