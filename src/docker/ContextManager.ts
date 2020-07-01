@@ -26,7 +26,7 @@ import { DockerServeClient } from './DockerServeClient/DockerServeClient';
 // Consider having our own timeout for execution of any context-related Docker CLI commands.
 // The following timeout is for _starting_ the command only; in the current implementation there is no timeot
 // for command duration.
-const ContextCmdExecOptions: ExecOptions = { timeout: 5000 }
+const ContextCmdExecOptions: ExecOptions = { timeout: 5000 };
 
 const dockerConfigFile = path.join(os.homedir(), '.docker', 'config.json');
 const dockerContextsFolder = path.join(os.homedir(), '.docker', 'contexts', 'meta');
