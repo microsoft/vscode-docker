@@ -16,13 +16,7 @@ export abstract class ContextChangeCancelClient implements Disposable {
 
     public constructor(private readonly contextManager: ContextManager) {
         this.contextChangeCps = new CancellationPromiseSource();
-        this.contextChangedDisposable = this.contextManager.onContextChanged((currentContext: DockerContext) => this.onContextChange(currentContext))
-    }
-
-    protected onContextChange(currentContext: DockerContext): void {
-        this.contextChangeCps.cancel();
-        this.contextChangeCps.dispose();
-        this.contextChangeCps = new CancellationPromiseSource();
+        this.contextChangedDisposable = this.contextManager.onContextChanged((currentContext: DockerContext) => this.dispose())
     }
 
     public dispose(): void {

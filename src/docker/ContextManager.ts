@@ -71,6 +71,8 @@ export class DockerContextManager implements ContextManager, Disposable {
     public dispose(): void {
         void this.configFileWatcher?.close();
         void this.contextFolderWatcher?.close();
+
+        // No event is fired so the client present at the end needs to be disposed manually
         void ext.dockerClient?.dispose();
     }
 
@@ -90,20 +92,14 @@ export class DockerContextManager implements ContextManager, Disposable {
             const contexts = await this.contextsCache.getValue();
             const currentContext = contexts.find(c => c.Current);
 
+            // Create a new client
             if (currentContext.DockerEndpoint === '') { // TODO: check based on type
-                if (ext.dockerClient instanceof DockerodeApiClient || ext.dockerClient === undefined) {
-                    // Need to switch modes to the new SDK client
-                    void ext.dockerClient?.dispose();
-                    ext.dockerClient = new DockerServeClient(this);
-                }
+                ext.dockerClient = new DockerServeClient(this);
             } else {
-                if (ext.dockerClient instanceof DockerServeClient || ext.dockerClient === undefined) {
-                    // Need to switch modes to the Dockerode client
-                    void ext.dockerClient?.dispose();
-                    ext.dockerClient = new DockerodeApiClient(this);
-                }
+                ext.dockerClient = new DockerodeApiClient(this, currentContext);
             }
 
+            // This will dispose the old client and refresh the tree
             this.emitter.fire(currentContext);
         } finally {
             this.refreshing = false;
