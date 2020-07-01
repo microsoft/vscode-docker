@@ -14,6 +14,8 @@ export interface PruneResult {
     readonly SpaceReclaimed: number;
 }
 
+// Note: a few of the inheriting objects remove some of these properties
+// e.g. contexts do not have CreatedTime, volumes do not have Id, etc.
 export interface DockerObject {
     readonly Id: string;
     readonly Name: string;
