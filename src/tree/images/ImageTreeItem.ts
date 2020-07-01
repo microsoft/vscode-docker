@@ -56,6 +56,14 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeImage(context, this.fullTag);
+        let ref = this.fullTag;
+
+        // Dangling images are not shown in the explorer. However, an image can end up with <none> tag, if a new version of that particular tag is pulled.
+        if (ref.endsWith(':<none>') && this._item.RepoDigests?.length) {
+            // Image is tagged <none>. Need to delete by digest.
+            ref = this._item.RepoDigests[0];
+        }
+
+        return ext.dockerClient.removeImage(context, ref);
     }
 }

@@ -143,15 +143,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async removeImage(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        let image: Dockerode.Image = this.dockerodeClient.getImage(ref);
-
-        // Dangling images are not shown in the explorer. However, an image can end up with <none> tag, if a new version of that particular tag is pulled.
-        if (ref.endsWith(':<none>')) {
-            // Image is tagged <none>. Need to delete by digest.
-            const inspectInfo = await this.callWithErrorHandling(context, async () => image.inspect());
-            image = this.dockerodeClient.getImage(inspectInfo.RepoDigests[0]);
-        }
-
+        const image: Dockerode.Image = this.dockerodeClient.getImage(ref);
         return this.callWithErrorHandling(context, async () => image.remove({ force: true }), token);
     }
 
