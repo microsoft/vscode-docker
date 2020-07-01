@@ -93,7 +93,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             const currentContext = contexts.find(c => c.Current);
 
             // Create a new client
-            if (currentContext.DockerEndpoint === '') { // TODO: check based on type
+            if (currentContext.Type === 'aci') {
                 ext.dockerClient = new DockerServeClient(this);
             } else {
                 ext.dockerClient = new DockerodeApiClient(this, currentContext);
@@ -171,6 +171,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                     result.push({
                         ...context,
                         Id: context.Name,
+                        Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no endpoint == aci
                     });
                 }
 
