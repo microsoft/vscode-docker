@@ -12,6 +12,12 @@ export interface DockerPort {
     readonly Type?: string;
 }
 
+// Ports from inspect have a different shape entirely
+export interface InspectionPort {
+    readonly HostIp?: string;
+    readonly HostPort?: string;
+}
+
 export interface DockerContainer extends DockerObject {
     readonly State: string;
     readonly Status: string;
@@ -32,10 +38,7 @@ export interface DockerContainerInspection extends DockerObject {
     };
     readonly NetworkSettings?: {
         readonly Ports?: {
-            readonly [portAndProtocol: string]: {
-                readonly HostIp?: string;
-                readonly HostPort?: string;
-            }[];
+            readonly [portAndProtocol: string]: InspectionPort[];
         };
     };
 }

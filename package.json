@@ -2628,6 +2628,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "@docker/sdk": "github:bwateratmsft/node-sdk#patch-1",
         "adal-node": "^0.2.1",
         "azure-arm-containerregistry": "^5.1.0",
         "azure-arm-website": "^5.7.0",
