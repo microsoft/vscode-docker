@@ -131,7 +131,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     private async loadContexts(): Promise<DockerContext[]> {
-        return callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
+        let loadResult = await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
             try {
                 // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
                 actionContext.telemetry.properties.isActivationEvent = 'true';
@@ -200,5 +200,18 @@ export class DockerContextManager implements ContextManager, Disposable {
                 throw err;
             }
         });
+
+        // If the load failed or is otherwise empty, return the default
+        // That way a returned value is ensured by this method
+        if (!loadResult) {
+            loadResult = [{
+                ...defaultContext,
+                Current: true,
+                DockerEndpoint: os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe,
+                Type: 'moby',
+            } as DockerContext];
+        }
+
+        return loadResult;
     }
 }
