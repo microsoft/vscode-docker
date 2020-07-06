@@ -137,7 +137,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
     public async tagImage(context: IActionContext, ref: string, fullTag: string, token?: CancellationToken): Promise<void> {
         const repo = fullTag.substr(0, fullTag.lastIndexOf(':'));
-        const tag = fullTag.substr(fullTag.lastIndexOf(':'));
+        const tag = fullTag.substr(fullTag.lastIndexOf(':') + 1);
         const image = this.dockerodeClient.getImage(ref);
         await this.callWithErrorHandling(context, async () => image.tag({ repo: repo, tag: tag }), token);
     }
