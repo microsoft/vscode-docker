@@ -107,6 +107,7 @@
         "onCommand:vscode-docker.contexts.configureExplorer",
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
+        "onCommand:vscode-docker.contexts.create.aci",
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
@@ -2522,6 +2523,11 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.contexts.create.aci",
+                "title": "%vscode-docker.commands.contexts.create.aci%",
+                "category": "%vscode-docker.commands.category.contexts%"
             }
         ],
         "views": {
