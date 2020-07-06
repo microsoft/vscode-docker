@@ -304,6 +304,11 @@
                     "group": "navigation@9"
                 },
                 {
+                    "command": "vscode-docker.contexts.create.aci",
+                    "when": "view == vscode-docker.views.dockerContexts",
+                    "group": "navigation@1"
+                },
+                {
                     "command": "vscode-docker.contexts.configureExplorer",
                     "when": "view == vscode-docker.views.dockerContexts",
                     "group": "navigation@8"
@@ -2527,7 +2532,11 @@
             {
                 "command": "vscode-docker.contexts.create.aci",
                 "title": "%vscode-docker.commands.contexts.create.aci%",
-                "category": "%vscode-docker.commands.category.contexts%"
+                "category": "%vscode-docker.commands.category.contexts%",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
+                }
             }
         ],
         "views": {

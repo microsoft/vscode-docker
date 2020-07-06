@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from 'vscode';
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, IResourceGroupWizardContext, LocationListStep, ResourceGroupListStep } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, IResourceGroupWizardContext, LocationListStep, parseError, ResourceGroupListStep } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
@@ -21,7 +21,11 @@ export async function createAciContext(actionContext: IActionContext): Promise<v
         ...actionContext,
     };
 
-    const promptSteps: AzureWizardPromptStep<IAciWizardContext>[] = [];
+    // Set up the prompt steps
+    const promptSteps: AzureWizardPromptStep<IAciWizardContext>[] = [
+        new ContextNameStep(),
+    ];
+
     // Create a temporary azure account tree item since Azure might not be connected
     const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
 
@@ -32,17 +36,12 @@ export async function createAciContext(actionContext: IActionContext): Promise<v
     }
 
     // Add additional prompt steps
-    promptSteps.push(...[
-        new ContextNameStep(),
-        new ResourceGroupListStep(),
-    ]);
-
-    // Add a location prompt step
+    promptSteps.push(new ResourceGroupListStep());
     LocationListStep.addStep(wizardContext, promptSteps);
 
+    // Set up the execute steps
     const executeSteps: AzureWizardExecuteStep<IAciWizardContext>[] = [
-        new DockerLoginAzureStep(),
-        new AciCreateStep(),
+        new AciContextCreateStep(),
     ];
 
     const title = localize('vscode-docker.commands.contexts.create.aci.title', 'Create new Azure Container Instances context');
@@ -62,23 +61,7 @@ class ContextNameStep extends AzureWizardPromptStep<IAciWizardContext> {
     }
 }
 
-class DockerLoginAzureStep extends AzureWizardExecuteStep<IAciWizardContext> {
-    public priority: number = 100;
-
-    public async execute(wizardContext: IAciWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const loggingIn: string = localize('vscode-docker.commands.contexts.create.aci.loginAzure', 'Logging in to Azure...');
-        ext.outputChannel.appendLine(loggingIn);
-        progress.report({ message: loggingIn });
-
-        await execAsync('docker login azure');
-    }
-
-    public shouldExecute(context: IAciWizardContext): boolean {
-        return true;
-    }
-}
-
-class AciCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
+class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
     public priority: number = 200;
 
     public async execute(wizardContext: IAciWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
@@ -87,7 +70,22 @@ class AciCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
         progress.report({ message: creatingNewContext });
 
         const command = `docker context create aci ${wizardContext.contextName} --subscription-id ${wizardContext.subscriptionId} --location ${wizardContext.location.name} --resource-group ${wizardContext.resourceGroup.name}`;
-        await execAsync(command);
+
+        try {
+            await execAsync(command);
+        } catch (err) {
+            const error = parseError(err);
+
+            // TODO: get the real error code
+            if (error.errorType === '1234') {
+                // If error is due to being not logged in, we'll go through login and try again
+                await execAsync('docker login azure');
+                await execAsync(command);
+            } else {
+                // Otherwise rethrow
+                throw err;
+            }
+        }
     }
 
     public shouldExecute(context: IAciWizardContext): boolean {
