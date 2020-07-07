@@ -14,7 +14,7 @@ adapterHost = args[0]
 if adapterHost.isnumeric():
     args[0] = 'host.docker.internal:' + adapterHost
 
-dockerExecArgs = ['docker', 'exec', '-d', containerId, 'python', '/debugpy/launcher'] + args
+dockerExecArgs = ['docker', 'exec', '-d', containerId, 'python3', '/debugpy/launcher'] + args
 
 command = ' '.join(dockerExecArgs)
 

@@ -65,7 +65,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneContainers(), token);
         return {
             ...result,
-            ObjectsDeleted: result.ContainersDeleted.length,
+            ObjectsDeleted: result.ContainersDeleted?.length ?? 0,
         };
     }
 
@@ -131,13 +131,13 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneImages(), token);
         return {
             ...result,
-            ObjectsDeleted: result.ImagesDeleted.length,
+            ObjectsDeleted: result.ImagesDeleted?.length ?? 0,
         };
     }
 
     public async tagImage(context: IActionContext, ref: string, fullTag: string, token?: CancellationToken): Promise<void> {
         const repo = fullTag.substr(0, fullTag.lastIndexOf(':'));
-        const tag = fullTag.substr(fullTag.lastIndexOf(':'));
+        const tag = fullTag.substr(fullTag.lastIndexOf(':') + 1);
         const image = this.dockerodeClient.getImage(ref);
         await this.callWithErrorHandling(context, async () => image.tag({ repo: repo, tag: tag }), token);
     }
@@ -174,7 +174,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneNetworks(), token);
         return {
             SpaceReclaimed: 0,
-            ObjectsDeleted: result.NetworksDeleted.length,
+            ObjectsDeleted: result.NetworksDeleted?.length ?? 0,
         };
     }
 
@@ -216,7 +216,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneVolumes(), token);
         return {
             ...result,
-            ObjectsDeleted: result.VolumesDeleted.length,
+            ObjectsDeleted: result.VolumesDeleted?.length ?? 0,
         };
     }
 
