@@ -15,8 +15,7 @@ import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
-import { getContainerName, getFullTagFromDigest } from './DockerodeUtils';
-import { refreshDockerode } from './refreshDockerode';
+import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
 // 20 s timeout for all calls (enough time for any call, but short enough to be UX-reasonable)
 const dockerodeCallTimeout = 20 * 1000;

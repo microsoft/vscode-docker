@@ -4,18 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Containers as ContainersClient } from '@docker/sdk';
-import { Container, DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/dist/containers';
+import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/dist/containers';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerInfo, PruneResult } from '../Common';
-import { DockerContainer, DockerContainerInspection, InspectionPort } from '../Containers';
+import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { NotSupportedError } from '../NotSupportedError';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
+import { containerPortsToInspectionPorts, containerToDockerContainer } from './DockerServeUtils';
 
 // 20 s timeout for all calls (enough time for any call, but short enough to be UX-reasonable)
 const dockerServeCallTimeout = 20 * 1000;
@@ -180,63 +181,4 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
         return this.withTimeoutAndCancellations(context, async () => callPromise, dockerServeCallTimeout, token);
     }
-}
-
-function containerToDockerContainer(container: Container.AsObject): DockerContainer | undefined {
-    if (!container) {
-        return undefined;
-    }
-
-    const ports = container.portsList.map(p => {
-        return {
-            IP: p.hostIp,
-            PublicPort: p.hostPort,
-            PrivatePort: p.containerPort,
-            Type: p.protocol,
-        };
-    });
-
-    const labels: { [key: string]: string } = {};
-    container.labelsList.forEach(l => {
-        const [label, value] = l.split('=');
-        labels[label] = value;
-    });
-
-    return {
-        Id: container.id,
-        Image: container.image,
-        Name: container.id, // TODO ?
-        State: container.status,
-        Status: container.status,
-        ImageID: undefined, // TODO ?
-        CreatedTime: undefined, // TODO ?
-        Labels: labels, // TODO--not working
-        Ports: ports,
-    };
-}
-
-function containerPortsToInspectionPorts(container: DockerContainer): { [portAndProtocol: string]: InspectionPort[] } | undefined {
-    if (container?.Ports === undefined) {
-        return undefined;
-    }
-
-    const result: { [portAndProtocol: string]: InspectionPort[] } = {};
-
-    for (const port of container.Ports) {
-        // Get the key
-        const key = `${port.PrivatePort}/${port.Type}`;
-
-        // If there's no entries for this key yet, create an empty list
-        if (result[key] === undefined) {
-            result[key] = [];
-        }
-
-        // Add the value to the list
-        result[key].push({
-            HostIp: port.IP,
-            HostPort: port.PublicPort.toString(),
-        });
-    }
-
-    return result;
 }
