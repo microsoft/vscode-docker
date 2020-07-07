@@ -1782,6 +1782,11 @@
                         "Label"
                     ]
                 },
+                "docker.images.checkForOutdatedImages": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
+                },
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
@@ -2047,11 +2052,6 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.showRemoteWorkspaceWarning%"
-                },
-                "docker.checkForOutdatedImages": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%vscode-docker.config.docker.checkForOutdatedImages%"
                 }
             }
         },

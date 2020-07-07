@@ -26,7 +26,7 @@ export class OutdatedImageChecker {
 
     public constructor() {
         const dockerConfig = vscode.workspace.getConfiguration('docker');
-        this.shouldLoad = dockerConfig.get('checkForOutdatedImages');
+        this.shouldLoad = dockerConfig.get('images.checkForOutdatedImages');
 
         this.defaultRequestOptions = new Lazy(() => this.getRequestOptions());
         this.authContext = new AsyncLazy(async () => this.getAuthContext());
