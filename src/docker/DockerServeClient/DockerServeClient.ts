@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Containers as ContainersClient } from '@docker/sdk';
-import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/dist/containers';
+import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/containers';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';

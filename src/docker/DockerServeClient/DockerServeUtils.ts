@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Container } from '@docker/sdk/dist/containers';
+import { Container } from '@docker/sdk/containers';
 import { DockerContainer, InspectionPort } from '../Containers';
 
 export function containerToDockerContainer(container: Container.AsObject): DockerContainer | undefined {
