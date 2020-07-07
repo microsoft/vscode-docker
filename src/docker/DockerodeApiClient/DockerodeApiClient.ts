@@ -18,7 +18,7 @@ import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { getContainerName, getFullTagFromDigest } from './DockerodeUtils';
 import { refreshDockerode } from './refreshDockerode';
 
-// 20 s timeout for all calls (enough time for a possible Dockerode refresh + the call, but short enough to be UX-reasonable)
+// 20 s timeout for all calls (enough time for any call, but short enough to be UX-reasonable)
 const dockerodeCallTimeout = 20 * 1000;
 
 export class DockerodeApiClient extends ContextChangeCancelClient implements DockerApiClient {
