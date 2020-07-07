@@ -9,7 +9,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { URL } from 'url';
-import { Event, EventEmitter, workspace } from 'vscode';
+import { commands, Event, EventEmitter, workspace } from 'vscode';
 import { Disposable } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { LineSplitter } from '../debugging/coreclr/lineSplitter';
@@ -48,6 +48,8 @@ export interface ContextManager {
     inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection>;
     use(actionContext: IActionContext, contextName: string): Promise<void>;
     remove(actionContext: IActionContext, contextName: string): Promise<void>;
+
+    isNewCli(): Promise<boolean>;
 }
 
 // TODO: consider a periodic refresh as a catch-all; but make sure it compares old data to new before firing a change event
@@ -55,12 +57,15 @@ export interface ContextManager {
 export class DockerContextManager implements ContextManager, Disposable {
     private readonly emitter: EventEmitter<DockerContext> = new EventEmitter<DockerContext>();
     private readonly contextsCache: AsyncLazy<DockerContext[]>;
+    private readonly newCli: AsyncLazy<boolean>;
     private readonly configFileWatcher: fs.FSWatcher;
     private readonly contextFolderWatcher: fs.FSWatcher;
     private refreshing: boolean = false;
 
     public constructor() {
         this.contextsCache = new AsyncLazy(async () => this.loadContexts());
+
+        this.newCli = new AsyncLazy(async () => this.getCliVersion());
 
         /* eslint-disable @typescript-eslint/tslint/config */
         this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
@@ -106,6 +111,9 @@ export class DockerContextManager implements ContextManager, Disposable {
         } finally {
             this.refreshing = false;
         }
+
+        // Lastly, trigger a CLI version check but don't wait
+        void this.newCli.getValue();
     }
 
     public async getContexts(): Promise<DockerContext[]> {
@@ -128,6 +136,10 @@ export class DockerContextManager implements ContextManager, Disposable {
     public async remove(actionContext: IActionContext, contextName: string): Promise<void> {
         const removeCmd: string = `docker context rm ${contextName}`;
         await spawnAsync(removeCmd, ContextCmdExecOptions);
+    }
+
+    public async isNewCli(): Promise<boolean> {
+        return this.newCli.getValue();
     }
 
     private async loadContexts(): Promise<DockerContext[]> {
@@ -200,5 +212,27 @@ export class DockerContextManager implements ContextManager, Disposable {
                 throw err;
             }
         });
+    }
+
+    private async getCliVersion(): Promise<boolean> {
+        let result: boolean = false;
+        const contexts = await this.contextsCache.getValue();
+
+        if (contexts.some(c => c.Type === 'aci')) {
+            // If there are any ACI contexts we automatically know it's the new CLI
+            result = true;
+        } else {
+            // Otherwise we look at the output of `docker serve --help`
+            // TODO: this is not a very good heuristic
+            const { stdout } = await execAsync('docker serve --help');
+
+            if (/^\s*Start an api server/i.test(stdout)) {
+                result = true;
+            }
+        }
+
+        // Set the VSCode context to the result (which may expose commands, etc.)
+        await commands.executeCommand('setContext', 'vscode-docker:newCli', result);
+        return result;
     }
 }

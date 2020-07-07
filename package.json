@@ -141,6 +141,10 @@
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.contexts.create.aci",
+                    "when": "vscode-docker:newCli"
                 }
             ],
             "editor/context": [
@@ -305,7 +309,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts",
+                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCli",
                     "group": "navigation@1"
                 },
                 {
