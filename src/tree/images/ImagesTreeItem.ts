@@ -15,7 +15,9 @@ import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImagePr
 import { ImageTreeItem } from "./ImageTreeItem";
 import { OutdatedImageChecker } from "./OutdatedImageChecker";
 
-export type DatedDockerImage = DockerImage & { Outdated?: boolean };
+export interface DatedDockerImage extends DockerImage {
+    Outdated?: boolean;
+}
 
 export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, ImageProperty> {
     private readonly outdatedImageChecker: OutdatedImageChecker = new OutdatedImageChecker();
