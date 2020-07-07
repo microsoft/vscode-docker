@@ -40,6 +40,8 @@ const defaultContext: Partial<DockerContext> = {
     Description: 'Current DOCKER_HOST based configuration',
 };
 
+type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent';
+
 export interface ContextManager {
     readonly onContextChanged: Event<DockerContext>;
     refresh(): Promise<void>;
@@ -101,8 +103,12 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // Create a new client
             if (currentContext.Type === 'aci') {
+                await this.setVsCodeContext('vscode-docker:aciContext', true);
+                await this.setVsCodeContext('vscode-docker:newSdkContext', true);
                 ext.dockerClient = new DockerServeClient();
             } else {
+                await this.setVsCodeContext('vscode-docker:aciContext', false);
+                await this.setVsCodeContext('vscode-docker:newSdkContext', false);
                 ext.dockerClient = new DockerodeApiClient(currentContext);
             }
 
@@ -245,7 +251,11 @@ export class DockerContextManager implements ContextManager, Disposable {
         }
 
         // Set the VSCode context to the result (which may expose commands, etc.)
-        await commands.executeCommand('setContext', 'vscode-docker:newCli', result);
+        await this.setVsCodeContext('vscode-docker:newCliPresent', result);
         return result;
+    }
+
+    private async setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): Promise<void> {
+        return commands.executeCommand('setContext', vsCodeContext, value);
     }
 }

@@ -144,7 +144,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
-                    "when": "vscode-docker:newCli"
+                    "when": "vscode-docker:newCliPresent"
                 }
             ],
             "editor/context": [
@@ -309,7 +309,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCli",
+                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent",
                     "group": "navigation@1"
                 },
                 {
