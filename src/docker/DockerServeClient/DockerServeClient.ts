@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient } from "@docker/sdk";
-import { Container, DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from "@docker/sdk/dist/containers";
+import { Containers as ContainersClient } from '@docker/sdk';
+import { Container, DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/dist/containers';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { localize } from "../../localize";
+import { localize } from '../../localize';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection, InspectionPort } from '../Containers';
-import { ContextChangeCancelClient } from "../ContextChangeCancelClient";
+import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
