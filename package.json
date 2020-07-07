@@ -356,17 +356,17 @@
                 },
                 {
                     "command": "vscode-docker.containers.start",
-                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@5"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
-                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@6"
                 },
                 {
                     "command": "vscode-docker.containers.restart",
-                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@7"
                 },
                 {
