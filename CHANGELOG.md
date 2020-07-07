@@ -2,7 +2,7 @@
 ### Added
 * Support for Azure Container Instances Docker contexts. [#2102](https://github.com/microsoft/vscode-docker/issues/2102)
 * ACI contexts can be created from the command palette or contexts view. [#2114](https://github.com/microsoft/vscode-docker/issues/2114)
-* Outdated base images are now flagged with a warning icon. The base image must exist in Docker Hub and be publicly-readable in order to be checked. This is on by default but can be disabled via the `docker.images.checkForOutdatedImages` setting. [#1493](https://github.com/microsoft/vscode-docker/issues/1493)
+* Outdated base images are now flagged with a warning icon. The base image must be in the root namespace in Docker Hub (i.e. docker.io/library). This feature is on by default but can be disabled via the `docker.images.checkForOutdatedImages` setting. [#1493](https://github.com/microsoft/vscode-docker/issues/1493)
 
 ### Fixed
 * Python debugging launcher now uses `python3` instead of `python`, to ensure Python 3.* is always run. [#2123](https://github.com/microsoft/vscode-docker/issues/2123)
