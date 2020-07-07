@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Containers as ContainersClient } from '@docker/sdk';
-import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StopRequest } from '@docker/sdk/containers';
+import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse } from '@docker/sdk/containers';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
@@ -81,16 +81,12 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     public async restartContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
         throw new NotSupportedError(context);
     }
-    // #endregion Not supported by the Docker SDK yet
 
     public async stopContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        // TODO: Stop is on the API but it returns not implemented error
-        const request = new StopRequest();
-        request.setId(ref);
-        request.setTimeout(5000);
-
-        await this.promisify(context, this.containersClient, this.containersClient.stop, request, token);
+        // Supported by SDK, but is not really the same thing; containers in ACI must stop/start as a group
+        throw new NotSupportedError(context);
     }
+    // #endregion Not supported by the Docker SDK yet
 
     public async removeContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
         const request = new DeleteRequest();
