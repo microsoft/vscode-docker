@@ -39,7 +39,10 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     public async getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]> {
-        const response: ListResponse = await this.promisify(context, this.containersClient, this.containersClient.list, new ListRequest(), token);
+        const request = new ListRequest();
+        request.setAll(true);
+
+        const response: ListResponse = await this.promisify(context, this.containersClient, this.containersClient.list, request, token);
         const result = response.getContainersList();
 
         return result.map(c => containerToDockerContainer(c.toObject()));
