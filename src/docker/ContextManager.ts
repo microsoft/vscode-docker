@@ -103,6 +103,8 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // Create a new client
             if (currentContext.Type === 'aci') {
+                // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
+                // But that probably won't be true in the future, so define both as separate concepts now
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', true);
                 ext.dockerClient = new DockerServeClient();
