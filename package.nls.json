@@ -136,6 +136,7 @@
     "vscode-docker.config.docker.images.description": "Any secondary properties to display for a image (an array). Possible elements include: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, and Tag",
     "vscode-docker.config.docker.images.label": "The primary property to display for a image: CreatedTime, FullTag, ImageId, Registry, Repository, RepositoryName, RepositoryNameAndTag, or Tag",
     "vscode-docker.config.docker.images.sortBy": "The property to use to sort images in Docker view: CreatedTime or Label",
+    "vscode-docker.config.docker.images.checkForOutdatedImages": "Check for outdated base images once per Visual Studio Code session",
     "vscode-docker.config.docker.networks.groupBy": "The property to use to group networks in Docker view: CreatedTime, NetworkDriver, NetworkId, NetworkName, or None",
     "vscode-docker.config.docker.networks.description": "Any secondary properties to display for a Docker network (an array). Possible elements include CreatedTime, NetworkDriver, NetworkId, and NetworkName",
     "vscode-docker.config.docker.networks.label": "The primary property to display for a Docker network: CreatedTime, NetworkDriver, NetworkId, or NetworkName",

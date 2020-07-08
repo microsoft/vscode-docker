@@ -1782,6 +1782,11 @@
                         "Label"
                     ]
                 },
+                "docker.images.checkForOutdatedImages": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
+                },
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
@@ -2649,7 +2654,7 @@
         "vscode-azureextensionui": "^0.33.6",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^4.1.2",
-        "vscode-tas-client": "^0.0.864",
+        "vscode-tas-client": "^0.1.4",
         "xml2js": "^0.4.23"
     }
 }

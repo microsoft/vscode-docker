@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerImage } from "../../docker/Images";
 import { IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getImageGroupIcon, ImageProperty } from "./ImageProperties";
+import { DatedDockerImage } from "./ImagesTreeItem";
 
-export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DockerImage, ImageProperty> {
+export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage, ImageProperty> {
     public static readonly contextValue: string = 'imageGroup';
     public readonly contextValue: string = ImageGroupTreeItem.contextValue;
     public childTypeLabel: string = 'image';
