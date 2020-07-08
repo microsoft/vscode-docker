@@ -2669,7 +2669,7 @@
         "request-promise-native": "^1.0.8",
         "semver": "^7.3.2",
         "tar": "^6.0.2",
-        "vscode-azureappservice": "^0.62.4",
+        "vscode-azureappservice": "^0.63.0",
         "vscode-azureextensionui": "^0.33.8",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^4.1.2",
