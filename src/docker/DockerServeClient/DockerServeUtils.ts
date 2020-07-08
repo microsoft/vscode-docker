@@ -34,7 +34,7 @@ export function containerToDockerContainer(container: Container.AsObject): Docke
         Status: container.status,
         ImageID: undefined, // TODO ?
         CreatedTime: undefined, // TODO ?
-        Labels: labels, // TODO--not working
+        Labels: labels, // TODO--not yet supported on ACI
         Ports: ports,
     };
 }
