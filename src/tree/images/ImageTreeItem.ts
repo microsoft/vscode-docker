@@ -4,17 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { DockerImage } from '../../docker/Images';
 import { ext } from '../../extensionVariables';
+import { localize } from "../../localize";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
-    private readonly _item: DockerImage;
+    private readonly _item: DatedDockerImage;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerImage) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DatedDockerImage) {
         super(parent);
         this._item = itemInfo;
     }
@@ -40,10 +41,14 @@ export class ImageTreeItem extends AzExtTreeItem {
     }
 
     public get description(): string | undefined {
-        return ext.imagesRoot.getTreeItemDescription(this._item);
+        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.Outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
     }
 
     public get iconPath(): IconPath {
+        if (this._item.Outdated) {
+            return getThemedIconPath('statusWarning');
+        }
+
         let icon: string;
         switch (ext.imagesRoot.labelSetting) {
             case 'Tag':

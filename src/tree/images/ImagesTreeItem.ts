@@ -13,14 +13,21 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
 import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
+import { OutdatedImageChecker } from "./OutdatedImageChecker";
 
-export class ImagesTreeItem extends LocalRootTreeItemBase<DockerImage, ImageProperty> {
+export interface DatedDockerImage extends DockerImage {
+    Outdated?: boolean;
+}
+
+export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, ImageProperty> {
+    private readonly outdatedImageChecker: OutdatedImageChecker = new OutdatedImageChecker();
+
     public treePrefix: string = 'images';
     public label: string = localize('vscode-docker.tree.images.label', 'Images');
     public configureExplorerTitle: string = localize('vscode-docker.tree.images.configure', 'Configure images explorer');
 
-    public childType: LocalChildType<DockerImage> = ImageTreeItem;
-    public childGroupType: LocalChildGroupType<DockerImage, ImageProperty> = ImageGroupTreeItem;
+    public childType: LocalChildType<DatedDockerImage> = ImageTreeItem;
+    public childGroupType: LocalChildGroupType<DatedDockerImage, ImageProperty> = ImageGroupTreeItem;
 
     public labelSettingInfo: ITreeSettingInfo<ImageProperty> = {
         properties: imageProperties,
@@ -41,8 +48,10 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DockerImage, ImageProp
         return this.groupBySetting === 'None' ? 'image' : 'image group';
     }
 
-    public async getItems(context: IActionContext): Promise<DockerImage[]> {
-        return ext.dockerClient.getImages(context);
+    public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
+        const result = await ext.dockerClient.getImages(context);
+        this.outdatedImageChecker.markOutdatedImages(result);
+        return result;
     }
 
     public getPropertyValue(item: DockerImage, property: ImageProperty): string {
