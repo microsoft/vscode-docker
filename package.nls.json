@@ -245,6 +245,7 @@
     "vscode-docker.commands.contexts.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.contexts.refresh": "Refresh",
     "vscode-docker.commands.contexts.help": "Docker Context Help",
+    "vscode-docker.commands.contexts.create.aci": "Create Azure Container Instances Context...",
     "vscode-docker.commands.help": "Docker Help",
     "vscode-docker.commands.category.docker": "Docker",
     "vscode-docker.commands.category.dockerContainers": "Docker Containers",
