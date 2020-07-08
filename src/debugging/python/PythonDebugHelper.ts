@@ -69,6 +69,11 @@ export class PythonDebugHelper implements DebugHelper {
         const projectType = debugConfiguration.python.projectType;
         const pythonRunTaskOptions = (context.runDefinition as PythonRunTaskDefinition)?.python || {};
 
+        ext.outputChannel.appendLine('Run task options:');
+        ext.outputChannel.appendLine(JSON.stringify(pythonRunTaskOptions));
+        ext.outputChannel.appendLine('Debug configuration:');
+        ext.outputChannel.appendLine(JSON.stringify(debugConfiguration));
+
         const dockerServerReadyAction =
             resolveDockerServerReadyAction(
                 debugConfiguration,
