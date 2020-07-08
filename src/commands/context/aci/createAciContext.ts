@@ -77,7 +77,7 @@ class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
             const error = parseError(err);
 
             // TODO: get the real error code
-            if (error.errorType === '1234') {
+            if (error.errorType === '5' || /not logged in/i.test(error.message)) {
                 // If error is due to being not logged in, we'll go through login and try again
                 await execAsync('docker login azure');
                 await execAsync(command);
