@@ -125,15 +125,7 @@ export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebug
     const workspaceTasks = workspace.getConfiguration('tasks');
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
-    ext.outputChannel.appendLine('Getting run tasks. VSCode returned this for all tasks:');
-    ext.outputChannel.appendLine(JSON.stringify(allTasks));
-
-    const result = await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration) as DockerRunTaskDefinition;
-
-    ext.outputChannel.appendLine('This is the result of the run task search:');
-    ext.outputChannel.appendLine(JSON.stringify(result));
-
-    return result;
+    return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration) as DockerRunTaskDefinition;
 }
 
 export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
