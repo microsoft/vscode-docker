@@ -21,7 +21,7 @@ export async function startContainer(context: IActionContext, node?: ContainerTr
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.start.starting', 'Starting Container(s)...') }, async () => {
         await Promise.all(nodes.map(async n => {
-            await ext.dockerClient.startContainer(context, node.containerId);
+            await ext.dockerClient.startContainer(context, n.containerId);
         }));
     });
 }
