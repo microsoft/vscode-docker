@@ -11,14 +11,6 @@ export const configPrefix: string = 'docker';
 // Consider downloading multiple pages (images, tags, etc)
 export const PAGE_SIZE = 100;
 
-export namespace keytarConstants {
-    export const serviceId: string = 'vscode-docker';
-
-    export const dockerHubTokenKey: string = 'dockerhub.token';
-    export const dockerHubUserNameKey: string = 'dockerhub.username';
-    export const dockerHubPasswordKey: string = 'dockerhub.password';
-}
-
 export namespace configurationKeys {
     export const groupImagesBy = 'groupImagesBy';
 }

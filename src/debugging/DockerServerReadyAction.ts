@@ -9,9 +9,9 @@
 
 import * as util from 'util';
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { callDockerode } from '../utils/callDockerode';
 import ChildProcessProvider from './coreclr/ChildProcessProvider';
 import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
@@ -204,31 +204,24 @@ class DockerLogsTracker extends vscode.Disposable {
             return;
         }
 
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.startListening();
     }
 
     private async startListening(): Promise<void> {
-        try {
-            const container = await callDockerode(() => ext.dockerode.getContainer(this.containerName));
+        return callWithTelemetryAndErrorHandling('dockerServerReadyAction.dockerLogsTracker.startListening', async (context: IActionContext) => {
+            // Don't actually telemetrize or show anything (same as prior behavior), but wrap call to get an IActionContext
+            context.telemetry.suppressAll = true;
+            context.errorHandling.suppressDisplay = true;
+            context.errorHandling.rethrow = false;
 
-            container.logs(
-                {
-                    follow: true,
-                    stdout: true
-                },
-                (err, stream) => {
-                    if (err) {
-                        return;
-                    }
+            this.logStream = await ext.dockerClient.getContainerLogs(context, this.containerName) as LogStream;
 
-                    this.logStream = <LogStream>stream;
-                    this.logStream.on('data', (data) => {
-                        // tslint:disable-next-line:no-unsafe-any
-                        this.detector.detectPattern(data.toString());
-                    });
-                });
-        } catch { }
+            this.logStream.on('data', (data) => {
+                // eslint-disable-next-line @typescript-eslint/tslint/config
+                this.detector.detectPattern(data.toString());
+            });
+        });
     }
 }
 

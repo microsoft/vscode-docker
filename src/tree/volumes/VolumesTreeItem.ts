@@ -3,23 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from "vscode-azureextensionui";
+import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { callDockerodeAsync } from "../../utils/callDockerode";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { LocalVolumeInfo } from "./LocalVolumeInfo";
 import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
 import { volumeProperties, VolumeProperty } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
 
-export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, VolumeProperty> {
+export class VolumesTreeItem extends LocalRootTreeItemBase<DockerVolume, VolumeProperty> {
     public treePrefix: string = 'volumes';
     public label: string = localize('vscode-docker.tree.volumes.label', 'Volumes');
     public configureExplorerTitle: string = localize('vscode-docker.tree.volumes.configure', 'Configure volumes explorer');
-    public childType: LocalChildType<LocalVolumeInfo> = VolumeTreeItem;
-    public childGroupType: LocalChildGroupType<LocalVolumeInfo, VolumeProperty> = VolumeGroupTreeItem;
+    public childType: LocalChildType<DockerVolume> = VolumeTreeItem;
+    public childGroupType: LocalChildGroupType<DockerVolume, VolumeProperty> = VolumeGroupTreeItem;
 
     public labelSettingInfo: ITreeSettingInfo<VolumeProperty> = {
         properties: volumeProperties,
@@ -40,16 +40,14 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<LocalVolumeInfo, Volu
         return this.groupBySetting === 'None' ? 'volume' : 'volume group';
     }
 
-    public async getItems(): Promise<LocalVolumeInfo[]> {
-        const result = await callDockerodeAsync(async () => ext.dockerode.listVolumes());
-        const volumes = (result && result.Volumes) || [];
-        return volumes.map(v => new LocalVolumeInfo(v));
+    public async getItems(context: IActionContext): Promise<DockerVolume[]> {
+        return ext.dockerClient.getVolumes(context);
     }
 
-    public getPropertyValue(item: LocalVolumeInfo, property: VolumeProperty): string {
+    public getPropertyValue(item: DockerVolume, property: VolumeProperty): string {
         switch (property) {
             case 'VolumeName':
-                return item.volumeName;
+                return item.Name;
             default:
                 return getCommonPropertyValue(item, property);
         }

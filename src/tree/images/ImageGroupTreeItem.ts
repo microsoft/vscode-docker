@@ -6,9 +6,9 @@
 import { IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getImageGroupIcon, ImageProperty } from "./ImageProperties";
-import { ILocalImageInfo } from "./LocalImageInfo";
+import { DatedDockerImage } from "./ImagesTreeItem";
 
-export class ImageGroupTreeItem extends LocalGroupTreeItemBase<ILocalImageInfo, ImageProperty> {
+export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage, ImageProperty> {
     public static readonly contextValue: string = 'imageGroup';
     public readonly contextValue: string = ImageGroupTreeItem.contextValue;
     public childTypeLabel: string = 'image';

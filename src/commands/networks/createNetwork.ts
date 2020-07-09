@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { DriverType } from '../../docker/Networks';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { callDockerodeWithErrorHandling } from '../../utils/callDockerode';
+import { getDockerOSType } from '../../utils/osUtils';
 
 export async function createNetwork(context: IActionContext): Promise<void> {
 
@@ -16,8 +16,9 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
     });
 
-    const engineVersion = await callDockerodeWithErrorHandling(async () => ext.dockerode.version(), context);
-    const drivers = engineVersion.Os === 'windows'
+    const osType = await getDockerOSType(context);
+
+    const drivers: { label: DriverType }[] = osType === 'windows'
         ? [
             { label: 'nat' },
             { label: 'transparent' }
@@ -36,8 +37,5 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         }
     );
 
-    const result = <{ id: string }>await callDockerodeWithErrorHandling(async () => ext.dockerode.createNetwork({ Name: name, Driver: driverSelection.label }), context);
-
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(localize('vscode-docker.commands.networks.create.created', 'Network Created with ID {0}', result.id.substr(0, 12)));
+    await ext.dockerClient.createNetwork(context, { Name: name, Driver: driverSelection.label });
 }

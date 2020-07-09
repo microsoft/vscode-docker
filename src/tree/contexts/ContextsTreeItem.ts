@@ -3,25 +3,24 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { workspace, WorkspaceConfiguration } from 'vscode';
-import { AzExtTreeItem } from 'vscode-azureextensionui';
+import { AzExtTreeItem, IActionContext } from 'vscode-azureextensionui';
+import { DockerContext } from '../../docker/Contexts';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { dockerContextManager } from "../../utils/dockerContextManager";
 import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
-import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
 import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { contextProperties, ContextProperty } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
-import { LocalContextInfo } from "./LocalContextInfo";
 
-export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, ContextProperty> {
+export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, ContextProperty> {
     public treePrefix: string = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
-    public childType: LocalChildType<LocalContextInfo> = ContextTreeItem;
-    public childGroupType: LocalChildGroupType<LocalContextInfo, ContextProperty> = ContextGroupTreeItem;
+    public childType: LocalChildType<DockerContext> = ContextTreeItem;
+    public childGroupType: LocalChildGroupType<DockerContext, ContextProperty> = ContextGroupTreeItem;
 
     public labelSettingInfo: ITreeSettingInfo<ContextProperty> = {
         properties: contextProperties,
@@ -42,21 +41,22 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, Co
         return this.groupBySetting === 'None' ? 'context' : 'context group';
     }
 
-    public async getItems(): Promise<LocalContextInfo[]> {
-        const contexts = await dockerContextManager.listAll();
-        return contexts.map(c => new LocalContextInfo(c));
+    public async getItems(context: IActionContext): Promise<DockerContext[]> {
+        return ext.dockerContextManager.getContexts();
     }
 
-    public getPropertyValue(item: LocalContextInfo, property: ContextProperty): string {
+    public getPropertyValue(item: DockerContext, property: ContextProperty): string {
         switch (property) {
             case 'Name':
-                return item.data.Name;
+                return item.Name;
             case 'Description':
-                return item.data.Description;
+                return item.Description;
             case 'DockerEndpoint':
-                return item.data.DockerEndpoint;
+                return item.DockerEndpoint;
             default:
-                return getCommonPropertyValue(item, property);
+                // No other properties exist for DockerContext but all case statements must have a default
+                // So return empty string
+                return '';
         }
     }
 
@@ -81,10 +81,5 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<LocalContextInfo, Co
                 settingInfo: this.descriptionSettingInfo
             }
         ]
-    }
-
-    protected getRefreshInterval(): number {
-        const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-        return configOptions.get<number>('explorerContextsRefreshInterval', 20) * 1000;
     }
 }

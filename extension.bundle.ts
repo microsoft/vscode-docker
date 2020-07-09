@@ -47,5 +47,10 @@ export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
 export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
 export { ActivityMeasurementService } from './src/telemetry/ActivityMeasurementService';
 export { ExperimentationTelemetry } from './src/telemetry/ExperimentationTelemetry';
+export { DockerApiClient } from './src/docker/DockerApiClient';
+export { DockerContainer } from './src/docker/Containers';
+export { DockerImage } from './src/docker/Images';
+export { DockerNetwork } from './src/docker/Networks';
+export { DockerVolume } from './src/docker/Volumes';
 
 export * from 'vscode-azureextensionui';
