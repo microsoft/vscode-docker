@@ -9,6 +9,7 @@ import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { getDockerOSType } from '../../utils/osUtils';
+import { execAsync } from '../../utils/spawnAsync';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
@@ -28,9 +29,22 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // On Windows containers, always use cmd
         shellCommand = 'cmd';
     } else {
-        // On Linux containers, check if bash is present
-        // If so use it, otherwise use sh
-        // TODO
+        const currentContext = await ext.dockerContextManager.getCurrentContext();
+
+        if (currentContext.Type === 'aci') {
+            // If it's ACI we have to do sh, because it's not possible to check if bash is present
+            shellCommand = 'sh';
+        } else {
+            // On Linux containers, check if bash is present
+            // If so use it, otherwise use sh
+            try {
+                // If this succeeds, bash is present (exit code 0)
+                await execAsync(`docker exec -i ${node.containerId} sh -c "which bash"`);
+                shellCommand = 'bash';
+            } catch {
+                shellCommand = 'sh';
+            }
+        }
     }
 
     const terminalCommand = await selectAttachCommand(
