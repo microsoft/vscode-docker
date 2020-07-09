@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
@@ -21,17 +20,18 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         });
     }
 
+    let shellCommand: string;
     let osType = await getDockerOSType(context);
     context.telemetry.properties.dockerOSType = osType;
 
-    let shellCommand: string;
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     if (osType === 'windows') {
-        shellCommand = configOptions.get('attachShellCommand.windowsContainer');
+        // On Windows containers, always use cmd
+        shellCommand = 'cmd';
     } else {
-        shellCommand = configOptions.get('attachShellCommand.linuxContainer');
+        // On Linux containers, check if bash is present
+        // If so use it, otherwise use sh
+        // TODO
     }
-    context.telemetry.properties.shellCommand = shellCommand;
 
     const terminalCommand = await selectAttachCommand(
         context,

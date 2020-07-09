@@ -163,8 +163,6 @@
     "vscode-docker.config.docker.languageserver.diagnostics.instructionHealthcheckMultiple": "Controls the diagnostic severity for flagging a Dockerfile with multiple HEALTHCHECK instructions",
     "vscode-docker.config.docker.languageserver.diagnostics.instructionJsonInSingleQuotes": "Controls the diagnostic severity for JSON instructions that are written incorrectly with single quotes",
     "vscode-docker.config.docker.languageserver.diagnostics.instructionWorkdirRelative": "Controls the diagnostic severity for WORKDIR instructions that do not point to an absolute path",
-    "vscode-docker.config.docker.attachShellCommand.linuxContainer": "Attach command to use for Linux containers",
-    "vscode-docker.config.docker.attachShellCommand.windowsContainer": "Attach command to use for Windows containers",
     "vscode-docker.config.docker.dockerComposeBuild": "Set to true to include --build option when docker-compose command is invoked",
     "vscode-docker.config.docker.dockerComposeDetached": "Set to true to include --d (detached) option when docker-compose command is invoked",
     "vscode-docker.config.docker.showRemoteWorkspaceWarning": "Set to true to prompt to switch from \"UI\" extension mode to \"Workspace\" extension mode if an operation is not supported in UI mode.",
