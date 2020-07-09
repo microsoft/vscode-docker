@@ -107,6 +107,7 @@
         "onCommand:vscode-docker.contexts.configureExplorer",
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
+        "onCommand:vscode-docker.contexts.create.aci",
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
@@ -140,6 +141,10 @@
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.contexts.create.aci",
+                    "when": "vscode-docker:newCliPresent"
                 }
             ],
             "editor/context": [
@@ -303,6 +308,11 @@
                     "group": "navigation@9"
                 },
                 {
+                    "command": "vscode-docker.contexts.create.aci",
+                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent",
+                    "group": "navigation@1"
+                },
+                {
                     "command": "vscode-docker.contexts.configureExplorer",
                     "when": "view == vscode-docker.views.dockerContexts",
                     "group": "navigation@8"
@@ -346,17 +356,17 @@
                 },
                 {
                     "command": "vscode-docker.containers.start",
-                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@5"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
-                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@6"
                 },
                 {
                     "command": "vscode-docker.containers.restart",
-                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i",
+                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i && vscode-docker:aciContext != true",
                     "group": "containers_1_general@7"
                 },
                 {
@@ -2527,6 +2537,15 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.contexts.create.aci",
+                "title": "%vscode-docker.commands.contexts.create.aci%",
+                "category": "%vscode-docker.commands.category.contexts%",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
+                }
             }
         ],
         "views": {
