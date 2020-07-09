@@ -39,8 +39,8 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     public async getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]> {
-        const request = new ListRequest();
-        request.setAll(true);
+        const request = new ListRequest()
+            .setAll(true);
 
         const response: ListResponse = await this.promisify(context, this.containersClient, this.containersClient.list, request, token);
         const result = response.getContainersList();
@@ -49,8 +49,8 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     public async inspectContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerContainerInspection> {
-        const request = new InspectRequest();
-        request.setId(ref);
+        const request = new InspectRequest()
+            .setId(ref);
 
         const response: InspectResponse = await this.promisify(context, this.containersClient, this.containersClient.inspect, request, token);
         const container = containerToDockerContainer(response.toObject().container);
@@ -92,9 +92,9 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     // #endregion Not supported by the Docker SDK yet
 
     public async removeContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        const request = new DeleteRequest();
-        request.setId(ref);
-        request.setForce(true);
+        const request = new DeleteRequest()
+            .setId(ref)
+            .setForce(true);
 
         await this.promisify(context, this.containersClient, this.containersClient.delete, request, token)
     }
