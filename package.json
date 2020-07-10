@@ -107,7 +107,6 @@
         "onCommand:vscode-docker.contexts.configureExplorer",
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
-        "onCommand:vscode-docker.contexts.create.aci",
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
@@ -141,10 +140,6 @@
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
-                },
-                {
-                    "command": "vscode-docker.contexts.create.aci",
-                    "when": "vscode-docker:newCliPresent"
                 }
             ],
             "editor/context": [
@@ -306,11 +301,6 @@
                     "command": "vscode-docker.volumes.refresh",
                     "when": "view == dockerVolumes",
                     "group": "navigation@9"
-                },
-                {
-                    "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent",
-                    "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.contexts.configureExplorer",
@@ -2537,15 +2527,6 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
-            },
-            {
-                "command": "vscode-docker.contexts.create.aci",
-                "title": "%vscode-docker.commands.contexts.create.aci%",
-                "category": "%vscode-docker.commands.category.contexts%",
-                "icon": {
-                    "light": "resources/light/add.svg",
-                    "dark": "resources/dark/add.svg"
-                }
             }
         ],
         "views": {
