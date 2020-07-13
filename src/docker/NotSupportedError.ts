@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "vscode-azureextensionui";
-import { localize } from "../localize";
+import { IActionContext } from 'vscode-azureextensionui';
+import { localize } from '../localize';
 
 export class NotSupportedError extends Error {
     public static ErrorType: string = 'NotSupportedError';
