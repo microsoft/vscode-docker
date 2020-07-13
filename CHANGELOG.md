@@ -1,3 +1,15 @@
+## 1.4.0 - 20 July 2020
+### Added
+* Support for Azure Container Instances Docker contexts. [#2102](https://github.com/microsoft/vscode-docker/issues/2102)
+* ACI contexts can be created from the command palette or contexts view. [#2114](https://github.com/microsoft/vscode-docker/issues/2114)
+* Outdated base images are now flagged with a warning icon. The base image must be in the root namespace in Docker Hub (i.e. docker.io/library). This feature is on by default but can be disabled via the `docker.images.checkForOutdatedImages` setting. [#1493](https://github.com/microsoft/vscode-docker/issues/1493)
+
+### Fixed
+* Python debugging launcher now uses `python3` instead of `python`, to ensure Python 3.* is always run. [#2123](https://github.com/microsoft/vscode-docker/issues/2123)
+* "Cannot read property 'filter' of null" during some commands. [#2030](https://github.com/microsoft/vscode-docker/issues/2030), [#2072](https://github.com/microsoft/vscode-docker/issues/2072), [#2108](https://github.com/microsoft/vscode-docker/issues/2108)
+* Node.js and Python debug configurations did not pass along all parameters. [#2024](https://github.com/microsoft/vscode-docker/issues/2024)
+* Fixed a few Dockerfile language server issues. [#2043](https://github.com/microsoft/vscode-docker/issues/2043), [#2055](https://github.com/microsoft/vscode-docker/issues/2055)
+
 ## 1.3.1 - 18 June 2020
 ### Fixed
 * Python debugging fails with message "Unable to find the debugger in the Python extension" due to new debugger location. [#2080](https://github.com/microsoft/vscode-docker/issues/2080)
