@@ -1764,7 +1764,8 @@
                             "Repository",
                             "RepositoryName",
                             "RepositoryNameAndTag",
-                            "Tag"
+                            "Tag",
+                            "Size"
                         ]
                     }
                 },
@@ -1780,7 +1781,8 @@
                         "Repository",
                         "RepositoryName",
                         "RepositoryNameAndTag",
-                        "Tag"
+                        "Tag",
+                        "Size"
                     ]
                 },
                 "docker.images.sortBy": {
@@ -1789,7 +1791,8 @@
                     "description": "%vscode-docker.config.docker.images.sortBy%",
                     "enum": [
                         "CreatedTime",
-                        "Label"
+                        "Label",
+                        "Size"
                     ]
                 },
                 "docker.images.checkForOutdatedImages": {

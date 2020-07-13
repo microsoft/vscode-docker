@@ -7,6 +7,7 @@ import { DockerObject } from './Common';
 
 export interface DockerImage extends DockerObject {
     readonly RepoDigests?: string[];
+    readonly Size?: number;
 }
 
 export interface DockerImageInspection extends DockerObject {
