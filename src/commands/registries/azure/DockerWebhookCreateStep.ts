@@ -16,9 +16,9 @@ import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegis
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
 import { DockerHubRepositoryTreeItem } from '../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { cryptoUtils } from '../../../utils/cryptoUtils';
 import { nonNullProp } from "../../../utils/nonNull";
 import { openExternal } from '../../../utils/openExternal';
-import { randomUtils } from '../../../utils/randomUtils';
 
 export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreate
@@ -81,7 +81,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         // trim to max length
         webhookName = webhookName.substr(0, maxLength - numRandomChars);
         // add random chars for uniqueness and to ensure min length is met
-        webhookName += randomUtils.getRandomHexString(numRandomChars);
+        webhookName += cryptoUtils.getRandomHexString(numRandomChars);
 
         // variables derived from the container registry
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
