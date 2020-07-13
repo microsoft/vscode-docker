@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
-import { getDockerOSType } from '../../utils/osUtils';
 import { execAsync } from '../../utils/spawnAsync';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
@@ -25,10 +24,9 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     let shellCommand: string;
     let osType: DockerOSType;
     try {
-        // TODO: get OS type from container instead of from system
-        osType = await getDockerOSType(context);
+        osType = (await ext.dockerClient.inspectContainer(context, node.containerId))?.Platform || 'linux';
     } catch {
-        // Assume linux
+        // Assume Linux if the above fails
         osType = 'linux';
     }
 
