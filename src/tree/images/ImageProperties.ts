@@ -11,7 +11,7 @@ import { getThemedIconPath, IconPath } from "../IconPath";
 import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 
-export type ImageProperty = CommonProperty | 'FullTag' | 'ImageId' | 'Registry' | 'Repository' | 'RepositoryName' | 'RepositoryNameAndTag' | 'Tag' | 'Size';
+export type ImageProperty = CommonProperty | 'FullTag' | 'ImageId' | 'Registry' | 'Repository' | 'RepositoryName' | 'RepositoryNameAndTag' | 'Tag';
 
 export const imageProperties: ITreePropertyInfo<ImageProperty>[] = [
     ...commonProperties,
@@ -38,7 +38,6 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Icon
         case 'FullTag':
         case 'ImageId':
         case 'RepositoryNameAndTag':
-        case 'Size':
             icon = 'applicationGroup';
             break;
         case 'Tag':
@@ -86,8 +85,6 @@ export function getImagePropertyValue(item: DockerImage, property: ImageProperty
             }
         case 'Tag':
             return parsedFullTag.tag || 'latest';
-        case 'Size':
-            return `${Math.round((item.Size ?? 0) / (1024 * 1024))} MB`;
         default:
             return getCommonPropertyValue(item, property);
     }

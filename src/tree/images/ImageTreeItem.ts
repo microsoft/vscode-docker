@@ -60,6 +60,10 @@ export class ImageTreeItem extends AzExtTreeItem {
         return getThemedIconPath(icon);
     }
 
+    public get size(): number {
+        return this._item.Size ?? 0;
+    }
+
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         let ref = this.fullTag;
 
