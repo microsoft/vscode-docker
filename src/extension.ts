@@ -82,7 +82,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
-        activateContext.telemetry.properties.hashedDockerInstallationID = await getHashedDockerInstallationID();
+        activateContext.telemetry.properties.dockerInstallationIDHash = await getDockerInstallationIDHash();
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -152,10 +152,10 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
     });
 }
 
-async function getHashedDockerInstallationID(): Promise<string> {
+async function getDockerInstallationIDHash(): Promise<string> {
     try {
         if (os.platform() === 'win32' || os.platform() === 'darwin') {
-            const cached = ext.context.globalState.get<string | undefined>('docker.installIdHashed', undefined);
+            const cached = ext.context.globalState.get<string | undefined>('docker.installIdHash', undefined);
 
             if (cached) {
                 return cached;
@@ -171,7 +171,7 @@ async function getHashedDockerInstallationID(): Promise<string> {
             if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
                 let result = bufferToString(await fse.readFile(installIdFilePath));
                 result = cryptoUtils.hashString(result);
-                await ext.context.globalState.update('docker.installIdHashed', result);
+                await ext.context.globalState.update('docker.installIdHash', result);
                 return result;
             }
         }

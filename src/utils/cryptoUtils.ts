@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as crypto from "crypto";
+import * as crypto from 'crypto';
 
 export namespace cryptoUtils {
     export function getRandomHexString(length: number = 10): string {
