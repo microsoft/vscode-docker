@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, AzExtParentTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerImage } from "../../docker/Images";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
