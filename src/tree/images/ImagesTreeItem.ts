@@ -40,7 +40,8 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     };
 
     public groupBySettingInfo: ITreeSettingInfo<ImageProperty | CommonGroupBy> = {
-        properties: [...imageProperties, groupByNoneProperty],
+        // No grouping by size
+        properties: [...imageProperties.filter(p => p.property !== 'Size'), groupByNoneProperty],
         defaultProperty: 'Repository',
     };
 
