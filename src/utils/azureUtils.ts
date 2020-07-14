@@ -57,11 +57,9 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
         form: {
             /* eslint-disable-next-line camelcase */
-            grant_type: 'refresh_token',
+            grant_type: 'access_token',
             service: registryHost,
             tenant: subContext.tenantId,
-            /* eslint-disable-next-line camelcase */
-            refresh_token: aadTokenResponse.refreshToken,
             /* eslint-disable-next-line camelcase */
             access_token: aadTokenResponse.accessToken,
         },
