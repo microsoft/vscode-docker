@@ -5,14 +5,14 @@ steps:
     targetType: F # search files and folders
     optionsUEPATH: '$(Build.SourcesDirectory)/.azure-pipelines/compliance/PoliCheckExclusions.xml'
   continueOnError: true
-  condition: ne(variables['System.PullRequest.IsFork'], 'True')
+  condition: eq(variables['Build.Reason'], 'Schedule')
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
   displayName: 'Publish Security Analysis Logs'
-  condition: ne(variables['System.PullRequest.IsFork'], 'True')
+  condition: eq(variables['Build.Reason'], 'Schedule')
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
   displayName: 'Post Analysis'
   inputs:
     AllTools: true
-  condition: ne(variables['System.PullRequest.IsFork'], 'True')
+  condition: eq(variables['Build.Reason'], 'Schedule')
