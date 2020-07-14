@@ -31,6 +31,7 @@ import { ExperimentationTelemetry } from './telemetry/ExperimentationTelemetry';
 import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
+import { cryptoUtils } from './utils/cryptoUtils';
 import { Keytar } from './utils/keytar';
 import { bufferToString } from './utils/spawnAsync';
 import { DefaultTerminalProvider } from './utils/TerminalProvider';
@@ -81,7 +82,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
-        activateContext.telemetry.properties.dockerInstallationID = await getDockerInstallationID();
+        activateContext.telemetry.properties.dockerInstallationIDHash = await getDockerInstallationIDHash();
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -151,27 +152,30 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
     });
 }
 
-async function getDockerInstallationID(): Promise<string> {
-    if (os.platform() === 'win32' || os.platform() === 'darwin') {
-        const cached = ext.context.globalState.get<string | undefined>('docker.installId', undefined);
+async function getDockerInstallationIDHash(): Promise<string> {
+    try {
+        if (os.platform() === 'win32' || os.platform() === 'darwin') {
+            const cached = ext.context.globalState.get<string | undefined>('docker.installIdHash', undefined);
 
-        if (cached) {
-            return cached;
-        }
+            if (cached) {
+                return cached;
+            }
 
-        let installIdFilePath: string | undefined;
-        if (os.platform() === 'win32' && process.env.APPDATA) {
-            installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
-        } else if (os.platform() === 'darwin') {
-            installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
-        }
+            let installIdFilePath: string | undefined;
+            if (os.platform() === 'win32' && process.env.APPDATA) {
+                installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
+            } else if (os.platform() === 'darwin') {
+                installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
+            }
 
-        if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
-            const result = bufferToString(await fse.readFile(installIdFilePath));
-            await ext.context.globalState.update('docker.installId', result);
-            return result;
+            if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
+                let result = bufferToString(await fse.readFile(installIdFilePath));
+                result = cryptoUtils.hashString(result);
+                await ext.context.globalState.update('docker.installIdHash', result);
+                return result;
+            }
         }
-    }
+    } catch { }
 
     return 'unknown';
 }
