@@ -80,6 +80,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     initializeExtensionVariables(ctx);
 
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
+        activateContext.errorHandling.rethrow = true;
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
         activateContext.telemetry.properties.dockerInstallationIDHash = await getDockerInstallationIDHash();

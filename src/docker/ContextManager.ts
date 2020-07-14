@@ -70,9 +70,16 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         this.newCli = new AsyncLazy(async () => this.getCliVersion());
 
+        // The file watchers are not strictly necessary; they serve to help the extension detect context switches
+        // that are done in CLI. Worst case, a user would have to restart VSCode.
         /* eslint-disable @typescript-eslint/tslint/config */
-        this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
-        this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+        if (fse.existsSync(dockerConfigFile)) {
+            this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+        }
+
+        if (fse.existsSync(dockerContextsFolder)) {
+            this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+        }
         /* eslint-enable @typescript-eslint/tslint/config */
     }
 
