@@ -46,6 +46,7 @@ export interface ContextManager {
     readonly onContextChanged: Event<DockerContext>;
     refresh(): Promise<void>;
     getContexts(): Promise<DockerContext[]>;
+    getCurrentContext(): Promise<DockerContext>;
 
     inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection>;
     use(actionContext: IActionContext, contextName: string): Promise<void>;
@@ -69,9 +70,16 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         this.newCli = new AsyncLazy(async () => this.getCliVersion());
 
+        // The file watchers are not strictly necessary; they serve to help the extension detect context switches
+        // that are done in CLI. Worst case, a user would have to restart VSCode.
         /* eslint-disable @typescript-eslint/tslint/config */
-        this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
-        this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+        if (fse.existsSync(dockerConfigFile)) {
+            this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+        }
+
+        if (fse.existsSync(dockerContextsFolder)) {
+            this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+        }
         /* eslint-enable @typescript-eslint/tslint/config */
     }
 
@@ -96,8 +104,9 @@ export class DockerContextManager implements ContextManager, Disposable {
             this.refreshing = true;
 
             this.contextsCache.clear();
-            const contexts = await this.contextsCache.getValue();
-            const currentContext = contexts.find(c => c.Current);
+
+            // Because the cache is cleared, this will load all the contexts before returning the current one
+            const currentContext = await this.getCurrentContext();
 
             void ext.dockerClient?.dispose();
 
@@ -126,6 +135,11 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     public async getContexts(): Promise<DockerContext[]> {
         return this.contextsCache.getValue();
+    }
+
+    public async getCurrentContext(): Promise<DockerContext> {
+        const contexts = await this.getContexts();
+        return contexts.find(c => c.Current);
     }
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {

@@ -4,8 +4,8 @@
 
 import * as semver from 'semver';
 import { parseError } from 'vscode-azureextensionui';
+import { cryptoUtils } from '../../utils/cryptoUtils';
 import { OSProvider } from "../../utils/LocalOSProvider";
-import { randomUtils } from '../../utils/randomUtils';
 import { ProcessProvider } from "./ChildProcessProvider";
 import { FileSystemProvider } from "./fsProvider";
 
@@ -100,7 +100,7 @@ export class CommandLineDotNetClient implements DotNetClient {
         const dotNetVer = await this.getVersion();
         if (semver.gte(dotNetVer, '3.0.0')) {
             // The dotnet 3.0 CLI has `dotnet user-secrets init`, let's use that if possible
-            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${randomUtils.getRandomHexString(32)}`;
+            const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${cryptoUtils.getRandomHexString(32)}`;
             await this.processProvider.exec(userSecretsInitCommand, {});
         } else {
             // Otherwise try to manually edit the project file by adding a property group immediately after the <Project> tag
@@ -112,7 +112,7 @@ export class CommandLineDotNetClient implements DotNetClient {
                 // If found, add the new property group immediately after
                 const propertyGroup = `
   <PropertyGroup>
-    <UserSecretsId>${randomUtils.getRandomHexString(32)}</UserSecretsId>
+    <UserSecretsId>${cryptoUtils.getRandomHexString(32)}</UserSecretsId>
   </PropertyGroup>`;
                 const newContents = contents.replace(matches[0], matches[0] + propertyGroup);
                 await this.fsProvider.writeFile(projectFile, newContents);
@@ -121,7 +121,7 @@ export class CommandLineDotNetClient implements DotNetClient {
     }
 
     private async exportCertificateAndSetPassword(projectFile: string, certificateExportPath: string): Promise<void> {
-        const password = randomUtils.getRandomHexString(32);
+        const password = cryptoUtils.getRandomHexString(32);
 
         // Export the certificate
         const exportCommand = `dotnet dev-certs https -ep "${certificateExportPath}" -p "${password}"`;

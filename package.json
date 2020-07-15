@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.3.2-alpha",
+    "version": "1.4.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -2628,7 +2628,6 @@
         "@typescript-eslint/eslint-plugin": "^3.6.0",
         "@typescript-eslint/eslint-plugin-tslint": "^3.6.0",
         "@typescript-eslint/parser": "^3.6.0",
-        "adal-node": "^0.2.1",
         "adm-zip": "^0.4.16",
         "copy-webpack-plugin": "^5.1.1",
         "eslint": "^7.4.0",
@@ -2653,11 +2652,13 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "@docker/sdk": "^0.1.7",
+        "adal-node": "^0.2.1",
         "azure-arm-containerregistry": "^5.1.0",
         "azure-arm-website": "^5.7.0",
         "azure-storage": "^2.10.3",
         "dockerfile-ast": "^0.0.27",
-        "dockerfile-language-server-nodejs": "^0.0.24",
+        "dockerfile-language-server-nodejs": "^0.1.0",
         "dockerode": "^3.2.0",
         "fs-extra": "^9.0.1",
         "glob": "^7.1.6",

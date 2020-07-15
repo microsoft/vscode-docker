@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
@@ -20,7 +21,15 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         });
     }
 
-    let osType = await getDockerOSType(context);
+    let osType: DockerOSType;
+    try {
+        // TODO: get OS type from container instead of from system
+        osType = await getDockerOSType(context);
+    } catch {
+        // Assume linux
+        osType = 'linux';
+    }
+
     context.telemetry.properties.dockerOSType = osType;
 
     let shellCommand: string;
