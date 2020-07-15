@@ -52,6 +52,7 @@ export namespace ext {
     export let networksRoot: NetworksTreeItem;
 
     export const prefix: string = 'docker';
+    export let tree: never; // This is required by IAppServiceExtensionVariables but should not be used in this extension
 
     export let registriesTree: AzExtTreeDataProvider;
     export let registriesTreeView: TreeView<AzExtTreeItem>;

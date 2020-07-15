@@ -64,7 +64,7 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
 }
 
 // Runs before all tests
-suiteSetup(async function (this: mocha.IHookCallbackContext): Promise<void> {
+suiteSetup(async function (this: mocha.Context): Promise<void> {
     this.timeout(60 * 1000);
     console.log('global.test.ts: suiteSetup');
 
@@ -81,7 +81,7 @@ suiteSetup(async function (this: mocha.IHookCallbackContext): Promise<void> {
 });
 
 // Runs after all tests
-suiteTeardown(async function (this: mocha.IHookCallbackContext): Promise<void> {
+suiteTeardown(async function (this: mocha.Context): Promise<void> {
     console.log('global.test.ts: suiteTeardown');
 
     if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {

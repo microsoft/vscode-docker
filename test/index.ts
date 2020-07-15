@@ -13,7 +13,7 @@ export function run(): Promise<void> {
     // Create the mocha test
     const mocha = new Mocha({
         ui: 'tdd',
-        useColors: true,
+        color: true,
         grep: process.env.MOCHA_grep,
     });
 
