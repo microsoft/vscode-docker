@@ -18,7 +18,7 @@ export let configureNode: IPlatformGeneratorInfo = {
     initializeForDebugging,
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd }: Partial<PackageInfo>): string {
     let exposeStatements = getExposeStatements(ports);
 
     let cmdDirective: string;
@@ -50,7 +50,7 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd }: Partial<PackageInfo>): string {
     const inspectConfig = '--inspect=0.0.0.0:9229';
 
     let cmdDirective: string;
@@ -85,11 +85,11 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
 }
 
 function toCMDArray(cmdArray: string[]): string {
-    return cmdArray.map(part => {
+    return `[${cmdArray.map(part => {
         if (part.startsWith('"') && part.endsWith('"')) {
             return part;
         }
 
         return `"${part}"`;
-    }).join(', ');
+    }).join(', ')}]`;
 }
