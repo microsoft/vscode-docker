@@ -24,9 +24,7 @@ import { ConfigureTelemetryProperties, genCommonDockerIgnoreFile, getSubfolderDe
 import { openFilesIfRequired, registerScaffolder, scaffold, Scaffolder, ScaffolderContext, ScaffoldFile } from './scaffolding';
 
 export interface PackageInfo {
-    npmStart: boolean; // has npm start
-    cmd: string;
-    fullCommand: string; // full command
+    cmd: string | string[];
     author: string;
     version: string;
     artifactName: string;
@@ -155,9 +153,7 @@ async function getPackageJson(folderPath: string): Promise<vscode.Uri[]> {
 
 function getDefaultPackageInfo(): PackageInfo {
     return {
-        npmStart: true,
-        fullCommand: 'npm start',
-        cmd: 'npm start',
+        cmd: ['npm', 'start'],
         author: 'author',
         version: '0.0.1',
         artifactName: ''
@@ -175,15 +171,9 @@ async function readPackageJson(folderPath: string): Promise<{ packagePath?: stri
         const json = <JsonPackageContents>JSON.parse(fse.readFileSync(packagePath, 'utf8'));
 
         if (json.scripts && typeof json.scripts.start === "string") {
-            packageInfo.npmStart = true;
-            packageInfo.fullCommand = json.scripts.start;
-            packageInfo.cmd = 'npm start';
+            packageInfo.cmd = ['npm', 'start'];
         } else if (typeof json.main === "string") {
-            packageInfo.npmStart = false;
-            packageInfo.fullCommand = 'node' + ' ' + json.main;
-            packageInfo.cmd = packageInfo.fullCommand;
-        } else {
-            packageInfo.fullCommand = '';
+            packageInfo.cmd = ['node', json.main];
         }
 
         if (typeof json.author === "string") {
