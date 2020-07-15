@@ -5,83 +5,83 @@
 
 import { ext, DockerImage } from '../../extension.bundle';
 import { runWithSetting } from '../runWithSetting';
-import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
+import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
 const testImages: DockerImage[] = [
     {
         Name: 'a',
         Id: 'sha256:b0648d86f18e6141a8bfa98d4d17d5180aa2699af7f27eac5491fd1f950f6f05',
-        CreatedTime: generateCreatedTimeInSec(2)
+        CreatedTime: generateCreatedTimeInMs(2)
     },
     {
         Name: 'abcdefghijklmnopqrstuvwxyz',
         Id: 'sha256:678090bb0827fecbee9eb0bbc65200022bbc09c91a8bf4acf136f5e633260a93',
-        CreatedTime: generateCreatedTimeInSec(3)
+        CreatedTime: generateCreatedTimeInMs(3)
     },
     {
         Name: 'abcdefghijklmnopqrstuvwxyz:version1.0.test',
         Id: 'sha256:0dbb0aabc7476292f98610d094a1bbc7f3012fd65cccc823e719a44267075bc7',
-        CreatedTime: generateCreatedTimeInSec(4)
+        CreatedTime: generateCreatedTimeInMs(4)
     },
     {
         Name: 'a.b/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:28bd20772f5203d07fdbfa38438f17cf720aaf01f7b53c205ac7e25b0795b718',
-        CreatedTime: generateCreatedTimeInSec(5)
+        CreatedTime: generateCreatedTimeInMs(5)
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:38e8467493f68c24a78dafbe49587c07e78b0f84ec8cdc19a509ce3536f334fa',
-        CreatedTime: generateCreatedTimeInSec(6)
+        CreatedTime: generateCreatedTimeInMs(6)
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:1e6d05ff19d567a103b3d134aa793841b51345a45fb59fd0287fb9d96e55c51b',
-        CreatedTime: generateCreatedTimeInSec(7)
+        CreatedTime: generateCreatedTimeInMs(7)
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:16bba3882d727858afbb6dee098c5b5c9671bce8d347b995091f558afbdb18a5',
-        CreatedTime: generateCreatedTimeInSec(8)
+        CreatedTime: generateCreatedTimeInMs(8)
     },
     {
         Name: 'registry.gitlab.com/sweatherford/hello-world/sub:latest',
         Id: 'sha256:a3f7187fcd572b4c2065f96abd87b759b9ab9ed58bf7ea3755714bcc8795cf8a',
-        CreatedTime: generateCreatedTimeInSec(9)
+        CreatedTime: generateCreatedTimeInMs(9)
     },
     {
         Name: '127.0.0.1:5443/registry:v2',
         Id: 'sha256:ad8fe06eeca42a64aa28ca767b0f3fbe8713c087a6dcc66be949cefbe2131287',
-        CreatedTime: generateCreatedTimeInSec(58)
+        CreatedTime: generateCreatedTimeInMs(58)
     },
     {
         Name: '127.0.0.1:5443/hello-world/sub:latest',
         Id: 'sha256:c8b4e4c47a8e6cc5e9c4f9cc9858f83d1d3e79c6ab4d890f7fb190a599d29903',
-        CreatedTime: generateCreatedTimeInSec(59)
+        CreatedTime: generateCreatedTimeInMs(59)
     },
     {
         Name: 'hello-world:latest',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
-        CreatedTime: generateCreatedTimeInSec(60)
+        CreatedTime: generateCreatedTimeInMs(60)
     },
     {
         Name: 'hello-world:v1',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
-        CreatedTime: generateCreatedTimeInSec(60)
+        CreatedTime: generateCreatedTimeInMs(60)
     },
     {
         Name: 'namespace1/abc:v3',
         Id: 'sha256:d0eed8dad114db55d81c870efb8c148026da4a0f61dc7710c053da55f9604849',
-        CreatedTime: generateCreatedTimeInSec(366)
+        CreatedTime: generateCreatedTimeInMs(366)
     },
     {
         Name: 'localhost/abc:v4',
         Id: 'sha256:f61138f385d368484da055ecb085201ec06a524e92a10c64e6535bf6c32d15a4',
-        CreatedTime: generateCreatedTimeInSec(367)
+        CreatedTime: generateCreatedTimeInMs(367)
     },
     {
         Name: 'localhost:8080/abc',
         Id: 'sha256:e05f39ada67afbe24e68a22eeb9a45c59d0aab31f0a1585870a75893981fae75',
-        CreatedTime: generateCreatedTimeInSec(368)
+        CreatedTime: generateCreatedTimeInMs(368)
     },
 ];
 
