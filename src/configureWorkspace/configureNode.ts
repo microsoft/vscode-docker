@@ -50,13 +50,12 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, main }: Partial<PackageInfo>): string {
     const inspectConfig = '--inspect=0.0.0.0:9229';
 
     let cmdDirective: string;
-    if (Array.isArray(cmd) && cmd[0].toLowerCase() === 'node') {
-        cmd.splice(1, 0, inspectConfig);
-        cmdDirective = `command: ${toCMDArray(cmd)}`;
+    if (main) {
+        cmdDirective = `command: ${toCMDArray(['node', inspectConfig, main])}`;
     } else {
         cmdDirective = `## set your startup file here\n    command: ["node", "${inspectConfig}", "index.js"]`;
     }

@@ -28,6 +28,7 @@ export interface PackageInfo {
     author: string;
     version: string;
     artifactName: string;
+    main?: string;
 }
 
 interface JsonPackageContents {
@@ -156,7 +157,8 @@ function getDefaultPackageInfo(): PackageInfo {
         cmd: ['npm', 'start'],
         author: 'author',
         version: '0.0.1',
-        artifactName: ''
+        artifactName: '',
+        main: 'index.js',
     };
 }
 
@@ -172,8 +174,14 @@ async function readPackageJson(folderPath: string): Promise<{ packagePath?: stri
 
         if (json.scripts && typeof json.scripts.start === "string") {
             packageInfo.cmd = ['npm', 'start'];
+
+            const matches = /node (.+)/i.exec(json.scripts.start);
+            if (matches?.[1]) {
+                packageInfo.main = matches[1];
+            }
         } else if (typeof json.main === "string") {
             packageInfo.cmd = ['node', json.main];
+            packageInfo.main = json.main;
         }
 
         if (typeof json.author === "string") {
