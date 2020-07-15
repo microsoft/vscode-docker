@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from 'vscode';
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, IResourceGroupWizardContext, LocationListStep, parseError, ResourceGroupListStep } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, IResourceGroupWizardContext, parseError, ResourceGroupListStep } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
@@ -37,7 +37,6 @@ export async function createAciContext(actionContext: IActionContext): Promise<v
 
     // Add additional prompt steps
     promptSteps.push(new ResourceGroupListStep());
-    LocationListStep.addStep(wizardContext, promptSteps);
 
     // Set up the execute steps
     const executeSteps: AzureWizardExecuteStep<IAciWizardContext>[] = [
@@ -66,10 +65,11 @@ class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
 
     public async execute(wizardContext: IAciWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
         const creatingNewContext: string = localize('vscode-docker.commands.contexts.create.aci.creatingContext', 'Creating ACI context "{0}"...', wizardContext.contextName);
+        const createdContext: string = localize('vscode-docker.commands.contexts.create.aci.createdContext', 'Created ACI context "{0}".', wizardContext.contextName);
         ext.outputChannel.appendLine(creatingNewContext);
         progress.report({ message: creatingNewContext });
 
-        const command = `docker context create aci ${wizardContext.contextName} --subscription-id ${wizardContext.subscriptionId} --location ${wizardContext.location.name} --resource-group ${wizardContext.resourceGroup.name}`;
+        const command = `docker context create aci ${wizardContext.contextName} --subscription-id ${wizardContext.subscriptionId} --resource-group ${wizardContext.resourceGroup.name}`;
 
         try {
             await execAsync(command);
@@ -85,6 +85,9 @@ class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
                 throw err;
             }
         }
+
+        ext.outputChannel.appendLine(createdContext);
+        progress.report({ message: createdContext });
     }
 
     public shouldExecute(context: IAciWizardContext): boolean {
