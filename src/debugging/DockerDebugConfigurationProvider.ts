@@ -125,7 +125,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidTerminateDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
-                // Don't do anything if this isn't our debug session, or if it's a subprocess debug session
+                // Don't do anything if this isn't our debug session, or if it's a subprocess debug session (which is how Python does hot reload sessions)
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName && !(sessionConfiguration?.subProcessId)) {
                     try {
                         await this.dockerClient.removeContainer(resolvedConfiguration.dockerOptions.containerName, { force: true });
@@ -142,7 +142,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             const disposable = debug.onDidStartDebugSession(async session => {
                 const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
 
-                // Don't do anything if this isn't our debug session (which is how Python does hot reload sessions)
+                // Don't do anything if this isn't our debug session
                 if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
                     try {
                         const inspectInfo = await ext.dockerClient.inspectContainer(context, resolvedConfiguration.dockerOptions.containerName);
