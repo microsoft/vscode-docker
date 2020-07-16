@@ -78,7 +78,7 @@ export async function composeRestart(context: IActionContext, dockerComposeFileU
 
 async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
     if ((await ext.dockerContextManager.getCurrentContext()).Type === 'aci') {
-        // Replace 'docker-compose ' at the start of a string with 'docker compose '
+        // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
         return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
     } else {
         return command;
