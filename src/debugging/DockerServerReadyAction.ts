@@ -289,15 +289,17 @@ class MultiOutputDockerServerReadyManager extends vscode.Disposable implements D
 }
 
 class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
-    private static trackers: Map<vscode.DebugSession, MultiOutputDockerServerReadyManager> = new Map<vscode.DebugSession, MultiOutputDockerServerReadyManager>();
+    private static trackers: Map<string, MultiOutputDockerServerReadyManager> = new Map<string, MultiOutputDockerServerReadyManager>();
 
     public static start(session: vscode.DebugSession): DockerDebugAdapterTracker | undefined {
         const configuration = <ResolvedDebugConfiguration>session.configuration;
         if (configuration?.dockerOptions?.dockerServerReadyAction) {
-            let tracker = DockerDebugAdapterTrackerFactory.trackers.get(session);
+            const realSessionId = configuration?.__sessionId as string || session.id;
+
+            let tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
             if (!tracker) {
                 tracker = new MultiOutputDockerServerReadyManager(session);
-                DockerDebugAdapterTrackerFactory.trackers.set(session, tracker);
+                DockerDebugAdapterTrackerFactory.trackers.set(realSessionId, tracker);
             }
 
             return tracker.tracker;
@@ -307,10 +309,11 @@ class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFact
     }
 
     public static stop(session: vscode.DebugSession): void {
-        const tracker = DockerDebugAdapterTrackerFactory.trackers.get(session);
+        const realSessionId = session.configuration?.__sessionId as string || session.id;
+        const tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
 
         if (tracker) {
-            DockerDebugAdapterTrackerFactory.trackers.delete(session);
+            DockerDebugAdapterTrackerFactory.trackers.delete(realSessionId);
             tracker.dispose();
         }
     }
