@@ -164,7 +164,7 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
 
     context.telemetry.properties.isDefaultCommand = defaultCommandsForContext.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
     context.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
-    context.telemetry.properties.commandContextType = selectedTemplate.parsedContextType.toString(); // TODO: validate this even works
+    context.telemetry.properties.commandContextType = selectedTemplate.parsedContextType.toString(); // TODO: validate this even works // TODO: it does not
     context.telemetry.properties.currentContextType = currentContextType.toString();
 
     return resolveVariables(selectedTemplate.template, folder, additionalVariables);

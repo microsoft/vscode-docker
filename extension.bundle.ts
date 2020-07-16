@@ -52,5 +52,6 @@ export { DockerContainer } from './src/docker/Containers';
 export { DockerImage } from './src/docker/Images';
 export { DockerNetwork } from './src/docker/Networks';
 export { DockerVolume } from './src/docker/Volumes';
+export { DockerContextTypes } from './src/docker/Contexts';
 
 export * from 'vscode-azureextensionui';
