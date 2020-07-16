@@ -147,7 +147,7 @@ module.exports = {
         "max-lines": "off",
         "new-parens": "error",
         "newline-per-chained-call": "off",
-        "no-bitwise": "error",
+        "no-bitwise": "off",
         "no-caller": "error",
         "no-cond-assign": "error",
         "no-console": [

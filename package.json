@@ -1418,6 +1418,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.build.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1450,6 +1461,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.run.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1482,6 +1504,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.runInteractive.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1514,6 +1547,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.attach.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1546,6 +1590,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.logs.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1578,6 +1633,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.composeUp.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1590,7 +1656,18 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose ${configurationFile} up ${detached} ${build}",
+                    "default": [
+                        {
+                            "label": "Compose Up",
+                            "template": "docker-compose ${configurationFile} up ${detached} ${build}",
+                            "contextType": "downlevel"
+                        },
+                        {
+                            "label": "Compose Up",
+                            "template": "docker compose ${configurationFile} up ${detached}",
+                            "contextType": "uplevel"
+                        }
+                    ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
                 },
                 "docker.commands.composeDown": {
@@ -1610,6 +1687,17 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.composeDown.match%"
+                                    },
+                                    "contextType": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.contextType.description%",
+                                        "enum": [
+                                            "all",
+                                            "downlevel",
+                                            "uplevel",
+                                            "aci"
+                                        ],
+                                        "default": "all"
                                     }
                                 },
                                 "required": [
@@ -1622,7 +1710,18 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker-compose ${configurationFile} down",
+                    "default": [
+                        {
+                            "label": "Compose Down",
+                            "template": "docker-compose ${configurationFile} down",
+                            "contextType": "downlevel"
+                        },
+                        {
+                            "label": "Compose Down",
+                            "template": "docker compose ${configurationFile} down",
+                            "contextType": "uplevel"
+                        }
+                    ],
                     "description": "%vscode-docker.config.template.composeDown.description%"
                 },
                 "docker.containers.groupBy": {

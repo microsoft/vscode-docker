@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { DockerContextTypes } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -15,19 +16,27 @@ type CommandTemplate = {
     template: string,
     label: string,
     match?: string,
+    contextType?: string,
+    parsedContextType: DockerContextTypes,
 };
 
 // NOTE: the default templates are duplicated in package.json, since VSCode offers no way of looking up extension-level default settings
 // So, when modifying them here, be sure to modify them there as well!
-const defaults: { [key in TemplateCommand]: CommandTemplate } = {
+const defaults: { [key in TemplateCommand]: CommandTemplate[] } = {
     /* eslint-disable no-template-curly-in-string */
-    'build': { label: 'Docker Build', template: 'docker build --pull --rm -f "${dockerfile}" -t ${tag} "${context}"' },
-    'run': { label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' },
-    'runInteractive': { label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' },
-    'attach': { label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' },
-    'logs': { label: 'Docker Logs', template: 'docker logs -f ${containerId}' },
-    'composeUp': { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}' },
-    'composeDown': { label: 'Compose Down', template: 'docker-compose ${configurationFile} down' },
+    'build': [{ label: 'Docker Build', template: 'docker build --pull --rm -f "${dockerfile}" -t ${tag} "${context}"', parsedContextType: DockerContextTypes.all }],
+    'run': [{ label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}', parsedContextType: DockerContextTypes.all }],
+    'runInteractive': [{ label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}', parsedContextType: DockerContextTypes.all }],
+    'attach': [{ label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}', parsedContextType: DockerContextTypes.all }],
+    'logs': [{ label: 'Docker Logs', template: 'docker logs -f ${containerId}', parsedContextType: DockerContextTypes.all }],
+    'composeUp': [
+        { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}', parsedContextType: DockerContextTypes.downlevel },
+        { label: 'Compose Up', template: 'docker compose ${configurationFile} up ${detached}', parsedContextType: DockerContextTypes.uplevel },
+    ],
+    'composeDown': [
+        { label: 'Compose Down', template: 'docker-compose ${configurationFile} down', parsedContextType: DockerContextTypes.downlevel },
+        { label: 'Compose Down', template: 'docker compose ${configurationFile} down', parsedContextType: DockerContextTypes.uplevel },
+    ],
     /* eslint-enable no-template-curly-in-string */
 };
 
@@ -89,6 +98,10 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
 }
 
 async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext?: string[], folder?: vscode.WorkspaceFolder, additionalVariables?: { [key: string]: string }): Promise<string> {
+    // Get the current context type
+    const currentContext = await ext.dockerContextManager.getCurrentContext();
+    const currentContextType = currentContext.ContextType;
+
     // Get the templates from settings
     const config = vscode.workspace.getConfiguration('docker');
     const templateSetting: CommandTemplate[] | string = config.get(`commands.${command}`);
@@ -104,8 +117,21 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
         templates = templateSetting;
     }
 
-    // Look for settings-defined template(s) with explicit match, that matches the context
+    // Set the parsedContextType on each template
+    templates.forEach(template => {
+        try {
+            template.parsedContextType = template.parsedContextType ?? template.contextType ? DockerContextTypes[template.contextType] as DockerContextTypes : DockerContextTypes.all;
+        } catch {
+            template.parsedContextType = DockerContextTypes.all;
+        }
+    });
+
+    // Look for settings-defined template(s) with explicit match, that matches the match context and the current Docker context type
     const matchedTemplates = templates.filter(template => {
+        if (!(template.parsedContextType & currentContextType)) {
+            return false;
+        }
+
         if (template.match) {
             try {
                 const matcher = new RegExp(template.match, 'i');
@@ -120,8 +146,11 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
         return false;
     });
 
-    // Look for settings-defined template(s) with no explicit match
-    const universalTemplates = templates.filter(template => !template.match);
+    // Look for settings-defined template(s) with no explicit match and the current Docker context type
+    const universalTemplates = templates.filter(template => !template.match && (template.parsedContextType & currentContextType));
+
+    // Get the default templates from code above that match the current context (hopefully just one)
+    const defaultCommandsForContext = defaults[command].filter(template => template.parsedContextType & currentContextType);
 
     // Select from explicit match templates, if none then from settings-defined universal templates, if none then hardcoded default
     let selectedTemplate: CommandTemplate;
@@ -130,11 +159,13 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
     } else if (universalTemplates.length > 0) {
         selectedTemplate = await quickPickTemplate(context, universalTemplates);
     } else {
-        selectedTemplate = defaults[command];
+        selectedTemplate = await quickPickTemplate(context, defaultCommandsForContext);
     }
 
-    context.telemetry.properties.isDefaultCommand = selectedTemplate.template === defaults[command].template ? 'true' : 'false';
+    context.telemetry.properties.isDefaultCommand = defaultCommandsForContext.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
     context.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
+    context.telemetry.properties.commandContextType = selectedTemplate.parsedContextType.toString(); // TODO: validate this even works
+    context.telemetry.properties.currentContextType = currentContextType.toString();
 
     return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }

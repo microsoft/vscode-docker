@@ -40,6 +40,19 @@ const defaultContext: Partial<DockerContext> = {
     Description: 'Current DOCKER_HOST based configuration',
 };
 
+export enum DockerContextTypes {
+    // All downlevel context types
+    downlevel = 1 << 1,
+
+    // All uplevel context types
+    aci = 1 << 15,
+
+    uplevel = aci,
+
+    // All context types (combines downlevel and uplevel)
+    all = downlevel | uplevel,
+}
+
 type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent';
 
 export interface ContextManager {
@@ -111,7 +124,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             void ext.dockerClient?.dispose();
 
             // Create a new client
-            if (currentContext.Type === 'aci') {
+            if (currentContext.ContextType & DockerContextTypes.uplevel) {
                 // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
                 // But that probably won't be true in the future, so define both as separate concepts now
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
@@ -204,10 +217,19 @@ export class DockerContextManager implements ContextManager, Disposable {
 
                 for (const line of lines) {
                     const context = JSON.parse(line) as DockerContext;
+
+                    let contextType: DockerContextTypes;
+                    if ((context.Type ?? 'aci' === 'aci') && !context.DockerEndpoint) {
+                        // TODO: this basically assumes no Type and no DockerEndpoint => aci
+                        contextType = DockerContextTypes.aci;
+                    } else {
+                        contextType = DockerContextTypes.downlevel;
+                    }
+
                     result.push({
                         ...context,
                         Id: context.Name,
-                        Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
+                        ContextType: contextType,
                     });
                 }
 
@@ -242,7 +264,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 ...defaultContext,
                 Current: true,
                 DockerEndpoint: os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe,
-                Type: 'moby',
+                ContextType: DockerContextTypes.downlevel,
             } as DockerContext];
         }
 
@@ -253,8 +275,8 @@ export class DockerContextManager implements ContextManager, Disposable {
         let result: boolean = false;
         const contexts = await this.contextsCache.getValue();
 
-        if (contexts.some(c => c.Type === 'aci')) {
-            // If there are any ACI contexts we automatically know it's the new CLI
+        if (contexts.some(c => c.ContextType & DockerContextTypes.uplevel)) {
+            // If there are any uplevel contexts we automatically know it's the new CLI
             result = true;
         } else {
             // Otherwise we look at the output of `docker serve --help`
