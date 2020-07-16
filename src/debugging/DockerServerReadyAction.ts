@@ -21,7 +21,7 @@ const URI_FORMAT = 'http://localhost:%s';
 /* eslint-disable-next-line no-template-curly-in-string */
 const WEB_ROOT = '${workspaceFolder}';
 
-export class ServerReadyDetector implements DockerServerReadyDetector {
+class ServerReadyDetector implements DockerServerReadyDetector {
     private hasFired: boolean = false;
     private regexp: RegExp;
 
@@ -342,6 +342,7 @@ class DockerServerReadyDebugConfigurationProvider implements vscode.DebugConfigu
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/tslint/config
 export function registerServerReadyAction(context: vscode.ExtensionContext): void {
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         DockerDebugAdapterTrackerFactory.stop(session);
