@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { ext } from '../extensionVariables';
 import { localize } from "../localize";
 import { executeAsTask } from '../utils/executeAsTask';
 import { createFileItem, Item, quickPickDockerComposeFileItem } from '../utils/quickPickFile';
