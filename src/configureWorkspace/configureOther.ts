@@ -17,7 +17,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: string, os:
     return `FROM docker/whalesay:latest
 LABEL Name=${serviceNameAndRelativePath} Version=${version}
 RUN apt-get -y update && apt-get install -y fortunes
-CMD /usr/games/fortune -a | cowsay
+CMD ["sh", "-c", "/usr/games/fortune -a | cowsay"]
 `;
 }
 
@@ -31,7 +31,7 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], _: Partial<PackageInfo>): string {
     return `version: '3.4'
 
 services:
