@@ -22,6 +22,7 @@ export const imageProperties: ITreePropertyInfo<ImageProperty>[] = [
     { property: 'RepositoryName', exampleValue: 'hello-world' },
     { property: 'RepositoryNameAndTag', exampleValue: 'hello-world:latest' },
     { property: 'Tag', exampleValue: 'latest' },
+    { property: 'Size', exampleValue: '27 MB' },
 ];
 
 export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): IconPath {

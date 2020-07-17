@@ -9,9 +9,9 @@ import { localize } from '../../localize';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
-export type CommonProperty = 'CreatedTime';
+export type CommonProperty = 'CreatedTime' | 'Size';
 export type CommonGroupBy = 'None';
-export type CommonSortBy = 'CreatedTime' | 'Label';
+export type CommonSortBy = 'CreatedTime' | 'Label' | 'Size';
 
 export const commonProperties: ITreePropertyInfo<CommonProperty>[] = [
     { property: 'CreatedTime', exampleValue: '2 hours ago' },
@@ -31,6 +31,10 @@ export function getCommonPropertyValue(item: DockerObject, property: CommonPrope
     switch (property) {
         case 'CreatedTime':
             return moment(new Date(item.CreatedTime)).fromNow();
+        case 'Size':
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/tslint/config
+            const size: number = (item as any).Size ?? 0;
+            return `${Math.round(size / (1024 * 1024))} MB`;
         default:
             throw new RangeError(localize('vscode-docker.tree.settings.unexpected1', 'Unexpected property "{0}".', property));
     }

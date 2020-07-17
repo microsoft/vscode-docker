@@ -11,77 +11,92 @@ const testImages: DockerImage[] = [
     {
         Name: 'a',
         Id: 'sha256:b0648d86f18e6141a8bfa98d4d17d5180aa2699af7f27eac5491fd1f950f6f05',
-        CreatedTime: generateCreatedTimeInMs(2)
+        CreatedTime: generateCreatedTimeInMs(2),
+        Size: 2 * 1024 * 1024,
     },
     {
         Name: 'abcdefghijklmnopqrstuvwxyz',
         Id: 'sha256:678090bb0827fecbee9eb0bbc65200022bbc09c91a8bf4acf136f5e633260a93',
-        CreatedTime: generateCreatedTimeInMs(3)
+        CreatedTime: generateCreatedTimeInMs(3),
+        Size: 7 * 1024 * 1024,
     },
     {
         Name: 'abcdefghijklmnopqrstuvwxyz:version1.0.test',
         Id: 'sha256:0dbb0aabc7476292f98610d094a1bbc7f3012fd65cccc823e719a44267075bc7',
-        CreatedTime: generateCreatedTimeInMs(4)
+        CreatedTime: generateCreatedTimeInMs(4),
+        Size: 3 * 1024 * 1024,
     },
     {
         Name: 'a.b/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:28bd20772f5203d07fdbfa38438f17cf720aaf01f7b53c205ac7e25b0795b718',
-        CreatedTime: generateCreatedTimeInMs(5)
+        CreatedTime: generateCreatedTimeInMs(5),
+        Size: 15 * 1024 * 1024,
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:38e8467493f68c24a78dafbe49587c07e78b0f84ec8cdc19a509ce3536f334fa',
-        CreatedTime: generateCreatedTimeInMs(6)
+        CreatedTime: generateCreatedTimeInMs(6),
+        Size: 500 * 1024 * 1024,
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:1e6d05ff19d567a103b3d134aa793841b51345a45fb59fd0287fb9d96e55c51b',
-        CreatedTime: generateCreatedTimeInMs(7)
+        CreatedTime: generateCreatedTimeInMs(7),
+        Size: 8 * 1024 * 1024,
     },
     {
         Name: 'abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest',
         Id: 'sha256:16bba3882d727858afbb6dee098c5b5c9671bce8d347b995091f558afbdb18a5',
-        CreatedTime: generateCreatedTimeInMs(8)
+        CreatedTime: generateCreatedTimeInMs(8),
+        Size: 9 * 1024 * 1024,
     },
     {
         Name: 'registry.gitlab.com/sweatherford/hello-world/sub:latest',
         Id: 'sha256:a3f7187fcd572b4c2065f96abd87b759b9ab9ed58bf7ea3755714bcc8795cf8a',
-        CreatedTime: generateCreatedTimeInMs(9)
+        CreatedTime: generateCreatedTimeInMs(9),
+        Size: 12 * 1024 * 1024,
     },
     {
         Name: '127.0.0.1:5443/registry:v2',
         Id: 'sha256:ad8fe06eeca42a64aa28ca767b0f3fbe8713c087a6dcc66be949cefbe2131287',
-        CreatedTime: generateCreatedTimeInMs(58)
+        CreatedTime: generateCreatedTimeInMs(58),
+        Size: 58 * 1024 * 1024,
     },
     {
         Name: '127.0.0.1:5443/hello-world/sub:latest',
         Id: 'sha256:c8b4e4c47a8e6cc5e9c4f9cc9858f83d1d3e79c6ab4d890f7fb190a599d29903',
-        CreatedTime: generateCreatedTimeInMs(59)
+        CreatedTime: generateCreatedTimeInMs(59),
+        Size: 59 * 1024 * 1024,
     },
     {
         Name: 'hello-world:latest',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
-        CreatedTime: generateCreatedTimeInMs(60)
+        CreatedTime: generateCreatedTimeInMs(60),
+        Size: 61 * 1024 * 1024,
     },
     {
         Name: 'hello-world:v1',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
-        CreatedTime: generateCreatedTimeInMs(60)
+        CreatedTime: generateCreatedTimeInMs(60),
+        Size: 60 * 1024 * 1024,
     },
     {
         Name: 'namespace1/abc:v3',
         Id: 'sha256:d0eed8dad114db55d81c870efb8c148026da4a0f61dc7710c053da55f9604849',
-        CreatedTime: generateCreatedTimeInMs(366)
+        CreatedTime: generateCreatedTimeInMs(366),
+        Size: 366 * 1024 * 1024,
     },
     {
         Name: 'localhost/abc:v4',
         Id: 'sha256:f61138f385d368484da055ecb085201ec06a524e92a10c64e6535bf6c32d15a4',
-        CreatedTime: generateCreatedTimeInMs(367)
+        CreatedTime: generateCreatedTimeInMs(367),
+        Size: 111 * 1024 * 1024,
     },
     {
         Name: 'localhost:8080/abc',
         Id: 'sha256:e05f39ada67afbe24e68a22eeb9a45c59d0aab31f0a1585870a75893981fae75',
-        CreatedTime: generateCreatedTimeInMs(368)
+        CreatedTime: generateCreatedTimeInMs(368),
+        Size: 150 * 1024 * 1024,
     },
 ];
 
@@ -387,6 +402,33 @@ suite('Images Tree', async () => {
                 { label: 'localhost/abc:v4' },
                 { label: 'namespace1/abc:v3' },
                 { label: "registry.gitlab.com/sweatherford/hello-world/sub:latest" },
+            ]);
+    });
+
+    test('FullTag sortBy Size', async () => {
+        await validateImagesTree(
+            {
+                label: 'FullTag',
+                description: [],
+                groupBy: 'None',
+                sortBy: 'Size',
+            },
+            [
+                { label: "abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest" },
+                { label: 'namespace1/abc:v3' },
+                { label: 'localhost:8080/abc' },
+                { label: 'localhost/abc:v4' },
+                { label: "hello-world:latest" },
+                { label: "hello-world:v1" },
+                { label: "127.0.0.1:5443/hello-world/sub:latest" },
+                { label: "127.0.0.1:5443/registry:v2" },
+                { label: "a.b/abcdefghijklmnopqrstuvwxyz:latest" },
+                { label: "registry.gitlab.com/sweatherford/hello-world/sub:latest" },
+                { label: "abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz:latest" },
+                { label: "abcdefghijklmnopqrstuvw.xyz/abcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyz:latest" },
+                { label: "abcdefghijklmnopqrstuvwxyz" },
+                { label: "abcdefghijklmnopqrstuvwxyz:version1.0.test" },
+                { label: "a" },
             ]);
     });
 
