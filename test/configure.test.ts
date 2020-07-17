@@ -1350,7 +1350,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 FROM docker/whalesay:latest
                 LABEL Name=testoutput Version=1.2.3
                 RUN apt-get -y update && apt-get install -y fortunes
-                CMD /usr/games/fortune -a | cowsay
+                CMD ["sh", "-c", "/usr/games/fortune -a | cowsay"]
                 `));
             assert.strictEqual(composeContents, removeIndentation(`
                 version: '3.4'

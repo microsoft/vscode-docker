@@ -17,7 +17,7 @@ function genDockerFile(serviceNameAndRelativePath: string, platform: string, os:
     return `FROM docker/whalesay:latest
 LABEL Name=${serviceNameAndRelativePath} Version=${version}
 RUN apt-get -y update && apt-get install -y fortunes
-CMD /usr/games/fortune -a | cowsay
+CMD ["sh", "-c", "/usr/games/fortune -a | cowsay"]
 `;
 }
 
