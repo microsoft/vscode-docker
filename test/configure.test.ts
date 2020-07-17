@@ -380,8 +380,6 @@ const gradleWithJarContents = removeIndentation(`
 suite("Configure (Add Docker files to Workspace)", function (this: Suite): void {
     this.timeout(30 * 1000);
 
-    test('add tests for compose files');
-
     const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
     ext.outputChannel = outputChannel;
 
@@ -465,19 +463,19 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD ["npm", "start"]');
 
             assertFileContains('docker-compose.debug.yml', '1234');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
-            assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+            assertFileContains('docker-compose.debug.yml', 'command: ["node", "--inspect=0.0.0.0:9229", "index.js"]');
 
             assertFileContains('docker-compose.yml', '1234');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
-            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+            assertNotFileContains('docker-compose.yml', 'command: ["node", "--inspect=0.0.0.0:9229", "index.js"]');
 
             assertFileContains('.dockerignore', '.vscode');
         });
@@ -496,7 +494,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 1234');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD ["npm", "start"]');
 
             assertFileContains('.dockerignore', '.vscode');
         });
@@ -536,19 +534,19 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
-            assertFileContains('Dockerfile', 'CMD npm start');
+            assertFileContains('Dockerfile', 'CMD ["npm", "start"]');
 
             assertFileContains('docker-compose.debug.yml', '4321');
             assertFileContains('docker-compose.debug.yml', '9229:9229');
             assertFileContains('docker-compose.debug.yml', 'image: testoutput');
             assertFileContains('docker-compose.debug.yml', 'NODE_ENV: development');
-            assertFileContains('docker-compose.debug.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
+            assertFileContains('docker-compose.debug.yml', 'command: ["node", "--inspect=0.0.0.0:9229", "./bin/www"]');
 
             assertFileContains('docker-compose.yml', '4321');
             assertNotFileContains('docker-compose.yml', '9229:9229');
             assertFileContains('docker-compose.yml', 'image: testoutput');
             assertFileContains('docker-compose.yml', 'NODE_ENV: production');
-            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 ./bin/www');
+            assertNotFileContains('docker-compose.yml', 'command: ["node", "--inspect=0.0.0.0:9229", "./bin/www"]');
 
             assertFileContains('.dockerignore', '.vscode');
         });
@@ -583,7 +581,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 ['package.json', 'Dockerfile', 'docker-compose.debug.yml', 'docker-compose.yml', '.dockerignore']
             );
 
-            assertNotFileContains('docker-compose.yml', 'command: node --inspect=0.0.0.0:9229 index.js');
+            assertNotFileContains('docker-compose.yml', 'command: ["node", "--inspect=0.0.0.0:9229", "index.js"]');
         });
 
         testInEmptyFolder("Without start script", async () => {
@@ -616,7 +614,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
             );
 
             assertFileContains('Dockerfile', 'EXPOSE 4321');
-            assertFileContains('Dockerfile', 'CMD node ./out/dockerExtension');
+            assertFileContains('Dockerfile', 'CMD ["node", "./out/dockerExtension"]');
         });
     });
 
@@ -1350,7 +1348,7 @@ suite("Configure (Add Docker files to Workspace)", function (this: Suite): void 
                 FROM docker/whalesay:latest
                 LABEL Name=testoutput Version=1.2.3
                 RUN apt-get -y update && apt-get install -y fortunes
-                CMD /usr/games/fortune -a | cowsay
+                CMD ["sh", "-c", "/usr/games/fortune -a | cowsay"]
                 `));
             assert.strictEqual(composeContents, removeIndentation(`
                 version: '3.4'

@@ -4,29 +4,29 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext, DockerVolume } from '../../extension.bundle';
-import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
+import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 // TODO: Update the test to validate the '1 month ago' description Issue #1758
 const testVolumes: DockerVolume[] = [
     {
-        CreatedTime: generateCreatedTimeInSec(1),
+        CreatedTime: generateCreatedTimeInMs(1),
         Name: "nginxVol",
         Driver: 'test',
         Id: undefined,
     },
     {
-        CreatedTime: generateCreatedTimeInSec(2),
+        CreatedTime: generateCreatedTimeInMs(2),
         Name: "my-vol",
         Driver: 'test',
         Id: undefined,
     },
     {
-        CreatedTime: generateCreatedTimeInSec(2),
+        CreatedTime: generateCreatedTimeInMs(2),
         Name: "zz",
         Driver: 'test',
         Id: undefined,
     },
     {
-        CreatedTime: generateCreatedTimeInSec(90),
+        CreatedTime: generateCreatedTimeInMs(90),
         Name: "83c3eaffa92c0caf9ab34df3931f37b094464cb0daaab274c482010129fc7c73",
         Driver: 'test',
         Id: undefined,

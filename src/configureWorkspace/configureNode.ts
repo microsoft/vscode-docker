@@ -18,8 +18,15 @@ export let configureNode: IPlatformGeneratorInfo = {
     initializeForDebugging,
 };
 
-function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, author, version, artifactName }: Partial<PackageInfo>): string {
+function genDockerFile(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd }: Partial<PackageInfo>): string {
     let exposeStatements = getExposeStatements(ports);
+
+    let cmdDirective: string;
+    if (Array.isArray(cmd)) {
+        cmdDirective = `CMD ${toCMDArray(cmd)}`;
+    } else {
+        cmdDirective = `CMD ${cmd}`;
+    }
 
     return `FROM node:12.18-alpine
 ENV NODE_ENV production
@@ -28,7 +35,7 @@ COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
 RUN npm install --production --silent && mv node_modules ../
 COPY . .
 ${exposeStatements}
-CMD ${cmd}`;
+${cmdDirective}`;
 }
 
 function genDockerCompose(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[]): string {
@@ -43,14 +50,14 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { cmd, main }: Partial<PackageInfo>): string {
     const inspectConfig = '--inspect=0.0.0.0:9229';
-    const cmdArray: string[] = cmd.split(' ');
-    if (cmdArray[0].toLowerCase() === 'node') {
-        cmdArray.splice(1, 0, inspectConfig);
-        cmd = `command: ${cmdArray.join(' ')}`;
+
+    let cmdDirective: string;
+    if (main) {
+        cmdDirective = `command: ${toCMDArray(['node', inspectConfig, main])}`;
     } else {
-        cmd = `## set your startup file here\n    command: node ${inspectConfig} index.js`;
+        cmdDirective = `## set your startup file here\n    command: ["node", "${inspectConfig}", "index.js"]`;
     }
 
     return `version: '3.4'
@@ -62,7 +69,7 @@ services:
     environment:
       NODE_ENV: development
 ${getComposePorts(ports, 9229)}
-    ${cmd}`;
+    ${cmdDirective}`;
 }
 
 async function initializeForDebugging(context: IActionContext, folder: WorkspaceFolder, platformOS: PlatformOS, dockerfile: string, packageInfo: PackageInfo): Promise<void> {
@@ -74,4 +81,14 @@ async function initializeForDebugging(context: IActionContext, folder: Workspace
     }
 
     await dockerDebugScaffoldingProvider.initializeNodeForDebugging(scaffoldContext);
+}
+
+function toCMDArray(cmdArray: string[]): string {
+    return `[${cmdArray.map(part => {
+        if (part.startsWith('"') && part.endsWith('"')) {
+            return part;
+        }
+
+        return `"${part}"`;
+    }).join(', ')}]`;
 }

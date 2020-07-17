@@ -45,7 +45,7 @@ services:
 ${getComposePorts(ports)}`;
 }
 
-function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], { fullCommand: cmd }: Partial<PackageInfo>): string {
+function genDockerComposeDebug(serviceNameAndRelativePath: string, platform: string, os: string | undefined, ports: number[], _: Partial<PackageInfo>): string {
     return `version: '3.4'
 
 services:
