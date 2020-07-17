@@ -380,8 +380,6 @@ const gradleWithJarContents = removeIndentation(`
 suite("Configure (Add Docker files to Workspace)", function (this: Suite): void {
     this.timeout(30 * 1000);
 
-    test('add tests for compose files');
-
     const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
     ext.outputChannel = outputChannel;
 
