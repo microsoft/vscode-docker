@@ -44,7 +44,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                 detached,
                 build
             );
-            await executeAsTask(context, rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
+            await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
         } else {
             for (const item of selectedItems) {
                 const terminalCommand = await selectComposeCommand(
@@ -55,7 +55,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                     detached,
                     build
                 );
-                await executeAsTask(context, rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
+                await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
             }
         }
     }
