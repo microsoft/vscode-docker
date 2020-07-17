@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import { ext, DockerContainer } from '../../extension.bundle';
-import { generateCreatedTimeInSec, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
+import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
 const testContainers: DockerContainer[] = [
     {
@@ -13,7 +13,7 @@ const testContainers: DockerContainer[] = [
         Name: "vigorous_booth",
         Image: "node:8.0",
         ImageID: "sha256:065e283f68bd5ef3b079aee76d3aa55b5e56e8f9ede991a97ff15fdc556f8cfd",
-        CreatedTime: generateCreatedTimeInSec(1),
+        CreatedTime: generateCreatedTimeInMs(1),
         Ports: [],
         State: "created",
         Status: "Created",
@@ -23,7 +23,7 @@ const testContainers: DockerContainer[] = [
         Name: "elegant_knuth",
         Image: "registry:latest",
         ImageID: "sha256:f32a97de94e13d29835a19851acd6cbc7979d1d50f703725541e44bb89a1ce91",
-        CreatedTime: generateCreatedTimeInSec(2),
+        CreatedTime: generateCreatedTimeInMs(2),
         Ports: [
             { IP: "0.0.0.0", PrivatePort: 5000, PublicPort: 5000, Type: "tcp" }
         ],
@@ -35,7 +35,7 @@ const testContainers: DockerContainer[] = [
         Name: "focused_cori",
         Image: "mcr.microsoft.com/dotnet/core/sdk:latest",
         ImageID: "sha256:bbae085fa7eb0725dd2647a357988095754620aaf64ddc4b152d6f1407111dc8",
-        CreatedTime: generateCreatedTimeInSec(3),
+        CreatedTime: generateCreatedTimeInMs(3),
         Ports: [],
         State: "paused",
         Status: "Up 8 minutes (Paused)",
@@ -45,7 +45,7 @@ const testContainers: DockerContainer[] = [
         Name: "zealous_napier",
         Image: "emjacr2.azurecr.io/docker-django-webapp-linux:cj8",
         ImageID: "sha256:d3eef98c0630cc7e2b81f37fe8c8db7b554aeff42d3bf193337842f80b208614",
-        CreatedTime: generateCreatedTimeInSec(35),
+        CreatedTime: generateCreatedTimeInMs(35),
         Ports: [
             { IP: "0.0.0.0", PrivatePort: 2222, PublicPort: 2222, Type: "tcp" },
             { IP: "0.0.0.0", PrivatePort: 8000, PublicPort: 8000, Type: "tcp" }
@@ -58,7 +58,7 @@ const testContainers: DockerContainer[] = [
         Name: "admiring_leavitt",
         Image: "vsc-js1-6b97c65e88377ff89a4eab7bc81b694d",
         ImageID: "sha256:7804287702e2a3d7f44b46a9ce864951ed093227e1d4e1f67992760292bd8126",
-        CreatedTime: generateCreatedTimeInSec(36),
+        CreatedTime: generateCreatedTimeInMs(36),
         Ports: [],
         State: "exited",
         Status: "Exited (137) 12 hours ago",
@@ -68,7 +68,7 @@ const testContainers: DockerContainer[] = [
         Name: "inspiring_brattain",
         Image: "acr-build-helloworld-node:latest",
         ImageID: "sha256:4d476c415ca931a558cfefe48f4f51e8b6bcbadf6f8820cf5a98a05794b59293",
-        CreatedTime: generateCreatedTimeInSec(37),
+        CreatedTime: generateCreatedTimeInMs(37),
         Ports: [{ IP: "0.0.0.0", PrivatePort: 80, PublicPort: 80, Type: "tcp" }],
         State: "running",
         Status: "Up 32 hours",
@@ -78,7 +78,7 @@ const testContainers: DockerContainer[] = [
         Name: "elegant_mendel",
         Image: "test:latest",
         ImageID: "sha256:93074a25f8cc8647a62dfc14d42710751d1f341479d0a6943384e618685db614",
-        CreatedTime: generateCreatedTimeInSec(90),
+        CreatedTime: generateCreatedTimeInMs(90),
         Ports: [],
         State: "running",
         Status: "Up 49 seconds"
@@ -88,7 +88,7 @@ const testContainers: DockerContainer[] = [
         Name: "devtest",
         Image: "nginx:latest",
         ImageID: "sha256:62c261073ecffe22a28f2ba67760a9320bc4bfe8136a83ba9b579983346564be",
-        CreatedTime: generateCreatedTimeInSec(365),
+        CreatedTime: generateCreatedTimeInMs(365),
         Ports: [],
         State: "exited",
         Status: "Exited (0) 2 days ago"
@@ -391,7 +391,7 @@ suite('Containers Tree', async () => {
                 Name: "elegant_knuth",
                 Image: "registry:latest",
                 ImageID: "sha256:f32a97de94e13d29835a19851acd6cbc7979d1d50f703725541e44bb89a1ce91",
-                CreatedTime: generateCreatedTimeInSec(2),
+                CreatedTime: generateCreatedTimeInMs(2),
                 Ports: [
                     { "IP": "0.0.0.0", "PrivatePort": 5000, "PublicPort": 5000, "Type": "tcp" }
                 ],
