@@ -24,7 +24,7 @@ import { TreeSettingStep } from "./settings/TreeSettingStep";
 
 type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 
-export type LocalChildType<T extends DockerObject> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; };
+export type LocalChildType<T extends DockerObject> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; size?: number };
 export type LocalChildGroupType<TItem extends DockerObject, TProperty extends string | CommonProperty> = new (parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) => LocalGroupTreeItemBase<TItem, TProperty>;
 
 const groupByKey: string = 'groupBy';
@@ -38,7 +38,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     public abstract descriptionSettingInfo: ITreeArraySettingInfo<TProperty>;
     public abstract groupBySettingInfo: ITreeSettingInfo<TProperty | CommonGroupBy>;
     public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = {
-        properties: sortByProperties,
+        properties: [...sortByProperties],
         defaultProperty: 'CreatedTime',
     }
 
@@ -184,6 +184,8 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
             } else if (ti1 instanceof this.childType && ti2 instanceof this.childType) {
                 if (this.sortBySetting === 'CreatedTime' && ti2.createdTime !== ti1.createdTime) {
                     return ti2.createdTime - ti1.createdTime;
+                } else if (this.sortBySetting === 'Size' && ti1.size !== undefined && ti2.size !== undefined) {
+                    return ti2.size - ti1.size;
                 }
             }
 
