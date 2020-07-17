@@ -294,7 +294,7 @@ class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFact
     public static start(session: vscode.DebugSession): DockerDebugAdapterTracker | undefined {
         const configuration = <ResolvedDebugConfiguration>session.configuration;
         if (configuration?.dockerOptions?.dockerServerReadyAction) {
-            const realSessionId = configuration?.__sessionId as string || session.id;
+            const realSessionId = DockerDebugAdapterTrackerFactory.getRealSessionId(session);
 
             let tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
             if (!tracker) {
@@ -309,13 +309,19 @@ class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFact
     }
 
     public static stop(session: vscode.DebugSession): void {
-        const realSessionId = session.configuration?.__sessionId as string || session.id;
+        const realSessionId = DockerDebugAdapterTrackerFactory.getRealSessionId(session);
         const tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
 
         if (tracker) {
             DockerDebugAdapterTrackerFactory.trackers.delete(realSessionId);
             tracker.dispose();
         }
+    }
+
+    private static getRealSessionId(session: vscode.DebugSession): string {
+        // If the session configuration has the property `__sessionId`, that ID is the _parent_ session ID, and the one we actually want
+        // This way, only one tracker gets created per session (for the parent session)
+        return session.configuration?.__sessionId as string || session.id;
     }
 
     public createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
