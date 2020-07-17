@@ -44,7 +44,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                 detached,
                 build
             );
-            await executeAsTask(context, terminalCommand, 'Docker Compose', /* addDockerEnv: */ true, folder);
+            await executeAsTask(context, rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
         } else {
             for (const item of selectedItems) {
                 const terminalCommand = await selectComposeCommand(
@@ -55,7 +55,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                     detached,
                     build
                 );
-                await executeAsTask(context, terminalCommand, 'Docker Compose', /* addDockerEnv: */ true, folder);
+                await executeAsTask(context, rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', /* addDockerEnv: */ true, folder);
             }
         }
     }
@@ -71,4 +71,13 @@ export async function composeDown(context: IActionContext, dockerComposeFileUri?
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
+}
+
+async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
+    if ((await ext.dockerContextManager.getCurrentContext()).Type === 'aci') {
+        // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
+        return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
+    } else {
+        return command;
+    }
 }
