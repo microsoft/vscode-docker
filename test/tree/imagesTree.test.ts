@@ -72,7 +72,7 @@ const testImages: DockerImage[] = [
         Name: 'hello-world:latest',
         Id: 'sha256:8a093bef2179f2c76b1b1d3254862e85ee6c26ee649fadad220e46527042f436',
         CreatedTime: generateCreatedTimeInMs(60),
-        Size: 60 * 1024 * 1024,
+        Size: 61 * 1024 * 1024,
     },
     {
         Name: 'hello-world:v1',
@@ -418,8 +418,8 @@ suite('Images Tree', async () => {
                 { label: 'namespace1/abc:v3' },
                 { label: 'localhost:8080/abc' },
                 { label: 'localhost/abc:v4' },
-                { label: "hello-world:v1" },
                 { label: "hello-world:latest" },
+                { label: "hello-world:v1" },
                 { label: "127.0.0.1:5443/hello-world/sub:latest" },
                 { label: "127.0.0.1:5443/registry:v2" },
                 { label: "a.b/abcdefghijklmnopqrstuvwxyz:latest" },
