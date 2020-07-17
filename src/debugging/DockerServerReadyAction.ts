@@ -21,7 +21,7 @@ const URI_FORMAT = 'http://localhost:%s';
 /* eslint-disable-next-line no-template-curly-in-string */
 const WEB_ROOT = '${workspaceFolder}';
 
-export class ServerReadyDetector implements DockerServerReadyDetector {
+class ServerReadyDetector implements DockerServerReadyDetector {
     private hasFired: boolean = false;
     private regexp: RegExp;
 
@@ -289,15 +289,17 @@ class MultiOutputDockerServerReadyManager extends vscode.Disposable implements D
 }
 
 class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
-    private static trackers: Map<vscode.DebugSession, MultiOutputDockerServerReadyManager> = new Map<vscode.DebugSession, MultiOutputDockerServerReadyManager>();
+    private static trackers: Map<string, MultiOutputDockerServerReadyManager> = new Map<string, MultiOutputDockerServerReadyManager>();
 
     public static start(session: vscode.DebugSession): DockerDebugAdapterTracker | undefined {
         const configuration = <ResolvedDebugConfiguration>session.configuration;
         if (configuration?.dockerOptions?.dockerServerReadyAction) {
-            let tracker = DockerDebugAdapterTrackerFactory.trackers.get(session);
+            const realSessionId = DockerDebugAdapterTrackerFactory.getRealSessionId(session);
+
+            let tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
             if (!tracker) {
                 tracker = new MultiOutputDockerServerReadyManager(session);
-                DockerDebugAdapterTrackerFactory.trackers.set(session, tracker);
+                DockerDebugAdapterTrackerFactory.trackers.set(realSessionId, tracker);
             }
 
             return tracker.tracker;
@@ -307,12 +309,19 @@ class DockerDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFact
     }
 
     public static stop(session: vscode.DebugSession): void {
-        const tracker = DockerDebugAdapterTrackerFactory.trackers.get(session);
+        const realSessionId = DockerDebugAdapterTrackerFactory.getRealSessionId(session);
+        const tracker = DockerDebugAdapterTrackerFactory.trackers.get(realSessionId);
 
         if (tracker) {
-            DockerDebugAdapterTrackerFactory.trackers.delete(session);
+            DockerDebugAdapterTrackerFactory.trackers.delete(realSessionId);
             tracker.dispose();
         }
+    }
+
+    private static getRealSessionId(session: vscode.DebugSession): string {
+        // If the session configuration has the property `__sessionId`, that ID is the _parent_ session ID, and the one we actually want
+        // This way, only one tracker gets created per session (for the parent session)
+        return session.configuration?.__sessionId as string || session.id;
     }
 
     public createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
@@ -339,6 +348,7 @@ class DockerServerReadyDebugConfigurationProvider implements vscode.DebugConfigu
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/tslint/config
 export function registerServerReadyAction(context: vscode.ExtensionContext): void {
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         DockerDebugAdapterTrackerFactory.stop(session);
