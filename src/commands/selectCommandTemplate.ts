@@ -120,7 +120,7 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
 
     // Look for settings-defined template(s) with explicit match, that matches the match context and the current Docker context type
     const matchedTemplates = templates.filter(template => {
-        if (!isMatchingContextType(currentContextType, template.contextType)) {
+        if (!currentContextTypeMatchesTemplate(currentContextType, template.contextType)) {
             return false;
         }
 
@@ -139,10 +139,10 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
     });
 
     // Look for settings-defined template(s) with no explicit match and the current Docker context type
-    const universalTemplates = templates.filter(template => !template.match && isMatchingContextType(currentContextType, template.contextType));
+    const universalTemplates = templates.filter(template => !template.match && currentContextTypeMatchesTemplate(currentContextType, template.contextType));
 
     // Get the default templates from code above that match the current context (hopefully just one)
-    const defaultCommandsForContext = defaults[command].filter(template => isMatchingContextType(currentContextType, template.contextType));
+    const defaultCommandsForContext = defaults[command].filter(template => currentContextTypeMatchesTemplate(currentContextType, template.contextType));
 
     // Select from explicit match templates, if none then from settings-defined universal templates, if none then hardcoded default
     let selectedTemplate: CommandTemplate;
@@ -183,7 +183,7 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
     return selection.data;
 }
 
-function isMatchingContextType(currentContextType: ContextType, templateContextType: TemplateContextType | undefined): boolean {
+function currentContextTypeMatchesTemplate(currentContextType: ContextType, templateContextType: TemplateContextType | undefined): boolean {
     templateContextType = templateContextType ?? 'all';
 
     switch (templateContextType) {
