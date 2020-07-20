@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Terminal } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 import { RemoteRepositoryTreeItemBase } from "../../tree/registries/RemoteRepositoryTreeItemBase";
 import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
+import { executeAsTask } from "../../utils/executeAsTask";
 import { logInToDockerCli } from "./logInToDockerCli";
 
 export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
@@ -31,7 +31,5 @@ export async function pullImageFromRepository(context: IActionContext, node?: Re
 async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
     await logInToDockerCli(context, node);
 
-    const terminal: Terminal = ext.terminalProvider.createTerminal("docker pull");
-    terminal.show();
-    terminal.sendText(`docker pull ${node.baseImagePath}/${imageRequest}`);
+    await executeAsTask(context, `docker pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
 }

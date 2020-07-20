@@ -11,6 +11,7 @@ import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
+import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
 import LocalOSProvider from '../utils/LocalOSProvider';
 import { openExternal } from '../utils/openExternal';
@@ -45,7 +46,7 @@ export abstract class DockerInstallerBase {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             vscode.window.showInformationMessage(installationMessage);
             try {
-                await this.install(downloadedFileName, command);
+                await this.install(context, downloadedFileName, command);
             } catch (error) {
                 const message = `${localize('vscode-docker.commands.DockerInstallerBase.installFailed', 'Docker Desktop installation failed')}. ${error}`;
                 const title = localize('vscode-docker.commands.DockerInstallerBase.openInstallLink', 'Install Instruction');
@@ -83,7 +84,7 @@ export abstract class DockerInstallerBase {
         context.errorHandling.suppressDisplay = true;
     }
 
-    protected abstract install(fileName: string, cmd: string): Promise<void>;
+    protected abstract install(context: IActionContext, fileName: string, cmd: string): Promise<void>;
 }
 
 export class WindowsDockerInstaller extends DockerInstallerBase {
@@ -94,7 +95,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
         return `"${fileName}"`;
     }
 
-    protected async install(fileName: string, cmd: string): Promise<void> {
+    protected async install(context: IActionContext, fileName: string, cmd: string): Promise<void> {
         const fsProvider = new LocalFileSystemProvider();
         try {
             ext.outputChannel.appendLine(localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Executing command {0}', cmd));
@@ -114,11 +115,11 @@ export class MacDockerInstaller extends DockerInstallerBase {
         return `chmod +x '${fileName}' && open '${fileName}'`;
     }
 
-    protected async install(fileName: string): Promise<void> {
-        const terminal = ext.terminalProvider.createTerminal(localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install'));
+    protected async install(context: IActionContext, fileName: string): Promise<void> {
+        const title = localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install');
         const command = this.getInstallCommand(fileName);
-        terminal.sendText(command);
-        terminal.show();
+
+        await executeAsTask(context, command, title, { addDockerEnv: false });
     }
 }
 

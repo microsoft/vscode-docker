@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { getDockerOSType } from '../../utils/osUtils';
+import { executeAsTask } from '../../utils/executeAsTask';
+import { execAsync } from '../../utils/spawnAsync';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
@@ -21,25 +21,38 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         });
     }
 
+    let shellCommand: string;
     let osType: DockerOSType;
     try {
-        // TODO: get OS type from container instead of from system
-        osType = await getDockerOSType(context);
+        osType = (await ext.dockerClient.inspectContainer(context, node.containerId))?.Platform || 'linux';
     } catch {
-        // Assume linux
+        // Assume Linux if the above fails
         osType = 'linux';
     }
 
     context.telemetry.properties.dockerOSType = osType;
 
-    let shellCommand: string;
-    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     if (osType === 'windows') {
-        shellCommand = configOptions.get('attachShellCommand.windowsContainer');
+        // On Windows containers, always use cmd
+        shellCommand = 'cmd';
     } else {
-        shellCommand = configOptions.get('attachShellCommand.linuxContainer');
+        const currentContext = await ext.dockerContextManager.getCurrentContext();
+
+        if (currentContext.Type === 'aci') {
+            // If it's ACI we have to do sh, because it's not possible to check if bash is present
+            shellCommand = 'sh';
+        } else {
+            // On Linux containers, check if bash is present
+            // If so use it, otherwise use sh
+            try {
+                // If this succeeds, bash is present (exit code 0)
+                await execAsync(`docker exec -i ${node.containerId} sh -c "which bash"`);
+                shellCommand = 'bash';
+            } catch {
+                shellCommand = 'sh';
+            }
+        }
     }
-    context.telemetry.properties.shellCommand = shellCommand;
 
     const terminalCommand = await selectAttachCommand(
         context,
@@ -49,7 +62,5 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         shellCommand
     );
 
-    const terminal = ext.terminalProvider.createTerminal(`Shell: ${node.containerName}`);
-    terminal.sendText(terminalCommand);
-    terminal.show();
+    await executeAsTask(context, terminalCommand, `Shell: ${node.containerName}`, { addDockerEnv: true });
 }

@@ -7,8 +7,8 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { executeAsTask } from '../../utils/executeAsTask';
 import { openExternal } from '../../utils/openExternal';
 import { getDockerOSType } from '../../utils/osUtils';
 
@@ -38,9 +38,6 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             vol += ` -v ${homeDir}/.kube:/root/.kube`;
         }
 
-        const cmd: string = `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`;
-        const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Azure CLI');
-        terminal.sendText(cmd);
-        terminal.show();
+        await executeAsTask(context, `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`, 'Azure CLI', { addDockerEnv: true });
     }
 }

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerObject } from './Common';
+import { DockerObject, DockerOSType } from './Common';
 
 export interface DockerPort {
     readonly IP?: string;
@@ -41,4 +41,5 @@ export interface DockerContainerInspection extends DockerObject {
             readonly [portAndProtocol: string]: InspectionPort[];
         };
     };
+    readonly Platform?: DockerOSType;
 }
