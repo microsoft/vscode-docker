@@ -22,7 +22,7 @@ export interface DockerContextInspection {
     readonly [key: string]: unknown;
 }
 
-export function isUplevelContextType(contextType: ContextType): boolean {
+export function isNewContextType(contextType: ContextType): boolean {
     switch (contextType) {
         case 'moby':
             return false;

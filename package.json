@@ -1424,8 +1424,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1467,8 +1467,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1510,8 +1510,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1553,8 +1553,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1596,8 +1596,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1639,8 +1639,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1660,12 +1660,12 @@
                         {
                             "label": "Compose Up",
                             "template": "docker-compose ${configurationFile} up ${detached} ${build}",
-                            "contextType": "downlevel"
+                            "contextType": "legacy"
                         },
                         {
                             "label": "Compose Up",
                             "template": "docker compose ${configurationFile} up ${detached}",
-                            "contextType": "uplevel"
+                            "contextType": "new"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
@@ -1693,8 +1693,8 @@
                                         "description": "%vscode-docker.config.template.contextType.description%",
                                         "enum": [
                                             "all",
-                                            "downlevel",
-                                            "uplevel",
+                                            "legacy",
+                                            "new",
                                             "aci"
                                         ],
                                         "default": "all"
@@ -1714,12 +1714,12 @@
                         {
                             "label": "Compose Down",
                             "template": "docker-compose ${configurationFile} down",
-                            "contextType": "downlevel"
+                            "contextType": "legacy"
                         },
                         {
                             "label": "Compose Down",
                             "template": "docker compose ${configurationFile} down",
-                            "contextType": "uplevel"
+                            "contextType": "new"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"

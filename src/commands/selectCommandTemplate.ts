@@ -5,12 +5,12 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { ContextType, isUplevelContextType } from '../docker/Contexts';
+import { ContextType, isNewContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
 
-type TemplateContextType = 'all' | 'downlevel' | 'uplevel' | 'aci';
+type TemplateContextType = 'all' | 'legacy' | 'new' | 'aci';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
@@ -31,12 +31,12 @@ const defaults: { [key in TemplateCommand]: CommandTemplate[] } = {
     'attach': [{ label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}', contextType: 'all' }],
     'logs': [{ label: 'Docker Logs', template: 'docker logs -f ${containerId}', contextType: 'all' }],
     'composeUp': [
-        { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}', contextType: 'downlevel' },
-        { label: 'Compose Up', template: 'docker compose ${configurationFile} up ${detached}', contextType: 'uplevel' },
+        { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}', contextType: 'legacy' },
+        { label: 'Compose Up', template: 'docker compose ${configurationFile} up ${detached}', contextType: 'new' },
     ],
     'composeDown': [
-        { label: 'Compose Down', template: 'docker-compose ${configurationFile} down', contextType: 'downlevel' },
-        { label: 'Compose Down', template: 'docker compose ${configurationFile} down', contextType: 'uplevel' },
+        { label: 'Compose Down', template: 'docker-compose ${configurationFile} down', contextType: 'legacy' },
+        { label: 'Compose Down', template: 'docker compose ${configurationFile} down', contextType: 'new' },
     ],
     /* eslint-enable no-template-curly-in-string */
 };
@@ -187,10 +187,10 @@ function currentContextTypeMatchesTemplate(currentContextType: ContextType, temp
     templateContextType = templateContextType || 'all';
 
     switch (templateContextType) {
-        case 'uplevel':
-            return isUplevelContextType(currentContextType);
-        case 'downlevel':
-            return !isUplevelContextType(currentContextType);
+        case 'new':
+            return isNewContextType(currentContextType);
+        case 'legacy':
+            return !isNewContextType(currentContextType);
         case 'all':
             return true;
         case 'aci':
