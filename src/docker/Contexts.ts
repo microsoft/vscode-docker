@@ -5,12 +5,13 @@
 
 import { DockerObject } from './Common';
 
+export type ContextType = 'aci' | 'moby';
+
 export interface DockerContext extends DockerObject {
     readonly Description?: string;
     readonly DockerEndpoint: string;
     readonly Current: boolean;
-    readonly Type?: string;
-    readonly ContextType: DockerContextTypes;
+    readonly Type: ContextType;
 
     readonly Id: string; // Will be equal to Name for contexts
 
@@ -21,15 +22,11 @@ export interface DockerContextInspection {
     readonly [key: string]: unknown;
 }
 
-export enum DockerContextTypes {
-    // All downlevel context types
-    downlevel = 1 << 1,
-
-    // All uplevel context types
-    aci = 1 << 15,
-
-    uplevel = aci,
-
-    // All context types (combines downlevel and uplevel)
-    all = downlevel | uplevel
+export function isUplevelContextType(contextType: ContextType): boolean {
+    switch (contextType) {
+        case 'aci':
+            return true;
+        default:
+            return false;
+    }
 }
