@@ -20,6 +20,6 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
     );
 
     for (const n of nodes) {
-        await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', /* addDockerEnv: */ true);
+        await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }

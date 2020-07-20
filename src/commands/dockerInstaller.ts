@@ -119,7 +119,7 @@ export class MacDockerInstaller extends DockerInstallerBase {
         const title = localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install');
         const command = this.getInstallCommand(fileName);
 
-        await executeAsTask(context, command, title, false);
+        await executeAsTask(context, command, title, { addDockerEnv: false });
     }
 }
 

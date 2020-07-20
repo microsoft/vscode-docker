@@ -38,6 +38,6 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             vol += ` -v ${homeDir}/.kube:/root/.kube`;
         }
 
-        await executeAsTask(context, `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`, 'Azure CLI', /* addDockerEnv: */ true);
+        await executeAsTask(context, `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`, 'Azure CLI', { addDockerEnv: true });
     }
 }

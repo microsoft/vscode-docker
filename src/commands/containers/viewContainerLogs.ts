@@ -26,5 +26,5 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         node.containerId
     );
 
-    await executeAsTask(context, terminalCommand, node.fullTag, /* addDockerEnv: */ true);
+    await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true });
 }

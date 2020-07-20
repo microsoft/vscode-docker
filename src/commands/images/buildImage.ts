@@ -65,6 +65,6 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             terminalCommand = terminalCommand.replace(tagRegex, imageName);
         }
 
-        await executeAsTask(context, terminalCommand, 'Docker', /* addDockerEnv: */ true, rootFolder);
+        await executeAsTask(context, terminalCommand, 'Docker', { addDockerEnv: true, workspaceFolder: rootFolder });
     }
 }
