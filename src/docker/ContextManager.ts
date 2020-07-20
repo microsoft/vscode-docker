@@ -53,6 +53,7 @@ export enum DockerContextTypes {
     all = downlevel | uplevel,
 }
 
+// These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
 type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent';
 
 export interface ContextManager {

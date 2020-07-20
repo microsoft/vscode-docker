@@ -7,6 +7,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { executeAsTask } from '../../utils/executeAsTask';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function pullImage(context: IActionContext, node?: ImageTreeItem, nodes?: ImageTreeItem[]): Promise<void> {
@@ -18,9 +19,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         nodes
     );
 
-    const terminal = ext.terminalProvider.createTerminal("docker pull");
-    terminal.show();
     for (const n of nodes) {
-        terminal.sendText(`docker pull ${n.fullTag}`);
+        await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }

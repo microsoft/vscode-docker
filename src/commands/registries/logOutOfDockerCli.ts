@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Terminal } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { executeAsTask } from '../../utils/executeAsTask';
 
 export async function logOutOfDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
@@ -15,7 +15,5 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
     }
 
     let creds = await node.getDockerCliCredentials();
-    const terminal: Terminal = ext.terminalProvider.createTerminal('docker logout');
-    terminal.sendText(`docker logout ${creds.registryPath}`);
-    terminal.show();
+    await executeAsTask(context, `docker logout ${creds.registryPath}`, 'Docker', { addDockerEnv: true });
 }

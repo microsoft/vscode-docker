@@ -7,6 +7,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { executeAsTask } from '../../utils/executeAsTask';
 import { selectRunCommand } from '../selectCommandTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -35,7 +36,5 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         inspectInfo?.Config?.ExposedPorts
     );
 
-    const terminal = ext.terminalProvider.createTerminal(node.fullTag);
-    terminal.sendText(terminalCommand);
-    terminal.show();
+    await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true });
 }

@@ -10,6 +10,7 @@ import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { executeAsTask } from '../../utils/executeAsTask';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -65,9 +66,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     addImageTaggingTelemetry(context, finalTag, '');
 
     // Finally push the image
-    const terminal = ext.terminalProvider.createTerminal(finalTag);
-    terminal.sendText(`docker push ${finalTag}`);
-    terminal.show();
+    await executeAsTask(context, `docker push ${finalTag}`, finalTag, { addDockerEnv: true });
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {

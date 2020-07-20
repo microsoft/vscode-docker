@@ -4,24 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext, DockerNetwork } from '../../extension.bundle';
-import { ITestTreeItem, IValidateTreeOptions, validateTree, generateCreatedTimeInSec } from './validateTree';
+import { ITestTreeItem, IValidateTreeOptions, validateTree, generateCreatedTimeInMs } from './validateTree';
 
 // TODO: Update the test to validate the '1 month ago' description Issue #1758
 const testNetworks: DockerNetwork[] = [
     {
-        CreatedTime: generateCreatedTimeInSec(1),
+        CreatedTime: generateCreatedTimeInMs(1),
         Name: "zzz-bridge",
         Driver: "bridge",
         Id: '7fc4ab013fd4aa4c2e749c443b066725eb5599a0d57a9f44951e7a45e8833883'
     },
     {
-        CreatedTime: generateCreatedTimeInSec(2),
+        CreatedTime: generateCreatedTimeInMs(2),
         Name: "net-host",
         Driver: "host",
         Id: '725558b7188f2fa22fce7868597e615c8a90682a2076fe15eee0404cb5f822b6'
     },
     {
-        CreatedTime: generateCreatedTimeInSec(2),
+        CreatedTime: generateCreatedTimeInMs(2),
         Name: "none",
         Driver: "nat",
         Id: 'f34848d85589e45cd2856f9c4f3fff218e0ea2b9af76eb56d02607198eab2c1a'
@@ -39,7 +39,7 @@ suite('Networks Tree', async () => {
             [
                 { label: "zzz-bridge", description: "bridge - a day ago" },
                 { label: "net-host", description: "host - 2 days ago" },
-                { label: "none", description: "null - 2 days ago" },
+                { label: "none", description: "nat - 2 days ago" },
             ]);
     });
 
@@ -54,7 +54,7 @@ suite('Networks Tree', async () => {
             [
                 { label: "zzz-bridge", description: "bridge - a day ago" },
                 { label: "net-host", description: "host - 2 days ago" },
-                { label: "none", description: "null - 2 days ago" },
+                { label: "none", description: "nat - 2 days ago" },
             ]);
     });
 
@@ -67,7 +67,7 @@ suite('Networks Tree', async () => {
             [
                 { label: "bridge" },
                 { label: "host" },
-                { label: "null" },
+                { label: "nat" },
             ]);
     });
 

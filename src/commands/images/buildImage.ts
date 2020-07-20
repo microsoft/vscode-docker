@@ -9,6 +9,7 @@ import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
+import { executeAsTask } from "../../utils/executeAsTask";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { delay } from "../../utils/promiseUtils";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
@@ -64,8 +65,6 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             terminalCommand = terminalCommand.replace(tagRegex, imageName);
         }
 
-        const terminal: vscode.Terminal = ext.terminalProvider.createTerminal('Docker');
-        terminal.sendText(terminalCommand);
-        terminal.show();
+        await executeAsTask(context, terminalCommand, 'Docker', { addDockerEnv: true, workspaceFolder: rootFolder });
     }
 }

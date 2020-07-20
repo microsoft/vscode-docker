@@ -5,19 +5,19 @@
 
 // The module 'assert' provides assertion methods from node
 import * as AdmZip from 'adm-zip';
-import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import { Context, Suite } from 'mocha';
 import * as path from 'path';
-import { commands, Uri } from 'vscode';
-import { IActionContext, createAzExtOutputChannel, IAzExtOutputChannel } from 'vscode-azureextensionui';
-import { configure, ext, httpsRequestBinary, Platform } from '../extension.bundle';
+import { commands, tasks, Uri } from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
+import { configure, httpsRequestBinary, Platform, bufferToString } from '../extension.bundle';
 import * as assertEx from './assertEx';
 import { shouldSkipDockerTest } from './dockerInfo';
 import { getTestRootFolder, testInEmptyFolder, testUserInput } from './global.test';
-import { TestTerminalProvider } from './TestTerminalProvider';
+import { runWithSetting } from './runWithSetting';
 
 let testRootFolder: string = getTestRootFolder();
+let buildOutputIndex: number = 0;
 
 /**
  * Downloads and then extracts only a specific folder and its subfolders.
@@ -62,20 +62,17 @@ async function extractFolderTo(zip: AdmZip, sourceFolderInZip: string, outputFol
 suite("Build Image", function (this: Suite): void {
     this.timeout(2 * 60 * 1000);
 
-    const outputChannel: IAzExtOutputChannel = createAzExtOutputChannel('Docker extension tests', 'docker');
-    ext.outputChannel = outputChannel;
-
     async function testConfigureAndBuildImage(
         platform: Platform,
         configureInputs: (string | undefined)[],
         buildInputs: (string | undefined)[]
     ): Promise<void> {
+        const testOutputFile = path.join(testRootFolder, `buildoutput${buildOutputIndex++}.txt`);
+
         // Set up simulated user input
         configureInputs.unshift(platform);
-        let testTerminalProvider = new TestTerminalProvider();
-        ext.terminalProvider = testTerminalProvider;
 
-        let context: IActionContext = {
+        const context: IActionContext = {
             telemetry: { properties: {}, measurements: {} },
             errorHandling: { issueProperties: {} }
         };
@@ -85,16 +82,34 @@ suite("Build Image", function (this: Suite): void {
         });
 
         // Build image
-        let dockerFile = Uri.file(path.join(testRootFolder, 'Dockerfile'));
-        await testUserInput.runWithInputs(buildInputs, async () => {
-            await commands.executeCommand('vscode-docker.images.build', dockerFile);
-        });
+        const dockerFile = Uri.file(path.join(testRootFolder, 'Dockerfile'));
 
-        let { outputText, errorText } = await testTerminalProvider.currentTerminal!.exit();
+        try {
+            await runWithSetting('commands.build', `docker build --pull --rm -f "\${dockerfile}" -t \${tag} "\${context}" > ${testOutputFile} 2>&1`, async () => {
+                await testUserInput.runWithInputs(buildInputs, async () => {
+                    const taskFinishedPromise = new Promise((resolve) => {
+                        const disposable = tasks.onDidEndTask(() => {
+                            disposable.dispose();
+                            resolve();
+                        });
+                    });
 
-        assert.equal(errorText, '', 'Expected no errors from Build Image');
-        assertEx.assertContains(outputText, 'Successfully built');
-        assertEx.assertContains(outputText, 'Successfully tagged')
+                    await commands.executeCommand('vscode-docker.images.build', dockerFile);
+
+                    // Wait for the task to finish
+                    await taskFinishedPromise;
+                });
+            });
+
+            const outputText = bufferToString(await fse.readFile(testOutputFile));
+
+            assertEx.assertContains(outputText, 'Successfully built');
+            assertEx.assertContains(outputText, 'Successfully tagged');
+        } finally {
+            if (await fse.pathExists(testOutputFile)) {
+                await fse.unlink(testOutputFile);
+            }
+        }
     }
 
     // Go

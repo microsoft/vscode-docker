@@ -82,6 +82,6 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
         return 'linux';
     } else {
         const info = await ext.dockerClient.info(context);
-        return info.OSType;
+        return info?.OSType || 'linux';
     }
 }

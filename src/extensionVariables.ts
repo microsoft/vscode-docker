@@ -17,7 +17,6 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { IKeytar } from './utils/keytar';
-import { ITerminalProvider } from "./utils/TerminalProvider";
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -32,7 +31,6 @@ export namespace ext {
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
 
-    export let terminalProvider: ITerminalProvider;
     export let keytar: IKeytar | undefined;
     export let dockerContextManager: ContextManager;
     export let dockerClient: DockerApiClient;

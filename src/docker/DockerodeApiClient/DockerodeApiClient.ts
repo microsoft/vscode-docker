@@ -52,7 +52,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         return {
             ...result,
             CreatedTime: new Date(result.Created).valueOf(),
-        };
+        } as DockerContainerInspection;
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
