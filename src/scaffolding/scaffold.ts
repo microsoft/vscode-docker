@@ -3,12 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { localize } from '../localize';
-import { pathNormalize } from '../utils/pathNormalize';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
-import { ChooseOsStep } from './wizard/ChooseOsStep';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldDebuggingStep } from './wizard/ScaffoldDebuggingStep';
@@ -19,7 +16,6 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
         new ChoosePlatformStep(),
-        new ChooseOsStep(),
         new ChooseComposeStep(),
     ];
 
@@ -38,25 +34,5 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
     });
 
     await wizard.prompt();
-
-    // Fill in some calculated values
-    if (wizardContext.artifact) {
-        wizardContext.relativeArtifactPath = pathNormalize(
-            path.relative(wizardContext.workspaceFolder.uri.fsPath, wizardContext.artifact),
-            wizardContext.platformOs
-        );
-
-        wizardContext.relativeDockerfilePath = pathNormalize(
-            path.relative(
-                wizardContext.workspaceFolder.uri.fsPath,
-                path.join(
-                    path.dirname(wizardContext.artifact),
-                    'Dockerfile'
-                ),
-            ),
-            'Linux' // relativeDockerfilePath is used in compose files and must always be Unix-style
-        );
-    }
-
     await wizard.execute();
 }

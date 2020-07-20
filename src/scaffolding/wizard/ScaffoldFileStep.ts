@@ -11,15 +11,31 @@ import { MessageItem, Progress } from 'vscode';
 import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
-import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { pathNormalize } from '../../utils/pathNormalize';
+import { PlatformOS } from '../../utils/platform';
+import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+
+Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
+    const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
+
+    return pathNormalize(
+        path.relative(workspaceFolder.uri.fsPath, absolutePath),
+        platform
+    );
+});
 
 export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
-    public constructor(private readonly fileType: '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml', public readonly priority: number) {
+    public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
         super();
     }
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         const inputPath = await this.getInputPath(wizardContext);
+
+        if (!(await fse.pathExists(inputPath))) {
+            throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.noInputTemplate', 'No input template exists at \'{0}\'', inputPath));
+        }
+
         const outputPath = await this.getOutputPath(wizardContext);
 
         const input = await fse.readFile(inputPath, 'utf-8');
@@ -40,44 +56,63 @@ export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardCo
 
     private async getInputPath(wizardContext: ScaffoldingWizardContext): Promise<string> {
         const config = vscode.workspace.getConfiguration('docker');
-        let templatesPath = config.get<string | undefined>('scaffolding.templatePath', undefined);
+        const settingsTemplatesPath = config.get<string | undefined>('scaffolding.templatePath', undefined);
+        const defaultTemplatesPath = path.join(ext.context.asAbsolutePath('resources'), 'templates');
 
-        if (!templatesPath || !(await fse.pathExists(templatesPath))) {
-            templatesPath = path.join(ext.context.asAbsolutePath('resources'), 'templates');
-        }
-
+        let subPath: string;
         switch (wizardContext.platform) {
             case 'Node.js':
-                return path.join(templatesPath, 'node', this.fileType);
+                subPath = path.join('node', this.fileType);
+                break;
             case '.NET: ASP.NET Core':
-                return path.join(templatesPath, 'netCore', 'aspnet', this.fileType);
+                subPath = path.join('netCore', 'aspnet', this.fileType);
+                break;
             case '.NET: Core Console':
-                return path.join(templatesPath, 'netCore', 'console', this.fileType);
+                subPath = path.join('netCore', 'console', this.fileType);
+                break;
             case 'Python: Django':
-                return path.join(templatesPath, 'python', 'django', this.fileType);
+                subPath = path.join('python', 'django', this.fileType);
+                break;
             case 'Python: Flask':
-                return path.join(templatesPath, 'python', 'flask', this.fileType);
+                subPath = path.join('python', 'flask', this.fileType);
+                break;
             case 'Python: General':
-                return path.join(templatesPath, 'python', 'general', this.fileType);
+                subPath = path.join('python', 'general', this.fileType);
+                break;
             case 'Java':
-                return path.join(templatesPath, 'java', this.fileType);
+                subPath = path.join('java', this.fileType);
+                break;
             case 'C++':
-                return path.join(templatesPath, 'cpp', this.fileType);
+                subPath = path.join('cpp', this.fileType);
+                break;
             case 'Go':
-                return path.join(templatesPath, 'go', this.fileType);
+                subPath = path.join('go', this.fileType);
+                break;
             case 'Ruby':
-                return path.join(templatesPath, 'ruby', this.fileType);
+                subPath = path.join('ruby', this.fileType);
+                break;
             case 'Other':
-                return path.join(templatesPath, 'cpp', this.fileType);
+                subPath = path.join('other', this.fileType);
+                break;
             default:
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
         }
+
+        if (settingsTemplatesPath) {
+            const result = path.join(settingsTemplatesPath, subPath);
+
+            if (await fse.pathExists(result)) {
+                return result;
+            }
+        }
+
+        return path.join(defaultTemplatesPath, subPath);
     }
 
     private async getOutputPath(wizardContext: ScaffoldingWizardContext): Promise<string> {
-        if (this.fileType === 'Dockerfile' && wizardContext.relativeDockerfilePath) {
+        if (this.fileType === 'Dockerfile' && wizardContext.artifact) {
             // Dockerfiles may be placed in subpaths; the others are always at the workspace folder level
-            return path.resolve(wizardContext.workspaceFolder.uri.fsPath, wizardContext.relativeDockerfilePath);
+            return path.resolve(wizardContext.workspaceFolder.uri.fsPath, path.join(path.dirname(wizardContext.artifact), this.fileType));
         } else {
             return path.join(wizardContext.workspaceFolder.uri.fsPath, this.fileType);
         }
