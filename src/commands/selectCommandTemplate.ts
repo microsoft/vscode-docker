@@ -184,17 +184,17 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
 }
 
 function currentContextTypeMatchesTemplate(currentContextType: ContextType, templateContextType: TemplateContextType | undefined): boolean {
-    templateContextType = templateContextType ?? 'all';
+    templateContextType = templateContextType || 'all';
 
     switch (templateContextType) {
         case 'uplevel':
             return isUplevelContextType(currentContextType);
         case 'downlevel':
             return !isUplevelContextType(currentContextType);
-        case 'aci':
-            return currentContextType === 'aci';
         case 'all':
-        default:
             return true;
+        case 'aci':
+        default:
+            return currentContextType === templateContextType;
     }
 }

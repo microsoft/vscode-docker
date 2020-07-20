@@ -24,9 +24,10 @@ export interface DockerContextInspection {
 
 export function isUplevelContextType(contextType: ContextType): boolean {
     switch (contextType) {
-        case 'aci':
-            return true;
-        default:
+        case 'moby':
             return false;
+        case 'aci': // ACI is new
+        default: // Anything else is likely a new context type as well
+            return true;
     }
 }
