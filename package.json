@@ -2053,6 +2053,10 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.showRemoteWorkspaceWarning%"
+                },
+                "docker.scaffolding.templatePath": {
+                    "type": "string",
+                    "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
                 }
             }
         },

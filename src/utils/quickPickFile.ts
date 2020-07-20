@@ -188,6 +188,7 @@ export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vsc
     return fileItem;
 }
 
+// TODO: remove this fn
 export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
     if (fileUri) {
         return createFileItem(rootFolder, fileUri);
@@ -199,5 +200,16 @@ export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: 
     if (!fileItem) {
         throw new Error(noProjectFileMessage);
     }
+    return fileItem;
+}
+
+export async function quickPickFile(rootFolder: vscode.WorkspaceFolder, prompt: string, globPatterns: string[], noItemsMessage: string): Promise<Item> {
+    const items: Item[] = await resolveFilesOfPattern(rootFolder, globPatterns);
+    const fileItem: Item = await quickPickFileItem(items, prompt);
+
+    if (!fileItem) {
+        throw new Error(noItemsMessage);
+    }
+
     return fileItem;
 }

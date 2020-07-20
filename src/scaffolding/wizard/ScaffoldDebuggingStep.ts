@@ -8,13 +8,13 @@ import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
-    public priority: number;
+    public readonly priority: number = 200;
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
     public shouldExecute(wizardContext: ScaffoldingWizardContext): boolean {
-        throw new Error("Method not implemented.");
+        return true;
     }
 }

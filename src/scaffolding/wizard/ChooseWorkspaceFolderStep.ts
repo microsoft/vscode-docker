@@ -3,29 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
-export class ChooseComposeStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
+export class ChooseWorkspaceFolderStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
     public async prompt(wizardContext: ScaffoldingWizardContext): Promise<void> {
-        const opt: vscode.QuickPickOptions = {
-            placeHolder: localize('vscode-docker.scaffold.chooseComposeStep.includeCompose', 'Include optional Docker Compose files?')
-        }
-
-        const response = await ext.ui.showQuickPick(
-            [
-                { label: 'No', data: false },
-                { label: 'Yes', data: true }
-            ],
-            opt);
-
-        wizardContext.scaffoldCompose = response.data;
+        wizardContext.workspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.scaffold.chooseWorkspaceFolderStep.noWorkspaceFolders', 'No workspace folders are open. Please open a workspace or workspace folder.'));
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
-        return wizardContext.scaffoldCompose === undefined;
+        return !!wizardContext.workspaceFolder;
     }
 }
