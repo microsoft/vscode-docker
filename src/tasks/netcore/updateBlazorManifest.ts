@@ -40,7 +40,7 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
 
     const locationsFile = tempFileProvider.getTempFilename();
 
-    const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'GetBlazorManifestLocations.targets');
+    const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', 'GetBlazorManifestLocations.targets');
 
     const command = `dotnet build /r:false /t:GetBlazorManifestLocations /p:CustomAfterMicrosoftCommonTargets="${targetsFile}" /p:BlazorManifestLocationsOutput="${locationsFile}" "${runDefinition.netCore.appProject}"`;
 
