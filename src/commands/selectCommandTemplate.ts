@@ -194,7 +194,7 @@ function currentContextTypeMatchesTemplate(currentContextType: ContextType, temp
         case 'all':
             return true;
         case 'aci':
-        default:
+        default: // Using this code as the default means unknown values can still be made to work
             return currentContextType === templateContextType;
     }
 }
