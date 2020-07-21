@@ -9,6 +9,8 @@ import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { localize } from '../../localize';
 import { PythonProjectType } from '../../utils/pythonUtils';
+import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
+import { PythonScaffoldingWizardContext } from './ChoosePythonArtifactStep';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
@@ -32,7 +34,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case '.NET: Core Console':
                 scaffoldContext.platform = 'netCore';
                 const netCoreOptions: NetCoreScaffoldingOptions = {
-                    appProject: 'todo',
+                    appProject: unresolveWorkspaceFolder(wizardContext.artifact, wizardContext.workspaceFolder),
                     platformOS: wizardContext.platformOS,
                 };
                 await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, netCoreOptions);
@@ -48,9 +50,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
                             'general';
                 const pythonOptions: PythonScaffoldingOptions = {
                     projectType: pythonProjectType,
-                    target: {
-                        file: 'todo',
-                    }
+                    target: (wizardContext as PythonScaffoldingWizardContext).pythonArtifact,
                 };
                 await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pythonOptions);
                 break;

@@ -60,7 +60,7 @@ function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[
     return result;
 }
 
-async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePatterns: string[])
+export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePatterns: string[])
     : Promise<Item[] | undefined> {
     let uris: vscode.Uri[] = [];
     await Promise.all(filePatterns.map(async (pattern: string) => {
@@ -76,7 +76,7 @@ async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePat
     }
 }
 
-async function quickPickFileItem(items: Item[], message: string): Promise<Item | undefined> {
+export async function quickPickFileItem(items: Item[], message: string): Promise<Item | undefined> {
     if (items) {
         if (items.length === 1) {
             return items[0];
@@ -188,7 +188,6 @@ export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vsc
     return fileItem;
 }
 
-// TODO: remove this fn
 export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
     if (fileUri) {
         return createFileItem(rootFolder, fileUri);
@@ -200,16 +199,5 @@ export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: 
     if (!fileItem) {
         throw new Error(noProjectFileMessage);
     }
-    return fileItem;
-}
-
-export async function quickPickFile(rootFolder: vscode.WorkspaceFolder, prompt: string, globPatterns: string[], noItemsMessage: string): Promise<Item> {
-    const items: Item[] = await resolveFilesOfPattern(rootFolder, globPatterns);
-    const fileItem: Item = await quickPickFileItem(items, prompt);
-
-    if (!fileItem) {
-        throw new Error(noItemsMessage);
-    }
-
     return fileItem;
 }
