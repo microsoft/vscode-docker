@@ -22,10 +22,10 @@ export class ChooseOsStep extends AzureWizardPromptStep<ScaffoldingWizardContext
         const items = OSes.map(p => <IAzureQuickPickItem<PlatformOS>>{ label: p, data: p });
 
         const response = await ext.ui.showQuickPick(items, opt);
-        wizardContext.platformOs = response.data;
+        wizardContext.platformOS = response.data;
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
-        return !wizardContext.platformOs;
+        return !wizardContext.platformOS;
     }
 }

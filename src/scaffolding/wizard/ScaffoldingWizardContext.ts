@@ -12,7 +12,7 @@ export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compos
 export interface ScaffoldingWizardContext extends IActionContext {
     // These come from user choice
     platform?: Platform;
-    platformOs?: PlatformOS;
+    platformOS?: PlatformOS;
     ports?: number[];
     scaffoldCompose?: boolean;
     workspaceFolder?: vscode.WorkspaceFolder;
