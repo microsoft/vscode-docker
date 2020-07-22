@@ -150,6 +150,10 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
         break;
     }
 
+    if (!selectedTemplate) {
+        throw new Error(localize('vscode-docker.commands.selectCommandTemplate.noTemplate', 'No command template was found for command \'{0}\'', command));
+    }
+
     context.telemetry.properties.isDefaultCommand = hardcodedTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
     context.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
     context.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
