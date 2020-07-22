@@ -39,6 +39,12 @@ suite("(unit) selectCommandTemplate", () => {
                     label: 'fail3',
                     template: 'fail',
                 },
+                {
+                    // Unconstrained hardcoded (value is test to assert isDefaultCommand == true)
+                    // (If we try to choose here it will fail due to prompting unexpectedly)
+                    label: 'fail4',
+                    template: 'test',
+                }
             ],
             [],
             'moby',
@@ -46,6 +52,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One constrained from settings (contextTypes)", async () => {
@@ -84,6 +94,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[moby, aci]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two constrained from settings", async () => {
@@ -120,6 +134,8 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One unconstrained from settings", async () => {
@@ -156,6 +172,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two unconstrained from settings", async () => {
@@ -197,6 +217,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One constrained from hardcoded (match)", async () => {
@@ -234,6 +258,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One constrained from hardcoded (contextTypes)", async () => {
@@ -272,6 +300,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[moby]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two constrained from hardcoded", async () => {
@@ -316,6 +348,9 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One unconstrained from hardcoded", async () => {
@@ -360,6 +395,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two unconstrained from hardcoded", async () => {
@@ -409,6 +448,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Setting is a string", async () => {
@@ -428,6 +471,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Setting is falsy", async () => {
@@ -446,6 +493,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Unknown context constrained", async () => {
@@ -476,6 +527,10 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'abc', 'Wrong value for currentContextType');
     });
 
     test("Unknown context unconstrained", async () => {
@@ -503,6 +558,10 @@ suite("(unit) selectCommandTemplate", () => {
 
         // Quick aside: validate that the context manager thinks an unknown context is new
         assert.equal(isNewContextType('abc' as any), true, 'Incorrect context type identification');
+        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
+        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
+        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
+        assert.equal(result.context.telemetry.properties.currentContextType, 'abc', 'Wrong value for currentContextType');
     });
 });
 
