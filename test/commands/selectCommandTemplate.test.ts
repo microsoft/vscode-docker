@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { runWithSetting } from '../runWithSetting';
-import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext } from '../../extension.bundle';
+import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext, isNewContextType } from '../../extension.bundle';
 import { TestInput } from 'vscode-azureextensiondev';
 import { IActionContext } from 'vscode-azureextensionui';
 import { testUserInput } from '../global.test';
 import assert = require('assert');
-import { isNewContextType } from '../../src/docker/Contexts';
 
 suite("(unit) selectCommandTemplate", () => {
     test("One constrained from settings (match)", async () => {
