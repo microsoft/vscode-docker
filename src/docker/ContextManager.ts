@@ -75,11 +75,15 @@ export class DockerContextManager implements ContextManager, Disposable {
         // that are done in CLI. Worst case, a user would have to restart VSCode.
         /* eslint-disable @typescript-eslint/tslint/config */
         if (fse.existsSync(dockerConfigFile)) {
-            this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+            try {
+                this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+            } catch { } // Best effort
         }
 
         if (fse.existsSync(dockerContextsFolder)) {
-            this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+            try {
+                this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+            } catch { } // Best effort
         }
         /* eslint-enable @typescript-eslint/tslint/config */
     }
