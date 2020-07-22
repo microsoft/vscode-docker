@@ -6,13 +6,13 @@
 import { ConfigurationTarget, workspace, WorkspaceConfiguration } from "vscode";
 import { configPrefix } from "../extension.bundle";
 
-export async function runWithSetting<T>(key: string, value: T | undefined, callback: () => Promise<void>): Promise<void> {
+export async function runWithSetting<TSetting, TCallback>(key: string, value: TSetting | undefined, callback: () => Promise<TCallback>): Promise<TCallback> {
     const config: WorkspaceConfiguration = workspace.getConfiguration(configPrefix);
-    const result = config.inspect<T>(key);
-    const oldValue: T | undefined = result && result.globalValue;
+    const result = config.inspect<TSetting>(key);
+    const oldValue: TSetting | undefined = result && result.globalValue;
     try {
         await config.update(key, value, ConfigurationTarget.Global);
-        await callback();
+        return await callback();
     } finally {
         await config.update(key, oldValue, ConfigurationTarget.Global);
     }

@@ -12,7 +12,8 @@ import { resolveVariables } from '../utils/resolveVariables';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
-type CommandTemplate = {
+// Exported only for tests
+export type CommandTemplate = {
     template: string,
     label: string,
     match?: string,
@@ -21,7 +22,8 @@ type CommandTemplate = {
 
 // NOTE: the default templates are duplicated in package.json, since VSCode offers no way of looking up extension-level default settings
 // So, when modifying them here, be sure to modify them there as well!
-const defaults: { [key in TemplateCommand]: CommandTemplate[] } = {
+// Exported only for tests
+export const defaultCommandTemplates: { [key in TemplateCommand]: CommandTemplate[] } = {
     /* eslint-disable no-template-curly-in-string */
     'build': [{ label: 'Docker Build', template: 'docker build --pull --rm -f "${dockerfile}" -t ${tag} "${context}"' }],
     'run': [{ label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' }],
@@ -96,10 +98,10 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
     );
 }
 
-async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext: string[], folder: vscode.WorkspaceFolder | undefined, additionalVariables: { [key: string]: string }): Promise<string> {
+// Exported only for tests
+export async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext: string[], folder: vscode.WorkspaceFolder | undefined, additionalVariables: { [key: string]: string }): Promise<string> {
     // Get the current context type
-    const currentContext = await ext.dockerContextManager.getCurrentContext();
-    const currentContextType = currentContext.Type;
+    const currentContextType = (await ext.dockerContextManager.getCurrentContext()).Type;
 
     // Get the configured settings values
     const config = vscode.workspace.getConfiguration('docker');
@@ -117,7 +119,7 @@ async function selectCommandTemplate(context: IActionContext, command: TemplateC
     }
 
     // Get a template array from hardcoded defaults
-    const hardcodedTemplates = defaults[command];
+    const hardcodedTemplates = defaultCommandTemplates[command];
 
     // Build the template selection matrix. Settings-defined values are preferred over hardcoded, and constrained over unconstrained.
     // Constrained templates have either `match` or `contextTypes`, and must match the constraints.
