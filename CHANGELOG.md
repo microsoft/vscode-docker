@@ -1,3 +1,7 @@
+## 1.4.1 - 22 July 2020
+### Fixed
+* "Permission denied" issue during extension activation. [#2181](https://github.com/microsoft/vscode-docker/issues/2181)
+
 ## 1.4.0 - 22 July 2020
 ### Added
 * Support for Azure Container Instances Docker contexts. [#2102](https://github.com/microsoft/vscode-docker/issues/2102)
