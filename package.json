@@ -2737,7 +2737,7 @@
         "typescript": "^3.9.7",
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.77.0",
-        "vscode-azureextensiondev": "^0.4.0",
+        "vscode-azureextensiondev": "^0.4.1",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.0",
         "webpack": "^4.43.0",
