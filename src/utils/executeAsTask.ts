@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
-export async function executeAsTask(context: IActionContext, command: string, name: string, options: { addDockerEnv?: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string }): Promise<vscode.TaskExecution> {
+export async function executeAsTask(context: IActionContext, command: string, name: string, options: { addDockerEnv?: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string, alwaysRunNew?: boolean }): Promise<vscode.TaskExecution> {
     let newEnv: NodeJS.ProcessEnv | undefined;
     options = options ?? {};
 
@@ -26,6 +26,13 @@ export async function executeAsTask(context: IActionContext, command: string, na
         new vscode.ShellExecution(command, { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir(), env: newEnv }),
         [] // problemMatchers
     );
+
+    if (options.alwaysRunNew) {
+        // If the command should always run in a new task (even if an identical command is still running), add a random value to the definition
+        // This will cause a new task to be run even if one with an identical command line is already running
+        // eslint-disable-next-line @typescript-eslint/tslint/config
+        task.definition.idRandomizer = Math.random();
+    }
 
     return vscode.tasks.executeTask(task);
 }

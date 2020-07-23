@@ -62,5 +62,5 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         shellCommand
     );
 
-    await executeAsTask(context, terminalCommand, `Shell: ${node.containerName}`, { addDockerEnv: true });
+    await executeAsTask(context, terminalCommand, `Shell: ${node.containerName}`, { addDockerEnv: true, alwaysRunNew: true });
 }
