@@ -13,7 +13,7 @@ import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from 'vsc
 import { localize } from '../../localize';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
-import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
     const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
@@ -24,12 +24,12 @@ Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardC
     );
 });
 
-export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
-    public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
+export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext, TScaffoldedFileType extends string> extends AzureWizardExecuteStep<TWizardContext> {
+    public constructor(private readonly fileType: TScaffoldedFileType, public readonly priority: number) {
         super();
     }
 
-    public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
+    public async execute(wizardContext: TWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         const inputPath = await this.getInputPath(wizardContext);
 
         if (!(await fse.pathExists(inputPath))) {
@@ -48,13 +48,13 @@ export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardCo
         await fse.writeFile(outputPath, output, { encoding: 'utf-8' });
     }
 
-    public shouldExecute(wizardContext: ScaffoldingWizardContext): boolean {
+    public shouldExecute(wizardContext: TWizardContext): boolean {
         return this.fileType === 'docker-compose.yml' || this.fileType === 'docker-compose.debug.yml' ?
             !!wizardContext.scaffoldCompose :
             true;
     }
 
-    private async getInputPath(wizardContext: ScaffoldingWizardContext): Promise<string> {
+    private async getInputPath(wizardContext: TWizardContext): Promise<string> {
         const config = vscode.workspace.getConfiguration('docker');
         const settingsTemplatesPath = config.get<string | undefined>('scaffolding.templatePath', undefined);
         const defaultTemplatesPath = path.join(ext.context.asAbsolutePath('resources'), 'templates');
@@ -109,7 +109,7 @@ export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardCo
         return path.join(defaultTemplatesPath, subPath);
     }
 
-    private async getOutputPath(wizardContext: ScaffoldingWizardContext): Promise<string> {
+    private async getOutputPath(wizardContext: TWizardContext): Promise<string> {
         if (this.fileType === 'Dockerfile' && wizardContext.artifact) {
             // Dockerfiles may be placed in subpaths; the others are always at the workspace folder level
             return path.resolve(wizardContext.workspaceFolder.uri.fsPath, path.join(path.dirname(wizardContext.artifact), this.fileType));
@@ -118,7 +118,7 @@ export class ScaffoldFileStep extends AzureWizardExecuteStep<ScaffoldingWizardCo
         }
     }
 
-    private async promptForOverwriteIfNeeded(wizardContext: ScaffoldingWizardContext, output: string, outputPath: string): Promise<void> {
+    private async promptForOverwriteIfNeeded(wizardContext: TWizardContext, output: string, outputPath: string): Promise<void> {
         if (wizardContext.overwriteAll) {
             // If overwriteAll is set, no need to prompt
             return;

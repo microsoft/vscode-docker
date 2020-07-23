@@ -15,6 +15,7 @@ const moduleRegex = /([a-z_]+[.])*([a-z_])/i;
 
 export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext {
     pythonArtifact?: PythonTarget;
+    pythonRequirements?: { [key: string]: string };
 }
 
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {

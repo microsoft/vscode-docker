@@ -11,6 +11,7 @@ import { ChooseArtifactStep } from './wizard/ChooseArtifactStep';
 import { ChooseOsStep } from './wizard/ChooseOsStep';
 import { ChoosePortsStep } from './wizard/ChoosePortsStep';
 import { ChoosePythonArtifactStep } from './wizard/ChoosePythonArtifactStep';
+import { PythonScaffoldFileStep } from './wizard/PythonScaffoldFileStep';
 import { ScaffoldDebuggingStep } from './wizard/ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
@@ -65,9 +66,12 @@ export function addPlatformSpecificExecuteSteps(platform: Platform, executeSteps
         case 'Node.js':
         case '.NET: ASP.NET Core':
         case '.NET: Core Console':
+            executeSteps.push(new ScaffoldDebuggingStep());
+            break;
         case 'Python: Django':
         case 'Python: Flask':
         case 'Python: General':
+            executeSteps.push(new PythonScaffoldFileStep('requirements.txt', 1100));
             executeSteps.push(new ScaffoldDebuggingStep());
             break;
 
