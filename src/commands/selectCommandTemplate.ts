@@ -192,7 +192,6 @@ function getConstrainedTemplates(templates: CommandTemplate[], matchContext: str
             return false;
         }
 
-
         return isContextTypeConstraintSatisfied(currentContextType, template.contextTypes) &&
             isMatchConstraintSatisfied(matchContext, template.match);
     });
@@ -227,4 +226,6 @@ function isMatchConstraintSatisfied(matchContext: string[], match: string | unde
         // Don't wait
         void ext.ui.showWarningMessage(localize('vscode-docker.commands.selectCommandTemplate.invalidMatch', 'Invalid match expression \'{0}\'. This template will be skipped.', match));
     }
+
+    return false;
 }
