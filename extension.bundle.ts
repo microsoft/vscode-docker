@@ -48,9 +48,11 @@ export { DebugConfigurationBase } from './src/debugging/DockerDebugConfiguration
 export { ActivityMeasurementService } from './src/telemetry/ActivityMeasurementService';
 export { ExperimentationTelemetry } from './src/telemetry/ExperimentationTelemetry';
 export { DockerApiClient } from './src/docker/DockerApiClient';
+export { DockerContext, isNewContextType } from './src/docker/Contexts';
 export { DockerContainer } from './src/docker/Containers';
 export { DockerImage } from './src/docker/Images';
 export { DockerNetwork } from './src/docker/Networks';
 export { DockerVolume } from './src/docker/Volumes';
+export { CommandTemplate, selectCommandTemplate, defaultCommandTemplates } from './src/commands/selectCommandTemplate';
 
 export * from 'vscode-azureextensionui';
