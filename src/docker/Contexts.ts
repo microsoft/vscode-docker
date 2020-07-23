@@ -5,11 +5,13 @@
 
 import { DockerObject } from './Common';
 
+export type ContextType = 'aci' | 'moby';
+
 export interface DockerContext extends DockerObject {
     readonly Description?: string;
     readonly DockerEndpoint: string;
     readonly Current: boolean;
-    readonly Type: 'aci' | 'moby';
+    readonly Type: ContextType;
 
     readonly Id: string; // Will be equal to Name for contexts
 
@@ -18,4 +20,14 @@ export interface DockerContext extends DockerObject {
 
 export interface DockerContextInspection {
     readonly [key: string]: unknown;
+}
+
+export function isNewContextType(contextType: ContextType): boolean {
+    switch (contextType) {
+        case 'moby':
+            return false;
+        case 'aci': // ACI is new
+        default: // Anything else is likely a new context type as well
+            return true;
+    }
 }

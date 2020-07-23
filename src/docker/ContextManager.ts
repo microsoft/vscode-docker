@@ -16,7 +16,7 @@ import { LineSplitter } from '../debugging/coreclr/lineSplitter';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
-import { DockerContext, DockerContextInspection } from './Contexts';
+import { DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 import { DockerodeApiClient } from './DockerodeApiClient/DockerodeApiClient';
 import { DockerServeClient } from './DockerServeClient/DockerServeClient';
 
@@ -74,13 +74,17 @@ export class DockerContextManager implements ContextManager, Disposable {
         // The file watchers are not strictly necessary; they serve to help the extension detect context switches
         // that are done in CLI. Worst case, a user would have to restart VSCode.
         /* eslint-disable @typescript-eslint/tslint/config */
-        if (fse.existsSync(dockerConfigFile)) {
-            this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
-        }
+        try {
+            if (fse.existsSync(dockerConfigFile)) {
+                this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+            }
+        } catch { } // Best effort
 
-        if (fse.existsSync(dockerContextsFolder)) {
-            this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
-        }
+        try {
+            if (fse.existsSync(dockerContextsFolder)) {
+                this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+            }
+        } catch { } // Best effort
         /* eslint-enable @typescript-eslint/tslint/config */
     }
 
@@ -112,7 +116,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             void ext.dockerClient?.dispose();
 
             // Create a new client
-            if (currentContext.Type === 'aci') {
+            if (isNewContextType(currentContext.Type)) {
                 // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
                 // But that probably won't be true in the future, so define both as separate concepts now
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
@@ -254,8 +258,8 @@ export class DockerContextManager implements ContextManager, Disposable {
         let result: boolean = false;
         const contexts = await this.contextsCache.getValue();
 
-        if (contexts.some(c => c.Type === 'aci')) {
-            // If there are any ACI contexts we automatically know it's the new CLI
+        if (contexts.some(c => isNewContextType(c.Type))) {
+            // If there are any new contexts we automatically know it's the new CLI
             result = true;
         } else {
             // Otherwise we look at the output of `docker serve --help`
