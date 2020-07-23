@@ -59,7 +59,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainer, C
     }
 
     public getPropertyValue(item: DockerContainer, property: ContainerProperty): string {
-        const networks = item.NetworkSettings?.Networks?.length > 0 ? Object.keys(item.NetworkSettings.Networks) : ['<none>'];
+        const networks = item.NetworkSettings?.Networks && Object.keys(item.NetworkSettings.Networks).length > 0 ? Object.keys(item.NetworkSettings.Networks) : ['<none>'];
         const ports = item.Ports?.length > 0 ? item.Ports.map(p => p.PublicPort) : ['<none>'];
 
         switch (property) {
