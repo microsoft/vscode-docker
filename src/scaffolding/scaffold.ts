@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as vscode from 'vscode';
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
@@ -23,8 +24,6 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
         new ScaffoldFileStep('.dockerignore', 100),
         new ScaffoldFileStep('Dockerfile', 200),
-        new ScaffoldFileStep('docker-compose.yml', 300),
-        new ScaffoldFileStep('docker-compose.debug.yml', 400),
     ];
 
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {
@@ -35,4 +34,8 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
 
     await wizard.prompt();
     await wizard.execute();
+
+    if (wizardContext.scaffoldCompose) {
+        await vscode.commands.executeCommand('vscode-docker.configureCompose', wizardContext);
+    }
 }

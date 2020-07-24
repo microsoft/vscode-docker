@@ -75,23 +75,8 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
     }
 
     public shouldExecute(wizardContext: TWizardContext): boolean {
-        switch (this.fileType) {
-            case 'docker-compose.yml':
-            case 'docker-compose.debug.yml':
-                return wizardContext.scaffoldCompose && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose');
-            case 'requirements.txt':
-                return (
-                    wizardContext.platform === 'Python: Django' ||
-                    wizardContext.platform === 'Python: Flask' ||
-                    wizardContext.platform === 'Python: General'
-                ) && wizardContext.scaffoldType === 'all';
-            case '.dockerignore':
-            case 'Dockerfile':
-                return wizardContext.scaffoldType === 'all';
-
-            default:
-                return false;
-        }
+        // If this step is created it always need to be executed
+        return true;
     }
 
     private async getInputPath(wizardContext: TWizardContext): Promise<string> {
