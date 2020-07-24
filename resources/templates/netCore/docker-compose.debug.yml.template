@@ -19,7 +19,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 {{#if ports}}
-      - ASPNETCORE_URLS=http://+:${ports[0]}
+      - ASPNETCORE_URLS=http://+:{{ ports.[0] }}
 {{/if}}
     volumes:
 {{#if (eq netCorePlatformOS 'Windows')}}
