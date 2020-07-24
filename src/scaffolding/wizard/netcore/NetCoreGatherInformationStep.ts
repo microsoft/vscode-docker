@@ -15,6 +15,6 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
-        return !wizardContext.netCoreOutputPath || !wizardContext.baseImage || !wizardContext.netCoreSdkBaseImage;
+        return !wizardContext.netCoreOutputPath || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage;
     }
 }

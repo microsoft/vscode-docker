@@ -22,9 +22,9 @@ export function getPythonSubwizardOptions(wizardContext: ScaffoldingWizardContex
         new ChoosePythonArtifactStep(),
     ];
 
-    if (wizardContext.platform === 'Python: Django') {
+    if (wizardContext.platform === 'Python: Django' && wizardContext.scaffoldType === 'all') {
         promptSteps.push(new ChoosePortsStep([8000]));
-    } else if (wizardContext.platform === 'Python: Flask') {
+    } else if (wizardContext.platform === 'Python: Flask' && wizardContext.scaffoldType === 'all') {
         promptSteps.push(new ChoosePortsStep([5000]));
     }
 

@@ -30,7 +30,10 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
 
         const platforms = this.platformsList || AllPlatforms as readonly Platform[];
 
-        const items = platforms.map(p => <IAzureQuickPickItem<Platform>>{ label: p, data: p });
+        const items: IAzureQuickPickItem<Platform>[] = platforms.map(p => {
+            return { label: p, data: p };
+        });
+
         const response = await ext.ui.showQuickPick(items, opt);
         wizardContext.platform = response.data;
     }
@@ -39,7 +42,7 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
         return !wizardContext.platform;
     }
 
-    public async getSubWizard?(wizardContext: ScaffoldingWizardContext): Promise<IWizardOptions<ScaffoldingWizardContext> | undefined> {
+    public async getSubWizard(wizardContext: ScaffoldingWizardContext): Promise<IWizardOptions<ScaffoldingWizardContext> | undefined> {
         switch (wizardContext.platform) {
             case 'Node.js':
                 return getNodeSubwizardOptions(wizardContext);

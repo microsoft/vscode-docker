@@ -24,7 +24,6 @@ export interface ScaffoldingWizardContext extends IActionContext {
     artifact?: string;
 
     // These are calculated depending on platform
-    baseImage?: string;
     version?: string;
     serviceNameAndRelativePath?: string;
 

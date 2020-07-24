@@ -70,7 +70,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case 'Python: Django':
             case 'Python: Flask':
             case 'Python: General':
-                return wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose';
+                return wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging';
 
             default:
                 return false;

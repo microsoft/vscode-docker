@@ -19,6 +19,7 @@ const noProjectFile = localize('vscode-docker.scaffold.platforms.netCore.noProje
 
 export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContext {
     netCoreOutputPath?: string;
+    netCoreRuntimeBaseImage?: string;
     netCoreSdkBaseImage?: string;
 }
 
