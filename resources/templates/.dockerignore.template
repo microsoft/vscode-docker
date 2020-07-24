@@ -12,9 +12,9 @@
 **/*.dbmdl
 **/*.jfm
 **/azds.yaml
-{{#if (eq platform 'Node.js')}}
+{{#unless (eq platform 'Node.js')}}
 **/bin
-{{/if}}
+{{/unless}}
 **/charts
 **/docker-compose*
 **/Dockerfile*
