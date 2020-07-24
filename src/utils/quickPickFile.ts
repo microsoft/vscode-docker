@@ -76,7 +76,7 @@ export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, 
     }
 }
 
-export async function quickPickFileItem(items: Item[], message: string): Promise<Item | undefined> {
+async function quickPickFileItem(items: Item[], message: string): Promise<Item | undefined> {
     if (items) {
         if (items.length === 1) {
             return items[0];
@@ -84,25 +84,6 @@ export async function quickPickFileItem(items: Item[], message: string): Promise
             return await ext.ui.showQuickPick<Item>(items, { placeHolder: message });
         }
     }
-}
-
-async function quickPickFileItems(items: Item[], message: string): Promise<Item[] | undefined> {
-    if (items) {
-        if (items.length === 1) {
-            return items;
-        } else {
-            return await ext.ui.showQuickPick<Item>(items, { placeHolder: message, canPickMany: true });
-        }
-    }
-}
-
-export async function quickPickDockerFileItems(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder, message: string): Promise<Item[]> {
-    if (dockerFileUri) {
-        return [createFileItem(rootFolder, dockerFileUri)];
-    }
-    const globPatterns: string[] = getDockerFileGlobPatterns();
-    const dockerFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
-    return await quickPickFileItems(dockerFiles, message);
 }
 
 export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
