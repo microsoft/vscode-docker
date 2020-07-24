@@ -38,6 +38,7 @@ const defaultContext: Partial<DockerContext> = {
     Id: 'default',
     Name: 'default',
     Description: 'Current DOCKER_HOST based configuration',
+    Type: 'moby',
 };
 
 // These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
@@ -247,7 +248,6 @@ export class DockerContextManager implements ContextManager, Disposable {
                 ...defaultContext,
                 Current: true,
                 DockerEndpoint: os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe,
-                Type: 'moby',
             } as DockerContext];
         }
 
