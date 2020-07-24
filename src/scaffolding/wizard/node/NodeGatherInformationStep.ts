@@ -9,6 +9,8 @@ import { NodeScaffoldingWizardContext } from './NodeScaffoldingWizardContext';
 export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffoldingWizardContext> {
     public async prompt(wizardContext: NodeScaffoldingWizardContext): Promise<void> {
         // TODO
+
+        await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: NodeScaffoldingWizardContext): boolean {

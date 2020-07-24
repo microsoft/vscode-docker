@@ -9,6 +9,8 @@ import { JavaScaffoldingWizardContext } from './JavaScaffoldingWizardContext';
 export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffoldingWizardContext> {
     public async prompt(wizardContext: JavaScaffoldingWizardContext): Promise<void> {
         // TODO
+
+        await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: JavaScaffoldingWizardContext): boolean {

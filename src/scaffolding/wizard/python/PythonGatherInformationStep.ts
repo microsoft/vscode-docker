@@ -19,6 +19,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
                 gunicorn: '20.0.4',
             };
         }
+
+        await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: PythonScaffoldingWizardContext): boolean {

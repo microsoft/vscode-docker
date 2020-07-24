@@ -15,7 +15,7 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
-Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
+Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
     const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
 
     return pathNormalize(
@@ -32,7 +32,7 @@ Handlebars.registerHelper('basename', (a: string) => {
     return path.basename(a);
 });
 
-Handlebars.registerHelper('dirname', (a: string, platform: PlatformOS) => {
+Handlebars.registerHelper('dirname', (a: string, platform: PlatformOS = 'Linux') => {
     return pathNormalize(
         path.dirname(a),
         platform

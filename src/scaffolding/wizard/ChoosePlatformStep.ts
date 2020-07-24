@@ -9,8 +9,9 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
 import { ChoosePortsStep } from './ChoosePortsStep';
+import { GatherInformationStep } from './GatherInformationStep';
 import { getJavaSubwizardOptions } from './java/JavaScaffoldingWizardContext';
-import { getNetCoreSubwizardOptions } from './netcore/NetCoreScaffoldingWizardContext';
+import { getNetCoreSubwizardOptions } from './netCore/NetCoreScaffoldingWizardContext';
 import { getNodeSubwizardOptions } from './node/NodeScaffoldingWizardContext';
 import { getPythonSubwizardOptions } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
@@ -57,15 +58,18 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
                 return {
                     promptSteps: [
                         new ChoosePortsStep([3000]),
-                    ],
-                    executeSteps: [
-                        // TODO
+                        new GatherInformationStep(),
                     ]
                 };
 
             case 'C++':
             case 'Other':
-            // No extra steps for C++ and Other
+                // Too simple to justify having their own methods
+                return {
+                    promptSteps: [
+                        new GatherInformationStep(),
+                    ]
+                };
 
             default:
                 throw new Error(localize('vscode-docker.scaffold.choosePlatformStep.unexpectedPlatform', 'Unexpected platform'));

@@ -10,6 +10,8 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     public async prompt(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
         // TODO
         // Output file path, base image
+
+        await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {

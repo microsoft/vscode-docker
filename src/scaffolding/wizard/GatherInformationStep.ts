@@ -6,6 +6,13 @@
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
-export abstract class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
+export class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
+    public async prompt(wizardContext: TWizardContext): Promise<void> {
+        // Calculate more info
+    }
 
+    public shouldPrompt(wizardContext: TWizardContext): boolean {
+        // TODO
+        return true;
+    }
 }

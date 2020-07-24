@@ -1,8 +1,8 @@
 {{#if (eq platform 'Windows')}}
 #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
-
 {{#/if}}
+
 FROM {{ baseImage }} AS base
 WORKDIR /app
 {{#each ports}}
@@ -11,10 +11,10 @@ EXPOSE {{ . }}
 
 FROM {{ netCoreSdkBaseImage }} AS build
 WORKDIR /src
-COPY ["{{ makeRelativePath artifact 'Linux' }}", "{{ dirname (makeRelativePath artifact 'Linux') 'Linux' }}"]
-RUN dotnet restore {{ makeRelativePath artifact 'Linux' }}
+COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}"]
+RUN dotnet restore {{ workspaceRelative . artifact platformOs }}
 COPY . .
-WORKDIR "/src/{{ dirname (makeRelativePath artifact 'Linux') 'Linux' }}"
+WORKDIR "/src/{{ dirname (workspaceRelative . artifact 'Linux') 'Linux' }}"
 RUN dotnet build "{{ basename artifact }}" -c Release -o /app/build
 
 FROM build AS publish
