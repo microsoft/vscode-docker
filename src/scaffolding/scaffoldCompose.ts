@@ -11,14 +11,17 @@ import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
 export async function scaffoldCompose(wizardContext: ScaffoldingWizardContext): Promise<void> {
+    wizardContext.scaffoldType = 'compose';
+    wizardContext.scaffoldCompose = true;
+
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
         new ChoosePlatformStep(),
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
-        new ScaffoldFileStep<ScaffoldingWizardContext>('docker-compose.yml', 300),
-        new ScaffoldFileStep<ScaffoldingWizardContext>('docker-compose.debug.yml', 400),
+        new ScaffoldFileStep('docker-compose.yml', 300),
+        new ScaffoldFileStep('docker-compose.debug.yml', 400),
     ];
 
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {

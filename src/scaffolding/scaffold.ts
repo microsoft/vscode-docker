@@ -8,11 +8,12 @@ import { localize } from '../localize';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
-import { ScaffoldDebuggingStep } from './wizard/ScaffoldDebuggingStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
 export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise<void> {
+    wizardContext.scaffoldType = 'all';
+
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
         new ChooseComposeStep(),
@@ -20,12 +21,10 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
-        new ScaffoldFileStep<ScaffoldingWizardContext>('.dockerignore', 100),
-        new ScaffoldFileStep<ScaffoldingWizardContext>('Dockerfile', 200),
-        new ScaffoldFileStep<ScaffoldingWizardContext>('docker-compose.yml', 300),
-        new ScaffoldFileStep<ScaffoldingWizardContext>('docker-compose.debug.yml', 400),
-        new ScaffoldFileStep<ScaffoldingWizardContext>('requirements.txt', 500),
-        new ScaffoldDebuggingStep(),
+        new ScaffoldFileStep('.dockerignore', 100),
+        new ScaffoldFileStep('Dockerfile', 200),
+        new ScaffoldFileStep('docker-compose.yml', 300),
+        new ScaffoldFileStep('docker-compose.debug.yml', 400),
     ];
 
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {

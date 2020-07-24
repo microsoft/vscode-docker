@@ -14,7 +14,7 @@ import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizard
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
-    public readonly priority: number = 200;
+    public readonly priority: number = 1000;
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         progress.report({ message: localize('vscode-docker.scaffold.scaffoldDebuggingStep.progress', 'Adding debug configuration and tasks...') });
@@ -70,7 +70,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case 'Python: Django':
             case 'Python: Flask':
             case 'Python: General':
-                return true;
+                return wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose';
 
             default:
                 return false;

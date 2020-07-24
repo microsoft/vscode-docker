@@ -24,6 +24,10 @@ Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardC
     );
 });
 
+Handlebars.registerHelper('eq', (a: string, b: string) => {
+    return a === b;
+});
+
 export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardExecuteStep<TWizardContext> {
     public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
         super();
@@ -51,17 +55,23 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
     }
 
     public shouldExecute(wizardContext: TWizardContext): boolean {
-        if (this.fileType === 'docker-compose.yml' || this.fileType === 'docker-compose.debug.yml') {
-            return wizardContext.scaffoldCompose;
-        } else if (this.fileType === 'requirements.txt') {
-            return (
-                wizardContext.platform === 'Python: Django' ||
-                wizardContext.platform === 'Python: Flask' ||
-                wizardContext.platform === 'Python: General'
-            );
-        }
+        switch (this.fileType) {
+            case 'docker-compose.yml':
+            case 'docker-compose.debug.yml':
+                return wizardContext.scaffoldCompose && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose');
+            case 'requirements.txt':
+                return (
+                    wizardContext.platform === 'Python: Django' ||
+                    wizardContext.platform === 'Python: Flask' ||
+                    wizardContext.platform === 'Python: General'
+                ) && wizardContext.scaffoldType === 'all';
+            case '.dockerignore':
+            case 'Dockerfile':
+                return wizardContext.scaffoldType === 'all';
 
-        return true;
+            default:
+                return false;
+        }
     }
 
     private async getInputPath(wizardContext: TWizardContext): Promise<string> {

@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
+import { IWizardOptions } from 'vscode-azureextensionui';
 import { localize } from '../../../localize';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';
+import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { NodeGatherInformationStep } from './NodeGatherInformationStep';
 
@@ -19,16 +20,14 @@ export interface NodeScaffoldingWizardContext extends ScaffoldingWizardContext {
 }
 
 export function getNodeSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NodeScaffoldingWizardContext> {
-    const promptSteps: AzureWizardPromptStep<NodeScaffoldingWizardContext>[] = [
-        new ChooseArtifactStep(choosePackageFile, nodeGlobPatterns, noPackageFile),
-        new ChoosePortsStep([3000]),
-        new NodeGatherInformationStep(),
-    ];
-
     return {
-        promptSteps: promptSteps,
+        promptSteps: [
+            new ChooseArtifactStep(choosePackageFile, nodeGlobPatterns, noPackageFile),
+            new ChoosePortsStep([3000]),
+            new NodeGatherInformationStep(),
+        ],
         executeSteps: [
-            // TODO
+            new ScaffoldDebuggingStep(),
         ],
     };
 }

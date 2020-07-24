@@ -20,8 +20,5 @@ export function getJavaSubwizardOptions(wizardContext: ScaffoldingWizardContext)
 
     return {
         promptSteps: promptSteps,
-        executeSteps: [
-            // TODO
-        ],
     };
 }

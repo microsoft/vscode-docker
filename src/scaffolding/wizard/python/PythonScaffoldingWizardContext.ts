@@ -6,6 +6,8 @@
 import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
 import { PythonTarget } from '../../../utils/pythonUtils';
 import { ChoosePortsStep } from '../ChoosePortsStep';
+import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
+import { ScaffoldFileStep } from '../ScaffoldFileStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { ChoosePythonArtifactStep } from './ChoosePythonArtifactStep';
 import { PythonGatherInformationStep } from './PythonGatherInformationStep';
@@ -31,7 +33,8 @@ export function getPythonSubwizardOptions(wizardContext: ScaffoldingWizardContex
     return {
         promptSteps: promptSteps,
         executeSteps: [
-            // TODO
+            new ScaffoldFileStep('requirements.txt', 0),
+            new ScaffoldDebuggingStep(),
         ],
     };
 }

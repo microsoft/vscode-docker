@@ -9,6 +9,7 @@ import { localize } from '../../../localize';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { ChooseOsStep } from '../ChooseOsStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';
+import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { NetCoreGatherInformationStep } from './NetCoreGatherInformationStep';
 
@@ -24,10 +25,13 @@ export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContex
 export function getNetCoreSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<NetCoreScaffoldingWizardContext>[] = [
         new ChooseArtifactStep(chooseProjectFile, netCoreGlobPatterns, noProjectFile),
-        new ChooseOsStep(),
     ];
 
-    if (wizardContext.platform === '.NET: ASP.NET Core') {
+    if (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging') {
+        promptSteps.push(new ChooseOsStep());
+    }
+
+    if (wizardContext.platform === '.NET: ASP.NET Core' && wizardContext.scaffoldType === 'all') {
         promptSteps.push(new ChoosePortsStep([80, 443]));
     }
 
@@ -36,7 +40,7 @@ export function getNetCoreSubwizardOptions(wizardContext: ScaffoldingWizardConte
     return {
         promptSteps: promptSteps,
         executeSteps: [
-            // TODO
+            new ScaffoldDebuggingStep(),
         ],
     };
 }

@@ -11,6 +11,8 @@ import { ScaffoldDebuggingStep } from './wizard/ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
 export async function scaffoldDebugConfig(wizardContext: ScaffoldingWizardContext): Promise<void> {
+    wizardContext.scaffoldType = 'debugging';
+
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
         new ChoosePlatformStep(['Node.js', '.NET: ASP.NET Core', '.NET: Core Console', 'Python: Django', 'Python: Flask', 'Python: General']),

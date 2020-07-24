@@ -10,6 +10,9 @@ import { Platform, PlatformOS } from '../../utils/platform';
 export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml' | 'requirements.txt';
 
 export interface ScaffoldingWizardContext extends IActionContext {
+    // These are set at the beginning
+    scaffoldType: 'all' | 'compose' | 'debugging';
+
     // These come from user choice
     platform?: Platform;
     platformOS?: PlatformOS;
