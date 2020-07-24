@@ -4,10 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizardPromptStep, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { AzureWizardPromptStep, IAzureQuickPickItem, IWizardOptions } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
+import { ChoosePortsStep } from './ChoosePortsStep';
+import { getJavaSubwizardOptions } from './java/JavaScaffoldingWizardContext';
+import { getNetCoreSubwizardOptions } from './netcore/NetCoreScaffoldingWizardContext';
+import { getNodeSubwizardOptions } from './node/NodeScaffoldingWizardContext';
+import { getPythonSubwizardOptions } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
@@ -31,5 +36,39 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
         return !wizardContext.platform;
+    }
+
+    public async getSubWizard?(wizardContext: ScaffoldingWizardContext): Promise<IWizardOptions<ScaffoldingWizardContext> | undefined> {
+        switch (wizardContext.platform) {
+            case 'Node.js':
+                return getNodeSubwizardOptions(wizardContext);
+            case '.NET: ASP.NET Core':
+            case '.NET: Core Console':
+                return getNetCoreSubwizardOptions(wizardContext);
+            case 'Python: Django':
+            case 'Python: Flask':
+            case 'Python: General':
+                return getPythonSubwizardOptions(wizardContext);
+            case 'Java':
+                return getJavaSubwizardOptions(wizardContext);
+            case 'Go':
+            case 'Ruby':
+                // Too simple to justify having their own methods
+                return {
+                    promptSteps: [
+                        new ChoosePortsStep([3000]),
+                    ],
+                    executeSteps: [
+                        // TODO
+                    ]
+                };
+
+            case 'C++':
+            case 'Other':
+            // No extra steps for C++ and Other
+
+            default:
+                throw new Error(localize('vscode-docker.scaffold.choosePlatformStep.unexpectedPlatform', 'Unexpected platform'));
+        }
     }
 }

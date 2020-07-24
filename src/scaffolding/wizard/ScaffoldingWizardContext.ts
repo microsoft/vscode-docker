@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { Platform, PlatformOS } from '../../utils/platform';
 
-export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml';
+export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml' | 'requirements.txt';
 
 export interface ScaffoldingWizardContext extends IActionContext {
     // These come from user choice
@@ -21,5 +21,6 @@ export interface ScaffoldingWizardContext extends IActionContext {
     artifact?: string;
 
     // Other properties that get calculated or set later
+    baseImage?: string;
     overwriteAll?: boolean;
 }

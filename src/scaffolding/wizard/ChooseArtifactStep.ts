@@ -25,6 +25,6 @@ export class ChooseArtifactStep<TWizardContext extends ScaffoldingWizardContext>
     }
 
     public shouldPrompt(wizardContext: TWizardContext): boolean {
-        return !!wizardContext.artifact;
+        return !wizardContext.artifact;
     }
 }

@@ -14,6 +14,6 @@ export class ChooseWorkspaceFolderStep extends AzureWizardPromptStep<Scaffolding
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
-        return !!wizardContext.workspaceFolder;
+        return !wizardContext.workspaceFolder;
     }
 }

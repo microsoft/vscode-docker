@@ -10,13 +10,15 @@ import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffo
 import { localize } from '../../localize';
 import { PythonProjectType } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { PythonScaffoldingWizardContext } from './ChoosePythonArtifactStep';
+import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
     public readonly priority: number = 200;
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
+        progress.report({ message: localize('vscode-docker.scaffold.scaffoldDebuggingStep.progress', 'Adding debug configuration and tasks...') });
+
         const scaffoldContext: DockerDebugScaffoldContext = {
             folder: wizardContext.workspaceFolder,
             actionContext: wizardContext,
@@ -61,7 +63,17 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
     }
 
     public shouldExecute(wizardContext: ScaffoldingWizardContext): boolean {
-        // This should always execute if this step is included
-        return true;
+        switch (wizardContext.platform) {
+            case 'Node.js':
+            case '.NET: ASP.NET Core':
+            case '.NET: Core Console':
+            case 'Python: Django':
+            case 'Python: Flask':
+            case 'Python: General':
+                return true;
+
+            default:
+                return false;
+        }
     }
 }

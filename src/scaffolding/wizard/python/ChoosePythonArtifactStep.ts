@@ -3,20 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { localize } from '../../localize';
-import { PythonTarget } from '../../utils/pythonUtils';
-import { Item, resolveFilesOfPattern } from '../../utils/quickPickFile';
-import { ChooseArtifactStep } from './ChooseArtifactStep';
-import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { ext } from '../../../extensionVariables';
+import { localize } from '../../../localize';
+import { Item, resolveFilesOfPattern } from '../../../utils/quickPickFile';
+import { ChooseArtifactStep } from '../ChooseArtifactStep';
+import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
 
 const moduleRegex = /([a-z_]+[.])*([a-z_])/i;
-
-export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext {
-    pythonArtifact?: PythonTarget;
-    pythonRequirements?: { [key: string]: string };
-}
 
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {
     public constructor() {

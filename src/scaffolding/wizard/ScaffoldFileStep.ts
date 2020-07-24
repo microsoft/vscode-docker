@@ -8,12 +8,12 @@ import Handlebars = require('handlebars');
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MessageItem, Progress } from 'vscode';
-import { ext } from 'vscode-azureappservice/out/src/extensionVariables';
 import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from 'vscode-azureextensionui';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
-import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
     const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
@@ -24,12 +24,14 @@ Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardC
     );
 });
 
-export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext, TScaffoldedFileType extends string> extends AzureWizardExecuteStep<TWizardContext> {
-    public constructor(private readonly fileType: TScaffoldedFileType, public readonly priority: number) {
+export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardExecuteStep<TWizardContext> {
+    public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
         super();
     }
 
     public async execute(wizardContext: TWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
+        progress.report({ message: localize('vscode-docker.scaffold.scaffoldFileStep.progress', 'Creating \'{0}\'...', this.fileType) });
+
         const inputPath = await this.getInputPath(wizardContext);
 
         if (!(await fse.pathExists(inputPath))) {
@@ -49,9 +51,17 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext, T
     }
 
     public shouldExecute(wizardContext: TWizardContext): boolean {
-        return this.fileType === 'docker-compose.yml' || this.fileType === 'docker-compose.debug.yml' ?
-            !!wizardContext.scaffoldCompose :
-            true;
+        if (this.fileType === 'docker-compose.yml' || this.fileType === 'docker-compose.debug.yml') {
+            return wizardContext.scaffoldCompose;
+        } else if (this.fileType === 'requirements.txt') {
+            return (
+                wizardContext.platform === 'Python: Django' ||
+                wizardContext.platform === 'Python: Flask' ||
+                wizardContext.platform === 'Python: General'
+            );
+        }
+
+        return true;
     }
 
     private async getInputPath(wizardContext: TWizardContext): Promise<string> {
