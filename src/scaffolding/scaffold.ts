@@ -12,7 +12,7 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise<void> {
+export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>): Promise<void> {
     wizardContext.scaffoldType = 'all';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
@@ -26,7 +26,7 @@ export async function scaffold(wizardContext: ScaffoldingWizardContext): Promise
         new ScaffoldFileStep('Dockerfile', 200),
     ];
 
-    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {
+    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {
         promptSteps: promptSteps,
         executeSteps: executeSteps,
         title: localize('vscode-docker.scaffold.addDockerFiles', 'Add Docker Files'),

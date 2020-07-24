@@ -10,7 +10,7 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldCompose(wizardContext: ScaffoldingWizardContext): Promise<void> {
+export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>): Promise<void> {
     wizardContext.scaffoldType = 'compose';
     wizardContext.scaffoldCompose = true;
 
@@ -24,7 +24,7 @@ export async function scaffoldCompose(wizardContext: ScaffoldingWizardContext): 
         new ScaffoldFileStep('docker-compose.debug.yml', 400),
     ];
 
-    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {
+    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {
         promptSteps: promptSteps,
         executeSteps: executeSteps,
         title: localize('vscode-docker.scaffold.addDockerFiles', 'Add Docker Compose Files'),

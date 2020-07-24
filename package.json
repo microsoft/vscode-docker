@@ -32,7 +32,6 @@
     },
     "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
     "activationEvents": [
-        "onCommand:vscode-docker.api.configure",
         "onCommand:vscode-docker.compose.down",
         "onCommand:vscode-docker.compose.restart",
         "onCommand:vscode-docker.compose.up",
@@ -126,10 +125,6 @@
     "contributes": {
         "menus": {
             "commandPalette": [
-                {
-                    "command": "vscode-docker.api.configure",
-                    "when": "never"
-                },
                 {
                     "command": "vscode-docker.containers.select",
                     "when": "never"
@@ -2171,11 +2166,6 @@
             }
         },
         "commands": [
-            {
-                "command": "vscode-docker.api.configure",
-                "title": "%vscode-docker.commands.api.configure%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
             {
                 "command": "vscode-docker.compose.down",
                 "title": "%vscode-docker.commands.compose.down%",

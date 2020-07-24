@@ -90,19 +90,13 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 subPath = path.join('node', `${this.fileType}.template`);
                 break;
             case '.NET: ASP.NET Core':
-                subPath = path.join('netCore', 'aspnet', `${this.fileType}.template`);
-                break;
             case '.NET: Core Console':
-                subPath = path.join('netCore', 'console', `${this.fileType}.template`);
+                subPath = path.join('netCore', `${this.fileType}.template`);
                 break;
             case 'Python: Django':
-                subPath = path.join('python', 'django', `${this.fileType}.template`);
-                break;
             case 'Python: Flask':
-                subPath = path.join('python', 'flask', `${this.fileType}.template`);
-                break;
             case 'Python: General':
-                subPath = path.join('python', 'general', `${this.fileType}.template`);
+                subPath = path.join('python', `${this.fileType}.template`);
                 break;
             case 'Java':
                 subPath = path.join('java', `${this.fileType}.template`);
@@ -131,7 +125,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
         const fileName = path.basename(file);
         let currentFile = file;
 
-        for (let i = 0; i <= maxDepth; i++) {
+        for (let i = 0; i < maxDepth; i++) {
             if (await fse.pathExists(currentFile)) {
                 return currentFile;
             }

@@ -9,7 +9,7 @@ import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldDebugConfig(wizardContext: ScaffoldingWizardContext): Promise<void> {
+export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWizardContext>): Promise<void> {
     wizardContext.scaffoldType = 'debugging';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
@@ -17,7 +17,7 @@ export async function scaffoldDebugConfig(wizardContext: ScaffoldingWizardContex
         new ChoosePlatformStep(['Node.js', '.NET: ASP.NET Core', '.NET: Core Console', 'Python: Django', 'Python: Flask', 'Python: General']),
     ];
 
-    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext, {
+    const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {
         promptSteps: promptSteps,
         title: localize('vscode-docker.scaffold.addDockerFiles', 'Initialize for Debugging'),
     });
