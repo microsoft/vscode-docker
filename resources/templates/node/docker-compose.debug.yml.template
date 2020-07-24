@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  {{ serviceNameAndRelativePath }}:
+    image: {{ serviceNameAndRelativePath }}
+    build: .
+    environment:
+      NODE_ENV: development
+    ports:
+      - 9229:9229
+{{#each ports}}
+      - {{ . }}:{{ . }}
+{{/each}}
+    command: {{ toQuotedArray nodeDebugCmdParts }}

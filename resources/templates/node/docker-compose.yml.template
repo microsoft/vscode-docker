@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  {{ serviceNameAndRelativePath }}:
+    image: {{ serviceNameAndRelativePath }}
+    build: .
+    environment:
+      NODE_ENV: production
+{{#if ports}}
+    ports:
+{{#each ports}}
+      - {{ . }}:{{ . }}
+{{/each}}
+{{/if}}

@@ -26,7 +26,7 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
             matchOnDescription: true,
             matchOnDetail: true,
             placeHolder: localize('vscode-docker.scaffold.choosePlatformStep.selectPlatform', 'Select Application Platform')
-        }
+        };
 
         const platforms = this.platformsList || AllPlatforms as readonly Platform[];
 

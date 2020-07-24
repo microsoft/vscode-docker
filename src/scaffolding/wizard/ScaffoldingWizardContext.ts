@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { Platform, PlatformOS } from '../../utils/platform';
+import { Platform } from '../../utils/platform';
 
 export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml' | 'requirements.txt';
 
@@ -15,7 +15,6 @@ export interface ScaffoldingWizardContext extends IActionContext {
 
     // These come from user choice
     platform?: Platform;
-    platformOS?: PlatformOS;
     ports?: number[];
     scaffoldCompose?: boolean;
     workspaceFolder?: vscode.WorkspaceFolder;

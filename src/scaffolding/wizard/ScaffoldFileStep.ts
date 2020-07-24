@@ -57,8 +57,9 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
 
         const inputPath = await this.getInputPath(wizardContext);
 
-        if (!(await fse.pathExists(inputPath))) {
-            throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.noInputTemplate', 'No input template exists at \'{0}\'', inputPath));
+        if (!inputPath) {
+            // If there's no template, skip
+            return;
         }
 
         const outputPath = await this.getOutputPath(wizardContext);
@@ -137,11 +138,8 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
         }
 
-        try {
-            return this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath));
-        } catch { } // Best effort
-
-        return this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
+        return (await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ??
+            await this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
     }
 
     private async scanUpwardForFile(file: string, maxDepth: number = 2): Promise<string> {
@@ -158,7 +156,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
             currentFile = path.join(parentDir, fileName);
         }
 
-        throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.noTemplate', 'Unable to find a template for \'{0}\'', fileName));
+        return undefined;
     }
 
     private async getOutputPath(wizardContext: TWizardContext): Promise<string> {

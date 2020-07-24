@@ -13,14 +13,15 @@ export class ChooseComposeStep extends AzureWizardPromptStep<ScaffoldingWizardCo
     public async prompt(wizardContext: ScaffoldingWizardContext): Promise<void> {
         const opt: vscode.QuickPickOptions = {
             placeHolder: localize('vscode-docker.scaffold.chooseComposeStep.includeCompose', 'Include optional Docker Compose files?')
-        }
+        };
 
         const response = await ext.ui.showQuickPick(
             [
                 { label: 'No', data: false },
                 { label: 'Yes', data: true }
             ],
-            opt);
+            opt
+        );
 
         wizardContext.scaffoldCompose = response.data;
     }

@@ -27,7 +27,7 @@ export class ChoosePortsStep extends AzureWizardPromptStep<ScaffoldingWizardCont
 
                 return undefined;
             }
-        }
+        };
 
         wizardContext.ports = splitPorts(await ext.ui.showInputBox(opt))
     }

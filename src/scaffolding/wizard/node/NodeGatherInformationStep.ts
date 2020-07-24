@@ -14,6 +14,6 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
     }
 
     public shouldPrompt(wizardContext: NodeScaffoldingWizardContext): boolean {
-        return !wizardContext.nodeCmdParts;
+        return !wizardContext.nodeCmdParts || !wizardContext.nodeDebugCmdParts;
     }
 }

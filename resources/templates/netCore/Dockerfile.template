@@ -1,4 +1,4 @@
-{{#if (eq platform 'Windows')}}
+{{#if (eq netCorePlatformOS 'Windows')}}
 #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 {{#/if}}
@@ -12,7 +12,7 @@ EXPOSE {{ . }}
 FROM {{ netCoreSdkBaseImage }} AS build
 WORKDIR /src
 COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}"]
-RUN dotnet restore {{ workspaceRelative . artifact platformOs }}
+RUN dotnet restore {{ workspaceRelative . artifact netCorePlatformOS }}
 COPY . .
 WORKDIR "/src/{{ dirname (workspaceRelative . artifact 'Linux') 'Linux' }}"
 RUN dotnet build "{{ basename artifact }}" -c Release -o /app/build

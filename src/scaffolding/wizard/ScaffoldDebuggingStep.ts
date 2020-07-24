@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { Progress } from 'vscode';
 import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
@@ -10,6 +11,7 @@ import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffo
 import { localize } from '../../localize';
 import { PythonProjectType } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
+import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
 import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
@@ -22,7 +24,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
         const scaffoldContext: DockerDebugScaffoldContext = {
             folder: wizardContext.workspaceFolder,
             actionContext: wizardContext,
-            dockerfile: 'todo',
+            dockerfile: path.join(path.dirname(wizardContext.artifact), 'Dockerfile'),
             ports: wizardContext.ports,
         };
 
@@ -37,7 +39,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
                 scaffoldContext.platform = 'netCore';
                 const netCoreOptions: NetCoreScaffoldingOptions = {
                     appProject: unresolveWorkspaceFolder(wizardContext.artifact, wizardContext.workspaceFolder),
-                    platformOS: wizardContext.platformOS,
+                    platformOS: (wizardContext as NetCoreScaffoldingWizardContext).netCorePlatformOS,
                 };
                 await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, netCoreOptions);
                 break;

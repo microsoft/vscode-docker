@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  {{ serviceNameAndRelativePath }}:
+    image: {{ serviceNameAndRelativePath }}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
+    ports:
+      - 5005:5005
+{{#each ports}}
+      - {{ . }}:{{ . }}
+{{/each}}

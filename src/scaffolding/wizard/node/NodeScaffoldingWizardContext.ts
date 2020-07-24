@@ -17,6 +17,7 @@ const noPackageFile = localize('vscode-docker.scaffold.platforms.node.noPackage'
 
 export interface NodeScaffoldingWizardContext extends ScaffoldingWizardContext {
     nodeCmdParts?: string[];
+    nodeDebugCmdParts?: string[];
 }
 
 export function getNodeSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NodeScaffoldingWizardContext> {

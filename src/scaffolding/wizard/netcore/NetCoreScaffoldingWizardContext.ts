@@ -6,11 +6,12 @@
 import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
 import { CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN } from '../../../constants';
 import { localize } from '../../../localize';
+import { PlatformOS } from '../../../utils/platform';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
-import { ChooseOsStep } from '../ChooseOsStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';
 import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
+import { NetCoreChooseOsStep } from './NetCoreChooseOsStep';
 import { NetCoreGatherInformationStep } from './NetCoreGatherInformationStep';
 
 const chooseProjectFile = localize('vscode-docker.scaffold.platforms.netCore.chooseProject', 'Choose a project file');
@@ -21,6 +22,7 @@ export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContex
     netCoreOutputPath?: string;
     netCoreRuntimeBaseImage?: string;
     netCoreSdkBaseImage?: string;
+    netCorePlatformOS?: PlatformOS;
 }
 
 export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
@@ -29,7 +31,7 @@ export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardConte
     ];
 
     if (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging') {
-        promptSteps.push(new ChooseOsStep());
+        promptSteps.push(new NetCoreChooseOsStep());
     }
 
     if (wizardContext.platform === '.NET: ASP.NET Core' && wizardContext.scaffoldType === 'all') {

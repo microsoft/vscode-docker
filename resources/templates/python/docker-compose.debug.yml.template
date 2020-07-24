@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  {{ serviceNameAndRelativePath }}:
+    image: {{ serviceNameAndRelativePath }}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 {{ TODO pythonCmd }}"]
+{{#if ports}}
+    ports:
+{{#each ports}}
+      - {{ . }}:{{ . }}
+{{/each}}
+{{/if}}
+{{#if (eq platform 'Python: Flask')}}
+    environment:
+      - FLASK_APP={{ TODO pythonArtifact }}
+{{/if}}
