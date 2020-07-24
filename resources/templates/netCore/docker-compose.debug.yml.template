@@ -23,7 +23,7 @@ services:
 {{/if}}
     volumes:
 {{#if (eq netCorePlatformOS 'Windows')}}
-      - ~/.vsdbg:c:\\remote_debugger:rw
+      - ~/.vsdbg:c:\\remote_debugger:ro
 {{#else}}
-      - ~/.vsdbg:/remote_debugger:rw'
+      - ~/.vsdbg:/remote_debugger:ro
 {{/if}}
