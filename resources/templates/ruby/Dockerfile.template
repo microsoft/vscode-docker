@@ -1,6 +1,6 @@
 FROM ruby:2.5-slim
 
-LABEL Name={{ serviceNameAndRelativePath }} Version={{ version }}
+LABEL Name={{ serviceName }} Version={{ version }}
 
 {{#each ports}}
 EXPOSE {{ . }}
@@ -15,4 +15,4 @@ COPY . /app
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-CMD ["ruby", "{{ serviceNameAndRelativePath }}.rb"]
+CMD ["ruby", "{{ serviceName }}.rb"]

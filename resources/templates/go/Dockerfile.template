@@ -11,7 +11,7 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
 ENTRYPOINT ./app
-LABEL Name={{ serviceNameAndRelativePath }} Version={{ version }}
+LABEL Name={{ serviceName }} Version={{ version }}
 {{#each ports}}
 EXPOSE {{ . }}
 {{/each}}

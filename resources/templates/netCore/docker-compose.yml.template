@@ -5,8 +5,8 @@
 version: '3.4'
 
 services:
-  $service_name$:
-    image: $image_name$
+  {{ serviceName }}:
+    image: {{ serviceName }}
     build:
       context: .
       dockerfile: {{ dirname (workspaceRelative . artifact) 'Linux' }}/Dockerfile

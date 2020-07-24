@@ -24,7 +24,7 @@ export interface ScaffoldingWizardContext extends IActionContext {
 
     // These are calculated depending on platform
     version?: string;
-    serviceNameAndRelativePath?: string;
+    serviceName?: string;
 
     // Other properties that get calculated or set later
     overwriteAll?: boolean;

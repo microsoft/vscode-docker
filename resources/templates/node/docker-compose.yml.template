@@ -1,8 +1,8 @@
 version: '3.4'
 
 services:
-  {{ serviceNameAndRelativePath }}:
-    image: {{ serviceNameAndRelativePath }}
+  {{ serviceName }}:
+    image: {{ serviceName }}
     build: .
     environment:
       NODE_ENV: production

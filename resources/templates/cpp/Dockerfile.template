@@ -16,4 +16,4 @@ RUN g++ -o myapp main.cpp
 # This command runs your application, comment out this line to compile only
 CMD ["./myapp"]
 
-LABEL Name={{ serviceNameAndRelativePath }} Version={{ version }}
+LABEL Name={{ serviceName }} Version={{ version }}
