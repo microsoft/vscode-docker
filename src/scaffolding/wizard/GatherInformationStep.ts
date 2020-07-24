@@ -8,11 +8,12 @@ import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
     public async prompt(wizardContext: TWizardContext): Promise<void> {
-        // Calculate more info
+        // TODO Calculate more info
+        // version, service name
     }
 
     public shouldPrompt(wizardContext: TWizardContext): boolean {
         // TODO
-        return true;
+        return !wizardContext.serviceName || !wizardContext.version;
     }
 }

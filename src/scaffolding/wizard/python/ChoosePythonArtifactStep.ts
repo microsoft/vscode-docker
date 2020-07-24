@@ -66,4 +66,8 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
             };
         }
     }
+
+    public shouldPrompt(wizardContext: PythonScaffoldingWizardContext): boolean {
+        return super.shouldPrompt(wizardContext) || !wizardContext.pythonArtifact;
+    }
 }

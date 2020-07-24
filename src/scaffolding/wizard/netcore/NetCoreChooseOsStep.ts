@@ -26,6 +26,6 @@ export class NetCoreChooseOsStep extends AzureWizardPromptStep<NetCoreScaffoldin
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
-        return !wizardContext.netCorePlatformOS;
+        return !wizardContext.netCorePlatformOS && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging');
     }
 }

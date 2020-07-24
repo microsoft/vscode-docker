@@ -22,7 +22,7 @@ export interface ScaffoldingWizardContext extends IActionContext {
     // A project file (.NET Core), entrypoint file (Python), or package.json (Node). For applicable platforms, guaranteed to be defined after the prompt phase.
     artifact?: string;
 
-    // These are calculated depending on platform
+    // These are calculated depending on platform, with defaults
     version?: string;
     serviceName?: string;
 

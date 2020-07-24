@@ -28,11 +28,8 @@ export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContex
 export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<NetCoreScaffoldingWizardContext>[] = [
         new ChooseArtifactStep(chooseProjectFile, netCoreGlobPatterns, noProjectFile),
+        new NetCoreChooseOsStep(),
     ];
-
-    if (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging') {
-        promptSteps.push(new NetCoreChooseOsStep());
-    }
 
     if (wizardContext.platform === '.NET: ASP.NET Core' && wizardContext.scaffoldType === 'all') {
         promptSteps.push(new ChoosePortsStep([80, 443]));

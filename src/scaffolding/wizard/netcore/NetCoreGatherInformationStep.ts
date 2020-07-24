@@ -9,7 +9,7 @@ import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardConte
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
     public async prompt(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
         // TODO
-        // Output file path, base image
+        // Output file path, base images
 
         await super.prompt(wizardContext);
     }

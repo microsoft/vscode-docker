@@ -9,6 +9,7 @@ import { NodeScaffoldingWizardContext } from './NodeScaffoldingWizardContext';
 export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffoldingWizardContext> {
     public async prompt(wizardContext: NodeScaffoldingWizardContext): Promise<void> {
         // TODO
+        // cmd and debug cmd
 
         await super.prompt(wizardContext);
     }
