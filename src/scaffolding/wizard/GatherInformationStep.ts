@@ -4,16 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
+import { getValidImageNameFromPath } from '../../utils/getValidImageName';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
     public async prompt(wizardContext: TWizardContext): Promise<void> {
-        // TODO Calculate more info
-        // version, service name
+        if (!wizardContext.serviceName) {
+            wizardContext.serviceName = getValidImageNameFromPath(wizardContext.workspaceFolder.uri.fsPath);
+        }
+
+        if (!wizardContext.version) {
+            wizardContext.version = '0.0.1';
+        }
     }
 
     public shouldPrompt(wizardContext: TWizardContext): boolean {
-        // TODO
         return !wizardContext.serviceName || !wizardContext.version;
     }
 }

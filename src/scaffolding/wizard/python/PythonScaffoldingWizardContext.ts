@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
-import { PythonTarget } from '../../../utils/pythonUtils';
+import { PythonDefaultPorts, PythonProjectType, PythonTarget } from '../../../utils/pythonUtils';
 import { ChoosePortsStep } from '../ChoosePortsStep';
 import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldFileStep } from '../ScaffoldFileStep';
@@ -13,8 +13,11 @@ import { ChoosePythonArtifactStep } from './ChoosePythonArtifactStep';
 import { PythonGatherInformationStep } from './PythonGatherInformationStep';
 
 export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext {
+    pythonProjectType?: PythonProjectType;
     pythonArtifact?: PythonTarget;
     pythonRequirements?: { [key: string]: string };
+    pythonCmdParts?: string[];
+    pythonDebugCmdParts?: string[];
 }
 
 export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<PythonScaffoldingWizardContext> {
@@ -23,9 +26,9 @@ export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContex
     ];
 
     if (wizardContext.platform === 'Python: Django' && wizardContext.scaffoldType === 'all') {
-        promptSteps.push(new ChoosePortsStep([8000]));
+        promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('django')]));
     } else if (wizardContext.platform === 'Python: Flask' && wizardContext.scaffoldType === 'all') {
-        promptSteps.push(new ChoosePortsStep([5000]));
+        promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('flask')]));
     }
 
     promptSteps.push(new PythonGatherInformationStep());

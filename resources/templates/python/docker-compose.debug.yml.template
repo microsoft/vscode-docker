@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 {{ TODO pythonCmd }}"]
+    command: {{ toQuotedArray pythonDebugCmdParts }}
 {{#if ports}}
     ports:
 {{#each ports}}
@@ -15,5 +15,5 @@ services:
 {{/if}}
 {{#if (eq platform 'Python: Flask')}}
     environment:
-      - FLASK_APP={{ TODO pythonArtifact }}
+      - FLASK_APP={{#if pythonArtifact.file}}{{ pythonArtifact.file }}{{#else}}-m {{ pythonArtifact.module }}{{/if}}
 {{/if}}

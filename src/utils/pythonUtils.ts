@@ -11,9 +11,10 @@ export type PythonProjectType = 'django' | 'flask' | 'general';
 
 export const PythonFileExtension = ".py";
 export const PythonDefaultDebugPort: number = 5678;
-export const PythonDefaultPorts: Map<PythonProjectType, number> = new Map<PythonProjectType, number>([
+export const PythonDefaultPorts = new Map<PythonProjectType, number | undefined>([
     ['django', 8000],
     ['flask', 5000],
+    ['general', undefined],
 ]);
 
 export type PythonTarget = PythonFileTarget | PythonModuleTarget;
