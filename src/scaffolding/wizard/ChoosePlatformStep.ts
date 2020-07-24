@@ -10,10 +10,10 @@ import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
 import { ChoosePortsStep } from './ChoosePortsStep';
 import { GatherInformationStep } from './GatherInformationStep';
-import { getJavaSubwizardOptions } from './java/JavaScaffoldingWizardContext';
-import { getNetCoreSubwizardOptions } from './netCore/NetCoreScaffoldingWizardContext';
-import { getNodeSubwizardOptions } from './node/NodeScaffoldingWizardContext';
-import { getPythonSubwizardOptions } from './python/PythonScaffoldingWizardContext';
+import { getJavaSubWizardOptions } from './java/JavaScaffoldingWizardContext';
+import { getNetCoreSubWizardOptions } from './netCore/NetCoreScaffoldingWizardContext';
+import { getNodeSubWizardOptions } from './node/NodeScaffoldingWizardContext';
+import { getPythonSubWizardOptions } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
@@ -45,16 +45,16 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
     public async getSubWizard(wizardContext: ScaffoldingWizardContext): Promise<IWizardOptions<ScaffoldingWizardContext> | undefined> {
         switch (wizardContext.platform) {
             case 'Node.js':
-                return getNodeSubwizardOptions(wizardContext);
+                return getNodeSubWizardOptions(wizardContext);
             case '.NET: ASP.NET Core':
             case '.NET: Core Console':
-                return getNetCoreSubwizardOptions(wizardContext);
+                return getNetCoreSubWizardOptions(wizardContext);
             case 'Python: Django':
             case 'Python: Flask':
             case 'Python: General':
-                return getPythonSubwizardOptions(wizardContext);
+                return getPythonSubWizardOptions(wizardContext);
             case 'Java':
-                return getJavaSubwizardOptions(wizardContext);
+                return getJavaSubWizardOptions(wizardContext);
             case 'Go':
             case 'Ruby':
                 // Too simple to justify having their own methods

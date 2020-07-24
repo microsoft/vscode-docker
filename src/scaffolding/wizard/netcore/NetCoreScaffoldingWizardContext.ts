@@ -23,7 +23,7 @@ export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContex
     netCoreSdkBaseImage?: string;
 }
 
-export function getNetCoreSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
+export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<NetCoreScaffoldingWizardContext>[] = [
         new ChooseArtifactStep(chooseProjectFile, netCoreGlobPatterns, noProjectFile),
     ];

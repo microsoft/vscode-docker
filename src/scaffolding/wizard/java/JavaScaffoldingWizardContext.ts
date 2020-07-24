@@ -12,7 +12,7 @@ export interface JavaScaffoldingWizardContext extends ScaffoldingWizardContext {
     javaOutputPath?: string;
 }
 
-export function getJavaSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<JavaScaffoldingWizardContext> {
+export function getJavaSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<JavaScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<JavaScaffoldingWizardContext>[] = [
         new ChoosePortsStep([3000]),
         new JavaGatherInformationStep(),

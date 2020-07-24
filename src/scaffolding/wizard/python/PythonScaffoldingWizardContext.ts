@@ -17,7 +17,7 @@ export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext
     pythonRequirements?: { [key: string]: string };
 }
 
-export function getPythonSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<PythonScaffoldingWizardContext> {
+export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<PythonScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<PythonScaffoldingWizardContext>[] = [
         new ChoosePythonArtifactStep(),
     ];

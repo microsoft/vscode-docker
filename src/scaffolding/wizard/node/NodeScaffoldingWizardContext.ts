@@ -19,7 +19,7 @@ export interface NodeScaffoldingWizardContext extends ScaffoldingWizardContext {
     nodeCmdParts?: string[];
 }
 
-export function getNodeSubwizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NodeScaffoldingWizardContext> {
+export function getNodeSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NodeScaffoldingWizardContext> {
     const promptSteps: AzureWizardPromptStep<NodeScaffoldingWizardContext>[] = [
         new ChooseArtifactStep(choosePackageFile, nodeGlobPatterns, noPackageFile),
     ];

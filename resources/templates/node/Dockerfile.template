@@ -7,4 +7,4 @@ COPY . .
 {{#each ports}}
 EXPOSE {{ . }}
 {{/each}}
-CMD {{ toQuotedArray nodeCmdParts }}
+CMD {{{ toQuotedArray nodeCmdParts }}}
