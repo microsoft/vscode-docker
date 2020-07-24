@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
+import * as path from 'path';
 import { inferPythonArgs, PythonDefaultPorts } from '../../../utils/pythonUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
@@ -14,16 +16,16 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
         switch (wizardContext.platform) {
             case 'Python: Django':
                 wizardContext.pythonProjectType = 'django';
-                this.getDjangoCmdParts(wizardContext);
+                await this.getDjangoCmdParts(wizardContext);
                 break;
             case 'Python: Flask':
                 wizardContext.pythonProjectType = 'flask';
-                this.getFlaskCmdParts(wizardContext);
+                await this.getFlaskCmdParts(wizardContext);
                 break;
             case 'Python: General':
             default:
                 wizardContext.pythonProjectType = 'general';
-                this.getGeneralCmdParts(wizardContext);
+                await this.getGeneralCmdParts(wizardContext);
         }
 
         await super.prompt(wizardContext);
@@ -33,8 +35,23 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
         return !wizardContext.pythonRequirements || !wizardContext.pythonCmdParts || !wizardContext.pythonDebugCmdParts || !wizardContext.pythonProjectType;
     }
 
-    private getDjangoCmdParts(wizardContext: PythonScaffoldingWizardContext): void {
+    private async getDjangoCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
         const { app, args, bindPort } = this.getCommonProps(wizardContext);
+
+        // For Django apps, there **usually** exists a "wsgi" module in a sub-folder named the same as the project folder.
+        // So we check if that path exists, then use it. Else, we output the comment below instructing the user to enter
+        // the correct python path to the wsgi module.
+
+        let wsgiModule: string;
+        const serviceName = path.basename(wizardContext.workspaceFolder.uri.fsPath);
+        const wsgiPath = path.join(wizardContext.workspaceFolder.uri.fsPath, serviceName, 'wsgi.py');
+
+        if (!(await fse.pathExists(wsgiPath))) {
+            wizardContext.wsgiComment = `# File wsgi.py was not found in subfolder: '${serviceName}'. Please enter the Python path to wsgi file.`;
+            wsgiModule = 'pythonPath.to.wsgi';
+        } else {
+            wsgiModule = `${serviceName}.wsgi`;
+        }
 
         wizardContext.pythonRequirements = {
             django: '3.0.8',
@@ -45,7 +62,7 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             'gunicorn',
             '--bind',
             `0.0.0.0:${bindPort}`,
-            'TODO', // TODO wsgi stuff
+            wsgiModule,
         ];
 
         wizardContext.pythonDebugCmdParts = [
@@ -55,8 +72,20 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
         ];
     }
 
-    private getFlaskCmdParts(wizardContext: PythonScaffoldingWizardContext): void {
+    private async getFlaskCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
         const { args, bindPort } = this.getCommonProps(wizardContext);
+
+        let wsgiModule: string;
+
+        if ('module' in wizardContext.pythonArtifact) {
+            wsgiModule = wizardContext.pythonArtifact.module;
+        } else if ('file' in wizardContext.pythonArtifact) {
+            // Get rid of the file extension.
+            wsgiModule = wizardContext.pythonArtifact.file.replace(/\.[^/.]+$/, '');
+        }
+
+        // Replace forward-slashes with dots.
+        wsgiModule = wsgiModule.replace(/\//g, '.');
 
         wizardContext.pythonRequirements = {
             flask: '1.1.2',
@@ -67,7 +96,7 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             'gunicorn',
             '--bind',
             `0.0.0.0:${bindPort}`,
-            'TODO', // TODO `${inferPythonWsgiModule(wizardContext.pythonArtifact)}:app`,
+            `${wsgiModule}:app`,
         ];
 
         wizardContext.pythonDebugCmdParts = [
@@ -77,7 +106,7 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
         ];
     }
 
-    private getGeneralCmdParts(wizardContext: PythonScaffoldingWizardContext): void {
+    private async getGeneralCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
         const { app, args } = this.getCommonProps(wizardContext);
 
         wizardContext.pythonCmdParts = [

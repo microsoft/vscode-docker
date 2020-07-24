@@ -18,6 +18,9 @@ export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext
     pythonRequirements?: { [key: string]: string };
     pythonCmdParts?: string[];
     pythonDebugCmdParts?: string[];
+
+    // Optional
+    wsgiComment?: string;
 }
 
 export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<PythonScaffoldingWizardContext> {
