@@ -82,37 +82,37 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
         let subPath: string;
         switch (wizardContext.platform) {
             case 'Node.js':
-                subPath = path.join('node', this.fileType);
+                subPath = path.join('node', `${this.fileType}.template`);
                 break;
             case '.NET: ASP.NET Core':
-                subPath = path.join('netCore', 'aspnet', this.fileType);
+                subPath = path.join('netCore', 'aspnet', `${this.fileType}.template`);
                 break;
             case '.NET: Core Console':
-                subPath = path.join('netCore', 'console', this.fileType);
+                subPath = path.join('netCore', 'console', `${this.fileType}.template`);
                 break;
             case 'Python: Django':
-                subPath = path.join('python', 'django', this.fileType);
+                subPath = path.join('python', 'django', `${this.fileType}.template`);
                 break;
             case 'Python: Flask':
-                subPath = path.join('python', 'flask', this.fileType);
+                subPath = path.join('python', 'flask', `${this.fileType}.template`);
                 break;
             case 'Python: General':
-                subPath = path.join('python', 'general', this.fileType);
+                subPath = path.join('python', 'general', `${this.fileType}.template`);
                 break;
             case 'Java':
-                subPath = path.join('java', this.fileType);
+                subPath = path.join('java', `${this.fileType}.template`);
                 break;
             case 'C++':
-                subPath = path.join('cpp', this.fileType);
+                subPath = path.join('cpp', `${this.fileType}.template`);
                 break;
             case 'Go':
-                subPath = path.join('go', this.fileType);
+                subPath = path.join('go', `${this.fileType}.template`);
                 break;
             case 'Ruby':
-                subPath = path.join('ruby', this.fileType);
+                subPath = path.join('ruby', `${this.fileType}.template`);
                 break;
             case 'Other':
-                subPath = path.join('other', this.fileType);
+                subPath = path.join('other', `${this.fileType}.template`);
                 break;
             default:
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
@@ -122,6 +122,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
             const result = path.join(settingsTemplatesPath, subPath);
 
             if (await fse.pathExists(result)) {
+                // Ensure the proposed file exists, otherwise fall back to the default
                 return result;
             }
         }
