@@ -1,25 +1,10 @@
-#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see https://aka.ms/containercompat
-
-FROM {{ baseImage }} AS base
-WORKDIR /app
-
+FROM node:12.18-alpine
+ENV NODE_ENV production
+WORKDIR /usr/src/app
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production --silent && mv node_modules ../
+COPY . .
 {{#each ports}}
 EXPOSE {{ . }}
 {{/each}}
-
-FROM {{ netCoreSdkBaseImage }} AS build
-WORKDIR /src
-COPY ["{{ makeRelativePath artifact Linux }}", "{{ TODO }}"]
-RUN dotnet restore "$container_project_directory$/$project_file_name$"
-COPY . .
-WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$"]
+CMD {{ toQuotedArray nodeCmdParts }}

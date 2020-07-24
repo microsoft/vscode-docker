@@ -1,25 +1,19 @@
-#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see https://aka.ms/containercompat
+# GCC support can be specified at major, minor, or micro version
+# (e.g. 8, 8.2 or 8.2.0).
+# See https://hub.docker.com/r/library/gcc/ for all supported GCC
+# tags from Docker Hub.
+# See https://docs.docker.com/samples/library/gcc/ for more on how to use this image
+FROM gcc:latest
 
-FROM {{ baseImage }} AS base
-WORKDIR /app
+# These commands copy your files into the specified directory in the image
+# and set that as the working location
+COPY . /usr/src/myapp
+WORKDIR /usr/src/myapp
 
-{{#each ports}}
-EXPOSE {{ . }}
-{{/each}}
+# This command compiles your app using GCC, adjust for your source code
+RUN g++ -o myapp main.cpp
 
-FROM {{ netCoreSdkBaseImage }} AS build
-WORKDIR /src
-COPY ["{{ makeRelativePath artifact Linux }}", "{{ TODO }}"]
-RUN dotnet restore "$container_project_directory$/$project_file_name$"
-COPY . .
-WORKDIR "/src/$container_project_directory$"
-RUN dotnet build "$project_file_name$" -c Release -o /app/build
+# This command runs your application, comment out this line to compile only
+CMD ["./myapp"]
 
-FROM build AS publish
-RUN dotnet publish "$project_file_name$" -c Release -o /app/publish
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "$assembly_name$"]
+LABEL Name={{ serviceNameAndRelativePath }} Version={{ version }}

@@ -15,7 +15,7 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
-Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
+Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS) => {
     const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
 
     return pathNormalize(
@@ -26,6 +26,25 @@ Handlebars.registerHelper('makeRelativePath', (wizardContext: ScaffoldingWizardC
 
 Handlebars.registerHelper('eq', (a: string, b: string) => {
     return a === b;
+});
+
+Handlebars.registerHelper('basename', (a: string) => {
+    return path.basename(a);
+});
+
+Handlebars.registerHelper('dirname', (a: string, platform: PlatformOS) => {
+    return pathNormalize(
+        path.dirname(a),
+        platform
+    );
+});
+
+Handlebars.registerHelper('toQuotedArray', (arr: string[]) => {
+    return `[${arr.map(a => `"${a}"`).join(', ')}]`;
+});
+
+Handlebars.registerHelper('isRootPort', (ports: number[]) => {
+    return ports?.some(p => p < 1024);
 });
 
 export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardExecuteStep<TWizardContext> {
@@ -125,11 +144,11 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
         return this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
     }
 
-    private async scanUpwardForFile(file: string, maxFolders: number = 3): Promise<string> {
+    private async scanUpwardForFile(file: string, maxDepth: number = 2): Promise<string> {
         const fileName = path.basename(file);
         let currentFile = file;
 
-        for (let i = 0; i < maxFolders; i++) {
+        for (let i = 0; i <= maxDepth; i++) {
             if (await fse.pathExists(currentFile)) {
                 return currentFile;
             }
