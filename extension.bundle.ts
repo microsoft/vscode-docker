@@ -32,7 +32,6 @@ export { OSProvider } from './src/utils/LocalOSProvider';
 export { bufferToString } from './src/utils/spawnAsync';
 export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './src/debugging/coreclr/prereqManager';
 export { ext } from './src/extensionVariables';
-export { globAsync } from './src/utils/globAsync';
 export { httpsRequestBinary } from './src/utils/httpRequest';
 export { IKeytar } from './src/utils/keytar';
 export { inferCommand, inferPackageName, InspectMode, NodePackage } from './src/utils/nodeUtils';
