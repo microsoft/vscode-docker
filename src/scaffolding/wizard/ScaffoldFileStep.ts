@@ -118,16 +118,28 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
         }
 
-        if (settingsTemplatesPath) {
-            const result = path.join(settingsTemplatesPath, subPath);
+        try {
+            return this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath));
+        } catch { } // Best effort
 
-            if (await fse.pathExists(result)) {
-                // Ensure the proposed file exists, otherwise fall back to the default
-                return result;
+        return this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
+    }
+
+    private async scanUpwardForFile(file: string, maxFolders: number = 3): Promise<string> {
+        const fileName = path.basename(file);
+        let currentFile = file;
+
+        for (let i = 0; i < maxFolders; i++) {
+            if (await fse.pathExists(currentFile)) {
+                return currentFile;
             }
+
+            const parentDir = path.resolve(path.join(path.dirname(currentFile), '..'));
+
+            currentFile = path.join(parentDir, fileName);
         }
 
-        return path.join(defaultTemplatesPath, subPath);
+        throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.noTemplate', 'Unable to find a template for \'{0}\'', fileName));
     }
 
     private async getOutputPath(wizardContext: TWizardContext): Promise<string> {
