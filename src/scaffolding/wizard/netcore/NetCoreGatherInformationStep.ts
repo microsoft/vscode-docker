@@ -5,6 +5,7 @@
 
 import { SemVer } from 'semver';
 import { localize } from '../../../localize';
+import { hasTask } from '../../../tasks/TaskHelper';
 import { getNetCoreProjectInfo } from '../../../utils/netCoreUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
@@ -15,12 +16,19 @@ const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
 const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
 
 // .NET Core 3.1 and below
+// Note: this will work for .NET Core 2.2/2.1 (which are EOL), but not for <2.0 (which are way EOL)
 const aspNetCoreBaseImage = 'mcr.microsoft.com/dotnet/core/aspnet';
 const consoleNetCoreBaseImage = 'mcr.microsoft.com/dotnet/core/runtime';
 const netCoreSdkImage = 'mcr.microsoft.com/dotnet/core/sdk';
 
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
     public async prompt(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
+        // First, we need to validate that build tasks are created
+        if (!hasTask('build', wizardContext.workspaceFolder)) {
+            wizardContext.errorHandling.suppressReportIssue = true;
+            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.prereqs', 'A build task is missing. Please generate a build task by running \'.NET: Generate Assets for Build and Debug\' before running this command.'));
+        }
+
         const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', wizardContext.artifact);
 
         if (projectInfo.length < 2) {
