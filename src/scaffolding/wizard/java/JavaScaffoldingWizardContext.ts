@@ -9,7 +9,7 @@ import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { JavaGatherInformationStep } from './JavaGatherInformationStep';
 
 export interface JavaScaffoldingWizardContext extends ScaffoldingWizardContext {
-    javaOutputPath?: string;
+    relativeJavaOutputPath?: string;
 }
 
 export function getJavaSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<JavaScaffoldingWizardContext> {

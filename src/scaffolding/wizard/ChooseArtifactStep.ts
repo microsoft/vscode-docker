@@ -16,7 +16,10 @@ export class ChooseArtifactStep<TWizardContext extends ScaffoldingWizardContext>
     public async prompt(wizardContext: TWizardContext): Promise<void> {
         const items = await resolveFilesOfPattern(wizardContext.workspaceFolder, this.globPatterns);
 
-        if (items.length === 1) {
+        if (!items) {
+            wizardContext.errorHandling.suppressReportIssue = true;
+            throw new Error(this.noItemsMessage);
+        } else if (items.length === 1) {
             wizardContext.artifact = items[0].absoluteFilePath;
         } else {
             const item = await ext.ui.showQuickPick(items, { placeHolder: this.promptText });

@@ -17,7 +17,8 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
         super(
             localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. app.py)'),
             ['**/*.{[Pp][Yy]}'],
-            localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.'))
+            localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.')
+        );
     }
 
     public async prompt(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
