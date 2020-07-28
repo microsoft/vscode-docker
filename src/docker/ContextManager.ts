@@ -131,6 +131,8 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // This will refresh the tree
             this.emitter.fire(currentContext);
+        } catch (err) {
+            ext.treeInitError = err;
         } finally {
             this.refreshing = false;
         }
@@ -172,73 +174,66 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     private async loadContexts(): Promise<DockerContext[]> {
         let loadResult = await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
-            try {
-                // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
-                actionContext.telemetry.properties.isActivationEvent = 'true';
+            // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
+            actionContext.telemetry.properties.isActivationEvent = 'true';
+            actionContext.errorHandling.rethrow = true; // Errors are handled outside of this scope
 
-                ext.treeInitError = undefined;
+            ext.treeInitError = undefined;
 
-                let dockerHost: string | undefined;
-                const config = workspace.getConfiguration('docker');
-                if ((dockerHost = config.get('host'))) { // Assignment + check is intentional
-                    actionContext.telemetry.properties.hostSource = 'docker.host';
-                } else if ((dockerHost = process.env.DOCKER_HOST)) { // Assignment + check is intentional
-                    actionContext.telemetry.properties.hostSource = 'env';
-                } else if (!(await fse.pathExists(dockerContextsFolder)) || (await fse.readdir(dockerContextsFolder)).length === 0) {
-                    // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
-                    // It is unnecessary to call `docker context inspect`
-                    actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
-                    dockerHost = os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe;
-                } else {
-                    dockerHost = undefined;
-                }
-
-                if (dockerHost !== undefined) {
-                    actionContext.telemetry.properties.hostProtocol = new URL(dockerHost).protocol;
-
-                    return [{
-                        ...defaultContext,
-                        Current: true,
-                        DockerEndpoint: dockerHost,
-                    } as DockerContext];
-                }
-
-                // No value for DOCKER_HOST, and multiple contexts exist, so check them
-                const result: DockerContext[] = [];
-                const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
-                const lines = LineSplitter.splitLines(stdout);
-
-                for (const line of lines) {
-                    const context = JSON.parse(line) as DockerContext;
-                    result.push({
-                        ...context,
-                        Id: context.Name,
-                        Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
-                    });
-                }
-
-                const currentContext = result.find(c => c.Current);
-
-                if (currentContext.Name === 'default') {
-                    actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
-                } else {
-                    actionContext.telemetry.properties.hostSource = 'customContextSelected'
-                }
-
-                try {
-                    actionContext.telemetry.properties.hostProtocol = new URL(currentContext.DockerEndpoint).protocol;
-                } catch {
-                    actionContext.telemetry.properties.hostProtocol = 'unknown';
-                }
-
-                return result;
-            } catch (err) {
-                ext.treeInitError = err;
-                actionContext.errorHandling.suppressDisplay = true;
-
-                // Rethrow the error to the telemetry handler
-                throw err;
+            let dockerHost: string | undefined;
+            const config = workspace.getConfiguration('docker');
+            if ((dockerHost = config.get('host'))) { // Assignment + check is intentional
+                actionContext.telemetry.properties.hostSource = 'docker.host';
+            } else if ((dockerHost = process.env.DOCKER_HOST)) { // Assignment + check is intentional
+                actionContext.telemetry.properties.hostSource = 'env';
+            } else if (!(await fse.pathExists(dockerContextsFolder)) || (await fse.readdir(dockerContextsFolder)).length === 0) {
+                // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
+                // It is unnecessary to call `docker context inspect`
+                actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
+                dockerHost = os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe;
+            } else {
+                dockerHost = undefined;
             }
+
+            if (dockerHost !== undefined) {
+                actionContext.telemetry.properties.hostProtocol = new URL(dockerHost).protocol;
+
+                return [{
+                    ...defaultContext,
+                    Current: true,
+                    DockerEndpoint: dockerHost,
+                } as DockerContext];
+            }
+
+            // No value for DOCKER_HOST, and multiple contexts exist, so check them
+            const result: DockerContext[] = [];
+            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
+            const lines = LineSplitter.splitLines(stdout);
+
+            for (const line of lines) {
+                const context = JSON.parse(line) as DockerContext;
+                result.push({
+                    ...context,
+                    Id: context.Name,
+                    Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
+                });
+            }
+
+            const currentContext = result.find(c => c.Current);
+
+            if (currentContext.Name === 'default') {
+                actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
+            } else {
+                actionContext.telemetry.properties.hostSource = 'customContextSelected'
+            }
+
+            try {
+                actionContext.telemetry.properties.hostProtocol = new URL(currentContext.DockerEndpoint).protocol;
+            } catch {
+                actionContext.telemetry.properties.hostProtocol = 'unknown';
+            }
+
+            return result;
         });
 
         // If the load failed or is otherwise empty, return the default
@@ -255,25 +250,27 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     private async getCliVersion(): Promise<boolean> {
-        let result: boolean = false;
-        const contexts = await this.contextsCache.getValue();
+        try {
+            let result: boolean = false;
+            const contexts = await this.contextsCache.getValue();
 
-        if (contexts.some(c => isNewContextType(c.Type))) {
-            // If there are any new contexts we automatically know it's the new CLI
-            result = true;
-        } else {
-            // Otherwise we look at the output of `docker serve --help`
-            // TODO: this is not a very good heuristic
-            const { stdout } = await execAsync('docker serve --help');
-
-            if (/^\s*Start an api server/i.test(stdout)) {
+            if (contexts.some(c => isNewContextType(c.Type))) {
+                // If there are any new contexts we automatically know it's the new CLI
                 result = true;
-            }
-        }
+            } else {
+                // Otherwise we look at the output of `docker serve --help`
+                // TODO: this is not a very good heuristic
+                const { stdout } = await execAsync('docker serve --help');
 
-        // Set the VSCode context to the result (which may expose commands, etc.)
-        await this.setVsCodeContext('vscode-docker:newCliPresent', result);
-        return result;
+                if (/^\s*Start an api server/i.test(stdout)) {
+                    result = true;
+                }
+            }
+
+            // Set the VSCode context to the result (which may expose commands, etc.)
+            await this.setVsCodeContext('vscode-docker:newCliPresent', result);
+            return result;
+        } catch { } // Best effort
     }
 
     private async setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): Promise<void> {
