@@ -19,7 +19,7 @@ const netCoreGlobPatterns = [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN];
 const noProjectFile = localize('vscode-docker.scaffold.platforms.netCore.noProject', 'No C# or F# project files were found in the workspace.');
 
 export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContext {
-    netCoreOutputPath?: string;
+    netCoreAssemblyName?: string;
     netCoreRuntimeBaseImage?: string;
     netCoreSdkBaseImage?: string;
     netCorePlatformOS?: PlatformOS;
