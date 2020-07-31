@@ -318,7 +318,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         const outputManager = new DefaultOutputManager(ext.outputChannel);
 
         await outputManager.performOperation(
-            localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container...'),
+            localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', hostDebuggerPath, containerDebuggerDirectory),
             async (output) => {
                 await dockerClient.copy(hostDebuggerPath, containerDebuggerPath);
             },
@@ -340,7 +340,10 @@ export class NetCoreDebugHelper implements DebugHelper {
                 : `/bin/sh -c 'if [ -f ${debuggerPath} ]; then echo true; fi;'`
         }
         const result: string = await dockerClient.exec(containerName, command, {});
-        return result === 'true';
+
+        // With Linux containers running on Windows machine the result of the command will be 'true\n'.
+        // That is why we use startsWith instead of equality checking.
+        return result?.startsWith('true');
     }
 
     private async getContainerNameToAttach(context: IActionContext): Promise<string> {
