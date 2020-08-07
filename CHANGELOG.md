@@ -10,7 +10,7 @@
 * Grouping containers by networks used is not working [#2185](https://github.com/microsoft/vscode-docker/issues/2185)
 * Activation errors due to filesystem permissions [#2204](https://github.com/microsoft/vscode-docker/issues/2204)
 * Prompt to copy debugger into container shows up repeatedly [#2186](https://github.com/microsoft/vscode-docker/issues/2186)
-
+* Allow logging to container registries without gnome-keyring installed [#722](https://github.com/microsoft/vscode-docker/issues/722)
 
 
 ### Removed
