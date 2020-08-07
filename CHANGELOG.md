@@ -1,3 +1,21 @@
+## 1.5.0 - 17 August 2020
+### Added
+* The applicable Docker context types can be set on customized commands. [#2168](https://github.com/microsoft/vscode-docker/issues/2168)
+* Image size has been added in the Explorer view as an optional property for labels and sorting. [#2047](https://github.com/microsoft/vscode-docker/issues/2047)
+
+### Fixed
+* Terminal windows will be reused, instead of opening a new terminal window every time. [#251](https://github.com/microsoft/vscode-docker/issues/251)
+* The recommended exec form of CMD directives is now used wherever possible. [#2090](https://github.com/microsoft/vscode-docker/issues/2090)
+* Debugging no longer stops on hot reload in Python. [#2148](https://github.com/microsoft/vscode-docker/issues/2148)
+* Grouping containers by networks used is not working [#2185](https://github.com/microsoft/vscode-docker/issues/2185)
+* Activation errors due to filesystem permissions [#2204](https://github.com/microsoft/vscode-docker/issues/2204)
+* Prompt to copy debugger into container shows up repeatedly [#2186](https://github.com/microsoft/vscode-docker/issues/2186)
+* Allow logging to container registries without gnome-keyring installed [#722](https://github.com/microsoft/vscode-docker/issues/722)
+
+
+### Removed
+* The `docker.attachShellCommand.Windows` and `docker.attachShellCommand.Linux` settings have been removed. [Command customization](https://code.visualstudio.com/docs/containers/reference#_command-customization) replaces this functionality.
+
 ## 1.4.1 - 22 July 2020
 ### Fixed
 * "Permission denied" issue during extension activation. [#2181](https://github.com/microsoft/vscode-docker/issues/2181)
