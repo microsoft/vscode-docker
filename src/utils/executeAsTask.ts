@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
-export async function executeAsTask(context: IActionContext, command: string, name: string, options: { addDockerEnv?: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string, alwaysRunNew?: boolean }): Promise<vscode.TaskExecution> {
+export async function executeAsTask(context: IActionContext, command: string, name: string, options: { addDockerEnv?: boolean, workspaceFolder?: vscode.WorkspaceFolder, cwd?: string, alwaysRunNew?: boolean }): Promise<void> {
     let newEnv: NodeJS.ProcessEnv | undefined;
     options = options ?? {};
 
@@ -34,5 +34,16 @@ export async function executeAsTask(context: IActionContext, command: string, na
         task.definition.idRandomizer = Math.random();
     }
 
-    return vscode.tasks.executeTask(task);
+    const taskExecution = await vscode.tasks.executeTask(task);
+
+    const taskEndPromise = new Promise<void>((resolve) => {
+        const disposable = vscode.tasks.onDidEndTaskProcess(e => {
+            if (e.execution === taskExecution) {
+                disposable.dispose();
+                resolve();
+            }
+        });
+    });
+
+    return taskEndPromise;
 }
