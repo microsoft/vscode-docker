@@ -37,8 +37,9 @@ export async function executeAsTask(context: IActionContext, command: string, na
     const taskExecution = await vscode.tasks.executeTask(task);
 
     const taskEndPromise = new Promise<void>((resolve) => {
-        vscode.tasks.onDidEndTaskProcess(e => {
+        const disposable = vscode.tasks.onDidEndTaskProcess(e => {
             if (e.execution === taskExecution) {
+                disposable.dispose();
                 resolve();
             }
         });
