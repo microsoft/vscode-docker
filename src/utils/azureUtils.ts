@@ -3,9 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationContext } from 'adal-node';
-import { ServiceClientCredentials } from 'ms-rest';
-import { TokenResponse } from 'ms-rest-azure';
 import * as request from 'request-promise-native';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
@@ -51,7 +48,7 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
-    const aadTokenResponse = await acquireAadTokens(subContext);
+    const aadTokenResponse = await subContext.credentials.getToken();
 
     /* eslint-disable-next-line camelcase */
     const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
@@ -67,22 +64,4 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     });
 
     return response.refresh_token;
-}
-
-async function acquireAadTokens(subContext: ISubscriptionContext): Promise<TokenResponse> {
-    const credentials = <{ context: AuthenticationContext, username: string, clientId: string } & ServiceClientCredentials>subContext.credentials;
-    return new Promise<TokenResponse>((resolve, reject) => {
-        credentials.context.acquireToken(
-            subContext.environment.activeDirectoryResourceId,
-            credentials.username,
-            credentials.clientId,
-            (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(<TokenResponse>result);
-                }
-            }
-        );
-    });
 }

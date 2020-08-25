@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerRegistryManagementClient } from 'azure-arm-containerregistry';
+import { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
 import { Progress } from 'vscode';
 import { AzureWizardExecuteStep, createAzureClient } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
