@@ -2656,19 +2656,23 @@
                 },
                 {
                     "id": "dockerNetworks",
-                    "name": "%vscode-docker.views.dockerNetworks%"
+                    "name": "%vscode-docker.views.dockerNetworks%",
+                    "visibility": "collapsed"
                 },
                 {
                     "id": "dockerVolumes",
-                    "name": "%vscode-docker.views.dockerVolumes%"
+                    "name": "%vscode-docker.views.dockerVolumes%",
+                    "visibility": "collapsed"
                 },
                 {
                     "id": "vscode-docker.views.dockerContexts",
-                    "name": "%vscode-docker.views.dockerContexts%"
+                    "name": "%vscode-docker.views.dockerContexts%",
+                    "visibility": "collapsed"
                 },
                 {
                     "id": "vscode-docker.views.help",
-                    "name": "%vscode-docker.views.help%"
+                    "name": "%vscode-docker.views.help%",
+                    "visibility": "collapsed"
                 }
             ]
         },
