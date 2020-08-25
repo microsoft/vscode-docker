@@ -38,6 +38,7 @@ export class OutdatedImageChecker {
 
             // Don't wait
             void callWithTelemetryAndErrorHandling('outdatedImageCheck', async (context: IActionContext) => {
+                context.telemetry.properties.isActivationEvent = 'true';
                 context.errorHandling.suppressReportIssue = true;
                 context.errorHandling.suppressDisplay = true;
 
