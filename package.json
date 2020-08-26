@@ -2671,8 +2671,7 @@
                 },
                 {
                     "id": "vscode-docker.views.help",
-                    "name": "%vscode-docker.views.help%",
-                    "visibility": "collapsed"
+                    "name": "%vscode-docker.views.help%"
                 }
             ]
         },
