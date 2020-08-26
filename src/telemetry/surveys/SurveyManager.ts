@@ -8,10 +8,9 @@ import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azuree
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { awareness } from './awareness';
-import { nps2 } from './nps2';
 
 // Currently-active surveys should be registered here
-const currentSurveys = [nps2, awareness];
+const currentSurveys = [awareness];
 
 const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
 const surveyFlightPrefix = 'vscode-docker.surveys';
