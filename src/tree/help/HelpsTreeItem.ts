@@ -14,8 +14,8 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         return [
-            // this.getStartedTreeItem,
             this.readDocumentationTreeItem,
+            this.getStartedTreeItem,
             this.reviewIssuesTreeItem,
             this.reportIssuesTreeItem
         ];
@@ -31,24 +31,23 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         return item1.id.localeCompare(item2.id);
     }
 
-    // This Get Started item will be enabled once we have the right Docker Tutorial url
-    // private get getStartedTreeItem(): AzExtTreeItem {
-    //     const node = new OpenUrlTreeItem(
-    //         this,
-    //         localize('views.help.getStarted', 'Get Started'),
-    //         'https://aka.ms/helppanel_getstarted',
-    //         getThemedIconPath('star-empty'));
-    //     node.id = '1';
-
-    //     return node;
-    // }
-
     private get readDocumentationTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.readDocumentation', 'Read Documentation'),
+            localize('views.help.readDocumentation', 'Docker Extension Documentation'),
             'https://aka.ms/helppanel_docs',
             getThemedIconPath('book'));
+        node.id = '1';
+
+        return node;
+    }
+
+    private get getStartedTreeItem(): AzExtTreeItem {
+        const node = new OpenUrlTreeItem(
+            this,
+            localize('views.help.getStarted', 'Get Started with Docker Tutorial'),
+            'https://aka.ms/helppanel_getstarted',
+            getThemedIconPath('star-empty'));
         node.id = '2';
 
         return node;
