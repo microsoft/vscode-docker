@@ -79,7 +79,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     const run = await node.client.registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
-    await streamLogs(node, run);
+    void streamLogs(node, run);
     await fse.unlink(tarFilePath);
 }
 
@@ -138,32 +138,41 @@ async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run): Prom
     const result = await node.client.runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
     const blobClient = new BlobClient(nonNullProp(result, 'logLink'));
 
-    // Wait until the blob exists or at most 30 seconds
-    await new Promise(async (resolve, reject) => {
-        let totalChecks = 0;
+    // Start streaming the response to the output channel
+    let byteOffset = 0;
+    let totalChecks = 0;
+    let exists = false;
+
+    // ESLint is confused and thinks this promise is incomplete
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    await new Promise((resolve, reject) => {
         const timer = setInterval(
             async () => {
-                totalChecks++;
+                if (!exists && !(exists = await blobClient.exists())) {
+                    totalChecks++;
+                    if (totalChecks >= maxBlobChecks) {
+                        clearInterval(timer);
+                        reject('Not found');
+                    }
+                }
 
-                if (await blobClient.exists()) {
+                const contentBuffer = await blobClient.downloadToBuffer(byteOffset);
+                const properties = await blobClient.getProperties();
+
+                byteOffset += contentBuffer.length;
+                const content = bufferToString(contentBuffer);
+
+                if (content) {
+                    ext.outputChannel.appendLine(content);
+                }
+
+                if (properties?.metadata?.complete) {
                     clearInterval(timer);
                     resolve();
-                } else if (totalChecks >= maxBlobChecks) {
-                    clearInterval(timer);
-                    reject('Not found');
                 }
             },
             blobCheckInterval
         );
-    });
-
-    // Start streaming the response to the output channel
-    const downloadResponse = await blobClient.download();
-    downloadResponse.readableStreamBody.on('data', (chunk: Buffer) => {
-        ext.outputChannel.appendLine(bufferToString(chunk));
-    });
-    downloadResponse.readableStreamBody.on('error', (error: unknown) => {
-        ext.outputChannel.appendLine(error?.toString());
     });
 }
 
