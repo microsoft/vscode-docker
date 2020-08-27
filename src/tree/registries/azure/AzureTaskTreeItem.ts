@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-containerregistry";
+import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";

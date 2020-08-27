@@ -56,9 +56,10 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 ext.activityMeasurementService.recordActivity('overallnoedit');
 
                 if (!folder) {
-                    folder = workspace.workspaceFolders[0];
+                    folder = workspace.workspaceFolders?.[0];
 
                     if (!folder) {
+                        actionContext.errorHandling.suppressReportIssue = true;
                         throw new Error(localize('vscode-docker.debug.configProvider.workspaceFolder', 'To debug with Docker you must first open a folder or workspace in VS Code.'));
                     }
                 }
