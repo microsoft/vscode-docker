@@ -23,7 +23,8 @@
                 "node_modules/vscode/*",
                 "*"
             ]
-        }
+        },
+        "skipLibCheck": true // https://github.com/Azure/ms-rest-js/issues/367
     },
     "exclude": [
         "node_modules",

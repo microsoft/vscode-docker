@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerRegistryManagementModels as AcrModels } from "azure-arm-containerregistry";
+import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
 import { window } from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
@@ -16,7 +16,7 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     }
 
     const registryTI = node.parent.parent;
-    let runRequest: AcrModels.TaskRunRequest = { type: 'TaskRunRequest', taskName: node.taskName };
+    let runRequest: AcrModels.TaskRunRequest = { type: 'TaskRunRequest', taskId: node.id };
     let run = await registryTI.client.registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
     await node.parent.refresh();
     // don't wait
