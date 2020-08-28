@@ -2750,7 +2750,7 @@
         "@azure/arm-appservice": "^6.0.0",
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.1.2",
-        "@docker/sdk": "0.1.7",
+        "@docker/sdk": "^0.1.13",
         "dockerfile-ast": "^0.0.30",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
