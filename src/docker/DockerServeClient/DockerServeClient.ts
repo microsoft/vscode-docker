@@ -8,7 +8,7 @@ import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListRespon
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
-import { DockerInfo, PruneResult } from '../Common';
+import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerApiClient } from '../DockerApiClient';
@@ -53,7 +53,9 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             .setId(ref);
 
         const response: InspectResponse = await this.promisify(context, this.containersClient, this.containersClient.inspect, request, token);
-        const container = containerToDockerContainer(response.toObject().container);
+        const responseContainer = response.toObject().container;
+
+        const container = containerToDockerContainer(responseContainer);
 
         if (!container) {
             throw new Error(localize('vscode-docker.dockerServeClient.noContainer', 'No container with name \'{0}\' was found.', ref));
@@ -64,6 +66,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             NetworkSettings: {
                 Ports: containerPortsToInspectionPorts(container),
             },
+            Platform: responseContainer.platform as DockerOSType,
         };
     }
 
