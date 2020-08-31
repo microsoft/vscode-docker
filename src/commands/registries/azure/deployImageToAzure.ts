@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice';
-import { NameValuePair } from 'request';
 import { env, Progress, Uri, window } from "vscode";
 import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
@@ -82,7 +81,7 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
 
     let username: string | undefined;
     let password: string | undefined;
-    let appSettings: NameValuePair[] = [];
+    let appSettings: WebSiteManagementModels.NameValuePair[] = [];
     if (registryTI instanceof DockerHubNamespaceTreeItem) {
         username = registryTI.parent.username;
         password = await registryTI.parent.getPassword();
