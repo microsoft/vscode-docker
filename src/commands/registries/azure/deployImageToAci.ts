@@ -15,8 +15,6 @@ import { execAsync } from '../../../utils/spawnAsync';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 
 export async function deployImageToAci(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
-    // We're already in an ACI context or the command would not show
-
     if (!node) {
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
