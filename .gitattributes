@@ -1,2 +1,2 @@
 # Stop git from breaking this script by putting CRLF in place of LF
-resources/vsdbg text eol=lf
+resources/netCore/vsdbg text eol=lf
