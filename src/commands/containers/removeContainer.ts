@@ -25,7 +25,6 @@ export async function removeContainer(context: IActionContext, node?: ContainerT
     } else {
         confirmRemove = localize('vscode-docker.commands.containers.remove.confirmMulti', 'Are you sure you want to remove selected containers?');
     }
-    // TODO: ACI container removal confirmation
 
     // no need to check result - cancel will throw a UserCancelledError
     await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.containers.remove.remove', 'Remove') });

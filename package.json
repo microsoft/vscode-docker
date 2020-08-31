@@ -149,7 +149,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "vscode-docker:aciContext"
+                    "when": "vscode-docker:newCliPresent"
                 }
             ],
             "editor/context": [
@@ -476,7 +476,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled && vscode-docker:aciContext",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent",
                     "group": "regs_tag_1_general@4"
                 },
                 {
@@ -561,17 +561,17 @@
                 },
                 {
                     "command": "vscode-docker.contexts.inspect",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "contexts_1_general@1"
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "contexts_1_general@2"
                 },
                 {
                     "command": "vscode-docker.contexts.remove",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext/i",
                     "group": "contexts_2_destructive@1"
                 }
             ]
