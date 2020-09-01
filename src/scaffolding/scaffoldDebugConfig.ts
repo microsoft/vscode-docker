@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, AzureWizardPromptStep, IActionContext } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { localize } from '../localize';
+import { copyWizardContext } from './copyWizardContext';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldDebugConfig(actionContext: IActionContext, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
-    const wizardContext: Partial<ScaffoldingWizardContext> = priorWizardContext ?? actionContext;
+export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWizardContext>, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
+    copyWizardContext(wizardContext, priorWizardContext);
     wizardContext.scaffoldType = 'debugging';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
