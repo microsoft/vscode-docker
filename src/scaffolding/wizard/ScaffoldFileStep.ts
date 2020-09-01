@@ -117,15 +117,15 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
         }
 
-        return (await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ??
+        return (settingsTemplatesPath && await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ??
             await this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
     }
 
-    private async scanUpwardForFile(file: string, maxDepth: number = 2): Promise<string> {
+    private async scanUpwardForFile(file: string, maxDepth: number = 1): Promise<string> {
         const fileName = path.basename(file);
         let currentFile = file;
 
-        for (let i = 0; i < maxDepth; i++) {
+        for (let i = 0; i <= maxDepth; i++) {
             if (await fse.pathExists(currentFile)) {
                 return currentFile;
             }
@@ -139,9 +139,10 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
     }
 
     private async getOutputPath(wizardContext: TWizardContext): Promise<string> {
-        if (this.fileType === 'Dockerfile' && wizardContext.artifact) {
-            // Dockerfiles may be placed in subpaths; the others are always at the workspace folder level
-            return path.resolve(wizardContext.workspaceFolder.uri.fsPath, path.join(path.dirname(wizardContext.artifact), this.fileType));
+        if (this.fileType === 'Dockerfile' && wizardContext.artifact &&
+            (wizardContext.platform === 'Node.js' || wizardContext.platform === '.NET: ASP.NET Core' || wizardContext.platform === '.NET: Core Console')) {
+            // Dockerfiles may be placed in subpaths for Node and .NET; the others are always at the workspace folder level
+            return path.join(path.dirname(wizardContext.artifact), this.fileType);
         } else {
             return path.join(wizardContext.workspaceFolder.uri.fsPath, this.fileType);
         }
