@@ -28,9 +28,9 @@ export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContex
         new ChoosePythonArtifactStep(),
     ];
 
-    if (wizardContext.platform === 'Python: Django' && wizardContext.scaffoldType === 'all') {
+    if (wizardContext.platform === 'Python: Django' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
         promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('django')]));
-    } else if (wizardContext.platform === 'Python: Flask' && wizardContext.scaffoldType === 'all') {
+    } else if (wizardContext.platform === 'Python: Flask' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
         promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('flask')]));
     }
 

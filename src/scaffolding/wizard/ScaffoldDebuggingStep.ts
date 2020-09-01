@@ -9,7 +9,6 @@ import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { localize } from '../../localize';
-import { PythonProjectType } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
 import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizardContext';
@@ -48,12 +47,8 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case 'Python: Flask':
             case 'Python: General':
                 scaffoldContext.platform = 'python';
-                const pythonProjectType: PythonProjectType =
-                    wizardContext.platform === 'Python: Django' ? 'django' :
-                        wizardContext.platform === 'Python: Flask' ? 'flask' :
-                            'general';
                 const pythonOptions: PythonScaffoldingOptions = {
-                    projectType: pythonProjectType,
+                    projectType: (wizardContext as PythonScaffoldingWizardContext).pythonProjectType,
                     target: (wizardContext as PythonScaffoldingWizardContext).pythonArtifact,
                 };
                 await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pythonOptions);
