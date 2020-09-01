@@ -15,5 +15,5 @@ services:
 {{/if}}
 {{#if (eq platform 'Python: Flask')}}
     environment:
-      - FLASK_APP={{#if pythonArtifact.file}}{{ pythonArtifact.file }}{{#else}}-m {{ pythonArtifact.module }}{{/if}}
+      - FLASK_APP={{#if pythonArtifact.file}}{{ pythonArtifact.file }}{{else}}-m {{ pythonArtifact.module }}{{/if}}
 {{/if}}

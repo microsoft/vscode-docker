@@ -43,7 +43,14 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             const targetFramework = projectInfo[1]; // Line 2 is the <TargetFramework> value, or first item from <TargetFrameworks>
 
             const [, , netCoreVersionString] = /net(coreapp)?([\d\.]+)/i.exec(targetFramework);
-            const netCoreVersion = new SemVer(netCoreVersionString);
+
+            let netCoreVersion: SemVer;
+            if (/^\d\.\d$/.test(netCoreVersionString)) {
+                // SemVer requires a patch number in the version, so add it if the version matches e.g. 5.0
+                netCoreVersion = new SemVer(netCoreVersionString + '.0');
+            } else {
+                netCoreVersion = new SemVer(netCoreVersionString)
+            }
 
             if (netCoreVersion.major >= 5) {
                 // .NET 5 or above

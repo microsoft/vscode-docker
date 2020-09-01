@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
@@ -12,7 +12,9 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>): Promise<void> {
+export async function scaffold(actionContext: IActionContext, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
+    // TODO: need to think about how telemetry gets passed around
+    const wizardContext: Partial<ScaffoldingWizardContext> = priorWizardContext ?? actionContext;
     wizardContext.scaffoldType = 'all';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [

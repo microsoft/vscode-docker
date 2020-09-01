@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>): Promise<void> {
+export async function scaffoldCompose(actionContext: IActionContext, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
+    const wizardContext: Partial<ScaffoldingWizardContext> = priorWizardContext ?? actionContext;
     wizardContext.scaffoldType = 'compose';
     wizardContext.scaffoldCompose = true;
 

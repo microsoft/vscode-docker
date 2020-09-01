@@ -117,7 +117,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
         }
 
-        return (settingsTemplatesPath && await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ??
+        return (settingsTemplatesPath && await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ||
             await this.scanUpwardForFile(path.join(defaultTemplatesPath, subPath));
     }
 

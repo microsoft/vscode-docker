@@ -1,6 +1,6 @@
 {{#if (eq platform '.NET: ASP.NET Core')}}
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
-{{#/if}}
+{{/if}}
 
 version: '3.4'
 
