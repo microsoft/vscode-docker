@@ -34,4 +34,6 @@ export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardCo
 
     await wizard.prompt();
     await wizard.execute();
+
+    // TODO: telem
 }

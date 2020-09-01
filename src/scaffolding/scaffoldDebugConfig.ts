@@ -26,4 +26,6 @@ export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWiza
 
     await wizard.prompt();
     await wizard.execute();
+
+    // TODO: telem
 }

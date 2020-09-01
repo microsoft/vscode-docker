@@ -40,4 +40,6 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     if (wizardContext.scaffoldCompose) {
         await vscode.commands.executeCommand('vscode-docker.configureCompose', wizardContext);
     }
+
+    // TODO: telem
 }
