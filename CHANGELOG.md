@@ -1,3 +1,7 @@
+## 1.6.0 - 16 September 2020
+### Added
+* Deployments to Azure Container Instances can be made directly from images in Docker Hub and Azure Container Registries in the Registries view. [#1718](https://github.com/microsoft/vscode-docker/issues/1718)
+
 ## 1.5.0 - 17 August 2020
 ### Added
 * The applicable Docker context types can be set on customized commands. [#2168](https://github.com/microsoft/vscode-docker/issues/2168)
