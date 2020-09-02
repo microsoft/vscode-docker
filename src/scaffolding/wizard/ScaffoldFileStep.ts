@@ -47,6 +47,16 @@ Handlebars.registerHelper('isRootPort', (ports: number[]) => {
     return ports?.some(p => p < 1024);
 });
 
+Handlebars.registerHelper('join', (a: never[] | undefined, b: never[] | undefined) => {
+    if (!a) {
+        return b;
+    } else if (!b) {
+        return a;
+    } else {
+        return a.concat(b);
+    }
+});
+
 export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardExecuteStep<TWizardContext> {
     public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
         super();

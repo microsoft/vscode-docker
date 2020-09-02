@@ -32,7 +32,7 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
                 // If it's a POM file, parse as XML
                 const pomObject = <PomContents>await xml2js.parseStringPromise(contents, { trim: true, normalizeTags: true, normalize: true, mergeAttrs: true });
 
-                wizardContext.version = pomObject?.project?.version;
+                wizardContext.version = pomObject?.project?.version || '0.0.1';
 
                 if (pomObject?.project?.artifactid) {
                     wizardContext.relativeJavaOutputPath = `target/${pomObject.project.artifactid}-${wizardContext.version}.jar`;
@@ -42,7 +42,7 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
                 // eslint-disable-next-line @typescript-eslint/tslint/config
                 const gradleObject = <GradleContents>await gradleParser.parseText(contents);
 
-                wizardContext.version = gradleObject?.jar?.version || gradleObject.version;
+                wizardContext.version = gradleObject?.jar?.version || gradleObject?.version || '0.0.1';
 
                 if (gradleObject?.jar?.archiveName) {
                     wizardContext.relativeJavaOutputPath = `build/libs/${gradleObject.jar.archiveName}`;
@@ -50,6 +50,8 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
                     wizardContext.relativeJavaOutputPath = `build/libs/${gradleObject.jar.baseName}-${wizardContext.version}.jar`
                 } else if (gradleObject?.archivesBaseName) {
                     wizardContext.relativeJavaOutputPath = `build/libs/${gradleObject.archivesBaseName}-${wizardContext.version}.jar`;
+                } else {
+                    wizardContext.relativeJavaOutputPath = `build/libs/${wizardContext.workspaceFolder.name}-${wizardContext.version}.jar`;
                 }
             }
         }
@@ -60,6 +62,8 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
             // If the artifact is not set (fell through the above if/else), it will just be the service name + .jar
             wizardContext.relativeJavaOutputPath = `${wizardContext.serviceName}.jar`;
         }
+
+        wizardContext.debugPorts = [5005];
     }
 
     public shouldPrompt(wizardContext: JavaScaffoldingWizardContext): boolean {

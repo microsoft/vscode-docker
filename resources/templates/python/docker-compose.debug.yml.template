@@ -6,10 +6,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: {{ toQuotedArray pythonDebugCmdParts }}
-{{#if ports}}
+    command: {{{ toQuotedArray pythonDebugCmdParts }}}
+{{#if (join ports debugPorts)}}
     ports:
-{{#each ports}}
+{{#each (join ports debugPorts)}}
       - {{ . }}:{{ . }}
 {{/each}}
 {{/if}}

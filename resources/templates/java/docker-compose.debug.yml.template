@@ -8,8 +8,9 @@ services:
       dockerfile: Dockerfile
     environment:
       JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
+{{#if (join ports debugPorts)}}
     ports:
-      - 5005:5005
-{{#each ports}}
+{{#each (join ports debugPorts)}}
       - {{ . }}:{{ . }}
 {{/each}}
+{{/if}}

@@ -16,6 +16,7 @@ export interface ScaffoldingWizardContext extends IActionContext {
     // These come from user choice
     platform?: Platform;
     ports?: number[];
+    debugPorts?: number[];
     scaffoldCompose?: boolean;
     workspaceFolder?: vscode.WorkspaceFolder;
 

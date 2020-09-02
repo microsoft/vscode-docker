@@ -1,3 +1,6 @@
+{{#if pythonProjectType}}
+**/__pycache__
+{{/if}}
 **/.classpath
 **/.dockerignore
 **/.env

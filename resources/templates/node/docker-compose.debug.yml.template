@@ -6,9 +6,10 @@ services:
     build: .
     environment:
       NODE_ENV: development
+{{#if (join ports debugPorts)}}
     ports:
-      - 9229:9229
-{{#each ports}}
+{{#each (join ports debugPorts)}}
       - {{ . }}:{{ . }}
 {{/each}}
-    command: {{ toQuotedArray nodeDebugCmdParts }}
+{{/if}}
+    command: {{{ toQuotedArray nodeDebugCmdParts }}}

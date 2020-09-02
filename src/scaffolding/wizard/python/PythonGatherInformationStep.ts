@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { inferPythonArgs, PythonDefaultPorts } from '../../../utils/pythonUtils';
+import { inferPythonArgs, PythonDefaultDebugPort, PythonDefaultPorts } from '../../../utils/pythonUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
 
@@ -70,6 +70,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             '-c',
             `${debugCmdPart} ${app.join(' ')} ${args.join(' ')}`,
         ];
+
+        wizardContext.debugPorts = [PythonDefaultDebugPort];
     }
 
     private async getFlaskCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
@@ -104,6 +106,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             '-c',
             `${debugCmdPart} -m flask ${args.join(' ')}`,
         ];
+
+        wizardContext.debugPorts = [PythonDefaultDebugPort];
     }
 
     private async getGeneralCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
@@ -120,6 +124,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             '-c',
             `${debugCmdPart} ${app.join(' ')} ${args.join(' ')}`,
         ];
+
+        wizardContext.debugPorts = [PythonDefaultDebugPort];
     }
 
     private getCommonProps(wizardContext: PythonScaffoldingWizardContext): { app: string[], args: string[], bindPort: number } {

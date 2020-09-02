@@ -30,6 +30,8 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
             wizardContext.serviceName = getValidImageName(nodePackage.name);
         }
 
+        wizardContext.debugPorts = [9229];
+
         await super.prompt(wizardContext);
     }
 
