@@ -9,10 +9,13 @@ import { GatherInformationStep } from '../GatherInformationStep';
 import { NodeScaffoldingWizardContext } from './NodeScaffoldingWizardContext';
 
 export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffoldingWizardContext> {
+    private packageHasStartScript: boolean = false;
+
     public async prompt(wizardContext: NodeScaffoldingWizardContext): Promise<void> {
         const nodePackage = await readPackage(wizardContext.artifact);
 
         if (nodePackage.scripts?.start) {
+            this.packageHasStartScript = true;
             wizardContext.nodeCmdParts = ['npm', 'start'];
 
             const [, main] = /node (.+)/i.exec(nodePackage.scripts.start) ?? [undefined, undefined];
@@ -37,5 +40,9 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
 
     public shouldPrompt(wizardContext: NodeScaffoldingWizardContext): boolean {
         return !wizardContext.nodeCmdParts || !wizardContext.nodeDebugCmdParts;
+    }
+
+    protected setTelemetry(wizardContext: NodeScaffoldingWizardContext): void {
+        wizardContext.telemetry.properties.packageHasStartScript = this.packageHasStartScript.toString();
     }
 }

@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { TelemetryPromptStep } from './TelemetryPromptStep';
 
-export class ChoosePortsStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
+export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContext> {
     public constructor(private readonly defaultPorts: number[]) {
         super();
     }
@@ -35,24 +35,10 @@ export class ChoosePortsStep extends AzureWizardPromptStep<ScaffoldingWizardCont
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
         return wizardContext.ports === undefined;
     }
-}
 
-export async function promptForPorts(ports: number[]): Promise<number[]> {
-    let opt: vscode.InputBoxOptions = {
-        placeHolder: ports.join(', '),
-        prompt: localize('vscode-docker.configUtils.whatPort', 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.'),
-        value: ports.join(', '),
-        validateInput: (value: string): string | undefined => {
-            let result = splitPorts(value);
-            if (!result) {
-                return localize('vscode-docker.configUtils.portsFormat', 'Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.');
-            }
-
-            return undefined;
-        }
+    protected setTelemetry(wizardContext: ScaffoldingWizardContext): void {
+        wizardContext.telemetry.measurements.numPorts = wizardContext.ports?.length ?? 0;
     }
-
-    return splitPorts(await ext.ui.showInputBox(opt));
 }
 
 /**

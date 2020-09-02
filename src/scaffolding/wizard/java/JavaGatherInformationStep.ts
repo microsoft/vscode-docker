@@ -23,6 +23,8 @@ interface GradleContents {
 }
 
 export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffoldingWizardContext> {
+    private javaProjectType: 'pom' | 'gradle' | 'unknown' = 'unknown';
+
     public async prompt(wizardContext: JavaScaffoldingWizardContext): Promise<void> {
         if (wizardContext.artifact) {
             // If an artifact exists, it's a POM or Gradle file, we can find some info in there
@@ -30,6 +32,7 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
 
             if (/pom.xml$/i.test(wizardContext.artifact)) {
                 // If it's a POM file, parse as XML
+                this.javaProjectType = 'pom';
                 const pomObject = <PomContents>await xml2js.parseStringPromise(contents, { trim: true, normalizeTags: true, normalize: true, mergeAttrs: true });
 
                 wizardContext.version = pomObject?.project?.version || '0.0.1';
@@ -39,6 +42,7 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
                 }
             } else {
                 // Otherwise it's a gradle file, parse with that
+                this.javaProjectType = 'gradle';
                 // eslint-disable-next-line @typescript-eslint/tslint/config
                 const gradleObject = <GradleContents>await gradleParser.parseText(contents);
 
@@ -68,5 +72,9 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
 
     public shouldPrompt(wizardContext: JavaScaffoldingWizardContext): boolean {
         return !wizardContext.relativeJavaOutputPath;
+    }
+
+    protected setTelemetry(wizardContext: JavaScaffoldingWizardContext): void {
+        wizardContext.telemetry.properties.javaProjectType = this.javaProjectType;
     }
 }

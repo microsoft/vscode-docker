@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { resolveFilesOfPattern } from '../../utils/quickPickFile';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { TelemetryPromptStep } from './TelemetryPromptStep';
 
-export class ChooseArtifactStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
+export class ChooseArtifactStep<TWizardContext extends ScaffoldingWizardContext> extends TelemetryPromptStep<TWizardContext> {
     public constructor(protected readonly promptText: string, protected readonly globPatterns: string[], protected readonly noItemsMessage: string) {
         super();
     }

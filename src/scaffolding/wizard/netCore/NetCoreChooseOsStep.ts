@@ -4,13 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizardPromptStep, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { PlatformOS } from '../../../utils/platform';
+import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
 
-export class NetCoreChooseOsStep extends AzureWizardPromptStep<NetCoreScaffoldingWizardContext> {
+export class NetCoreChooseOsStep extends TelemetryPromptStep<NetCoreScaffoldingWizardContext> {
     public async prompt(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
         const opt: vscode.QuickPickOptions = {
             matchOnDescription: true,
@@ -27,5 +28,9 @@ export class NetCoreChooseOsStep extends AzureWizardPromptStep<NetCoreScaffoldin
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
         return !wizardContext.netCorePlatformOS && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging');
+    }
+
+    protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {
+        wizardContext.telemetry.properties.platformOS = wizardContext.netCorePlatformOS;
     }
 }

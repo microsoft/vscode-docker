@@ -22,6 +22,8 @@ const consoleNetCoreBaseImage = 'mcr.microsoft.com/dotnet/core/runtime';
 const netCoreSdkImage = 'mcr.microsoft.com/dotnet/core/sdk';
 
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
+    private targetFramework: string;
+
     public async prompt(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
         // First, we need to validate that build tasks are created
         if (!hasTask('build', wizardContext.workspaceFolder)) {
@@ -40,9 +42,9 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         }
 
         if (!wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage) {
-            const targetFramework = projectInfo[1]; // Line 2 is the <TargetFramework> value, or first item from <TargetFrameworks>
+            this.targetFramework = projectInfo[1]; // Line 2 is the <TargetFramework> value, or first item from <TargetFrameworks>
 
-            const [, , netCoreVersionString] = /net(coreapp)?([\d\.]+)/i.exec(targetFramework);
+            const [, , netCoreVersionString] = /net(coreapp)?([\d\.]+)/i.exec(this.targetFramework);
 
             let netCoreVersion: SemVer;
             if (/^\d\.\d$/.test(netCoreVersionString)) {
@@ -68,5 +70,9 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
         return !wizardContext.netCoreAssemblyName || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage;
+    }
+
+    protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {
+        wizardContext.telemetry.properties.targetFramework = this.targetFramework;
     }
 }

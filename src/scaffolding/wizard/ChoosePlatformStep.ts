@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizardPromptStep, IAzureQuickPickItem, IWizardOptions } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, IWizardOptions } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
@@ -15,8 +15,9 @@ import { getNetCoreSubWizardOptions } from './netCore/NetCoreScaffoldingWizardCo
 import { getNodeSubWizardOptions } from './node/NodeScaffoldingWizardContext';
 import { getPythonSubWizardOptions } from './python/PythonScaffoldingWizardContext';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { TelemetryPromptStep } from './TelemetryPromptStep';
 
-export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardContext> {
+export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardContext> {
     public constructor(private readonly platformsList?: Platform[]) {
         super();
     }
@@ -43,6 +44,9 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
     }
 
     public async getSubWizard(wizardContext: ScaffoldingWizardContext): Promise<IWizardOptions<ScaffoldingWizardContext> | undefined> {
+        // No output is expected from this but it will call the setTelemetry method
+        await super.getSubWizard(wizardContext);
+
         switch (wizardContext.platform) {
             case 'Node.js':
                 return getNodeSubWizardOptions(wizardContext);
@@ -77,5 +81,10 @@ export class ChoosePlatformStep extends AzureWizardPromptStep<ScaffoldingWizardC
             default:
                 throw new Error(localize('vscode-docker.scaffold.choosePlatformStep.unexpectedPlatform', 'Unexpected platform'));
         }
+    }
+
+    protected setTelemetry(wizardContext: ScaffoldingWizardContext): void {
+        // TODO: validate shape of this against existing telemetry
+        wizardContext.telemetry.properties.platform = wizardContext.platform;
     }
 }

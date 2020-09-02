@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { getValidImageNameFromPath } from '../../utils/getValidImageName';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
+import { TelemetryPromptStep } from './TelemetryPromptStep';
 
-export class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardPromptStep<TWizardContext> {
+export class GatherInformationStep<TWizardContext extends ScaffoldingWizardContext> extends TelemetryPromptStep<TWizardContext> {
     public async prompt(wizardContext: TWizardContext): Promise<void> {
         if (!wizardContext.serviceName) {
             wizardContext.serviceName = getValidImageNameFromPath(wizardContext.workspaceFolder.uri.fsPath);

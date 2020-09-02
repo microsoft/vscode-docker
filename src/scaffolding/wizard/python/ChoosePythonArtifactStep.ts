@@ -71,4 +71,8 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
     public shouldPrompt(wizardContext: PythonScaffoldingWizardContext): boolean {
         return super.shouldPrompt(wizardContext) || !wizardContext.pythonArtifact;
     }
+
+    protected setTelemetry(wizardContext: PythonScaffoldingWizardContext): void {
+        wizardContext.telemetry.properties.pythonArtifact = ('module' in wizardContext.pythonArtifact) ? 'module' : 'file';
+    }
 }
