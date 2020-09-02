@@ -20,9 +20,12 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
 
             const [, main] = /node (.+)/i.exec(nodePackage.scripts.start) ?? [undefined, undefined];
             wizardContext.nodeDebugCmdParts = ['node', '--inspect=0.0.0.0:9229', nodePackage.main || main || 'index.js'];
+        } else if (nodePackage.main) {
+            wizardContext.nodeCmdParts = ['node', nodePackage.main]
+            wizardContext.nodeDebugCmdParts = ['node', '--inspect=0.0.0.0:9229', nodePackage.main];
         } else {
-            wizardContext.nodeCmdParts = ['node', nodePackage.main || 'index.js']
-            wizardContext.nodeDebugCmdParts = ['node', '--inspect=0.0.0.0:9229', nodePackage.main || 'index.js'];
+            wizardContext.nodeCmdParts = ['npm', 'start']
+            wizardContext.nodeDebugCmdParts = ['node', '--inspect=0.0.0.0:9229', 'index.js'];
         }
 
         if (nodePackage.version) {
