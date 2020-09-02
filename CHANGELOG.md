@@ -1,6 +1,7 @@
 ## 1.6.0 - 16 September 2020
 ### Added
 * Deployments to Azure Container Instances can be made directly from images in Docker Hub and Azure Container Registries in the Registries view. [#1718](https://github.com/microsoft/vscode-docker/issues/1718)
+* ACI containers can now be stopped and started from the Explorer view. [#2265](https://github.com/microsoft/vscode-docker/pull/2265)
 
 ## 1.5.0 - 17 August 2020
 ### Added
