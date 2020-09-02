@@ -13,17 +13,19 @@ services:
 {{#if ports}}
     ports:
 {{#each ports}}
+{{#unless (eq . 443)}}
       - {{ . }}:{{ . }}
+{{/unless}}
 {{/each}}
 {{/if}}
+{{#if ports}}
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-{{#if ports}}
       - ASPNETCORE_URLS=http://+:{{ ports.[0] }}
 {{/if}}
     volumes:
 {{#if (eq netCorePlatformOS 'Windows')}}
-      - ~/.vsdbg:c:\\remote_debugger:ro
+      - ~/.vsdbg:c:\remote_debugger:rw
 {{else}}
-      - ~/.vsdbg:/remote_debugger:ro
+      - ~/.vsdbg:/remote_debugger:rw
 {{/if}}

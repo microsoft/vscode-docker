@@ -13,6 +13,8 @@ services:
 {{#if ports}}
     ports:
 {{#each ports}}
+{{#unless (eq . 443)}}
       - {{ . }}:{{ . }}
+{{/unless}}
 {{/each}}
 {{/if}}

@@ -6,6 +6,7 @@
 import { SemVer } from 'semver';
 import { localize } from '../../../localize';
 import { hasTask } from '../../../tasks/TaskHelper';
+import { getValidImageNameFromPath } from '../../../utils/getValidImageName';
 import { getNetCoreProjectInfo } from '../../../utils/netCoreUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
@@ -65,11 +66,15 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             }
         }
 
+        if (!wizardContext.serviceName) {
+            wizardContext.serviceName = getValidImageNameFromPath(wizardContext.artifact);
+        }
+
         await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
-        return !wizardContext.netCoreAssemblyName || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage;
+        return !wizardContext.netCoreAssemblyName || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage || !wizardContext.serviceName;
     }
 
     protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {

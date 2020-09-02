@@ -6,8 +6,8 @@ EXPOSE {{ . }}
 
 FROM {{ netCoreSdkBaseImage }} AS build
 WORKDIR /src
-COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}"]
-RUN dotnet restore {{ workspaceRelative . artifact netCorePlatformOS }}
+COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}/"]
+RUN dotnet restore "{{ workspaceRelative . artifact netCorePlatformOS }}"
 COPY . .
 WORKDIR "/src/{{ dirname (workspaceRelative . artifact 'Linux') 'Linux' }}"
 RUN dotnet build "{{ basename artifact }}" -c Release -o /app/build
