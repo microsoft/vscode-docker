@@ -10,8 +10,8 @@ import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWizardContext>, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
-    copyWizardContext(wizardContext, priorWizardContext);
+export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'debugging';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
@@ -26,6 +26,4 @@ export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWiza
 
     await wizard.prompt();
     await wizard.execute();
-
-    // TODO: telem
 }

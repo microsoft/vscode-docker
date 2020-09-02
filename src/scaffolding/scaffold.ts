@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { copyWizardContext } from './copyWizardContext';
@@ -13,14 +12,14 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
-    copyWizardContext(wizardContext, priorWizardContext);
+export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'all';
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
-        new ChooseComposeStep(),
         new ChoosePlatformStep(),
+        new ChooseComposeStep(),
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
@@ -35,11 +34,13 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     });
 
     await wizard.prompt();
-    await wizard.execute();
+
+    // TODO: would like to capture telemetry within the prompt steps but after `prompt()` regardless of whether or not it is called
 
     if (wizardContext.scaffoldCompose) {
-        await vscode.commands.executeCommand('vscode-docker.configureCompose', wizardContext);
+        executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 300));
+        executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 400));
     }
 
-    // TODO: telem
+    await wizard.execute();
 }

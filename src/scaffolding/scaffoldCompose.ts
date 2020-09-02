@@ -11,8 +11,8 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
-export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>, priorWizardContext?: ScaffoldingWizardContext): Promise<void> {
-    copyWizardContext(wizardContext, priorWizardContext);
+export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'compose';
     wizardContext.scaffoldCompose = true;
 
@@ -34,6 +34,4 @@ export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardCo
 
     await wizard.prompt();
     await wizard.execute();
-
-    // TODO: telem
 }

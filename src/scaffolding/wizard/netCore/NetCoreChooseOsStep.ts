@@ -15,10 +15,10 @@ export class NetCoreChooseOsStep extends AzureWizardPromptStep<NetCoreScaffoldin
         const opt: vscode.QuickPickOptions = {
             matchOnDescription: true,
             matchOnDetail: true,
-            placeHolder: localize('vscode-docker.scaffold.chooseOsStep.selectOS', 'Select Operating System')
+            placeHolder: localize('vscode-docker.scaffold.chooseOsStep.selectOS', 'Select Operating System'),
         };
 
-        const OSes: PlatformOS[] = ['Windows', 'Linux'];
+        const OSes: PlatformOS[] = ['Linux', 'Windows'];
         const items = OSes.map(p => <IAzureQuickPickItem<PlatformOS>>{ label: p, data: p });
 
         const response = await ext.ui.showQuickPick(items, opt);
