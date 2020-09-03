@@ -21,6 +21,11 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
 
     const aciContext = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>([/aciContext;/i], context);
 
+    // Switch to the other context if needed
+    if (!aciContext.current) {
+        await vscode.commands.executeCommand('vscode-docker.contexts.use', aciContext);
+    }
+
     // Log in to the registry to ensure the run actually succeeds
     // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
     await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', node.parent.parent);
