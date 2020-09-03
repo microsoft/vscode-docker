@@ -15,7 +15,6 @@ import { PythonGatherInformationStep } from './PythonGatherInformationStep';
 export interface PythonScaffoldingWizardContext extends ScaffoldingWizardContext {
     pythonProjectType?: PythonProjectType;
     pythonArtifact?: PythonTarget;
-    pythonRequirements?: { [key: string]: string };
     pythonCmdParts?: string[];
     pythonDebugCmdParts?: string[];
 

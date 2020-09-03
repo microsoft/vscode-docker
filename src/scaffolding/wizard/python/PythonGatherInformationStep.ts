@@ -32,7 +32,7 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
     }
 
     public shouldPrompt(wizardContext: PythonScaffoldingWizardContext): boolean {
-        return !wizardContext.pythonRequirements || !wizardContext.pythonCmdParts || !wizardContext.pythonDebugCmdParts || !wizardContext.pythonProjectType;
+        return !wizardContext.pythonCmdParts || !wizardContext.pythonDebugCmdParts || !wizardContext.pythonProjectType;
     }
 
     private async getDjangoCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
@@ -52,11 +52,6 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
         } else {
             wsgiModule = `${serviceName}.wsgi`;
         }
-
-        wizardContext.pythonRequirements = {
-            django: '3.0.8',
-            gunicorn: '20.0.4',
-        };
 
         wizardContext.pythonCmdParts = [
             'gunicorn',
@@ -88,11 +83,6 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
 
         // Replace forward-slashes with dots.
         wsgiModule = wsgiModule.replace(/\//g, '.');
-
-        wizardContext.pythonRequirements = {
-            flask: '1.1.2',
-            gunicorn: '20.0.4',
-        };
 
         wizardContext.pythonCmdParts = [
             'gunicorn',

@@ -15,7 +15,7 @@ const moduleRegex = /([a-z_]+[.])*([a-z_])/i;
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {
     public constructor() {
         super(
-            localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. app.py)'),
+            localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. manage.py, app.py)'),
             ['**/*.{[Pp][Yy]}'],
             localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.')
         );
@@ -40,6 +40,7 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
 
         const result = await ext.ui.showQuickPick(pickChoices, {
             placeHolder: this.promptText,
+            suppressPersistence: true,
         });
 
         if (result === enterModuleChoice) {
