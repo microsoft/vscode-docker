@@ -15,7 +15,7 @@ export const awareness: Survey = {
     prompt: localize('vscode-docker.survey.aware.prompt', 'The Docker extension is always adding new features. Do you want to learn more about them?'),
     buttons: new Map<string, string | undefined>([
         [localize('vscode-docker.survey.aware.button.watch', 'Watch a video'), 'https://aka.ms/AA8lh3s'],
-        [localize('vscode-docker.survey.aware.button.read', 'Read documentation'), 'https://aka.ms/helppanel_docs'],
+        [localize('vscode-docker.survey.aware.button.read', 'Read documentation'), 'https://aka.ms/AA9j59w'],
         [localize('vscode-docker.survey.aware.button.never', 'Don\'t show again'), undefined],
     ]),
     activationDelayMs: 30 * 1000,
