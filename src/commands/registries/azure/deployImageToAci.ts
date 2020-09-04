@@ -30,19 +30,30 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
     // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
     await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', node.parent.parent);
 
-    const ports = await getImagePorts(node.fullTag);
+    const progressOptions = {
+        location: vscode.ProgressLocation.Notification,
+        title: localize('vscode-docker.commands.registries.deployImageToAci.gettingPorts', 'Determining ports from image...'),
+    };
+    const ports = await vscode.window.withProgress(progressOptions, async () => {
+        return getImagePorts(node.fullTag);
+    });
     const portsArg = ports.map(port => `-p ${port}:${port}`).join(' ');
 
     addImageTaggingTelemetry(context, node.fullTag, '');
 
-    await executeAsTask(
-        context,
-        `docker --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`,
-        localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI'),
-        {
-            addDockerEnv: false,
-        }
-    );
+    const command = `docker --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
+    const title = localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI');
+    const options = {
+        addDockerEnv: false,
+    };
+
+    try {
+        await executeAsTask(context, command, title, options);
+    } catch {
+        // If it fails, try logging in and make one more attempt
+        await executeAsTask(context, 'docker login azure', title, options);
+        await executeAsTask(context, command, title, options);
+    }
 }
 
 async function getImagePorts(fullTag: string): Promise<number[]> {
