@@ -3,14 +3,20 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, IActionContext } from 'vscode-azureextensionui';
+import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext, ResourceGroupListStep } from 'vscode-azureextensionui';
 import { DockerContext } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { RegistryApi } from '../registries/all/RegistryApi';
+import { AzureAccountTreeItem } from '../registries/azure/AzureAccountTreeItem';
+import { azureRegistryProviderId } from '../registries/azure/azureRegistryProvider';
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
+import { AciContextCreateStep } from './aci/AciContextCreateStep';
+import { ContextNameStep } from './aci/ContextNameStep';
+import { IAciWizardContext } from './aci/IAciWizardContext';
 import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { contextProperties, ContextProperty } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
@@ -21,6 +27,7 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
     public childType: LocalChildType<DockerContext> = ContextTreeItem;
     public childGroupType: LocalChildGroupType<DockerContext, ContextProperty> = ContextGroupTreeItem;
+    public createNewLabel: string = localize('vscode-docker.tree.Contexts.createNewLabel', 'Create new ACI context...');
 
     public labelSettingInfo: ITreeSettingInfo<ContextProperty> = {
         properties: contextProperties,
@@ -81,5 +88,48 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
                 settingInfo: this.descriptionSettingInfo
             }
         ]
+    }
+
+    public async createChildImpl(actionContext: ICreateChildImplContext): Promise<ContextTreeItem> {
+        const wizardContext: IActionContext & Partial<IAciWizardContext> = {
+            ...actionContext,
+        };
+
+        // Set up the prompt steps
+        const promptSteps: AzureWizardPromptStep<IAciWizardContext>[] = [
+            new ContextNameStep(),
+        ];
+
+        // Create a temporary azure account tree item since Azure might not be connected
+        const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
+
+        // Add a subscription prompt step (skipped if there is exactly one subscription)
+        const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
+        if (subscriptionStep) {
+            promptSteps.push(subscriptionStep);
+        }
+
+        // Add additional prompt steps
+        promptSteps.push(new ResourceGroupListStep());
+
+        // Set up the execute steps
+        const executeSteps: AzureWizardExecuteStep<IAciWizardContext>[] = [
+            new AciContextCreateStep(),
+        ];
+
+        const title = localize('vscode-docker.commands.contexts.create.aci.title', 'Create new Azure Container Instances context');
+
+        const wizard = new AzureWizard(wizardContext, { title, promptSteps, executeSteps });
+        await wizard.prompt();
+        await wizard.execute();
+
+        return new ContextTreeItem(this, {
+            Id: wizardContext.contextName,
+            Name: wizardContext.contextName,
+            Current: false,
+            DockerEndpoint: undefined,
+            CreatedTime: undefined,
+            Type: 'aci',
+        });
     }
 }
