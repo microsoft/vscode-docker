@@ -12,7 +12,7 @@ const maximumNotEditOnlySessions = 0;
 
 export const awareness: Survey = {
     id: 'aware',
-    prompt: localize('vscode-docker.survey.aware.prompt', 'The Docker extension is always adding new features. Do you want to learn more about them?'),
+    prompt: localize('vscode-docker.survey.aware.prompt', 'The Docker extension is always adding new features. Would you like to learn more about them?'),
     buttons: new Map<string, string | undefined>([
         [localize('vscode-docker.survey.aware.button.watch', 'Watch a video'), 'https://aka.ms/AA8lh3s'],
         [localize('vscode-docker.survey.aware.button.read', 'Read docs'), 'https://aka.ms/AA9j59w'],
