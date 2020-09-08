@@ -225,6 +225,7 @@
     "vscode-docker.commands.registries.copyImageDigest": "Copy Image Digest",
     "vscode-docker.commands.registries.deleteImage": "Delete Image...",
     "vscode-docker.commands.registries.deployImageToAzure": "Deploy Image to Azure App Service...",
+    "vscode-docker.commands.registries.deployImageToAci": "Deploy Image to Azure Container Instances...",
     "vscode-docker.commands.registries.disconnectRegistry": "Disconnect",
     "vscode-docker.commands.registries.dockerHub.openInBrowser": "Open in Browser",
     "vscode-docker.commands.registries.help": "Registries Help",
