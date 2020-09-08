@@ -35,6 +35,10 @@ export class RemoteTagTreeItem extends AzExtTreeItem {
         return this.parent.repoName + ':' + this.tag;
     }
 
+    public get fullTag(): string {
+        return `${this.parent.parent.baseImagePath}/${this.repoNameAndTag}`;
+    }
+
     public get description(): string {
         return moment(this.time).fromNow();
     }

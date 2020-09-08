@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
+import { IResourceGroupWizardContext } from 'vscode-azureextensionui';
 
-export async function createAciContext(actionContext: IActionContext): Promise<void> {
-    await ext.contextsRoot.createChild(actionContext);
+export interface IAciWizardContext extends IResourceGroupWizardContext {
+    contextName: string;
 }

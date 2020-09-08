@@ -87,6 +87,7 @@
         "onCommand:vscode-docker.registries.copyImageDigest",
         "onCommand:vscode-docker.registries.deleteImage",
         "onCommand:vscode-docker.registries.deployImageToAzure",
+        "onCommand:vscode-docker.registries.deployImageToAci",
         "onCommand:vscode-docker.registries.disconnectRegistry",
         "onCommand:vscode-docker.registries.dockerHub.openInBrowser",
         "onCommand:vscode-docker.registries.help",
@@ -144,6 +145,10 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
+                    "when": "vscode-docker:newCliPresent"
+                },
+                {
+                    "command": "vscode-docker.registries.deployImageToAci",
                     "when": "vscode-docker:newCliPresent"
                 }
             ],
@@ -356,17 +361,17 @@
                 },
                 {
                     "command": "vscode-docker.containers.start",
-                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i && vscode-docker:aciContext != true",
+                    "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
                     "group": "containers_1_general@5"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
-                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i && vscode-docker:aciContext != true",
+                    "when": "view == dockerContainers && viewItem =~ /^(paused|restarting|running)Container$/i",
                     "group": "containers_1_general@6"
                 },
                 {
                     "command": "vscode-docker.containers.restart",
-                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i && vscode-docker:aciContext != true",
+                    "when": "view == dockerContainers && viewItem =~ /^runningContainer$/i",
                     "group": "containers_1_general@7"
                 },
                 {
@@ -470,6 +475,11 @@
                     "group": "regs_tag_1_general@3"
                 },
                 {
+                    "command": "vscode-docker.registries.deployImageToAci",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent",
+                    "group": "regs_tag_1_general@4"
+                },
+                {
                     "command": "vscode-docker.registries.azure.untagImage",
                     "when": "view == dockerRegistries && viewItem == azure;DockerV2;Tag;",
                     "group": "regs_tag_2_destructive@1"
@@ -551,17 +561,17 @@
                 },
                 {
                     "command": "vscode-docker.contexts.inspect",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "contexts_1_general@1"
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "contexts_1_general@2"
                 },
                 {
                     "command": "vscode-docker.contexts.remove",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext$/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext/i",
                     "group": "contexts_2_destructive@1"
                 }
             ]
@@ -2496,6 +2506,11 @@
             {
                 "command": "vscode-docker.registries.deployImageToAzure",
                 "title": "%vscode-docker.commands.registries.deployImageToAzure%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+                "command": "vscode-docker.registries.deployImageToAci",
+                "title": "%vscode-docker.commands.registries.deployImageToAci%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
