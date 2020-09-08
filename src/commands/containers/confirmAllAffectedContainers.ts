@@ -9,7 +9,7 @@ import { localize } from '../../localize';
 import { getComposeProjectName, NonComposeGroupName } from '../../tree/containers/ContainersTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
-export async function aciContainerActionWarning(context: IActionContext, nodes: ContainerTreeItem[]): Promise<string[]> {
+export async function confirmAllAffectedContainers(context: IActionContext, nodes: ContainerTreeItem[]): Promise<string[]> {
     if ((await ext.dockerContextManager.getCurrentContext()).Type !== 'aci' ||
         nodes.every(n => getComposeProjectName(n.containerItem) === NonComposeGroupName)) {
         // If we're not in an ACI context, or every node in the list is not part of any ACI container group, return unchanged
