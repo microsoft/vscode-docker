@@ -1908,7 +1908,7 @@
                 },
                 "docker.images.checkForOutdatedImages": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
                 },
                 "docker.networks.groupBy": {
