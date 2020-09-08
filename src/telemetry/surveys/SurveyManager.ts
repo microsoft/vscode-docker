@@ -16,6 +16,9 @@ const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
 const surveyFlightPrefix = 'vscode-docker.surveys';
 const lastToastedSessionKey = 'vscode-docker.surveys.lastSession';
 
+// A random value between 0 and slushTime will be added to / subtracted from the activation delay
+const slushTime = 3000;
+
 export interface Survey {
     id: string;
     url: string;
@@ -32,12 +35,16 @@ export class SurveyManager {
         }
 
         for (const survey of currentSurveys) {
+            // Generate a slush of +/- 3 seconds
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            const slush = Math.round(Math.random() * slushTime * 2) - slushTime;
+
             const timer = setTimeout(
                 async () => {
                     clearTimeout(timer);
                     await this.executeSurvey(survey);
                 },
-                survey.activationDelayMs
+                survey.activationDelayMs + slush
             );
         }
     }
