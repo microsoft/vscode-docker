@@ -5,9 +5,10 @@
 
 import { commands } from "vscode";
 import { IActionContext, registerCommand as registerCommandAzUI } from "vscode-azureextensionui";
-import { configure, configureApi } from "../configureWorkspace/configure";
-import { configureCompose } from "../configureWorkspace/configureCompose";
 import { ext } from "../extensionVariables";
+import { scaffold } from "../scaffolding/scaffold";
+import { scaffoldCompose } from "../scaffolding/scaffoldCompose";
+import { scaffoldDebugConfig } from "../scaffolding/scaffoldDebugConfig";
 import { deployImageToAzure } from "../utils/lazyLoad";
 import { viewAzureTaskLogs } from "../utils/lazyLoad";
 import { composeDown, composeRestart, composeUp } from "./compose";
@@ -90,12 +91,13 @@ export function registerCommand(commandId: string, callback: (context: IActionCo
 }
 
 export function registerCommands(): void {
-    registerWorkspaceCommand('vscode-docker.api.configure', configureApi);
+    registerWorkspaceCommand('vscode-docker.configure', scaffold);
+    registerWorkspaceCommand('vscode-docker.configureCompose', scaffoldCompose);
+    registerWorkspaceCommand('vscode-docker.debugging.initializeForDebugging', scaffoldDebugConfig);
+
     registerWorkspaceCommand('vscode-docker.compose.down', composeDown);
     registerWorkspaceCommand('vscode-docker.compose.restart', composeRestart);
     registerWorkspaceCommand('vscode-docker.compose.up', composeUp);
-    registerWorkspaceCommand('vscode-docker.configure', configure);
-    registerWorkspaceCommand('vscode-docker.configureCompose', configureCompose);
     registerCommand('vscode-docker.pruneSystem', pruneSystem);
 
     registerWorkspaceCommand('vscode-docker.containers.attachShell', attachShellContainer);

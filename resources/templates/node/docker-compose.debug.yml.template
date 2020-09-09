@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  {{ serviceName }}:
+    image: {{ serviceName }}
+    build: .
+    environment:
+      NODE_ENV: development
+{{#if (join ports debugPorts)}}
+    ports:
+{{#each (join ports debugPorts)}}
+      - {{ . }}:{{ . }}
+{{/each}}
+{{/if}}
+    command: {{{ toQuotedArray nodeDebugCmdParts }}}

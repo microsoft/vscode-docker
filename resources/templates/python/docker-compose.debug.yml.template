@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  {{ serviceName }}:
+    image: {{ serviceName }}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: {{{ toQuotedArray pythonDebugCmdParts }}}
+{{#if (join ports debugPorts)}}
+    ports:
+{{#each (join ports debugPorts)}}
+      - {{ . }}:{{ . }}
+{{/each}}
+{{/if}}
+{{#if (eq platform 'Python: Flask')}}
+    environment:
+      - FLASK_APP={{#if pythonArtifact.file}}{{ pythonArtifact.file }}{{else}}-m {{ pythonArtifact.module }}{{/if}}
+{{/if}}

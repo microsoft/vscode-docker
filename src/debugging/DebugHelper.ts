@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, ConfigurationTarget, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
-import { IActionContext, registerCommand } from 'vscode-azureextensionui';
-import { initializeForDebugging } from '../commands/debugging/initializeForDebugging';
+import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
@@ -62,8 +61,6 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
     );
 
     registerServerReadyAction(ctx);
-
-    registerCommand('vscode-docker.debugging.initializeForDebugging', initializeForDebugging);
 }
 
 // TODO: This is stripping out a level of indentation, but the tasks one isn't

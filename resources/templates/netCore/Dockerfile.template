@@ -1,0 +1,21 @@
+FROM {{ netCoreRuntimeBaseImage }} AS base
+WORKDIR /app
+{{#each ports}}
+EXPOSE {{ . }}
+{{/each}}
+
+FROM {{ netCoreSdkBaseImage }} AS build
+WORKDIR /src
+COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}/"]
+RUN dotnet restore "{{ workspaceRelative . artifact netCorePlatformOS }}"
+COPY . .
+WORKDIR "/src/{{ dirname (workspaceRelative . artifact 'Linux') 'Linux' }}"
+RUN dotnet build "{{ basename artifact }}" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "{{ basename artifact }}" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "{{ netCoreAssemblyName }}"]

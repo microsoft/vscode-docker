@@ -5,16 +5,16 @@
 
 import * as path from 'path';
 
-/**
- * Given a path to an application, creates a valid Docker image name based on that path
- * @param appPath The application path to make an image name from (e.g. the app folder, .NET Core project file, etc.)
- */
-export function getValidImageName(appPath: string, tag?: string): string {
-    let result = path.parse(appPath).name.replace(/[^a-z0-9]/gi, '').toLowerCase();
+export function getValidImageName(nameHint: string): string {
+    return nameHint.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'image';
+}
 
-    if (result.length === 0) {
-        result = 'image'
-    }
+export function getValidImageNameFromPath(appPath: string, tag?: string): string {
+    const hint = path.parse(appPath).name;
 
-    return tag ? `${result}:${tag}` : result;
+    return tag ? getValidImageNameWithTag(hint, tag) : getValidImageName(hint);
+}
+
+export function getValidImageNameWithTag(nameHint: string, tag: string): string {
+    return `${getValidImageName(nameHint)}:${tag}`
 }
