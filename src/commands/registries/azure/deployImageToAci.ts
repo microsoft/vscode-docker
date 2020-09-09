@@ -48,7 +48,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
     };
 
     try {
-        await executeAsTask(context, command, title, options);
+        await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     } catch {
         // If it fails, try logging in and make one more attempt
         await executeAsTask(context, 'docker login azure', title, options);
