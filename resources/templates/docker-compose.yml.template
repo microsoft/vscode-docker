@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  {{ serviceName }}:
+    image: {{ serviceName }}
+    build: .
+{{#if ports}}
+    ports:
+{{#each ports}}
+      - {{ . }}:{{ . }}
+{{/each}}
+{{/if}}

@@ -1,0 +1,10 @@
+<Project>
+    <!-- All the relevant info is in root-level PropertyGroups, so there are no dependent targets to make this work -->
+    <Target Name="GetProjectProperties">
+        <WriteLinesToFile
+            File="$(InfoOutputPath)"
+            Lines="$(AssemblyName).dll
+$(TargetFramework)$(TargetFrameworks.Split(';')[0])"
+            Overwrite="True" />
+    </Target>
+</Project>

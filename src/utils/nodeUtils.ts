@@ -11,6 +11,7 @@ export interface NodePackage {
     main?: string;
     name?: string;
     scripts?: { [key: string]: string };
+    version?: string;
 }
 
 export type InspectMode = 'default' | 'break';

@@ -10,7 +10,7 @@ import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
 import { executeAsTask } from "../../utils/executeAsTask";
-import { getValidImageName } from "../../utils/getValidImageName";
+import { getValidImageNameFromPath } from "../../utils/getValidImageName";
 import { delay } from "../../utils/promiseUtils";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
@@ -52,7 +52,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             const prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
 
             // Get imageName based previous entries, else on name of subfolder containing the Dockerfile
-            const suggestedImageName = prevImageName || getValidImageName(dockerFileItem.absoluteFolderPath, 'latest');
+            const suggestedImageName = prevImageName || getValidImageNameFromPath(dockerFileItem.absoluteFolderPath, 'latest');
 
             // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
             await delay(500);

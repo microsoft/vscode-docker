@@ -32,7 +32,6 @@
     },
     "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
     "activationEvents": [
-        "onCommand:vscode-docker.api.configure",
         "onCommand:vscode-docker.compose.down",
         "onCommand:vscode-docker.compose.restart",
         "onCommand:vscode-docker.compose.up",
@@ -127,10 +126,6 @@
     "contributes": {
         "menus": {
             "commandPalette": [
-                {
-                    "command": "vscode-docker.api.configure",
-                    "when": "never"
-                },
                 {
                     "command": "vscode-docker.containers.select",
                     "when": "never"
@@ -2164,6 +2159,10 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.showRemoteWorkspaceWarning%"
+                },
+                "docker.scaffolding.templatePath": {
+                    "type": "string",
+                    "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
                 }
             }
         },
@@ -2177,11 +2176,6 @@
             }
         },
         "commands": [
-            {
-                "command": "vscode-docker.api.configure",
-                "title": "%vscode-docker.commands.api.configure%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
             {
                 "command": "vscode-docker.compose.down",
                 "title": "%vscode-docker.commands.compose.down%",
@@ -2766,12 +2760,12 @@
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.1.2",
         "@docker/sdk": "^0.1.13",
-        "dockerfile-ast": "^0.0.30",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
         "fs-extra": "^9.0.1",
         "glob": "^7.1.6",
         "gradle-to-js": "^2.0.0",
+        "handlebars": "^4.7.6",
         "moment": "^2.27.0",
         "request": "^2.88.2",
         "request-promise-native": "^1.0.9",

@@ -1,0 +1,31 @@
+{{#if (eq platform '.NET: ASP.NET Core')}}
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+{{/if}}
+
+version: '3.4'
+
+services:
+  {{ serviceName }}:
+    image: {{ serviceName }}
+    build:
+      context: .
+      dockerfile: {{ dirname (workspaceRelative . artifact) 'Linux' }}/Dockerfile
+{{#if ports}}
+    ports:
+{{#each ports}}
+{{#unless (eq . 443)}}
+      - {{ . }}:{{ . }}
+{{/unless}}
+{{/each}}
+{{/if}}
+{{#if ports}}
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:{{ ports.[0] }}
+{{/if}}
+    volumes:
+{{#if (eq netCorePlatformOS 'Windows')}}
+      - ~/.vsdbg:c:\remote_debugger:rw
+{{else}}
+      - ~/.vsdbg:/remote_debugger:rw
+{{/if}}

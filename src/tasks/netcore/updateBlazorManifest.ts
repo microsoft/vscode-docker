@@ -4,17 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import * as path from 'path';
 import * as xml2js from 'xml2js';
-import ChildProcessProvider from "../../debugging/coreclr/ChildProcessProvider";
 import { DockerContainerVolume } from '../../debugging/coreclr/CliDockerClient';
-import { OSTempFileProvider } from "../../debugging/coreclr/tempFileProvider";
-import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import LocalOSProvider from "../../utils/LocalOSProvider";
+import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
-import { execAsync } from '../../utils/spawnAsync';
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { DockerRunTaskContext } from "../TaskHelper";
 
@@ -36,33 +31,13 @@ interface Manifest {
 }
 
 export async function updateBlazorManifest(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
-    const tempFileProvider = new OSTempFileProvider(new LocalOSProvider(), new ChildProcessProvider());
+    const contents = await getNetCoreProjectInfo('GetBlazorManifestLocations', runDefinition.netCore.appProject);
 
-    const locationsFile = tempFileProvider.getTempFilename();
-
-    const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'GetBlazorManifestLocations.targets');
-
-    const command = `dotnet build /r:false /t:GetBlazorManifestLocations /p:CustomAfterMicrosoftCommonTargets="${targetsFile}" /p:BlazorManifestLocationsOutput="${locationsFile}" "${runDefinition.netCore.appProject}"`;
-
-    try {
-        await execAsync(command, { timeout: 5000 });
-
-        if (await fse.pathExists(locationsFile)) {
-            const contents = (await fse.readFile(locationsFile)).toString().split(/\r?\n/ig);
-
-            if (contents.length < 2) {
-                throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest1', 'Unable to determine Blazor manifest locations from output file.'));
-            }
-
-            await transformBlazorManifest(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
-        } else {
-            throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest2', 'Unable to determine Blazor manifest locations from output file.'))
-        }
-    } finally {
-        if (await fse.pathExists(locationsFile)) {
-            await fse.unlink(locationsFile);
-        }
+    if (contents.length < 2) {
+        throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest1', 'Unable to determine Blazor manifest locations from output file.'));
     }
+
+    await transformBlazorManifest(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
 }
 
 async function transformBlazorManifest(context: DockerRunTaskContext, inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {

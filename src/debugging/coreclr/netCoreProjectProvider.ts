@@ -20,7 +20,7 @@ export class MsBuildNetCoreProjectProvider implements NetCoreProjectProvider {
     }
 
     public async getTargetPath(projectFile: string): Promise<string> {
-        const getTargetPathProjectFile = path.join(ext.context.asAbsolutePath('resources'), 'GetTargetPath.proj');
+        const getTargetPathProjectFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', 'GetTargetPath.proj');
         const targetOutputFilename = this.tempFileProvider.getTempFilename();
         try {
             await this.dotNetClient.execTarget(
