@@ -35,8 +35,6 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
 
     await wizard.prompt();
 
-    // TODO: would like to capture telemetry within the prompt steps but after `prompt()` regardless of whether or not it is called
-
     if (wizardContext.scaffoldCompose) {
         executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 300));
         executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 400));

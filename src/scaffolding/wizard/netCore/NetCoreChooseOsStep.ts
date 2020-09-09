@@ -27,10 +27,10 @@ export class NetCoreChooseOsStep extends TelemetryPromptStep<NetCoreScaffoldingW
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
-        return !wizardContext.netCorePlatformOS && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging');
+        return !wizardContext.netCorePlatformOS;
     }
 
     protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {
-        wizardContext.telemetry.properties.platformOS = wizardContext.netCorePlatformOS;
+        wizardContext.telemetry.properties.configureOS = wizardContext.netCorePlatformOS;
     }
 }

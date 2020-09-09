@@ -48,7 +48,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             const [, , netCoreVersionString] = /net(coreapp)?([\d\.]+)/i.exec(this.targetFramework);
 
             let netCoreVersion: SemVer;
-            if (/^\d\.\d$/.test(netCoreVersionString)) {
+            if (/^\d+\.\d+$/.test(netCoreVersionString)) {
                 // SemVer requires a patch number in the version, so add it if the version matches e.g. 5.0
                 netCoreVersion = new SemVer(netCoreVersionString + '.0');
             } else {
@@ -78,6 +78,6 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     }
 
     protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {
-        wizardContext.telemetry.properties.targetFramework = this.targetFramework;
+        wizardContext.telemetry.properties.netCoreVersion = this.targetFramework;
     }
 }

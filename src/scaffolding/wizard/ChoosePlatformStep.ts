@@ -84,7 +84,6 @@ export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardCon
     }
 
     protected setTelemetry(wizardContext: ScaffoldingWizardContext): void {
-        // TODO: validate shape of this against existing telemetry
-        wizardContext.telemetry.properties.platform = wizardContext.platform;
+        wizardContext.telemetry.properties.configurePlatform = wizardContext.platform;
     }
 }

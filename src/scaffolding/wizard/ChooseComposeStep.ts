@@ -31,7 +31,6 @@ export class ChooseComposeStep extends TelemetryPromptStep<ScaffoldingWizardCont
     }
 
     protected setTelemetry(wizardContext: ScaffoldingWizardContext): void {
-        // TODO: validate shape of this against existing telemetry
-        wizardContext.telemetry.properties.scaffoldCompose = wizardContext.scaffoldCompose.toString();
+        wizardContext.telemetry.properties.orchestration = wizardContext.scaffoldCompose ? 'docker-compose' : 'single';
     }
 }
