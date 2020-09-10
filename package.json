@@ -1074,6 +1074,10 @@
                             "pull": {
                                 "type": "boolean",
                                 "description": "%vscode-docker.tasks.docker-build.dockerBuild.pull%"
+                            },
+                            "customOptions": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.customOptions%"
                             }
                         }
                     },
@@ -1263,6 +1267,10 @@
                                 "type": "boolean",
                                 "description": "%vscode-docker.tasks.docker-run.dockerRun.remove%",
                                 "default": false
+                            },
+                            "customOptions": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.customOptions%"
                             }
                         }
                     },

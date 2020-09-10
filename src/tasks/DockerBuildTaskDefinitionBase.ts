@@ -13,6 +13,7 @@ export interface DockerBuildOptions {
     tag?: string;
     target?: string;
     pull?: boolean;
+    customOptions?: string;
 }
 
 export interface DockerBuildTaskDefinitionBase extends TaskDefinitionBase {
