@@ -9,8 +9,6 @@ import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper'
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
 import LocalOSProvider from '../../utils/LocalOSProvider';
 import { PythonProjectType } from '../../utils/pythonUtils';
-import ChildProcessProvider from '../coreclr/ChildProcessProvider';
-import CliDockerClient from '../coreclr/CliDockerClient';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
@@ -96,7 +94,7 @@ export class PythonDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             debugLauncherPath: debugConfiguration.debugLauncherPath || launcherPath,
-            debugAdapterHost: debugConfiguration.debugAdapterHost || await this.getDebugAdapterHost(),
+            debugAdapterHost: debugConfiguration.debugAdapterHost || await this.getDebugAdapterHost(context),
             console: debugConfiguration.console || "integratedTerminal",
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
             module: debugConfiguration.module || pythonRunTaskOptions.module,
@@ -118,7 +116,7 @@ export class PythonDebugHelper implements DebugHelper {
         }
     }
 
-    private async getDebugAdapterHost(): Promise<string> {
+    private async getDebugAdapterHost(context: DockerDebugContext): Promise<string> {
         const osProvider = new LocalOSProvider();
 
         // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
@@ -129,12 +127,9 @@ export class PythonDebugHelper implements DebugHelper {
 
         // For Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
         // on the bridge network's ip address (predefined network).
-        const dockerClient = new CliDockerClient(new ChildProcessProvider());
-        const dockerBridgeIp = await dockerClient.inspectObject('bridge', {
-            format: '{{(index .IPAM.Config 0).Gateway}}'
-        });
+        const networkInspection = await ext.dockerClient.inspectNetwork(context.actionContext, 'bridge', context.cancellationToken);
 
-        return dockerBridgeIp;
+        return networkInspection?.IPAM?.Config?.[0].Gateway;
     }
 }
 

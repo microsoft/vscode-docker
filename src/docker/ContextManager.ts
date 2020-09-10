@@ -12,7 +12,6 @@ import { URL } from 'url';
 import { commands, Event, EventEmitter, workspace } from 'vscode';
 import { Disposable } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { LineSplitter } from '../debugging/coreclr/lineSplitter';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
@@ -208,7 +207,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // No value for DOCKER_HOST, and multiple contexts exist, so check them
             const result: DockerContext[] = [];
             const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
-            const lines = LineSplitter.splitLines(stdout);
+            const lines = stdout.split(/\r?\n/im);
 
             for (const line of lines) {
                 const context = JSON.parse(line) as DockerContext;

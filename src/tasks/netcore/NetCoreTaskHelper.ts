@@ -9,7 +9,6 @@ import * as path from 'path';
 import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { LocalAspNetCoreSslManager } from '../../debugging/coreclr/LocalAspNetCoreSslManager';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';

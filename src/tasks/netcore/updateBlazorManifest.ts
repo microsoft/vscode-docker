@@ -5,11 +5,11 @@
 
 import * as fse from 'fs-extra';
 import * as xml2js from 'xml2js';
-import { DockerContainerVolume } from '../../debugging/coreclr/CliDockerClient';
 import { localize } from '../../localize';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
+import { DockerContainerVolume } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
 import { DockerRunTaskContext } from "../TaskHelper";
 

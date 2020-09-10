@@ -12,7 +12,6 @@ import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputCha
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
-import { registerDebugConfigurationProvider } from './debugging/coreclr/registerDebugConfigurationProvider';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -122,8 +121,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerTrees();
         registerCommands();
-
-        registerDebugConfigurationProvider(ctx);
 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);

@@ -18,15 +18,6 @@ import { getDockerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { ChildProcessProvider } from '../coreclr/ChildProcessProvider';
-import { CliDockerClient } from '../coreclr/CliDockerClient';
-import { CommandLineDotNetClient } from '../coreclr/CommandLineDotNetClient';
-import { LocalFileSystemProvider } from '../coreclr/fsProvider';
-import { AspNetCoreSslManager, LocalAspNetCoreSslManager } from '../coreclr/LocalAspNetCoreSslManager';
-import { MsBuildNetCoreProjectProvider, NetCoreProjectProvider } from '../coreclr/netCoreProjectProvider';
-import { DefaultOutputManager } from '../coreclr/outputManager';
-import { OSTempFileProvider } from '../coreclr/tempFileProvider';
-import { RemoteVsDbgClient, VsDbgClient } from '../coreclr/vsdbgClient';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 
