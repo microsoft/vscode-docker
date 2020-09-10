@@ -1,3 +1,16 @@
+## 1.6.0 - 15 September 2020
+### Added
+* Deployments to Azure Container Instances can be made directly from images in Docker Hub and Azure Container Registries in the Registries view. [#1718](https://github.com/microsoft/vscode-docker/issues/1718)
+* ACI containers can now be stopped and started from the Explorer view. [#2265](https://github.com/microsoft/vscode-docker/pull/2265)
+* Templates for scaffolding can be provided with the new `docker.scaffolding.templatePath` setting. [#1617](https://github.com/microsoft/vscode-docker/issues/1617)
+* The scaffolding experience is now a wizard, which has improved UX. [#1642](https://github.com/microsoft/vscode-docker/issues/1642)
+
+### Changed
+* The outdated image check feature has been turned off by default. It can still be turned on in settings but may result in rate limiting from Docker Hub. For more information see [#2272](https://github.com/microsoft/vscode-docker/issues/2272).
+
+### Removed
+* The command `vscode-docker.api.configure` has been removed. The command `vscode-docker.configure` can still be used to programmatically scaffold Dockerfiles. [#2267](https://github.com/microsoft/vscode-docker/pull/2267)
+
 ## 1.5.0 - 17 August 2020
 ### Added
 * The applicable Docker context types can be set on customized commands. [#2168](https://github.com/microsoft/vscode-docker/issues/2168)
@@ -11,7 +24,6 @@
 * Activation errors due to filesystem permissions [#2204](https://github.com/microsoft/vscode-docker/issues/2204)
 * Prompt to copy debugger into container shows up repeatedly [#2186](https://github.com/microsoft/vscode-docker/issues/2186)
 * Allow logging to container registries without gnome-keyring installed [#722](https://github.com/microsoft/vscode-docker/issues/722)
-
 
 ### Removed
 * The `docker.attachShellCommand.Windows` and `docker.attachShellCommand.Linux` settings have been removed. [Command customization](https://code.visualstudio.com/docs/containers/reference#_command-customization) replaces this functionality.

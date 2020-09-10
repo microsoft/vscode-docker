@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Containers as ContainersClient } from '@docker/sdk';
-import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse } from '@docker/sdk/containers';
+import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StartRequest, StopRequest } from '@docker/sdk/containers';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
-import { DockerInfo, PruneResult } from '../Common';
+import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerApiClient } from '../DockerApiClient';
@@ -53,7 +53,9 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             .setId(ref);
 
         const response: InspectResponse = await this.promisify(context, this.containersClient, this.containersClient.inspect, request, token);
-        const container = containerToDockerContainer(response.toObject().container);
+        const responseContainer = response.toObject().container;
+
+        const container = containerToDockerContainer(responseContainer);
 
         if (!container) {
             throw new Error(localize('vscode-docker.dockerServeClient.noContainer', 'No container with name \'{0}\' was found.', ref));
@@ -64,6 +66,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             NetworkSettings: {
                 Ports: containerPortsToInspectionPorts(container),
             },
+            Platform: responseContainer.platform as DockerOSType,
         };
     }
 
@@ -76,20 +79,26 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     public async pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult> {
         throw new NotSupportedError(context);
     }
+    // #endregion Not supported by the Docker SDK yet
 
     public async startContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        throw new NotSupportedError(context);
+        const request = new StartRequest()
+            .setId(ref);
+
+        await this.promisify(context, this.containersClient, this.containersClient.start, request, token);
     }
 
     public async restartContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        throw new NotSupportedError(context);
+        await this.stopContainer(context, ref, token);
+        await this.startContainer(context, ref, token);
     }
 
     public async stopContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
-        // Supported by SDK, but is not really the same thing; containers in ACI must stop/start as a group
-        throw new NotSupportedError(context);
+        const request = new StopRequest()
+            .setId(ref);
+
+        await this.promisify(context, this.containersClient, this.containersClient.stop, request, token);
     }
-    // #endregion Not supported by the Docker SDK yet
 
     public async removeContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void> {
         const request = new DeleteRequest()

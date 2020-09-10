@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { extractRegExGroups } from '../../utils/extractRegExGroups';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
     if (!node) {
@@ -67,18 +66,15 @@ const KnownRegistries: { type: string, regex: RegExp }[] = [
 
 export function addImageTaggingTelemetry(context: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
     try {
-        let defaultRegistryPath: string = vscode.workspace.getConfiguration('docker').get('defaultRegistryPath', '');
         let properties: TelemetryProperties = {};
 
-        let [repository, tag] = extractRegExGroups(fullImageName, /^(.*):(.*)$/, [fullImageName, '']);
+        let [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
 
         if (!!tag.match(/^[0-9.-]*(|alpha|beta|latest|edge|v|version)?[0-9.-]*$/)) {
             properties.safeTag = tag
         }
         properties.hasTag = String(!!tag);
         properties.numSlashes = String(numberMatches(repository.match(/\//g)));
-        properties.isDefaultRegistryPathInName = String(repository.startsWith(`${defaultRegistryPath}/`));
-        properties.isDefaultRegistryPathSet = String(!!defaultRegistryPath);
 
         let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
         if (knownRegistry) {

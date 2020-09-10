@@ -10,7 +10,7 @@ import { AzureTaskRunTreeItem } from '../tree/registries/azure/AzureTaskRunTreeI
 import { RemoteTagTreeItem } from '../tree/registries/RemoteTagTreeItem';
 import { Lazy } from './lazy';
 
-// This allows us to defer loading of vscode-azureappservice and azure-arm-website, primarily
+// This allows us to defer loading of vscode-azureappservice and @azure/arm-appservice, primarily
 const deployImageToAzureLazy = new Lazy<Promise<(context: IActionContext, node?: RemoteTagTreeItem) => Promise<void>>>(async () => {
     const appService = (await import(/* webpackChunkName: "appService" */ 'vscode-azureappservice'));
 
@@ -24,7 +24,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     return await deployImageToAzureFunction(context, node);
 }
 
-// This allows us to defer loading of azure-storage, primarily, as well as tar
+// This allows us to defer loading of @azure/storage-blob
 const scheduleRunRequestLazy = new Lazy<Promise<(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri?: vscode.Uri) => Promise<void>>>(async () => {
     return (await import(/* webpackChunkName: "scheduleRunRequest" */ '../commands/registries/azure/tasks/scheduleRunRequest')).scheduleRunRequest;
 });
@@ -34,7 +34,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     return await scheduleRunRequestFunction(context, requestType, uri);
 }
 
-// This is also to defer loading of azure-storage
+// This is also to defer loading of @azure/storage-blob
 const viewAzureTaskLogsLazy = new Lazy<Promise<(context: IActionContext, node?: AzureTaskRunTreeItem) => Promise<void>>>(async () => {
     return (await import(/* webpackChunkName: "viewAzureTaskLogs" */ '../commands/registries/azure/tasks/viewAzureTaskLogs')).viewAzureTaskLogs;
 })

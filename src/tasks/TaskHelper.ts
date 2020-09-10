@@ -10,6 +10,7 @@ import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationP
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
@@ -235,18 +236,4 @@ async function findTaskByLabel(allTasks: TaskDefinitionBase[], label: string): P
 
 async function findTaskByType(allTasks: TaskDefinitionBase[], type: string): Promise<TaskDefinitionBase | undefined> {
     return allTasks.find(t => t.type === type);
-}
-
-function getValidImageName(nameHint: string): string {
-    let result = nameHint.replace(/[^a-z0-9]/gi, '').toLowerCase();
-
-    if (result.length === 0) {
-        result = 'image'
-    }
-
-    return result;
-}
-
-function getValidImageNameWithTag(nameHint: string, tag: 'dev' | 'latest'): string {
-    return `${getValidImageName(nameHint)}:${tag}`
 }

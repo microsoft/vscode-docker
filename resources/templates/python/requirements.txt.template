@@ -1,0 +1,10 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+{{#if (eq platform 'Python: Django')}}
+django==3.1.1
+{{/if}}
+{{#if (eq platform 'Python: Flask')}}
+flask==1.1.2
+{{/if}}
+{{#unless (eq platform 'Python: General')}}
+gunicorn==20.0.4
+{{/unless}}

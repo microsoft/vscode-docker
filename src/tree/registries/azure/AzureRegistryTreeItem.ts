@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "azure-arm-containerregistry";
+import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
 import { URL } from "url";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
