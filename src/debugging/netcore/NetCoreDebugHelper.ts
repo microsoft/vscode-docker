@@ -214,7 +214,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             type: 'coreclr',
             request: 'attach',
             justMyCode: false,
-            // if processId is specified in the debugConfiguration, then it will take precedences
+            // if processId is specified in the debugConfiguration, then it will take precedence
             // and processName will be undefined.
             processName: debugConfiguration.processId ? undefined : debugConfiguration.processName || 'dotnet',
             pipeTransport: {
