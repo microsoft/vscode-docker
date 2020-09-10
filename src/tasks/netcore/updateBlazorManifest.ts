@@ -78,9 +78,9 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 }
 
 function containerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {
-    const matchingVolume: DockerContainerVolume = volumes.find(v => oldPath.startsWith(v.localPath));
+    const matchingVolume: DockerContainerVolume = volumes.find(v => oldPath.toLowerCase().startsWith(v.localPath.toLowerCase()));
 
     return matchingVolume ?
-        pathNormalize(oldPath.replace(matchingVolume.localPath, matchingVolume.containerPath), os) :
+        pathNormalize(matchingVolume.containerPath + oldPath.substring(matchingVolume.localPath.length), os) :
         oldPath;
 }
