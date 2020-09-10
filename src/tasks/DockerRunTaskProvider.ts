@@ -95,6 +95,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
             .withFlagArg('--rm', runOptions.remove)
+            .withArg(runOptions.customOptions)
             .withQuotedArg(runOptions.image)
             .withArgs(runOptions.command);
     }
