@@ -1077,7 +1077,7 @@
                             },
                             "customOptions": {
                                 "type": "string",
-                                "description": "%vscode-docker.tasks.docker-run.dockerRun.customOptions%"
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.customOptions%"
                             }
                         }
                     },
