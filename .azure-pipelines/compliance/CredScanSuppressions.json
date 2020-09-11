@@ -4,6 +4,14 @@
         {
             "folder": "node_modules\\",
             "_justification": "No need to scan external node modules."
+        },
+        {
+            "folder": ".vscode-test\\",
+            "_justification": "No need to scan external test code."
+        },
+        {
+            "folder": "dist\\",
+            "_justification": "No need to scan built code."
         }
     ]
 }
