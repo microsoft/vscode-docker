@@ -108,7 +108,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         switch (debugConfiguration.request) {
             case 'launch':
-                return this.resolveLauchDebugConfiguration(context, debugConfiguration);
+                return this.resolveLaunchDebugConfiguration(context, debugConfiguration);
             case 'attach':
                 return this.resolveAttachDebugConfiguration(context, debugConfiguration);
             default:
@@ -116,7 +116,11 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
     }
 
-    public async resolveLauchDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+    public static getHostDebuggerPathBase(): string {
+        return path.join(os.homedir(), '.vsdbg');
+    }
+
+    private async resolveLaunchDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
@@ -185,7 +189,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    public async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+    private async resolveAttachDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerAttachConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         // Get Container Name if missing
         const containerName: string = debugConfiguration.containerName ?? await this.getContainerNameToAttach(context.actionContext);
 
@@ -209,10 +213,10 @@ export class NetCoreDebugHelper implements DebugHelper {
             ...debugConfiguration, // Gets things like name, preLaunchTask, serverReadyAction, etc.
             type: 'coreclr',
             request: 'attach',
-            'justMyCode': false,
-            // if processId is specified in the debugConfiguration, then it will take precedences
-            // and processName will be ignored.
-            processName: debugConfiguration.processName || 'dotnet',
+            justMyCode: false,
+            // if processId is specified in the debugConfiguration, then it will take precedence
+            // and processName will be undefined.
+            processName: debugConfiguration.processId ? undefined : debugConfiguration.processName || 'dotnet',
             pipeTransport: {
                 pipeProgram: 'docker',
                 pipeArgs: ['exec', '-i', containerName],
@@ -226,10 +230,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/src': '${workspaceFolder}'
             }
         };
-    }
-
-    public static getHostDebuggerPathBase(): string {
-        return path.join(os.homedir(), '.vsdbg');
     }
 
     private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {

@@ -97,6 +97,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultVsCodeLabels))
             .withNamedArg('-t', options.tag)
             .withNamedArg('--target', options.target)
+            .withArg(options.customOptions)
             .withQuotedArg(options.context);
     }
 }
