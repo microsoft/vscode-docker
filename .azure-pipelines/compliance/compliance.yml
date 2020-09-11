@@ -11,6 +11,7 @@ steps:
   displayName: 'Run CredScan'
   inputs:
     toolMajorVersion: V2
+    suppressionsFile: '$(Build.SourcesDirectory)/.azure-pipelines/compliance/CredScanSuppressions.json'
     debugMode: true # Needed to suppress folders
     folderSuppression: true
   continueOnError: true
@@ -18,10 +19,10 @@ steps:
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
   displayName: 'Publish Security Analysis Logs'
-  condition: eq(variables['Build.Reason'], 'Schedule')
+  #condition: eq(variables['Build.Reason'], 'Schedule')
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
   displayName: 'Post Analysis'
   inputs:
     AllTools: true
-  condition: eq(variables['Build.Reason'], 'Schedule')
+  #condition: eq(variables['Build.Reason'], 'Schedule')
