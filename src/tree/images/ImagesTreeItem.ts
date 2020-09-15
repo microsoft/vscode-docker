@@ -10,10 +10,10 @@ import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
 import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
-import { OutdatedImageChecker } from "./OutdatedImageChecker";
 
 export interface DatedDockerImage extends DockerImage {
     Outdated?: boolean;
