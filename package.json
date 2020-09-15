@@ -2703,7 +2703,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.44.0"
+        "vscode": "^1.49.0"
     },
     "scripts": {
         "watch": "tsc -watch -p ./",
@@ -2735,7 +2735,7 @@
         "@types/semver": "^7.3.3",
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/tar": "^4.0.3",
-        "@types/vscode": "1.44.0",
+        "@types/vscode": "1.49.0",
         "@types/xml2js": "^0.4.5",
         "@typescript-eslint/eslint-plugin": "^3.10.1",
         "@typescript-eslint/eslint-plugin-tslint": "^3.10.1",
