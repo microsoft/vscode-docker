@@ -77,7 +77,7 @@ export class OutdatedImageChecker {
                     context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
 
                     // Load the data for all images then force the tree to refresh
-                    await Promise.all(imageCheckPromises);
+                    await Promise.allSettled(imageCheckPromises);
                     await ext.context.globalState.update(outdatedImagesKey, this.outdatedImageIds);
 
                     context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
@@ -97,7 +97,7 @@ export class OutdatedImageChecker {
         try {
             const [registryAndRepo, tag] = image.Name.split(':');
             // Remove the registry and leading/trailing slashes from the registryAndRepo to get the repo
-            const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/i, '');
+            const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
                 return 'outdated';
