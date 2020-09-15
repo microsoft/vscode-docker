@@ -7,8 +7,8 @@ import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudo
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { spawnAsync } from '../utils/spawnAsync';
-import { DockerBuildTask } from './DockerBuildTaskProvider';
-import { DockerRunTask } from './DockerRunTaskProvider';
+import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
+import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
 
@@ -27,7 +27,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
     /* eslint-disable-next-line no-invalid-this */
     public readonly onDidClose: Event<number> = this.closeEmitter.event;
 
-    public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask) { }
+    public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask, private readonly resolvedDefinition: DockerBuildTaskDefinition | DockerRunTaskDefinition) { }
 
     public open(initialDimensions: TerminalDimensions | undefined): void {
         const folder = this.task.scope === TaskScope.Workspace
@@ -38,7 +38,9 @@ export class DockerPseudoterminal implements Pseudoterminal {
             folder,
             cancellationToken: this.cts.token,
             terminal: this,
-        }
+        };
+
+        this.task.definition = this.resolvedDefinition;
 
         // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here

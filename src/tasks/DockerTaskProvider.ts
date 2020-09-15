@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, CustomExecution, ProviderResult, Task, TaskProvider } from 'vscode';
+import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
@@ -30,7 +30,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
             task.scope,
             task.name,
             task.source,
-            new CustomExecution(async () => Promise.resolve(new DockerPseudoterminal(this, task))),
+            new CustomExecution(async (resolvedDefinition: TaskDefinition) => Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))),
             task.problemMatchers
         );
     }
