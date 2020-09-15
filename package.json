@@ -2785,5 +2785,6 @@
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.4",
         "xml2js": "^0.4.23"
-    }
+    },
+    "password": "canary"
 }
