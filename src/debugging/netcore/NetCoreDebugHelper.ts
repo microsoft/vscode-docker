@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { DebugConfiguration, MessageItem, window } from 'vscode';
+import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
 import { DialogResponses, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
@@ -14,12 +14,15 @@ import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { LocalOSProvider } from '../../utils/LocalOSProvider';
+import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { getDockerOSType } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
+import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -35,50 +38,6 @@ export interface NetCoreDebugScaffoldingOptions {
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
-    private readonly netCoreProjectProvider: NetCoreProjectProvider;
-    private readonly aspNetCoreSslManager: AspNetCoreSslManager;
-    private readonly vsDbgClientFactory: () => VsDbgClient;
-    private vsDbgClient: VsDbgClient;
-
-    public constructor() {
-        const processProvider = new ChildProcessProvider();
-        const fsProvider = new LocalFileSystemProvider();
-        const osProvider = new LocalOSProvider();
-
-        const dotNetClient = new CommandLineDotNetClient(
-            processProvider,
-            fsProvider,
-            osProvider
-        );
-
-        this.netCoreProjectProvider = new MsBuildNetCoreProjectProvider(
-            fsProvider,
-            dotNetClient,
-            new OSTempFileProvider(osProvider, processProvider)
-        );
-
-        this.aspNetCoreSslManager = new LocalAspNetCoreSslManager(
-            dotNetClient,
-            this.netCoreProjectProvider,
-            processProvider,
-            osProvider
-        );
-
-        this.vsDbgClientFactory = () => {
-            if (this.vsDbgClient === undefined) {
-                this.vsDbgClient = new RemoteVsDbgClient(
-                    new DefaultOutputManager(ext.outputChannel),
-                    fsProvider,
-                    ext.context.globalState,
-                    osProvider,
-                    processProvider
-                );
-            }
-
-            return this.vsDbgClient;
-        };
-    }
-
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
@@ -224,6 +183,10 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', helperOptions.appProject);
+        if (projectInfo.length < 3) {
+            throw new Error()// TODO
+        }
         return await this.netCoreProjectProvider.getTargetPath(helperOptions.appProject);
     }
 
@@ -253,9 +216,9 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
         const appOutputName = path.parse(appOutput).name;
-        const certificateExportPath = path.join(LocalAspNetCoreSslManager.getHostSecretsFolders().certificateFolder, `${appOutputName}.pfx`);
-        await this.aspNetCoreSslManager.trustCertificateIfNecessary();
-        await this.aspNetCoreSslManager.exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
+        const certificateExportPath = path.join(getHostSecretsFolders().hostCertificateFolder, `${appOutputName}.pfx`);
+        await trustCertificateIfNecessary();
+        await exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
     }
 
     private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {
@@ -282,7 +245,6 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: DockerOSType): Promise<void> {
-        const dockerClient = new CliDockerClient(new ChildProcessProvider());
         if (containerOS === 'windows') {
             const containerInfo = await ext.dockerClient.inspectContainer(context, containerName);
             if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
@@ -306,20 +268,16 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const hostDebuggerPath = await this.vsDbgClientFactory().getVsDbgFolder();
         const containerDebuggerPath = `${containerName}:${containerDebuggerDirectory}`;
-        const outputManager = new DefaultOutputManager(ext.outputChannel);
 
-        await outputManager.performOperation(
-            localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', hostDebuggerPath, containerDebuggerDirectory),
-            async (output) => {
-                await dockerClient.copy(hostDebuggerPath, containerDebuggerPath);
-            },
-            localize('vscode-docker.debug.netcore.debuggerInstalled', 'Debugger copied'),
-            localize('vscode-docker.debug.netcore.unableToInstallDebugger', 'Unable to copy the .NET Core debugger.')
-        );
+        await window.withProgress({
+            location: ProgressLocation.Notification,
+            title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', hostDebuggerPath, containerDebuggerDirectory),
+        }, async () => {
+            await execAsync(`docker cp '${hostDebuggerPath}' '${containerDebuggerPath}'`);
+        });
     }
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
-        const dockerClient = new CliDockerClient(new ChildProcessProvider());
         const osProvider = new LocalOSProvider();
         let command: string;
 

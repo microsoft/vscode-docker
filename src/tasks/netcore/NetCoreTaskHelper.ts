@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
+import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
 import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';
@@ -289,12 +290,12 @@ export class NetCoreTaskHelper implements TaskHelper {
         }
 
         if (userSecrets || ssl) {
-            const hostSecretsFolders = LocalAspNetCoreSslManager.getHostSecretsFolders();
-            const containerSecretsFolders = LocalAspNetCoreSslManager.getContainerSecretsFolders(runOptions.os);
+            const hostSecretsFolders = getHostSecretsFolders();
+            const containerSecretsFolders = getContainerSecretsFolders(runOptions.os);
 
             const userSecretsVolume: DockerContainerVolume = {
-                localPath: hostSecretsFolders.userSecretsFolder,
-                containerPath: containerSecretsFolders.userSecretsFolder,
+                localPath: hostSecretsFolders.hostUserSecretsFolder,
+                containerPath: containerSecretsFolders.containerUserSecretsFolder,
                 permissions: 'ro'
             };
 
@@ -302,8 +303,8 @@ export class NetCoreTaskHelper implements TaskHelper {
 
             if (ssl) {
                 const certVolume: DockerContainerVolume = {
-                    localPath: hostSecretsFolders.certificateFolder,
-                    containerPath: containerSecretsFolders.certificateFolder,
+                    localPath: hostSecretsFolders.hostCertificateFolder,
+                    containerPath: containerSecretsFolders.containerCertificateFolder,
                     permissions: 'ro'
                 };
 

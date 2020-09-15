@@ -5,12 +5,12 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { SemVer } from 'semver';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getTempFileName } from './osUtils';
 import { execAsync } from './spawnAsync';
 
-// eslint-disable-next-line @typescript-eslint/tslint/config
 export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations' | 'GetProjectProperties', project: string): Promise<string[]> {
     const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', `${target}.targets`);
     const outputFile = getTempFileName();
@@ -34,4 +34,15 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
             await fse.unlink(outputFile);
         }
     }
+}
+
+let dotNetVersion: SemVer | undefined;
+export async function getDotNetVersion(): Promise<SemVer> {
+    if (dotNetVersion) {
+        return dotNetVersion;
+    }
+
+    const { stdout } = await execAsync('dotnet --version');
+
+    dotNetVersion = new SemVer(stdout);
 }
