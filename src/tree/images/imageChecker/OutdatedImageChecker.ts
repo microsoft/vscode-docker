@@ -77,7 +77,7 @@ export class OutdatedImageChecker {
                     context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
 
                     // Load the data for all images then force the tree to refresh
-                    await Promise.allSettled(imageCheckPromises);
+                    await Promise.all(imageCheckPromises);
                     await ext.context.globalState.update(outdatedImagesKey, this.outdatedImageIds);
 
                     context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;

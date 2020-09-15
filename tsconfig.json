@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "ES2020",
+        "target": "es2018",
         "outDir": "out",
         "lib": [
-            "ES2020"
+            "es7"
         ],
         "sourceMap": true,
         "rootDir": ".",
