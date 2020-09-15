@@ -34,7 +34,7 @@ export class OutdatedImageChecker {
             method: 'GET',
             json: true,
             resolveWithFullResponse: true,
-            strictSSL: strictSSL
+            strictSSL: strictSSL,
         };
     }
 
@@ -95,7 +95,9 @@ export class OutdatedImageChecker {
 
     private async checkImage(context: IActionContext, registry: ImageRegistry, image: DockerImage): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
-            const [repo, tag] = image.Name.split(':');
+            const [registryAndRepo, tag] = image.Name.split(':');
+            // Remove the registry and leading/trailing slashes from the registryAndRepo to get the repo
+            const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/i, '');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
                 return 'outdated';

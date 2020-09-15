@@ -6,7 +6,6 @@
 import { Response } from 'request';
 import * as request from 'request-promise-native';
 import { localize } from '../../../localize';
-import { AsyncLazy } from '../../../utils/lazy';
 import { IOAuthContext } from '../../registries/auth/IAuthProvider';
 import { getWwwAuthenticateContext } from '../../registries/auth/oAuthUtils';
 
@@ -16,40 +15,36 @@ export interface ImageRegistry {
     getToken?(requestOptions: request.RequestPromiseOptions, scope: string): Promise<string>;
 }
 
-const dockerHubAuthContext = new AsyncLazy<IOAuthContext>(async () => {
-    try {
-        const options = this.defaultRequestOptions.value;
-        await request('https://registry-1.docker.io/v2/', options);
-    } catch (err) {
-        const result = getWwwAuthenticateContext(err);
-
-        if (!result) {
-            throw err;
-        }
-
-        return result;
-    }
-});
+let dockerHubAuthContext: IOAuthContext | undefined;
 
 export const registries: ImageRegistry[] = [
     {
         registryMatch: /docker[.]io\/library/i,
         baseUrl: 'https://registry-1.docker.io/v2/library',
         getToken: async (requestOptions: request.RequestPromiseOptions, scope: string): Promise<string> => {
-            const authContext = {
-                ...await dockerHubAuthContext.getValue(),
-                scope: scope,
-            };
+            if (!dockerHubAuthContext) {
+                try {
+                    await request('https://registry-1.docker.io/v2/', requestOptions);
+                } catch (err) {
+                    const result = getWwwAuthenticateContext(err);
+
+                    if (!result) {
+                        throw err;
+                    }
+
+                    dockerHubAuthContext = result;
+                }
+            }
 
             const authOptions: request.RequestPromiseOptions = {
                 ...requestOptions,
                 qs: {
-                    service: authContext.service,
-                    scope: authContext.scope,
+                    service: dockerHubAuthContext.service,
+                    scope: scope,
                 },
             };
 
-            const tokenResponse = await request(authContext.realm.toString(), authOptions) as Response;
+            const tokenResponse = await request(dockerHubAuthContext.realm.toString(), authOptions) as Response;
             // eslint-disable-next-line @typescript-eslint/tslint/config
             const token: string = tokenResponse?.body?.token;
 
@@ -62,6 +57,6 @@ export const registries: ImageRegistry[] = [
     },
     {
         registryMatch: /mcr[.]microsoft[.]com/i,
-        baseUrl: 'https://mcr.microsoft.com',
+        baseUrl: 'https://mcr.microsoft.com/v2',
     }
 ];
