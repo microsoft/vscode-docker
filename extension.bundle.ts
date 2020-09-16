@@ -22,7 +22,6 @@ export { configPrefix } from './src/constants';
 export { CommandLineBuilder } from './src/utils/commandLineBuilder';
 export { delay } from './src/utils/promiseUtils';
 export { Lazy, AsyncLazy } from './src/utils/lazy';
-export { OSProvider } from './src/utils/LocalOSProvider';
 export { bufferToString } from './src/utils/spawnAsync';
 export { ext } from './src/extensionVariables';
 export { httpsRequestBinary } from './src/utils/httpRequest';

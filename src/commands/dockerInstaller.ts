@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
@@ -11,7 +12,6 @@ import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
-import { LocalOSProvider } from '../utils/LocalOSProvider';
 import { openExternal } from '../utils/openExternal';
 import { getTempFileName } from '../utils/osUtils';
 import { execAsync } from '../utils/spawnAsync';
@@ -119,14 +119,17 @@ export class MacDockerInstaller extends DockerInstallerBase {
 }
 
 export async function showDockerInstallNotification(): Promise<void> {
-    const installMessageLinux = localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?');
-    const installMessageNonLinux = localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
-    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more')
-    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install')
-    const osProvider: LocalOSProvider = new LocalOSProvider();
-    const dockerInstallMessage = osProvider.os === 'Linux' ? installMessageLinux : installMessageNonLinux;
-    const confirmationPrompt: vscode.MessageItem = osProvider.os === 'Linux' ? { title: learnMore } : { title: install };
-    const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
+    const isLinux = os.platform() !== 'win32' && os.platform() !== 'darwin';
+
+    const installMessage = isLinux ?
+        localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?') :
+        localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
+
+    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more');
+    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install');
+
+    const confirmationPrompt: vscode.MessageItem = isLinux ? { title: learnMore } : { title: install };
+    const response = await vscode.window.showInformationMessage(installMessage, ...[confirmationPrompt]);
     if (response) {
         await vscode.commands.executeCommand('vscode-docker.installDocker');
     }

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as os from 'os';
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
-import LocalOSProvider from '../../utils/LocalOSProvider';
 import { PythonProjectType } from '../../utils/pythonUtils';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
@@ -117,11 +117,9 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     private async getDebugAdapterHost(context: DockerDebugContext): Promise<string> {
-        const osProvider = new LocalOSProvider();
-
         // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
         // we use 'host.docker.internal' in the launcher to get the host's ip address.
-        if (osProvider.os !== 'Linux') {
+        if (os.platform() === 'win32' || os.platform() === 'darwin') {
             return 'localhost';
         }
 

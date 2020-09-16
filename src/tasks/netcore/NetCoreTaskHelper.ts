@@ -10,7 +10,8 @@ import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
-import { NetCoreDebugHelper, NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
+import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { localize } from '../../localize';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
@@ -252,7 +253,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             }
 
             const debuggerVolume: DockerContainerVolume = {
-                localPath: NetCoreDebugHelper.getHostDebuggerPathBase(),
+                localPath: vsDbgInstallBasePath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
                 permissions: 'ro'
             };

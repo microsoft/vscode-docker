@@ -5,6 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import * as path from 'path';
 import * as semver from 'semver';
 import { MessageItem } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
@@ -62,11 +63,35 @@ export async function exportCertificateIfNecessary(projectFile: string, certific
 }
 
 export function getHostSecretsFolders(): { hostCertificateFolder: string, hostUserSecretsFolder: string } {
+    let appDataEnvironmentVariable: string | undefined;
 
+    if (os.platform() === 'win32') {
+        appDataEnvironmentVariable = process.env.AppData;
+
+        if (appDataEnvironmentVariable === undefined) {
+            throw new Error(localize('vscode-docker.debug.coreclr.sslManager.appDataUndefined', 'The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.'));
+        }
+    }
+
+    return {
+        hostCertificateFolder: os.platform() === 'win32' ?
+            path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
+            path.join(os.homedir(), '.aspnet', 'https'),
+        hostUserSecretsFolder: os.platform() === 'win32' ?
+            path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
+            path.join(os.homedir(), '.microsoft', 'usersecrets'),
+    };
 }
 
 export function getContainerSecretsFolders(platform: PlatformOS): { containerCertificateFolder: string, containerUserSecretsFolder: string } {
-
+    return {
+        containerCertificateFolder: platform === 'Windows' ?
+            'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
+            '/root/.aspnet/https',
+        containerUserSecretsFolder: platform === 'Windows' ?
+            'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' :
+            '/root/.microsoft/usersecrets',
+    };
 }
 
 async function isCertificateTrusted(): Promise<boolean> {
