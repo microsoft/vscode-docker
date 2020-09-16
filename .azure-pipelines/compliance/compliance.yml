@@ -7,6 +7,14 @@ steps:
   continueOnError: true
   condition: eq(variables['Build.Reason'], 'Schedule')
 
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+  displayName: 'Run CredScan'
+  inputs:
+    toolMajorVersion: V2
+    suppressionsFile: '$(Build.SourcesDirectory)/.azure-pipelines/compliance/CredScanSuppressions.json'
+  continueOnError: true
+  condition: eq(variables['Build.Reason'], 'Schedule')
+
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
   displayName: 'Publish Security Analysis Logs'
   condition: eq(variables['Build.Reason'], 'Schedule')
