@@ -4,11 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from "../../docker/Common";
 import { DockerContainer, DockerPort } from "../../docker/Containers";
+import { getContainerDirectoryItems } from "../../docker/DockerContainerDirectoryProvider";
 import { ext } from "../../extensionVariables";
+import { AsyncLazy } from "../../utils/lazy";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
-import { getContainerStateIcon } from "./ContainerProperties";
+import { getContainerStateIcon } from "./ContainerProperties";import { DirectoryItemProvider } from "./files/DirectoryTreeItem";
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
 export class ContainerTreeItem extends AzExtParentTreeItem {
@@ -90,6 +93,21 @@ export class ContainerTreeItem extends AzExtParentTreeItem {
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        return [ new FilesTreeItem(this) ];
+        return [ new FilesTreeItem(this, this.getDirectoryItemProvider(context)) ];
+    }
+
+    private getDirectoryItemProvider(context: IActionContext): DirectoryItemProvider {
+        const platformTask = new AsyncLazy<DockerOSType | undefined>(
+            async () => {
+                const result = await ext.dockerClient.inspectContainer(context, this.containerId);
+
+                return result.Platform
+            });
+
+        return async (path: string | undefined) => {
+            const platform = await platformTask.getValue();
+
+            return getContainerDirectoryItems(ext.dockerClient, this.containerId, path, platform);
+        };
     }
 }

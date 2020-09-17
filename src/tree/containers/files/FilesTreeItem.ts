@@ -1,16 +1,13 @@
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem } from "vscode-azureextensionui";
+import { DirectoryItemProvider, DirectoryTreeItem } from "./DirectoryTreeItem";
 
-export class FilesTreeItem extends AzExtParentTreeItem {
+export class FilesTreeItem extends DirectoryTreeItem {
+    public constructor(parent: AzExtParentTreeItem, itemProvider: DirectoryItemProvider) {
+        super(parent, undefined, itemProvider);
+    }
+
     public get contextValue(): string {
         return '';
-    }
-
-    public hasMoreChildrenImpl(): boolean {
-        return false;
-    }
-
-    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        return [];
     }
 
     public get label(): string {
