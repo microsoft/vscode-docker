@@ -9,11 +9,13 @@ import { ext } from "../../extensionVariables";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { getContainerStateIcon } from "./ContainerProperties";
+import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends AzExtTreeItem {
+export class ContainerTreeItem extends AzExtParentTreeItem {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainer;
+    private children: AzExtTreeItem[] | undefined;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainer) {
         super(parent);
@@ -81,5 +83,13 @@ export class ContainerTreeItem extends AzExtTreeItem {
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         return ext.dockerClient.removeContainer(context, this.containerId);
+    }
+
+    public hasMoreChildrenImpl(): boolean {
+        return !!this.children;
+    }
+
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+        return [ new FilesTreeItem(this) ];
     }
 }
