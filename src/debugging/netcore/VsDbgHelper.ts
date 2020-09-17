@@ -79,5 +79,6 @@ async function executeAcquisitionScriptIfNecessary(runtime: VsDbgRuntime, versio
         ext.outputChannel.append(output);
     });
 
+    await ext.context.globalState.update(scriptExecutedDateKey, Date.now());
     ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.debuggerInstalled', 'VsDbg installed, Runtime = {0}, Version = {1}...', runtime, version));
 }

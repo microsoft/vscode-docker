@@ -38,11 +38,10 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
 
 let dotNetVersion: SemVer | undefined;
 export async function getDotNetVersion(): Promise<SemVer> {
-    if (dotNetVersion) {
-        return dotNetVersion;
+    if (!dotNetVersion) {
+        const { stdout } = await execAsync('dotnet --version');
+        dotNetVersion = new SemVer(stdout);
     }
 
-    const { stdout } = await execAsync('dotnet --version');
-
-    dotNetVersion = new SemVer(stdout);
+    return dotNetVersion;
 }
