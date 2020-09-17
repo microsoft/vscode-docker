@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
 
@@ -8,6 +9,10 @@ export class FileTreeItem extends AzExtTreeItem {
 
     public get contextValue(): string {
         return '';
+    }
+
+    public get iconPath(): vscode.ThemeIcon {
+        return new vscode.ThemeIcon('file');
     }
 
     public get label(): string {

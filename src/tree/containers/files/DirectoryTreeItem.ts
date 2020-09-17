@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
 import { FileTreeItem } from "./FileTreeItem";
@@ -20,6 +21,10 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
 
     public hasMoreChildrenImpl(): boolean {
         return !!this.children;
+    }
+
+    public get iconPath(): vscode.ThemeIcon {
+        return new vscode.ThemeIcon('folder');
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
