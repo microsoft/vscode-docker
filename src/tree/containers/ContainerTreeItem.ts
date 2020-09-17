@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import ChildProcessProvider from "../../debugging/coreclr/ChildProcessProvider";
+import CliDockerClient from "../../debugging/coreclr/CliDockerClient";
 import { DockerOSType } from "../../docker/Common";
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { getContainerDirectoryItems } from "../../docker/DockerContainerDirectoryProvider";
@@ -107,7 +109,14 @@ export class ContainerTreeItem extends AzExtParentTreeItem {
         return async (path: string | undefined) => {
             const platform = await platformTask.getValue();
 
-            return getContainerDirectoryItems(ext.dockerClient, this.containerId, path, platform);
+            return getContainerDirectoryItems(ContainerTreeItem.dockerExecutor, this.containerId, path, platform);
         };
+    }
+
+    private static async dockerExecutor(containerId: string, command: string, user?: string): Promise<string> {
+        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+
+        // TODO: Support user option.
+        return await dockerClient.exec(containerId, command, {});
     }
 }
