@@ -266,13 +266,18 @@ export class NetCoreDebugHelper implements DebugHelper {
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
-            await execAsync(`docker cp '${vsDbgInstallBasePath}' '${containerDebuggerPath}'`);
+            const command = CommandLineBuilder
+                .create('docker', 'cp')
+                .withQuotedArg(vsDbgInstallBasePath)
+                .withQuotedArg(containerDebuggerPath)
+                .build();
+            await execAsync(command);
         });
     }
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
         const command = CommandLineBuilder
-            .create('docker', 'exec', '-it')
+            .create('docker', 'exec', '-i')
             .withQuotedArg(containerName)
             .withArg(containerOS === 'windows' ? 'cmd /C' : '/bin/sh -c')
             .withQuotedArg(containerOS === 'windows' ? `IF EXIST "${debuggerPath}" (echo true) else (echo false)` : `if [ -f ${debuggerPath} ]; then echo true; fi;`)
