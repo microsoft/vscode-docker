@@ -210,6 +210,11 @@ export class DockerContextManager implements ContextManager, Disposable {
             const lines = stdout.split(/\r?\n/im);
 
             for (const line of lines) {
+                // Blank lines should be skipped
+                if (!line) {
+                    continue;
+                }
+
                 const context = JSON.parse(line) as DockerContext;
                 result.push({
                     ...context,

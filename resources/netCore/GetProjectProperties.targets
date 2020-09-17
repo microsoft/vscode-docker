@@ -5,7 +5,7 @@
             File="$(InfoOutputPath)"
             Lines="$(AssemblyName).dll
 $(TargetFramework)$(TargetFrameworks.Split(';')[0])
-@(TargetOutput)"
+$(OutputPath)/$(AssemblyName).dll"
             Overwrite="True" />
     </Target>
 </Project>
