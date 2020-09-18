@@ -8,8 +8,6 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
-import ChildProcessProvider from './coreclr/ChildProcessProvider';
-import CliDockerClient from './coreclr/CliDockerClient';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
 import { DockerPlatform } from './DockerPlatformHelper';
@@ -50,7 +48,6 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
         debug.registerDebugConfigurationProvider(
             'docker',
             new DockerDebugConfigurationProvider(
-                new CliDockerClient(new ChildProcessProvider()),
                 {
                     netCore: netCoreDebugHelper,
                     node: nodeDebugHelper,

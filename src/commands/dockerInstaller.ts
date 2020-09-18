@@ -3,18 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import ChildProcessProvider from '../debugging/coreclr/ChildProcessProvider';
-import { LocalFileSystemProvider } from '../debugging/coreclr/fsProvider';
-import { OSTempFileProvider } from '../debugging/coreclr/tempFileProvider';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
-import LocalOSProvider from '../utils/LocalOSProvider';
 import { openExternal } from '../utils/openExternal';
+import { getTempFileName, isLinux } from '../utils/osUtils';
 import { execAsync } from '../utils/spawnAsync';
 
 export abstract class DockerInstallerBase {
@@ -69,10 +67,7 @@ export abstract class DockerInstallerBase {
     }
 
     private async downloadInstaller(): Promise<string> {
-        const osProvider = new LocalOSProvider();
-        const processProvider = new ChildProcessProvider();
-        const tempFileProvider = new OSTempFileProvider(osProvider, processProvider);
-        const fileName = tempFileProvider.getTempFilename('docker', this.fileExtension);
+        const fileName = getTempFileName();
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
     }
@@ -96,13 +91,12 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
     }
 
     protected async install(context: IActionContext, fileName: string, cmd: string): Promise<void> {
-        const fsProvider = new LocalFileSystemProvider();
         try {
             ext.outputChannel.appendLine(localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Executing command {0}', cmd));
             await execAsync(cmd);
         } finally {
-            if (await fsProvider.fileExists(fileName)) {
-                await fsProvider.unlinkFile(fileName);
+            if (await fse.pathExists(fileName)) {
+                await fse.unlink(fileName);
             }
         }
     }
@@ -124,14 +118,15 @@ export class MacDockerInstaller extends DockerInstallerBase {
 }
 
 export async function showDockerInstallNotification(): Promise<void> {
-    const installMessageLinux = localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?');
-    const installMessageNonLinux = localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
-    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more')
-    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install')
-    const osProvider: LocalOSProvider = new LocalOSProvider();
-    const dockerInstallMessage = osProvider.os === 'Linux' ? installMessageLinux : installMessageNonLinux;
-    const confirmationPrompt: vscode.MessageItem = osProvider.os === 'Linux' ? { title: learnMore } : { title: install };
-    const response = await vscode.window.showInformationMessage(dockerInstallMessage, ...[confirmationPrompt]);
+    const installMessage = isLinux() ?
+        localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?') :
+        localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
+
+    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more');
+    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install');
+
+    const confirmationPrompt: vscode.MessageItem = isLinux() ? { title: learnMore } : { title: install };
+    const response = await vscode.window.showInformationMessage(installMessage, ...[confirmationPrompt]);
     if (response) {
         await vscode.commands.executeCommand('vscode-docker.installDocker');
     }
