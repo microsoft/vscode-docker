@@ -8,7 +8,7 @@ export class FileTreeItem extends AzExtTreeItem {
     }
 
     public get contextValue(): string {
-        return '';
+        return 'containerFile';
     }
 
     public get iconPath(): vscode.ThemeIcon {
@@ -17,5 +17,9 @@ export class FileTreeItem extends AzExtTreeItem {
 
     public get label(): string {
         return this.item.name;
+    }
+
+    public get path(): string {
+        return this.item.path;
     }
 }

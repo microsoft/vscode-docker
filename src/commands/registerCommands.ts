@@ -15,6 +15,7 @@ import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
+import { openContainerFile } from "./containers/files/openContainerFIle";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
@@ -104,6 +105,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.browse', browseContainer);
     registerCommand('vscode-docker.containers.inspect', inspectContainer);
     registerCommand('vscode-docker.containers.configureExplorer', configureContainersExplorer);
+    registerCommand('vscode-docker.containers.openFile', openContainerFile);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
     registerCommand('vscode-docker.containers.restart', restartContainer);
