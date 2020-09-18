@@ -14,6 +14,7 @@ import { Disposable } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
+import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
 import { DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 import { DockerodeApiClient } from './DockerodeApiClient/DockerodeApiClient';
@@ -189,7 +190,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
                 // It is unnecessary to call `docker context inspect`
                 actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
-                dockerHost = os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe;
+                dockerHost = isWindows() ? WindowsLocalPipe : UnixLocalPipe;
             } else {
                 dockerHost = undefined;
             }
@@ -250,7 +251,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             loadResult = [{
                 ...defaultContext,
                 Current: true,
-                DockerEndpoint: os.platform() === 'win32' ? WindowsLocalPipe : UnixLocalPipe,
+                DockerEndpoint: isWindows() ? WindowsLocalPipe : UnixLocalPipe,
             } as DockerContext];
         }
 

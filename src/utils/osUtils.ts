@@ -26,3 +26,15 @@ let counter = 0;
 export function getTempFileName(): string {
     return path.join(os.tmpdir(), `${vscode.env.sessionId}-${counter++}.tmp`);
 }
+
+export function isWindows(): boolean {
+    return os.platform() === 'win32';
+}
+
+export function isMac(): boolean {
+    return os.platform() === 'darwin';
+}
+
+export function isLinux(): boolean {
+    return os.platform() !== 'win32' && os.platform() !== 'darwin';
+}

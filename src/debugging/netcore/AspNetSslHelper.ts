@@ -13,6 +13,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 import { getDotNetVersion } from '../../utils/netCoreUtils';
+import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 import { execAsync } from '../../utils/spawnAsync';
 
@@ -24,7 +25,7 @@ export async function trustCertificateIfNecessary(): Promise<void> {
         return;
     }
 
-    if (os.platform() === 'win32') {
+    if (isWindows()) {
         if (!(await isCertificateTrusted())) {
             const trust: MessageItem = { title: localize('vscode-docker.debugging.netCore.trust', 'Trust') };
             const message = localize('vscode-docker.debugging.netCore.notTrusted', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`, or click "Trust" below.');
@@ -39,7 +40,7 @@ export async function trustCertificateIfNecessary(): Promise<void> {
                     }
                 });
         }
-    } else if (os.platform() === 'darwin') {
+    } else if (isMac()) {
         if (!(await isCertificateTrusted())) {
             const message = localize('vscode-docker.debugging.netCore.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run \`dotnet dev-certs https --trust\`.');
 
@@ -65,7 +66,7 @@ export async function exportCertificateIfNecessary(projectFile: string, certific
 export function getHostSecretsFolders(): { hostCertificateFolder: string, hostUserSecretsFolder: string } {
     let appDataEnvironmentVariable: string | undefined;
 
-    if (os.platform() === 'win32') {
+    if (isWindows()) {
         appDataEnvironmentVariable = process.env.AppData;
 
         if (appDataEnvironmentVariable === undefined) {
@@ -74,10 +75,10 @@ export function getHostSecretsFolders(): { hostCertificateFolder: string, hostUs
     }
 
     return {
-        hostCertificateFolder: os.platform() === 'win32' ?
+        hostCertificateFolder: isWindows() ?
             path.join(appDataEnvironmentVariable, 'ASP.NET', 'Https') :
             path.join(os.homedir(), '.aspnet', 'https'),
-        hostUserSecretsFolder: os.platform() === 'win32' ?
+        hostUserSecretsFolder: isWindows() ?
             path.join(appDataEnvironmentVariable, 'Microsoft', 'UserSecrets') :
             path.join(os.homedir(), '.microsoft', 'usersecrets'),
     };

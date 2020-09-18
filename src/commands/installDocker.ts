@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as os from 'os';
 import { IActionContext } from 'vscode-azureextensionui';
 import { openExternal } from '../utils/openExternal';
+import { isMac, isWindows } from '../utils/osUtils';
 import { MacDockerInstaller, WindowsDockerInstaller } from './dockerInstaller';
 
 export async function installDocker(context: IActionContext): Promise<void> {
-    if (os.platform() === 'win32') {
+    if (isWindows()) {
         await (new WindowsDockerInstaller()).downloadAndInstallDocker(context);
-    } else if (os.platform() === 'darwin') {
+    } else if (isMac()) {
         await (new MacDockerInstaller()).downloadAndInstallDocker(context);
     } else {
         await openExternal('https://aka.ms/download-docker-linux-vscode');

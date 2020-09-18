@@ -5,12 +5,12 @@
 
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
-import * as os from 'os';
 import { CancellationTokenSource, workspace } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
 import { cloneObject } from '../../utils/cloneObject';
+import { isWindows } from '../../utils/osUtils';
 import { TimeoutPromiseSource } from '../../utils/promiseUtils';
 import { DockerContext } from '../Contexts';
 
@@ -66,7 +66,7 @@ export function refreshDockerode(currentContext: DockerContext): Dockerode {
 
     // If host is an SSH URL, we need to configure / validate SSH_AUTH_SOCK for Dockerode
     if (newEnv.DOCKER_HOST && SSH_URL_REGEX.test(newEnv.DOCKER_HOST)) {
-        if (!newEnv.SSH_AUTH_SOCK && os.platform() === 'win32') {
+        if (!newEnv.SSH_AUTH_SOCK && isWindows()) {
             // On Windows, we can use this one by default
             newEnv.SSH_AUTH_SOCK = '\\\\.\\pipe\\openssh-ssh-agent';
         }

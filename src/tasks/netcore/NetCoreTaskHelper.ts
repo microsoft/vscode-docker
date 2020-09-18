@@ -13,6 +13,7 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { localize } from '../../localize';
+import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -266,7 +267,7 @@ export class NetCoreTaskHelper implements TaskHelper {
 
             let programFilesEnvironmentVariable: string | undefined;
 
-            if (os.platform() === 'win32') {
+            if (isWindows()) {
                 programFilesEnvironmentVariable = process.env.ProgramFiles;
 
                 if (programFilesEnvironmentVariable === undefined) {
@@ -275,8 +276,8 @@ export class NetCoreTaskHelper implements TaskHelper {
             }
 
             const nugetFallbackVolume: DockerContainerVolume = {
-                localPath: os.platform() === 'win32' ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
-                    (os.platform() === 'darwin' ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
+                localPath: isWindows() ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
+                    (isMac() ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
                 permissions: 'ro'
             };

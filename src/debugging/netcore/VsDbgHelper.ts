@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as request from 'request-promise-native';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { isWindows } from '../../utils/osUtils';
 import { execAsync } from '../../utils/spawnAsync';
 
 type VsDbgVersion = 'latest'; // There are other versions but we don't use them
@@ -21,7 +22,7 @@ const dayInMs = 24 * 60 * 60 * 1000;
 export const vsDbgInstallBasePath = path.join(os.homedir(), '.vsdbg');
 
 const acquisition: { url: string, scriptPath: string, getShellCommand(runtime: VsDbgRuntime, version: VsDbgVersion): string; } =
-    os.platform() === 'win32' ?
+    isWindows() ?
         {
             url: 'https://aka.ms/getvsdbgps1',
             scriptPath: path.join(vsDbgInstallBasePath, 'GetVsDbg.ps1'),

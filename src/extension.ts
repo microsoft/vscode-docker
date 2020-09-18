@@ -31,6 +31,7 @@ import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
 import { Keytar } from './utils/keytar';
+import { isLinux, isMac, isWindows } from './utils/osUtils';
 import { bufferToString } from './utils/spawnAsync';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -140,7 +141,7 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
 
 async function getDockerInstallationIDHash(): Promise<string> {
     try {
-        if (os.platform() === 'win32' || os.platform() === 'darwin') {
+        if (!isLinux()) {
             const cached = ext.context.globalState.get<string | undefined>('docker.installIdHash', undefined);
 
             if (cached) {
@@ -148,9 +149,9 @@ async function getDockerInstallationIDHash(): Promise<string> {
             }
 
             let installIdFilePath: string | undefined;
-            if (os.platform() === 'win32' && process.env.APPDATA) {
+            if (isWindows() && process.env.APPDATA) {
                 installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
-            } else if (os.platform() === 'darwin') {
+            } else if (isMac()) {
                 installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
             }
 

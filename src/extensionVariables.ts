@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as osNode from 'os';
 import { ExtensionContext, TreeView } from "vscode";
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput } from "vscode-azureextensionui";
 import { ContextManager } from './docker/ContextManager';
@@ -62,12 +61,6 @@ export namespace ext {
     export let contextsTree: AzExtTreeDataProvider;
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
-    /**
-     * A test-injectable structure defining the current operating system and version
-     */
-    export let os = {
-        platform: osNode.platform(),
-        release: osNode.release()
-    };
+
     export let runningTests: boolean = false;
 }
