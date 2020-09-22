@@ -40,7 +40,7 @@
     "vscode-docker.debug.attach.platform": "The target platform for the application.",
     "vscode-docker.debug.attach.sourceFileMap": "Optional source file mappings passed to the debug engine. Example: '{ \"/src\":\"${workspaceFolder}\" }'",
     "vscode-docker.debug.attach.netCore.description": "Options for debugging .NET Core projects in Docker.",
-    "vscode-docker.debug.attach.netCore.debuggerPath": "enter the path for the debugger on the target machine, for example /remote_debugger/vsdbg.",
+    "vscode-docker.debug.attach.netCore.debuggerPath": "The path for the debugger in the target container, for example `/remote_debugger/vsdbg`.",
     "vscode-docker.tasks.docker-build.dockerBuild.description": "Options for building the Docker image used for debugging. Learn more at https://aka.ms/vscode-docker-build-task",
     "vscode-docker.tasks.docker-build.dockerBuild.buildArgs": "Build arguments applied to the Docker image used for debugging.",
     "vscode-docker.tasks.docker-build.dockerBuild.context": "Path to the Docker build context.",
