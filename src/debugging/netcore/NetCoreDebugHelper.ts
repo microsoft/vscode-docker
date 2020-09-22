@@ -198,12 +198,19 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
-        if (platformOS === 'Windows') {
-            await installDebuggerIfNecessary('win7-x64', 'latest');
-        } else {
-            await installDebuggerIfNecessary('linux-x64', 'latest');
-            await installDebuggerIfNecessary('linux-musl-x64', 'latest');
-        }
+        await window.withProgress(
+            {
+                location: ProgressLocation.Notification,
+                title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring VSDBG...'),
+            }, async () => {
+                if (platformOS === 'Windows') {
+                    await installDebuggerIfNecessary('win7-x64', 'latest');
+                } else {
+                    await installDebuggerIfNecessary('linux-x64', 'latest');
+                    await installDebuggerIfNecessary('linux-musl-x64', 'latest');
+                }
+            }
+        );
 
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('resources'), 'netCore', 'vsdbg');
         const destPath = path.join(vsDbgInstallBasePath, 'vsdbg');
