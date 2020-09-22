@@ -43,9 +43,3 @@ suite("(unit) nonNull", async function (this: Suite): Promise<void> {
         testNonNullThrows('array-of-undefined property: missing', () => nonNullProp(<TestSubscription>{}, 'arrayOrUndefined'));
     });
 });
-
-suite("(unit) fail", async function (this: Suite): Promise<void> {
-    test("fail", () => {
-        assert.fail("This should fail.");
-    });
-});
