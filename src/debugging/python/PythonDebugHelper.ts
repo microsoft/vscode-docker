@@ -94,7 +94,7 @@ export class PythonDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             debugLauncherPath: debugConfiguration.debugLauncherPath || launcherPath,
-            debugAdapterHost: debugConfiguration.debugAdapterHost || await this.getDebugAdapterHost(context),
+            debugAdapterHost: debugConfiguration.debugAdapterHost || await this.getDebugAdapterHost(context) || '172.17.0.1', // 172.17.0.1 is the default gateway for the bridge network
             console: debugConfiguration.console || "integratedTerminal",
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
             module: debugConfiguration.module || pythonRunTaskOptions.module,

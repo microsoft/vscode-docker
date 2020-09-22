@@ -34,7 +34,12 @@ async function main(): Promise<void> {
     console.log(`Test options: ${JSON.stringify(options)}`);
 
     // Download VS Code, unzip it and run the integration test
-    await runTests(options);
+    try {
+        await runTests(options);
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
 }
 
 main();
