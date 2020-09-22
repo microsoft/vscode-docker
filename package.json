@@ -196,7 +196,7 @@
             ],
             "explorer/context": [
                 {
-                    "when": "resourceFilename =~ /(^|\\.)dockerfile$/i && isAzureAccountInstalled",
+                    "when": "resourceFilename =~ /dockerfile/i && isAzureAccountInstalled",
                     "command": "vscode-docker.registries.azure.buildImage",
                     "group": "docker"
                 },
