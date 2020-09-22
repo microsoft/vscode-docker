@@ -201,7 +201,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         await window.withProgress(
             {
                 location: ProgressLocation.Notification,
-                title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring VSDBG...'),
+                title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring .NET Debugger...'),
             }, async () => {
                 if (platformOS === 'Windows') {
                     await installDebuggerIfNecessary('win7-x64', 'latest');
