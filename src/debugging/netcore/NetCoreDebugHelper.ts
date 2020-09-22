@@ -144,6 +144,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
             const containerOS = await getDockerOSType(context.actionContext);
+            await this.acquireDebuggers(containerOS === 'windows' ? 'Windows' : 'Linux');
             const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
             debuggerPath = containerOS === 'windows'
                 ? path.win32.join(debuggerDirectory, 'win7-x64', 'latest', 'vsdbg.exe')
@@ -197,12 +198,19 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
-        if (platformOS === 'Windows') {
-            await installDebuggerIfNecessary('win7-x64', 'latest');
-        } else {
-            await installDebuggerIfNecessary('linux-x64', 'latest');
-            await installDebuggerIfNecessary('linux-musl-x64', 'latest');
-        }
+        await window.withProgress(
+            {
+                location: ProgressLocation.Notification,
+                title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring .NET Debugger...'),
+            }, async () => {
+                if (platformOS === 'Windows') {
+                    await installDebuggerIfNecessary('win7-x64', 'latest');
+                } else {
+                    await installDebuggerIfNecessary('linux-x64', 'latest');
+                    await installDebuggerIfNecessary('linux-musl-x64', 'latest');
+                }
+            }
+        );
 
         const debuggerScriptPath = path.join(ext.context.asAbsolutePath('resources'), 'netCore', 'vsdbg');
         const destPath = path.join(vsDbgInstallBasePath, 'vsdbg');
@@ -285,7 +293,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const { stdout } = await execAsync(command)
 
-        return /true/i.test(stdout);
+        return /true/ig.test(stdout);
     }
 
     private async getContainerNameToAttach(context: IActionContext): Promise<string> {

@@ -27,19 +27,26 @@ const acquisition: { url: string, scriptPath: string, getShellCommand(runtime: V
             url: 'https://aka.ms/getvsdbgps1',
             scriptPath: path.join(vsDbgInstallBasePath, 'GetVsDbg.ps1'),
             getShellCommand: (runtime: VsDbgRuntime, version: VsDbgVersion) => {
-                return `powershell -NonInteractive -NoProfile -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File "${acquisition.scriptPath}" -Version ${version} -RuntimeID ${runtime} -InstallPath "${path.join(vsDbgInstallBasePath, runtime, version)}"`;
+                return `powershell -NonInteractive -NoProfile -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File "${acquisition.scriptPath}" -Version ${version} -RuntimeID ${runtime} -InstallPath "${getInstallDirectory(runtime, version)}"`;
             }
         } :
         {
             url: 'https://aka.ms/getvsdbgsh',
             scriptPath: path.join(vsDbgInstallBasePath, 'getvsdbg.sh'),
             getShellCommand: (runtime: VsDbgRuntime, version: VsDbgVersion) => {
-                return `${acquisition.scriptPath} -v ${version} -r ${runtime} -l "${path.join(vsDbgInstallBasePath, runtime, version)}"`;
+                return `${acquisition.scriptPath} -v ${version} -r ${runtime} -l "${getInstallDirectory(runtime, version)}"`;
             }
         };
 
+function getInstallDirectory(runtime: VsDbgRuntime, version: VsDbgVersion): string {
+    return path.join(vsDbgInstallBasePath, runtime, version);
+}
 
 export async function installDebuggerIfNecessary(runtime: VsDbgRuntime, version: VsDbgVersion): Promise<void> {
+    if (!(await fse.pathExists(vsDbgInstallBasePath))) {
+        await fse.mkdir(vsDbgInstallBasePath);
+    }
+
     const newScript = await getLatestAcquisitionScriptIfNecessary();
     await executeAcquisitionScriptIfNecessary(runtime, version, newScript);
 }
@@ -47,7 +54,7 @@ export async function installDebuggerIfNecessary(runtime: VsDbgRuntime, version:
 async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
     const lastAcquired = ext.context.globalState.get<number | undefined>(scriptAcquiredDateKey, undefined);
 
-    if (lastAcquired && Date.now() - lastAcquired < dayInMs) {
+    if (lastAcquired && Date.now() - lastAcquired < dayInMs && await fse.pathExists(acquisition.scriptPath)) {
         // Acquired recently, no need to reacquire
         return false;
     }
@@ -66,7 +73,7 @@ async function executeAcquisitionScriptIfNecessary(runtime: VsDbgRuntime, versio
 
     const lastExecuted = ext.context.globalState.get<number | undefined>(scriptExecutedDateKey, undefined);
 
-    if (!newScript && lastExecuted && Date.now() - lastExecuted < dayInMs) {
+    if (!newScript && lastExecuted && Date.now() - lastExecuted < dayInMs && await fse.pathExists(getInstallDirectory(runtime, version))) {
         // Executed recently, no need to reexecute
         return;
     }
