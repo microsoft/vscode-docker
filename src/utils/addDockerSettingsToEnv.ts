@@ -10,6 +10,7 @@ import { localize } from '../localize';
 
 export function addDockerSettingsToEnv(env: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
     addDockerSettingToEnv("host", 'DOCKER_HOST', env, oldEnv);
+    addDockerSettingToEnv("context", 'DOCKER_CONTEXT', env, oldEnv);
     addDockerSettingToEnv("certPath", 'DOCKER_CERT_PATH', env, oldEnv);
     addDockerSettingToEnv("tlsVerify", 'DOCKER_TLS_VERIFY', env, oldEnv);
     addDockerSettingToEnv("machineName", 'DOCKER_MACHINE_NAME', env, oldEnv);
