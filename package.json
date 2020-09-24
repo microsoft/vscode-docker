@@ -1761,7 +1761,7 @@
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
-                    "default": "None",
+                    "default": "Compose Project Name",
                     "description": "%vscode-docker.config.docker.containers.groupBy%",
                     "enum": [
                         "Compose Project Name",
