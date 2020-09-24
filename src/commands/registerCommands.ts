@@ -14,6 +14,7 @@ import { viewAzureTaskLogs } from "../utils/lazyLoad";
 import { composeDown, composeRestart, composeUp } from "./compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
+import { composeGroupDown, composeGroupRestart } from "./containers/composeGroup";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
@@ -111,6 +112,8 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.start', startContainer);
     registerCommand('vscode-docker.containers.stop', stopContainer);
     registerWorkspaceCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
+    registerCommand('vscode-docker.containers.composeGroup.restart', composeGroupRestart);
+    registerCommand('vscode-docker.containers.composeGroup.down', composeGroupDown);
 
     registerWorkspaceCommand('vscode-docker.images.build', buildImage);
     registerCommand('vscode-docker.images.configureExplorer', configureImagesExplorer);

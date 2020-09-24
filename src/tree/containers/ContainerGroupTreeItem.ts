@@ -11,9 +11,15 @@ import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { ContainerProperty, getContainerStateIcon } from "./ContainerProperties";
 
 export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContainer, ContainerProperty> {
-    public static readonly contextValue: string = 'containerGroup';
-    public readonly contextValue: string = ContainerGroupTreeItem.contextValue;
     public childTypeLabel: string = 'container';
+
+    public get contextValue(): string {
+        if (this.parent.groupBySetting === 'Compose Project Name') {
+            return 'containerGroup;composeGroup';
+        }
+
+        return 'containerGroup';
+    }
 
     public get iconPath(): IconPath {
         let icon: string;
