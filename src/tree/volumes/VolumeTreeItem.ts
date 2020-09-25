@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
+import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from "../IconPath";
 import { getTreeId } from "../LocalRootTreeItemBase";
 
-export class VolumeTreeItem extends AzExtTreeItem {
+export class VolumeTreeItem extends AzExtTreeItemIntermediate {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
     private readonly _item: DockerVolume;
