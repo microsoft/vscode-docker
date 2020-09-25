@@ -14,7 +14,7 @@ export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
     public tag: string;
     public time: Date;
 
-    public readonly id?: string;
+    public readonly id?: string; // Unused but needs to be implemented since it is abstract in the parent
 
     public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
         super(parent);
