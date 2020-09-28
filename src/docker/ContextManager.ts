@@ -122,7 +122,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // But that probably won't be true in the future, so define both as separate concepts now
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', true);
-                ext.dockerClient = new DockerServeClient();
+                ext.dockerClient = new DockerServeClient(currentContext);
             } else {
                 await this.setVsCodeContext('vscode-docker:aciContext', false);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', false);

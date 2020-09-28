@@ -3,14 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient } from '@docker/sdk';
+import { Containers as ContainersClient, Contexts as ContextsClient } from '@docker/sdk';
 import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StartRequest, StopRequest } from '@docker/sdk/containers';
+import { SetCurrentRequest, SetCurrentResponse } from '@docker/sdk/contexts';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
+import { DockerContext } from '../Contexts';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -23,10 +25,25 @@ const dockerServeCallTimeout = 20 * 1000;
 
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
+    // private readonly setContextPromise: Promise<void>;
 
-    public constructor() {
+    public constructor(private readonly currentContext: DockerContext) {
         super();
         this.containersClient = new ContainersClient();
+
+        /* this.setContextPromise = new Promise((resolve, reject) => {
+            const contextsClient = new ContextsClient();
+            const request = new SetCurrentRequest()
+                .setName(currentContext.Name);
+
+            contextsClient.setCurrent(request, (err: unknown, response: SetCurrentResponse) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve();
+            });
+        });*/
     }
 
     public dispose(): void {
@@ -172,6 +189,8 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         clientCallback: (req: TRequest, callback: (err: unknown, response: TResponse) => void) => unknown,
         request: TRequest,
         token?: CancellationToken): Promise<TResponse> {
+
+        // await this.setContextPromise;
 
         const callPromise: Promise<TResponse> = new Promise((resolve, reject) => {
             try {
