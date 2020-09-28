@@ -11,6 +11,7 @@ import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { ContainerProperty, getContainerStateIcon } from "./ContainerProperties";
+import { NonComposeGroupName } from "./ContainersTreeItem";
 
 export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContainer, ContainerProperty> {
     public childTypeLabel: string = 'container';
@@ -25,7 +26,7 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContain
     }
 
     public get contextValue(): string {
-        if (this.parent.groupBySetting === 'Compose Project Name') {
+        if (this.parent.groupBySetting === 'Compose Project Name' && this.group !== NonComposeGroupName) {
             return 'containerGroup;composeGroup';
         }
 

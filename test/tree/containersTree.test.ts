@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, DockerContainer } from '../../extension.bundle';
-import { NonComposeGroupName } from '../../src/tree/containers/ContainersTreeItem';
+import { ext, DockerContainer, NonComposeGroupName } from '../../extension.bundle';
 import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
 const testContainers: DockerContainer[] = [
