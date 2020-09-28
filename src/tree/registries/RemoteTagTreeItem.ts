@@ -4,15 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as moment from 'moment';
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtTreeItemIntermediate } from '../AzExtTreeItemIntermediate';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 
-export class RemoteTagTreeItem extends AzExtTreeItem {
+export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
     public parent: RemoteRepositoryTreeItemBase;
     public tag: string;
     public time: Date;
+
+    public readonly id?: string; // Unused but needs to be implemented since it is abstract in the parent
 
     public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
         super(parent);

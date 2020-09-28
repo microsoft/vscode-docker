@@ -14,14 +14,7 @@ import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
     public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent);
-    }
-
-    public get contextValue(): string {
-        return getRegistryContextValue(this, registryProviderSuffix);
-    }
-
-    public set contextValue(_value: string) {
-        // this is needed because the parent `AzureAccountTreeItemBase` has a setter, but we ignore `_value` in favor of the above getter
+        this.contextValue = getRegistryContextValue(this, registryProviderSuffix);
     }
 
     public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {

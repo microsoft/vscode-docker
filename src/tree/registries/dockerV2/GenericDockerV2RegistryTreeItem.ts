@@ -3,25 +3,28 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
+import { IAuthProvider } from "../auth/IAuthProvider";
 import { getWwwAuthenticateContext } from "../auth/oAuthUtils";
+import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
 import { DockerV2RepositoryTreeItem } from "./DockerV2RepositoryTreeItem";
 
 export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBase {
+    public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider, authHelper: IAuthProvider) {
+        super(parent, cachedProvider, authHelper);
+        this.id = this.baseUrl;
+    }
+
     public get contextValue(): string {
         return getRegistryContextValue(this, registrySuffix, registryProviderSuffix);
     }
 
     public get label(): string {
         return this.host;
-    }
-
-    public get id(): string {
-        return this.baseUrl;
     }
 
     public get baseUrl(): string {

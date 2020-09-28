@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
+import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 
-export class NetworkTreeItem extends AzExtTreeItem {
+export class NetworkTreeItem extends AzExtTreeItemIntermediate {
     public static allContextRegExp: RegExp = /Network$/;
     public static customNetworkRegExp: RegExp = /^customNetwork$/i;
 
