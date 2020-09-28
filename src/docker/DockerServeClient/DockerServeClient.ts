@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient, Contexts as ContextsClient } from '@docker/sdk';
+import { Containers as ContainersClient } from '@docker/sdk';
 import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StartRequest, StopRequest } from '@docker/sdk/containers';
-import { SetCurrentRequest, SetCurrentResponse } from '@docker/sdk/contexts';
+import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
@@ -25,25 +25,13 @@ const dockerServeCallTimeout = 20 * 1000;
 
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
-    // private readonly setContextPromise: Promise<void>;
+    private readonly callMetadata: Metadata;
 
-    public constructor(private readonly currentContext: DockerContext) {
+    public constructor(currentContext: DockerContext) {
         super();
         this.containersClient = new ContainersClient();
-
-        /* this.setContextPromise = new Promise((resolve, reject) => {
-            const contextsClient = new ContextsClient();
-            const request = new SetCurrentRequest()
-                .setName(currentContext.Name);
-
-            contextsClient.setCurrent(request, (err: unknown, response: SetCurrentResponse) => {
-                if (err) {
-                    reject(err);
-                }
-
-                resolve();
-            });
-        });*/
+        this.callMetadata = new Metadata();
+        this.callMetadata.add('context_key', currentContext.Name);
     }
 
     public dispose(): void {
@@ -185,8 +173,8 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
     private async promisify<TRequest, TResponse>(
         context: IActionContext,
-        thisArg: unknown,
-        clientCallback: (req: TRequest, callback: (err: unknown, response: TResponse) => void) => unknown,
+        client: GrpcClient,
+        clientCallback: (req: TRequest, md: Metadata, callback: (err: unknown, response: TResponse) => void) => unknown,
         request: TRequest,
         token?: CancellationToken): Promise<TResponse> {
 
@@ -194,7 +182,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
         const callPromise: Promise<TResponse> = new Promise((resolve, reject) => {
             try {
-                clientCallback.call(thisArg, request, (err, response) => {
+                clientCallback.call(client, request, this.callMetadata, (err, response) => {
                     if (err) {
                         reject(err);
                     }

@@ -2778,6 +2778,7 @@
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.2.1",
         "@docker/sdk": "^0.1.15",
+        "@grpc/grpc-js": "^1.1.7",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
         "fs-extra": "^9.0.1",
