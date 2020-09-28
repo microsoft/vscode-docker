@@ -178,8 +178,6 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         request: TRequest,
         token?: CancellationToken): Promise<TResponse> {
 
-        // await this.setContextPromise;
-
         const callPromise: Promise<TResponse> = new Promise((resolve, reject) => {
             try {
                 clientCallback.call(client, request, this.callMetadata, (err, response) => {
