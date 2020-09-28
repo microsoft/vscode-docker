@@ -5,27 +5,28 @@
 
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { DockerObject } from "../docker/Common";
+import { IconPath } from "./IconPath";
 import { LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
 import { CommonProperty } from "./settings/CommonProperties";
 
 export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
-    public parent: LocalRootTreeItemBase<TItem, TProperty>;
-    public group: string;
+    public readonly parent: LocalRootTreeItemBase<TItem, TProperty>;
+    public readonly group: string;
     private _items: TItem[];
     private _childTreeItems: AzExtTreeItem[];
+
+    // Redefining this as an abstract allows inheriting classes to either do an accessor or a property
+    public abstract readonly iconPath?: IconPath;
 
     public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);
         this.group = group;
+        this.id = this.group + '|LocalGroup'; // Add suffix to ensure this id doesn't coincidentally overlap with a non-grouped item
         this._items = items;
     }
 
     public get label(): string {
         return this.group;
-    }
-
-    public get id(): string {
-        return this.group + '|LocalGroup'; // Add suffix to ensure this id doesn't coincidentally overlap with a non-grouped item
     }
 
     public get maxCreatedTime(): number {

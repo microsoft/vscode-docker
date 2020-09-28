@@ -5,12 +5,12 @@
 
 import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
 import * as moment from 'moment';
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
+import { AzExtTreeItemIntermediate } from "../../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
-export class AzureTaskRunTreeItem extends AzExtTreeItem {
+export class AzureTaskRunTreeItem extends AzExtTreeItemIntermediate {
     public static contextValue: string = 'azureTaskRun';
     public contextValue: string = AzureTaskRunTreeItem.contextValue;
     public parent: AzureTaskTreeItem;

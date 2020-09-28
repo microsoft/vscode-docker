@@ -7,7 +7,7 @@ import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-conta
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";
-import { getThemedIconPath, IconPath } from "../../IconPath";
+import { getThemedIconPath } from "../../IconPath";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
@@ -24,10 +24,8 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     public constructor(parent: AzureTasksTreeItem, task: AcrModels.Task | undefined) {
         super(parent);
         this._task = task;
-    }
-
-    public get iconPath(): IconPath {
-        return getThemedIconPath('task');
+        this.iconPath = getThemedIconPath('task');
+        this.id = this._task ? this._task.id : undefined;
     }
 
     public get contextValue(): string {
@@ -36,10 +34,6 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
 
     public get label(): string {
         return this._task ? this.taskName : localize('vscode-docker.tree.registries.azure.runsWithoutTask', 'Runs without a task');
-    }
-
-    public get id(): string | undefined {
-        return this._task ? this._task.id : undefined;
     }
 
     public get taskName(): string {

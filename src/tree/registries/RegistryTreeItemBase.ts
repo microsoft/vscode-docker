@@ -6,7 +6,7 @@
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { IRegistryAuthTreeItem } from "../../utils/registryRequestUtils";
-import { getThemedIconPath, IconPath } from "../IconPath";
+import { getThemedIconPath } from "../IconPath";
 import { getRegistryContextValue, registrySuffix } from "./registryContextValues";
 
 /**
@@ -15,10 +15,10 @@ import { getRegistryContextValue, registrySuffix } from "./registryContextValues
  */
 export abstract class RegistryTreeItemBase extends AzExtParentTreeItem implements IRegistryAuthTreeItem {
     public childTypeLabel: string = 'repository';
-    public parent: AzExtParentTreeItem;
 
-    public get iconPath(): IconPath {
-        return getThemedIconPath('registry');
+    public constructor(parent: AzExtParentTreeItem | undefined) {
+        super(parent);
+        this.iconPath = getThemedIconPath('registry');
     }
 
     public get contextValue(): string {
