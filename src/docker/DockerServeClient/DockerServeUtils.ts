@@ -41,7 +41,7 @@ export function containerToDockerContainer(container: Container.AsObject): Docke
     return {
         Id: container.id,
         Image: container.image,
-        Name: container.id, // TODO ?
+        Name: container.id,
         State: container.status,
         Status: container.status,
         Platform: container.platform.toLowerCase() as DockerOSType,
