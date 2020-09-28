@@ -124,6 +124,10 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainer, C
 export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Other Containers');
 
 export function getComposeProjectName(container: DockerContainer): string {
+    if (!container.Labels) {
+        return NonComposeGroupName;
+    }
+
     const labels = Object.keys(container.Labels)
         .map(label => ({ label: label, value: container.Labels[label] }));
 
