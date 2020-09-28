@@ -145,6 +145,10 @@
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
                     "when": "vscode-docker:newCliPresent"
+                },
+                {
+                    "command": "vscode-docker.contexts.use",
+                    "when": "!vscode-docker:contextLocked"
                 }
             ],
             "editor/context": [
@@ -561,7 +565,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i && !vscode-docker:contextLocked",
                     "group": "contexts_1_general@2"
                 },
                 {
@@ -2036,6 +2040,12 @@
                     "description": "%vscode-docker.config.docker.host%",
                     "scope": "machine-overridable"
                 },
+                "docker.context": {
+                    "type": "string",
+                    "default": "",
+                    "description": "%vscode-docker.config.docker.context%",
+                    "scope": "machine-overridable"
+                },
                 "docker.certPath": {
                     "type": "string",
                     "default": "",
@@ -2768,6 +2778,7 @@
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.2.1",
         "@docker/sdk": "^0.1.15",
+        "@grpc/grpc-js": "^1.1.7",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
         "fs-extra": "^9.0.1",
