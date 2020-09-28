@@ -213,7 +213,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // No value for DOCKER_HOST, and multiple contexts exist, so check them
             const result: DockerContext[] = [];
-            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
+            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
             const lines = stdout.split(/\r?\n/im);
 
             for (const line of lines) {
@@ -226,7 +226,6 @@ export class DockerContextManager implements ContextManager, Disposable {
                 result.push({
                     ...context,
                     Id: context.Name,
-                    Current: dockerContextEnv ? dockerContextEnv === context.Name : context.Current, // If DOCKER_CONTEXT is set, current is whichever has the same name, otherwise copy from CLI output
                     Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
                 });
             }
