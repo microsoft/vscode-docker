@@ -213,6 +213,9 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // No value for DOCKER_HOST, and multiple contexts exist, so check them
             const result: DockerContext[] = [];
+
+            // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
+            // return that specified context as Current = true. This way we don't need extra logic below in parsing.
             const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
             const lines = stdout.split(/\r?\n/im);
 
