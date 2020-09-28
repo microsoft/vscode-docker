@@ -15,7 +15,7 @@ const gitLabRegistryUrl: string = 'registry.gitlab.com';
 
 export class GitLabProjectTreeItem extends RegistryTreeItemBase {
     public parent: GitLabAccountTreeItem;
-    public projectId: string;
+    public readonly projectId: string;
     public pathWithNamespace: string;
 
     private _nextLink?: string;
@@ -24,14 +24,11 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         super(parent);
         this.projectId = id;
         this.pathWithNamespace = pathWithNamespace;
+        this.id = this.projectId;
     }
 
     public get baseUrl(): string {
         return this.parent.baseUrl;
-    }
-
-    public get id(): string {
-        return this.projectId;
     }
 
     public get label(): string {
