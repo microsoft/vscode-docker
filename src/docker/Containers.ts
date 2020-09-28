@@ -30,6 +30,7 @@ export interface DockerContainer extends DockerObject {
     readonly Labels?: {
         readonly [key: string]: string;
     }
+    readonly Platform?: DockerOSType;
 }
 
 export interface DockerContainerInspection extends DockerObject {

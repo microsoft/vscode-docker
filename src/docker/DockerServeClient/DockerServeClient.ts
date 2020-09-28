@@ -8,7 +8,7 @@ import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListRespon
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
-import { DockerInfo, DockerOSType, PruneResult } from '../Common';
+import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerApiClient } from '../DockerApiClient';
@@ -66,7 +66,6 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             NetworkSettings: {
                 Ports: containerPortsToInspectionPorts(container),
             },
-            Platform: responseContainer.platform as DockerOSType,
         };
     }
 

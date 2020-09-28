@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Container } from '@docker/sdk/containers';
+import { DockerOSType } from '../Common';
 import { DockerContainer, InspectionPort } from '../Containers';
 
 // Group 1 is container group name; group 2 is container name
@@ -43,6 +44,7 @@ export function containerToDockerContainer(container: Container.AsObject): Docke
         Name: container.id, // TODO ?
         State: container.status,
         Status: container.status,
+        Platform: container.platform.toLowerCase() as DockerOSType,
         ImageID: undefined, // TODO ?
         CreatedTime: undefined, // TODO ?
         Labels: labels, // TODO--not yet supported on ACI
