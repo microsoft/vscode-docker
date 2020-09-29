@@ -8,6 +8,7 @@ import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
+import { isWindows } from '../../utils/osUtils';
 import { rewriteCommandForNewCliIfNeeded } from '../compose';
 
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
@@ -20,7 +21,7 @@ export async function composeGroupDown(context: IActionContext, node: ContainerG
 
 async function composeGroup(context: IActionContext, composeCommand: 'restart' | 'down', node: ContainerGroupTreeItem): Promise<void> {
     const workingDirectory = getComposeWorkingDirectory(node);
-    const filesArgument = getComposeFiles(node)?.map(f => `-f ${f}`)?.join(' ');
+    const filesArgument = getComposeFiles(node)?.map(f => isWindows() ? `-f "${f}"` : `-f '${f}'`)?.join(' ');
 
     if (!workingDirectory || !filesArgument) {
         context.errorHandling.suppressReportIssue = true;
