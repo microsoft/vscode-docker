@@ -154,6 +154,7 @@
     "vscode-docker.config.docker.truncateMaxLength": "Maximum length of a registry paths displayed in Docker view, including elipsis. The truncateLongRegistryPaths setting must be set to true for truncateMaxLength setting to be effective.",
     "vscode-docker.config.docker.dockerodeOptions": "If specified, this object will be passed to the Dockerode constructor. Takes precedence over DOCKER_HOST, the Docker Host setting, and any existing Docker contexts.",
     "vscode-docker.config.docker.host": "Equivalent to setting the DOCKER_HOST environment variable.",
+    "vscode-docker.config.docker.context": "Equivalent to setting the DOCKER_CONTEXT environment variable.",
     "vscode-docker.config.docker.certPath": "Equivalent to setting the DOCKER_CERT_PATH environment variable.",
     "vscode-docker.config.docker.tlsVerify": "Equivalent to setting the DOCKER_TLS_VERIFY environment variable.",
     "vscode-docker.config.docker.machineName": "Equivalent to setting the DOCKER_MACHINE_NAME environment variable.",

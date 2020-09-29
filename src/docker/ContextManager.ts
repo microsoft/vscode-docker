@@ -42,7 +42,7 @@ const defaultContext: Partial<DockerContext> = {
 };
 
 // These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
-type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent';
+type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent' | 'vscode-docker:contextLocked';
 
 export interface ContextManager {
     readonly onContextChanged: Event<DockerContext>;
@@ -122,7 +122,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // But that probably won't be true in the future, so define both as separate concepts now
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', true);
-                ext.dockerClient = new DockerServeClient();
+                ext.dockerClient = new DockerServeClient(currentContext);
             } else {
                 await this.setVsCodeContext('vscode-docker:aciContext', false);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', false);
@@ -180,34 +180,43 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             ext.treeInitError = undefined;
 
-            let dockerHost: string | undefined;
+            let dockerHostEnv: string | undefined;
+            let dockerContextEnv: string | undefined;
             const config = workspace.getConfiguration('docker');
-            if ((dockerHost = config.get('host'))) { // Assignment + check is intentional
+            if ((dockerHostEnv = config.get('host'))) { // Assignment + check is intentional
                 actionContext.telemetry.properties.hostSource = 'docker.host';
-            } else if ((dockerHost = process.env.DOCKER_HOST)) { // Assignment + check is intentional
+            } else if ((dockerHostEnv = process.env.DOCKER_HOST)) { // Assignment + check is intentional
                 actionContext.telemetry.properties.hostSource = 'env';
+            } else if ((dockerContextEnv = config.get('context'))) { // Assignment + check is intentional
+                actionContext.telemetry.properties.hostSource = 'docker.context';
+            } else if ((dockerContextEnv = process.env.DOCKER_CONTEXT)) { // Assignment + check is intentional
+                actionContext.telemetry.properties.hostSource = 'envContext';
             } else if (!(await fse.pathExists(dockerContextsFolder)) || (await fse.readdir(dockerContextsFolder)).length === 0) {
                 // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
                 // It is unnecessary to call `docker context inspect`
                 actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
-                dockerHost = isWindows() ? WindowsLocalPipe : UnixLocalPipe;
+                dockerHostEnv = isWindows() ? WindowsLocalPipe : UnixLocalPipe;
             } else {
-                dockerHost = undefined;
+                dockerHostEnv = undefined;
             }
 
-            if (dockerHost !== undefined) {
-                actionContext.telemetry.properties.hostProtocol = new URL(dockerHost).protocol;
+            if (dockerHostEnv !== undefined) {
+                actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
+                await this.setVsCodeContext('vscode-docker:contextLocked', true);
 
                 return [{
                     ...defaultContext,
                     Current: true,
-                    DockerEndpoint: dockerHost,
+                    DockerEndpoint: dockerHostEnv,
                 } as DockerContext];
             }
 
             // No value for DOCKER_HOST, and multiple contexts exist, so check them
             const result: DockerContext[] = [];
-            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', ContextCmdExecOptions);
+
+            // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
+            // return that specified context as Current = true. This way we don't need extra logic below in parsing.
+            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
             const lines = stdout.split(/\r?\n/im);
 
             for (const line of lines) {
@@ -240,6 +249,12 @@ export class DockerContextManager implements ContextManager, Disposable {
                 }
             } catch {
                 actionContext.telemetry.properties.hostProtocol = 'unknown';
+            }
+
+            if (dockerContextEnv) {
+                await this.setVsCodeContext('vscode-docker:contextLocked', true);
+            } else {
+                await this.setVsCodeContext('vscode-docker:contextLocked', false);
             }
 
             return result;

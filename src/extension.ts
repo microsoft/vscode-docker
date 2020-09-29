@@ -218,6 +218,7 @@ namespace Configuration {
                 // These settings will result in a need to change context that doesn't actually change the docker context
                 // So, force a manual refresh so the settings get picked up
                 if (e.affectsConfiguration('docker.host') ||
+                    e.affectsConfiguration('docker.context') ||
                     e.affectsConfiguration('docker.certPath') ||
                     e.affectsConfiguration('docker.tlsVerify') ||
                     e.affectsConfiguration('docker.machineName') ||

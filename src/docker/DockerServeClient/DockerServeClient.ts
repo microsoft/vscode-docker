@@ -5,12 +5,14 @@
 
 import { Containers as ContainersClient } from '@docker/sdk';
 import { DeleteRequest, InspectRequest, InspectResponse, ListRequest, ListResponse, StartRequest, StopRequest } from '@docker/sdk/containers';
+import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
+import { DockerContext } from '../Contexts';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -23,10 +25,13 @@ const dockerServeCallTimeout = 20 * 1000;
 
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
+    private readonly callMetadata: Metadata;
 
-    public constructor() {
+    public constructor(currentContext: DockerContext) {
         super();
         this.containersClient = new ContainersClient();
+        this.callMetadata = new Metadata();
+        this.callMetadata.add('context_key', currentContext.Name);
     }
 
     public dispose(): void {
@@ -168,14 +173,14 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
     private async promisify<TRequest, TResponse>(
         context: IActionContext,
-        thisArg: unknown,
-        clientCallback: (req: TRequest, callback: (err: unknown, response: TResponse) => void) => unknown,
+        client: GrpcClient,
+        clientCallback: (req: TRequest, md: Metadata, callback: (err: unknown, response: TResponse) => void) => unknown,
         request: TRequest,
         token?: CancellationToken): Promise<TResponse> {
 
         const callPromise: Promise<TResponse> = new Promise((resolve, reject) => {
             try {
-                clientCallback.call(thisArg, request, (err, response) => {
+                clientCallback.call(client, request, this.callMetadata, (err, response) => {
                     if (err) {
                         reject(err);
                     }
