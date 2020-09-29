@@ -233,7 +233,7 @@
             "view/title": [
                 {
                     "command": "vscode-docker.containers.prune",
-                    "when": "view == dockerContainers",
+                    "when": "view == dockerContainers && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -253,12 +253,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.create",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.networks.prune",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -268,7 +268,7 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
-                    "when": "view == dockerImages",
+                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -298,7 +298,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.prune",
-                    "when": "view == dockerVolumes",
+                    "when": "view == dockerVolumes && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -550,7 +550,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.inspect",
-                    "when": "view == dockerVolumes && viewItem == volume",
+                    "when": "view == dockerVolumes && viewItem == volume && !vscode-docker:newSdkContext",
                     "group": "volumes_1_general@1"
                 },
                 {
@@ -2777,7 +2777,7 @@
         "@azure/arm-appservice": "^6.0.0",
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.2.1",
-        "@docker/sdk": "^0.1.15",
+        "@docker/sdk": "^0.1.18",
         "@grpc/grpc-js": "^1.1.7",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
