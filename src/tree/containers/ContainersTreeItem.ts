@@ -121,7 +121,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainer, C
     }
 }
 
-export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Standalone Containers');
+export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Individual Containers');
 
 export function getComposeProjectName(container: DockerContainer): string {
     if (!container.Labels) {
