@@ -3,7 +3,9 @@ version: '3.4'
 services:
   {{ serviceName }}:
     image: {{ serviceName }}
-    build: .
+    build:
+      context: {{ workspaceRelative . dockerBuildContext }}
+      dockerfile: {{ dirname (workspaceRelative . dockerfileDirectory) 'Linux' }}/Dockerfile
 {{#if ports}}
     ports:
 {{#each ports}}
