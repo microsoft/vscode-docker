@@ -46,6 +46,7 @@ export class NodeTaskHelper implements TaskHelper {
                     context: unresolveWorkspaceFolder(path.dirname(context.dockerfile), context.folder),
                     pull: true
                 },
+                // If the package is at the root, we'll leave it out of the config for brevity, otherwise it must be specified explicitly
                 node: NodeTaskHelper.getNodeOptionsForScaffolding(options?.package, context.folder),
             }
         ];
@@ -71,6 +72,7 @@ export class NodeTaskHelper implements TaskHelper {
                     }
                 },
                 node: {
+                    // If the package is at the root, we'll leave it out of the config for brevity, otherwise it must be specified explicitly
                     ...NodeTaskHelper.getNodeOptionsForScaffolding(options?.package, context.folder),
                     enableDebugging: true
                 },

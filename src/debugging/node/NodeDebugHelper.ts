@@ -44,6 +44,7 @@ export class NodeDebugHelper implements DebugHelper {
         const nodeOptions: NodeDockerDebugOptions = NodeTaskHelper.getNodeOptionsForScaffolding(options?.package, context.folder);
 
         if (nodeOptions) {
+            // localRoot must match the build context
             nodeOptions.localRoot = unresolveWorkspaceFolder(path.dirname(options.package), context.folder)
         }
 
