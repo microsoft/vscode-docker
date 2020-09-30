@@ -41,6 +41,10 @@ export class ContainerTreeItem extends AzExtTreeItemIntermediate {
         return this._item.Image;
     }
 
+    public get labels(): { [key: string]: string } {
+        return this._item.Labels;
+    }
+
     public get label(): string {
         return ext.containersRoot.getTreeItemLabel(this._item);
     }
