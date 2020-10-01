@@ -121,19 +121,13 @@ export class DockerContextManager implements ContextManager, Disposable {
                 await this.setVsCodeContext('vscode-docker:aciContext', true);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', true);
 
-                const start = process.hrtime.bigint();
                 const dsc = await import('./DockerServeClient/DockerServeClient');
-                const end = process.hrtime.bigint();
-                ext.outputChannel.appendLine(`Elapsed ${((end - start) / BigInt(1000 * 1000)).toString()} ms loading DockerServeClient`);
                 ext.dockerClient = new dsc.DockerServeClient(currentContext);
             } else {
                 await this.setVsCodeContext('vscode-docker:aciContext', false);
                 await this.setVsCodeContext('vscode-docker:newSdkContext', false);
 
-                const start = process.hrtime.bigint();
                 const dockerode = await import('./DockerodeApiClient/DockerodeApiClient');
-                const end = process.hrtime.bigint();
-                ext.outputChannel.appendLine(`Elapsed ${((end - start) / BigInt(1000 * 1000)).toString()} ms loading DockerodeApiClient`);
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
             }
 
