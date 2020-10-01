@@ -32,6 +32,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         increment?: number;
     }>): Promise<void> {
         const vscAzureAppService = await import('vscode-azureappservice');
+        vscAzureAppService.registerAppServiceExtensionVariables(ext);
         const site: WebSiteManagementModels.Site = nonNullProp(context, 'site');
         let siteClient = new vscAzureAppService.SiteClient(site, context);
         let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;

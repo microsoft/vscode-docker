@@ -29,6 +29,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     }
 
     const vscAzureAppService = await import('vscode-azureappservice');
+    vscAzureAppService.registerAppServiceExtensionVariables(ext);
 
     const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
         ...context,
