@@ -5,7 +5,7 @@ services:
     image: {{ serviceName }}
     build:
       context: {{ workspaceRelative . dockerBuildContext }}
-      dockerfile: {{ dirname (workspaceRelative . dockerfileDirectory) 'Linux' }}/Dockerfile
+      dockerfile: {{ contextRelative . dockerfileDirectory }}/Dockerfile
 {{#if ports}}
     ports:
 {{#each ports}}

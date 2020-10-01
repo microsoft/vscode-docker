@@ -5,7 +5,7 @@ services:
     image: {{ serviceName }}
     build:
       context: {{ workspaceRelative . dockerBuildContext }}
-      dockerfile: {{ dirname (workspaceRelative . dockerfileDirectory) 'Linux' }}/Dockerfile
+      dockerfile: {{ contextRelative . dockerfileDirectory }}/Dockerfile
     environment:
       JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
 {{#if (join ports debugPorts)}}
