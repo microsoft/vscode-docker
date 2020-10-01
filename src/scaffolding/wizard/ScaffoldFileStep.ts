@@ -26,7 +26,7 @@ Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizard
 
 Handlebars.registerHelper('contextRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
     return pathNormalize(
-        path.relative(wizardContext.dockerBuildContext as string, absolutePath),
+        path.relative(wizardContext.dockerBuildContext, absolutePath),
         platform
     );
 });
