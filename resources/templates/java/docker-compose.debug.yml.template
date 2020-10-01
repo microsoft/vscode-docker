@@ -4,8 +4,8 @@ services:
   {{ serviceName }}:
     image: {{ serviceName }}
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: {{ workspaceRelative . dockerBuildContext }}
+      dockerfile: {{ contextRelative . dockerfileDirectory }}/Dockerfile
     environment:
       JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y
 {{#if (join ports debugPorts)}}

@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Progress } from 'vscode';
 import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
-import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, NodeScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { localize } from '../../localize';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
@@ -21,25 +20,20 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         progress.report({ message: localize('vscode-docker.scaffold.scaffoldDebuggingStep.progress', 'Adding debug configuration and tasks...') });
 
-        let dockerfilePath: string;
-        if (await fse.pathExists(wizardContext.artifact)) {
-            dockerfilePath = path.join(path.dirname(wizardContext.artifact) || wizardContext.workspaceFolder.uri.fsPath, 'Dockerfile');
-        } else {
-            // In the case of Python the artifact might be a module instead of a file; if so use the workspace folder as the root
-            dockerfilePath = path.join(wizardContext.workspaceFolder.uri.fsPath, 'Dockerfile');
-        }
-
         const scaffoldContext: DockerDebugScaffoldContext = {
             folder: wizardContext.workspaceFolder,
             actionContext: wizardContext,
-            dockerfile: dockerfilePath,
+            dockerfile: path.join(wizardContext.dockerfileDirectory, 'Dockerfile'),
             ports: wizardContext.ports,
         };
 
         switch (wizardContext.platform) {
             case 'Node.js':
                 scaffoldContext.platform = 'node';
-                await dockerDebugScaffoldingProvider.initializeNodeForDebugging(scaffoldContext);
+                const nodeOptions: NodeScaffoldingOptions = {
+                    package: wizardContext.artifact,
+                };
+                await dockerDebugScaffoldingProvider.initializeNodeForDebugging(scaffoldContext, nodeOptions);
                 break;
 
             case '.NET: ASP.NET Core':
