@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { getValidImageName } from '../../../utils/getValidImageName';
 import { readPackage } from '../../../utils/nodeUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
@@ -38,11 +39,21 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
 
         wizardContext.debugPorts = [9229];
 
+        if (!wizardContext.dockerBuildContext) {
+            // For Node, build context is always adjacent the artifact (package.json)
+            wizardContext.dockerBuildContext = path.dirname(wizardContext.artifact);
+        }
+
+        if (!wizardContext.dockerfileDirectory) {
+            // For .NET Core, the Dockerfile is always adjacent the artifact (package.json)
+            wizardContext.dockerfileDirectory = path.dirname(wizardContext.artifact);
+        }
+
         await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: NodeScaffoldingWizardContext): boolean {
-        return !wizardContext.nodeCmdParts || !wizardContext.nodeDebugCmdParts;
+        return !wizardContext.nodeCmdParts || !wizardContext.nodeDebugCmdParts || !wizardContext.dockerBuildContext || !wizardContext.dockerfileDirectory;
     }
 
     protected setTelemetry(wizardContext: NodeScaffoldingWizardContext): void {

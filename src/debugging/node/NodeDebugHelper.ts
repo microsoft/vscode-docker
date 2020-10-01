@@ -3,11 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
 import { inferPackageName, readPackage } from '../../utils/nodeUtils';
+import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { NodeScaffoldingOptions } from '../DockerDebugScaffoldingProvider';
 
 export interface NodeDebugOptions {
     address?: string;
@@ -36,14 +39,23 @@ export interface NodeDockerDebugConfiguration extends DockerDebugConfigurationBa
 }
 
 export class NodeDebugHelper implements DebugHelper {
-    public async provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]> {
+    public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NodeScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
+        // If the package is at the root, we'll leave it out of the config for brevity, otherwise it must be specified explicitly
+        const nodeOptions: NodeDockerDebugOptions = NodeTaskHelper.getNodeOptionsForScaffolding(options?.package, context.folder);
+
+        if (nodeOptions) {
+            // localRoot must match the build context
+            nodeOptions.localRoot = unresolveWorkspaceFolder(path.dirname(options.package), context.folder)
+        }
+
         return [
             {
                 name: 'Docker Node.js Launch',
                 type: 'docker',
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
-                platform: 'node'
+                platform: 'node',
+                node: nodeOptions,
             }
         ];
     }

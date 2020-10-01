@@ -109,12 +109,14 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
     }
 
     private async getOutputPath(wizardContext: TWizardContext): Promise<string> {
-        if (this.fileType === 'Dockerfile' && wizardContext.artifact &&
-            (wizardContext.platform === 'Node.js' || wizardContext.platform === '.NET: ASP.NET Core' || wizardContext.platform === '.NET: Core Console')) {
-            // Dockerfiles may be placed in subpaths for Node and .NET; the others are always at the workspace folder level
-            return path.join(path.dirname(wizardContext.artifact), this.fileType);
-        } else {
-            return path.join(wizardContext.workspaceFolder.uri.fsPath, this.fileType);
+        switch (this.fileType) {
+            case 'Dockerfile':
+                return path.join(wizardContext.dockerfileDirectory, this.fileType);
+            case '.dockerignore':
+                return path.join(wizardContext.dockerBuildContext, this.fileType);
+            default:
+                // All other files go to the root
+                return path.join(wizardContext.workspaceFolder.uri.fsPath, this.fileType);
         }
     }
 
@@ -167,6 +169,13 @@ async function registerHandlebarsHelpers(): Promise<void> {
 
         return pathNormalize(
             path.relative(workspaceFolder.uri.fsPath, absolutePath),
+            platform
+        );
+    });
+
+    Handlebars.registerHelper('contextRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
+        return pathNormalize(
+            path.relative(wizardContext.dockerBuildContext, absolutePath),
             platform
         );
     });
