@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { BlobClient } from "@azure/storage-blob";
 import { IActionContext, openReadOnlyContent } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
@@ -18,9 +17,10 @@ export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTas
 
     const registryTI = node.parent.parent.parent;
     await node.runWithTemporaryDescription(localize('vscode-docker.commands.registries.azure.tasks.retrievingLogs', 'Retrieving logs...'), async () => {
-        const result = await registryTI.client.runs.getLogSasUrl(registryTI.resourceGroup, registryTI.registryName, node.runId);
+        const result = await (await registryTI.getClient()).runs.getLogSasUrl(registryTI.resourceGroup, registryTI.registryName, node.runId);
 
-        const blobClient = new BlobClient(nonNullProp(result, 'logLink'));
+        const storageBlob = await import('@azure/storage-blob');
+        const blobClient = new storageBlob.BlobClient(nonNullProp(result, 'logLink'));
         const contentBuffer = await blobClient.downloadToBuffer();
         const content = bufferToString(contentBuffer);
 

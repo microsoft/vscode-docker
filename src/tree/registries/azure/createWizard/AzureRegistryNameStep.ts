@@ -15,7 +15,8 @@ export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardCon
     }
 
     public async prompt(context: IAzureRegistryWizardContext): Promise<void> {
-        const client = createAzureClient(context, ContainerRegistryManagementClient);
+        const armContainerRegistry = await import('@azure/arm-containerregistry');
+        const client = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         context.newRegistryName = (await ext.ui.showInputBox({
             placeHolder: localize('vscode-docker.tree.registries.azure.createWizard.name', 'Registry name'),
             prompt: localize('vscode-docker.tree.registries.azure.createWizard.namePrompt', 'Provide a registry name'),
