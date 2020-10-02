@@ -91,7 +91,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
 
     private static async getTaskRuns(registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<AcrModels.RunListResult> {
         return nextLink === undefined ?
-            await registryTI.client.runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
-            await registryTI.client.runs.listNext(nextLink);
+            await (await registryTI.getClient()).runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
+            await (await registryTI.getClient()).runs.listNext(nextLink);
     }
 }

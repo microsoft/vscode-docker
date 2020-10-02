@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import Handlebars = require('handlebars');
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MessageItem, Progress } from 'vscode';
@@ -15,55 +14,6 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
-Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
-    const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
-
-    return pathNormalize(
-        path.relative(workspaceFolder.uri.fsPath, absolutePath),
-        platform
-    );
-});
-
-Handlebars.registerHelper('contextRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
-    return pathNormalize(
-        path.relative(wizardContext.dockerBuildContext, absolutePath),
-        platform
-    );
-});
-
-Handlebars.registerHelper('eq', (a: string, b: string) => {
-    return a === b;
-});
-
-Handlebars.registerHelper('basename', (a: string) => {
-    return path.basename(a);
-});
-
-Handlebars.registerHelper('dirname', (a: string, platform: PlatformOS = 'Linux') => {
-    return pathNormalize(
-        path.dirname(a),
-        platform
-    );
-});
-
-Handlebars.registerHelper('toQuotedArray', (arr: string[]) => {
-    return `[${arr.map(a => `"${a}"`).join(', ')}]`;
-});
-
-Handlebars.registerHelper('isRootPort', (ports: number[]) => {
-    return ports?.some(p => p < 1024);
-});
-
-Handlebars.registerHelper('join', (a: never[] | undefined, b: never[] | undefined) => {
-    if (!a) {
-        return b;
-    } else if (!b) {
-        return a;
-    } else {
-        return a.concat(b);
-    }
-});
-
 export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> extends AzureWizardExecuteStep<TWizardContext> {
     public constructor(private readonly fileType: ScaffoldedFileType, public readonly priority: number) {
         super();
@@ -71,6 +21,9 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
 
     public async execute(wizardContext: TWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
         progress.report({ message: localize('vscode-docker.scaffold.scaffoldFileStep.progress', 'Creating \'{0}\'...', this.fileType) });
+
+        await registerHandlebarsHelpers();
+        const Handlebars = await import('handlebars');
 
         const inputPath = await this.getInputPath(wizardContext);
 
@@ -201,4 +154,64 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
             wizardContext.overwriteAll = true;
         }
     }
+}
+
+let helpersRegistered = false;
+async function registerHandlebarsHelpers(): Promise<void> {
+    if (helpersRegistered) {
+        return;
+    }
+
+    const Handlebars = await import('handlebars');
+
+    Handlebars.registerHelper('workspaceRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
+        const workspaceFolder: vscode.WorkspaceFolder = wizardContext.workspaceFolder;
+
+        return pathNormalize(
+            path.relative(workspaceFolder.uri.fsPath, absolutePath),
+            platform
+        );
+    });
+
+    Handlebars.registerHelper('contextRelative', (wizardContext: ScaffoldingWizardContext, absolutePath: string, platform: PlatformOS = 'Linux') => {
+        return pathNormalize(
+            path.relative(wizardContext.dockerBuildContext, absolutePath),
+            platform
+        );
+    });
+
+    Handlebars.registerHelper('eq', (a: string, b: string) => {
+        return a === b;
+    });
+
+    Handlebars.registerHelper('basename', (a: string) => {
+        return path.basename(a);
+    });
+
+    Handlebars.registerHelper('dirname', (a: string, platform: PlatformOS = 'Linux') => {
+        return pathNormalize(
+            path.dirname(a),
+            platform
+        );
+    });
+
+    Handlebars.registerHelper('toQuotedArray', (arr: string[]) => {
+        return `[${arr.map(a => `"${a}"`).join(', ')}]`;
+    });
+
+    Handlebars.registerHelper('isRootPort', (ports: number[]) => {
+        return ports?.some(p => p < 1024);
+    });
+
+    Handlebars.registerHelper('join', (a: never[] | undefined, b: never[] | undefined) => {
+        if (!a) {
+            return b;
+        } else if (!b) {
+            return a;
+        } else {
+            return a.concat(b);
+        }
+    });
+
+    helpersRegistered = true;
 }

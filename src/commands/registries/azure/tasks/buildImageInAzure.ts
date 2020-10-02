@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { IActionContext } from 'vscode-azureextensionui';
-import { scheduleRunRequest } from '../../../../utils/lazyLoad';
+import { scheduleRunRequest } from './scheduleRunRequest';
 
 export async function buildImageInAzure(context: IActionContext, uri?: vscode.Uri | undefined): Promise<void> {
     await scheduleRunRequest(context, "DockerBuildRequest", uri);
