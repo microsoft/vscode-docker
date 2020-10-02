@@ -63,6 +63,7 @@ export class AsyncLazy<T> {
 
     public clear(): void {
         this._isValueCreated = false;
+        this._valuePromise = undefined;
     }
 
     public async getValue(): Promise<T> {

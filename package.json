@@ -49,6 +49,8 @@
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
+        "onCommand:vscode-docker.containers.composeGroup.restart",
+        "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.help.reportIssue",
         "onCommand:vscode-docker.images.build",
@@ -145,6 +147,14 @@
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
                     "when": "vscode-docker:newCliPresent"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.restart",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.down",
+                    "when": "never"
                 },
                 {
                     "command": "vscode-docker.contexts.use",
@@ -377,6 +387,16 @@
                     "command": "vscode-docker.containers.remove",
                     "when": "view == dockerContainers && viewItem =~ /container$/i",
                     "group": "containers_2_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.restart",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "group": "composeGroup_1_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.down",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "group": "composeGroup_1_destructive@2"
                 },
                 {
                     "command": "vscode-docker.images.run",
@@ -1745,7 +1765,7 @@
                 },
                 "docker.containers.groupBy": {
                     "type": "string",
-                    "default": "None",
+                    "default": "Compose Project Name",
                     "description": "%vscode-docker.config.docker.containers.groupBy%",
                     "enum": [
                         "Compose Project Name",
@@ -2294,6 +2314,16 @@
             {
                 "command": "vscode-docker.containers.viewLogs",
                 "title": "%vscode-docker.commands.containers.viewLogs%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.composeGroup.restart",
+                "title": "%vscode-docker.commands.containers.composeGroup.restart%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.composeGroup.down",
+                "title": "%vscode-docker.commands.containers.composeGroup.down%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
