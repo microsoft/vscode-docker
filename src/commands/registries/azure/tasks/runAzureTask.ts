@@ -17,7 +17,7 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
 
     const registryTI = node.parent.parent;
     let runRequest: AcrModels.TaskRunRequest = { type: 'TaskRunRequest', taskId: node.id };
-    let run = await registryTI.client.registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
+    let run = await (await registryTI.getClient()).registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
     await node.parent.refresh();
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

@@ -33,8 +33,8 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         const registryTI = this.parent;
 
         let taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
-            await registryTI.client.tasks.list(registryTI.resourceGroup, registryTI.registryName) :
-            await registryTI.client.tasks.listNext(this._nextLink);
+            await (await registryTI.getClient()).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
+            await (await registryTI.getClient()).tasks.listNext(this._nextLink);
 
         this._nextLink = taskListResult.nextLink;
 
