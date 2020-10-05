@@ -1,8 +1,12 @@
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
+import { AzExtTreeItemIntermediate } from '../../AzExtTreeItemIntermediate';
 
-export class FileTreeItem extends AzExtTreeItem {
+export class FileTreeItem extends AzExtTreeItemIntermediate {
+    public id?: string;
+    public description?: string = '';
+
     public constructor(parent: AzExtParentTreeItem, private readonly item: DirectoryItem) {
         super(parent);
     }

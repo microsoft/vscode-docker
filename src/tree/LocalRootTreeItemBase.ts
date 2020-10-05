@@ -50,6 +50,9 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     public abstract getItems(context: IActionContext): Promise<TItem[] | undefined>;
     public abstract getPropertyValue(item: TItem, property: TProperty): string;
 
+    // Redefining this as an abstract allows inheriting classes to either do an accessor or a property
+    public readonly abstract childTypeLabel: string;
+
     public static autoRefreshViews: boolean = true;
 
     public groupBySetting: TProperty | CommonGroupBy;
@@ -328,6 +331,8 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     private getDockerErrorTreeItems(context: IActionContext, error: IParsedError, dockerInstalled: boolean): AzExtTreeItem[] {
         if (error.errorType === NotSupportedError.ErrorType) {
             return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.contextNotSupported', 'This view is not supported in the current Docker context.'), contextValue: 'contextNotSupported' })];
+        } else if (error.isUserCancelledError) {
+            return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.changingContexts', 'Changing Docker context...'), contextValue: 'changingContexts' })];
         }
 
         const result: AzExtTreeItem[] = dockerInstalled

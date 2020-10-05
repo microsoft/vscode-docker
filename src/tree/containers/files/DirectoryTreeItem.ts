@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
+import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
 import { FileTreeItem } from "./FileTreeItem";
 
 export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;
 
-export class DirectoryTreeItem extends AzExtParentTreeItem {
+export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
+    public id?: string ;
+    public description?: string = '';
+
     private children: AzExtTreeItem[] | undefined;
 
     public constructor(
@@ -24,7 +28,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
     }
 
     public get iconPath(): vscode.ThemeIcon {
-        return this.collapsibleState === vscode.TreeItemCollapsibleState.Expanded
+        return (this as vscode.TreeItem).collapsibleState === vscode.TreeItemCollapsibleState.Expanded
             ? new vscode.ThemeIcon('folder-opened')
             : new vscode.ThemeIcon('folder');
     }

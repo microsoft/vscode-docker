@@ -3,16 +3,21 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as moment from 'moment';
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import * as dayjs from 'dayjs';
+import * as relativeTime from 'dayjs/plugin/relativeTime';
+import { AzExtTreeItemIntermediate } from '../AzExtTreeItemIntermediate';
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 
-export class RemoteTagTreeItem extends AzExtTreeItem {
+dayjs.extend(relativeTime);
+
+export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
     public parent: RemoteRepositoryTreeItemBase;
     public tag: string;
     public time: Date;
+
+    public readonly id?: string; // Unused but needs to be implemented since it is abstract in the parent
 
     public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
         super(parent);
@@ -40,7 +45,7 @@ export class RemoteTagTreeItem extends AzExtTreeItem {
     }
 
     public get description(): string {
-        return moment(this.time).fromNow();
+        return dayjs(this.time).fromNow();
     }
 
     public get iconPath(): IconPath {

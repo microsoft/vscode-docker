@@ -9,7 +9,7 @@ import { PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getIconPath, IconPath } from "../../IconPath";
+import { getIconPath } from "../../IconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
@@ -29,22 +29,13 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
         super(parent);
         this.cachedProvider = provider;
+        this.id = this.cachedProvider.id + this.username;
+        this.iconPath = getIconPath('gitLab');
+        this.description = ext.registriesRoot.hasMultiplesOfProvider(this.cachedProvider) ? this.username : undefined;
     }
 
     public get contextValue(): string {
         return getRegistryContextValue(this, registryProviderSuffix);
-    }
-
-    public get description(): string | undefined {
-        return ext.registriesRoot.hasMultiplesOfProvider(this.cachedProvider) ? this.username : undefined;
-    }
-
-    public get iconPath(): IconPath {
-        return getIconPath('gitLab');
-    }
-
-    public get id(): string {
-        return this.cachedProvider.id + this.username;
     }
 
     public get username(): string {

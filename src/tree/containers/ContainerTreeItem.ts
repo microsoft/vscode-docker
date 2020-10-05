@@ -4,19 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import ChildProcessProvider from "../../debugging/coreclr/ChildProcessProvider";
-import CliDockerClient from "../../debugging/coreclr/CliDockerClient";
 import { DockerOSType } from "../../docker/Common";
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { getContainerDirectoryItems } from "../../docker/DockerContainerDirectoryProvider";
 import { ext } from "../../extensionVariables";
 import { AsyncLazy } from "../../utils/lazy";
+import { execAsync } from "../../utils/spawnAsync";
+import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
-import { getContainerStateIcon } from "./ContainerProperties";import { DirectoryItemProvider } from "./files/DirectoryTreeItem";
+import { getContainerStateIcon } from "./ContainerProperties";
+import { DirectoryItemProvider } from "./files/DirectoryTreeItem";
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends AzExtParentTreeItem {
+export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainer;
@@ -45,6 +46,10 @@ export class ContainerTreeItem extends AzExtParentTreeItem {
 
     public get fullTag(): string {
         return this._item.Image;
+    }
+
+    public get labels(): { [key: string]: string } {
+        return this._item.Labels;
     }
 
     public get label(): string {
@@ -114,9 +119,8 @@ export class ContainerTreeItem extends AzExtParentTreeItem {
     }
 
     private static async dockerExecutor(containerId: string, command: string, user?: string): Promise<string> {
-        const dockerClient = new CliDockerClient(new ChildProcessProvider());
+        const results = await execAsync(command);
 
-        // TODO: Support user option.
-        return await dockerClient.exec(containerId, command, {});
+        return results.stdout
     }
 }

@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
+import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
-export class ImageTreeItem extends AzExtTreeItem {
+export class ImageTreeItem extends AzExtTreeItemIntermediate {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
     private readonly _item: DatedDockerImage;

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice';
+import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import { env, Progress, Uri, window } from "vscode";
-import { AppKind, AppServicePlanListStep, IAppServiceWizardContext, SiteNameStep, WebsiteOS } from "vscode-azureappservice";
+import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -28,10 +28,13 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
 
+    const vscAzureAppService = await import('vscode-azureappservice');
+    vscAzureAppService.registerAppServiceExtensionVariables(ext);
+
     const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
         ...context,
-        newSiteOS: WebsiteOS.linux,
-        newSiteKind: AppKind.app
+        newSiteOS: vscAzureAppService.WebsiteOS.linux,
+        newSiteKind: vscAzureAppService.AppKind.app
     };
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
     // Create a temporary azure account tree item since Azure might not be connected
@@ -42,9 +45,9 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     }
 
     promptSteps.push(...[
-        new SiteNameStep(),
+        new vscAzureAppService.SiteNameStep(),
         new ResourceGroupListStep(),
-        new AppServicePlanListStep()
+        new vscAzureAppService.AppServicePlanListStep()
     ]);
     LocationListStep.addStep(wizardContext, promptSteps);
 
@@ -135,7 +138,8 @@ class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardConte
         ext.outputChannel.appendLine(creatingNewApp);
         progress.report({ message: creatingNewApp });
 
-        const client: WebSiteManagementClient = createAzureClient(context, WebSiteManagementClient);
+        const armAppService = await import('@azure/arm-appservice');
+        const client: WebSiteManagementClient = createAzureClient(context, armAppService.WebSiteManagementClient);
         context.site = await client.webApps.createOrUpdate(nonNullValueAndProp(context.resourceGroup, 'name'), nonNullProp(context, 'newSiteName'), {
             name: context.newSiteName,
             kind: 'app,linux',

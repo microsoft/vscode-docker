@@ -12,8 +12,6 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import ChildProcessProvider from './coreclr/ChildProcessProvider';
-import CliDockerClient from './coreclr/CliDockerClient';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
@@ -56,71 +54,78 @@ class ServerReadyDetector implements DockerServerReadyDetector {
             throw new Error(localize('vscode-docker.debug.serverReady.noContainer', 'No container name was resolved or provided to DockerServerReadyAction.'));
         }
 
-        if (captureString === '') {
-            // nothing captured by reg exp -> use the uriFormat as the target url without substitution
-            // verify that format does not contain '%s'
-            if (format.indexOf('%s') >= 0) {
-                const errMsg = localize('vscode-docker.debug.serverReady.noCapture', 'Format uri (\'{0}\') uses a substitution placeholder but pattern did not capture anything.', format);
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
-                return;
-            }
-            captureString = format;
-        } else if (/^[0-9]+$/.test(captureString)) {
-            // looks like a port number -> use the uriFormat and substitute a single "%s" with the port
-            // verify that format only contains a single '%s'
-            const s = format.split('%s');
-            if (s.length !== 2) {
-                const errMsg = localize('vscode-docker.debug.serverReady.oneSubstitution', 'Format uri (\'{0}\') must contain exactly one substitution placeholder.', format);
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
-                return;
-            }
+        await callWithTelemetryAndErrorHandling('dockerServerReadyAction.serverReadyDetector.openExternalWithString', async (context: IActionContext) => {
+            // Don't actually telemetrize or show anything (same as prior behavior), but wrap call to get an IActionContext
+            context.telemetry.suppressAll = true;
+            context.errorHandling.suppressDisplay = true;
+            context.errorHandling.rethrow = false;
 
-            const dockerClient = new CliDockerClient(new ChildProcessProvider());
-            const containerPort = Number.parseInt(captureString, 10);
-            const hostPort = await dockerClient.getHostPort(args.containerName, containerPort);
-
-            if (!hostPort) {
-                throw new Error(localize('vscode-docker.debug.serverReady.noHostPortA', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
-            }
-
-            captureString = util.format(format, hostPort);
-        } else {
-            const containerPort = this.getContainerPort(captureString);
-
-            if (containerPort === undefined) {
-                const errMsg = localize('vscode-docker.debug.serverReady.noCapturedPort', 'Captured string (\'{0}\') must contain a port number.', captureString);
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
-                return;
-            }
-
-            const containerProtocol = this.getContainerProtocol(captureString);
-            const dockerClient = new CliDockerClient(new ChildProcessProvider());
-            const hostPort = await dockerClient.getHostPort(args.containerName, containerPort);
-
-            if (!hostPort) {
-                throw new Error(localize('vscode-docker.debug.serverReady.noHostPortB', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
-            }
-
-            const s = format.split('%s');
-
-            if (s.length === 1) {
-                // Format string has no substitutions, so use as-is...
+            if (captureString === '') {
+                // nothing captured by reg exp -> use the uriFormat as the target url without substitution
+                // verify that format does not contain '%s'
+                if (format.indexOf('%s') >= 0) {
+                    const errMsg = localize('vscode-docker.debug.serverReady.noCapture', 'Format uri (\'{0}\') uses a substitution placeholder but pattern did not capture anything.', format);
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    return;
+                }
                 captureString = format;
-            } else if (s.length === 3) {
-                // There are exactly two substitutions (which is expected)...
-                captureString = util.format(format, containerProtocol, hostPort);
-            } else {
-                const errMsg = localize('vscode-docker.debug.serverReady.twoSubstitutions', 'Format uri (\'{0}\') must contain exactly two substitution placeholders.', format);
-                /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
-                return;
-            }
-        }
+            } else if (/^[0-9]+$/.test(captureString)) {
+                // looks like a port number -> use the uriFormat and substitute a single "%s" with the port
+                // verify that format only contains a single '%s'
+                const s = format.split('%s');
+                if (s.length !== 2) {
+                    const errMsg = localize('vscode-docker.debug.serverReady.oneSubstitution', 'Format uri (\'{0}\') must contain exactly one substitution placeholder.', format);
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    return;
+                }
 
-        this.openExternalWithUri(session, captureString);
+                const containerPort = Number.parseInt(captureString, 10);
+                const containerInspectInfo = await ext.dockerClient.inspectContainer(context, args.containerName);
+                const hostPort = containerInspectInfo.NetworkSettings.Ports[`${containerPort}/tcp`][0].HostPort;
+
+                if (!hostPort) {
+                    throw new Error(localize('vscode-docker.debug.serverReady.noHostPortA', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
+                }
+
+                captureString = util.format(format, hostPort);
+            } else {
+                const containerPort = this.getContainerPort(captureString);
+
+                if (containerPort === undefined) {
+                    const errMsg = localize('vscode-docker.debug.serverReady.noCapturedPort', 'Captured string (\'{0}\') must contain a port number.', captureString);
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    return;
+                }
+
+                const containerProtocol = this.getContainerProtocol(captureString);
+                const containerInspectInfo = await ext.dockerClient.inspectContainer(context, args.containerName);
+                const hostPort = containerInspectInfo.NetworkSettings.Ports[`${containerPort}/tcp`][0].HostPort;
+
+                if (!hostPort) {
+                    throw new Error(localize('vscode-docker.debug.serverReady.noHostPortB', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
+                }
+
+                const s = format.split('%s');
+
+                if (s.length === 1) {
+                    // Format string has no substitutions, so use as-is...
+                    captureString = format;
+                } else if (s.length === 3) {
+                    // There are exactly two substitutions (which is expected)...
+                    captureString = util.format(format, containerProtocol, hostPort);
+                } else {
+                    const errMsg = localize('vscode-docker.debug.serverReady.twoSubstitutions', 'Format uri (\'{0}\') must contain exactly two substitution placeholders.', format);
+                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    return;
+                }
+            }
+
+            this.openExternalWithUri(session, captureString);
+        });
     }
 
     private getContainerProtocol(containerUrl: string): string {

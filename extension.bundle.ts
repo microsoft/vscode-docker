@@ -19,18 +19,10 @@ export { deactivateInternal } from './src/extension';
 // The tests should import '../extension.bundle.ts'. At design-time they live in tests/ and so will pick up this file (extension.bundle.ts).
 // At runtime the tests live in dist/tests and will therefore pick up the main webpack bundle at dist/extension.bundle.js.
 export { configPrefix } from './src/constants';
-export { ProcessProvider } from './src/debugging/coreclr/ChildProcessProvider';
-export { DockerBuildImageOptions, DockerClient } from './src/debugging/coreclr/CliDockerClient';
 export { CommandLineBuilder } from './src/utils/commandLineBuilder';
-export { DotNetClient } from './src/debugging/coreclr/CommandLineDotNetClient';
-export { compareBuildImageOptions, LaunchOptions } from './src/debugging/coreclr/dockerManager';
-export { FileSystemProvider } from './src/debugging/coreclr/fsProvider';
-export { LineSplitter } from './src/debugging/coreclr/lineSplitter';
 export { delay } from './src/utils/promiseUtils';
 export { Lazy, AsyncLazy } from './src/utils/lazy';
-export { OSProvider } from './src/utils/LocalOSProvider';
 export { bufferToString } from './src/utils/spawnAsync';
-export { DockerDaemonIsLinuxPrerequisite, DockerfileExistsPrerequisite, DotNetSdkInstalledPrerequisite, LinuxUserInDockerGroupPrerequisite, MacNuGetFallbackFolderSharedPrerequisite } from './src/debugging/coreclr/prereqManager';
 export { ext } from './src/extensionVariables';
 export { httpsRequestBinary } from './src/utils/httpRequest';
 export { IKeytar } from './src/utils/keytar';
@@ -51,5 +43,6 @@ export { DockerImage } from './src/docker/Images';
 export { DockerNetwork } from './src/docker/Networks';
 export { DockerVolume } from './src/docker/Volumes';
 export { CommandTemplate, selectCommandTemplate, defaultCommandTemplates } from './src/commands/selectCommandTemplate';
+export { NonComposeGroupName } from './src/tree/containers/ContainersTreeItem';
 
 export * from 'vscode-azureextensionui';

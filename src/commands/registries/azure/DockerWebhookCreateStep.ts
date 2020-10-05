@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { WebSiteManagementModels } from '@azure/arm-appservice';
-import { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry';
+import { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry';
 import { Progress } from "vscode";
 import * as vscode from "vscode";
-import { IAppServiceWizardContext, SiteClient } from "vscode-azureappservice";
+import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -31,8 +31,10 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         message?: string;
         increment?: number;
     }>): Promise<void> {
+        const vscAzureAppService = await import('vscode-azureappservice');
+        vscAzureAppService.registerAppServiceExtensionVariables(ext);
         const site: WebSiteManagementModels.Site = nonNullProp(context, 'site');
-        let siteClient = new SiteClient(site, context);
+        let siteClient = new vscAzureAppService.SiteClient(site, context);
         let appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
         if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
             const creatingNewWebhook: string = localize('vscode-docker.commands.registries.azure.dockerWebhook.creatingWebhook', 'Creating webhook for web app "{0}"...', context.newSiteName);
@@ -84,7 +86,8 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
 
         // variables derived from the container registry
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
-        const crmClient = createAzureClient(registryTreeItem.parent.root, ContainerRegistryManagementClient);
+        const armContainerRegistry = await import('@azure/arm-containerregistry');
+        const crmClient = createAzureClient(registryTreeItem.parent.root, armContainerRegistry.ContainerRegistryManagementClient);
         let webhookCreateParameters: AcrModels.WebhookCreateParameters = {
             location: registryTreeItem.registryLocation,
             serviceUri: appUri,

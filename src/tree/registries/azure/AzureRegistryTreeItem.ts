@@ -8,7 +8,7 @@ import { URL } from "url";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
 import { nonNullProp } from "../../../utils/nonNull";
-import { getIconPath, IconPath } from "../../IconPath";
+import { getIconPath } from "../../IconPath";
 import { azureOAuthProvider, IAzureOAuthContext } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
@@ -32,6 +32,9 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
             subscriptionContext: this.parent.root,
             scope: 'registry:catalog:*',
         }
+
+        this.id = this.registryId;
+        this.iconPath = getIconPath('azureRegistry');
     }
 
     public get registryName(): string {
@@ -50,24 +53,17 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         return this._registry.location;
     }
 
-    public get client(): ContainerRegistryManagementClient {
-        return createAzureClient(this.parent.root, ContainerRegistryManagementClient);
+    public async getClient(): Promise<ContainerRegistryManagementClient> {
+        const armContainerRegistry = await import('@azure/arm-containerregistry');
+        return createAzureClient(this.parent.root, armContainerRegistry.ContainerRegistryManagementClient);
     }
 
     public get label(): string {
         return this.registryName;
     }
 
-    public get id(): string {
-        return this.registryId;
-    }
-
     public get properties(): unknown {
         return this._registry;
-    }
-
-    public get iconPath(): IconPath {
-        return getIconPath('azureRegistry');
     }
 
     public get baseUrl(): string {
@@ -105,12 +101,12 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public async deleteTreeItemImpl(): Promise<void> {
-        await this.client.registries.deleteMethod(this.resourceGroup, this.registryName);
+        await (await this.getClient()).registries.deleteMethod(this.resourceGroup, this.registryName);
     }
 
     public async tryGetAdminCredentials(): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
         if (this._registry.adminUserEnabled) {
-            return await this.client.registries.listCredentials(this.resourceGroup, this.registryName);
+            return await (await this.getClient()).registries.listCredentials(this.resourceGroup, this.registryName);
         } else {
             return undefined;
         }

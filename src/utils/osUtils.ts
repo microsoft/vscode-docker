@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as os from 'os';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { DockerOSType } from '../docker/Common';
 import { ext } from '../extensionVariables';
 
-// eslint-disable-next-line @typescript-eslint/tslint/config
 export async function getDockerOSType(context: IActionContext): Promise<DockerOSType> {
     if (os.platform() !== 'win32') {
         // On Linux or macOS, this can only ever be linux,
@@ -18,4 +19,22 @@ export async function getDockerOSType(context: IActionContext): Promise<DockerOS
         const info = await ext.dockerClient.info(context);
         return info?.OSType || 'linux';
     }
+}
+
+let counter = 0;
+
+export function getTempFileName(): string {
+    return path.join(os.tmpdir(), `${vscode.env.sessionId}-${counter++}.tmp`);
+}
+
+export function isWindows(): boolean {
+    return os.platform() === 'win32';
+}
+
+export function isMac(): boolean {
+    return os.platform() === 'darwin';
+}
+
+export function isLinux(): boolean {
+    return os.platform() !== 'win32' && os.platform() !== 'darwin';
 }

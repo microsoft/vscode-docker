@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { SemVer } from 'semver';
 import { localize } from '../../../localize';
 import { hasTask } from '../../../tasks/TaskHelper';
@@ -70,11 +71,18 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             wizardContext.serviceName = getValidImageNameFromPath(wizardContext.artifact);
         }
 
+        if (!wizardContext.dockerfileDirectory) {
+            // For .NET Core, the Dockerfile is always adjacent the artifact (csproj)
+            wizardContext.dockerfileDirectory = path.dirname(wizardContext.artifact);
+        }
+
+        // No need to set dockerBuildContext because the superclass will set it to the proper value (the workspace root)
+
         await super.prompt(wizardContext);
     }
 
     public shouldPrompt(wizardContext: NetCoreScaffoldingWizardContext): boolean {
-        return !wizardContext.netCoreAssemblyName || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage || !wizardContext.serviceName;
+        return !wizardContext.netCoreAssemblyName || !wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage || !wizardContext.serviceName || !wizardContext.dockerfileDirectory;
     }
 
     protected setTelemetry(wizardContext: NetCoreScaffoldingWizardContext): void {

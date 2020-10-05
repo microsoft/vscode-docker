@@ -4,13 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
-import * as moment from 'moment';
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import * as dayjs from 'dayjs';
+import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { nonNullProp } from "../../../utils/nonNull";
+import { AzExtTreeItemIntermediate } from "../../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from "../../IconPath";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
-export class AzureTaskRunTreeItem extends AzExtTreeItem {
+dayjs.extend(relativeTime);
+
+export class AzureTaskRunTreeItem extends AzExtTreeItemIntermediate {
     public static contextValue: string = 'azureTaskRun';
     public contextValue: string = AzureTaskRunTreeItem.contextValue;
     public parent: AzureTaskTreeItem;
@@ -71,7 +74,7 @@ export class AzureTaskRunTreeItem extends AzExtTreeItem {
     public get description(): string {
         const parts: string[] = [];
         if (this.createTime) {
-            parts.push(moment(this.createTime).fromNow());
+            parts.push(dayjs(this.createTime).fromNow());
         }
 
         if (this._run.status && this._run.status !== 'Succeeded') {

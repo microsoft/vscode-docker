@@ -2,19 +2,17 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { IActionContext } from "vscode-azureextensionui";
-import ChildProcessProvider from "../../../debugging/coreclr/ChildProcessProvider";
 import { ContainerTreeItem } from "../../../tree/containers/ContainerTreeItem";
 import { FileTreeItem } from "../../../tree/containers/files/FileTreeItem";
 import { CommandLineBuilder } from "../../../utils/commandLineBuilder";
+import { execAsync } from '../../../utils/spawnAsync';
 
 async function getContainerFileOnLinux(containerId: string, containerPath: string, localPath: string): Promise<void> {
     const command = CommandLineBuilder
         .create('docker', 'cp', `${containerId}:${containerPath}`, localPath)
         .build();
 
-    const processProvider = new ChildProcessProvider();
-
-    await processProvider.exec(command, {});
+    await execAsync(command, {});
 }
 
 export async function openContainerFile(context: IActionContext, node?: FileTreeItem): Promise<void> {
