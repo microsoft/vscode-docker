@@ -11,6 +11,7 @@ import { ext } from '../../extensionVariables';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
+    // High priority number to make this execute after everything else
     public readonly priority: number = 10000;
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: never): Promise<void> {
@@ -26,6 +27,7 @@ export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizard
     }
 
     public shouldExecute(wizardContext: ScaffoldingWizardContext): boolean {
+        // Only open the Dockerfile if we scaffolded it (as opposed to doing just compose or debug init)
         return wizardContext.scaffoldType === 'all';
     }
 }
