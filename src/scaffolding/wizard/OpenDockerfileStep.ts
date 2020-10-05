@@ -21,7 +21,7 @@ export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizard
             wizardContext.telemetry.properties.openedDockerfile = 'true';
 
             // Don't wait
-            void vscode.workspace.openTextDocument(vscode.Uri.file(dockerfilePath));
+            void vscode.window.showTextDocument(vscode.Uri.file(dockerfilePath));
         }
     }
 
