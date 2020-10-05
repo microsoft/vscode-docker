@@ -115,6 +115,7 @@
         "onDebugInitialConfigurations",
         "onDebugResolve:docker-coreclr",
         "onDebugResolve:docker",
+        "onFileSystem:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",

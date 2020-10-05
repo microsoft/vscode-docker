@@ -3,18 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { DockerOSType } from "../../docker/Common";
 import { DockerContainer, DockerPort } from "../../docker/Containers";
-import { getContainerDirectoryItems } from "../../docker/DockerContainerDirectoryProvider";
 import { ext } from "../../extensionVariables";
-import { AsyncLazy } from "../../utils/lazy";
-import { execAsync } from "../../utils/spawnAsync";
 import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { getContainerStateIcon } from "./ContainerProperties";
-import { DirectoryItemProvider } from "./files/DirectoryTreeItem";
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
 export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
@@ -100,27 +96,6 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        return [ new FilesTreeItem(this, this.getDirectoryItemProvider(context)) ];
-    }
-
-    private getDirectoryItemProvider(context: IActionContext): DirectoryItemProvider {
-        const platformTask = new AsyncLazy<DockerOSType | undefined>(
-            async () => {
-                const result = await ext.dockerClient.inspectContainer(context, this.containerId);
-
-                return result.Platform
-            });
-
-        return async (path: string | undefined) => {
-            const platform = await platformTask.getValue();
-
-            return getContainerDirectoryItems(ContainerTreeItem.dockerExecutor, this.containerId, path, platform);
-        };
-    }
-
-    private static async dockerExecutor(containerId: string, command: string, user?: string): Promise<string> {
-        const results = await execAsync(command);
-
-        return results.stdout
+        return [ new FilesTreeItem(this, vscode.workspace.fs, this.containerId) ];
     }
 }

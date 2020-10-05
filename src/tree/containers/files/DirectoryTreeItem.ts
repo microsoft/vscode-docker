@@ -14,8 +14,9 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
 
     public constructor(
         parent: AzExtParentTreeItem,
-        private readonly item: DirectoryItem | undefined,
-        private readonly itemProvider: DirectoryItemProvider) {
+        private readonly fs: vscode.FileSystem,
+        private readonly name: string,
+        private readonly uri: vscode.Uri) {
         super(parent);
     }
 
@@ -38,21 +39,23 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
             this.children = undefined;
         }
 
-        const items = await this.itemProvider(this.item?.path);
+        const items = await this.fs.readDirectory(this.uri);
 
         return items.map(item => this.createTreeItemForDirectoryItem(item));
     }
 
-    private createTreeItemForDirectoryItem(item: DirectoryItem): AzExtTreeItem {
-        switch (item.type) {
-            case 'directory': return new DirectoryTreeItem(this, item, this.itemProvider);
-            case 'file': return new FileTreeItem(this, item);
+    private createTreeItemForDirectoryItem(item: [string, vscode.FileType]): AzExtTreeItem {
+        const itemUri = vscode.Uri.joinPath(this.uri, item[0]);
+
+        switch (item[1]) {
+            case vscode.FileType.Directory: return new DirectoryTreeItem(this, this.fs, item[0], itemUri);
+            case vscode.FileType.File: return new FileTreeItem(this, item[0], itemUri);
             default:
                 throw new Error('Unrecognized directory item type.');
         }
     }
 
     public get label(): string {
-        return this.item?.name ?? '<Unknown>';
+        return this.name;
     }
 }

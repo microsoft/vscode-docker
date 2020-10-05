@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
-import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
 import { AzExtTreeItemIntermediate } from '../../AzExtTreeItemIntermediate';
 
 export class FileTreeItem extends AzExtTreeItemIntermediate {
     public id?: string;
     public description?: string = '';
 
-    public constructor(parent: AzExtParentTreeItem, private readonly item: DirectoryItem) {
+    public constructor(
+        parent: AzExtParentTreeItem,
+        private readonly name: string,
+        public readonly uri: vscode.Uri) {
         super(parent);
     }
 
@@ -20,10 +22,6 @@ export class FileTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public get label(): string {
-        return this.item.name;
-    }
-
-    public get path(): string {
-        return this.item.path;
+        return this.name;
     }
 }

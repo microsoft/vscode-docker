@@ -14,6 +14,7 @@ import { registerCommands } from './commands/registerCommands';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
+import { ContainerFilesProvider } from './docker/files/containerFilesProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
@@ -119,6 +120,17 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
         await ext.dockerContextManager.refresh();
+
+        ctx.subscriptions.push(
+            vscode.workspace.registerFileSystemProvider(
+                'docker',
+                new ContainerFilesProvider(),
+                {
+                    // TODO: Is this the safest, since this may be container-specific?
+                    isCaseSensitive: true,
+                    isReadonly: true
+                })
+        );
 
         registerTrees();
         registerCommands();
