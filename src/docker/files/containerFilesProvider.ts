@@ -6,6 +6,7 @@ import { ext } from '../../extensionVariables';
 import { execAsync } from '../../utils/spawnAsync';
 import { DockerOSType } from '../Common';
 import { DockerContainerExecutor, getContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
+import { DockerUri, DockerUriFileType } from './dockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
 
@@ -20,12 +21,14 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
+        const dockerUri = DockerUri.parse(uri);
+
         // TODO: Implement!
         return {
             ctime: 0,
             mtime: 0,
             size: 0,
-            type: vscode.FileType.Directory
+            type: ContainerFilesProvider.toVsCodeFileType(dockerUri.fileType)
         };
     }
 
@@ -117,5 +120,15 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         const result = await ext.dockerClient.inspectContainer(/* context */ undefined, id);
 
         return result.Platform
+    }
+
+    private static toVsCodeFileType(fileType: DockerUriFileType): vscode.FileType {
+        switch (fileType) {
+            case 'directory': return vscode.FileType.Directory;
+            case 'file': return vscode.FileType.File;
+            default:
+
+                return vscode.FileType.Unknown;
+        }
     }
 }
