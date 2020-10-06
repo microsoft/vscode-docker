@@ -1,6 +1,8 @@
+import * as querystring from 'querystring';
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
+import { DockerUri } from '../../../docker/files/dockerUri';
 import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
 import { FileTreeItem } from "./FileTreeItem";
 
@@ -16,7 +18,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         parent: AzExtParentTreeItem,
         private readonly fs: vscode.FileSystem,
         private readonly name: string,
-        private readonly uri: vscode.Uri) {
+        private readonly uri: DockerUri) {
         super(parent);
     }
 
@@ -39,17 +41,26 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
             this.children = undefined;
         }
 
-        const items = await this.fs.readDirectory(this.uri);
+        const items = await this.fs.readDirectory(this.uri.uri);
 
         return items.map(item => this.createTreeItemForDirectoryItem(item));
     }
 
     private createTreeItemForDirectoryItem(item: [string, vscode.FileType]): AzExtTreeItem {
-        const itemUri = vscode.Uri.joinPath(this.uri, item[0]);
+        const name = item[0];
+        const fileType = item[1];
 
-        switch (item[1]) {
-            case vscode.FileType.Directory: return new DirectoryTreeItem(this, this.fs, item[0], itemUri);
-            case vscode.FileType.File: return new FileTreeItem(this, item[0], itemUri);
+        let itemUri = DockerUri.joinPath(this.uri, name);
+
+        switch (fileType) {
+            case vscode.FileType.Directory:
+
+                return new DirectoryTreeItem(this, this.fs, name, itemUri);
+
+            case vscode.FileType.File:
+
+                return new FileTreeItem(this, name, itemUri.with({ fileType: 'file' }));
+
             default:
                 throw new Error('Unrecognized directory item type.');
         }

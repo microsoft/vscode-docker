@@ -15,7 +15,7 @@ async function getContainerFileOnLinux(containerId: string, containerPath: strin
 
 export async function openContainerFile(context: IActionContext, node?: FileTreeItem): Promise<void> {
     if (node) {
-        const document = await vscode.workspace.openTextDocument(node.uri);
+        const document = await vscode.workspace.openTextDocument(node.uri.uri);
 
         await vscode.window.showTextDocument(document);
     }
