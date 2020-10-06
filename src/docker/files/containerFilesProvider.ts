@@ -1,3 +1,6 @@
+import * as fs from 'fs-extra';
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { execAsync } from '../../utils/spawnAsync';
@@ -64,7 +67,34 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
-        throw new Error('Method not implemented.');
+        const method =
+            async (): Promise<Uint8Array> => {
+
+                const containerId = uri.authority;
+                const containerPath = uri.path;
+
+                const localPath = path.join(os.tmpdir(), 'testfile.txt');
+
+                const command = `docker cp "${containerId}:${containerPath}" "${localPath}"`;
+
+                await execAsync(command, {});
+
+                // TODO: Read from temp path.
+
+                // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
+                // eslint-disable-next-line @typescript-eslint/tslint/config
+                const contents = await fs.readFile(localPath);
+
+                const results = Uint8Array.from(contents);
+
+                try {
+                    return results;
+                } finally {
+                    await fs.remove(localPath);
+                }
+            };
+
+        return method();
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
