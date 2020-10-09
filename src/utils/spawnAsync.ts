@@ -74,6 +74,7 @@ export async function spawnAsync(
 
         if (options?.stdin) {
             process.stdin.write(options.stdin);
+            process.stdin.end();
         }
 
         if (onStdout || stdoutBuffer) {
