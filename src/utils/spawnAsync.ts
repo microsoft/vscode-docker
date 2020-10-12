@@ -17,7 +17,7 @@ export type ExecError = Error & { code: any, signal: any, stdErrHandled: boolean
 
 export async function spawnAsync(
     command: string,
-    options?: cp.SpawnOptions,
+    options?: cp.SpawnOptions & { stdin?: string },
     onStdout?: Progress,
     stdoutBuffer?: Buffer,
     onStderr?: Progress,
@@ -72,6 +72,11 @@ export async function spawnAsync(
             return resolve();
         });
 
+        if (options?.stdin) {
+            process.stdin.write(options.stdin);
+            process.stdin.end();
+        }
+
         if (onStdout || stdoutBuffer) {
             process.stdout.on('data', (chunk: Buffer) => {
                 const data = chunk.toString();
@@ -108,7 +113,7 @@ export async function spawnAsync(
     });
 }
 
-export async function execAsync(command: string, options?: cp.ExecOptions, progress?: (content: string, process: cp.ChildProcess) => void): Promise<{ stdout: string, stderr: string }> {
+export async function execAsync(command: string, options?: cp.ExecOptions & { stdin?: string }, progress?: (content: string, process: cp.ChildProcess) => void): Promise<{ stdout: string, stderr: string }> {
     const stdoutBuffer = Buffer.alloc(options && options.maxBuffer || DEFAULT_BUFFER_SIZE);
     const stderrBuffer = Buffer.alloc(options && options.maxBuffer || DEFAULT_BUFFER_SIZE);
 
