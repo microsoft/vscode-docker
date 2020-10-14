@@ -1,3 +1,20 @@
+## 1.7.0 - 19 October 2020
+### Added
+* The containers view is now grouped by compose project by default. This can be changed by settings. [#2324](https://github.com/microsoft/vscode-docker/issues/2324)
+* On compose project grouping nodes, the commands "Compose Down" and "Compose Restart" can be used from context menu. [#2304](https://github.com/microsoft/vscode-docker/issues/2304)
+* A `docker.context` setting is added, similar to `docker.host`, used for controlling the `DOCKER_CONTEXT` environment variable. [#2264](https://github.com/microsoft/vscode-docker/issues/2264)
+* The checking for outdated images now applies to images from Microsoft Container Registry (MCR), including .NET and ASP.NET images. [#2165](https://github.com/microsoft/vscode-docker/issues/2165)
+* The `docker-build` and `docker-run` tasks now have a `customOptions` flag, which can be used to add any arbitrary command line parameters to the `docker build` and `docker run` commands, respectively. [#2259](https://github.com/microsoft/vscode-docker/issues/2259), [#2271](https://github.com/microsoft/vscode-docker/issues/2271)
+
+### Fixed
+* The outdated image checking feature now will run at most once per day in order to conserve rate limits. The feature remains disabled by default but can be enabled in settings, with `docker.images.checkForOutdatedImages`. [#2272](https://github.com/microsoft/vscode-docker/issues/2272)
+* Fixed an issue with Django project debugging not working on Linux. [#2313](https://github.com/microsoft/vscode-docker/issues/2313)
+* Support for environment variables (like `${env:HOME}`) in launch configurations has been added. In general, any [variables](https://code.visualstudio.com/docs/editor/variables-reference) VS Code supports should work. [#1961](https://github.com/microsoft/vscode-docker/issues/1961)
+* Node.js applications in subfolders should now be scaffolded correctly for building and debugging in Docker. [#2057](https://github.com/microsoft/vscode-docker/issues/2057)
+
+### Removed
+* The deprecated `docker-coreclr` debug configuration has been removed. It is replaced by the [`docker` debug configuration](https://code.visualstudio.com/docs/containers/debug-common). [#2197](https://github.com/microsoft/vscode-docker/issues/2197)
+
 ## 1.6.0 - 15 September 2020
 ### Added
 * Deployments to Azure Container Instances can be made directly from images in Docker Hub and Azure Container Registries in the Registries view. [#1718](https://github.com/microsoft/vscode-docker/issues/1718)
