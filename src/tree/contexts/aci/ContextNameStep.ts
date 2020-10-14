@@ -3,14 +3,20 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
+import { AzureNameStep, ResourceGroupListStep, resourceGroupNamingRules } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { IAciWizardContext } from './IAciWizardContext';
 
-export class ContextNameStep extends AzureWizardPromptStep<IAciWizardContext> {
+export class ContextNameStep extends AzureNameStep<IAciWizardContext> {
+    protected async isRelatedNameAvailable(context: IAciWizardContext, name: string): Promise<boolean> {
+        return await ResourceGroupListStep.isNameAvailable(context, name);
+    }
+
     public async prompt(context: IAciWizardContext): Promise<void> {
         context.contextName = await ext.ui.showInputBox({ prompt: localize('vscode-docker.tree.contexts.create.aci.enterContextName', 'Enter context name'), validateInput: validateContextName });
+
+        context.relatedNameTask = this.generateRelatedName(context, context.contextName, resourceGroupNamingRules);
     }
 
     public shouldPrompt(wizardContext: IAciWizardContext): boolean {
