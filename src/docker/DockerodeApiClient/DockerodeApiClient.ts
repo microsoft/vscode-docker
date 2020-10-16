@@ -14,6 +14,7 @@ import { DockerContext } from '../Contexts';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
+import { NotSupportedError } from '../NotSupportedError';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
@@ -56,16 +57,18 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async execInContainer(context: IActionContext, ref: string, command: string[], token?: CancellationToken): Promise<string> {
-        const container = this.dockerodeClient.getContainer(ref);
-        const result = await this.callWithErrorHandling(
-            context,
-            async () => container.exec({
-                Cmd: command
-            }));
+        //         const container = this.dockerodeClient.getContainer(ref);
+        //         const result = await this.callWithErrorHandling(
+        //             context,
+        //             async () => container.exec({
+        //                 Cmd: command
+        //             }));
+        //
+        //        const startResult = await result.start({});
+        //
+        //        startResult.pipe()
 
-        const startResult = await result.start({});
-
-        startResult.pipe()
+        throw new NotSupportedError(context);
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {

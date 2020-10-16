@@ -1,4 +1,3 @@
-import * as querystring from 'querystring';
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
