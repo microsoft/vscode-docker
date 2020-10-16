@@ -28,16 +28,23 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
         const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
         let vol: string = '';
 
-        if (fse.existsSync(`${homeDir}/.azure`)) {
+        if (await fse.pathExists(`${homeDir}/.azure`)) {
             vol += ` -v ${homeDir}/.azure:/root/.azure`;
         }
-        if (fse.existsSync(`${homeDir}/.ssh`)) {
+
+        if (await fse.pathExists(`${homeDir}/.ssh`)) {
             vol += ` -v ${homeDir}/.ssh:/root/.ssh`;
         }
-        if (fse.existsSync(`${homeDir}/.kube`)) {
+
+        if (await fse.pathExists(`${homeDir}/.kube`)) {
             vol += ` -v ${homeDir}/.kube:/root/.kube`;
         }
 
-        await executeAsTask(context, `docker run ${option} ${vol.trim()} -it --rm azuresdk/azure-cli-python:latest`, 'Azure CLI', { addDockerEnv: true });
+        const workspaceFolder = vscode.workspace?.workspaceFolders?.[0];
+        if (workspaceFolder) {
+            vol += ` -v ${workspaceFolder.uri.fsPath}:/workspace`;
+        }
+
+        await executeAsTask(context, `docker run ${option} ${vol.trim()} -it --rm mcr.microsoft.com/azure-cli:latest`, 'Azure CLI', { addDockerEnv: true });
     }
 }
