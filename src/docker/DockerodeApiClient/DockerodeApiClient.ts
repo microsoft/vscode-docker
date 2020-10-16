@@ -55,6 +55,19 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         } as DockerContainerInspection;
     }
 
+    public async execInContainer(context: IActionContext, ref: string, command: string[], token?: CancellationToken): Promise<string> {
+        const container = this.dockerodeClient.getContainer(ref);
+        const result = await this.callWithErrorHandling(
+            context,
+            async () => container.exec({
+                Cmd: command
+            }));
+
+        const startResult = await result.start({});
+
+        startResult.pipe()
+    }
+
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
         const container = this.dockerodeClient.getContainer(ref);
         return this.callWithErrorHandling(context, async () => container.logs({ follow: true, stdout: true }));
