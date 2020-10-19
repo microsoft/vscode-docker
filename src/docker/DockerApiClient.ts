@@ -12,12 +12,16 @@ import { DockerImage, DockerImageInspection } from './Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from './Networks';
 import { DockerVolume, DockerVolumeInspection } from './Volumes';
 
+export type DockerExecOptions = {
+    user?: string;
+};
+
 export interface DockerApiClient extends Disposable {
     info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo>;
 
     getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]>;
     inspectContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerContainerInspection>;
-    execInContainer(context: IActionContext, ref: string, command: string[], token?: CancellationToken): Promise<string>;
+    execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string>;
     getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream>;
     pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult | undefined>;
     startContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void>;

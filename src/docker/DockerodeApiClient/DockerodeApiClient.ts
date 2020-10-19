@@ -7,14 +7,14 @@ import Dockerode = require('dockerode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
+import { execAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient } from '../DockerApiClient';
+import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
-import { NotSupportedError } from '../NotSupportedError';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
@@ -56,19 +56,18 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         } as DockerContainerInspection;
     }
 
-    public async execInContainer(context: IActionContext, ref: string, command: string[], token?: CancellationToken): Promise<string> {
-        //         const container = this.dockerodeClient.getContainer(ref);
-        //         const result = await this.callWithErrorHandling(
-        //             context,
-        //             async () => container.exec({
-        //                 Cmd: command
-        //             }));
-        //
-        //        const startResult = await result.start({});
-        //
-        //        startResult.pipe()
+    public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
+        let dockerCommand = 'docker exec ';
 
-        throw new NotSupportedError(context);
+        if (options?.user) {
+            dockerCommand += `--user "${options.user}" `;
+        }
+
+        dockerCommand += `"${ref}" ${command.join(' ')}`;
+
+        const results = await execAsync(dockerCommand);
+
+        return results.stdout;
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
@@ -244,7 +243,9 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         try {
             return await this.withTimeoutAndCancellations(context, callback, dockerodeCallTimeout, token);
         } catch (err) {
-            context.errorHandling.suppressReportIssue = true;
+            if (context) {
+                context.errorHandling.suppressReportIssue = true;
+            }
 
             const error = parseError(err);
 

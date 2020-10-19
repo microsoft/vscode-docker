@@ -13,7 +13,7 @@ import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient } from '../DockerApiClient';
+import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { NotSupportedError } from '../NotSupportedError';
@@ -75,7 +75,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         };
     }
 
-    public async execInContainer(context: IActionContext, ref: string, command: string[], token?: CancellationToken): Promise<string> {
+    public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
         throw new NotSupportedError(context);
     }
 

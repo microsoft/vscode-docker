@@ -2,15 +2,17 @@ import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
 import { execAsync } from '../../utils/spawnAsync';
 import { DockerOSType } from '../Common';
+import { DockerApiClient } from '../DockerApiClient';
 import { DockerContainerExecutor, getContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
 import { DockerUri, DockerUriFileType } from './dockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
-
     private readonly changeEmitter: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+
+    public constructor(private readonly dockerClientProvider: () => DockerApiClient) {
+    }
 
     public get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
         return this.changeEmitter.event;
@@ -35,29 +37,16 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         const method = async (): Promise <[string, vscode.FileType][]> => {
 
-            // Container URI: docker://<containerId>/<path>
-            const containerId = uri.authority;
-            const parentPath = uri.path;
+            const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
-            async (id, command, user) => {
+                async (id, command, user) => {
+                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, [ command ], { user });
+                };
 
-                let dockerCommand = 'docker exec ';
+            const osType = await this.getContainerPlatform(dockerUri.containerId)
 
-                if (user) {
-                    dockerCommand += `--user "${user}" `;
-                }
-
-                dockerCommand += `"${id}" ${command}`;
-
-                const results = await execAsync(dockerCommand);
-
-                return results.stdout;
-            };
-
-            const osType = await ContainerFilesProvider.getContainerPlatform(containerId)
-
-            const items = await getContainerDirectoryItems(executor, containerId, parentPath, osType);
+            const items = await getContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.path, osType);
 
             return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File])
         };
@@ -73,12 +62,11 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         const method =
             async (): Promise<Uint8Array> => {
 
-                const containerId = uri.authority;
-                const containerPath = uri.path;
+                const dockerUri = DockerUri.parse(uri);
 
                 const localPath = path.join(os.tmpdir(), 'testfile.txt');
 
-                const command = `docker cp "${containerId}:${containerPath}" "${localPath}"`;
+                const command = `docker cp "${dockerUri.containerId}:${dockerUri.path}" "${localPath}"`;
 
                 await execAsync(command, {});
 
@@ -116,8 +104,8 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         throw new Error('Method not implemented.');
     }
 
-    private static async getContainerPlatform(id: string): Promise<DockerOSType | undefined> {
-        const result = await ext.dockerClient.inspectContainer(/* context */ undefined, id);
+    private async getContainerPlatform(id: string): Promise<DockerOSType | undefined> {
+        const result = await this.dockerClientProvider().inspectContainer(/* context */ undefined, id);
 
         return result.Platform
     }

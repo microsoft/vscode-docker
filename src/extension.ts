@@ -124,7 +124,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
                 'docker',
-                new ContainerFilesProvider(),
+                new ContainerFilesProvider(() => ext.dockerClient),
                 {
                     // TODO: Is this the safest, since this may be container-specific?
                     isCaseSensitive: true,
