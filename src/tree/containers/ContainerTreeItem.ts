@@ -11,15 +11,16 @@ import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermedi
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { getContainerStateIcon } from "./ContainerProperties";
+import { DockerContainerEx } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
 export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
-    private readonly _item: DockerContainer;
+    private readonly _item: DockerContainerEx;
     private children: AzExtTreeItem[] | undefined;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainer) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerEx) {
         super(parent);
         this._item = itemInfo;
     }
@@ -92,10 +93,18 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return !!this.children;
+        return this._item.showFiles && !!this.children;
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        return [ new FilesTreeItem(this, vscode.workspace.fs, this.containerId) ];
+        if (clearCache) {
+            this.children = undefined;
+        }
+
+        if (this._item.showFiles) {
+            this.children = [ new FilesTreeItem(this, vscode.workspace.fs, this.containerId) ];
+        }
+
+        return this.children;
     }
 }

@@ -71,11 +71,14 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             NetworkSettings: {
                 Ports: containerPortsToInspectionPorts(container),
             },
-            Platform: responseContainer.platform as DockerOSType,
+            // NOTE: ACI contexts return "Linux" whereas default contexts return "linux".
+            Platform: responseContainer.platform.toLowerCase() as DockerOSType,
         };
     }
 
     public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
+        // Supported by SDK, but ACI implementation does not support non-interactive nor commands with arguments.
+        // (This means no listing of container directories to show files.)
         throw new NotSupportedError(context);
     }
 
