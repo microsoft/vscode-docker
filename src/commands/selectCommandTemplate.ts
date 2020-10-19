@@ -29,7 +29,7 @@ export const defaultCommandTemplates: { [key in TemplateCommand]: CommandTemplat
     'run': [{ label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' }],
     'runInteractive': [{ label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' }],
     'attach': [{ label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' }],
-    'logs': [{ label: 'Docker Logs', template: 'docker logs -f ${containerId}' }],
+    'logs': [{ label: 'Docker Logs', template: 'docker logs --tail 1000 -f ${containerId}' }],
     'composeUp': [
         { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}', contextTypes: ['moby'] },
         { label: 'Compose Up', template: 'docker compose ${configurationFile} up ${detached}' },
