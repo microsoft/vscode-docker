@@ -93,7 +93,7 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return this._item.showFiles && !!this.children;
+        return this._item.showFiles && this.children === undefined;
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
