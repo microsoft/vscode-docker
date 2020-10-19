@@ -7,7 +7,6 @@ import Dockerode = require('dockerode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
-import { execAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
@@ -57,17 +56,45 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
-        let dockerCommand = 'docker exec ';
+        // let dockerCommand = 'docker exec ';
 
-        if (options?.user) {
-            dockerCommand += `--user "${options.user}" `;
-        }
+        // if (options?.user) {
+        //     dockerCommand += `--user "${options.user}" `;
+        // }
 
-        dockerCommand += `"${ref}" ${command.join(' ')}`;
+        // dockerCommand += `"${ref}" ${command.join(' ')}`;
 
-        const results = await execAsync(dockerCommand);
+        // const results = await execAsync(dockerCommand);
 
-        return results.stdout;
+        // return results.stdout;
+
+        const container = this.dockerodeClient.getContainer(ref);
+
+        const exec = await container.exec({
+            AttachStderr: true,
+            AttachStdout: true,
+            // TODO: This makes sense only for Linux; should caller comprehend shell to use?
+            Cmd: ['/bin/sh', '-c', ...command],
+            User: options?.user
+        });
+
+        const stream = await exec.start({
+        });
+
+        return new Promise<string>(
+            (resolve, reject) => {
+
+                const chunks = [];
+
+                stream.on('data', chunk => {
+                    chunks.push(chunk);
+                });
+
+                stream.on('end', () => {
+                    // TODO: How do we determine errors (as error text will be mixed with normal text)?
+                    resolve(Buffer.concat(chunks).toString('utf8'));
+                });
+            });
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
