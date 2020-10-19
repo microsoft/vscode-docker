@@ -1650,7 +1650,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker logs -f ${containerId}",
+                    "default": "docker logs --tail 1000 -f ${containerId}",
                     "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
