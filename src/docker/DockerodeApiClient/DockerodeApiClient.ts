@@ -7,6 +7,8 @@ import Dockerode = require('dockerode');
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
+import { isWindows } from '../../utils/osUtils';
+import { execAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
@@ -56,46 +58,52 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
-        // let dockerCommand = 'docker exec ';
 
-        // if (options?.user) {
-        //     dockerCommand += `--user "${options.user}" `;
-        // }
+        // NOTE: Dockerode's exec() doesn't seem to work with Windows against the socket endpoint.
+        //       https://github.com/apocas/dockerode/issues/534
 
-        // dockerCommand += `"${ref}" ${command.join(' ')}`;
+        if (isWindows()) {
+            let dockerCommand = 'docker exec ';
 
-        // const results = await execAsync(dockerCommand);
+            if (options?.user) {
+                dockerCommand += `--user "${options.user}" `;
+            }
 
-        // return results.stdout;
+            dockerCommand += `"${ref}" ${command.join(' ')}`;
 
-        const container = this.dockerodeClient.getContainer(ref);
+            const results = await execAsync(dockerCommand);
 
-        const exec = await container.exec({
-            AttachStderr: true,
-            AttachStdout: true,
-            // TODO: This makes sense only for Linux; should caller comprehend shell to use?
-            Cmd: ['/bin/sh', '-c', ...command],
-            User: options?.user
-        });
+            return results.stdout;
+        } else {
+            const container = this.dockerodeClient.getContainer(ref);
 
-        const stream = await exec.start({
-        });
-
-        return new Promise<string>(
-            (resolve, reject) => {
-
-                const chunks = [];
-
-                stream.on('data', chunk => {
-                    chunks.push(chunk);
-                });
-
-                stream.on('end', () => {
-                    // TODO: How do we determine errors (as error text will be mixed with normal text)?
-                    resolve(Buffer.concat(chunks).toString('utf8'));
-                });
+            const exec = await container.exec({
+                AttachStderr: true,
+                AttachStdout: true,
+                // TODO: This makes sense only for Linux; should caller comprehend shell to use?
+                Cmd: ['/bin/sh', '-c', ...command],
+                User: options?.user
             });
-    }
+
+            const stream = await exec.start({
+            });
+
+            return new Promise<string>(
+                (resolve, reject) => {
+
+                    const chunks = [];
+
+                    stream.on('data', chunk => {
+                        chunks.push(chunk);
+                    });
+
+                    stream.on('end', () => {
+                        // TODO: How do we determine errors (as error text will be mixed with normal text)?
+                        resolve(Buffer.concat(chunks).toString('utf8'));
+                    });
+                });
+            }
+        }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
         const container = this.dockerodeClient.getContainer(ref);

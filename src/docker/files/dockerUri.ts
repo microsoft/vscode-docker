@@ -24,7 +24,7 @@ export class DockerUri {
     }
 
     public static joinPath(baseUri: DockerUri, ...pathSegments: string[]): DockerUri {
-        const joinedPath = corepath.join(baseUri.path, ...pathSegments);
+        const joinedPath = corepath.posix.join(baseUri.path, ...pathSegments);
 
         return DockerUri.create(baseUri.containerId, joinedPath, baseUri.fileType);
     }
