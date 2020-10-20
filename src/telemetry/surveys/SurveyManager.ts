@@ -56,7 +56,7 @@ export class SurveyManager {
                 const alreadyToasted = ext.context.globalState.get<string>(lastToastedSessionKey) === vscode.env.sessionId;
                 const responded = ext.context.globalState.get<boolean>(`${surveyRespondedKeyPrefix}.${survey.id}`, false);
                 const eligible = await survey.isEligible();
-                const flighted = await ext.experimentationService.isFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
+                const flighted = await ext.experimentationService.isCachedFlightEnabled(`${surveyFlightPrefix}.${survey.id}`);
 
                 context.telemetry.properties.surveyAlreadyToasted = alreadyToasted.toString();
                 context.telemetry.properties.surveyResponded = responded.toString();
