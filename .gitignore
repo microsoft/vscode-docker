@@ -1,6 +1,7 @@
 out
 node_modules
 *.vsix
+*.tgz
 .nyc_output/**
 coverage/**
 

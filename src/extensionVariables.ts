@@ -26,8 +26,8 @@ export namespace ext {
     export let ui: IAzureUserInput;
 
     export let telemetryOptIn: boolean;
-    export let activityMeasurementService: IActivityMeasurementService;
     export let experimentationService: IExperimentationServiceAdapter;
+    export let activityMeasurementService: IActivityMeasurementService;
 
     export let keytar: IKeytar | undefined;
     export let dockerContextManager: ContextManager;
