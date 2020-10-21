@@ -178,5 +178,5 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.reportIssue', reportIssue);
-    registerCommand('vscode-docker.help.startPage', openStartPage);
+    registerCommand('vscode-docker.help.openStartPage', openStartPage);
 }

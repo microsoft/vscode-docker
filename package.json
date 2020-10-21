@@ -50,7 +50,7 @@
         "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.help",
         "onCommand:vscode-docker.help.reportIssue",
-        "onCommand:vscode-docker.help.startPage",
+        "onCommand:vscode-docker.help.openStartPage",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -2199,6 +2199,11 @@
                 "docker.scaffolding.templatePath": {
                     "type": "string",
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
+                },
+                "docker.showStartPage": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.showStartPage%"
                 }
             }
         },
@@ -2647,8 +2652,8 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.help.startPage",
-                "title": "%vscode-docker.commands.help.startPage%",
+                "command": "vscode-docker.help.openStartPage",
+                "title": "%vscode-docker.commands.help.openStartPage%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {

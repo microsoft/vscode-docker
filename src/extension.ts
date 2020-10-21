@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerTelemetryHandler, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import { registerCommands } from './commands/registerCommands';
+import { openStartPageIfNecessary } from './commands/startPage/openStartPage';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
@@ -129,6 +130,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateLanguageClient(ctx);
 
         registerListeners();
+
+        void openStartPageIfNecessary();
     });
 }
 

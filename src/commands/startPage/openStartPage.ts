@@ -3,48 +3,41 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
+import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { extensionVersion } from '../../constants';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { startPage } from './StartPage';
 
-let activePanel: vscode.WebviewPanel | undefined;
+const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
 
-export async function openStartPage(context: IActionContext): Promise<void> {
-
-    if (!activePanel) {
-        activePanel = vscode.window.createWebviewPanel(
-            'dockerStartPage',
-            localize('vscode-docker.help.startPage.title', 'Docker: Getting Started'),
-            vscode.ViewColumn.One,
-            {
-                enableCommandUris: true,
-                localResourceRoots: [vscode.Uri.file(ext.context.asAbsolutePath('resources'))]
-            }
-        );
-
-        activePanel.onDidDispose(() => {
-            activePanel = undefined;
-        });
-    }
-
-    activePanel.webview.html = await getWebviewContent(activePanel.webview);
+export async function openStartPage(context: IActionContext, reason: 'install' | 'command' = 'command'): Promise<void> {
+    context.telemetry.properties.reason = reason;
+    await startPage.createOrShow(context);
 }
 
-async function getWebviewContent(webview: vscode.Webview): Promise<string> {
-    return `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} file:;">
-        <title>Cat Coding</title>
-    </head>
-    <body>
-        <a href="command:vscode-docker.help">Hello</a>
-        <div>Regular text</div>
-        <img src="${webview.asWebviewUri(vscode.Uri.joinPath(ext.context.extensionUri, 'resources', (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light ? 'light' : 'dark'), 'docker.svg'))}" width="300" />
-    </body>
-    </html>`;
+export async function openStartPageIfNecessary(): Promise<void> {
+    if (!vscode.workspace.getConfiguration('docker').get('showStartPage', false)) {
+        // Don't show: disabled by settings
+        return;
+    }
+    // TODO: re-enable this code!
+    /* else if (!(await ext.experimentationService.isFlightEnabled('vscode-docker.openStartPage'))) {
+        // Don't show: flight not enabled
+        return;
+    }*/
+
+    const lastVersion = new semver.SemVer(ext.context.globalState.get(lastVersionKey, '0.0.1'));
+    const thisVersion = new semver.SemVer(extensionVersion.value);
+    const diff = semver.diff(thisVersion, lastVersion);
+
+    if (semver.lte(thisVersion, lastVersion) || diff === 'prepatch' || diff === 'patch' || diff === 'prerelease') {
+        // Don't show: already showed during this major/minor
+        return;
+    }
+
+    // Show!
+    await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
+    void vscode.commands.executeCommand('vscode-docker.help.openStartPage', 'install');
 }
