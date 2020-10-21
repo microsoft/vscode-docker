@@ -48,7 +48,9 @@
         "onCommand:vscode-docker.containers.composeGroup.restart",
         "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
+        "onCommand:vscode-docker.help",
         "onCommand:vscode-docker.help.reportIssue",
+        "onCommand:vscode-docker.help.startPage",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -2328,11 +2330,6 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.help.reportIssue",
-                "title": "%vscode-docker.commands.help.reportIssue%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
-            {
                 "command": "vscode-docker.images.build",
                 "title": "%vscode-docker.commands.images.build%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
@@ -2643,6 +2640,16 @@
                 "title": "%vscode-docker.commands.help%",
                 "category": "%vscode-docker.commands.category.docker%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.help.reportIssue",
+                "title": "%vscode-docker.commands.help.reportIssue%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.help.startPage",
+                "title": "%vscode-docker.commands.help.startPage%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.contexts.use",

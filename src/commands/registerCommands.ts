@@ -71,6 +71,7 @@ import { pullImageFromRepository, pullRepository } from "./registries/pullImages
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
 import { reportIssue } from "./reportIssue";
+import { openStartPage } from "./startPage/openStartPage";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
@@ -177,4 +178,5 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.reportIssue', reportIssue);
+    registerCommand('vscode-docker.help.startPage', openStartPage);
 }
