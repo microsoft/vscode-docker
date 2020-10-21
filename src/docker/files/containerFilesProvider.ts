@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { execAsync } from '../../utils/spawnAsync';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DockerContainerExecutor, getContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
+import { DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
 import { DockerUri, DockerUriFileType } from './dockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
@@ -30,13 +30,12 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             ctime: 0,
             mtime: 0,
             size: 0,
-            type: ContainerFilesProvider.toVsCodeFileType(dockerUri.fileType)
+            type: ContainerFilesProvider.toVsCodeFileType(dockerUri.options?.fileType)
         };
     }
 
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         const method = async (): Promise <[string, vscode.FileType][]> => {
-
             const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
@@ -44,9 +43,16 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
                     return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, [ command ], { user });
                 };
 
-            const osType = await this.getContainerPlatform(dockerUri.containerId)
+            const osType = await this.getContainerOS(dockerUri.containerId)
 
-            const items = await getContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.path, osType);
+            let items;
+
+            switch (osType) {
+                case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.path); break;
+                case 'windows': items = await getWindowsContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.windowsPath); break;
+                default:
+                    throw new Error('Unrecognized OS type.');
+            }
 
             return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File])
         };
@@ -61,27 +67,24 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     public readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
         const method =
             async (): Promise<Uint8Array> => {
-
                 const dockerUri = DockerUri.parse(uri);
 
-                const localPath = path.join(os.tmpdir(), 'testfile.txt');
+                let serverOS = dockerUri.options?.serverOS;
 
-                const command = `docker cp "${dockerUri.containerId}:${dockerUri.path}" "${localPath}"`;
+                if (serverOS === undefined) {
+                    const version = await this.dockerClientProvider().version(undefined);
 
-                await execAsync(command, {});
+                    serverOS = version.Os;
+                }
 
-                // TODO: Read from temp path.
+                switch (serverOS) {
+                    case 'linux':
 
-                // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
-                // eslint-disable-next-line @typescript-eslint/tslint/config
-                const contents = await fs.readFile(localPath);
+                        return await this.readFileViaCopy(dockerUri);
 
-                const results = Uint8Array.from(contents);
+                    default:
 
-                try {
-                    return results;
-                } finally {
-                    await fs.remove(localPath);
+                        return await this.readFileViaExec(dockerUri);
                 }
             };
 
@@ -104,10 +107,65 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         throw new Error('Method not implemented.');
     }
 
-    private async getContainerPlatform(id: string): Promise<DockerOSType | undefined> {
+    private async getContainerOS(id: string): Promise<DockerOSType | undefined> {
         const result = await this.dockerClientProvider().inspectContainer(/* context */ undefined, id);
 
         return result.Platform
+    }
+
+    private async readFileViaCopy(dockerUri: DockerUri): Promise<Uint8Array> {
+        const localPath = path.join(os.tmpdir(), 'testfile.txt');
+
+        const command = `docker cp "${dockerUri.containerId}:${dockerUri.path}" "${localPath}"`;
+
+        await execAsync(command, {});
+
+        // TODO: Read from temp path.
+
+        try {
+            // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            const contents = await fs.readFile(localPath);
+
+            // TODO: Is this the most efficient transform (e.g. for large files)?
+            return Uint8Array.from(contents);
+        } finally {
+            await fs.remove(localPath);
+        }
+    }
+
+    private async readFileViaExec(dockerUri: DockerUri): Promise<Uint8Array> {
+        let containerOS = dockerUri.options?.containerOS;
+
+        if (containerOS === undefined) {
+            containerOS = await this.getContainerOS(dockerUri.containerId);
+        }
+
+        let command;
+
+        switch (containerOS) {
+            case 'linux':
+
+                command = `cat "${dockerUri.path}"`;
+
+                break;
+
+            case 'windows':
+
+                command = `cmd /C type "${dockerUri.windowsPath}"`;
+
+                break;
+
+            default:
+
+                throw new Error('Unrecognized container OS.');
+        }
+
+        // TODO: Check status code (for error)?
+        const stdout = await this.dockerClientProvider().execInContainer(undefined, dockerUri.containerId, [command]);
+        const buffer = Buffer.from(stdout, 'utf8');
+
+        return Uint8Array.from(buffer);
     }
 
     private static toVsCodeFileType(fileType: DockerUriFileType): vscode.FileType {

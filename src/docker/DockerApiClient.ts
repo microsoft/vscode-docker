@@ -10,6 +10,7 @@ import { DockerInfo, PruneResult } from './Common';
 import { DockerContainer, DockerContainerInspection } from './Containers';
 import { DockerImage, DockerImageInspection } from './Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from './Networks';
+import { DockerVersion } from './Version';
 import { DockerVolume, DockerVolumeInspection } from './Volumes';
 
 export type DockerExecOptions = {
@@ -18,6 +19,7 @@ export type DockerExecOptions = {
 
 export interface DockerApiClient extends Disposable {
     info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo>;
+    version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion>;
 
     getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]>;
     inspectContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerContainerInspection>;

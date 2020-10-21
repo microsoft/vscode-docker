@@ -17,6 +17,7 @@ import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { NotSupportedError } from '../NotSupportedError';
+import { DockerVersion } from '../Version';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { containerPortsToInspectionPorts, containerToDockerContainer } from './DockerServeUtils';
 
@@ -40,6 +41,10 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     public async info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo> {
+        throw new NotSupportedError(context);
+    }
+
+    public async version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion> {
         throw new NotSupportedError(context);
     }
 

@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { DockerOSType } from "./Common";
 
 export type DirectoryItemType = 'directory' | 'file';
 
@@ -117,7 +116,7 @@ function parseWindowsDirectoryItems(input: string, parentPath: string): Director
     return items;
 }
 
-async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
+export async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
     if (parentPath === undefined) {
         parentPath = '/';
     }
@@ -129,24 +128,23 @@ async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor
     return parseLinuxDirectoryItems(output, parentPath);
 }
 
-async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
-    if (parentPath.startsWith('/')) {
-        parentPath = path.win32.join('C:\\', parentPath.substr(1));
-    }
-
-    // TODO: Try different users on error.
+export async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
     const command = `cmd /C dir /A-S /-C "${parentPath}"`;
 
-    const output = await executor(containerId, command);
+    let output;
+
+    try {
+        // Try the listing with the default user...
+        output = await executor(containerId, command);
+    } catch {
+        try {
+            // If that fails, try another well-known user...
+            output = await executor(containerId, command, 'ContainerAdministrator');
+        } catch {
+            // If *that* fails, try a last well-known user...
+            output = await executor(containerId, command, 'Administrator');
+        }
+    }
 
     return parseWindowsDirectoryItems(output, parentPath);
-}
-
-export async function getContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined, osType: DockerOSType): Promise<DirectoryItem[]> {
-    switch (osType) {
-        case 'linux': return await getLinuxContainerDirectoryItems(executor, containerId, parentPath);
-        case 'windows': return await getWindowsContainerDirectoryItems(executor, containerId, parentPath);
-        default:
-            throw new Error('Unrecognized OS type.');
-    }
 }

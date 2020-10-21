@@ -16,6 +16,7 @@ import { DockerContext } from '../Contexts';
 import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
+import { DockerVersion } from '../Version';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
@@ -32,6 +33,10 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
     public async info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo> {
         return this.callWithErrorHandling(context, async () => this.dockerodeClient.info(), token);
+    }
+
+    public async version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion> {
+        return this.callWithErrorHandling(context, async () => <DockerVersion>this.dockerodeClient.version(), token);
     }
 
     public async getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]> {

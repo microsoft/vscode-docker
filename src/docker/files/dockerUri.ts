@@ -1,17 +1,20 @@
 import * as corepath from 'path';
 import * as querystring from 'querystring';
 import * as vscode from 'vscode';
+import { DockerOSType } from '../Common';
 
 export type DockerUriFileType = 'directory' | 'file';
 
 export type DockerUriQuery = {
+    containerOS?: DockerOSType;
     fileType?: DockerUriFileType;
+    serverOS?: DockerOSType;
 };
 
 export class DockerUri {
 
-    public static create(containerId: string, path: string, fileType?: DockerUriFileType): DockerUri {
-        return new DockerUri(containerId, path, fileType);
+    public static create(containerId: string, path: string, options?: DockerUriQuery): DockerUri {
+        return new DockerUri(containerId, path, options);
     }
 
     public static parse(uri: vscode.Uri): DockerUri {
@@ -20,24 +23,23 @@ export class DockerUri {
 
         const query = <DockerUriQuery>querystring.decode(uri.query);
 
-        return DockerUri.create(containerId, path, query?.fileType);
+        return DockerUri.create(containerId, path, query);
     }
 
     public static joinPath(baseUri: DockerUri, ...pathSegments: string[]): DockerUri {
         const joinedPath = corepath.posix.join(baseUri.path, ...pathSegments);
 
-        return DockerUri.create(baseUri.containerId, joinedPath, baseUri.fileType);
+        return DockerUri.create(baseUri.containerId, joinedPath, baseUri.options);
     }
 
-    public with(options: {
+    public with(options: DockerUriQuery & {
         containerId?: string,
-        fileType?: DockerUriFileType,
         path?: string
     }): DockerUri {
         return DockerUri.create(
             options.containerId ?? this.containerId,
             options.path ?? this.path,
-            options.fileType ?? this.fileType
+            { ...this.options, ...options }
         );
     }
 
@@ -48,11 +50,19 @@ export class DockerUri {
                 path: this.path
             });
 
-        return this.fileType
-            ? uri.with({ query: querystring.encode({ fileType: this.fileType })})
+        return this.options
+            ? uri.with({ query: querystring.encode(this.options)})
             : uri;
     }
 
-    private constructor(public readonly containerId: string, public readonly path: string, public readonly fileType?: DockerUriFileType) {
+    public get windowsPath(): string {
+        if (this.path.startsWith('/')) {
+            return corepath.win32.join('C:\\', this.path.substr(1));
+        }
+
+        return this.path;
+    }
+
+    private constructor(public readonly containerId: string, public readonly path: string, public readonly options?: DockerUriQuery) {
     }
 }

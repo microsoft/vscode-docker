@@ -5,7 +5,7 @@ import { DirectoryTreeItem } from "./DirectoryTreeItem";
 
 export class FilesTreeItem extends DirectoryTreeItem {
     public constructor(parent: AzExtParentTreeItem, fs: vscode.FileSystem, containerId: string) {
-        super(parent, fs, 'Files', DockerUri.create(containerId, '/', 'directory'));
+        super(parent, fs, 'Files', DockerUri.create(containerId, '/', { fileType: 'directory' }));
     }
 
     public get contextValue(): string {
