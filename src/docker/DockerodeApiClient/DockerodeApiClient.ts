@@ -4,9 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Dockerode = require('dockerode');
-import * as fs from 'fs-extra';
-import * as os from 'os';
-import * as corepath from 'path';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
@@ -114,21 +111,42 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         }
 
     public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
-        const localPath = corepath.join(os.tmpdir(), 'testfile.txt');
+        // const localPath = corepath.join(os.tmpdir(), 'testfile.txt');
 
-        const command = `docker cp "${ref}:${path}" "${localPath}"`;
+        // const command = `docker cp "${ref}:${path}" "${localPath}"`;
 
-        await execAsync(command, {});
+        // await execAsync(command, {});
 
-        // TODO: Read from temp path.
+        // // TODO: Read from temp path.
 
-        try {
-            // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
-            // eslint-disable-next-line @typescript-eslint/tslint/config
-            return await fs.readFile(localPath);
-        } finally {
-            await fs.remove(localPath);
-        }
+        // try {
+        //     // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
+        //     // eslint-disable-next-line @typescript-eslint/tslint/config
+        //     return await fs.readFile(localPath);
+        // } finally {
+        //     await fs.remove(localPath);
+        // }
+
+        const container = this.dockerodeClient.getContainer(ref);
+
+        const stream = await this.callWithErrorHandling(context, () => container.getArchive({ path }));
+
+        return await new Promise(
+            (resolve, reject) => {
+                const chunks = [];
+
+                stream.on('data', chunk => {
+                    chunks.push(chunk);
+                });
+
+                stream.on('error', error => {
+                    reject(error);
+                });
+
+                stream.on('end', () => {
+                    resolve(Buffer.concat(chunks));
+                });
+            });
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
