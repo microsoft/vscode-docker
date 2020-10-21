@@ -49,32 +49,32 @@ class StartPage {
 
         return `<!DOCTYPE html>
             <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} file:; script-src 'nonce-${nonce}';">
-                <title>Cat Coding</title>
-            </head>
-            <body>
-                <a href="command:vscode-docker.help">Hello</a>
-                <div>Regular text</div>
-                <img src="${webview.asWebviewUri(vscode.Uri.joinPath(themedResourcesPath, 'docker.svg'))}" width="300" />
-                <input type="checkbox" id="showStartPage" ${vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : ''} />
-                <label for="showStartPage">Show this page on install / upgrade</label>
-            </body>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} file:; script-src 'nonce-${nonce}';">
+                    <title>Docker: Getting Started</title>
+                </head>
+                <body>
+                    <a href="command:vscode-docker.help">Hello</a>
+                    <div>Regular text</div>
+                    <img src="${webview.asWebviewUri(vscode.Uri.joinPath(themedResourcesPath, 'docker.svg'))}" width="300" />
+                    <input type="checkbox" id="showStartPage" ${vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : ''} />
+                    <label for="showStartPage">Show this page when a new update to the Docker extension is released</label>
+                </body>
 
-            <script nonce="${nonce}">
-                const vscode = acquireVsCodeApi();
-                const showStartPageCheckbox = document.getElementById('showStartPage');
+                <script nonce="${nonce}">
+                    const vscode = acquireVsCodeApi();
+                    const showStartPageCheckbox = document.getElementById('showStartPage');
 
-                showStartPageCheckbox.addEventListener('click', function() {
-                    vscode.postMessage({
-                        command: 'showStartPageClicked',
-                        showStartPage: showStartPageCheckbox.checked
+                    showStartPageCheckbox.addEventListener('click', function() {
+                        vscode.postMessage({
+                            command: 'showStartPageClicked',
+                            showStartPage: showStartPageCheckbox.checked
+                        });
                     });
-                });
-            </script>
-        </html>`;
+                </script>
+            </html>`;
     }
 
     private async handleMessage(message: WebviewMessage): Promise<void> {

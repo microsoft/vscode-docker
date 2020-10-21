@@ -21,6 +21,9 @@ export async function openStartPageIfNecessary(): Promise<void> {
     if (!vscode.workspace.getConfiguration('docker').get('showStartPage', false)) {
         // Don't show: disabled by settings
         return;
+    } else if (!/^en(-us)?$/i.test(vscode.env.language)) {
+        // Don't show: this page is English only
+        return;
     }
     // TODO: re-enable this code!
     /* else if (!(await ext.experimentationService.isFlightEnabled('vscode-docker.openStartPage'))) {
