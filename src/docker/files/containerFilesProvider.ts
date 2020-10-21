@@ -1,8 +1,4 @@
-import * as fs from 'fs-extra';
-import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
-import { execAsync } from '../../utils/spawnAsync';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
 import { DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
@@ -114,24 +110,18 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     private async readFileViaCopy(dockerUri: DockerUri): Promise<Uint8Array> {
-        const localPath = path.join(os.tmpdir(), 'testfile.txt');
+        let containerOS = dockerUri.options?.containerOS;
 
-        const command = `docker cp "${dockerUri.containerId}:${dockerUri.path}" "${localPath}"`;
-
-        await execAsync(command, {});
-
-        // TODO: Read from temp path.
-
-        try {
-            // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
-            // eslint-disable-next-line @typescript-eslint/tslint/config
-            const contents = await fs.readFile(localPath);
-
-            // TODO: Is this the most efficient transform (e.g. for large files)?
-            return Uint8Array.from(contents);
-        } finally {
-            await fs.remove(localPath);
+        if (containerOS === undefined) {
+            containerOS = await this.getContainerOS(dockerUri.containerId);
         }
+
+        const buffer = await this.dockerClientProvider().getContainerFile(
+            undefined,
+            dockerUri.containerId,
+            containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path);
+
+        return Uint8Array.from(buffer);
     }
 
     private async readFileViaExec(dockerUri: DockerUri): Promise<Uint8Array> {

@@ -81,13 +81,17 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         };
     }
 
+    // #region Not supported by the Docker SDK yet
     public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
         // Supported by SDK, but ACI implementation does not support non-interactive nor commands with arguments.
         // (This means no listing of container directories to show files.)
         throw new NotSupportedError(context);
     }
 
-    // #region Not supported by the Docker SDK yet
+    public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
+        throw new NotSupportedError(context);
+    }
+
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
         // Supported by SDK, but used only for debugging which will not work in ACI, and complicated to implement
         throw new NotSupportedError(context);
