@@ -239,7 +239,7 @@
             "view/title": [
                 {
                     "command": "vscode-docker.containers.prune",
-                    "when": "view == dockerContainers",
+                    "when": "view == dockerContainers && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -259,12 +259,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.create",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.networks.prune",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -274,7 +274,7 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
-                    "when": "view == dockerImages",
+                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -304,7 +304,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.prune",
-                    "when": "view == dockerVolumes",
+                    "when": "view == dockerVolumes && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -566,7 +566,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.inspect",
-                    "when": "view == dockerVolumes && viewItem == volume",
+                    "when": "view == dockerVolumes && viewItem == volume && !vscode-docker:newSdkContext",
                     "group": "volumes_1_general@1"
                 },
                 {
