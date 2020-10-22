@@ -8,7 +8,7 @@ import * as Containers from '@docker/sdk/containers';
 import * as Volumes from '@docker/sdk/volumes';
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
@@ -203,7 +203,14 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             try {
                 clientCallback.call(client, request, this.callMetadata, (err, response) => {
                     if (err) {
-                        reject(err);
+                        const error = parseError(err);
+
+                        if (error.errorType === '12') {
+                            // Rewrap NotImplemented (12) as NotSupportedError
+                            reject(new NotSupportedError(context));
+                        } else {
+                            reject(err);
+                        }
                     }
 
                     resolve(response);
