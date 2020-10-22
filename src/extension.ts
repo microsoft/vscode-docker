@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerExperimentationService, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -89,7 +89,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         } else {
             targetPopulation = tas.TargetPopulation.Public;
         }
-        await registerExperimentationService(ctx, targetPopulation);
+        ext.experimentationService = await createExperimentationService(ctx, targetPopulation);
 
         (new SurveyManager()).activate();
 
