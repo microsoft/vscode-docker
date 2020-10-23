@@ -35,7 +35,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
-                async (id, commands, user) => {
+                async (commands, user) => {
                     return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
                 };
 
@@ -44,8 +44,8 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             let items: DirectoryItem[];
 
             switch (osType) {
-                case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.path); break;
-                case 'windows': items = await getWindowsContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.windowsPath); break;
+                case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.path); break;
+                case 'windows': items = await getWindowsContainerDirectoryItems(executor, dockerUri.windowsPath); break;
                 default:
                     throw new Error('Unrecognized OS type.');
             }

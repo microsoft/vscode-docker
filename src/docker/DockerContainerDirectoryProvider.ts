@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { DockerExecCommandProvider } from './DockerApiClient';
 
 export type DirectoryItemType = 'directory' | 'file';
 
@@ -8,7 +9,7 @@ export interface DirectoryItem {
     type: DirectoryItemType;
 }
 
-export type DockerContainerExecutor = (containerId: string, commands: string[], user?: string) => Promise<string>;
+export type DockerContainerExecutor = (command: string[] | DockerExecCommandProvider, user?: string) => Promise<string>;
 
 function parseLinuxName(name: string): string {
     const expression = /(?<name>.+)(?= -> )/g;
@@ -116,33 +117,37 @@ function parseWindowsDirectoryItems(input: string, parentPath: string): Director
     return items;
 }
 
-export async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
+export async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor, parentPath: string | undefined): Promise<DirectoryItem[]> {
     if (parentPath === undefined) {
         parentPath = '/';
     }
 
-    const commands = ['/bin/sh', '-c', `ls -la "${parentPath}"` ];
+    const commandProvider: DockerExecCommandProvider = shell => {
+        return shell === 'windows'
+            ? ['/bin/sh', '-c', `"ls -la \"${parentPath}\""` ]
+            : ['/bin/sh', '-c', `ls -la "${parentPath}"` ];
+    };
 
-    const output = await executor(containerId, commands);
+    const output = await executor(commandProvider);
 
     return parseLinuxDirectoryItems(output, parentPath);
 }
 
-export async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
-    const commands = ['cmd', '/C', `dir /A-S /-C "${parentPath}"` ];
+export async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, parentPath: string | undefined): Promise<DirectoryItem[]> {
+    const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"` ];
 
     let output: string;
 
     try {
         // Try the listing with the default user...
-        output = await executor(containerId, commands);
+        output = await executor(command);
     } catch {
         try {
             // If that fails, try another well-known user...
-            output = await executor(containerId, commands, 'ContainerAdministrator');
+            output = await executor(command, 'ContainerAdministrator');
         } catch {
             // If *that* fails, try a last well-known user...
-            output = await executor(containerId, commands, 'Administrator');
+            output = await executor(command, 'Administrator');
         }
     }
 

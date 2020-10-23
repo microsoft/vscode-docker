@@ -6,7 +6,7 @@
 import { Disposable } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
-import { DockerInfo, PruneResult } from './Common';
+import { DockerInfo, DockerOSType, PruneResult } from './Common';
 import { DockerContainer, DockerContainerInspection } from './Containers';
 import { DockerImage, DockerImageInspection } from './Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from './Networks';
@@ -17,13 +17,15 @@ export type DockerExecOptions = {
     user?: string;
 };
 
+export type DockerExecCommandProvider = (shell: DockerOSType) => string[];
+
 export interface DockerApiClient extends Disposable {
     info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo>;
     version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion>;
 
     getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]>;
     inspectContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerContainerInspection>;
-    execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string>;
+    execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<string>;
     getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer>;
     getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream>;
     pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult | undefined>;

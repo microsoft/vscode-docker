@@ -14,7 +14,7 @@ import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
+import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { DockerVersion } from '../Version';
@@ -63,10 +63,12 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         } as DockerContainerInspection;
     }
 
-    public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
+    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
 
         // NOTE: Dockerode's exec() doesn't seem to work with Windows against the socket endpoint.
         //       https://github.com/apocas/dockerode/issues/534
+
+        const commandProvider = Array.isArray(command) ? () => command : command;
 
         if (isWindows()) {
             let dockerCommand = 'docker exec ';
@@ -75,7 +77,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                 dockerCommand += `--user "${options.user}" `;
             }
 
-            dockerCommand += `"${ref}" ${command.join(' ')}`;
+            dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
 
             const results = await execStreamAsync(dockerCommand, {}, token);
 
@@ -86,7 +88,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             const exec = await container.exec({
                 AttachStderr: true,
                 AttachStdout: true,
-                Cmd: command,
+                Cmd: commandProvider('linux'),
                 User: options?.user
             });
 

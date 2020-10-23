@@ -13,7 +13,7 @@ import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient, DockerExecOptions } from '../DockerApiClient';
+import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { NotSupportedError } from '../NotSupportedError';
@@ -82,7 +82,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     // #region Not supported by the Docker SDK yet
-    public async execInContainer(context: IActionContext, ref: string, command: string[], options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
+    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
         // Supported by SDK, but ACI implementation does not support non-interactive nor commands with arguments.
         // (This means no listing of container directories to show files.)
         throw new NotSupportedError(context);
