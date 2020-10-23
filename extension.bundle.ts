@@ -35,7 +35,6 @@ export { recursiveFindTaskByType } from './src/tasks/TaskHelper';
 export { TaskDefinitionBase } from './src/tasks/TaskDefinitionBase';
 export { DebugConfigurationBase } from './src/debugging/DockerDebugConfigurationBase';
 export { ActivityMeasurementService } from './src/telemetry/ActivityMeasurementService';
-export { ExperimentationTelemetry } from './src/telemetry/ExperimentationTelemetry';
 export { DockerApiClient } from './src/docker/DockerApiClient';
 export { DockerContext, isNewContextType } from './src/docker/Contexts';
 export { DockerContainer } from './src/docker/Containers';

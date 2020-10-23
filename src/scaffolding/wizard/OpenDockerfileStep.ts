@@ -18,7 +18,7 @@ export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizard
         const dockerfilePath = path.join(wizardContext.dockerfileDirectory, 'Dockerfile');
 
         if (await fse.pathExists(dockerfilePath) &&
-            await ext.experimentationService.isFlightEnabled('vscode-docker.openDockerfile')) {
+            await ext.experimentationService.isCachedFlightEnabled('vscode-docker.openDockerfile')) {
             wizardContext.telemetry.properties.openedDockerfile = 'true';
 
             // Don't wait

@@ -241,7 +241,7 @@
             "view/title": [
                 {
                     "command": "vscode-docker.containers.prune",
-                    "when": "view == dockerContainers",
+                    "when": "view == dockerContainers && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -261,12 +261,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.create",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.networks.prune",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -276,7 +276,7 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
-                    "when": "view == dockerImages",
+                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -306,7 +306,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.prune",
-                    "when": "view == dockerVolumes",
+                    "when": "view == dockerVolumes && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -568,7 +568,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.inspect",
-                    "when": "view == dockerVolumes && viewItem == volume",
+                    "when": "view == dockerVolumes && viewItem == volume && !vscode-docker:newSdkContext",
                     "group": "volumes_1_general@1"
                 },
                 {
@@ -2830,7 +2830,7 @@
         "semver": "^7.3.2",
         "tar": "^6.0.5",
         "vscode-azureappservice": "^0.68.0",
-        "vscode-azureextensionui": "^0.36.0",
+        "vscode-azureextensionui": "^0.36.1",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.13",
