@@ -22,7 +22,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
     }
 
     public get contextValue(): string {
-        return '';
+        return 'containerDirectory';
     }
 
     public hasMoreChildrenImpl(): boolean {
