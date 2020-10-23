@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
+import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
@@ -14,7 +15,7 @@ import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerEx } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
+export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implements MultiSelectNode {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerEx;
@@ -24,6 +25,8 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
         super(parent);
         this._item = itemInfo;
     }
+
+    public readonly canMultiSelect = true;
 
     public get id(): string {
         return getTreeId(this._item);
@@ -93,7 +96,7 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return this._item.showFiles && this.children === undefined;
+        return this._item.showFiles && this.isRunning && this.children === undefined;
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
@@ -101,10 +104,14 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate {
             this.children = undefined;
         }
 
-        if (this._item.showFiles) {
+        if (this._item.showFiles && this.isRunning) {
             this.children = [ new FilesTreeItem(this, vscode.workspace.fs, this.containerId) ];
         }
 
         return this.children;
+    }
+
+    private get isRunning(): boolean {
+        return this._item.State.toLowerCase() === 'running';
     }
 }
