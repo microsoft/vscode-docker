@@ -86,7 +86,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             const exec = await container.exec({
                 AttachStderr: true,
                 AttachStdout: true,
-                Cmd: ['/bin/sh', '-c', ...command],
+                Cmd: command,
                 User: options?.user
             });
 
@@ -107,13 +107,13 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                         resolve(Buffer.concat(chunks).toString('utf8'));
                     });
                 });
-            }
         }
+    }
 
     public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
         const container = this.dockerodeClient.getContainer(ref);
 
-        const stream = await this.callWithErrorHandling(context, () => container.getArchive({ path }));
+        const stream = await this.callWithErrorHandling(context, async () => container.getArchive({ path }));
 
         return await new Promise(
             (resolve, reject) => {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
+import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
 import { DockerUri, DockerUriFileType } from './dockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
@@ -41,7 +41,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
 
             const osType = await this.getContainerOS(dockerUri.containerId)
 
-            let items;
+            let items: DirectoryItem[];
 
             switch (osType) {
                 case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.containerId, dockerUri.path); break;

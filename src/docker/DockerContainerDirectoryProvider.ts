@@ -121,7 +121,7 @@ export async function getLinuxContainerDirectoryItems(executor: DockerContainerE
         parentPath = '/';
     }
 
-    const commands = ['/bin/sh', '-c', `"ls -la '${parentPath}'"` ];
+    const commands = ['/bin/sh', '-c', `ls -la "${parentPath}"` ];
 
     const output = await executor(containerId, commands);
 
@@ -131,7 +131,7 @@ export async function getLinuxContainerDirectoryItems(executor: DockerContainerE
 export async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, containerId: string, parentPath: string | undefined): Promise<DirectoryItem[]> {
     const commands = ['cmd', '/C', `dir /A-S /-C "${parentPath}"` ];
 
-    let output;
+    let output: string;
 
     try {
         // Try the listing with the default user...
