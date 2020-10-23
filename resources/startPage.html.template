@@ -10,39 +10,119 @@
     <title>Docker: Getting Started</title>
 
     <style nonce="{{ nonce }}">
-        #icons {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
+        .icon .codicon {
+            font-size: 80px;
+            background-color: var(--vscode-titleBar-activeBackground);
+            padding: 5px;
         }
 
-        #icons .icon {
-            width: 140px;
-            padding: 20px;
-            font-size: 14px;
+        #dockerIcon {
+            width: 80px;
+            padding: 5px;
+            background-color: var(--vscode-titleBar-activeBackground);
+        }
+
+        svg path {
+            fill: var(--vscode-editor-foreground);
+        }
+
+        a.icon:hover {
+            color: var(--vscode-editor-foreground);
+        }
+
+        div .container {
+            display: flex;
+        }
+
+        div .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        div .column {
             display: flex;
             flex-direction: column;
-            text-align: center;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
 
-        #icons .icon .codicon {
-            font-size: 32px;
-            padding-bottom: 16px;
+        div .cell {
+            margin: 10px;
+        }
+
+        .linkheading {
+            text-decoration: none;
+            color: var(--vscode-editor-foreground);
         }
     </style>
 </head>
 
 <body>
-    <a href="command:vscode-docker.help">Hello</a>
-    <div>Regular text</div>
-    <img src="{{ dockerSvgUri }}" width="300" />
-    <input type="checkbox" id="showStartPage" {{ showStartPageChecked }} />
-    <label for="showStartPage">Show this page when a new update to the Docker extension is released</label>
-
-    <div id="icons">
-        <div class="icon"><i class="codicon codicon-account"></i>account</div>
+    <div class="container">
+        <div class="row">
+            <div class="cell">
+                <a href="command:workbench.view.extension.dockerView">
+                    <img id="dockerIcon" src="{{ dockerSvgUri }}" />
+                </a>
+            </div>
+            <div class="cell">
+                <div>
+                    <a class="linkheading" href="command:workbench.view.extension.dockerView">
+                        <h1>View Docker Resources in the Explorer</h1>
+                    </a>
+                </div>
+                <div>Check out the Docker <a href="command:workbench.view.extension.dockerView">explorer</a> to view and
+                    manage Docker resources</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell">
+                <a href="command:vscode-docker.configure" class="linkheading icon">
+                    <i class="codicon codicon-new-file"></i>
+                </a>
+            </div>
+            <div class="cell">
+                <div>
+                    <a class="linkheading" href="command:vscode-docker.configure">
+                        <h1>Add Docker Files to your Project</h1>
+                    </a>
+                </div>
+                <div>
+                    Open the command palette (<kbd>F1</kbd>) and enter
+                    <a href="command:vscode-docker.configure">Docker: Add Docker Files to Workspace...</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell">
+                <a href="command:vscode-docker.registries.connectRegistry" class="linkheading icon">
+                    <i class="codicon codicon-cloud-upload"></i>
+                </a>
+            </div>
+            <div class="cell">
+                <div>
+                    <a class="linkheading" href="command:vscode-docker.registries.connectRegistry">
+                        <h1>Connect a Container Registry to Push Images</h1>
+                    </a>
+                </div>
+                <div>
+                    Open the command palette (<kbd>F1</kbd>) and enter
+                    <a href="command:vscode-docker.registries.connectRegistry">Docker Registries: Connect
+                        Registry...</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell">
+                <input type="checkbox" id="showStartPage" {{ showStartPageChecked }} />
+                <label for="showStartPage">Show this page when a new update to the Docker extension is released</label>
+            </div>
+        </div>
     </div>
+
+
 </body>
 
 <script nonce="{{ nonce }}">
