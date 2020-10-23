@@ -9,7 +9,7 @@ import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
 import { isWindows } from '../../utils/osUtils';
-import { execAsync } from '../../utils/spawnAsync';
+import { execStreamAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
@@ -77,16 +77,15 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             dockerCommand += `"${ref}" ${command.join(' ')}`;
 
-            const results = await execAsync(dockerCommand);
+            const results = await execStreamAsync(dockerCommand, {}, token);
 
-            return results.stdout;
+            return results.stdout.toString('utf8');
         } else {
             const container = this.dockerodeClient.getContainer(ref);
 
             const exec = await container.exec({
                 AttachStderr: true,
                 AttachStdout: true,
-                // TODO: This makes sense only for Linux; should caller comprehend shell to use?
                 Cmd: ['/bin/sh', '-c', ...command],
                 User: options?.user
             });
@@ -112,22 +111,6 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         }
 
     public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
-        // const localPath = corepath.join(os.tmpdir(), 'testfile.txt');
-
-        // const command = `docker cp "${ref}:${path}" "${localPath}"`;
-
-        // await execAsync(command, {});
-
-        // // TODO: Read from temp path.
-
-        // try {
-        //     // NOTE: False positive: https://github.com/nodesecurity/eslint-plugin-security/issues/65
-        //     // eslint-disable-next-line @typescript-eslint/tslint/config
-        //     return await fs.readFile(localPath);
-        // } finally {
-        //     await fs.remove(localPath);
-        // }
-
         const container = this.dockerodeClient.getContainer(ref);
 
         const stream = await this.callWithErrorHandling(context, () => container.getArchive({ path }));

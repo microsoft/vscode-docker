@@ -35,8 +35,8 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
-                async (id, command, user) => {
-                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, [ command ], { user });
+                async (id, commands, user) => {
+                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
                 };
 
             const osType = await this.getContainerOS(dockerUri.containerId)
@@ -131,18 +131,18 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             containerOS = await this.getContainerOS(dockerUri.containerId);
         }
 
-        let command;
+        let command: string[];
 
         switch (containerOS) {
             case 'linux':
 
-                command = `cat "${dockerUri.path}"`;
+                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"` ];
 
                 break;
 
             case 'windows':
 
-                command = `cmd /C type "${dockerUri.windowsPath}"`;
+                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"` ];
 
                 break;
 
@@ -152,7 +152,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         }
 
         // TODO: Check status code (for error)?
-        const stdout = await this.dockerClientProvider().execInContainer(undefined, dockerUri.containerId, [command]);
+        const stdout = await this.dockerClientProvider().execInContainer(undefined, dockerUri.containerId, command);
         const buffer = Buffer.from(stdout, 'utf8');
 
         return Uint8Array.from(buffer);
