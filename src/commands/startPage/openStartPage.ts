@@ -24,7 +24,7 @@ export async function openStartPageIfNecessary(): Promise<void> {
     } else if (!/^en(-us)?$/i.test(vscode.env.language)) {
         // Don't show: this page is English only
         return;
-    } else if (!(await ext.experimentationService.isFlightEnabled('vscode-docker.openStartPage'))) {
+    } else if (!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.openStartPage'))) {
         // Don't show: flight not enabled
         return;
     }
