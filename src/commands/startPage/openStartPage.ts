@@ -24,12 +24,10 @@ export async function openStartPageIfNecessary(): Promise<void> {
     } else if (!/^en(-us)?$/i.test(vscode.env.language)) {
         // Don't show: this page is English only
         return;
-    }
-    // TODO: re-enable this code!
-    /* else if (!(await ext.experimentationService.isFlightEnabled('vscode-docker.openStartPage'))) {
+    } else if (!(await ext.experimentationService.isFlightEnabled('vscode-docker.openStartPage'))) {
         // Don't show: flight not enabled
         return;
-    }*/
+    }
 
     const lastVersion = new semver.SemVer(ext.context.globalState.get(lastVersionKey, '0.0.1'));
     const thisVersion = new semver.SemVer(extensionVersion.value);

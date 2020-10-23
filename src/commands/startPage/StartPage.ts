@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
@@ -10,6 +11,15 @@ import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 
 type WebviewMessage = { command: string, [key: string]: string };
+
+interface StartPageContext {
+    cspSource: string;
+    nonce: string;
+    codiconsFontUri: string;
+    codiconsStyleUri: string;
+    dockerSvgUri: string;
+    showStartPageChecked: 'checked' | '';
+}
 
 class StartPage {
     private activePanel: vscode.WebviewPanel | undefined;
@@ -43,74 +53,28 @@ class StartPage {
     }
 
     private async getWebviewHtml(resourcesRoot: vscode.Uri, codiconsRoot: vscode.Uri): Promise<string> {
+        const Handlebars = await import('handlebars');
         const webview = this.activePanel.webview;
         const themedResourcesPath = vscode.Uri.joinPath(resourcesRoot, vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light ? 'light' : 'dark');
+        const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
 
-        const codiconsStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css'));
-        const codiconsFontUri = webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.ttf'));
+        const startPageContext: StartPageContext = {
+            cspSource: webview.cspSource,
+            nonce: cryptoUtils.getRandomHexString(8),
+            codiconsFontUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.ttf')).toString(),
+            codiconsStyleUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css')).toString(),
+            dockerSvgUri: webview.asWebviewUri(vscode.Uri.joinPath(themedResourcesPath, 'docker.svg')).toString(),
+            showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
+        };
 
-        const nonce = cryptoUtils.getRandomHexString(8);
-
-        return `<!DOCTYPE html>
-            <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} file:; script-src 'nonce-${nonce}'; font-src ${codiconsFontUri}; style-src ${webview.cspSource} ${codiconsStyleUri} 'nonce-${nonce}';">
-                    <link href="${codiconsStyleUri}" rel="stylesheet" />
-                    <title>Docker: Getting Started</title>
-
-                    <style nonce="${nonce}">
-                        #icons {
-                            display: flex;
-                            flex-wrap: wrap;
-                            align-items: center;
-                            justify-content: center;
-                        }
-
-                        #icons .icon {
-                            width: 140px;
-                            padding: 20px;
-                            font-size: 14px;
-                            display: flex;
-                            flex-direction: column;
-                            text-align: center;
-                        }
-
-                        #icons .icon .codicon {
-                            font-size: 32px;
-                            padding-bottom: 16px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <a href="command:vscode-docker.help">Hello</a>
-                    <div>Regular text</div>
-                    <img src="${webview.asWebviewUri(vscode.Uri.joinPath(themedResourcesPath, 'docker.svg'))}" width="300" />
-                    <input type="checkbox" id="showStartPage" ${vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : ''} />
-                    <label for="showStartPage">Show this page when a new update to the Docker extension is released</label>
-
-                    <div id="icons"><div class="icon"><i class="codicon codicon-account"></i>account</div></div>
-                </body>
-
-                <script nonce="${nonce}">
-                    const vscode = acquireVsCodeApi();
-                    const showStartPageCheckbox = document.getElementById('showStartPage');
-
-                    showStartPageCheckbox.addEventListener('click', function() {
-                        vscode.postMessage({
-                            command: 'showStartPageClicked',
-                            showStartPage: showStartPageCheckbox.checked
-                        });
-                    });
-                </script>
-            </html>`;
+        const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
+        return template(startPageContext);
     }
 
     private async handleMessage(message: WebviewMessage): Promise<void> {
         switch (message.command) {
             case 'showStartPageClicked':
-                await vscode.workspace.getConfiguration('docker').update('showStartPage', message.showStartPage, true);
+                await vscode.workspace.getConfiguration('docker').update('showStartPage', Boolean(message.showStartPage), vscode.ConfigurationTarget.Global);
                 break;
             default:
         }
