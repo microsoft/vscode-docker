@@ -2817,7 +2817,7 @@
         "semver": "^7.3.2",
         "tar": "^6.0.5",
         "vscode-azureappservice": "^0.68.0",
-        "vscode-azureextensionui": "^0.36.0",
+        "vscode-azureextensionui": "^0.36.1",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.13",

@@ -8,10 +8,11 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, IActionContext, registerTelemetryHandler, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/lib/main';
+import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
-import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
+import { COMPOSE_FILE_GLOB_PATTERN, extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -24,8 +25,6 @@ import { localize } from './localize';
 import { registerListeners } from './registerListeners';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
-import { ExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
-import { ExperimentationTelemetry } from './telemetry/ExperimentationTelemetry';
 import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
@@ -81,9 +80,17 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
-        const experimentationTelemetry = new ExperimentationTelemetry();
-        ctx.subscriptions.push(registerTelemetryHandler(async (context: IActionContext) => experimentationTelemetry.handleTelemetry(context)));
-        ext.experimentationService = await ExperimentationServiceAdapter.create(ctx.globalState, experimentationTelemetry);
+
+        let targetPopulation: tas.TargetPopulation;
+        if (ext.runningTests || process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
+            targetPopulation = tas.TargetPopulation.Team;
+        } else if (/alpha/ig.test(extensionVersion.value)) {
+            targetPopulation = tas.TargetPopulation.Insiders;
+        } else {
+            targetPopulation = tas.TargetPopulation.Public;
+        }
+        ext.experimentationService = await createExperimentationService(ctx, targetPopulation);
+
         (new SurveyManager()).activate();
 
         validateOldPublisher(activateContext);
