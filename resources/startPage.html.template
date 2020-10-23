@@ -60,7 +60,9 @@
                 <a href="https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker"><img src="{{ dockerIconUri }}" /></a>
             </div>
             <div class="cell">
-                <h1>Docker</h1>
+                <a href="https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker" class="linkheading">
+                    <h1>Docker</h1>
+                </a>
             </div>
         </div>
         <div class="row">
@@ -76,7 +78,7 @@
                     </a>
                 </div>
                 <div>
-                    Open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.configure">Docker: Add Docker Files to Workspace...</a>
+                    After opening a workspace or workspace folder, open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.configure">Docker: Add Docker Files to Workspace...</a>
                 </div>
             </div>
         </div>
