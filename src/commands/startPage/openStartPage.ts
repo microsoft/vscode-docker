@@ -18,23 +18,21 @@ export async function openStartPage(context: IActionContext, reason: 'install' |
 }
 
 export async function openStartPageIfNecessary(): Promise<void> {
+    const lastVersion = new semver.SemVer(ext.context.globalState.get(lastVersionKey, '0.0.1'));
+    const thisVersion = new semver.SemVer(extensionVersion.value);
+    const diff = semver.diff(thisVersion, lastVersion);
+
     if (!vscode.workspace.getConfiguration('docker').get('showStartPage', false)) {
         // Don't show: disabled by settings
         return;
     } else if (!/^en(-us)?$/i.test(vscode.env.language)) {
         // Don't show: this page is English only
         return;
+    } else if (semver.lte(thisVersion, lastVersion) || diff === 'prepatch' || diff === 'patch' || diff === 'prerelease') {
+        // Don't show: already showed during this major/minor
+        return;
     } else if (!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.openStartPage'))) {
         // Don't show: flight not enabled
-        return;
-    }
-
-    const lastVersion = new semver.SemVer(ext.context.globalState.get(lastVersionKey, '0.0.1'));
-    const thisVersion = new semver.SemVer(extensionVersion.value);
-    const diff = semver.diff(thisVersion, lastVersion);
-
-    if (semver.lte(thisVersion, lastVersion) || diff === 'prepatch' || diff === 'patch' || diff === 'prerelease') {
-        // Don't show: already showed during this major/minor
         return;
     }
 
