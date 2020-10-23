@@ -17,7 +17,7 @@ interface StartPageContext {
     nonce: string;
     codiconsFontUri: string;
     codiconsStyleUri: string;
-    dockerSvgUri: string;
+    dockerIconUri: string;
     showStartPageChecked: 'checked' | '';
 }
 
@@ -31,7 +31,7 @@ class StartPage {
         if (!this.activePanel) {
             this.activePanel = vscode.window.createWebviewPanel(
                 'vscode-docker.startPage',
-                localize('vscode-docker.help.startPage.title', 'Docker: Getting Started'),
+                localize('vscode-docker.help.startPage.title', 'Docker - Get Started'),
                 vscode.ViewColumn.One,
                 {
                     enableCommandUris: true,
@@ -55,7 +55,6 @@ class StartPage {
     private async getWebviewHtml(resourcesRoot: vscode.Uri, codiconsRoot: vscode.Uri): Promise<string> {
         const Handlebars = await import('handlebars');
         const webview = this.activePanel.webview;
-        const themedResourcesPath = vscode.Uri.joinPath(resourcesRoot, vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light ? 'light' : 'dark');
         const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
 
         const startPageContext: StartPageContext = {
@@ -63,7 +62,7 @@ class StartPage {
             nonce: cryptoUtils.getRandomHexString(8),
             codiconsFontUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.ttf')).toString(),
             codiconsStyleUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css')).toString(),
-            dockerSvgUri: webview.asWebviewUri(vscode.Uri.joinPath(themedResourcesPath, 'docker.svg')).toString(),
+            dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker.png')).toString(),
             showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
         };
 
