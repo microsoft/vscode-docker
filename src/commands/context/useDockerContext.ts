@@ -28,18 +28,18 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
             async () => {
                 // Get a promise for the onContextChangedEvent
                 const contextChangedEventPromise = new Promise((resolve) => {
-                    const disposable1 = ext.dockerContextManager.onContextChanged(() => {
-                        disposable1.dispose();
-                        clearTimeout(disposable2);
+                    const disposable = ext.dockerContextManager.onContextChanged(() => {
+                        disposable.dispose();
+                        clearTimeout(timer);
 
                         resolve();
                     });
 
                     // If 10 seconds pass and it hasn't been updated, force a refresh
                     // This covers the scenario where the filesystem watchers aren't working (e.g. Codespaces)
-                    const disposable2 = setTimeout(() => {
-                        disposable1.dispose();
-                        clearTimeout(disposable2);
+                    const timer = setTimeout(() => {
+                        disposable.dispose();
+                        clearTimeout(timer);
 
                         void ext.dockerContextManager.refresh();
                         resolve();
