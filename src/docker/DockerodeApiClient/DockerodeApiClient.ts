@@ -9,7 +9,7 @@ import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
 import { isWindows } from '../../utils/osUtils';
-import { execStreamAsync } from '../../utils/spawnAsync';
+import { bufferToString, execStreamAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
@@ -81,7 +81,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             const results = await execStreamAsync(dockerCommand, {}, token);
 
-            return results.stdout.toString('utf8');
+            return results.stdout;
         } else {
             const container = this.dockerodeClient.getContainer(ref);
 
@@ -97,7 +97,6 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             return new Promise<string>(
                 (resolve, reject) => {
-
                     const chunks = [];
 
                     stream.on('data', chunk => {
@@ -106,7 +105,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
                     stream.on('end', () => {
                         // TODO: How do we determine errors (as error text will be mixed with normal text)?
-                        resolve(Buffer.concat(chunks).toString('utf8'));
+                        resolve(bufferToString(Buffer.concat(chunks)));
                     });
                 });
         }

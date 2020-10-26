@@ -206,7 +206,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
 export async function execStreamAsync(
     command: string,
     options?: cp.ExecOptions & { stdin?: string },
-    token?: CancellationToken): Promise<{ stdout: Buffer, stderr: Buffer }> {
+    token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
     const stdoutChunks = [];
     const stderrChunks = [];
 
@@ -218,8 +218,8 @@ export async function execStreamAsync(
         token);
 
     return {
-        stdout: Buffer.concat(stdoutChunks),
-        stderr: Buffer.concat(stderrChunks),
+        stdout: bufferToString(Buffer.concat(stdoutChunks)),
+        stderr: bufferToString(Buffer.concat(stderrChunks)),
     }
 }
 

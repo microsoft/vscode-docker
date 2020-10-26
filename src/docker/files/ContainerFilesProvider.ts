@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
 import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
-import { DockerUri, DockerUriFileType } from './DockerUri';
+import { DockerUri } from './DockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
     private readonly changeEmitter: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
@@ -19,15 +19,42 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
-        const dockerUri = DockerUri.parse(uri);
+        const method = async (): Promise<vscode.FileStat> => {
+            const dockerUri = DockerUri.parse(uri);
 
-        // TODO: Implement!
-        return {
-            ctime: 0,
-            mtime: 0,
-            size: 0,
-            type: ContainerFilesProvider.toVsCodeFileType(dockerUri.options?.fileType)
+            const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
+
+            switch (containerOS) {
+                case 'linux':
+                    const user: string = undefined;
+                    const command: string[] = [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${dockerUri.path}"` ];
+
+                    const result = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, command, { user });
+
+                    const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
+
+                    const statMatch = statRegex.exec(result);
+
+                    if (statMatch === null) {
+                        throw new Error('Unexpected stat output.');
+                    }
+
+                    // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
+
+                    return {
+                        ctime: parseInt(statMatch.groups.ctime, 10) * 1000,
+                        mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
+                        size: parseInt(statMatch.groups.size, 10),
+                        type: statMatch.groups.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
+                    };
+
+                case 'windows':
+                default:
+                    throw new Error('Not yet implemented.');
+            }
         };
+
+        return method();
     }
 
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
@@ -39,11 +66,11 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
                     return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
                 };
 
-            const osType = await this.getContainerOS(dockerUri.containerId)
+            let containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
 
             let items: DirectoryItem[];
 
-            switch (osType) {
+            switch (containerOS) {
                 case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.path); break;
                 case 'windows': items = await getWindowsContainerDirectoryItems(executor, dockerUri.windowsPath); break;
                 default:
@@ -158,13 +185,15 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         return Uint8Array.from(buffer);
     }
 
-    private static toVsCodeFileType(fileType: DockerUriFileType): vscode.FileType {
-        switch (fileType) {
-            case 'directory': return vscode.FileType.Directory;
-            case 'file': return vscode.FileType.File;
-            default:
 
-                return vscode.FileType.Unknown;
-        }
-    }
+    //     TODO: Do we need this and/or the fileType option in DockerUri?
+    // private static toVsCodeFileType(fileType: DockerUriFileType): vscode.FileType {
+    //     switch (fileType) {
+    //         case 'directory': return vscode.FileType.Directory;
+    //         case 'file': return vscode.FileType.File;
+    //         default:
+
+    //             return vscode.FileType.Unknown;
+    //     }
+    // }
 }
