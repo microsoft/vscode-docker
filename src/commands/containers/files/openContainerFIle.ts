@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { IActionContext } from "vscode-azureextensionui";
-import { localize } from '../../../localize';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
-import { FileTreeItem } from "../../../tree/containers/files/FileTreeItem";
+import { localize } from '../../../localize';
+import { FileTreeItem } from '../../../tree/containers/files/FileTreeItem';
 import { multiSelectNodes } from '../../../utils/multiSelectNodes';
 
 export async function openContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
@@ -30,5 +30,5 @@ export async function openContainerFile(context: IActionContext, node?: FileTree
 
                         await vscode.window.showTextDocument(document, { preview: nodes.length === 1 });
                     }));
-    });
+        });
 }

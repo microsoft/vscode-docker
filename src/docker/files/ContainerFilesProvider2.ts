@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
 import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
-import { DockerUri, DockerUriFileType } from './dockerUri';
+import { DockerUri, DockerUriFileType } from './DockerUri2';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
     private readonly changeEmitter: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();

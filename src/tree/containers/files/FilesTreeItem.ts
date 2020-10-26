@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
-import { DockerUri } from '../../../docker/files/dockerUri';
+import { DockerUri } from '../../../docker/files/DockerUri2';
 import { DirectoryTreeItem } from "./DirectoryTreeItem";
 
 export class FilesTreeItem extends DirectoryTreeItem {

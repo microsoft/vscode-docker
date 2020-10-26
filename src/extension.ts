@@ -14,7 +14,7 @@ import { registerCommands } from './commands/registerCommands';
 import { COMPOSE_FILE_GLOB_PATTERN } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
-import { ContainerFilesProvider } from './docker/files/containerFilesProvider';
+import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider2';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
