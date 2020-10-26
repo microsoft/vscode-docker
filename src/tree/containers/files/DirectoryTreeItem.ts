@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DirectoryItem } from "../../../docker/DockerContainerDirectoryProvider";
-import { DockerUri } from '../../../docker/files/DockerUri2';
+import { DockerUri } from '../../../docker/files/DockerUri';
 import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
 import { FileTreeItem } from "./FileTreeItem";
 
