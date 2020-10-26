@@ -17,7 +17,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         parent: AzExtParentTreeItem,
         private readonly fs: vscode.FileSystem,
         private readonly name: string,
-        private readonly uri: DockerUri) {
+        private readonly uriProvider: (context: IActionContext) => Promise<DockerUri>) {
         super(parent);
     }
 
@@ -40,21 +40,23 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
             this.children = undefined;
         }
 
-        const items = await this.fs.readDirectory(this.uri.uri);
+        const uri = await this.uriProvider(context);
+        const items = await this.fs.readDirectory(uri.uri);
 
-        return items.map(item => this.createTreeItemForDirectoryItem(item));
+        return items.map(item => this.createTreeItemForDirectoryItem(item, uri));
     }
 
-    private createTreeItemForDirectoryItem(item: [string, vscode.FileType]): AzExtTreeItem {
+    private createTreeItemForDirectoryItem(item: [string, vscode.FileType], parentUri: DockerUri): AzExtTreeItem {
         const name = item[0];
         const fileType = item[1];
 
-        let itemUri = DockerUri.joinPath(this.uri, name);
+        // TODO: Verify that this uri has (and keeps) the containerOS option.
+        let itemUri = DockerUri.joinPath(parentUri, name);
 
         switch (fileType) {
             case vscode.FileType.Directory:
 
-                return new DirectoryTreeItem(this, this.fs, name, itemUri);
+                return new DirectoryTreeItem(this, this.fs, name, async () => itemUri);
 
             case vscode.FileType.File:
 

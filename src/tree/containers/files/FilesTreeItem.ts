@@ -1,15 +1,21 @@
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from '../../../docker/Common';
 import { DockerUri } from '../../../docker/files/DockerUri';
+import { localize } from '../../../localize';
 import { DirectoryTreeItem } from "./DirectoryTreeItem";
 
 export class FilesTreeItem extends DirectoryTreeItem {
-    public constructor(parent: AzExtParentTreeItem, fs: vscode.FileSystem, containerId: string) {
-        super(parent, fs, 'Files', DockerUri.create(containerId, '/', { fileType: 'directory' }));
-    }
+    public constructor(parent: AzExtParentTreeItem, fs: vscode.FileSystem, containerId: string, containerOSProvider: (context: IActionContext) => Promise<DockerOSType>) {
+        super(
+            parent,
+            fs,
+            localize('vscode-docker.tree.containers.files.filesTitle', 'Files'),
+            async context => {
+                const containerOS = await containerOSProvider(context);
 
-    public get contextValue(): string {
-        return '';
+                return DockerUri.create(containerId, '/', { containerOS, fileType: 'directory' });
+            });
     }
 
     public get iconPath(): vscode.ThemeIcon {

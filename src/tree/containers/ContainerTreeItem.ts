@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from '../../docker/Common';
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { MultiSelectNode } from '../../utils/multiSelectNodes';
@@ -20,13 +21,14 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerEx;
     private children: AzExtTreeItem[] | undefined;
+    private containerOS: DockerOSType;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerEx) {
         super(parent);
         this._item = itemInfo;
     }
 
-    public readonly canMultiSelect = true;
+    public readonly canMultiSelect: boolean = true;
 
     public get id(): string {
         return getTreeId(this._item);
@@ -105,7 +107,19 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
         }
 
         if (this._item.showFiles && this.isRunning) {
-            this.children = [ new FilesTreeItem(this, vscode.workspace.fs, this.containerId) ];
+            this.children = [
+                new FilesTreeItem(
+                    this,
+                    vscode.workspace.fs,
+                    this.containerId,
+                    async c => {
+                        if (this.containerOS === undefined) {
+                            this.containerOS = (await ext.dockerClient.inspectContainer(c, this.containerId)).Platform;
+                        }
+
+                        return this.containerOS;
+                    })
+            ];
         }
 
         return this.children;
