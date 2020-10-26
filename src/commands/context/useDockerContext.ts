@@ -39,7 +39,6 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
                     // This covers the scenario where the filesystem watchers aren't working (e.g. Codespaces)
                     const timer = setTimeout(() => {
                         disposable.dispose();
-                        clearTimeout(timer);
 
                         void ext.dockerContextManager.refresh();
                         resolve();
