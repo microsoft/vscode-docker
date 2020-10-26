@@ -118,14 +118,14 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (isNewContextType(currentContext.Type)) {
                 // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
                 // But that probably won't be true in the future, so define both as separate concepts now
-                await this.setVsCodeContext('vscode-docker:aciContext', true);
-                await this.setVsCodeContext('vscode-docker:newSdkContext', true);
+                this.setVsCodeContext('vscode-docker:aciContext', true);
+                this.setVsCodeContext('vscode-docker:newSdkContext', true);
 
                 const dsc = await import('./DockerServeClient/DockerServeClient');
                 ext.dockerClient = new dsc.DockerServeClient(currentContext);
             } else {
-                await this.setVsCodeContext('vscode-docker:aciContext', false);
-                await this.setVsCodeContext('vscode-docker:newSdkContext', false);
+                this.setVsCodeContext('vscode-docker:aciContext', false);
+                this.setVsCodeContext('vscode-docker:newSdkContext', false);
 
                 const dockerode = await import('./DockerodeApiClient/DockerodeApiClient');
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
@@ -204,7 +204,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             if (dockerHostEnv !== undefined) {
                 actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
-                await this.setVsCodeContext('vscode-docker:contextLocked', true);
+                this.setVsCodeContext('vscode-docker:contextLocked', true);
 
                 return [{
                     ...defaultContext,
@@ -254,9 +254,9 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             if (dockerContextEnv) {
-                await this.setVsCodeContext('vscode-docker:contextLocked', true);
+                this.setVsCodeContext('vscode-docker:contextLocked', true);
             } else {
-                await this.setVsCodeContext('vscode-docker:contextLocked', false);
+                this.setVsCodeContext('vscode-docker:contextLocked', false);
             }
 
             return result;
@@ -294,12 +294,12 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             // Set the VSCode context to the result (which may expose commands, etc.)
-            await this.setVsCodeContext('vscode-docker:newCliPresent', result);
+            this.setVsCodeContext('vscode-docker:newCliPresent', result);
             return result;
         } catch { } // Best effort
     }
 
-    private async setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): Promise<void> {
-        return commands.executeCommand('setContext', vsCodeContext, value);
+    private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {
+        void commands.executeCommand('setContext', vsCodeContext, value);
     }
 }
