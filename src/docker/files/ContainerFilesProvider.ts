@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from '../DockerContainerDirectoryProvider';
+import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {

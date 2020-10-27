@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { DockerExecCommandProvider } from './DockerApiClient';
+import { DockerExecCommandProvider } from '../DockerApiClient';
 
 export type DirectoryItemType = 'directory' | 'file';
 
