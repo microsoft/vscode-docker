@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
@@ -73,7 +73,10 @@ class StartPage {
     private async handleMessage(message: WebviewMessage): Promise<void> {
         switch (message.command) {
             case 'showStartPageClicked':
-                await vscode.workspace.getConfiguration('docker').update('showStartPage', Boolean(message.showStartPage), vscode.ConfigurationTarget.Global);
+                await callWithTelemetryAndErrorHandling('showStartPage.checkboxClicked', async (context: IActionContext) => {
+                    context.telemetry.properties.newValue = message.showStartPage;
+                    await vscode.workspace.getConfiguration('docker').update('showStartPage', Boolean(message.showStartPage), vscode.ConfigurationTarget.Global);
+                });
                 break;
             default:
         }
