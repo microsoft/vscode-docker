@@ -77,14 +77,25 @@ import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
 
+interface CommandReasonArgument {
+    commandReason: 'tree' | 'palette' | 'startPage';
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function registerCommand(commandId: string, callback: (context: IActionContext, ...args: any[]) => any, debounce?: number): void {
     registerCommandAzUI(
         commandId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (context, ...args: any[]) => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ext.activityMeasurementService.recordActivity('overallnoedit');
+            void ext.activityMeasurementService.recordActivity('overallnoedit');
+
+            const commandReasonArgIndex = args.findIndex(a => a && 'commandReason' in <CommandReasonArgument>a);
+            if (commandReasonArgIndex >= 0) {
+                context.telemetry.properties.commandReason = (<CommandReasonArgument>args[commandReasonArgIndex]).commandReason;
+
+                // Remove the reason argument from the list to prevent confusing the command
+                args.splice(commandReasonArgIndex, 1);
+            }
 
             return callback(context, ...args);
         },

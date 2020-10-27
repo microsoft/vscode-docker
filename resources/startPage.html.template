@@ -69,18 +69,18 @@
         </div>
         <div class="row">
             <div>
-                <a href="command:vscode-docker.configure" class="linkheading icon" tabindex="-1">
+                <a href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D" class="linkheading icon" tabindex="-1">
                     <i class="codicon codicon-new-file" aria-label="Add Docker files"></i>
                 </a>
             </div>
             <div>
                 <div>
-                    <a class="linkheading" href="command:vscode-docker.configure">
+                    <a class="linkheading" href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D">
                         <h2>Add Docker Files to your Project</h2>
                     </a>
                 </div>
                 <div>
-                    After opening a workspace or workspace folder, open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.configure">Docker: Add Docker Files to Workspace...</a>
+                    After opening a workspace or workspace folder, open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Add Docker Files to Workspace...</a>
                 </div>
             </div>
         </div>
@@ -114,36 +114,36 @@
         </div>
         <div class="row">
             <div>
-                <a href="command:vscode-docker.images.run" class="linkheading icon" tabindex="-1">
+                <a href="command:vscode-docker.images.run?%7B%22commandReason%22%3A%22startPage%22%7D" class="linkheading icon" tabindex="-1">
                     <i class="codicon codicon-play" aria-label="Run an image"></i>
                 </a>
             </div>
             <div>
                 <div>
-                    <a class="linkheading" href="command:vscode-docker.images.run">
+                    <a class="linkheading" href="command:vscode-docker.images.run?%7B%22commandReason%22%3A%22startPage%22%7D">
                         <h2>Run Docker Images</h2>
                     </a>
                 </div>
                 <div>
-                    Open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.images.run">Docker Images: Run</a> or go to the <a href="command:dockerImages.focus">images explorer</a> and run images by right-clicking them
+                    Open the command palette (<kbd>F1</kbd>) and enter <a href="command:vscode-docker.images.run?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Images: Run</a> or go to the <a href="command:dockerImages.focus">images explorer</a> and run images by right-clicking them
                 </div>
             </div>
         </div>
         <div class="row">
             <div>
-                <a href="command:vscode-docker.registries.connectRegistry" class="linkheading icon" tabindex="-1">
+                <a href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D" class="linkheading icon" tabindex="-1">
                     <i class="codicon codicon-cloud-upload" aria-label="Connect a Docker registry"></i>
                 </a>
             </div>
             <div>
                 <div>
-                    <a class="linkheading" href="command:vscode-docker.registries.connectRegistry">
+                    <a class="linkheading" href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D">
                         <h2>Connect a Container Registry to Push Images</h2>
                     </a>
                 </div>
                 <div>
                     Open the command palette (<kbd>F1</kbd>) and enter
-                    <a href="command:vscode-docker.registries.connectRegistry">Docker Registries: Connect Registry...</a>
+                    <a href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Connect Registry...</a>
                 </div>
             </div>
         </div>
