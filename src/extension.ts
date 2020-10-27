@@ -160,7 +160,7 @@ async function getDockerInstallationIDHash(): Promise<string> {
                 installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
             }
 
-            // Sync is intentionally used for performance
+            // Sync is intentionally used for performance, this is on the activation code path
             if (installIdFilePath && fse.pathExistsSync(installIdFilePath)) {
                 let result = fse.readFileSync(installIdFilePath, 'utf-8');
                 result = cryptoUtils.hashString(result);

@@ -193,7 +193,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 actionContext.telemetry.properties.hostSource = 'docker.context';
             } else if ((dockerContextEnv = process.env.DOCKER_CONTEXT)) { // Assignment + check is intentional
                 actionContext.telemetry.properties.hostSource = 'envContext';
-            } else if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance
+            } else if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance, this is on the activation code path
                 // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
                 // It is unnecessary to call `docker context inspect`
                 actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
