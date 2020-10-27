@@ -19,7 +19,18 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         nodes
     );
 
+    let noneTagWarningShown = false;
+
     for (const n of nodes) {
+        if (/:<none>/i.test(n.fullTag)) {
+            if (!noneTagWarningShown) {
+                void ext.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
+                noneTagWarningShown = true;
+            }
+
+            continue;
+        }
+
         await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }
