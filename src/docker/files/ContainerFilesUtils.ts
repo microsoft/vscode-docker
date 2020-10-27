@@ -149,3 +149,33 @@ export async function listWindowsContainerDirectory(executor: DockerContainerExe
 
     return parseWindowsDirectoryItems(output, parentPath);
 }
+
+export interface DirectoryItemStat {
+    ctime: number;
+    mtime: number;
+    size: number;
+    type: DirectoryItemType
+}
+
+export async function statLinuxContainerItem(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat> {
+    const command: string[] = [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${itemPath}"` ];
+
+    const result = await executor(command);
+
+    const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
+
+    const statMatch = statRegex.exec(result);
+
+    if (statMatch === null) {
+        throw new Error('Unexpected stat output.');
+    }
+
+    // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
+
+    return {
+        ctime: parseInt(statMatch.groups.ctime, 10) * 1000,
+        mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
+        size: parseInt(statMatch.groups.size, 10),
+        type: statMatch.groups.type === 'directory' ? 'directory' : 'file'
+    };
+}

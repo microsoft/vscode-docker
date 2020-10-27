@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DirectoryItem, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory } from './ContainerFilesUtils';
+import { DirectoryItem, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
@@ -22,36 +22,46 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         const method = async (): Promise<vscode.FileStat> => {
             const dockerUri = DockerUri.parse(uri);
 
+            const executor: DockerContainerExecutor =
+                async (commands, user) => {
+                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
+                };
+
             const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
 
             switch (containerOS) {
                 case 'linux':
-                    const user: string = undefined;
-                    const command: string[] = [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${dockerUri.path}"` ];
 
-                    const result = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, command, { user });
+                    const stat = await statLinuxContainerItem(executor, dockerUri.path);
 
-                    const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
-
-                    const statMatch = statRegex.exec(result);
-
-                    if (statMatch === null) {
-                        throw new Error('Unexpected stat output.');
+                    if (stat) {
+                        return {
+                            ctime: stat.ctime,
+                            mtime: stat.mtime,
+                            size: stat.size,
+                            type: stat.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
+                        };
                     }
 
-                    // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
-
-                    return {
-                        ctime: parseInt(statMatch.groups.ctime, 10) * 1000,
-                        mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
-                        size: parseInt(statMatch.groups.size, 10),
-                        type: statMatch.groups.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
-                    };
+                    break;
 
                 case 'windows':
                 default:
                     throw new Error('Not yet implemented.');
             }
+
+            // If unable to get an item's stats, return a default item having just been created (in order to force VS Code to re-fetch it, if necessary).
+
+            if (dockerUri.options.fileType === undefined) {
+                throw new Error('Unable to determine the type of file.');
+            }
+
+            return {
+                ctime: 0,
+                mtime: Date.now(),
+                size: 0,
+                type: dockerUri.options.fileType === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
+            };
         };
 
         return method();
