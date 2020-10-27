@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DirectoryItem, DockerContainerExecutor, getLinuxContainerDirectoryItems, getWindowsContainerDirectoryItems } from './ContainerFilesUtils';
+import { DirectoryItem, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
@@ -71,8 +71,8 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             let items: DirectoryItem[];
 
             switch (containerOS) {
-                case 'linux': items = await getLinuxContainerDirectoryItems(executor, dockerUri.path); break;
-                case 'windows': items = await getWindowsContainerDirectoryItems(executor, dockerUri.windowsPath); break;
+                case 'linux': items = await listLinuxContainerDirectory(executor, dockerUri.path); break;
+                case 'windows': items = await listWindowsContainerDirectory(executor, dockerUri.windowsPath); break;
                 default:
                     throw new Error('Unrecognized OS type.');
             }

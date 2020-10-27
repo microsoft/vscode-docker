@@ -117,11 +117,7 @@ function parseWindowsDirectoryItems(input: string, parentPath: string): Director
     return items;
 }
 
-export async function getLinuxContainerDirectoryItems(executor: DockerContainerExecutor, parentPath: string | undefined): Promise<DirectoryItem[]> {
-    if (parentPath === undefined) {
-        parentPath = '/';
-    }
-
+export async function listLinuxContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const commandProvider: DockerExecCommandProvider = shell => {
         return shell === 'windows'
             ? ['/bin/sh', '-c', `"ls -la \"${parentPath}\""` ]
@@ -133,7 +129,7 @@ export async function getLinuxContainerDirectoryItems(executor: DockerContainerE
     return parseLinuxDirectoryItems(output, parentPath);
 }
 
-export async function getWindowsContainerDirectoryItems(executor: DockerContainerExecutor, parentPath: string | undefined): Promise<DirectoryItem[]> {
+export async function listWindowsContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"` ];
 
     let output: string;
