@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, TreeView } from "vscode";
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput } from "vscode-azureextensionui";
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, IExperimentationServiceAdapter } from "vscode-azureextensionui";
 import { ContextManager } from './docker/ContextManager';
 import { DockerApiClient } from './docker/DockerApiClient';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
-import { IExperimentationServiceAdapter } from './telemetry/ExperimentationServiceAdapter';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
