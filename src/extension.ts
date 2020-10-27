@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
@@ -31,7 +30,6 @@ import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionList
 import { cryptoUtils } from './utils/cryptoUtils';
 import { Keytar } from './utils/keytar';
 import { isLinux, isMac, isWindows } from './utils/osUtils';
-import { bufferToString } from './utils/spawnAsync';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -162,8 +160,9 @@ async function getDockerInstallationIDHash(): Promise<string> {
                 installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
             }
 
-            if (installIdFilePath && await fse.pathExists(installIdFilePath)) {
-                let result = bufferToString(await fse.readFile(installIdFilePath));
+            // Sync is intentionally used for performance, this is on the activation code path
+            if (installIdFilePath && fse.pathExistsSync(installIdFilePath)) {
+                let result = fse.readFileSync(installIdFilePath, 'utf-8');
                 result = cryptoUtils.hashString(result);
                 await ext.context.globalState.update('docker.installIdHash', result);
                 return result;
@@ -250,7 +249,6 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
                 "server.js"
             )
         );
-        assert(true === await fse.pathExists(serverModule), "Could not find language client module");
 
         let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
