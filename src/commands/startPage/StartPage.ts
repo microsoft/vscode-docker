@@ -19,6 +19,7 @@ interface StartPageContext {
     codiconsStyleUri: string;
     dockerIconUri: string;
     showStartPageChecked: 'checked' | '';
+    showAzure: boolean;
 }
 
 class StartPage {
@@ -64,6 +65,7 @@ class StartPage {
             codiconsStyleUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css')).toString(),
             dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker.png')).toString(),
             showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
+            showAzure: true, // TODO?
         };
 
         const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
