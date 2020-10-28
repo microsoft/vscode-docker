@@ -44,7 +44,7 @@
         .icon {
             min-width: 110px;
             padding: 5px;
-            text-align: right;
+            text-align: center;
             flex-basis: 110px;
         }
 
@@ -91,7 +91,7 @@
                 <div>
                     <ul>
                         <li>After opening a workspace, run <a href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Add Docker Files to Workspace...</a> in the command palette (<kbd>F1</kbd>)</li>
-                        <li>Use the extension to help with editing Dockerfiles and Compose files</li>
+                        <li>Use the extension to help with editing <a href="https://docs.docker.com/engine/reference/builder/">Dockerfiles</a> and <a href="https://docs.docker.com/compose/compose-file/">Compose files</a></li>
                     </ul>
                 </div>
             </div>
@@ -136,6 +136,7 @@
                 <div>
                     <ul>
                         <li>Open the <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> to view and manage Docker resources</li>
+                        <li>View container logs with <a href="command:vscode-docker.containers.viewLogs?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Containers: View Logs</a> in the command palette (<kbd>F1</kbd>)</li>
                     </ul>
                 </div>
             </div>
@@ -152,7 +153,7 @@
                     <ul>
                         <li>Run <a href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Connect Registry...</a> in the command palette (<kbd>F1</kbd>)</li>
                         <li>Run <a href="command:vscode-docker.images.push?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Images: Push...</a> in the command palette (<kbd>F1</kbd>)</li>
-                        {{#if showAzure}}<li>Run <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Deploy Image to Azure App Service...</a> in the command palette (<kbd>F1</kbd>)</li>{{/if}}
+                        {{#if showAzure}}<li>Run <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Deploy Image to Azure App Service...</a> or <a href="command:vscode-docker.registries.deployImageToAci?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Deploy Image to Azure App Service...</a> in the command palette (<kbd>F1</kbd>)</li>{{/if}}
                     </ul>
                 </div>
             </div>
