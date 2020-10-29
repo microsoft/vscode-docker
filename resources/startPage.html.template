@@ -90,7 +90,7 @@
                 </div>
                 <div>
                     <ul>
-                        <li>After opening a workspace, run <a href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Add Docker Files to Workspace</a> in the command palette (<kbd>F1</kbd>)</li>
+                        <li>After opening a workspace, run <a href="command:vscode-docker.configure?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Add Docker Files to Workspace</a> in the command palette ({{#if isMac}}<kbd>⇧</kbd><kbd>⌘</kbd><kbd>P</kbd>{{else}}<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>{{/if}})</li>
                         <li>Use the extension to help with editing <a href="https://docs.docker.com/engine/reference/builder/">Dockerfiles</a> and <a href="https://docs.docker.com/compose/compose-file/">Compose files</a></li>
                     </ul>
                 </div>
