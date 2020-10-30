@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
-import { DirectoryItem, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem } from './ContainerFilesUtils';
+import { DirectoryItem, DirectoryItemStat, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem, statWindowsContainerItem } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 
 export class ContainerFilesProvider implements vscode.FileSystemProvider {
@@ -29,39 +29,36 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
 
             const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
 
+            let statItem: DirectoryItemStat;
+
             switch (containerOS) {
                 case 'linux':
 
-                    const stat = await statLinuxContainerItem(executor, dockerUri.path);
-
-                    if (stat) {
-                        return {
-                            ctime: stat.ctime,
-                            mtime: stat.mtime,
-                            size: stat.size,
-                            type: stat.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
-                        };
-                    }
+                    statItem = await statLinuxContainerItem(executor, dockerUri.path);
 
                     break;
 
                 case 'windows':
+
+                    statItem = await statWindowsContainerItem(executor, dockerUri.windowsPath, dockerUri.options.fileType);
+
+                    break;
+
                 default:
-                    throw new Error('Not yet implemented.');
+
+                    throw new Error('Unsupported container OS.');
             }
 
-            // If unable to get an item's stats, return a default item having just been created (in order to force VS Code to re-fetch it, if necessary).
-
-            if (dockerUri.options.fileType === undefined) {
-                throw new Error('Unable to determine the type of file.');
+            if (statItem) {
+                return {
+                    ctime: statItem.ctime,
+                    mtime: statItem.mtime,
+                    size: statItem.size,
+                    type: statItem.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
+                };
             }
 
-            return {
-                ctime: 0,
-                mtime: Date.now(),
-                size: 0,
-                type: dockerUri.options.fileType === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
-            };
+            throw vscode.FileSystemError.FileNotFound(uri);
         };
 
         return method();

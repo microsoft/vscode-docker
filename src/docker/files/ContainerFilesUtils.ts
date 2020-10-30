@@ -1,5 +1,11 @@
 import * as path from 'path';
+import * as dayjs from 'dayjs';
+import * as objectSupport from 'dayjs/plugin/objectSupport';
+import * as utc from 'dayjs/plugin/utc';
 import { DockerExecCommandProvider } from '../DockerApiClient';
+
+dayjs.extend(objectSupport);
+dayjs.extend(utc);
 
 export type DirectoryItemType = 'directory' | 'file';
 
@@ -178,4 +184,132 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
         size: parseInt(statMatch.groups.size, 10),
         type: statMatch.groups.type === 'directory' ? 'directory' : 'file'
     };
+}
+
+function parseWmiList(wmiList: string): { [key: string]: string } | undefined {
+    const lines = wmiList.replace(/[\r]+/g, '').split('\n');
+
+    let parsedObject;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const index = line.indexOf('=');
+
+        if (index > 0) {
+            const name = line.substr(0, index);
+            const value = line.substr(index + 1);
+
+            if (parsedObject === undefined) {
+                parsedObject = {};
+            }
+
+            parsedObject[name] = value;
+        }
+    }
+
+    return parsedObject;
+}
+
+function parseWmiTime(wmiTime: string): number | undefined {
+    if (wmiTime) {
+        const match = /^(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<minute>\d{2})(?<second>\d{2})\.(?<micro>\d{6})(?<offset>[+-]\d{3})$/.exec(wmiTime);
+
+        if (match) {
+
+            const options = {
+                year: parseInt(match.groups.year, 10),
+                month: parseInt(match.groups.month, 10) - 1,
+                day: parseInt(match.groups.day, 10),
+                hour: parseInt(match.groups.hour, 10),
+                minute: parseInt(match.groups.minute, 10),
+                second: parseInt(match.groups.second, 10),
+                millisecond: parseInt(match.groups.micro, 10) / 1000
+            };
+
+            // TODO: Add ObjectSupport constructor to type definitions.
+            const time = dayjs(<dayjs.ConfigType><unknown>options).utcOffset(parseInt(match.groups.offset, 10));
+
+            return time.valueOf();
+        }
+    }
+
+    return undefined;
+}
+
+const CreationDate = 'CreationDate';
+const FileSize = 'FileSize';
+const LastModified = 'LastModified';
+
+async function statWindowsContainerDirectory(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
+    if (/^[a-zA-Z]:\\$/.test(itemPath)) {
+
+        //
+        // For root directories, assume they exist and return a faked stat...
+        //
+        // TODO: Find a WMI command that provides such properties for root directories.
+        //
+
+        return {
+            ctime: 0,
+            mtime: Date.now(),
+            size: 0,
+            type: 'directory'
+        };
+    }
+
+    const parsedPath = path.win32.parse(itemPath);
+
+    const drive = parsedPath.root.replace(/\\/, '');
+    const wmipath = parsedPath.dir.concat('\\');
+    const filename = parsedPath.base;
+    const command = [ 'cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list` ];
+
+    const result = await executor(command);
+
+    const parsedResult = parseWmiList(result);
+
+    if (parsedResult) {
+        return {
+            ctime: parseWmiTime(parsedResult[CreationDate]),
+            mtime: parseWmiTime(parsedResult[LastModified]),
+            size: 0,
+            type: 'directory'
+        };
+    }
+
+    return undefined;
+}
+
+async function statWindowsContainerFile(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
+
+    const name = itemPath.replace(/\\/, '\\\\');
+    const command = [ 'cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list` ];
+
+    const result = await executor(command);
+
+    const parsedResult = parseWmiList(result);
+
+    if (parsedResult) {
+        return {
+            ctime: parseWmiTime(parsedResult[CreationDate]),
+            mtime: parseWmiTime(parsedResult[LastModified]),
+            size: parseInt(parsedResult[FileSize], 10),
+            type: 'file'
+        };
+    }
+
+    return undefined;
+}
+
+export function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType | undefined): Promise<DirectoryItemStat | undefined> {
+    if (itemType === undefined) {
+        throw new Error('Unable to stat Windows directory items without prior knowledge of the item type.');
+    }
+
+    switch (itemType) {
+        case 'directory':   return statWindowsContainerDirectory(executor, itemPath);
+        case 'file':        return statWindowsContainerFile(executor, itemPath);
+        default:
+            throw new Error('Unrecognized directory item type.');
+    }
 }
