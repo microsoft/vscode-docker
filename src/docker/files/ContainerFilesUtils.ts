@@ -164,7 +164,12 @@ export interface DirectoryItemStat {
 }
 
 export async function statLinuxContainerItem(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat> {
-    const command: string[] = [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${itemPath}"` ];
+    const command: DockerExecCommandProvider =
+        shell => {
+            return shell === 'windows'
+                ? [ '/bin/sh', '-c', `"stat -c '%W;%Y;%s;%F' '${itemPath}'"` ]
+                : [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${itemPath}"` ];
+        };
 
     const result = await executor(command);
 

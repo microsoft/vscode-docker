@@ -129,6 +129,8 @@ export async function spawnStreamAsync(
 
         const process = cp.spawn(command, options);
 
+        const errorChunks = [];
+
         process.on('error', (err) => {
             if (cancellationListener) {
                 cancellationListener.dispose();
@@ -150,11 +152,13 @@ export async function spawnStreamAsync(
             } else if (code) {
                 let errorMessage = localize('vscode-docker.utils.spawn.exited', 'Process \'{0}\' exited with code {1}', command.length > 50 ? `${command.substring(0, 50)}...` : command, code);
 
+                errorMessage += localize('vscode-docker.utils.spawn.exitedError', '\nError: {0}', bufferToString(Buffer.concat(errorChunks)));
+
                 const error = <ExecError>new Error(errorMessage);
 
                 error.code = code;
                 error.signal = signal;
-                error.stdErrHandled = onStderr != null;
+                error.stdErrHandled = false;
 
                 return reject(error);
             }
@@ -177,6 +181,8 @@ export async function spawnStreamAsync(
 
         if (onStderr) {
             process.stderr.on('data', chunk => {
+                errorChunks.push(chunk);
+
                 if (onStderr) {
                     onStderr(chunk);
                 }
