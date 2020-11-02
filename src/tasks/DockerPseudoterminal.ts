@@ -3,17 +3,19 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as nodeptytypes from 'node-pty';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { getCoreNodeModule } from '../utils/getCoreNodeModule';
+import { isWindows } from '../utils/osUtils';
 import { resolveVariables } from '../utils/resolveVariables';
-import { spawnAsync } from '../utils/spawnAsync';
+import { ExecError } from '../utils/spawnAsync';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
 
 const DEFAULT = '0m';
-const DEFAULTBOLD = '0;1m';
 const RED = '31m';
 const YELLOW = '33m';
 
@@ -22,10 +24,13 @@ export class DockerPseudoterminal implements Pseudoterminal {
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
 
-    /* eslint-disable-next-line no-invalid-this */
+    private initialDimensions: TerminalDimensions;
+    private activePty: nodeptytypes.IPty;
+
+    /* eslint-disable no-invalid-this */
     public readonly onDidWrite: Event<string> = this.writeEmitter.event;
-    /* eslint-disable-next-line no-invalid-this */
     public readonly onDidClose: Event<number> = this.closeEmitter.event;
+    /* eslint-enable no-invalid-this */
 
     public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask, private readonly resolvedDefinition: DockerBuildTaskDefinition | DockerRunTaskDefinition) { }
 
@@ -33,6 +38,8 @@ export class DockerPseudoterminal implements Pseudoterminal {
         const folder = this.task.scope === TaskScope.Workspace
             ? workspace.workspaceFolders[0]
             : this.task.scope as WorkspaceFolder;
+
+        this.initialDimensions = initialDimensions;
 
         const executeContext: DockerTaskExecutionContext = {
             folder,
@@ -44,8 +51,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
+        void this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
     }
 
     public close(code?: number): void {
@@ -56,33 +62,49 @@ export class DockerPseudoterminal implements Pseudoterminal {
     public async executeCommandInTerminal(
         command: CommandLineBuilder,
         folder: WorkspaceFolder,
-        rejectOnStderr?: boolean,
-        stdoutBuffer?: Buffer,
-        stderrBuffer?: Buffer,
         token?: CancellationToken): Promise<void> {
         const commandLine = resolveVariables(command.build(), folder);
 
-        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
+        const nodepty = getCoreNodeModule<typeof nodeptytypes>('node-pty');
 
-        // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
-        await spawnAsync(
-            commandLine,
-            { cwd: folder.uri.fsPath },
-            (stdout: string) => {
-                this.writeOutput(stdout);
-            },
-            stdoutBuffer,
-            (stderr: string) => {
-                this.writeError(stderr);
+        this.activePty = nodepty.spawn(isWindows() ? 'powershell.exe' : 'sh', ['-c', commandLine], {
+            name: 'xterm-color',
+            cols: this.initialDimensions.columns,
+            rows: this.initialDimensions.rows,
+            cwd: folder.uri.fsPath,
+            env: process.env,
+        });
 
-                if (rejectOnStderr) {
-                    throw new Error(stderr);
+        return new Promise((resolve, reject) => {
+            const dataDisposable = this.activePty.onData((e: string) => this.writeEmitter.fire(e));
+            const exitDisposable = this.activePty.onExit(
+                (e: { exitCode: number, signal?: number }) => {
+                    dataDisposable.dispose();
+                    exitDisposable.dispose();
+
+                    if (e.exitCode) {
+                        const error = <ExecError>new Error();
+                        error.code = e.exitCode;
+                        error.signal = e.signal;
+                        reject(error);
+                    }
+
+                    resolve();
                 }
-            },
-            stderrBuffer,
-            token
-        );
+            );
+
+            const cancelDisposable = token?.onCancellationRequested(() => {
+                cancelDisposable.dispose();
+                this.activePty.kill();
+            });
+        });
+    }
+
+    public setDimensions(dimensions: TerminalDimensions): void {
+        // In case this gets called before executeCommandInTerminal, we'll overwrite this.initialDimensions
+        this.initialDimensions = dimensions;
+
+        this.activePty?.resize(dimensions.columns, dimensions.rows);
     }
 
     public writeOutput(message: string): void {
