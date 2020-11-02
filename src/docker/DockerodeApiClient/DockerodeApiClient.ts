@@ -103,9 +103,20 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                         chunks.push(chunk);
                     });
 
-                    stream.on('end', () => {
-                        // TODO: How do we determine errors (as error text will be mixed with normal text)?
-                        resolve(bufferToString(Buffer.concat(chunks)));
+                    stream.on('end', async () => {
+                        try {
+                            const inspectInfo = await exec.inspect();
+
+                            const output = bufferToString(Buffer.concat(chunks));
+
+                            if (inspectInfo.ExitCode) {
+                                reject(new Error(output));
+                            } else {
+                                resolve(output);
+                            }
+                        } catch (err) {
+                            reject(err);
+                        }
                     });
                 });
         }

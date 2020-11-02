@@ -185,7 +185,7 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
 
     const result = await executor(command);
 
-    const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
+    const statRegex = /^(?<ctime>\d+|[W]);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
 
     const statMatch = statRegex.exec(result);
 
@@ -194,9 +194,10 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
     }
 
     // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
+    //       stat() on BusyBox doesn't support the '%W' option, returning 'W' instead.
 
     return {
-        ctime: parseInt(statMatch.groups.ctime, 10) * 1000,
+        ctime: statMatch.groups.ctime !== 'W' ? parseInt(statMatch.groups.ctime, 10) * 1000 : 0,
         mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
         size: parseInt(statMatch.groups.size, 10),
         type: statMatch.groups.type === 'directory' ? 'directory' : 'file'
