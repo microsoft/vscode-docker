@@ -14,7 +14,7 @@ import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
 import { composeGroupDown, composeGroupRestart } from "./containers/composeGroup";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
-import { openContainerFile } from "./containers/files/openContainerFile2";
+import { openContainerFile } from "./containers/files/openContainerFile";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
