@@ -118,14 +118,14 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (isNewContextType(currentContext.Type)) {
                 // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
                 // But that probably won't be true in the future, so define both as separate concepts now
-                await this.setVsCodeContext('vscode-docker:aciContext', true);
-                await this.setVsCodeContext('vscode-docker:newSdkContext', true);
+                this.setVsCodeContext('vscode-docker:aciContext', true);
+                this.setVsCodeContext('vscode-docker:newSdkContext', true);
 
                 const dsc = await import('./DockerServeClient/DockerServeClient');
                 ext.dockerClient = new dsc.DockerServeClient(currentContext);
             } else {
-                await this.setVsCodeContext('vscode-docker:aciContext', false);
-                await this.setVsCodeContext('vscode-docker:newSdkContext', false);
+                this.setVsCodeContext('vscode-docker:aciContext', false);
+                this.setVsCodeContext('vscode-docker:newSdkContext', false);
 
                 const dockerode = await import('./DockerodeApiClient/DockerodeApiClient');
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
@@ -193,7 +193,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 actionContext.telemetry.properties.hostSource = 'docker.context';
             } else if ((dockerContextEnv = process.env.DOCKER_CONTEXT)) { // Assignment + check is intentional
                 actionContext.telemetry.properties.hostSource = 'envContext';
-            } else if (!(await fse.pathExists(dockerContextsFolder)) || (await fse.readdir(dockerContextsFolder)).length === 0) {
+            } else if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance, this is on the activation code path
                 // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
                 // It is unnecessary to call `docker context inspect`
                 actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
@@ -204,7 +204,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             if (dockerHostEnv !== undefined) {
                 actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
-                await this.setVsCodeContext('vscode-docker:contextLocked', true);
+                this.setVsCodeContext('vscode-docker:contextLocked', true);
 
                 return [{
                     ...defaultContext,
@@ -254,9 +254,9 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             if (dockerContextEnv) {
-                await this.setVsCodeContext('vscode-docker:contextLocked', true);
+                this.setVsCodeContext('vscode-docker:contextLocked', true);
             } else {
-                await this.setVsCodeContext('vscode-docker:contextLocked', false);
+                this.setVsCodeContext('vscode-docker:contextLocked', false);
             }
 
             return result;
@@ -294,12 +294,12 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             // Set the VSCode context to the result (which may expose commands, etc.)
-            await this.setVsCodeContext('vscode-docker:newCliPresent', result);
+            this.setVsCodeContext('vscode-docker:newCliPresent', result);
             return result;
         } catch { } // Best effort
     }
 
-    private async setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): Promise<void> {
-        return commands.executeCommand('setContext', vsCodeContext, value);
+    private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {
+        void commands.executeCommand('setContext', vsCodeContext, value);
     }
 }

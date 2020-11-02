@@ -14,7 +14,8 @@ export class ContextNameStep extends AzureNameStep<IAciWizardContext> {
     }
 
     public async prompt(context: IAciWizardContext): Promise<void> {
-        context.contextName = await ext.ui.showInputBox({ prompt: localize('vscode-docker.tree.contexts.create.aci.enterContextName', 'Enter context name'), validateInput: validateContextName });
+        const currentContextNames = (await ext.dockerContextManager.getContexts()).map(c => c.Name);
+        context.contextName = await ext.ui.showInputBox({ prompt: localize('vscode-docker.tree.contexts.create.aci.enterContextName', 'Enter context name'), validateInput: (value: string | undefined) => validateContextName(value, currentContextNames) });
 
         context.relatedNameTask = this.generateRelatedName(context, context.contextName, resourceGroupNamingRules);
     }
@@ -26,9 +27,11 @@ export class ContextNameStep extends AzureNameStep<IAciWizardContext> {
 
 // Slightly more strict than CLI
 const contextNameRegex = /^[a-z0-9][a-z0-9_-]+$/i;
-function validateContextName(value: string | undefined): string | undefined {
+function validateContextName(value: string | undefined, currentContextNames: string[]): string | undefined {
     if (!contextNameRegex.test(value)) {
         return localize('vscode-docker.tree.contexts.create.aci.contextNameValidation', 'Context names must be start with an alphanumeric character and can only contain alphanumeric characters, underscores, and dashes.');
+    } else if (currentContextNames.some(c => c === value)) { // Intentionally case sensitive; Docker allows multiple contexts of same name with different case
+        return localize('vscode-docker.tree.contexts.create.aci.contextNameUnique', 'Context names must be unique. There is already a context named \'{0}\'.', value);
     } else {
         return undefined;
     }

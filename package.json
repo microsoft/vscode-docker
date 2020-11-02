@@ -1,16 +1,12 @@
 {
     "name": "vscode-docker",
-    "version": "1.7.0",
+    "version": "1.7.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
-    "extensionKind": [
-        "workspace",
-        "ui"
-    ],
     "galleryBanner": {
         "color": "#1289B9",
         "theme": "dark"
@@ -113,7 +109,6 @@
         "onCommand:vscode-docker.contexts.create.aci",
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
-        "onDebugResolve:docker-coreclr",
         "onDebugResolve:docker",
         "onFileSystem:docker",
         "onLanguage:dockerfile",
@@ -249,7 +244,7 @@
             "view/title": [
                 {
                     "command": "vscode-docker.containers.prune",
-                    "when": "view == dockerContainers",
+                    "when": "view == dockerContainers && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -269,12 +264,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.create",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.networks.prune",
-                    "when": "view == dockerNetworks",
+                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -284,7 +279,7 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
-                    "when": "view == dockerImages",
+                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
                 {
@@ -314,7 +309,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.prune",
-                    "when": "view == dockerVolumes",
+                    "when": "view == dockerVolumes && !vscode-docker:newSdkContext",
                     "group": "navigation@1"
                 },
                 {
@@ -580,7 +575,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.inspect",
-                    "when": "view == dockerVolumes && viewItem == volume",
+                    "when": "view == dockerVolumes && viewItem == volume && !vscode-docker:newSdkContext",
                     "group": "volumes_1_general@1"
                 },
                 {
@@ -880,185 +875,6 @@
                         }
                     }
                 ]
-            },
-            {
-                "type": "docker-coreclr",
-                "label": "Docker: Launch .NET Core (Deprecated)",
-                "configurationSnippets": [],
-                "configurationAttributes": {
-                    "launch": {
-                        "properties": {
-                            "appFolder": {
-                                "type": "string",
-                                "description": "Path to the folder for the application."
-                            },
-                            "appOutput": {
-                                "type": "string",
-                                "description": "Path to the output assembly for the application."
-                            },
-                            "appProject": {
-                                "type": "string",
-                                "description": "Path to the application project file."
-                            },
-                            "dockerBuild": {
-                                "description": "Options for building the Docker image used for debugging.",
-                                "properties": {
-                                    "args": {
-                                        "type": "object",
-                                        "description": "Build arguments applied to the Docker image used for debugging.",
-                                        "additionalProperties": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "context": {
-                                        "type": "string",
-                                        "description": "Path to the Docker build context."
-                                    },
-                                    "dockerfile": {
-                                        "type": "string",
-                                        "description": "Path to the Dockerfile used for the build."
-                                    },
-                                    "labels": {
-                                        "type": "object",
-                                        "description": "Labels applied to the Docker image used for debugging.",
-                                        "additionalProperties": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "tag": {
-                                        "type": "string",
-                                        "description": "Tag applied to the Docker image used for debugging."
-                                    },
-                                    "target": {
-                                        "type": "string",
-                                        "description": "Docker build target (stage) used for debugging."
-                                    }
-                                }
-                            },
-                            "dockerRun": {
-                                "description": "Options for running the Docker container used for debugging.",
-                                "properties": {
-                                    "containerName": {
-                                        "type": "string",
-                                        "description": "Name of the container used for debugging."
-                                    },
-                                    "env": {
-                                        "type": "object",
-                                        "description": "Environment variables applied to the Docker container used for debugging.",
-                                        "additionalProperties": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "envFiles": {
-                                        "type": "array",
-                                        "description": "Files of environment variables read in and applied to the Docker container used for debugging.",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "labels": {
-                                        "type": "object",
-                                        "description": "Labels applied to the Docker container used for debugging.",
-                                        "additionalProperties": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "network": {
-                                        "type": "string",
-                                        "description": "The network to which the container will be connected."
-                                    },
-                                    "networkAlias": {
-                                        "type": "string",
-                                        "description": "The network-scoped alias to assign to the container."
-                                    },
-                                    "ports": {
-                                        "type": "array",
-                                        "description": "Ports that are going to be mapped on the host.",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "hostPort": {
-                                                    "type": "string",
-                                                    "description": "Port number to be bound on the host."
-                                                },
-                                                "containerPort": {
-                                                    "type": "string",
-                                                    "description": "Port number of the container to be bound."
-                                                },
-                                                "protocol": {
-                                                    "type": "string",
-                                                    "description": "Specific protocol for the binding (`tcp | udp`).",
-                                                    "enum": [
-                                                        "tcp",
-                                                        "udp"
-                                                    ]
-                                                },
-                                                "required": [
-                                                    "containerPort"
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "extraHosts": {
-                                        "type": "array",
-                                        "description": "Hosts to be added to the container's `hosts` file for DNS resolution.",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "hostname": {
-                                                    "type": "string",
-                                                    "description": "Hostname for dns resolution."
-                                                },
-                                                "ip": {
-                                                    "type": "string",
-                                                    "description": "IP associated to the hostname."
-                                                }
-                                            },
-                                            "required": [
-                                                "hostname",
-                                                "ip"
-                                            ]
-                                        }
-                                    },
-                                    "volumes": {
-                                        "type": "array",
-                                        "description": "Volumes that are going to be mapped to the container.",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "localPath": {
-                                                    "type": "string",
-                                                    "description": "Path on local machine that will be mapped. The folder will be created if it does not exist."
-                                                },
-                                                "containerPath": {
-                                                    "type": "string",
-                                                    "description": "Path where the volume will be mapped within the container. The folder will be created if it does not exist."
-                                                },
-                                                "permissions": {
-                                                    "type": "string",
-                                                    "description": "Permissions for the container for the mapped volume, `rw` for read-write or `ro` for read-only.",
-                                                    "enum": [
-                                                        "rw",
-                                                        "ro"
-                                                    ]
-                                                }
-                                            },
-                                            "required": [
-                                                "localPath",
-                                                "containerPath"
-                                            ]
-                                        }
-                                    }
-                                }
-                            },
-                            "configureAspNetCoreSsl": {
-                                "type": "boolean",
-                                "default": true,
-                                "description": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services."
-                            }
-                        }
-                    }
-                }
             }
         ],
         "taskDefinitions": [
@@ -1660,7 +1476,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker logs -f ${containerId}",
+                    "default": "docker logs --tail 1000 -f ${containerId}",
                     "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
@@ -2781,23 +2597,23 @@
         "@types/adm-zip": "^0.4.33",
         "@types/deep-equal": "^1.0.1",
         "@types/dockerode": "^2.5.34",
-        "@types/fs-extra": "^9.0.1",
+        "@types/fs-extra": "^9.0.2",
         "@types/glob": "^7.1.3",
         "@types/keytar": "^4.4.2",
         "@types/mocha": "^8.0.3",
-        "@types/node": "^12.12.62",
+        "@types/node": "^12.12.67",
         "@types/request-promise-native": "^1.0.17",
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/vscode": "1.49.0",
         "@types/xml2js": "^0.4.5",
-        "@typescript-eslint/eslint-plugin": "^4.2.0",
-        "@typescript-eslint/eslint-plugin-tslint": "^4.2.0",
-        "@typescript-eslint/parser": "^4.2.0",
+        "@typescript-eslint/eslint-plugin": "^4.4.1",
+        "@typescript-eslint/eslint-plugin-tslint": "^4.4.1",
+        "@typescript-eslint/parser": "^4.4.1",
         "adm-zip": "^0.4.16",
-        "copy-webpack-plugin": "^6.1.1",
-        "eslint": "^7.9.0",
-        "eslint-plugin-import": "^2.22.0",
+        "copy-webpack-plugin": "^6.2.1",
+        "eslint": "^7.11.0",
+        "eslint-plugin-import": "^2.22.1",
         "eslint-plugin-unicorn": "^22.0.0",
         "gulp": "^4.0.2",
         "gulp-eslint": "^6.0.0",
@@ -2810,7 +2626,7 @@
         "tslint-microsoft-contrib": "^6.2.0",
         "typescript": "^4.0.3",
         "umd-compat-loader": "^2.1.2",
-        "vsce": "^1.80.0",
+        "vsce": "^1.81.1",
         "vscode-azureextensiondev": "^0.5.0",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.0",
@@ -2818,12 +2634,12 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@azure/arm-appservice": "^6.0.0",
+        "@azure/arm-appservice": "^6.1.0",
         "@azure/arm-containerregistry": "^8.0.0",
         "@azure/storage-blob": "^12.2.1",
-        "@docker/sdk": "^0.1.15",
+        "@docker/sdk": "^0.1.18",
         "@grpc/grpc-js": "^1.1.7",
-        "dayjs": "^1.9.1",
+        "dayjs": "^1.9.3",
         "dockerfile-language-server-nodejs": "^0.1.1",
         "dockerode": "^3.2.1",
         "fs-extra": "^9.0.1",
@@ -2834,11 +2650,11 @@
         "request-promise-native": "^1.0.9",
         "semver": "^7.3.2",
         "tar": "^6.0.5",
-        "vscode-azureappservice": "^0.67.1",
-        "vscode-azureextensionui": "^0.36.0",
+        "vscode-azureappservice": "^0.68.0",
+        "vscode-azureextensionui": "^0.36.1",
         "vscode-languageclient": "^6.1.3",
         "vscode-nls": "^5.0.0",
-        "vscode-tas-client": "^0.1.4",
+        "vscode-tas-client": "^0.1.13",
         "xml2js": "^0.4.23"
     }
 }

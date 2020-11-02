@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import vscode = require('vscode');
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, NoResourceFoundError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
@@ -33,8 +33,10 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             try {
                 connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
             } catch (error) {
-                if (error instanceof UserCancelledError) {
-                    // Rethrow UserCancelledError, otherwise, move on without a selected registry
+                if (error instanceof NoResourceFoundError) {
+                    // Do nothing, move on without a selected registry
+                } else {
+                    // Rethrow
                     throw error;
                 }
             }
