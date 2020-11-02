@@ -4,15 +4,31 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { localize } from '../../localize';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
 import { DirectoryItem, DirectoryItemStat, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem, statWindowsContainerItem } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 
-export class ContainerFilesProvider implements vscode.FileSystemProvider {
+class MethodNotImplementedError extends Error {
+    public constructor() {
+        super(localize('docker.files.containerFilesProvider.methodNotImplemented', 'Method not implemented.'));
+    }
+}
+
+class UnrecognizedContainerOSError extends Error {
+    public constructor() {
+        super(localize('docker.files.containerFilesProvider.unrecognizedContainerOS', 'Unrecognized container OS.'));
+    }
+}
+
+export class ContainerFilesProvider extends vscode.Disposable implements vscode.FileSystemProvider {
     private readonly changeEmitter: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
 
     public constructor(private readonly dockerClientProvider: () => DockerApiClient) {
+        super(() => {
+            this.changeEmitter.dispose();
+        });
     }
 
     public get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
@@ -20,7 +36,10 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
-        throw new Error('Method not implemented.');
+        // As we don't actually support watching files, just return a dummy subscription object...
+        return {
+            dispose: () => {}
+        };
     }
 
     public stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
@@ -51,7 +70,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
 
                 default:
 
-                    throw new Error('Unsupported container OS.');
+                    throw new UnrecognizedContainerOSError();
             }
 
             if (statItem) {
@@ -83,10 +102,21 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
             let items: DirectoryItem[];
 
             switch (containerOS) {
-                case 'linux': items = await listLinuxContainerDirectory(executor, dockerUri.path); break;
-                case 'windows': items = await listWindowsContainerDirectory(executor, dockerUri.windowsPath); break;
+                case 'linux':
+
+                    items = await listLinuxContainerDirectory(executor, dockerUri.path);
+
+                    break;
+
+                case 'windows':
+
+                    items = await listWindowsContainerDirectory(executor, dockerUri.windowsPath);
+
+                    break;
+
                 default:
-                    throw new Error('Unrecognized OS type.');
+
+                    throw new UnrecognizedContainerOSError();
             }
 
             return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File])
@@ -96,7 +126,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public createDirectory(uri: vscode.Uri): void | Thenable<void> {
-        throw new Error('Method not implemented.');
+        throw new MethodNotImplementedError();
     }
 
     public readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
@@ -127,19 +157,19 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
-        throw new Error('Method not implemented.');
+        throw new MethodNotImplementedError();
     }
 
     public delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
-        throw new Error('Method not implemented.');
+        throw new MethodNotImplementedError();
     }
 
     public rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-        throw new Error('Method not implemented.');
+        throw new MethodNotImplementedError();
     }
 
     public copy?(source: vscode.Uri, destination: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-        throw new Error('Method not implemented.');
+        throw new MethodNotImplementedError();
     }
 
     private async getContainerOS(id: string): Promise<DockerOSType | undefined> {
@@ -156,7 +186,7 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
         }
 
         const buffer = await this.dockerClientProvider().getContainerFile(
-            undefined,
+            undefined, // context
             dockerUri.containerId,
             containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path);
 
@@ -187,25 +217,12 @@ export class ContainerFilesProvider implements vscode.FileSystemProvider {
 
             default:
 
-                throw new Error('Unrecognized container OS.');
+                throw new UnrecognizedContainerOSError();
         }
 
-        // TODO: Check status code (for error)?
-        const stdout = await this.dockerClientProvider().execInContainer(undefined, dockerUri.containerId, command);
+        const stdout = await this.dockerClientProvider().execInContainer(/* context */ undefined, dockerUri.containerId, command);
         const buffer = Buffer.from(stdout, 'utf8');
 
         return Uint8Array.from(buffer);
     }
-
-
-    //     TODO: Do we need this and/or the fileType option in DockerUri?
-    // private static toVsCodeFileType(fileType: DockerUriFileType): vscode.FileType {
-    //     switch (fileType) {
-    //         case 'directory': return vscode.FileType.Directory;
-    //         case 'file': return vscode.FileType.File;
-    //         default:
-
-    //             return vscode.FileType.Unknown;
-    //     }
-    // }
 }

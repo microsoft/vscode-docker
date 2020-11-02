@@ -7,6 +7,7 @@ import * as dayjs from 'dayjs';
 import * as objectSupport from 'dayjs/plugin/objectSupport';
 import * as utc from 'dayjs/plugin/utc';
 import * as path from 'path';
+import { localize } from '../../localize';
 import { DockerExecCommandProvider } from '../DockerApiClient';
 
 dayjs.extend(objectSupport);
@@ -18,6 +19,12 @@ export interface DirectoryItem {
     name: string;
     path: string;
     type: DirectoryItemType;
+}
+
+export class UnrecognizedDirectoryItemTypeError extends Error {
+    public constructor() {
+        super(localize('docker.files.containerFilesUtils.unrecognizedDirectoryItemType', 'Unrecognized directory item type.'));
+    }
 }
 
 export type DockerContainerExecutor = (command: string[] | DockerExecCommandProvider, user?: string) => Promise<string>;
@@ -312,13 +319,13 @@ async function statWindowsContainerFile(executor: DockerContainerExecutor, itemP
 
 export async function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType | undefined): Promise<DirectoryItemStat | undefined> {
     if (itemType === undefined) {
-        throw new Error('Unable to stat Windows directory items without prior knowledge of the item type.');
+        throw new Error(localize('docker.files.containerFilesUtils.unknownDirectoryItemType', 'Unable to stat Windows directory items without prior knowledge of the item type.'));
     }
 
     switch (itemType) {
         case 'directory':   return await statWindowsContainerDirectory(executor, itemPath);
         case 'file':        return await statWindowsContainerFile(executor, itemPath);
         default:
-            throw new Error('Unrecognized directory item type.');
+            throw new UnrecognizedDirectoryItemTypeError();
     }
 }

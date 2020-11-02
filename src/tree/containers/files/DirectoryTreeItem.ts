@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { DirectoryItem } from "../../../docker/files/ContainerFilesUtils";
+import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
 import { DockerUri } from '../../../docker/files/DockerUri';
 import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
 import { FileTreeItem } from "./FileTreeItem";
@@ -55,7 +55,6 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         const name = item[0];
         const fileType = item[1];
 
-        // TODO: Verify that this uri has (and keeps) the containerOS option.
         let itemUri = DockerUri.joinPath(parentUri, name);
 
         switch (fileType) {
@@ -68,7 +67,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
                 return new FileTreeItem(this, name, itemUri.with({ fileType: 'file' }));
 
             default:
-                throw new Error('Unrecognized directory item type.');
+                throw new UnrecognizedDirectoryItemTypeError();
         }
     }
 
