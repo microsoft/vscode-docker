@@ -113,6 +113,9 @@ export async function spawnAsync(
     });
 }
 
+/**
+ * TODO: See if this can be folded into spawnAsync().
+ */
 export async function spawnStreamAsync(
     command: string,
     options?: cp.SpawnOptions & { stdin?: string },
@@ -209,6 +212,9 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
     }
 }
 
+/**
+ * TODO: See if this can be folded into execAsync().
+ */
 export async function execStreamAsync(
     command: string,
     options?: cp.ExecOptions & { stdin?: string },

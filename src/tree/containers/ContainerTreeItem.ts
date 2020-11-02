@@ -13,17 +13,17 @@ import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermedi
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { getContainerStateIcon } from "./ContainerProperties";
-import { DockerContainerEx } from './ContainersTreeItem';
+import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
 export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implements MultiSelectNode {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
-    private readonly _item: DockerContainerEx;
+    private readonly _item: DockerContainerInfo;
     private children: AzExtTreeItem[] | undefined;
     private containerOS: DockerOSType;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerEx) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
         this._item = itemInfo;
     }

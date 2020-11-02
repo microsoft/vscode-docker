@@ -17,17 +17,17 @@ import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
 import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
-export type DockerContainerEx = DockerContainer & {
+export type DockerContainerInfo = DockerContainer & {
     showFiles: boolean
 };
 
-export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerEx, ContainerProperty> {
+export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
     public treePrefix: string = 'containers';
     public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
     public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
 
-    public childType: LocalChildType<DockerContainerEx> = ContainerTreeItem;
-    public childGroupType: LocalChildGroupType<DockerContainerEx, ContainerProperty> = ContainerGroupTreeItem;
+    public childType: LocalChildType<DockerContainerInfo> = ContainerTreeItem;
+    public childGroupType: LocalChildGroupType<DockerContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
 
     private newContainerUser: boolean = false;
 
@@ -55,7 +55,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerEx,
         return this.groupBySetting === 'None' ? 'container' : 'container group';
     }
 
-    public async getItems(context: IActionContext): Promise<DockerContainerEx[]> {
+    public async getItems(context: IActionContext): Promise<DockerContainerInfo[]> {
         const rawResults = await ext.dockerClient.getContainers(context);
         const showFiles = (await ext.dockerContextManager.getCurrentContext())?.Type === 'moby';
 
@@ -66,7 +66,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerEx,
         return results;
     }
 
-    public getPropertyValue(item: DockerContainerEx, property: ContainerProperty): string {
+    public getPropertyValue(item: DockerContainerInfo, property: ContainerProperty): string {
         const networks = item.NetworkSettings?.Networks && Object.keys(item.NetworkSettings.Networks).length > 0 ? Object.keys(item.NetworkSettings.Networks) : ['<none>'];
         const ports = item.Ports?.length > 0 ? item.Ports.map(p => p.PublicPort) : ['<none>'];
 
@@ -121,7 +121,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerEx,
         return ext.context.globalState.get<boolean>('vscode-docker.container.newContainerUser', true);
     }
 
-    private async updateNewContainerUser(items: DockerContainerEx[]): Promise<void> {
+    private async updateNewContainerUser(items: DockerContainerInfo[]): Promise<void> {
         if (this.newContainerUser && items && items.length > 0) {
             this.newContainerUser = false;
             await ext.context.globalState.update('vscode-docker.container.newContainerUser', false);
