@@ -116,8 +116,8 @@ export async function spawnAsync(
 export async function spawnStreamAsync(
     command: string,
     options?: cp.SpawnOptions & { stdin?: string },
-    onStdout?: (chunk: any) => void,
-    onStderr?: (chunk: any) => void,
+    onStdout?: (chunk: Buffer | string) => void,
+    onStderr?: (chunk: Buffer | string) => void,
     token?: CancellationToken): Promise<void> {
 
     return await new Promise((resolve, reject) => {
@@ -172,7 +172,7 @@ export async function spawnStreamAsync(
         }
 
         if (onStdout) {
-            process.stdout.on('data', chunk => {
+            process.stdout.on('data', (chunk: Buffer | string) => {
                 if (onStdout) {
                     onStdout(chunk);
                 }
@@ -180,7 +180,7 @@ export async function spawnStreamAsync(
         }
 
         if (onStderr) {
-            process.stderr.on('data', chunk => {
+            process.stderr.on('data', (chunk: Buffer | string) => {
                 errorChunks.push(chunk);
 
                 if (onStderr) {

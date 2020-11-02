@@ -1,9 +1,10 @@
 declare module "tar" {
-    export interface ParseStream extends NodeJS.ReadWriteStream {
-        new(): ParseStream;
+    export interface ParseClass {
+        // eslint-disable-next-line @typescript-eslint/prefer-function-type
+        new(): NodeJS.ReadWriteStream;
     }
 
-    export const Parse: ParseStream;
+    export const Parse: ParseClass;
 
     export interface ReadEntry extends NodeJS.EventEmitter {
         path: string;
@@ -13,7 +14,7 @@ declare module "tar" {
         cwd?: string;
     }
 
-    export function create(options: CreateOptions, fileList: ReadonlyArray<string>): NodeJS.ReadableStream;
+    export function create(options: CreateOptions, fileList: string[]): NodeJS.ReadableStream;
 
     export const c: typeof create;
 }

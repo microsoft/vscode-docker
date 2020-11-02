@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as dayjs from 'dayjs';
 import * as objectSupport from 'dayjs/plugin/objectSupport';
 import * as utc from 'dayjs/plugin/utc';
+import * as path from 'path';
 import { DockerExecCommandProvider } from '../DockerApiClient';
 
 dayjs.extend(objectSupport);
@@ -199,10 +199,9 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
 function parseWmiList(wmiList: string): { [key: string]: string } | undefined {
     const lines = wmiList.replace(/[\r]+/g, '').split('\n');
 
-    let parsedObject;
+    let parsedObject: { [key: string]: string };
 
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+    for (const line of lines) {
         const index = line.indexOf('=');
 
         if (index > 0) {
@@ -311,14 +310,14 @@ async function statWindowsContainerFile(executor: DockerContainerExecutor, itemP
     return undefined;
 }
 
-export function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType | undefined): Promise<DirectoryItemStat | undefined> {
+export async function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType | undefined): Promise<DirectoryItemStat | undefined> {
     if (itemType === undefined) {
         throw new Error('Unable to stat Windows directory items without prior knowledge of the item type.');
     }
 
     switch (itemType) {
-        case 'directory':   return statWindowsContainerDirectory(executor, itemPath);
-        case 'file':        return statWindowsContainerFile(executor, itemPath);
+        case 'directory':   return await statWindowsContainerDirectory(executor, itemPath);
+        case 'file':        return await statWindowsContainerFile(executor, itemPath);
         default:
             throw new Error('Unrecognized directory item type.');
     }
