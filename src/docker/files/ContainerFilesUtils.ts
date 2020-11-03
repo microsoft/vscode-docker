@@ -175,7 +175,7 @@ export interface DirectoryItemStat {
     type: DirectoryItemType
 }
 
-export async function statLinuxContainerItem(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat> {
+export async function statLinuxContainerItem(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
     const command: DockerExecCommandProvider =
         shell => {
             return shell === 'windows'
@@ -185,23 +185,23 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
 
     const result = await executor(command);
 
+    // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
+    //       stat() on BusyBox doesn't support the '%W' option, returning 'W' instead.
+
     const statRegex = /^(?<ctime>\d+|[W]);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
 
     const statMatch = statRegex.exec(result);
 
-    if (statMatch === null) {
-        throw new Error('Unexpected stat output.');
+    if (statMatch) {
+        return {
+            ctime: statMatch.groups.ctime !== 'W' ? parseInt(statMatch.groups.ctime, 10) * 1000 : 0,
+            mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
+            size: parseInt(statMatch.groups.size, 10),
+            type: statMatch.groups.type === 'directory' ? 'directory' : 'file'
+        };
     }
 
-    // NOTE: stat() (i.e. '%W' and "%Y') reports time in seconds since the epoch; VS Code requires milliseconds since the epoch.
-    //       stat() on BusyBox doesn't support the '%W' option, returning 'W' instead.
-
-    return {
-        ctime: statMatch.groups.ctime !== 'W' ? parseInt(statMatch.groups.ctime, 10) * 1000 : 0,
-        mtime: parseInt(statMatch.groups.mtime, 10) * 1000,
-        size: parseInt(statMatch.groups.size, 10),
-        type: statMatch.groups.type === 'directory' ? 'directory' : 'file'
-    };
+    return undefined;
 }
 
 function parseWmiList(wmiList: string): { [key: string]: string } | undefined {
