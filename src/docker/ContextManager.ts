@@ -36,7 +36,7 @@ const defaultContext: Partial<DockerContext> = {
     Id: 'default',
     Name: 'default',
     Description: 'Current DOCKER_HOST based configuration',
-    Type: 'moby',
+    ContextType: 'moby',
 };
 
 // These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
@@ -115,7 +115,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             void ext.dockerClient?.dispose();
 
             // Create a new client
-            if (isNewContextType(currentContext.Type)) {
+            if (isNewContextType(currentContext.ContextType)) {
                 // Currently vscode-docker:aciContext vscode-docker:newSdkContext mean the same thing
                 // But that probably won't be true in the future, so define both as separate concepts now
                 this.setVsCodeContext('vscode-docker:aciContext', true);
@@ -174,7 +174,9 @@ export class DockerContextManager implements ContextManager, Disposable {
         return this.newCli.getValue();
     }
 
+    // eslint-disable-next-line @typescript-eslint/tslint/config
     private async loadContexts(): Promise<DockerContext[]> {
+        // eslint-disable-next-line @typescript-eslint/tslint/config
         let loadResult = await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
             // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
             actionContext.telemetry.properties.isActivationEvent = 'true';
@@ -218,21 +220,37 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
             // return that specified context as Current = true. This way we don't need extra logic below in parsing.
+            // TODO: eventually change to `docker context ls --format json`
             const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
-            const lines = stdout.split(/\r?\n/im);
 
-            for (const line of lines) {
-                // Blank lines should be skipped
-                if (!line) {
-                    continue;
+            try {
+                // Try parsing as-is; newer CLIs output a JSON object array
+                const contexts = JSON.parse(stdout) as DockerContext[];
+
+                result.push(...contexts.map(context => {
+                    return {
+                        ...context,
+                        Id: context.Name,
+                        ContextType: context.ContextType || (context.DockerEndpoint ? 'moby' : 'aci'), // TODO: this basically assumes no Type and no DockerEndpoint => aci
+                    };
+                }));
+            } catch {
+                // Otherwise split by line, older CLIs output one JSON object per line
+                const lines = stdout.split(/\r?\n/im);
+
+                for (const line of lines) {
+                    // Blank lines should be skipped
+                    if (!line) {
+                        continue;
+                    }
+
+                    const context = JSON.parse(line) as DockerContext;
+                    result.push({
+                        ...context,
+                        Id: context.Name,
+                        ContextType: context.ContextType || (context.DockerEndpoint ? 'moby' : 'aci'), // TODO: this basically assumes no Type and no DockerEndpoint => aci
+                    });
                 }
-
-                const context = JSON.parse(line) as DockerContext;
-                result.push({
-                    ...context,
-                    Id: context.Name,
-                    Type: context.Type || context.DockerEndpoint ? 'moby' : 'aci', // TODO: this basically assumes no Type and no DockerEndpoint => aci
-                });
             }
 
             const currentContext = result.find(c => c.Current);
@@ -244,8 +262,8 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             try {
-                if (currentContext.Type === 'aci') {
-                    actionContext.telemetry.properties.hostProtocol = 'aci';
+                if (isNewContextType(currentContext.ContextType)) {
+                    actionContext.telemetry.properties.hostProtocol = currentContext.ContextType
                 } else {
                     actionContext.telemetry.properties.hostProtocol = new URL(currentContext.DockerEndpoint).protocol;
                 }
@@ -280,7 +298,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             let result: boolean = false;
             const contexts = await this.contextsCache.getValue();
 
-            if (contexts.some(c => isNewContextType(c.Type))) {
+            if (contexts.some(c => isNewContextType(c.ContextType))) {
                 // If there are any new contexts we automatically know it's the new CLI
                 result = true;
             } else {

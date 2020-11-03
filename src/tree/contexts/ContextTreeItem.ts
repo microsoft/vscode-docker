@@ -32,7 +32,7 @@ export class ContextTreeItem extends AzExtTreeItemIntermediate {
             result = 'customContext;';
         }
 
-        if (this._item.Type === 'aci') {
+        if (this._item.ContextType === 'aci') {
             result += 'aciContext;';
         }
 
