@@ -122,7 +122,7 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
             ];
         }
 
-        return this.children;
+        return this.children ?? [];
     }
 
     private get isRunning(): boolean {

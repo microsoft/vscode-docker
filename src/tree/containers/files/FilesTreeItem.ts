@@ -16,11 +16,8 @@ export class FilesTreeItem extends DirectoryTreeItem {
             parent,
             fs,
             localize('vscode-docker.tree.containers.files.filesTitle', 'Files'),
-            async context => {
-                const containerOS = await containerOSProvider(context);
-
-                return DockerUri.create(containerId, '/', { containerOS, fileType: 'directory' });
-            });
+            DockerUri.create(containerId, '/', { fileType: 'directory' }),
+            containerOSProvider);
     }
 
     public get iconPath(): vscode.ThemeIcon {

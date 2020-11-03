@@ -9,7 +9,6 @@ import { DockerUri } from '../../../docker/files/DockerUri';
 import { AzExtTreeItemIntermediate } from '../../AzExtTreeItemIntermediate';
 
 export class FileTreeItem extends AzExtTreeItemIntermediate {
-    public id?: string;
     public description?: string = '';
 
     public constructor(
@@ -25,6 +24,10 @@ export class FileTreeItem extends AzExtTreeItemIntermediate {
 
     public get iconPath(): vscode.ThemeIcon {
         return new vscode.ThemeIcon('file');
+    }
+
+    public get id(): string {
+        return this.uri.uri.toString();
     }
 
     public get label(): string {

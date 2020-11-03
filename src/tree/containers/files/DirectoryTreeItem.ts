@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from '../../../docker/Common';
 import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
 import { DockerUri } from '../../../docker/files/DockerUri';
 import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
@@ -13,7 +14,6 @@ import { FileTreeItem } from "./FileTreeItem";
 export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;
 
 export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
-    public id?: string ;
     public description?: string = '';
 
     private children: AzExtTreeItem[] | undefined;
@@ -22,7 +22,8 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         parent: AzExtParentTreeItem,
         private readonly fs: vscode.FileSystem,
         private readonly name: string,
-        private readonly uriProvider: (context: IActionContext) => Promise<DockerUri>) {
+        private readonly uri: DockerUri,
+        private readonly containerOSProvider: (context: IActionContext) => Promise<DockerOSType>) {
         super(parent);
     }
 
@@ -45,10 +46,11 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
             this.children = undefined;
         }
 
-        const uri = await this.uriProvider(context);
-        const items = await this.fs.readDirectory(uri.uri);
+        const containerOS = await this.containerOSProvider(context);
+        const actualUri = this.uri.with({ containerOS });
+        const items = await this.fs.readDirectory(actualUri.uri);
 
-        return items.map(item => this.createTreeItemForDirectoryItem(item, uri));
+        return items.map(item => this.createTreeItemForDirectoryItem(item, actualUri));
     }
 
     private createTreeItemForDirectoryItem(item: [string, vscode.FileType], parentUri: DockerUri): AzExtTreeItem {
@@ -60,7 +62,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         switch (fileType) {
             case vscode.FileType.Directory:
 
-                return new DirectoryTreeItem(this, this.fs, name, async () => itemUri);
+                return new DirectoryTreeItem(this, this.fs, name, itemUri, this.containerOSProvider);
 
             case vscode.FileType.File:
 
@@ -69,6 +71,10 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
             default:
                 throw new UnrecognizedDirectoryItemTypeError();
         }
+    }
+
+    public get id(): string {
+        return this.uri.uri.toString();
     }
 
     public get label(): string {
