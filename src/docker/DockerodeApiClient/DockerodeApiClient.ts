@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Dockerode = require('dockerode');
+import * as stream from 'stream';
 import * as tar from 'tar';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
@@ -63,7 +64,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         } as DockerContainerInspection;
     }
 
-    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<string> {
+    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
 
         // NOTE: Dockerode's exec() doesn't seem to work with Windows against the socket endpoint.
         //       https://github.com/apocas/dockerode/issues/534
@@ -79,9 +80,9 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
 
-            const results = await execStreamAsync(dockerCommand, {}, token);
+            const { stdout, stderr } = await execStreamAsync(dockerCommand, {}, token);
 
-            return results.stdout;
+            return { stdout, stderr };
         } else {
             const container = this.dockerodeClient.getContainer(ref);
 
@@ -92,27 +93,40 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                 User: options?.user
             });
 
-            const stream = await exec.start({
+            const execStream = await exec.start({
             });
 
-            return new Promise<string>(
+            return new Promise<{ stdout: string, stderr: string }>(
                 (resolve, reject) => {
-                    const chunks = [];
+                    const stdoutChunks = [];
+                    const stderrChunks = [];
 
-                    stream.on('data', chunk => {
-                        chunks.push(chunk);
+                    const stdout = new stream.PassThrough();
+                    const stderr = new stream.PassThrough();
+
+                    // TODO: Get demuxStream() included in type definition.
+                    // eslint-disable-next-line @typescript-eslint/tslint/config
+                    container.modem.demuxStream(execStream, stdout, stderr);
+
+                    stdout.on('data', chunk => {
+                        stdoutChunks.push(chunk);
                     });
 
-                    stream.on('end', async () => {
+                    stderr.on('data', chunk => {
+                        stderrChunks.push(chunk);
+                    });
+
+                    execStream.on('end', async () => {
                         try {
                             const inspectInfo = await exec.inspect();
 
-                            const output = bufferToString(Buffer.concat(chunks));
+                            const stdoutOutput = bufferToString(Buffer.concat(stdoutChunks));
+                            const stderrOutput = bufferToString(Buffer.concat(stderrChunks));
 
                             if (inspectInfo.ExitCode) {
-                                reject(new Error(output));
+                                reject(new Error(stderrOutput || stdoutOutput));
                             } else {
-                                resolve(output);
+                                resolve({ stdout: stdoutOutput, stderr: stderrOutput });
                             }
                         } catch (err) {
                             reject(err);
@@ -125,7 +139,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
         const container = this.dockerodeClient.getContainer(ref);
 
-        const stream = await this.callWithErrorHandling(context, async () => container.getArchive({ path }));
+        const archiveStream = await this.callWithErrorHandling(context, async () => container.getArchive({ path }));
 
         return await new Promise(
             (resolve, reject) => {
@@ -147,7 +161,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                     });
                 });
 
-                stream.pipe(tarParser);
+                archiveStream.pipe(tarParser);
             });
     }
 

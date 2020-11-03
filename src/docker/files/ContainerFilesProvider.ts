@@ -48,7 +48,9 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
             const executor: DockerContainerExecutor =
                 async (commands, user) => {
-                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
+                    const { stdout } = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
+
+                    return stdout;
                 };
 
             const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
@@ -94,7 +96,9 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
             const executor: DockerContainerExecutor =
                 async (commands, user) => {
-                    return await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
+                    const { stdout } = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
+
+                    return stdout;
                 };
 
             let containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
@@ -220,7 +224,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 throw new UnrecognizedContainerOSError();
         }
 
-        const stdout = await this.dockerClientProvider().execInContainer(/* context */ undefined, dockerUri.containerId, command);
+        const { stdout } = await this.dockerClientProvider().execInContainer(/* context */ undefined, dockerUri.containerId, command);
         const buffer = Buffer.from(stdout, 'utf8');
 
         return Uint8Array.from(buffer);
