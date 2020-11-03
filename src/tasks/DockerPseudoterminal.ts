@@ -107,7 +107,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
         // In case this gets called before executeCommandInTerminal, we'll overwrite this.initialDimensions
         this.initialDimensions = dimensions;
 
-        this.activePty?.resize(dimensions.columns, dimensions.rows);
+        void this.activePty?.resize(dimensions.columns, dimensions.rows);
     }
 
     public writeOutput(message: string): void {
