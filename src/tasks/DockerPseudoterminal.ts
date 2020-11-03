@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nodeptytypes from 'node-pty';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { getCoreNodeModule } from '../utils/getCoreNodeModule';
@@ -26,7 +25,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
 
     private initialDimensions: TerminalDimensions;
-    private activePty: nodeptytypes.IPty;
+    private activePty: IPty;
 
     /* eslint-disable no-invalid-this */
     public readonly onDidWrite: Event<string> = this.writeEmitter.event;
@@ -69,9 +68,9 @@ export class DockerPseudoterminal implements Pseudoterminal {
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
         this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
-        const nodepty = getCoreNodeModule<typeof nodeptytypes>('node-pty');
+        const pty = getCoreNodeModule<nodepty>('node-pty');
 
-        this.activePty = nodepty.spawn(isWindows() ? 'powershell.exe' : 'sh', ['-c', commandLine], {
+        this.activePty = pty.spawn(isWindows() ? 'powershell.exe' : 'sh', ['-c', commandLine], {
             name: 'xterm-color',
             cols: this.initialDimensions?.columns,
             rows: this.initialDimensions?.rows,
@@ -139,4 +138,22 @@ export class DockerPseudoterminal implements Pseudoterminal {
         message = message.replace(/\r?\n/g, '\r\n'); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
+}
+
+/**
+ * Loosely based on https://github.com/microsoft/node-pty/blob/master/typings/node-pty.d.ts, but downloading that is difficult and actually installing
+ * the node-pty package is even more difficult (lots of native code)
+ */
+interface nodepty {
+    spawn(file: string, args: string[] | string, options: unknown): IPty;
+}
+
+/**
+ * Loosely based on IPty in https://github.com/microsoft/node-pty/blob/master/typings/node-pty.d.ts
+ */
+interface IPty {
+    kill(): void,
+    resize(columns: number, rows: number): void;
+    onData: Event<string>;
+    onExit: Event<{ exitCode: number, signal?: number }>;
 }
