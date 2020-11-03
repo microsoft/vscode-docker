@@ -9,7 +9,7 @@ import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTree
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { isWindows } from '../../utils/osUtils';
-import { rewriteCommandForNewCliIfNeeded } from '../compose';
+import { rewriteCommandForNewCliIfNeeded } from '../compose/compose';
 
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
     return composeGroup(context, 'restart', node);

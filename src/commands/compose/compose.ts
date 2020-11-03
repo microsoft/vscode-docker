@@ -5,12 +5,13 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { ext } from '../extensionVariables';
-import { localize } from "../localize";
-import { executeAsTask } from '../utils/executeAsTask';
-import { createFileItem, Item, quickPickDockerComposeFileItem } from '../utils/quickPickFile';
-import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { selectComposeCommand } from './selectCommandTemplate';
+import { ext } from '../../extensionVariables';
+import { localize } from "../../localize";
+import { executeAsTask } from '../../utils/executeAsTask';
+import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
+import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
+import { selectComposeCommand } from '../selectCommandTemplate';
+import { getComposeServiceList } from './getComposeServiceList';
 
 async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
@@ -56,6 +57,8 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                     detached,
                     build
                 );
+
+                await getComposeServiceList(context, folder, terminalCommand);
                 await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
             }
         }
