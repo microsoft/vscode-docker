@@ -69,8 +69,8 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         this.activePty = nodepty.spawn(isWindows() ? 'powershell.exe' : 'sh', ['-c', commandLine], {
             name: 'xterm-color',
-            cols: this.initialDimensions.columns,
-            rows: this.initialDimensions.rows,
+            cols: this.initialDimensions?.columns,
+            rows: this.initialDimensions?.rows,
             cwd: folder.uri.fsPath,
             env: process.env,
         });
