@@ -16,6 +16,7 @@ import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
 
 const DEFAULT = '0m';
+const DEFAULTBOLD = '0;1m';
 const RED = '31m';
 const YELLOW = '33m';
 
@@ -64,6 +65,9 @@ export class DockerPseudoterminal implements Pseudoterminal {
         folder: WorkspaceFolder,
         token?: CancellationToken): Promise<void> {
         const commandLine = resolveVariables(command.build(), folder);
+
+        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
+        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
         const nodepty = getCoreNodeModule<typeof nodeptytypes>('node-pty');
 
