@@ -32,9 +32,9 @@ export class DockerUri {
     }
 
     public static joinPath(baseUri: DockerUri, ...pathSegments: string[]): DockerUri {
-        const joinedPath = corepath.posix.join(baseUri.path, ...pathSegments);
-
-        return DockerUri.create(baseUri.containerId, joinedPath, baseUri.options);
+        return baseUri.with({
+            path: corepath.posix.join(baseUri.path, ...pathSegments)
+        });
     }
 
     public with(options: DockerUriQuery & {
