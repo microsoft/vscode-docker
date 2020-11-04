@@ -38,7 +38,8 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
 
     for (const command of commands) {
         if (selectedItems.length === 0) {
-            const terminalCommand = await selectComposeCommand(
+            // Get the initial command
+            let terminalCommand = await selectComposeCommand(
                 context,
                 folder,
                 command,
@@ -46,10 +47,17 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                 detached,
                 build
             );
-            await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
+
+            // Add the service list if needed
+            terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
+
+            // Rewrite for the new CLI if needed
+            terminalCommand = await rewriteCommandForNewCliIfNeeded(terminalCommand);
+
+            await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
         } else {
             for (const item of selectedItems) {
-                const terminalCommand = await selectComposeCommand(
+                let terminalCommand = await selectComposeCommand(
                     context,
                     folder,
                     command,
@@ -58,8 +66,13 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                     build
                 );
 
-                await getComposeServiceList(context, folder, terminalCommand);
-                await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
+                // Add the service list if needed
+                terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
+
+                // Rewrite for the new CLI if needed
+                terminalCommand = await rewriteCommandForNewCliIfNeeded(terminalCommand);
+
+                await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
             }
         }
     }
@@ -77,10 +90,20 @@ export async function composeRestart(context: IActionContext, dockerComposeFileU
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
+// Exported for compose group down/restart commands
 export async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
     if ((await ext.dockerContextManager.getCurrentContext()).Type === 'aci') {
         // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
         return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
+    } else {
+        return command;
+    }
+}
+
+const serviceListPlaceholder = /\${serviceList}/i;
+async function addServicesListIfNeeded(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, command: string): Promise<string> {
+    if (serviceListPlaceholder.test(command)) {
+        return command.replace(serviceListPlaceholder, await getComposeServiceList(context, workspaceFolder, command));
     } else {
         return command;
     }
