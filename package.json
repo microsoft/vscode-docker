@@ -1220,6 +1220,102 @@
                         ]
                     }
                 }
+            },
+            {
+                "type": "docker-compose",
+                "properties": {
+                    "dockerCompose": {
+                        "description": "Arguments given to the docker-compose command",
+                        "properties": {
+                            "up": {
+                                "description": "Arguments given to the docker-compose up command",
+                                "properties": {
+                                    "detached": {
+                                        "type": "boolean",
+                                        "description": "Whether to run detached or not.",
+                                        "default": true
+                                    },
+                                    "build": {
+                                        "type": "boolean",
+                                        "description": "Whether to build or not.",
+                                        "default": true
+                                    },
+                                    "scale": {
+                                        "type": "object",
+                                        "description": "The scale for each service.",
+                                        "additionalProperties": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "customOptions": {
+                                        "type": "string",
+                                        "description": "Additional arguments included in the docker-compose up command."
+                                    }
+                                }
+                            },
+                            "down": {
+                                "description": "Arguments given to the docker-compose down command",
+                                "properties": {
+                                    "removeImages": {
+                                        "type": "string",
+                                        "description": "Remove images",
+                                        "enum": [
+                                            "all",
+                                            "local"
+                                        ]
+                                    },
+                                    "removeVolumes": {
+                                        "type": "boolean",
+                                        "description": "Remove named and anonymous volumes",
+                                        "default": false
+                                    },
+                                    "customOptions": {
+                                        "type": "string",
+                                        "description": "Additional arguments included in the docker-compose down command."
+                                    }
+                                }
+                            },
+                            "files": {
+                                "type": "array",
+                                "description": "The docker-compose files to include, in order",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "oneOf": [
+                            {
+                                "required": [
+                                    "up"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "down"
+                                    ]
+                                }
+                            },
+                            {
+                                "required": [
+                                    "down"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "up"
+                                    ]
+                                }
+                            }
+                        ],
+                        "default": {
+                            "up": {
+                                "detached": true,
+                                "build": true
+                            },
+                            "files": [
+                                "${workspaceFolder}/docker-compose.yml"
+                            ]
+                        }
+                    }
+                }
             }
         ],
         "languages": [
