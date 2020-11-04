@@ -59,7 +59,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
         const rawResults = await ext.dockerClient.getContainers(context);
         const showFiles = (await ext.dockerContextManager.getCurrentContext())?.Type === 'moby';
 
-        const results = rawResults.map(result => ({ ...result, showFiles }));
+        const results = rawResults.map(result => ({ showFiles, ...result }));
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.updateNewContainerUser(results);
