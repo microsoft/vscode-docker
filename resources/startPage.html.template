@@ -44,12 +44,12 @@
         .icon {
             min-width: 110px;
             padding: 5px;
-            text-align: center;
+            text-align: right;
             flex-basis: 110px;
         }
 
         .icon .codicon {
-            font-size: 70px;
+            font-size: 32px;
         }
 
         ul {
@@ -58,12 +58,15 @@
         }
 
         #dockerIcon {
-            width: 70px;
-            padding: 5px;
+            width: 32px;
         }
 
         #dockerIcon path {
             fill: var(--vscode-editor-foreground);
+        }
+
+        .footer {
+            margin-left: 140px;
         }
     </style>
 </head>
@@ -136,7 +139,8 @@
                 <div>
                     <ul>
                         <li>Open the <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> to view and manage Docker resources</li>
-                        <li>You can easily view container logs by right-clicking the container in the <a href="command:dockerImages.focus">Docker Explorer: Images</a> panel and choosing "View Logs"</li>
+                        <li>View files in running containers with the <a href="command:dockerContainers.focus">Docker Explorer: Containers</a> panel</li>
+                        <li>You can easily view container logs by right-clicking the container in the <a href="command:dockerContainers.focus">Docker Explorer: Containers</a> panel and choosing "View Logs"</li>
                     </ul>
                 </div>
             </div>
@@ -158,14 +162,14 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row footer">
             <div>
                 Visit the extension's <a href="https://github.com/microsoft/vscode-docker">GitHub repository</a>,
                 read <a href="https://github.com/microsoft/vscode-docker/releases">release notes</a> and <a href="https://code.visualstudio.com/docs/containers/overview">documentation</a>,
                 or <a href="https://github.com/microsoft/vscode-docker/issues/new">create an issue</a>
             </div>
         </div>
-        <div class="row">
+        <div class="row footer">
             <div>
                 <input type="checkbox" id="showStartPage" {{ showStartPageChecked }} />
                 <label for="showStartPage">Show this page when a new update to the Docker extension is released</label>
