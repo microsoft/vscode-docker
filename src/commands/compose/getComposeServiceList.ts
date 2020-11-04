@@ -19,12 +19,17 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
             label: s,
             data: s,
         };
-    })
+    });
+
+    // Fetch the previously chosen services list. By default, all will be selected.
+    const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
+    const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, pickChoices.map(c => c.data));
 
     const subsetChoices =
         await ext.ui.showQuickPick(
             pickChoices,
             {
+                isPickSelected: (item: vscode.QuickPickItem) => previousChoices.some(i => i === item.label), // `label` is the same as `data` so this is an OK comparison
                 canPickMany: true,
                 placeHolder: localize('vscode-docker.getComposeServiceList.choose', 'Choose services to start'),
             }
@@ -32,6 +37,9 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
 
     context.telemetry.measurements.totalServices = pickChoices.length;
     context.telemetry.measurements.chosenServices = subsetChoices.length;
+
+    // Update the cache
+    await ext.context.workspaceState.update(workspaceServiceListKey, subsetChoices.map(c => c.data));
 
     return subsetChoices.map(c => c.data).join(' ');
 }
