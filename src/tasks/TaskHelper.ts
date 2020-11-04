@@ -15,6 +15,7 @@ import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
+import { DockerComposeTaskProvider } from './DockerComposeTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
@@ -49,7 +50,6 @@ export interface DockerTaskExecutionContext extends DockerTaskContext {
     terminal: DockerPseudoterminal;
 }
 
-// tslint:disable-next-line: no-empty-interface
 export interface DockerBuildTaskContext extends DockerTaskExecutionContext {
     imageName?: string;
     buildTaskResult?: string;
@@ -59,6 +59,9 @@ export interface DockerRunTaskContext extends DockerTaskExecutionContext {
     containerId?: string;
     buildDefinition?: DockerBuildTaskDefinition;
 }
+
+// This doesn't need to be extended so redefining for parity is simplest
+export type DockerComposeTaskContext = DockerTaskExecutionContext;
 
 export interface TaskHelper {
     preBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
@@ -88,6 +91,13 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
         tasks.registerTaskProvider(
             'docker-run',
             new DockerRunTaskProvider(helpers)
+        )
+    );
+
+    ctx.subscriptions.push(
+        tasks.registerTaskProvider(
+            'docker-compose',
+            new DockerComposeTaskProvider()
         )
     );
 }

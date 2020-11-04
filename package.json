@@ -1247,6 +1247,13 @@
                                             "type": "number"
                                         }
                                     },
+                                    "services": {
+                                        "type": "array",
+                                        "description": "A subset of services to start",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
                                     "customOptions": {
                                         "type": "string",
                                         "description": "Additional arguments included in the docker-compose up command."
