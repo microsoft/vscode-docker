@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import { ext, NonComposeGroupName, DockerContainerInfo } from '../../extension.bundle';
+import { runWithSetting } from '../runWithSetting';
 import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
 const testContainers: DockerContainerInfo[] = [
@@ -111,7 +112,9 @@ const testContainers: DockerContainerInfo[] = [
 ];
 
 async function validateContainersTree(options: IValidateTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
-    await validateTree(ext.containersRoot, 'containers', options, { containers: testContainers }, expectedNodes);
+    await runWithSetting('truncateLongRegistryPaths', false, async () => {
+        await validateTree(ext.containersRoot, 'containers', options, { containers: testContainers }, expectedNodes);
+    });
 }
 
 suite('Containers Tree', async () => {
