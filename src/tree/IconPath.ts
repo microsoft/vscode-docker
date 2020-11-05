@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { Uri } from 'vscode';
+import { ThemeIcon, Uri } from 'vscode';
 import { ext } from '../extensionVariables';
 
-export type IconPath = string | Uri | { light: string | Uri; dark: string | Uri };
+export type IconPath = string | Uri | { light: string | Uri; dark: string | Uri } | ThemeIcon;
 
 export function getIconPath(iconName: string): IconPath {
     return path.join(getResourcesPath(), `${iconName}.svg`);

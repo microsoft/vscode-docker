@@ -43,5 +43,6 @@ export { DockerNetwork } from './src/docker/Networks';
 export { DockerVolume } from './src/docker/Volumes';
 export { CommandTemplate, selectCommandTemplate, defaultCommandTemplates } from './src/commands/selectCommandTemplate';
 export { NonComposeGroupName } from './src/tree/containers/ContainersTreeItem';
+export { DockerContainerInfo } from './src/tree/containers/ContainersTreeItem';
 
 export * from 'vscode-azureextensionui';

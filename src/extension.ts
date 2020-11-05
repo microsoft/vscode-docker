@@ -14,6 +14,7 @@ import { registerCommands } from './commands/registerCommands';
 import { COMPOSE_FILE_GLOB_PATTERN, extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
+import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
 import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
 import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
@@ -124,6 +125,19 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
         await ext.dockerContextManager.refresh();
+
+        ctx.subscriptions.push(
+            vscode.workspace.registerFileSystemProvider(
+                'docker',
+                new ContainerFilesProvider(() => ext.dockerClient),
+                {
+                    // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
+                    isCaseSensitive: true,
+
+                    // TODO: Add support for editing container files (https://github.com/microsoft/vscode-docker/issues/2465)
+                    isReadonly: true
+                })
+        );
 
         registerTrees();
         registerCommands();

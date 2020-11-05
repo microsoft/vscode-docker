@@ -4,16 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Dockerode = require('dockerode');
+import * as stream from 'stream';
+import * as tar from 'tar';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
+import { isWindows } from '../../utils/osUtils';
+import { bufferToString, execStreamAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient } from '../DockerApiClient';
+import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
+import { DockerVersion } from '../Version';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
@@ -30,6 +35,10 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
     public async info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo> {
         return this.callWithErrorHandling(context, async () => this.dockerodeClient.info(), token);
+    }
+
+    public async version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion> {
+        return this.callWithErrorHandling(context, async () => <DockerVersion>this.dockerodeClient.version(), token);
     }
 
     public async getContainers(context: IActionContext, token?: CancellationToken): Promise<DockerContainer[]> {
@@ -53,6 +62,107 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             ...result,
             CreatedTime: new Date(result.Created).valueOf(),
         } as DockerContainerInspection;
+    }
+
+    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
+
+        // NOTE: Dockerode's exec() doesn't seem to work with Windows against the socket endpoint.
+        //       https://github.com/apocas/dockerode/issues/534
+
+        const commandProvider = Array.isArray(command) ? () => command : command;
+
+        if (isWindows()) {
+            let dockerCommand = 'docker exec ';
+
+            if (options?.user) {
+                dockerCommand += `--user "${options.user}" `;
+            }
+
+            dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
+
+            const { stdout, stderr } = await execStreamAsync(dockerCommand, {}, token);
+
+            return { stdout, stderr };
+        } else {
+            const container = this.dockerodeClient.getContainer(ref);
+
+            const exec = await container.exec({
+                AttachStderr: true,
+                AttachStdout: true,
+                Cmd: commandProvider('linux'),
+                User: options?.user
+            });
+
+            const execStream = await exec.start({
+            });
+
+            return new Promise<{ stdout: string, stderr: string }>(
+                (resolve, reject) => {
+                    const stdoutChunks = [];
+                    const stderrChunks = [];
+
+                    const stdout = new stream.PassThrough();
+                    const stderr = new stream.PassThrough();
+
+                    // TODO: Get demuxStream() included in type definition.
+                    // eslint-disable-next-line @typescript-eslint/tslint/config
+                    container.modem.demuxStream(execStream, stdout, stderr);
+
+                    stdout.on('data', chunk => {
+                        stdoutChunks.push(chunk);
+                    });
+
+                    stderr.on('data', chunk => {
+                        stderrChunks.push(chunk);
+                    });
+
+                    execStream.on('end', async () => {
+                        try {
+                            const inspectInfo = await exec.inspect();
+
+                            const stdoutOutput = bufferToString(Buffer.concat(stdoutChunks));
+                            const stderrOutput = bufferToString(Buffer.concat(stderrChunks));
+
+                            if (inspectInfo.ExitCode) {
+                                reject(new Error(stderrOutput || stdoutOutput));
+                            } else {
+                                resolve({ stdout: stdoutOutput, stderr: stderrOutput });
+                            }
+                        } catch (err) {
+                            reject(err);
+                        }
+                    });
+                });
+        }
+    }
+
+    public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
+        const container = this.dockerodeClient.getContainer(ref);
+
+        const archiveStream = await this.callWithErrorHandling(context, async () => container.getArchive({ path }));
+
+        return await new Promise(
+            (resolve, reject) => {
+                const tarParser = new tar.Parse();
+
+                tarParser.on('entry', (entry: tar.ReadEntry) => {
+                    const chunks = [];
+
+                    entry.on('data', chunk => {
+                        chunks.push(chunk);
+                    });
+
+                    entry.on('error', error => {
+                        reject(error);
+                    });
+
+                    entry.on('end', () => {
+                        resolve(Buffer.concat(chunks));
+                    });
+                });
+
+                archiveStream.pipe(tarParser);
+            });
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
@@ -228,7 +338,9 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         try {
             return await this.withTimeoutAndCancellations(context, callback, dockerodeCallTimeout, token);
         } catch (err) {
-            context.errorHandling.suppressReportIssue = true;
+            if (context) {
+                context.errorHandling.suppressReportIssue = true;
+            }
 
             const error = parseError(err);
 
