@@ -101,7 +101,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
 // Exported only for tests
 export async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext: string[], folder: vscode.WorkspaceFolder | undefined, additionalVariables: { [key: string]: string }): Promise<string> {
     // Get the current context type
-    const currentContextType = (await ext.dockerContextManager.getCurrentContext()).Type;
+    const currentContextType = (await ext.dockerContextManager.getCurrentContext()).ContextType;
 
     // Get the configured settings values
     const config = vscode.workspace.getConfiguration('docker');

@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
+import { isNewContextType } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
@@ -92,7 +93,7 @@ export async function composeRestart(context: IActionContext, dockerComposeFileU
 
 // Exported for compose group down/restart commands
 export async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
-    if ((await ext.dockerContextManager.getCurrentContext()).Type === 'aci') {
+    if (isNewContextType((await ext.dockerContextManager.getCurrentContext()).ContextType)) {
         // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
         return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
     } else {
