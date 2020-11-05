@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
+import { IPty, nodepty } from '../types/node-pty';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { getCoreNodeModule } from '../utils/getCoreNodeModule';
 import { isWindows } from '../utils/osUtils';
@@ -140,22 +141,4 @@ export class DockerPseudoterminal implements Pseudoterminal {
         message = message.replace(/\r?\n/g, '\r\n'); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
-}
-
-/**
- * Loosely based on https://github.com/microsoft/node-pty/blob/master/typings/node-pty.d.ts, but downloading that is difficult and actually installing
- * the node-pty package is even more difficult (lots of native code)
- */
-interface nodepty {
-    spawn(file: string, args: string[] | string, options: unknown): IPty;
-}
-
-/**
- * Loosely based on IPty in https://github.com/microsoft/node-pty/blob/master/typings/node-pty.d.ts
- */
-interface IPty {
-    kill(): void,
-    resize(columns: number, rows: number): void;
-    onData: Event<string>;
-    onExit: Event<{ exitCode: number, signal?: number }>;
 }
