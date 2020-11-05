@@ -11,7 +11,7 @@ export interface DockerContext extends DockerObject {
     readonly Description?: string;
     readonly DockerEndpoint: string;
     readonly Current: boolean;
-    readonly Type: ContextType;
+    readonly ContextType: ContextType;
 
     readonly Id: string; // Will be equal to Name for contexts
 

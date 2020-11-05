@@ -129,7 +129,7 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
             Current: false,
             DockerEndpoint: undefined,
             CreatedTime: undefined,
-            Type: 'aci',
+            ContextType: 'aci',
         });
     }
 }
