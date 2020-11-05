@@ -227,13 +227,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // Try parsing as-is; newer CLIs output a JSON object array
                 const contexts = JSON.parse(stdout) as DockerContext[];
 
-                result.push(...contexts.map(context => {
-                    return {
-                        ...context,
-                        Id: context.Name,
-                        ContextType: context.ContextType || (context.DockerEndpoint ? 'moby' : 'aci'), // TODO: this basically assumes no Type and no DockerEndpoint => aci
-                    };
-                }));
+                result.push(...contexts.map(toDockerContext));
             } catch {
                 // Otherwise split by line, older CLIs output one JSON object per line
                 const lines = stdout.split(/\r?\n/im);
@@ -245,11 +239,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                     }
 
                     const context = JSON.parse(line) as DockerContext;
-                    result.push({
-                        ...context,
-                        Id: context.Name,
-                        ContextType: context.ContextType || (context.DockerEndpoint ? 'moby' : 'aci'), // TODO: this basically assumes no Type and no DockerEndpoint => aci
-                    });
+                    result.push(toDockerContext(context));
                 }
             }
 
@@ -320,4 +310,12 @@ export class DockerContextManager implements ContextManager, Disposable {
     private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {
         void commands.executeCommand('setContext', vsCodeContext, value);
     }
+}
+
+function toDockerContext(cliContext: Partial<DockerContext>): DockerContext {
+    return {
+        ...cliContext,
+        Id: cliContext.Name,
+        ContextType: cliContext.ContextType || (cliContext.DockerEndpoint ? 'moby' : 'aci'), // TODO: this basically assumes no Type and no DockerEndpoint => aci
+    } as DockerContext;
 }
