@@ -70,7 +70,8 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         const pty = getCoreNodeModule<nodepty>('node-pty');
 
-        this.activePty = pty.spawn(isWindows() ? 'powershell.exe' : 'sh', ['-c', commandLine], {
+        const windows = isWindows();
+        this.activePty = pty.spawn(windows ? 'cmd.exe' : 'sh', [windows ? '/C' : '-c', commandLine], {
             name: 'xterm-color',
             cols: this.initialDimensions?.columns,
             rows: this.initialDimensions?.rows,
@@ -84,6 +85,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
                 (e: { exitCode: number, signal?: number }) => {
                     dataDisposable.dispose();
                     exitDisposable.dispose();
+                    void cancelDisposable?.dispose();
 
                     if (e.exitCode) {
                         const error = <ExecError>new Error();
