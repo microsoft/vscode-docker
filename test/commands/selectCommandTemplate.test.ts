@@ -588,7 +588,7 @@ async function runWithCommandSetting(
         // From it, only Type is used
         getCurrentContext: async () => {
             return {
-                Type: contextType,
+                ContextType: contextType,
             } as DockerContext;
         },
     };
