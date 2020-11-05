@@ -7,6 +7,7 @@ import { Progress } from 'vscode';
 import { AzureWizardExecuteStep, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
+import { executeAsTask } from '../../../utils/executeAsTask';
 import { execAsync } from '../../../utils/spawnAsync';
 import { IAciWizardContext } from './IAciWizardContext';
 
@@ -28,7 +29,8 @@ export class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardConte
 
             if (error.errorType === '5' || /not logged in/i.test(error.message)) {
                 // If error is due to being not logged in, we'll go through login and try again
-                await execAsync('docker login azure');
+                // Because login could involve device auth we do this step in the terminal
+                await executeAsTask(wizardContext, 'docker login azure', localize('vscode-docker.commands.contexts.create.aci.azureLogin', 'Azure Login'), { rejectOnError: true });
                 await execAsync(command);
             } else {
                 // Otherwise rethrow

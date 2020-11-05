@@ -38,7 +38,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     } else {
         const currentContext = await ext.dockerContextManager.getCurrentContext();
 
-        if (currentContext.Type === 'aci') {
+        if (currentContext.ContextType === 'aci') {
             // If it's ACI we have to do sh, because it's not possible to check if bash is present
             shellCommand = 'sh';
         } else {
