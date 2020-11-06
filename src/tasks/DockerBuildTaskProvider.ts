@@ -52,9 +52,13 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
         const commandLine = await this.resolveCommandLine(definition.dockerBuild);
 
+        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
         await context.terminal.executeCommandInTerminal(
             commandLine,
             context.folder,
+            false, // rejectOnStderr
+            undefined, // stdoutBuffer
+            Buffer.alloc(10 * 1024), // stderrBuffer
             context.cancellationToken
         );
         throwIfCancellationRequested(context);

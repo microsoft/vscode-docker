@@ -56,6 +56,7 @@ export interface DockerBuildTaskContext extends DockerTaskExecutionContext {
 }
 
 export interface DockerRunTaskContext extends DockerTaskExecutionContext {
+    containerId?: string;
     buildDefinition?: DockerBuildTaskDefinition;
 }
 
