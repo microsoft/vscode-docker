@@ -37,6 +37,7 @@
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
         "onCommand:vscode-docker.containers.inspect",
+        "onCommand:vscode-docker.containers.openFile",
         "onCommand:vscode-docker.containers.prune",
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
@@ -109,6 +110,7 @@
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker",
+        "onFileSystem:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
@@ -123,6 +125,10 @@
     "contributes": {
         "menus": {
             "commandPalette": [
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "never"
+                },
                 {
                     "command": "vscode-docker.containers.select",
                     "when": "never"
@@ -367,6 +373,10 @@
                     "command": "vscode-docker.containers.start",
                     "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
                     "group": "containers_1_general@5"
+                },
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "view == dockerContainers && viewItem == containerFile"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
@@ -2085,6 +2095,11 @@
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
+                "command": "vscode-docker.containers.openFile",
+                "title": "%vscode-docker.commands.containers.openFile%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
                 "command": "vscode-docker.containers.prune",
                 "title": "%vscode-docker.commands.containers.prune%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
@@ -2590,7 +2605,6 @@
         "@types/request-promise-native": "^1.0.17",
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
-        "@types/tar": "^4.0.3",
         "@types/vscode": "1.49.0",
         "@types/xml2js": "^0.4.5",
         "@typescript-eslint/eslint-plugin": "^4.4.1",

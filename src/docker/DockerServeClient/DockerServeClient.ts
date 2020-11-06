@@ -14,10 +14,11 @@ import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
-import { DockerApiClient } from '../DockerApiClient';
+import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { NotSupportedError } from '../NotSupportedError';
+import { DockerVersion } from '../Version';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 import { containerPortsToInspectionPorts, containerToDockerContainer } from './DockerServeUtils';
 
@@ -45,6 +46,10 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     public async info(context: IActionContext, token?: CancellationToken): Promise<DockerInfo> {
+        throw new NotSupportedError(context);
+    }
+
+    public async version(context: IActionContext, token?: CancellationToken): Promise<DockerVersion> {
         throw new NotSupportedError(context);
     }
 
@@ -76,11 +81,22 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             NetworkSettings: {
                 Ports: containerPortsToInspectionPorts(container),
             },
-            Platform: responseContainer.platform as DockerOSType,
+            // NOTE: ACI contexts return "Linux" whereas default contexts return "linux".
+            Platform: responseContainer.platform.toLowerCase() as DockerOSType,
         };
     }
 
     // #region Not supported by the Docker SDK yet
+    public async execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
+        // Supported by SDK, but ACI implementation does not support non-interactive nor commands with arguments.
+        // (This means no listing of container directories to show files.)
+        throw new NotSupportedError(context);
+    }
+
+    public async getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer> {
+        throw new NotSupportedError(context);
+    }
+
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
         // Supported by SDK, but used only for debugging which will not work in ACI, and complicated to implement
         throw new NotSupportedError(context);
