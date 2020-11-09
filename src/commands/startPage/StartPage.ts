@@ -68,7 +68,7 @@ class StartPage {
             dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker_blue.png')).toString(),
             showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
             isMac: isMac(),
-            showAzure: true, // TODO?
+            showAzure: await ext.experimentationService.isCachedFlightEnabled('vscode-docker.startPageAzureText'),
         };
 
         const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
