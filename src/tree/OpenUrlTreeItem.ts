@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
-import { openExternal } from "../utils/openExternal";
 import { getThemedIconPath } from "./IconPath";
 
 export class OpenUrlTreeItem extends GenericTreeItem {
@@ -23,6 +22,6 @@ export class OpenUrlTreeItem extends GenericTreeItem {
     }
 
     public async openUrl(): Promise<void> {
-        await openExternal(this._url);
+        await vscode.env.openExternal(vscode.Uri.parse(this._url));
     }
 }

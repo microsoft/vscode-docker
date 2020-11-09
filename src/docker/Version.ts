@@ -3,12 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EventEmitter } from "vscode";
+import { DockerOSType } from "./Common";
 
-export interface DockerTaskEvent {
-    name: string,
-    success: boolean,
-    error?: string
+export interface DockerVersion {
+    readonly Os?: DockerOSType;
 }
-
-export const dockerTaskEndEventListener = new EventEmitter<DockerTaskEvent>();

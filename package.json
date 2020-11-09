@@ -37,6 +37,7 @@
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
         "onCommand:vscode-docker.containers.inspect",
+        "onCommand:vscode-docker.containers.openFile",
         "onCommand:vscode-docker.containers.prune",
         "onCommand:vscode-docker.containers.refresh",
         "onCommand:vscode-docker.containers.remove",
@@ -48,7 +49,9 @@
         "onCommand:vscode-docker.containers.composeGroup.restart",
         "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
+        "onCommand:vscode-docker.help",
         "onCommand:vscode-docker.help.reportIssue",
+        "onCommand:vscode-docker.help.openStartPage",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -109,6 +112,7 @@
         "onCommand:workbench.action.tasks.runTask",
         "onDebugInitialConfigurations",
         "onDebugResolve:docker",
+        "onFileSystem:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
         "onView:dockerContainers",
@@ -123,6 +127,10 @@
     "contributes": {
         "menus": {
             "commandPalette": [
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "never"
+                },
                 {
                     "command": "vscode-docker.containers.select",
                     "when": "never"
@@ -367,6 +375,10 @@
                     "command": "vscode-docker.containers.start",
                     "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
                     "group": "containers_1_general@5"
+                },
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "view == dockerContainers && viewItem == containerFile"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
@@ -2120,6 +2132,11 @@
                 "docker.scaffolding.templatePath": {
                     "type": "string",
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
+                },
+                "docker.showStartPage": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.showStartPage%"
                 }
             }
         },
@@ -2188,6 +2205,11 @@
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
+                "command": "vscode-docker.containers.openFile",
+                "title": "%vscode-docker.commands.containers.openFile%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
                 "command": "vscode-docker.containers.prune",
                 "title": "%vscode-docker.commands.containers.prune%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
@@ -2248,11 +2270,6 @@
             {
                 "command": "vscode-docker.debugging.initializeForDebugging",
                 "title": "%vscode-docker.commands.debugging.initializeForDebugging%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
-            {
-                "command": "vscode-docker.help.reportIssue",
-                "title": "%vscode-docker.commands.help.reportIssue%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
@@ -2568,6 +2585,16 @@
                 "icon": "$(question)"
             },
             {
+                "command": "vscode-docker.help.reportIssue",
+                "title": "%vscode-docker.commands.help.reportIssue%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.help.openStartPage",
+                "title": "%vscode-docker.commands.help.openStartPage%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
                 "command": "vscode-docker.contexts.use",
                 "title": "%vscode-docker.commands.contexts.use%",
                 "category": "%vscode-docker.commands.category.contexts%"
@@ -2693,7 +2720,6 @@
         "@types/request-promise-native": "^1.0.17",
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
-        "@types/tar": "^4.0.3",
         "@types/vscode": "1.49.0",
         "@types/xml2js": "^0.4.5",
         "@typescript-eslint/eslint-plugin": "^4.4.1",
@@ -2717,6 +2743,7 @@
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.81.1",
         "vscode-azureextensiondev": "^0.5.0",
+        "vscode-codicons": "0.0.12",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.0",
         "webpack": "^4.44.2",

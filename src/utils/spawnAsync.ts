@@ -33,9 +33,9 @@ export async function spawnAsync(
         options = options || {};
         options.shell = true;
 
-        const process = cp.spawn(command, options);
+        const subprocess = cp.spawn(command, options);
 
-        process.on('error', (err) => {
+        subprocess.on('error', (err) => {
             if (cancellationListener) {
                 cancellationListener.dispose();
                 cancellationListener = undefined;
@@ -44,7 +44,7 @@ export async function spawnAsync(
             return reject(err);
         });
 
-        process.on('close', (code, signal) => {
+        subprocess.on('close', (code, signal) => {
             if (cancellationListener) {
                 cancellationListener.dispose();
                 cancellationListener = undefined;
@@ -73,16 +73,16 @@ export async function spawnAsync(
         });
 
         if (options?.stdin) {
-            process.stdin.write(options.stdin);
-            process.stdin.end();
+            subprocess.stdin.write(options.stdin);
+            subprocess.stdin.end();
         }
 
         if (onStdout || stdoutBuffer) {
-            process.stdout.on('data', (chunk: Buffer) => {
+            subprocess.stdout.on('data', (chunk: Buffer) => {
                 const data = chunk.toString();
 
                 if (onStdout) {
-                    onStdout(data, process);
+                    onStdout(data, subprocess);
                 }
 
                 if (stdoutBuffer) {
@@ -92,15 +92,102 @@ export async function spawnAsync(
         }
 
         if (onStderr || stderrBuffer) {
-            process.stderr.on('data', (chunk: Buffer) => {
+            subprocess.stderr.on('data', (chunk: Buffer) => {
                 const data = chunk.toString();
 
                 if (onStderr) {
-                    onStderr(data, process);
+                    onStderr(data, subprocess);
                 }
 
                 if (stderrBuffer) {
                     stderrBytesWritten += stderrBuffer.write(data, stderrBytesWritten);
+                }
+            });
+        }
+
+        if (token) {
+            cancellationListener = token.onCancellationRequested(() => {
+                subprocess.kill();
+            });
+        }
+    });
+}
+
+/**
+ * TODO: See if this can be folded into spawnAsync().
+ */
+export async function spawnStreamAsync(
+    command: string,
+    options?: cp.SpawnOptions & { stdin?: string },
+    onStdout?: (chunk: Buffer | string) => void,
+    onStderr?: (chunk: Buffer | string) => void,
+    token?: CancellationToken): Promise<void> {
+
+    return await new Promise((resolve, reject) => {
+        let cancellationListener: Disposable;
+
+        // Without the shell option, it pukes on arguments
+        options = options || {};
+        options.shell = true;
+
+        const process = cp.spawn(command, options);
+
+        const errorChunks = [];
+
+        process.on('error', (err) => {
+            if (cancellationListener) {
+                cancellationListener.dispose();
+                cancellationListener = undefined;
+            }
+
+            return reject(err);
+        });
+
+        process.on('close', (code, signal) => {
+            if (cancellationListener) {
+                cancellationListener.dispose();
+                cancellationListener = undefined;
+            }
+
+            if (token && token.isCancellationRequested) {
+                // If cancellation is requested we'll assume that's why it exited
+                return reject(new UserCancelledError());
+            } else if (code) {
+                let errorMessage = localize('vscode-docker.utils.spawn.exited', 'Process \'{0}\' exited with code {1}', command.length > 50 ? `${command.substring(0, 50)}...` : command, code);
+
+                errorMessage += localize('vscode-docker.utils.spawn.exitedError', '\nError: {0}', bufferToString(Buffer.concat(errorChunks)));
+
+                const error = <ExecError>new Error(errorMessage);
+
+                error.code = code;
+                error.signal = signal;
+                error.stdErrHandled = false;
+
+                return reject(error);
+            }
+
+            return resolve();
+        });
+
+        if (options?.stdin) {
+            process.stdin.write(options.stdin);
+            process.stdin.end();
+        }
+
+        if (onStdout) {
+            process.stdout.on('data', (chunk: Buffer | string) => {
+                if (onStdout) {
+                    onStdout(chunk);
+                }
+            });
+        }
+
+        if (onStderr) {
+            process.stderr.on('data', (chunk: Buffer | string) => {
+                errorChunks.push(chunk);
+
+                if (onStderr) {
+                    onStderr(chunk);
                 }
             });
         }
@@ -122,6 +209,29 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
     return {
         stdout: bufferToString(stdoutBuffer),
         stderr: bufferToString(stderrBuffer),
+    }
+}
+
+/**
+ * TODO: See if this can be folded into execAsync().
+ */
+export async function execStreamAsync(
+    command: string,
+    options?: cp.ExecOptions & { stdin?: string },
+    token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
+    const stdoutChunks = [];
+    const stderrChunks = [];
+
+    await spawnStreamAsync(
+        command,
+        options as cp.CommonOptions,
+        chunk => stdoutChunks.push(chunk),
+        chunk => stderrChunks.push(chunk),
+        token);
+
+    return {
+        stdout: bufferToString(Buffer.concat(stdoutChunks)),
+        stderr: bufferToString(Buffer.concat(stderrChunks)),
     }
 }
 
