@@ -6,6 +6,10 @@
 import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPickerContext, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../extensionVariables";
 
+export interface MultiSelectNode {
+    readonly canMultiSelect: boolean;
+}
+
 /**
  * Helps determine the full list of eligible selected tree item nodes for context menu and commands
  * @param context Tree item context
@@ -50,7 +54,7 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
     }
 
     // Filter off parent items (i.e. group items), as it doesn't make sense to perform actions on them, when we don't allow actions to be performed on *only* them
-    nodes = nodes.filter(n => !(n instanceof AzExtParentTreeItem));
+    nodes = nodes.filter(n => ((<MultiSelectNode><unknown>n).canMultiSelect === true) || !(n instanceof AzExtParentTreeItem));
 
     // If we end with no nodes, cancel
     if (nodes.length === 0) {

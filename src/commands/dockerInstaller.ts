@@ -11,7 +11,6 @@ import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
-import { openExternal } from '../utils/openExternal';
 import { getTempFileName, isLinux } from '../utils/osUtils';
 import { execAsync } from '../utils/spawnAsync';
 
@@ -67,14 +66,14 @@ export abstract class DockerInstallerBase {
     }
 
     private async downloadInstaller(): Promise<string> {
-        const fileName = getTempFileName();
+        const fileName = `${getTempFileName()}.${this.fileExtension}`;
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
     }
 
     private handleError(context: IActionContext, message: string, title: string, url: string): void {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        vscode.window.showErrorMessage(message, { title: title }).then(response => { if (response) { openExternal(url); } });
+        vscode.window.showErrorMessage(message, { title: title }).then(response => { if (response) { vscode.env.openExternal(vscode.Uri.parse(url)); } });
         context.errorHandling.suppressReportIssue = true;
         context.errorHandling.suppressDisplay = true;
     }
