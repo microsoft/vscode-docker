@@ -13,7 +13,6 @@ import { ExecError } from '../utils/spawnAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
-import { dockerTaskEndEventListener } from './DockerTaskEndEventListener';
 import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 
 export abstract class DockerTaskProvider implements TaskProvider {
@@ -54,8 +53,6 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.actionContext.telemetry.properties.dockerPlatform = context.platform;
                 context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 await this.executeTaskInternal(context, task);
-
-                dockerTaskEndEventListener.fire({ name: task.name, success: true });
             });
         } catch (err) {
             // Errors will not be rethrown, rather it will simply return an error code or 1
@@ -64,8 +61,6 @@ export abstract class DockerTaskProvider implements TaskProvider {
             if (!(err as ExecError)?.stdErrHandled) {
                 context.terminal.writeErrorLine(error.message);
             }
-
-            dockerTaskEndEventListener.fire({ name: task.name, success: false, error: error.message });
 
             return parseInt(error.errorType, 10) || 1;
         }

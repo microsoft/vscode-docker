@@ -14,7 +14,6 @@ import { DockerTaskExecutionContext } from './TaskHelper';
 
 const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
-const RED = '31m';
 const YELLOW = '33m';
 
 export class DockerPseudoterminal implements Pseudoterminal {
@@ -22,10 +21,10 @@ export class DockerPseudoterminal implements Pseudoterminal {
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
 
-    /* eslint-disable-next-line no-invalid-this */
+    /* eslint-disable no-invalid-this */
     public readonly onDidWrite: Event<string> = this.writeEmitter.event;
-    /* eslint-disable-next-line no-invalid-this */
     public readonly onDidClose: Event<number> = this.closeEmitter.event;
+    /* eslint-enable no-invalid-this */
 
     public constructor(private readonly taskProvider: DockerTaskProvider, private readonly task: DockerBuildTask | DockerRunTask, private readonly resolvedDefinition: DockerBuildTaskDefinition | DockerRunTaskDefinition) { }
 
@@ -44,8 +43,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
 
         // We intentionally don't have an error handler in the then() below. DockerTaskProvider.executeTask() cannot throw--errors will be caught and some nonzero integer returned.
         // Can't wait here
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
+        void this.taskProvider.executeTask(executeContext, this.task).then(result => this.close(result));
     }
 
     public close(code?: number): void {
@@ -94,7 +92,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
     }
 
     public writeError(message: string): void {
-        this.write(message, RED);
+        this.write(message, DEFAULT);
     }
 
     public writeOutputLine(message: string): void {
