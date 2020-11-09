@@ -22,6 +22,8 @@
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"typescript.preferences.importModuleSpecifier": "relative",
 	"files.associations": {
-		"*.template": "plaintext"
-	}
+		"*.template": "plaintext",
+		"*.html.template": "html"
+	},
+	"html.format.wrapLineLength": 0
 }

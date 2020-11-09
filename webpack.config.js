@@ -11,8 +11,8 @@
 const process = require('process');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const StringReplacePlugin = require("string-replace-webpack-plugin");
-const dev = require("vscode-azureextensiondev");
+const StringReplacePlugin = require('string-replace-webpack-plugin');
+const dev = require('vscode-azureextensiondev');
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 let DEBUG_WEBPACK = !!process.env.DEBUG_WEBPACK;
@@ -106,7 +106,11 @@ let config = dev.getDefaultWebpackConfig({
         new CopyWebpackPlugin({
             patterns: [
                 // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
-                { from: './out/src/utils/getCoreNodeModule.js', to: 'node_modules' }
+                { from: './out/src/utils/getCoreNodeModule.js', to: 'node_modules' },
+
+                // node_modules/vscode-codicons/dist/codicon.css, .ttf -> dist/node_modules/vscode-codicons/dist/codicon.css, .ttf
+                { from: './node_modules/vscode-codicons/dist/codicon.css', to: 'node_modules/vscode-codicons/dist' },
+                { from: './node_modules/vscode-codicons/dist/codicon.ttf', to: 'node_modules/vscode-codicons/dist' },
             ]
         }),
 

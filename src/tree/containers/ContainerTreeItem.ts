@@ -3,23 +3,32 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import * as vscode from 'vscode';
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from '../../docker/Common';
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
-import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
+import { MultiSelectNode } from '../../utils/multiSelectNodes';
+import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { getContainerStateIcon } from "./ContainerProperties";
+import { DockerContainerInfo } from './ContainersTreeItem';
+import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends AzExtTreeItemIntermediate {
+export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implements MultiSelectNode {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
-    private readonly _item: DockerContainer;
+    private readonly _item: DockerContainerInfo;
+    private children: AzExtTreeItem[] | undefined;
+    private containerOS: DockerOSType;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainer) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
         this._item = itemInfo;
     }
+
+    public readonly canMultiSelect: boolean = true;
 
     public get id(): string {
         return getTreeId(this._item);
@@ -86,5 +95,37 @@ export class ContainerTreeItem extends AzExtTreeItemIntermediate {
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         return ext.dockerClient.removeContainer(context, this.containerId);
+    }
+
+    public hasMoreChildrenImpl(): boolean {
+        return this._item.showFiles && this.isRunning && this.children === undefined;
+    }
+
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+        if (clearCache) {
+            this.children = undefined;
+        }
+
+        if (this._item.showFiles && this.isRunning) {
+            this.children = [
+                new FilesTreeItem(
+                    this,
+                    vscode.workspace.fs,
+                    this.containerId,
+                    async c => {
+                        if (this.containerOS === undefined) {
+                            this.containerOS = (await ext.dockerClient.inspectContainer(c, this.containerId)).Platform;
+                        }
+
+                        return this.containerOS;
+                    })
+            ];
+        }
+
+        return this.children ?? [];
+    }
+
+    private get isRunning(): boolean {
+        return this._item.State.toLowerCase() === 'running';
     }
 }

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as vscode from "vscode";
 import { IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
@@ -11,7 +12,6 @@ import { DockerHubNamespaceTreeItem } from "../../../tree/registries/dockerHub/D
 import { DockerHubRepositoryTreeItem } from "../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem";
 import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
 import { RemoteTagTreeItem } from "../../../tree/registries/RemoteTagTreeItem";
-import { openExternal } from "../../../utils/openExternal";
 
 export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | RemoteTagTreeItem): Promise<void> {
     if (!node) {
@@ -31,5 +31,5 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Doc
         url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`;
     }
 
-    await openExternal(url);
+    await vscode.env.openExternal(vscode.Uri.parse(url));
 }

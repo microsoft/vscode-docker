@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
+import { DockerOSType } from "./Common";
 
-export async function registryHelp(context: IActionContext): Promise<void> {
-    void vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/helpicon_containerregistries'));
+export interface DockerVersion {
+    readonly Os?: DockerOSType;
 }
