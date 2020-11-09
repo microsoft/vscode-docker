@@ -72,10 +72,15 @@ import { pullImageFromRepository, pullRepository } from "./registries/pullImages
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
 import { reportIssue } from "./reportIssue";
+import { openStartPage } from "./startPage/openStartPage";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
+
+interface CommandReasonArgument {
+    commandReason: 'tree' | 'palette' | 'startPage';
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function registerCommand(commandId: string, callback: (context: IActionContext, ...args: any[]) => any, debounce?: number): void {
@@ -83,8 +88,16 @@ export function registerCommand(commandId: string, callback: (context: IActionCo
         commandId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (context, ...args: any[]) => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ext.activityMeasurementService.recordActivity('overallnoedit');
+            void ext.activityMeasurementService.recordActivity('overallnoedit');
+
+            // If a command reason is given, record it. Currently only the start page provides the reason.
+            const commandReasonArgIndex = args.findIndex(a => (<CommandReasonArgument>a)?.commandReason);
+            if (commandReasonArgIndex >= 0) {
+                context.telemetry.properties.commandReason = (<CommandReasonArgument>args[commandReasonArgIndex]).commandReason;
+
+                // Remove the reason argument from the list to prevent confusing the command
+                args.splice(commandReasonArgIndex, 1);
+            }
 
             return callback(context, ...args);
         },
@@ -179,4 +192,5 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.reportIssue', reportIssue);
+    registerCommand('vscode-docker.help.openStartPage', openStartPage);
 }

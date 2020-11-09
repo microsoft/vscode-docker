@@ -49,7 +49,9 @@
         "onCommand:vscode-docker.containers.composeGroup.restart",
         "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
+        "onCommand:vscode-docker.help",
         "onCommand:vscode-docker.help.reportIssue",
+        "onCommand:vscode-docker.help.openStartPage",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -2027,6 +2029,11 @@
                 "docker.scaffolding.templatePath": {
                     "type": "string",
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
+                },
+                "docker.showStartPage": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.showStartPage%"
                 }
             }
         },
@@ -2160,11 +2167,6 @@
             {
                 "command": "vscode-docker.debugging.initializeForDebugging",
                 "title": "%vscode-docker.commands.debugging.initializeForDebugging%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
-            {
-                "command": "vscode-docker.help.reportIssue",
-                "title": "%vscode-docker.commands.help.reportIssue%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
@@ -2480,6 +2482,16 @@
                 "icon": "$(question)"
             },
             {
+                "command": "vscode-docker.help.reportIssue",
+                "title": "%vscode-docker.commands.help.reportIssue%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.help.openStartPage",
+                "title": "%vscode-docker.commands.help.openStartPage%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
                 "command": "vscode-docker.contexts.use",
                 "title": "%vscode-docker.commands.contexts.use%",
                 "category": "%vscode-docker.commands.category.contexts%"
@@ -2628,6 +2640,7 @@
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.81.1",
         "vscode-azureextensiondev": "^0.5.0",
+        "vscode-codicons": "0.0.12",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.0",
         "webpack": "^4.44.2",
