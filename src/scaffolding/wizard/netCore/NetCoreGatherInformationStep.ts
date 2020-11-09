@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { SemVer } from 'semver';
+import * as semver from 'semver';
 import { localize } from '../../../localize';
 import { hasTask } from '../../../tasks/TaskHelper';
 import { getValidImageNameFromPath } from '../../../utils/getValidImageName';
@@ -12,16 +12,10 @@ import { getNetCoreProjectInfo } from '../../../utils/netCoreUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
 
-// .NET 5 and above
+// All supported .NET versions no longer have "core" in the name
 const aspNetBaseImage = 'mcr.microsoft.com/dotnet/aspnet';
 const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
 const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
-
-// .NET Core 3.1 and below
-// Note: this will work for .NET Core 2.2/2.1 (which are EOL), but not for <2.0 (which are way EOL)
-const aspNetCoreBaseImage = 'mcr.microsoft.com/dotnet/core/aspnet';
-const consoleNetCoreBaseImage = 'mcr.microsoft.com/dotnet/core/runtime';
-const netCoreSdkImage = 'mcr.microsoft.com/dotnet/core/sdk';
 
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
     private targetFramework: string;
@@ -48,23 +42,11 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
 
             const [, , netCoreVersionString] = /net(coreapp)?([\d\.]+)/i.exec(this.targetFramework);
 
-            let netCoreVersion: SemVer;
-            if (/^\d+\.\d+$/.test(netCoreVersionString)) {
-                // SemVer requires a patch number in the version, so add it if the version matches e.g. 5.0
-                netCoreVersion = new SemVer(netCoreVersionString + '.0');
-            } else {
-                netCoreVersion = new SemVer(netCoreVersionString)
-            }
+            // semver.coerce tolerates version strings like "5.0" which is typically what is present in the .NET project file
+            const netCoreVersion = semver.coerce(netCoreVersionString);
 
-            if (netCoreVersion.major >= 5) {
-                // .NET 5 or above
-                wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersionString}` : `${consoleNetBaseImage}:${netCoreVersionString}`;
-                wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersionString}`;
-            } else {
-                // .NET 3.1 or below
-                wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetCoreBaseImage}:${netCoreVersionString}` : `${consoleNetCoreBaseImage}:${netCoreVersionString}`;
-                wizardContext.netCoreSdkBaseImage = `${netCoreSdkImage}:${netCoreVersionString}`;
-            }
+            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
+            wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
         }
 
         if (!wizardContext.serviceName) {
