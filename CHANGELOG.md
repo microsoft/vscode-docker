@@ -1,3 +1,17 @@
+## 1.8.0 - 16 November 2020
+### Added
+* Added a read-only file explorer for running containers, this can be seen in the Docker Explorer tab. [#2333](https://github.com/microsoft/vscode-docker/issues/2333)
+* In ACI contexts, volumes are now visible. [#2315](https://github.com/microsoft/vscode-docker/issues/2315)
+* A start page will now open on install / upgrade with some pointers on where to begin. The automatic opening can be disabled with a checkbox on the page. [#1895](https://github.com/microsoft/vscode-docker/issues/1895)
+
+### Fixed
+* Activation performance has been improved. [#2371](https://github.com/microsoft/vscode-docker/issues/2371)
+* .NET Core image names below 5.0 can now be pulled without `/core`. The scaffolding code has been updated to reflect this. [#2429](https://github.com/microsoft/vscode-docker/issues/2429)
+* Output looked bad for BuildKit builds. [#2451](https://github.com/microsoft/vscode-docker/issues/2451)
+
+### Removed
+* UI mode has been removed for the purposes of remoting, but it can be manually re-enabled. This change significantly improves the user experience when using remote features. [#2356](https://github.com/microsoft/vscode-docker/issues/2356)
+
 ## 1.7.0 - 19 October 2020
 ### Added
 * The containers view is now grouped by compose project by default. This can be changed by settings. [#2324](https://github.com/microsoft/vscode-docker/issues/2324)
