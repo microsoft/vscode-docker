@@ -91,7 +91,7 @@ export function registerCommand(commandId: string, callback: (context: IActionCo
             void ext.activityMeasurementService.recordActivity('overallnoedit');
 
             // If a command reason is given, record it. Currently only the start page provides the reason.
-            const commandReasonArgIndex = args.findIndex(a => a && 'commandReason' in <CommandReasonArgument>a);
+            const commandReasonArgIndex = args.findIndex(a => (<CommandReasonArgument>a)?.commandReason);
             if (commandReasonArgIndex >= 0) {
                 context.telemetry.properties.commandReason = (<CommandReasonArgument>args[commandReasonArgIndex]).commandReason;
 

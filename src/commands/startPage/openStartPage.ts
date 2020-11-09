@@ -12,8 +12,7 @@ import { startPage } from './StartPage';
 
 const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
 
-export async function openStartPage(context: IActionContext, reason: 'install' | 'command' = 'command'): Promise<void> {
-    context.telemetry.properties.reason = reason;
+export async function openStartPage(context: IActionContext): Promise<void> {
     await startPage.createOrShow(context);
 }
 
@@ -34,7 +33,7 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
 
     // Show!
     await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
-    void vscode.commands.executeCommand('vscode-docker.help.openStartPage', 'install');
+    void vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
 }
 
 // Exported just for unit tests
