@@ -66,7 +66,7 @@ export abstract class DockerInstallerBase {
     }
 
     private async downloadInstaller(): Promise<string> {
-        const fileName = getTempFileName();
+        const fileName = `${getTempFileName()}.${this.fileExtension}`;
         await streamToFile(this.downloadUrl, fileName);
         return fileName;
     }

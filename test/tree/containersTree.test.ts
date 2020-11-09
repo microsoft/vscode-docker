@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ext, DockerContainer, NonComposeGroupName } from '../../extension.bundle';
+import { ext, NonComposeGroupName, DockerContainerInfo } from '../../extension.bundle';
+import { runWithSetting } from '../runWithSetting';
 import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
-const testContainers: DockerContainer[] = [
+const testContainers: DockerContainerInfo[] = [
     {
         Id: "9330566c414439f4873edd95689b559466993681f7b9741005b5a74786134202",
         Name: "vigorous_booth",
@@ -17,7 +18,8 @@ const testContainers: DockerContainer[] = [
         Ports: [],
         State: "created",
         Status: "Created",
-        Labels: { "com.docker.compose.project": "proj1" }
+        Labels: { "com.docker.compose.project": "proj1" },
+        showFiles: false
     },
     {
         Id: "faeb6f02af06df748a0040476ba7c335fb8aaefd76f6ea14a76800faf0fa3910",
@@ -30,7 +32,8 @@ const testContainers: DockerContainer[] = [
         ],
         State: "running",
         Status: "Up 6 minutes",
-        Labels: { "com.docker.compose.project": "proj1" }
+        Labels: { "com.docker.compose.project": "proj1" },
+        showFiles: false
     },
     {
         Id: "99636d5207b3da8a9865ef931aa3c758688e795e7787a6982fc7b5da07a5de8c",
@@ -41,7 +44,8 @@ const testContainers: DockerContainer[] = [
         Ports: [],
         State: "paused",
         Status: "Up 8 minutes (Paused)",
-        Labels: { "com.docker.compose.project": "proj2" }
+        Labels: { "com.docker.compose.project": "proj2" },
+        showFiles: false
     },
     {
         Id: "49df1ed4a46c2617025298a8bdb01bc37267ecae82fc8ab88b0504314d94b983",
@@ -55,7 +59,8 @@ const testContainers: DockerContainer[] = [
         ],
         State: "running",
         Status: "Up 8 minutes",
-        Labels: { "com.docker.compose.project": "proj2" }
+        Labels: { "com.docker.compose.project": "proj2" },
+        showFiles: false
     },
     {
         Id: "ee098ec2fb0b337e4f480a1a33dd1d396ef6b242579bb8b874e480957c053f34",
@@ -66,7 +71,8 @@ const testContainers: DockerContainer[] = [
         Ports: [],
         State: "exited",
         Status: "Exited (137) 12 hours ago",
-        Labels: { "com.docker.compose.project": "proj3" }
+        Labels: { "com.docker.compose.project": "proj3" },
+        showFiles: false
     },
     {
         Id: "5e25d05c0797d44c0efaf3479633316f9229e3f71feccfbe2278c35681c0436f",
@@ -77,7 +83,8 @@ const testContainers: DockerContainer[] = [
         Ports: [{ IP: "0.0.0.0", PrivatePort: 80, PublicPort: 80, Type: "tcp" }],
         State: "running",
         Status: "Up 32 hours",
-        Labels: { "com.docker.compose.project": "proj3" }
+        Labels: { "com.docker.compose.project": "proj3" },
+        showFiles: false
     },
     {
         Id: "531005593f5da6f15ce13a6149a9b4866608fad5bddc600d37239e3d9976f00f",
@@ -88,7 +95,8 @@ const testContainers: DockerContainer[] = [
         Ports: [],
         State: "running",
         Status: "Up 49 seconds",
-        Labels: { "com.docker.compose.project": "proj3" }
+        Labels: { "com.docker.compose.project": "proj3" },
+        showFiles: false
     },
     {
         Id: "99fd96f9cdf9fb7668887477f91b0c72682461690ff83030e8a6aa63a871f63a",
@@ -98,12 +106,15 @@ const testContainers: DockerContainer[] = [
         CreatedTime: generateCreatedTimeInMs(365),
         Ports: [],
         State: "exited",
-        Status: "Exited (0) 2 days ago"
+        Status: "Exited (0) 2 days ago",
+        showFiles: false
     }
 ];
 
 async function validateContainersTree(options: IValidateTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
-    await validateTree(ext.containersRoot, 'containers', options, { containers: testContainers }, expectedNodes);
+    await runWithSetting('truncateLongRegistryPaths', false, async () => {
+        await validateTree(ext.containersRoot, 'containers', options, { containers: testContainers }, expectedNodes);
+    });
 }
 
 suite('Containers Tree', async () => {
@@ -151,14 +162,14 @@ suite('Containers Tree', async () => {
                 sortBy: 'test3'
             },
             [
-                { label: "node:8.0", description: "vigorous_booth - Created" },
-                { label: "registry:latest", description: "elegant_knuth - Up 6 minutes" },
-                { label: "mcr.microsoft.com/dotnet/core/sdk:latest", description: "focused_cori - Up 8 minutes (Paused)" },
-                { label: "emjacr2.azurecr.io/docker-django-webapp-linux:cj8", description: "zealous_napier - Up 8 minutes" },
-                { label: "vsc-js1-6b97c65e88377ff89a4eab7bc81b694d", description: "admiring_leavitt - Exited (137) 12 hours ago" },
-                { label: "acr-build-helloworld-node:latest", description: "inspiring_brattain - Up 32 hours" },
-                { label: "test:latest", description: "elegant_mendel - Up 49 seconds" },
-                { label: "nginx:latest", description: "devtest - Exited (0) 2 days ago" },
+                { label: "node:8.0", description: "vigorous_booth - Created", children: [] },
+                { label: "registry:latest", description: "elegant_knuth - Up 6 minutes", children: [] },
+                { label: "mcr.microsoft.com/dotnet/core/sdk:latest", description: "focused_cori - Up 8 minutes (Paused)", children: [] },
+                { label: "emjacr2.azurecr.io/docker-django-webapp-linux:cj8", description: "zealous_napier - Up 8 minutes", children: [] },
+                { label: "vsc-js1-6b97c65e88377ff89a4eab7bc81b694d", description: "admiring_leavitt - Exited (137) 12 hours ago", children: [] },
+                { label: "acr-build-helloworld-node:latest", description: "inspiring_brattain - Up 32 hours", children: [] },
+                { label: "test:latest", description: "elegant_mendel - Up 49 seconds", children: [] },
+                { label: "nginx:latest", description: "devtest - Exited (0) 2 days ago", children: [] },
             ]);
     });
 
@@ -400,14 +411,14 @@ suite('Containers Tree', async () => {
                 sortBy: 'Label',
             },
             [
-                { label: "admiring_leavitt" },
-                { label: "devtest" },
-                { label: "elegant_knuth" },
-                { label: "elegant_mendel" },
-                { label: "focused_cori" },
-                { label: "inspiring_brattain" },
-                { label: "vigorous_booth" },
-                { label: "zealous_napier" },
+                { label: "admiring_leavitt", children: [] },
+                { label: "devtest", children: [] },
+                { label: "elegant_knuth", children: [] },
+                { label: "elegant_mendel", children: [] },
+                { label: "focused_cori", children: [] },
+                { label: "inspiring_brattain", children: [] },
+                { label: "vigorous_booth", children: [] },
+                { label: "zealous_napier", children: [] },
             ]);
     });
 
@@ -533,7 +544,7 @@ suite('Containers Tree', async () => {
      * https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
      */
     test('Remote Containers - Attach Visual Studio Code', async () => {
-        const containers: DockerContainer[] = [
+        const containers: DockerContainerInfo[] = [
             {
                 Id: "faeb6f02af06df748a0040476ba7c335fb8aaefd76f6ea14a76800faf0fa3910",
                 Name: "elegant_knuth",
@@ -545,11 +556,12 @@ suite('Containers Tree', async () => {
                 ],
                 State: "running",
                 Status: "Up 6 minutes",
+                showFiles: false
             },
         ];
 
         const expectedNodes = [
-            { label: "registry:latest", description: "elegant_knuth - Up 6 minutes" },
+            { label: "registry:latest", description: "elegant_knuth - Up 6 minutes", children: [] },
         ];
 
         const actualNodes = await validateTree(ext.containersRoot, 'containers', { groupBy: 'None' }, { containers: containers }, expectedNodes);
