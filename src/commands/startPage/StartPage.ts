@@ -29,7 +29,10 @@ class StartPage {
 
     public async createOrShow(context: IActionContext): Promise<void> {
         const resourcesRoot = vscode.Uri.joinPath(ext.context.extensionUri, 'resources');
-        const codiconsRoot = vscode.Uri.joinPath(ext.context.extensionUri, 'node_modules', 'vscode-codicons', 'dist');
+
+        // If we're using the bundled version, the codicons root URI is at <extensionRoot>/dist/node_modules/vscode-codicons/dist
+        // If we're not using the bundled version, the codicons root URI is <extensionRoot>/node_modules/vscode-codicons/dist
+        const codiconsRoot = vscode.Uri.joinPath(ext.context.extensionUri, ...ext.ignoreBundle ? ['node_modules'] : ['dist', 'node_modules'], 'vscode-codicons', 'dist');
 
         if (!this.activePanel) {
             this.activePanel = vscode.window.createWebviewPanel(
