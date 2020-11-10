@@ -3,6 +3,7 @@
 * Added a read-only file explorer for running containers, this can be seen in the Docker Explorer tab. [#2333](https://github.com/microsoft/vscode-docker/issues/2333)
 * In ACI contexts, volumes are now visible. [#2315](https://github.com/microsoft/vscode-docker/issues/2315)
 * A start page will now open on install / upgrade with some pointers on where to begin. The automatic opening can be disabled with a checkbox on the page. [#1895](https://github.com/microsoft/vscode-docker/issues/1895)
+* New extension icon! [#2475](https://github.com/microsoft/vscode-docker/pull/2475)
 
 ### Fixed
 * Activation performance has been improved. [#2371](https://github.com/microsoft/vscode-docker/issues/2371)
