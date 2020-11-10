@@ -101,7 +101,8 @@ export class PythonDebugHelper implements DebugHelper {
             program: debugConfiguration.file || pythonRunTaskOptions.file,
             redirectOutput: debugConfiguration.redirectOutput || true,
             args: args,
-            cwd: '.'
+            cwd: '.',
+            python: 'python3', // This controls what Python path gets used by the launcher to launch the debuggee. In a container we should always use `python3` to launch it.
         };
     }
 
