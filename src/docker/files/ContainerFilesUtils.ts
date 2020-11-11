@@ -180,7 +180,7 @@ export async function listWindowsContainerDirectory(executor: DockerContainerExe
 
     const output = await tryWithItems(
         users,
-        user => executor(command, user));
+        async user => await executor(command, user));
 
     return parseWindowsDirectoryItems(output, parentPath);
 }
