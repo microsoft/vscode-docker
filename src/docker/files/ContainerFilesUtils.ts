@@ -147,23 +147,40 @@ export async function listLinuxContainerDirectory(executor: DockerContainerExecu
     return parseLinuxDirectoryItems(output, parentPath);
 }
 
+async function tryWithItems<T, U>(items: T[], callback: (item: T) => Promise<U | undefined>): Promise<U | undefined> {
+    let lastErr;
+
+    for (const item of items) {
+        try {
+            const result = await callback(item);
+
+            if (result !== undefined) {
+                return result;
+            }
+        } catch (err) {
+            lastErr = err;
+        }
+    }
+
+    if (lastErr) {
+        throw lastErr;
+    }
+
+    return undefined;
+}
+
 export async function listWindowsContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"`];
 
-    let output: string;
+    const users = [
+        /* Default user */ undefined,
+        'ContainerAdministrator',
+        'Administrator'
+    ];
 
-    try {
-        // Try the listing with the default user...
-        output = await executor(command);
-    } catch {
-        try {
-            // If that fails, try another well-known user...
-            output = await executor(command, 'ContainerAdministrator');
-        } catch {
-            // If *that* fails, try a last well-known user...
-            output = await executor(command, 'Administrator');
-        }
-    }
+    const output = await tryWithItems(
+        users,
+        user => executor(command, user));
 
     return parseWindowsDirectoryItems(output, parentPath);
 }
