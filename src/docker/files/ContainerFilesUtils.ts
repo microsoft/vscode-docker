@@ -138,8 +138,8 @@ function parseWindowsDirectoryItems(input: string, parentPath: string): Director
 export async function listLinuxContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const commandProvider: DockerExecCommandProvider = shell => {
         return shell === 'windows'
-            ? ['/bin/sh', '-c', `"ls -la \"${parentPath}\""` ]
-            : ['/bin/sh', '-c', `ls -la "${parentPath}"` ];
+            ? ['/bin/sh', '-c', `"ls -la \"${parentPath}\""`]
+            : ['/bin/sh', '-c', `ls -la "${parentPath}"`];
     };
 
     const output = await executor(commandProvider);
@@ -148,7 +148,7 @@ export async function listLinuxContainerDirectory(executor: DockerContainerExecu
 }
 
 export async function listWindowsContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
-    const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"` ];
+    const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"`];
 
     let output: string;
 
@@ -179,8 +179,8 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
     const command: DockerExecCommandProvider =
         shell => {
             return shell === 'windows'
-                ? [ '/bin/sh', '-c', `"stat -c '%W;%Y;%s;%F' '${itemPath}'"` ]
-                : [ '/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${itemPath}"` ];
+                ? ['/bin/sh', '-c', `"stat -c '%W;%Y;%s;%F' '${itemPath}'"`]
+                : ['/bin/sh', '-c', `stat -c "%W;%Y;%s;%F" "${itemPath}"`];
         };
 
     const result = await executor(command);
@@ -279,19 +279,31 @@ async function statWindowsContainerDirectory(executor: DockerContainerExecutor, 
     const drive = parsedPath.root.replace(/\\/, '');
     const wmipath = parsedPath.dir.concat('\\');
     const filename = parsedPath.base;
-    const command = [ 'cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list` ];
+    const command = ['cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list`];
 
-    const result = await executor(command);
+    try {
+        const result = await executor(command);
 
-    const parsedResult = parseWmiList(result);
+        const parsedResult = parseWmiList(result);
 
-    if (parsedResult) {
+        if (parsedResult) {
+            return {
+                ctime: parseWmiTime(parsedResult[CreationDate]),
+                mtime: parseWmiTime(parsedResult[LastModified]),
+                size: 0,
+                type: 'directory'
+            };
+        }
+    } catch {
+        // NOTE: Not every Windows container contains the WMI subsystem (e.g. Nanoserver used for .NET Core apps);
+        //       if the call fails, assume it isn't installed and fake a "recently updated" directory.
+        // TODO: Find a non-WMI means to obtain file system information (in a normalized, non-localized, manner).
         return {
-            ctime: parseWmiTime(parsedResult[CreationDate]),
-            mtime: parseWmiTime(parsedResult[LastModified]),
+            ctime: 0,
+            mtime: Date.now(),
             size: 0,
             type: 'directory'
-        };
+        }
     }
 
     return undefined;
@@ -300,19 +312,31 @@ async function statWindowsContainerDirectory(executor: DockerContainerExecutor, 
 async function statWindowsContainerFile(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
 
     const name = itemPath.replace(/\\/, '\\\\');
-    const command = [ 'cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list` ];
+    const command = ['cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list`];
 
-    const result = await executor(command);
+    try {
+        const result = await executor(command);
 
-    const parsedResult = parseWmiList(result);
+        const parsedResult = parseWmiList(result);
 
-    if (parsedResult) {
+        if (parsedResult) {
+            return {
+                ctime: parseWmiTime(parsedResult[CreationDate]),
+                mtime: parseWmiTime(parsedResult[LastModified]),
+                size: parseInt(parsedResult[FileSize], 10),
+                type: 'file'
+            };
+        }
+    } catch {
+        // NOTE: Not every Windows container contains the WMI subsystem (e.g. Nanoserver used for .NET Core apps);
+        //       if the call fails, assume it isn't installed and fake a "recently updated" file.
+        // TODO: Find a non-WMI means to obtain file system information (in a normalized, non-localized, manner).
         return {
-            ctime: parseWmiTime(parsedResult[CreationDate]),
-            mtime: parseWmiTime(parsedResult[LastModified]),
-            size: parseInt(parsedResult[FileSize], 10),
+            ctime: 0,
+            mtime: Date.now(),
+            size: 0,
             type: 'file'
-        };
+        }
     }
 
     return undefined;
@@ -324,8 +348,8 @@ export async function statWindowsContainerItem(executor: DockerContainerExecutor
     }
 
     switch (itemType) {
-        case 'directory':   return await statWindowsContainerDirectory(executor, itemPath);
-        case 'file':        return await statWindowsContainerFile(executor, itemPath);
+        case 'directory': return await statWindowsContainerDirectory(executor, itemPath);
+        case 'file': return await statWindowsContainerFile(executor, itemPath);
         default:
             throw new UnrecognizedDirectoryItemTypeError();
     }
