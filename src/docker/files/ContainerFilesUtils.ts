@@ -336,9 +336,13 @@ async function statWindowsContainerFile(executor: DockerContainerExecutor, itemP
     const command = ['cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list`];
 
     try {
-        const result = await executor(command);
+        const parsedResult = await tryWithItems(
+            users,
+            async user => {
+                const result = await executor(command, user);
 
-        const parsedResult = parseWmiList(result);
+                return parseWmiList(result);
+            });
 
         if (parsedResult) {
             return {
