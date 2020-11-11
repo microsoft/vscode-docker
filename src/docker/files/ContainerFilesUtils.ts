@@ -81,6 +81,12 @@ function parseLinuxDirectoryItems(input: string, parentPath: string): DirectoryI
     return items;
 }
 
+const users = [
+    /* Default user */ undefined,
+    'ContainerAdministrator',
+    'Administrator'
+];
+
 function parseWindowsName(dirOrSize: string, name: string): string {
     const symlinkPlaceholder = '<SYMLINKD>';
 
@@ -171,12 +177,6 @@ async function tryWithItems<T, U>(items: T[], callback: (item: T) => Promise<U |
 
 export async function listWindowsContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"`];
-
-    const users = [
-        /* Default user */ undefined,
-        'ContainerAdministrator',
-        'Administrator'
-    ];
 
     const output = await tryWithItems(
         users,
@@ -299,9 +299,13 @@ async function statWindowsContainerDirectory(executor: DockerContainerExecutor, 
     const command = ['cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list`];
 
     try {
-        const result = await executor(command);
+        const parsedResult = await tryWithItems(
+            users,
+            async user => {
+                const result = await executor(command, user);
 
-        const parsedResult = parseWmiList(result);
+                return parseWmiList(result);
+            });
 
         if (parsedResult) {
             return {
