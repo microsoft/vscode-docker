@@ -9,6 +9,8 @@ import * as tar from 'tar';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
+import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
+import { cloneObject } from '../../utils/cloneObject';
 import { isWindows } from '../../utils/osUtils';
 import { bufferToString, execStreamAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
@@ -80,7 +82,11 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
 
-            const { stdout, stderr } = await execStreamAsync(dockerCommand, {}, token);
+            // Copy the Docker environment settings in
+            let newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
+            addDockerSettingsToEnv(newEnv, process.env);
+
+            const { stdout, stderr } = await execStreamAsync(dockerCommand, { env: newEnv }, token);
 
             return { stdout, stderr };
         } else {
