@@ -81,6 +81,12 @@ function parseLinuxDirectoryItems(input: string, parentPath: string): DirectoryI
     return items;
 }
 
+const users = [
+    /* Default user */ undefined,
+    'ContainerAdministrator',
+    'Administrator'
+];
+
 function parseWindowsName(dirOrSize: string, name: string): string {
     const symlinkPlaceholder = '<SYMLINKD>';
 
@@ -147,23 +153,34 @@ export async function listLinuxContainerDirectory(executor: DockerContainerExecu
     return parseLinuxDirectoryItems(output, parentPath);
 }
 
+async function tryWithItems<T, U>(items: T[], callback: (item: T) => Promise<U | undefined>): Promise<U | undefined> {
+    let lastErr;
+
+    for (const item of items) {
+        try {
+            const result = await callback(item);
+
+            if (result !== undefined) {
+                return result;
+            }
+        } catch (err) {
+            lastErr = err;
+        }
+    }
+
+    if (lastErr) {
+        throw lastErr;
+    }
+
+    return undefined;
+}
+
 export async function listWindowsContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const command = ['cmd', '/C', `dir /A-S /-C "${parentPath}"`];
 
-    let output: string;
-
-    try {
-        // Try the listing with the default user...
-        output = await executor(command);
-    } catch {
-        try {
-            // If that fails, try another well-known user...
-            output = await executor(command, 'ContainerAdministrator');
-        } catch {
-            // If *that* fails, try a last well-known user...
-            output = await executor(command, 'Administrator');
-        }
-    }
+    const output = await tryWithItems(
+        users,
+        async user => await executor(command, user));
 
     return parseWindowsDirectoryItems(output, parentPath);
 }
@@ -282,9 +299,13 @@ async function statWindowsContainerDirectory(executor: DockerContainerExecutor, 
     const command = ['cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list`];
 
     try {
-        const result = await executor(command);
+        const parsedResult = await tryWithItems(
+            users,
+            async user => {
+                const result = await executor(command, user);
 
-        const parsedResult = parseWmiList(result);
+                return parseWmiList(result);
+            });
 
         if (parsedResult) {
             return {
@@ -315,9 +336,13 @@ async function statWindowsContainerFile(executor: DockerContainerExecutor, itemP
     const command = ['cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list`];
 
     try {
-        const result = await executor(command);
+        const parsedResult = await tryWithItems(
+            users,
+            async user => {
+                const result = await executor(command, user);
 
-        const parsedResult = parseWmiList(result);
+                return parseWmiList(result);
+            });
 
         if (parsedResult) {
             return {
