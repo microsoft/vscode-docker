@@ -67,7 +67,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         }
     }
 
-    private createTreeItemForDirectoryItem(item: [string, vscode.FileType], parentUri: DockerUri): DirectoryTreeItem | FileTreeItem {
+    private createTreeItemForDirectoryItem(item: [string, vscode.FileType], parentUri: DockerUri): AzExtTreeItem {
         const name = item[0];
         const fileType = item[1];
 
