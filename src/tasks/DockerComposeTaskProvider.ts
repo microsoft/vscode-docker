@@ -58,7 +58,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
     }
 
     private async resolveCommandLine(options: DockerComposeOptions): Promise<CommandLineBuilder> {
-        const isNewContext = isNewContextType((await ext.dockerContextManager.getCurrentContext()).Type);
+        const isNewContext = isNewContextType((await ext.dockerContextManager.getCurrentContext()).ContextType);
 
         if (options.up) {
             return CommandLineBuilder
