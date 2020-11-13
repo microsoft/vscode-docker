@@ -53,7 +53,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         return items.map(item => this.createTreeItemForDirectoryItem(item, actualUri));
     }
 
-    public compareChildrenImpl(item1: AzExtTreeItem, item2: AzExtTreeItem): number {
+    public compareChildrenImpl(item1: DirectoryTreeItem | FileTreeItem, item2: DirectoryTreeItem | FileTreeItem): number {
         if ((item1 instanceof DirectoryTreeItem && item2 instanceof DirectoryTreeItem) ||
             (item1 instanceof FileTreeItem && item2 instanceof FileTreeItem)) {
             // If both are directories, or both are files, go alphabetical
