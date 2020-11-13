@@ -15,7 +15,7 @@ interface HelpMenuItem extends vscode.QuickPickItem {
     telemetryID: string
 }
 
-export async function help(context: IActionContext, ...args: unknown[]): Promise<void> {
+export async function help(context: IActionContext): Promise<void> {
     let items: HelpMenuItem[] = [
         { label: localize('vscode-docker.commands.help.getStarted', 'Get started with Docker...'), handler: getStarted, telemetryID: 'getStarted' },
         { label: localize('vscode-docker.commands.help.review', 'Review Docker extension issues...'), handler: reviewIssues, telemetryID: 'reviewIssues' },
