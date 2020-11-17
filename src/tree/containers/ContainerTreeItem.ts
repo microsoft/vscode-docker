@@ -125,6 +125,16 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
         return this.children ?? [];
     }
 
+    public isAncestorOfImpl(expectedContextValue: string | RegExp): boolean {
+        // If we're looking for something matching `Container$` in the expectedContextValue, it will not be a child of this item (which is the container)
+        // The only children of this item have `containerFile` and `containerDirectory` as context values
+        if (/Container\$?$/i.test(typeof expectedContextValue === 'string' ? expectedContextValue : expectedContextValue.source)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private get isRunning(): boolean {
         return this._item.State.toLowerCase() === 'running';
     }
