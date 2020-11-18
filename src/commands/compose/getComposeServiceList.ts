@@ -14,22 +14,22 @@ const composeCommandReplaceRegex = /(up|down).*$/i;
 export async function getComposeServiceList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string): Promise<string> {
     const services = await getServices(workspaceFolder, composeCommand);
 
+    // Fetch the previously chosen services list. By default, all will be selected.
+    const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
+    const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, services);
+
     const pickChoices: IAzureQuickPickItem<string>[] = services.map(s => {
         return {
             label: s,
             data: s,
+            picked: previousChoices.some(p => p === s),
         };
     });
-
-    // Fetch the previously chosen services list. By default, all will be selected.
-    const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
-    const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, pickChoices.map(c => c.data));
 
     const subsetChoices =
         await ext.ui.showQuickPick(
             pickChoices,
             {
-                isPickSelected: (item: vscode.QuickPickItem) => previousChoices.some(i => i === item.label), // `label` is the same as `data` so this is an OK comparison
                 canPickMany: true,
                 placeHolder: localize('vscode-docker.getComposeServiceList.choose', 'Choose services to start'),
             }

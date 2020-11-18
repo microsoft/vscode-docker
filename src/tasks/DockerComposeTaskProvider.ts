@@ -52,8 +52,10 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             throw new Error(localize('vscode-docker.tasks.composeProvider.noUpOrDown', 'Neither the "up" or "down" properties are present in the docker-compose task.'));
         }
 
-        if (dockerCompose.files.some(async (f) => await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(f, context.folder))))) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.invalidFile', 'One or more docker-compose files does not exist or could not be accessed.'));
+        for (const file of dockerCompose.files) {
+            if (!(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(file, context.folder))))) {
+                throw new Error(localize('vscode-docker.tasks.composeProvider.invalidFile', 'One or more docker-compose files does not exist or could not be accessed.'));
+            }
         }
     }
 
@@ -77,7 +79,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 .withArg('down')
                 .withNamedArg('--rmi', options.down.removeImages)
                 .withFlagArg('--volumes', options.down.removeVolumes)
-                .withArg(options.up.customOptions);
+                .withArg(options.down.customOptions);
         }
     }
 }
