@@ -53,6 +53,20 @@ export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
         return items.map(item => this.createTreeItemForDirectoryItem(item, actualUri));
     }
 
+    public compareChildrenImpl(item1: DirectoryTreeItem | FileTreeItem, item2: DirectoryTreeItem | FileTreeItem): number {
+        if ((item1 instanceof DirectoryTreeItem && item2 instanceof DirectoryTreeItem) ||
+            (item1 instanceof FileTreeItem && item2 instanceof FileTreeItem)) {
+            // If both are directories, or both are files, go alphabetical
+            return item1.label.localeCompare(item2.label);
+        } else if (item1 instanceof DirectoryTreeItem) {
+            // item1 is a directory and item2 is a file, so item1 should show first
+            return -1;
+        } else {
+            // item2 is a directory and item1 is a file, so item2 should show first
+            return 1;
+        }
+    }
+
     private createTreeItemForDirectoryItem(item: [string, vscode.FileType], parentUri: DockerUri): AzExtTreeItem {
         const name = item[0];
         const fileType = item[1];
