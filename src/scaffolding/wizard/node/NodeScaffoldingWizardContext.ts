@@ -25,7 +25,7 @@ export function getNodeSubWizardOptions(wizardContext: ScaffoldingWizardContext)
         new ChooseArtifactStep(choosePackageFile, nodeGlobPatterns, noPackageFile),
     ];
 
-    if (wizardContext.scaffoldType === 'all') {
+    if (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose') {
         promptSteps.push(new ChoosePortsStep([3000]));
     }
 
