@@ -1,6 +1,6 @@
 ## 1.8.1 - 18 November 2020
 ### Fixed
-* This update fixes an issue that prevented debugging Python applications in Docker containers. The latest version of the Python extension is also required. [#2455](https://github.com/microsoft/vscode-docker/issues/2455)
+* This update fixes an issue that prevented debugging Python applications in Docker containers. The latest version of the [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) is also required. [#2455](https://github.com/microsoft/vscode-docker/issues/2455)
 * Fixed an issue where the logo was hard to see in the [extension gallery page](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) in the browser. [#2499](https://github.com/microsoft/vscode-docker/issues/2499)
 
 ## 1.8.0 - 16 November 2020
