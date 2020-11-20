@@ -13,6 +13,7 @@ import { commands, Event, EventEmitter, workspace } from 'vscode';
 import { Disposable } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
+import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
 import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
@@ -113,6 +114,17 @@ export class DockerContextManager implements ContextManager, Disposable {
             const currentContext = await this.getCurrentContext();
 
             void ext.dockerClient?.dispose();
+
+            // Emit some info about what is being connected to
+            /* eslint-disable @typescript-eslint/indent */ // The linter is completely wrong about indentation here
+            ext.outputChannel.appendLine(
+                localize('vscode-docker.docker.contextManager.targetLog',
+                    'The Docker extension will try to connect to \'{0}\', via context \'{1}\'.',
+                    currentContext.DockerEndpoint || currentContext.ContextType,
+                    currentContext.Name
+                )
+            );
+            /* eslint-enable @typescript-eslint/indent */
 
             // Create a new client
             if (isNewContextType(currentContext.ContextType)) {
