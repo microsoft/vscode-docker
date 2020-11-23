@@ -68,7 +68,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
         return 0;
     }
 
-    protected abstract async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void>;
+    protected abstract executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void>;
 
     protected getHelper(platform: DockerPlatform): TaskHelper {
         return this.helpers[platform];
