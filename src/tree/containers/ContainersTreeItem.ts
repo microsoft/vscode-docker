@@ -76,6 +76,8 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
         switch (property) {
             case 'ContainerId':
                 return item.Id.slice(0, 12);
+            case 'ImageId':
+                return item.ImageID.replace('sha256:', '').slice(0, 12);
             case 'ContainerName':
                 return item.Name;
             case 'Networks':
