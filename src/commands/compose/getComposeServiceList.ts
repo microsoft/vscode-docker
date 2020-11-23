@@ -9,7 +9,8 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { execAsync } from '../../utils/spawnAsync';
 
-const composeCommandReplaceRegex = /(up|down).*$/i;
+// Matches an `up` or `down` and everything after it--so that it can be replaced with `config --services`, to get a service list using all of the files originally part of the compose command
+const composeCommandReplaceRegex = /(\b(up|down)\b).*$/i;
 
 export async function getComposeServiceList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string): Promise<string> {
     const services = await getServices(workspaceFolder, composeCommand);
