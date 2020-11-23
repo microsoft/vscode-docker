@@ -36,7 +36,7 @@ export namespace PythonExtensionHelper {
 
     export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
         const pyExtensionId = 'ms-python.python';
-        const minPyExtensionVersion = new semver.SemVer('2020.5.78807');
+        const minPyExtensionVersion = new semver.SemVer('2020.11.367453362');
 
         const pyExt = vscode.extensions.getExtension(pyExtensionId);
         const button = localize('vscode-docker.tasks.pythonExt.openExtension', 'Open Extension');
