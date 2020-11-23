@@ -268,6 +268,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         return result.map(ni => {
             return {
                 ...ni,
+                Driver: ni.Driver as DriverType,
                 // eslint-disable-next-line @typescript-eslint/tslint/config
                 CreatedTime: new Date(ni.Created).valueOf(),
             }
