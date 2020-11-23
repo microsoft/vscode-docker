@@ -331,7 +331,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent",
+                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent && isAzureAccountInstalled",
                     "group": "navigation@1"
                 },
                 {
@@ -512,7 +512,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent && isAzureAccountInstalled",
                     "group": "regs_tag_1_general@4"
                 },
                 {
