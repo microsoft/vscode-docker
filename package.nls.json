@@ -191,6 +191,7 @@
     "vscode-docker.commands.containers.start": "Start",
     "vscode-docker.commands.containers.stop": "Stop",
     "vscode-docker.commands.containers.viewLogs": "View Logs",
+    "vscode-docker.commands.containers.composeGroup.logs": "Compose Logs",
     "vscode-docker.commands.containers.composeGroup.restart": "Compose Restart",
     "vscode-docker.commands.containers.composeGroup.down": "Compose Down",
     "vscode-docker.commands.debugging.initializeForDebugging": "Initialize for Docker debugging",

@@ -11,6 +11,10 @@ import { executeAsTask } from '../../utils/executeAsTask';
 import { isWindows } from '../../utils/osUtils';
 import { rewriteCommandForNewCliIfNeeded } from '../compose';
 
+export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
+    return composeGroup(context, 'logs', node, '-f --tail 1000');
+}
+
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
     return composeGroup(context, 'restart', node);
 }
@@ -19,7 +23,7 @@ export async function composeGroupDown(context: IActionContext, node: ContainerG
     return composeGroup(context, 'down', node);
 }
 
-async function composeGroup(context: IActionContext, composeCommand: 'restart' | 'down', node: ContainerGroupTreeItem): Promise<void> {
+async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'restart' | 'down', node: ContainerGroupTreeItem, additionalArguments?: string): Promise<void> {
     const workingDirectory = getComposeWorkingDirectory(node);
     const filesArgument = getComposeFiles(node)?.map(f => isWindows() ? `-f "${f}"` : `-f '${f}'`)?.join(' ');
 
@@ -28,7 +32,7 @@ async function composeGroup(context: IActionContext, composeCommand: 'restart' |
         throw new Error(localize('vscode-docker.commands.containers.composeGroup.noCompose', 'Unable to determine compose project info for container group \'{0}\'.', node.label));
     }
 
-    const terminalCommand = `docker-compose ${filesArgument} ${composeCommand}`;
+    const terminalCommand = `docker-compose ${filesArgument} ${composeCommand} ${additionalArguments || ''}`;
 
     await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
 }

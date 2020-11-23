@@ -46,6 +46,7 @@
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
+        "onCommand:vscode-docker.containers.composeGroup.logs",
         "onCommand:vscode-docker.containers.composeGroup.restart",
         "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
@@ -150,6 +151,10 @@
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
                     "when": "vscode-docker:newCliPresent"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.logs",
+                    "when": "never"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.restart",
@@ -396,14 +401,19 @@
                     "group": "containers_2_destructive@1"
                 },
                 {
+                    "command": "vscode-docker.containers.composeGroup.logs",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "group": "composeGroup_1_general@1"
+                },
+                {
                     "command": "vscode-docker.containers.composeGroup.restart",
                     "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
-                    "group": "composeGroup_1_destructive@1"
+                    "group": "composeGroup_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.down",
                     "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
-                    "group": "composeGroup_1_destructive@2"
+                    "group": "composeGroup_2_destructive@2"
                 },
                 {
                     "command": "vscode-docker.images.run",
@@ -2152,6 +2162,11 @@
             {
                 "command": "vscode-docker.containers.viewLogs",
                 "title": "%vscode-docker.commands.containers.viewLogs%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.composeGroup.logs",
+                "title": "%vscode-docker.commands.containers.composeGroup.logs%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
