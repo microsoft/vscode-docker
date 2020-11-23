@@ -2,7 +2,7 @@ FROM openjdk:8-jdk-alpine
 VOLUME /tmp
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
-ADD {{ relativeJavaOutputPath }} {{ serviceName }}.jar
+COPY {{ relativeJavaOutputPath }} {{ serviceName }}.jar
 {{#each ports}}
 EXPOSE {{ . }}
 {{/each}}
