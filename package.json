@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -8,7 +8,7 @@
     "icon": "resources/docker_blue.png",
     "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
     "galleryBanner": {
-        "color": "#1289B9",
+        "color": "#1e1e1e",
         "theme": "dark"
     },
     "categories": [
