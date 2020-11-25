@@ -19,13 +19,11 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
     const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
     const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, services);
 
-    const pickChoices: IAzureQuickPickItem<string>[] = services.map(s => {
-        return {
-            label: s,
-            data: s,
-            picked: previousChoices.some(p => p === s),
-        };
-    });
+    const pickChoices: IAzureQuickPickItem<string>[] = services.map(s => ({
+        label: s,
+        data: s,
+        picked: previousChoices.some(p => p === s),
+    }));
 
     const subsetChoices =
         await ext.ui.showQuickPick(
