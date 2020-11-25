@@ -6,24 +6,26 @@
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerComposeUpOptions {
-    detached?: boolean;
-    build?: boolean;
-    scale?: { [service: string]: number };
-    services?: string[];
-    customOptions?: string;
+    up?: {
+        detached?: boolean;
+        build?: boolean;
+        scale?: { [service: string]: number };
+        services?: string[];
+        customOptions?: string;
+    };
+    down?: never;
 }
 
 export interface DockerComposeDownOptions {
-    removeImages?: 'all' | 'local';
-    removeVolumes?: boolean;
-    customOptions?: string;
+    up?: never;
+    down?: {
+        removeImages?: 'all' | 'local';
+        removeVolumes?: boolean;
+        customOptions?: string;
+    };
 }
 
-export interface DockerComposeOptions {
-    up?: DockerComposeUpOptions;
-    down?: DockerComposeDownOptions;
-    files?: string[];
-}
+export type DockerComposeOptions = (DockerComposeUpOptions | DockerComposeDownOptions) & { files?: string[] };
 
 export interface DockerComposeTaskDefinitionBase extends TaskDefinitionBase {
     dockerCompose?: DockerComposeOptions;
