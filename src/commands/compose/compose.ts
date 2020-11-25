@@ -38,12 +38,16 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
 
     for (const command of commands) {
         if (selectedItems.length === 0) {
-            // Get the initial command
+            // Push a dummy item in so that we can use the looping logic below
+            selectedItems.push(undefined);
+        }
+
+        for (const item of selectedItems) {
             let terminalCommand = await selectComposeCommand(
                 context,
                 folder,
                 command,
-                undefined,
+                item?.relativeFilePath,
                 detached,
                 build
             );
@@ -55,25 +59,6 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
             terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
 
             await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
-        } else {
-            for (const item of selectedItems) {
-                let terminalCommand = await selectComposeCommand(
-                    context,
-                    folder,
-                    command,
-                    item.relativeFilePath,
-                    detached,
-                    build
-                );
-
-                // Add the service list if needed
-                terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
-
-                // Rewrite for the new CLI if needed
-                terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
-
-                await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
-            }
         }
     }
 }
