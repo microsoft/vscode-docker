@@ -10,7 +10,7 @@ import { getComposeProjectName, NonComposeGroupName } from '../../tree/container
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function confirmAllAffectedContainers(context: IActionContext, nodes: ContainerTreeItem[]): Promise<string[]> {
-    if ((await ext.dockerContextManager.getCurrentContext()).ContextType !== 'aci' ||
+    if (await ext.dockerContextManager.getCurrentContextType() !== 'aci' ||
         nodes.every(n => getComposeProjectName(n.containerItem) === NonComposeGroupName)) {
         // If we're not in an ACI context, or every node in the list is not part of any ACI container group, return unchanged
         return nodes.map(n => n.containerId);

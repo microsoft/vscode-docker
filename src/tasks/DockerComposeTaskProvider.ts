@@ -6,8 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
-import { isNewContextType } from '../docker/Contexts';
-import { ext } from '../extensionVariables';
+import { getComposeCliCommand } from '../docker/Contexts';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
@@ -64,11 +63,9 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
     }
 
     private async resolveCommandLine(options: DockerComposeOptions): Promise<CommandLineBuilder> {
-        const isNewContext = isNewContextType((await ext.dockerContextManager.getCurrentContext()).ContextType);
-
         if (options.up) {
             return CommandLineBuilder
-                .create(isNewContext ? 'docker compose' : 'docker-compose')
+                .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
@@ -78,7 +75,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         } else {
             // Validation earlier guarantees that if up is not defined, down must be
             return CommandLineBuilder
-                .create(isNewContext ? 'docker compose' : 'docker-compose')
+                .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
                 .withArg('down')
                 .withNamedArg('--rmi', options.down.removeImages)

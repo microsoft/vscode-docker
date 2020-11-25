@@ -5,8 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { isNewContextType } from '../../docker/Contexts';
-import { ext } from '../../extensionVariables';
+import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
 import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
@@ -53,7 +52,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
             terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
 
             // Rewrite for the new CLI if needed
-            terminalCommand = await rewriteCommandForNewCliIfNeeded(terminalCommand);
+            terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
 
             await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
         } else {
@@ -71,7 +70,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
                 terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
 
                 // Rewrite for the new CLI if needed
-                terminalCommand = await rewriteCommandForNewCliIfNeeded(terminalCommand);
+                terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
 
                 await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
             }
@@ -89,16 +88,6 @@ export async function composeDown(context: IActionContext, dockerComposeFileUri?
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
-}
-
-// Exported for compose group down/restart commands
-export async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
-    if (isNewContextType((await ext.dockerContextManager.getCurrentContext()).ContextType)) {
-        // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
-        return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
-    } else {
-        return command;
-    }
 }
 
 const serviceListPlaceholder = /\${serviceList}/i;
