@@ -48,8 +48,12 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
     }
 
     private async validateResolvedDefinition(context: DockerComposeTaskContext, dockerCompose: DockerComposeOptions): Promise<void> {
+        if (dockerCompose.up && dockerCompose.down) {
+            throw new Error(localize('vscode-docker.tasks.composeProvider.bothUpAndDown', 'Both "up" and "down" properties are present in the docker-compose task.'));
+        }
+
         if (!dockerCompose.up && !dockerCompose.down) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.noUpOrDown', 'Neither the "up" or "down" properties are present in the docker-compose task.'));
+            throw new Error(localize('vscode-docker.tasks.composeProvider.noUpOrDown', 'Neither "up" nor "down" properties are present in the docker-compose task.'));
         }
 
         for (const file of dockerCompose.files) {
