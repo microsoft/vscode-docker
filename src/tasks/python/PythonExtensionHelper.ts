@@ -9,7 +9,7 @@ import * as semver from 'semver';
 import * as vscode from "vscode";
 import { localize } from '../../localize';
 
-// Adapted from https://github.com/microsoft/vscode-python/blob/master/src/client/api.ts
+// Adapted from https://github.com/microsoft/vscode-python/blob/main/src/client/api.ts
 interface PythonExtensionAPI {
     debug: {
         getDebuggerPackagePath(): Promise<string | undefined>;
