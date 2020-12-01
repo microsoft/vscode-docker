@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from 'vscode-azureextensionui';
+import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { isWindows } from '../../utils/osUtils';
-import { rewriteCommandForNewCliIfNeeded } from '../compose';
 
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
     return composeGroup(context, 'logs', node, '-f --tail 1000');
@@ -34,7 +34,7 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'r
 
     const terminalCommand = `docker-compose ${filesArgument} ${composeCommand} ${additionalArguments || ''}`;
 
-    await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
+    await executeAsTask(context, await rewriteComposeCommandIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
 }
 
 function getComposeWorkingDirectory(node: ContainerGroupTreeItem): string | undefined {

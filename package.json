@@ -1242,6 +1242,112 @@
                         ]
                     }
                 }
+            },
+            {
+                "type": "docker-compose",
+                "properties": {
+                    "dockerCompose": {
+                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.description%",
+                        "properties": {
+                            "up": {
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.description%",
+                                "properties": {
+                                    "detached": {
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.detached%",
+                                        "default": true
+                                    },
+                                    "build": {
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.build%",
+                                        "default": true
+                                    },
+                                    "scale": {
+                                        "type": "object",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.scale%",
+                                        "additionalProperties": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "services": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.services%",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "customOptions": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.customOptions%"
+                                    }
+                                }
+                            },
+                            "down": {
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.description%",
+                                "properties": {
+                                    "removeImages": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.removeImages%",
+                                        "enum": [
+                                            "all",
+                                            "local"
+                                        ]
+                                    },
+                                    "removeVolumes": {
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.removeVolumes%",
+                                        "default": false
+                                    },
+                                    "customOptions": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.customOptions%"
+                                    }
+                                }
+                            },
+                            "files": {
+                                "type": "array",
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.files.description%",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "oneOf": [
+                            {
+                                "required": [
+                                    "up"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "down"
+                                    ]
+                                }
+                            },
+                            {
+                                "required": [
+                                    "down"
+                                ],
+                                "not": {
+                                    "enum": [
+                                        "up"
+                                    ]
+                                }
+                            }
+                        ],
+                        "default": {
+                            "up": {
+                                "detached": true,
+                                "build": true
+                            },
+                            "files": [
+                                "${workspaceFolder}/docker-compose.yml"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "dockerCompose"
+                ]
             }
         ],
         "languages": [

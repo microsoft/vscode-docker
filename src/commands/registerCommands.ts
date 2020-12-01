@@ -9,7 +9,7 @@ import { ext } from "../extensionVariables";
 import { scaffold } from "../scaffolding/scaffold";
 import { scaffoldCompose } from "../scaffolding/scaffoldCompose";
 import { scaffoldDebugConfig } from "../scaffolding/scaffoldDebugConfig";
-import { composeDown, composeRestart, composeUp } from "./compose";
+import { composeDown, composeRestart, composeUp } from "./compose/compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
 import { composeGroupDown, composeGroupLogs, composeGroupRestart } from "./containers/composeGroup";

@@ -5,13 +5,13 @@
 
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { isNewContextType } from '../docker/Contexts';
-import { ext } from '../extensionVariables';
-import { localize } from "../localize";
-import { executeAsTask } from '../utils/executeAsTask';
-import { createFileItem, Item, quickPickDockerComposeFileItem } from '../utils/quickPickFile';
-import { quickPickWorkspaceFolder } from '../utils/quickPickWorkspaceFolder';
-import { selectComposeCommand } from './selectCommandTemplate';
+import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
+import { localize } from "../../localize";
+import { executeAsTask } from '../../utils/executeAsTask';
+import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
+import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
+import { selectComposeCommand } from '../selectCommandTemplate';
+import { getComposeServiceList } from './getComposeServiceList';
 
 async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
@@ -38,27 +38,27 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
 
     for (const command of commands) {
         if (selectedItems.length === 0) {
-            const terminalCommand = await selectComposeCommand(
+            // Push a dummy item in so that we can use the looping logic below
+            selectedItems.push(undefined);
+        }
+
+        for (const item of selectedItems) {
+            let terminalCommand = await selectComposeCommand(
                 context,
                 folder,
                 command,
-                undefined,
+                item?.relativeFilePath,
                 detached,
                 build
             );
-            await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
-        } else {
-            for (const item of selectedItems) {
-                const terminalCommand = await selectComposeCommand(
-                    context,
-                    folder,
-                    command,
-                    item.relativeFilePath,
-                    detached,
-                    build
-                );
-                await executeAsTask(context, await rewriteCommandForNewCliIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
-            }
+
+            // Add the service list if needed
+            terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
+
+            // Rewrite for the new CLI if needed
+            terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
+
+            await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
         }
     }
 }
@@ -75,10 +75,10 @@ export async function composeRestart(context: IActionContext, dockerComposeFileU
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export async function rewriteCommandForNewCliIfNeeded(command: string): Promise<string> {
-    if (isNewContextType((await ext.dockerContextManager.getCurrentContext()).ContextType)) {
-        // Replace 'docker-compose ' at the start of a string with 'docker compose ', and '--build' anywhere with ''
-        return command.replace(/^docker-compose /, 'docker compose ').replace(/--build/, '');
+const serviceListPlaceholder = /\${serviceList}/i;
+async function addServicesListIfNeeded(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, command: string): Promise<string> {
+    if (serviceListPlaceholder.test(command)) {
+        return command.replace(serviceListPlaceholder, await getComposeServiceList(context, workspaceFolder, command));
     } else {
         return command;
     }

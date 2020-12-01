@@ -17,7 +17,7 @@ import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
 import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
-import { DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
+import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 
 // CONSIDER
 // Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
@@ -48,6 +48,7 @@ export interface ContextManager {
     refresh(): Promise<void>;
     getContexts(): Promise<DockerContext[]>;
     getCurrentContext(): Promise<DockerContext>;
+    getCurrentContextType(): Promise<ContextType>;
 
     inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection>;
     use(actionContext: IActionContext, contextName: string): Promise<void>;
@@ -162,6 +163,10 @@ export class DockerContextManager implements ContextManager, Disposable {
     public async getCurrentContext(): Promise<DockerContext> {
         const contexts = await this.getContexts();
         return contexts.find(c => c.Current);
+    }
+
+    public async getCurrentContextType(): Promise<ContextType> {
+        return (await this.getCurrentContext()).ContextType;
     }
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {
