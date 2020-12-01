@@ -64,14 +64,24 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(options: DockerComposeOptions): Promise<CommandLineBuilder> {
         if (options.up) {
+            // CommandLineBuilder requires key-value objects to be string => string, but scale is string => number
+            // So, convert it to string => string
+            const scaleAsString: { [key: string]: string } = {};
+            if (options.up.scale) {
+                for (const key of Object.keys(options.up.scale)) {
+                    scaleAsString[key] = options.up.scale[key].toString();
+                }
+            }
+
             return CommandLineBuilder
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
                 .withFlagArg('--build', !!options.up.build)
+                .withKeyValueArgs('--scale', scaleAsString)
                 .withArg(options.up.customOptions)
-                .withArg(options.up.services.join(' '));
+                .withArg(options.up.services?.join(' '));
         } else {
             // Validation earlier guarantees that if up is not defined, down must be
             return CommandLineBuilder

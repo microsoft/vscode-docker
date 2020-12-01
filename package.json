@@ -1344,7 +1344,10 @@
                             ]
                         }
                     }
-                }
+                },
+                "required": [
+                    "dockerCompose"
+                ]
             }
         ],
         "languages": [
