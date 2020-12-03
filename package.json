@@ -26,7 +26,7 @@
         "type": "git",
         "url": "https://github.com/microsoft/vscode-docker"
     },
-    "homepage": "https://github.com/Microsoft/vscode-docker/blob/master/README.md",
+    "homepage": "https://github.com/Microsoft/vscode-docker/blob/main/README.md",
     "activationEvents": [
         "onCommand:vscode-docker.compose.down",
         "onCommand:vscode-docker.compose.restart",

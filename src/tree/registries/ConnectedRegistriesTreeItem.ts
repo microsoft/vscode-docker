@@ -15,7 +15,7 @@ export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
 
     public constructor(parent: AzExtParentTreeItem | undefined) {
         super(parent);
-        this.iconPath = getThemedIconPath('ConnectPlugged');
+        this.iconPath = getThemedIconPath('connectPlugged');
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
