@@ -67,7 +67,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
 }
 
-export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<void> {
+export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<unknown | undefined> {
     perfStats.loadEndTime = Date.now();
 
     initializeExtensionVariables(ctx);
@@ -152,6 +152,18 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         void openStartPageAfterExtensionUpdate();
     });
+
+    // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
+    if (process.env.VSCODE_DOCKER_TEAM === '1') {
+        return {
+            memento: {
+                globalState: ctx.globalState,
+                workspaceState: ctx.workspaceState,
+            },
+        };
+    } else {
+        return undefined;
+    }
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
