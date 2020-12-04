@@ -9,9 +9,9 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { URL } from 'url';
-import { commands, Event, EventEmitter, workspace } from 'vscode';
+import { commands, Event, EventEmitter, window, workspace } from 'vscode';
 import { Disposable } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
@@ -222,7 +222,26 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
 
             if (dockerHostEnv !== undefined) {
-                actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
+                try {
+                    // This will try to parse the URL, using the same logic docker-modem does
+                    actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
+                } catch {
+                    // If URL parsing fails, let's catch it and give a better error message, and rethrow as user cancelled
+                    const message = actionContext.telemetry.properties.hostSource === 'docker.host' ?
+                        localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` is invalid. It must include the protocol, for example, ssh://myuser@1.2.3.4, or tcp://1.2.3.4.') :
+                        localize('vscode-docker.docker.contextManager.invalidHostEnv', 'The value provided for the environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@1.2.3.4, or tcp://1.2.3.4.');
+                    const button = localize('vscode-docker.docker.contextManager.openSettings', 'Open Settings');
+
+                    void window.showErrorMessage(message, button)
+                        .then((result: string) => {
+                            if (result === button) {
+                                void commands.executeCommand('workbench.action.openSettings', 'docker.host');
+                            }
+                        });
+
+                    throw new UserCancelledError();
+                }
+
                 this.setVsCodeContext('vscode-docker:contextLocked', true);
 
                 return [{
