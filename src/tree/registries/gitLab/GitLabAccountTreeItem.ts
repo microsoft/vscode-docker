@@ -30,7 +30,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         super(parent);
         this.cachedProvider = provider;
         this.id = this.cachedProvider.id + this.username;
-        this.iconPath = getIconPath('gitLab');
+        this.iconPath = getIconPath('gitlab');
         this.description = ext.registriesRoot.hasMultiplesOfProvider(this.cachedProvider) ? this.username : undefined;
     }
 
