@@ -5,11 +5,24 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { FileTreeItem } from '../../../tree/containers/files/FileTreeItem';
 import { multiSelectNodes } from '../../../utils/multiSelectNodes';
+
+async function fileExists(file: vscode.Uri): Promise<boolean> {
+    try {
+        // NOTE: The expectation is that stat() throws when the file does not exist.
+        //       Filed https://github.com/microsoft/vscode/issues/112107 to provide
+        //       a better mechanism than trapping exceptions.
+        await vscode.workspace.fs.stat(file);
+
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 export async function downloadContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
@@ -29,23 +42,61 @@ export async function downloadContainerFile(context: IActionContext, node?: File
             title: localize('vscode-docker.commands.containers.files.downloadContainerFile.openTitle', 'Select folder for download')
         });
 
+    const localFolderUri = localFolderUris[0];
+
+    const files = nodes.map(n => {
+        const containerFileUri = n.uri;
+        const fileName = path.posix.basename(containerFileUri.path);
+
+        return {
+            containerUri: n.uri.uri,
+            fileName,
+            localUri: vscode.Uri.joinPath(localFolderUri, fileName)
+        };
+    });
+
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
             title: localize('vscode-docker.commands.containers.files.downloadContainerFile.opening', 'Downloading File(s)...')
         },
-        async () => {
-            await Promise.all(
-                nodes.map(
-                    async n => {
-                        const containerFileUri = node.uri;
-                        const filePath = containerFileUri.path;
-                        const fileName = path.posix.basename(filePath);
-                        const localFileUri = vscode.Uri.joinPath(localFolderUris[0], fileName);
+        async (_, token) => {
+            for (const file of files) {
+                if (token.isCancellationRequested) {
+                    throw new UserCancelledError();
+                }
 
-                        const content = await vscode.workspace.fs.readFile(containerFileUri.uri);
+                const localFileExists = await fileExists(file.localUri);
 
-                        await vscode.workspace.fs.writeFile(localFileUri, content);
-                    }));
+                if (localFileExists) {
+                    const overwriteFile: vscode.MessageItem = {
+                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.overwriteFile', 'Overwrite File')
+                    };
+
+                    const skipFile: vscode.MessageItem = {
+                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.skipFile', 'Skip File')
+                    };
+
+                    const cancelDownload: vscode.MessageItem = {
+                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.cancelDownload', 'Cancel')
+                    };
+
+                    const result = await vscode.window.showWarningMessage(
+                        localize('vscode-docker.commands.containers.files.downloadContainerFile.existingFileWarning', 'The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
+                        overwriteFile,
+                        skipFile,
+                        cancelDownload);
+
+                    if (result === skipFile) {
+                        continue;
+                    } else if (result !== overwriteFile) {
+                        throw new UserCancelledError();
+                    }
+                }
+
+                const content = await vscode.workspace.fs.readFile(file.containerUri);
+
+                await vscode.workspace.fs.writeFile(file.localUri, content);
+            }
         });
 }
