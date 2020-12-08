@@ -193,6 +193,7 @@
     "vscode-docker.commands.containers.attachShell": "Attach Shell",
     "vscode-docker.commands.containers.browse": "Open in Browser",
     "vscode-docker.commands.containers.configureExplorer": "Configure Explorer...",
+    "vscode-docker.commands.containers.downloadFile": "Download",
     "vscode-docker.commands.containers.inspect": "Inspect",
     "vscode-docker.commands.containers.openFile": "Open",
     "vscode-docker.commands.containers.prune": "Prune...",
