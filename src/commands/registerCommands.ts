@@ -14,6 +14,7 @@ import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
 import { composeGroupDown, composeGroupLogs, composeGroupRestart } from "./containers/composeGroup";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
+import { downloadContainerFile } from "./containers/files/downloadContainerFile";
 import { openContainerFile } from "./containers/files/openContainerFile";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
@@ -121,6 +122,7 @@ export function registerCommands(): void {
 
     registerWorkspaceCommand('vscode-docker.containers.attachShell', attachShellContainer);
     registerCommand('vscode-docker.containers.browse', browseContainer);
+    registerCommand('vscode-docker.containers.downloadFile', downloadContainerFile);
     registerCommand('vscode-docker.containers.inspect', inspectContainer);
     registerCommand('vscode-docker.containers.configureExplorer', configureContainersExplorer);
     registerCommand('vscode-docker.containers.openFile', openContainerFile);

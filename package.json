@@ -36,6 +36,7 @@
         "onCommand:vscode-docker.containers.attachShell",
         "onCommand:vscode-docker.containers.browse",
         "onCommand:vscode-docker.containers.configureExplorer",
+        "onCommand:vscode-docker.containers.downloadFile",
         "onCommand:vscode-docker.containers.inspect",
         "onCommand:vscode-docker.containers.openFile",
         "onCommand:vscode-docker.containers.prune",
@@ -128,6 +129,10 @@
     "contributes": {
         "menus": {
             "commandPalette": [
+                {
+                    "command": "vscode-docker.containers.downloadFile",
+                    "when": "never"
+                },
                 {
                     "command": "vscode-docker.containers.openFile",
                     "when": "never"
@@ -380,6 +385,10 @@
                     "command": "vscode-docker.containers.start",
                     "when": "view == dockerContainers && viewItem =~ /^(created|dead|exited|paused|terminated)Container$/i",
                     "group": "containers_1_general@5"
+                },
+                {
+                    "command": "vscode-docker.containers.downloadFile",
+                    "when": "view == dockerContainers && viewItem == containerFile"
                 },
                 {
                     "command": "vscode-docker.containers.openFile",
@@ -2211,6 +2220,11 @@
                     "light": "resources/light/settings.svg",
                     "dark": "resources/dark/settings.svg"
                 }
+            },
+            {
+                "command": "vscode-docker.containers.downloadFile",
+                "title": "%vscode-docker.commands.containers.downloadFile%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
                 "command": "vscode-docker.containers.inspect",
