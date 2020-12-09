@@ -24,6 +24,18 @@ async function fileExists(file: vscode.Uri): Promise<boolean> {
     }
 }
 
+const overwriteFile: vscode.MessageItem = {
+    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.overwriteFile', 'Overwrite File')
+};
+
+const skipFile: vscode.MessageItem = {
+    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.skipFile', 'Skip File')
+};
+
+const cancelDownload: vscode.MessageItem = {
+    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.cancelDownload', 'Cancel')
+};
+
 export async function downloadContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
         { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.files.downloadContainerFile.noFiles', 'No files are available to download.') },
@@ -41,6 +53,10 @@ export async function downloadContainerFile(context: IActionContext, node?: File
             openLabel: localize('vscode-docker.commands.containers.files.downloadContainerFile.openLabel', 'Select'),
             title: localize('vscode-docker.commands.containers.files.downloadContainerFile.openTitle', 'Select folder for download')
         });
+
+    if (localFolderUris === undefined || localFolderUris.length === 0) {
+        throw new UserCancelledError();
+    }
 
     const localFolderUri = localFolderUris[0];
 
@@ -69,18 +85,6 @@ export async function downloadContainerFile(context: IActionContext, node?: File
                 const localFileExists = await fileExists(file.localUri);
 
                 if (localFileExists) {
-                    const overwriteFile: vscode.MessageItem = {
-                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.overwriteFile', 'Overwrite File')
-                    };
-
-                    const skipFile: vscode.MessageItem = {
-                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.skipFile', 'Skip File')
-                    };
-
-                    const cancelDownload: vscode.MessageItem = {
-                        title: localize('vscode-docker.commands.containers.files.downloadContainerFile.cancelDownload', 'Cancel')
-                    };
-
                     const result = await vscode.window.showWarningMessage(
                         localize('vscode-docker.commands.containers.files.downloadContainerFile.existingFileWarning', 'The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
                         overwriteFile,
@@ -94,9 +98,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
                     }
                 }
 
-                const content = await vscode.workspace.fs.readFile(file.containerUri);
-
-                await vscode.workspace.fs.writeFile(file.localUri, content);
+                await vscode.workspace.fs.copy(file.containerUri, file.localUri, { overwrite: true });
             }
         });
 }
