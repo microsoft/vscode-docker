@@ -228,8 +228,8 @@ export class DockerContextManager implements ContextManager, Disposable {
                 } catch (err) {
                     // If URL parsing fails, let's catch it and give a better error message
                     const message = actionContext.telemetry.properties.hostSource === 'docker.host' ?
-                        localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` is invalid. It must include the protocol, for example, ssh://myuser@1.2.3.4 or tcp://1.2.3.4.') :
-                        localize('vscode-docker.docker.contextManager.invalidHostEnv', 'The value provided for the environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@1.2.3.4 or tcp://1.2.3.4.');
+                        localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.') :
+                        localize('vscode-docker.docker.contextManager.invalidHostEnv', 'The value provided for the environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.');
                     const button = localize('vscode-docker.docker.contextManager.openSettings', 'Open Settings');
 
                     void window.showErrorMessage(message, button)
