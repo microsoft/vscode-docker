@@ -1,15 +1,15 @@
 ## 1.9.0 - 16 December 2020
 ### Added
-* View logs of Compose projects (cumulative logs of all containers belonging to a Compose run) (2506)[https://github.com/microsoft/vscode-docker/issues/2506]
-* Show the Docker daemon host information in diagnostic output (2493)[https://github.com/microsoft/vscode-docker/issues/2493]
-* Support launching a subset of services from Compose file (2445)[https://github.com/microsoft/vscode-docker/issues/2445]
-* Allow users to download container files (2551)[https://github.com/microsoft/vscode-docker/pull/2551]
+* View logs of Compose projects (cumulative logs of all containers belonging to a Compose run). [#2506](https://github.com/microsoft/vscode-docker/issues/2506)
+* Show the Docker daemon host information in diagnostic output. [#2493](https://github.com/microsoft/vscode-docker/issues/2493)
+* Support launching a subset of services from Compose file. [#2445](https://github.com/microsoft/vscode-docker/issues/2445)
+* Allow users to download container files. [#2466](https://github.com/microsoft/vscode-docker/issues/2466)
 
 ### Fixed
-* Directories in Windows containers cannot be browsed [2479](https://github.com/microsoft/vscode-docker/issues/2479)
-* "Stop" action should only be shown for running containers [2497](https://github.com/microsoft/vscode-docker/issues/2497)
-* Allow port selection when scaffolding Compose files for Node.js app [2495](https://github.com/microsoft/vscode-docker/issues/2495)
-* Properly show image ID for container when requested [2507](https://github.com/microsoft/vscode-docker/issues/2507)
+* Directories in Windows containers cannot be browsed. [#2479](https://github.com/microsoft/vscode-docker/issues/2479)
+* "Stop" action should only be shown for running containers. [#2497](https://github.com/microsoft/vscode-docker/issues/2497)
+* Allow port selection when scaffolding Compose files for Node.js app. [#2495](https://github.com/microsoft/vscode-docker/issues/2495)
+* Properly show image ID for container when requested. [#2507](https://github.com/microsoft/vscode-docker/issues/2507)
 
 ## 1.8.1 - 23 November 2020
 ### Fixed
