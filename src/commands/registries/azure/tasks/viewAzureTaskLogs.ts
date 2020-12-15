@@ -16,7 +16,7 @@ export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTas
     }
 
     const registryTI = node.parent.parent.parent;
-    await node.runWithTemporaryDescription(localize('vscode-docker.commands.registries.azure.tasks.retrievingLogs', 'Retrieving logs...'), async () => {
+    await node.runWithTemporaryDescription(context, localize('vscode-docker.commands.registries.azure.tasks.retrievingLogs', 'Retrieving logs...'), async () => {
         const result = await (await registryTI.getClient()).runs.getLogSasUrl(registryTI.resourceGroup, registryTI.registryName, node.runId);
 
         const storageBlob = await import('@azure/storage-blob');

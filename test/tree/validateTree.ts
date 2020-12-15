@@ -36,9 +36,8 @@ export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix
             await runWithSetting(`${treePrefix}.label`, treeOptions.label, async () => {
                 await runWithSetting(`${treePrefix}.description`, treeOptions.description, async () => {
                     await runWithMockClient(mockClientOptions, async () => {
-                        await rootTreeItem.refresh();
-
-                        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} } };
+                        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} }, ui: undefined, valuesToMask: undefined };
+                        await rootTreeItem.refresh(context);
 
                         actualNodes = await rootTreeItem.getCachedChildren(context);
 

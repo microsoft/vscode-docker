@@ -12,7 +12,7 @@ import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
     if (!node) {
-        await ext.imagesTree.refresh();
+        await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.images.tag.noImages', 'No images are available to tag')

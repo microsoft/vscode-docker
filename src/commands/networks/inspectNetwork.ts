@@ -10,7 +10,7 @@ import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
     if (!node) {
-        await ext.networksTree.refresh();
+        await ext.networksTree.refresh(context);
         node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.allContextRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.networks.inspect.noNetworks', 'No networks are available to inspect')

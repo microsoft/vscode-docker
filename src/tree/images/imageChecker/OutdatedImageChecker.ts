@@ -83,7 +83,7 @@ export class OutdatedImageChecker {
                     context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
 
                     // Don't wait
-                    void ext.imagesRoot.refresh();
+                    void ext.imagesRoot.refresh(context);
                 }
             });
         }

@@ -30,7 +30,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: DockerV2
     });
 
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
-    await repoTI.refresh();
+    await repoTI.refresh(context);
     const message = localize('vscode-docker.commands.registries.deleteRemote.deleted', 'Successfully deleted image "{0}".', node.repoNameAndTag);
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

@@ -297,7 +297,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async getContainerNameToAttach(context: IActionContext): Promise<string> {
-        await ext.containersTree.refresh();
+        await ext.containersTree.refresh(context);
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.debug.netcore.noContainers', 'No running containers are available to attach.')

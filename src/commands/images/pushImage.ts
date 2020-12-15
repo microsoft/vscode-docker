@@ -15,7 +15,7 @@ import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
     if (!node) {
-        await ext.imagesTree.refresh();
+        await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.images.push.noImages', 'No images are available to push'),
