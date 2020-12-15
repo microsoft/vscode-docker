@@ -29,6 +29,8 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
 
     const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
 
+    context.telemetry.properties.containerOS = inspectInfo.Os || 'linux';
+
     const terminalCommand = await selectRunCommand(
         context,
         node.fullTag,

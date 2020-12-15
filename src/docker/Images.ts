@@ -16,5 +16,6 @@ export interface DockerImageInspection extends DockerObject {
         readonly Image?: string;
     };
 
+    readonly Os: string;
     readonly Name: undefined; // Not defined for inspection
 }
