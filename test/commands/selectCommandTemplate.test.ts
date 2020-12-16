@@ -601,6 +601,8 @@ async function runWithCommandSetting(
         const tempContext: IActionContext = {
             telemetry: { properties: {}, measurements: {}, },
             errorHandling: { issueProperties: {}, },
+            ui: undefined,
+            valuesToMask: undefined,
         };
 
         const cmdResult: string = await runWithSetting('commands.build', settingsValues, async () => {

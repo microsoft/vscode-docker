@@ -98,7 +98,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
                             // Auto refresh could be disabled while invoking the hasChanged()
                             // So check again before starting the refresh.
                             if (this.autoRefreshEnabled) {
-                                await this.refresh();
+                                await this.refresh(context);
                             }
                         }
                     },
@@ -114,7 +114,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
             context.telemetry.properties.isActivationEvent = 'true';
 
             if (e.affectsConfiguration(`${configPrefix}.${this.treePrefix}`)) {
-                await this.refresh();
+                await this.refresh(context);
             }
         });
     }

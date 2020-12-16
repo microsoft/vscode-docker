@@ -131,7 +131,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         }
 
         this._cachedProviders.push(cachedProvider);
-        await this.saveCachedProviders();
+        await this.saveCachedProviders(context);
     }
 
     public async disconnectRegistry(context: IActionContext, cachedProvider: ICachedRegistryProvider | undefined): Promise<void> {
@@ -178,7 +178,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             this._cachedProviders.splice(index, 1);
         }
 
-        await this.saveCachedProviders();
+        await this.saveCachedProviders(context);
     }
 
     public hasMultiplesOfProvider(cachedProvider: ICachedRegistryProvider): boolean {
@@ -189,9 +189,9 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         return await recursiveGetAllConnectedRegistries(context, ext.registriesRoot);
     }
 
-    private async saveCachedProviders(): Promise<void> {
+    private async saveCachedProviders(context: IActionContext): Promise<void> {
         await ext.context.globalState.update(providersKey, this._cachedProviders);
-        await this.refresh();
+        await this.refresh(context);
     }
 
     private initTreeItem(node: AzExtParentTreeItem & IRegistryProviderTreeItem): AzExtParentTreeItem & IRegistryProviderTreeItem {

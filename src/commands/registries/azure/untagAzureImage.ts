@@ -28,7 +28,7 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
     const repoTI = node.parent;
     await window.withProgress({ location: ProgressLocation.Notification, title: untagging }, async () => {
         await registryRequest(repoTI, 'DELETE', `v2/_acr/${repoTI.repoName}/tags/${node.tag}`);
-        await repoTI.refresh();
+        await repoTI.refresh(context);
     });
 
     // don't wait

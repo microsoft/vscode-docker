@@ -28,7 +28,7 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Dock
             throw new Error(localize('vscode-docker.commands.registries.copyRemote.noOutputImage', 'Failed to find output image for this task run.'));
         }
     } else {
-        await node.runWithTemporaryDescription(localize('vscode-docker.commands.registries.copyRemote.gettingDigest', 'Getting digest...'), async () => {
+        await node.runWithTemporaryDescription(context, localize('vscode-docker.commands.registries.copyRemote.gettingDigest', 'Getting digest...'), async () => {
             digest = await (<DockerV2TagTreeItem>node).getDigest();
         });
     }

@@ -13,7 +13,7 @@ export async function selectContainer(context: IActionContext): Promise<string> 
     let node: ContainerTreeItem;
 
     // Expecting running containers to change often as this is a debugging scenario.
-    await ext.containersTree.refresh();
+    await ext.containersTree.refresh(context);
 
     node = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
         ...context,

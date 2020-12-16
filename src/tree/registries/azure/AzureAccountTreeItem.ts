@@ -28,7 +28,7 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
                 extensionInstallEventDisposable.dispose();
 
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                this.refresh();
+                this.refresh(context);
             });
         }
 

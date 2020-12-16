@@ -18,7 +18,7 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     const registryTI = node.parent.parent;
     let runRequest: AcrModels.TaskRunRequest = { type: 'TaskRunRequest', taskId: node.id };
     let run = await (await registryTI.getClient()).registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
-    await node.parent.refresh();
+    await node.parent.refresh(context);
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(localize('vscode-docker.commands.registries.azure.tasks.runTaskScheduled', 'Successfully scheduled run "{0}" for task "{1}".', run.runId, node.taskName));

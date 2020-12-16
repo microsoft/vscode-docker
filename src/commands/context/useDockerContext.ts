@@ -24,10 +24,11 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
     try {
         LocalRootTreeItemBase.autoRefreshViews = false;
         await node.runWithTemporaryDescription(
+            actionContext,
             localize('vscode-docker.tree.context.switching', 'Switching...'),
             async () => {
                 // Get a promise for the onContextChangedEvent
-                const contextChangedEventPromise = new Promise((resolve) => {
+                const contextChangedEventPromise = new Promise<void>((resolve) => {
                     const disposable = ext.dockerContextManager.onContextChanged(() => {
                         disposable.dispose();
                         clearTimeout(timer);

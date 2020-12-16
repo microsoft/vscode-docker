@@ -147,7 +147,7 @@ async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run): Prom
 
     // ESLint is confused and thinks this promise is incomplete
     // eslint-disable-next-line @typescript-eslint/tslint/config
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         const timer = setInterval(
             async () => {
                 if (!exists && !(exists = await blobClient.exists())) {

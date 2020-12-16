@@ -10,7 +10,7 @@ import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 
 export async function inspectContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        await ext.containersTree.refresh();
+        await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.containers.inspect.noContainers', 'No containers are available to inspect')

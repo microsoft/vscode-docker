@@ -35,7 +35,7 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
 
     if (nodes.length === 0) {
         // If still no selected nodes, need to prompt
-        await tree.refresh();
+        await tree.refresh(context);
         nodes = await tree.showTreeItemPicker<T>(expectedContextValue, { ...context, canPickMany: true });
     } else if (expectedContextValue) {
         // Otherwise if there's a filter, need to filter our selection to exclude ineligible nodes

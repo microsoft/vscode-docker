@@ -14,7 +14,7 @@ import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
-        await ext.containersTree.refresh();
+        await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.containers.attachShellContainer.noContainers', 'No running containers are available to attach')
