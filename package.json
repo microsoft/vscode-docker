@@ -2796,7 +2796,7 @@
         "handlebars": "^4.7.6",
         "request": "^2.88.2",
         "request-promise-native": "^1.0.9",
-        "semver": "^7.3.4",
+        "semver": "^7.3.2",
         "tar": "^6.0.5",
         "vscode-azureappservice": "^0.72.1",
         "vscode-azureextensionui": "^0.38.2",
