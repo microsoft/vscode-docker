@@ -6,8 +6,8 @@
 import Dockerode = require('dockerode');
 import * as stream from 'stream';
 import * as tar from 'tar';
+import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
-import { CancellationToken } from 'vscode-languageclient';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
 import { cloneObject } from '../../utils/cloneObject';
