@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
-import { Disposable } from 'vscode-languageclient';
 import { localize } from '../localize';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
@@ -63,7 +62,7 @@ export class TimeoutPromiseSource implements vscode.Disposable {
         this.emitter = new vscode.EventEmitter<void>();
     }
 
-    public onTimeout(callback: () => void): Disposable {
+    public onTimeout(callback: () => void): vscode.Disposable {
         return this.emitter.event(callback);
     }
 

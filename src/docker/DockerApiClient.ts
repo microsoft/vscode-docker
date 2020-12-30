@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from 'vscode';
+import { CancellationToken, Disposable } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
-import { CancellationToken } from 'vscode-languageclient';
 import { DockerInfo, DockerOSType, PruneResult } from './Common';
 import { DockerContainer, DockerContainerInspection } from './Containers';
 import { DockerImage, DockerImageInspection } from './Images';
