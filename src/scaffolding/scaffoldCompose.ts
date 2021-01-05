@@ -10,6 +10,7 @@ import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
+import { VerifyDockerfileStep } from './wizard/VerifyDockerfileStep';
 
 export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
     copyWizardContext(wizardContext, apiInput);
@@ -19,6 +20,7 @@ export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardCo
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
         new ChoosePlatformStep(),
+        new VerifyDockerfileStep(),
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
