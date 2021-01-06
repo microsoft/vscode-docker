@@ -28,7 +28,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         rootFolder = vscode.workspace.getWorkspaceFolder(dockerFileUri);
     }
 
-    rootFolder = rootFolder || await quickPickWorkspaceFolder(localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
+    rootFolder = rootFolder || await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
 
     const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
     const task = await getOfficialBuildTaskForDockerfile(dockerFileItem.absoluteFilePath, rootFolder);

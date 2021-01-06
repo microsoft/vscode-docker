@@ -30,11 +30,11 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     let fileItem: Item;
     let imageName: string;
     if (requestType === 'DockerBuildRequest') {
-        rootFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.registries.azure.tasks.buildFolder', 'To quick build Docker files you must first open a folder or workspace in VS Code.'));
+        rootFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.registries.azure.tasks.buildFolder', 'To quick build Docker files you must first open a folder or workspace in VS Code.'));
         fileItem = await quickPickDockerFileItem(context, uri, rootFolder);
         imageName = await quickPickImageName(context, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
-        rootFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.registries.azure.tasks.yamlFolder', 'To run a task from a .yaml file you must first open a folder or workspace in VS Code.'));
+        rootFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.registries.azure.tasks.yamlFolder', 'To run a task from a .yaml file you must first open a folder or workspace in VS Code.'));
         fileItem = await quickPickYamlFileItem(uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
     } else {
         throw new Error(localize('vscode-docker.commands.registries.azure.tasks.runTypeUnsupported', 'Run Request Type Currently not supported.'));

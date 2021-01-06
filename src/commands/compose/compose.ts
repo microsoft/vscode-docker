@@ -14,7 +14,7 @@ import { selectComposeCommand } from '../selectCommandTemplate';
 import { getComposeServiceList } from './getComposeServiceList';
 
 async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
+    const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
 
     let commandParameterFileUris: vscode.Uri[];
     if (selectedComposeFileUris && selectedComposeFileUris.length) {
