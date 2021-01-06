@@ -23,7 +23,7 @@ export async function quickPickWorkspaceFolder(context: IActionContext, noWorksp
                 callback: async () => {
                     void vscode.commands.executeCommand('workbench.action.files.openFolder');
                 },
-                title: localize('vscode-docker.quickPickWorkspaceFolder.openWorkspace', 'Open Workspace Folder'),
+                title: localize('vscode-docker.quickPickWorkspaceFolder.openFolder', 'Open Folder'),
             }
         ]
         throw new Error(noWorkspacesMessage);
