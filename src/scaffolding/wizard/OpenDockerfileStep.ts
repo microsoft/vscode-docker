@@ -7,7 +7,6 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {
@@ -17,8 +16,7 @@ export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizard
     public async execute(wizardContext: ScaffoldingWizardContext, progress: never): Promise<void> {
         const dockerfilePath = path.join(wizardContext.dockerfileDirectory, 'Dockerfile');
 
-        if (await fse.pathExists(dockerfilePath) &&
-            await ext.experimentationService.isCachedFlightEnabled('vscode-docker.openDockerfile')) {
+        if (await fse.pathExists(dockerfilePath)) {
             wizardContext.telemetry.properties.openedDockerfile = 'true';
 
             // Don't wait
