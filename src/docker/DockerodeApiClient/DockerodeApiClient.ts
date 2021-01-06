@@ -179,7 +179,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     public async pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult> {
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneContainers(), token);
         return {
-            ...result,
+            SpaceReclaimed: result.SpaceReclaimed ?? 0,
             ObjectsDeleted: result.ContainersDeleted?.length ?? 0,
         };
     }
@@ -245,7 +245,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     public async pruneImages(context: IActionContext, token?: CancellationToken): Promise<PruneResult> {
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneImages(), token);
         return {
-            ...result,
+            SpaceReclaimed: result.SpaceReclaimed ?? 0,
             ObjectsDeleted: result.ImagesDeleted?.length ?? 0,
         };
     }
@@ -331,7 +331,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     public async pruneVolumes(context: IActionContext, token?: CancellationToken): Promise<PruneResult> {
         const result = await this.callWithErrorHandling(context, async () => this.dockerodeClient.pruneVolumes(), token);
         return {
-            ...result,
+            SpaceReclaimed: result.SpaceReclaimed ?? 0,
             ObjectsDeleted: result.VolumesDeleted?.length ?? 0,
         };
     }
