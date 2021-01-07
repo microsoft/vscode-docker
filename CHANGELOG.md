@@ -1,3 +1,9 @@
+## 1.9.1 - 18 January 2021
+### Fixed
+* Prompt to open a folder or workspace when executing commands that require one--instead of Report Issue button. [#2512](https://github.com/microsoft/vscode-docker/issues/2512)
+* Fixed "object null is not iterable" error when scaffolding Dockerfiles for .NET apps. [#2572](https://github.com/microsoft/vscode-docker/issues/2572)
+* Fixed some issues with understanding the state of containers in Azure Container Instances. [#2602](https://github.com/microsoft/vscode-docker/issues/2602)
+
 ## 1.9.0 - 16 December 2020
 ### Added
 * View logs of Compose projects (cumulative logs of all containers belonging to a Compose run). [#2506](https://github.com/microsoft/vscode-docker/issues/2506)
