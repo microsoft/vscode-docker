@@ -18,7 +18,7 @@ export async function pruneNetworks(context: IActionContext): Promise<void> {
         async () => {
             const result = await ext.dockerClient.pruneNetworks(context);
 
-            let message = localize('vscode-docker.commands.networks.prune.removed', 'Removed {0} networks(s).', result.ObjectsDeleted);
+            let message = localize('vscode-docker.commands.networks.prune.removed', 'Removed {0} network(s).', result.ObjectsDeleted);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);
