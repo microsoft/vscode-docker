@@ -41,7 +41,7 @@ export function containerToDockerContainer(container: Container.AsObject): Docke
         Id: container.id,
         Image: container.image,
         Name: container.id, // TODO ?
-        State: container.status,
+        State: mapContainerStatus(container.status),
         Status: container.status,
         ImageID: undefined, // TODO ?
         CreatedTime: undefined, // TODO ?
@@ -74,4 +74,15 @@ export function containerPortsToInspectionPorts(container: DockerContainer): { [
     }
 
     return result;
+}
+
+function mapContainerStatus(status: string): string {
+    switch (status) {
+        case 'Node Pending': // ACI has an intermediate starting state
+            return 'waiting';
+        case 'Node Stopped': // ACI has an intermediate stopping state
+            return 'terminated';
+        default:
+            return status;
+    }
 }
