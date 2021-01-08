@@ -26,8 +26,17 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
     } else if (!isHigherMinorVersion(extensionVersion.value, ext.context.globalState.get(lastVersionKey, '0.0.1'))) {
         // Don't show: already showed during this major/minor
         return;
-    } else if (!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.openStartPage'))) {
-        // Don't show: flight not enabled
+    }
+
+    const flightValue: boolean | undefined = await ext.experimentationService.getLiveTreatmentVariable('vscode-docker.openStartPage');
+
+    if (flightValue === false) {
+        // Exactly false means this is in the control group. We'll stamp the version so that the behavior is the same as treatment, minus showing the page of course.
+        // This means that, like the treatment group, the query-expfeature event will fire only once
+        await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
+        return;
+    } else if (flightValue === undefined) {
+        // Exactly undefined means this is in neither treatment nor control. We will *not* stamp the version, and will not show.
         return;
     }
 
