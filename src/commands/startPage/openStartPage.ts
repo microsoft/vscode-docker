@@ -26,13 +26,24 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
     } else if (!isHigherMinorVersion(extensionVersion.value, ext.context.globalState.get(lastVersionKey, '0.0.1'))) {
         // Don't show: already showed during this major/minor
         return;
-    } else if (!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.openStartPage'))) {
-        // Don't show: flight not enabled
+    }
+
+    const flightValue: boolean | undefined = await ext.experimentationService.getLiveTreatmentVariable('vscode-docker.openStartPage');
+
+    if (flightValue === undefined) {
+        // Don't show: neither in control nor treatment. We will *not* stamp the version, and will not show.
+        return;
+    }
+
+    // Either in control or treatment--so need to stamp the version so that they behave the same way, i.e. send only one live query event
+    await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
+
+    if (flightValue === false) {
+        // Don't show: in control group
         return;
     }
 
     // Show!
-    await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
     void vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
 }
 
