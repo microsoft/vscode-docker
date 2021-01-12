@@ -23,6 +23,11 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
     private children: AzExtTreeItem[] | undefined;
     private containerOS: DockerOSType;
 
+    public async resolveTooltip(): Promise<string> {
+        // @ts-expect-error
+        return new vscode.MarkdownString(`# Sit monstratum nubibus famulumque et et enim`);
+    }
+
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
         this._item = itemInfo;

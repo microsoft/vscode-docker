@@ -2721,7 +2721,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.49.0"
+        "vscode": "^1.52.0"
     },
     "scripts": {
         "watch": "tsc -watch -p ./",
@@ -2752,7 +2752,7 @@
         "@types/request-promise-native": "^1.0.17",
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
-        "@types/vscode": "1.49.0",
+        "@types/vscode": "1.52.0",
         "@types/xml2js": "^0.4.7",
         "@typescript-eslint/eslint-plugin": "^4.12.0",
         "@typescript-eslint/eslint-plugin-tslint": "^4.12.0",
@@ -2799,7 +2799,7 @@
         "semver": "7.3.2",
         "tar": "^6.0.5",
         "vscode-azureappservice": "^0.72.2",
-        "vscode-azureextensionui": "^0.38.3",
+        "vscode-azureextensionui": "file:../vscode-azuretools/ui/vscode-azureextensionui-0.38.4.tgz",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.17",
