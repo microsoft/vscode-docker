@@ -21,7 +21,6 @@ import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
-import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 import { installDebuggerIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
@@ -70,7 +69,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
-        const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
+        const { containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             // inferAppOutput is slow, give a chance to cancel
@@ -81,14 +80,6 @@ export class NetCoreDebugHelper implements DebugHelper {
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             // acquireDebuggers is slow, give a chance to cancel
             return undefined;
-        }
-
-        if (configureSsl) {
-            await this.configureSsl(debugConfiguration, appOutput);
-            if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
-                // configureSsl is slow, give a chance to cancel
-                return undefined;
-            }
         }
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
@@ -103,7 +94,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 action: 'openExternally',
                 uriFormat: '%s://localhost:%s',
             },
-            configureSsl || await NetCoreTaskHelper.isWebApp(debugConfiguration.netCore.appProject) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
+            await NetCoreTaskHelper.isWebApp(debugConfiguration.netCore.appProject) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
         );
 
         return {
@@ -187,11 +178,10 @@ export class NetCoreDebugHelper implements DebugHelper {
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
     }
 
-    private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+    private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ containerName: string, platformOS: PlatformOS }> {
         const associatedTask = context.runDefinition;
 
         return {
-            configureSsl: associatedTask && associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, debugConfiguration.netCore),
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask && associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
         }
@@ -216,13 +206,6 @@ export class NetCoreDebugHelper implements DebugHelper {
         const destPath = path.join(vsDbgInstallBasePath, 'vsdbg');
         await fse.copyFile(debuggerScriptPath, destPath);
         await fse.chmod(destPath, 0o755); // Give all read and execute permissions
-    }
-
-    private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
-        const appOutputName = path.parse(appOutput).name;
-        const certificateExportPath = path.join(getHostSecretsFolders().hostCertificateFolder, `${appOutputName}.pfx`);
-        await trustCertificateIfNecessary();
-        await exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
     }
 
     private static getAdditionalProbingPathsArgs(platformOS: PlatformOS): string {

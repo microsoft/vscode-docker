@@ -1164,10 +1164,6 @@
                             "enableDebugging": {
                                 "type": "boolean",
                                 "description": "%vscode-docker.tasks.docker-run.netCore.enableDebugging%"
-                            },
-                            "configureSsl": {
-                                "type": "boolean",
-                                "description": "%vscode-docker.tasks.docker-run.netCore.configureSsl%"
                             }
                         },
                         "required": [

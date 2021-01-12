@@ -9,11 +9,10 @@ import * as path from 'path';
 import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
-import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { localize } from '../../localize';
-import { isMac, isWindows } from '../../utils/osUtils';
+import { isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -26,7 +25,6 @@ import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
     appProject?: string;
-    configureSsl?: boolean;
     enableDebugging?: boolean;
 }
 
@@ -42,19 +40,6 @@ export interface NetCoreTaskScaffoldingOptions {
     appProject?: string;
     platformOS?: PlatformOS;
 }
-
-interface LaunchProfile {
-    applicationUrl?: string;
-    commandName?: string;
-}
-
-interface LaunchSettings {
-    profiles?: { [key: string]: LaunchProfile };
-}
-
-const UserSecretsRegex = /UserSecretsId/i;
-const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
-const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 export class NetCoreTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
@@ -101,9 +86,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
         options.platformOS = options.platformOS || 'Linux';
 
-        // If there's exactly one port and it's 80, then set configureSsl to false, otherwise leave it undefined
-        const configureSsl: false | undefined = context.ports?.length === 1 && context.ports?.[0] === 80 ? false : undefined;
-
         return [
             {
                 type: 'docker-run',
@@ -114,8 +96,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 },
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
-                    enableDebugging: true,
-                    configureSsl: configureSsl,
+                    enableDebugging: true
                 }
             },
             {
@@ -154,22 +135,10 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.os = runOptions.os || 'Linux';
         runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 
-        const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
-        const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
-
         runOptions.env = runOptions.env || {};
         runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER = runOptions.env.DOTNET_USE_POLLING_FILE_WATCHER || '1';
 
-        if (userSecrets) {
-            runOptions.env.ASPNETCORE_ENVIRONMENT = runOptions.env.ASPNETCORE_ENVIRONMENT || 'Development';
-
-            if (ssl) {
-                // tslint:disable-next-line: no-http-string
-                runOptions.env.ASPNETCORE_URLS = runOptions.env.ASPNETCORE_URLS || 'https://+:443;http://+:80';
-            }
-        }
-
-        runOptions.volumes = await this.inferVolumes(context.folder, runOptions, helperOptions, ssl, userSecrets); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
+        runOptions.volumes = await this.inferVolumes(context.folder, runOptions, helperOptions); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
 
         return runOptions;
     }
@@ -199,39 +168,13 @@ export class NetCoreTaskHelper implements TaskHelper {
         return result;
     }
 
-    public static async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
-        try {
-            const launchSettingsPath = path.join(path.dirname(helperOptions.appProject), 'Properties', 'launchSettings.json');
-
-            if (await fse.pathExists(launchSettingsPath)) {
-                const launchSettings = <LaunchSettings>await fse.readJson(launchSettingsPath);
-
-                if (launchSettings && launchSettings.profiles) {
-                    // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
-                    const projectProfile = Object.values(launchSettings.profiles).find(p => p.commandName === 'Project');
-
-                    if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
-                        return true;
-                    }
-                }
-            }
-        } catch { }
-
-        return false;
-    }
-
     public static async isWebApp(appProject: string): Promise<boolean> {
         const projectContents = await fse.readFile(appProject);
 
         return /Sdk\s*=\s*\"Microsoft\.NET\.Sdk\.Web\"/ig.test(projectContents.toString());
     }
 
-    private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
-        const contents = await fse.readFile(helperOptions.appProject);
-        return UserSecretsRegex.test(contents.toString());
-    }
-
-    private async inferVolumes(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, ssl: boolean, userSecrets: boolean): Promise<DockerContainerVolume[]> {
+    private async inferVolumes(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions): Promise<DockerContainerVolume[]> {
         const volumes: DockerContainerVolume[] = [];
 
         if (runOptions.volumes) {
@@ -275,43 +218,10 @@ export class NetCoreTaskHelper implements TaskHelper {
                 }
             }
 
-            const nugetFallbackVolume: DockerContainerVolume = {
-                localPath: isWindows() ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
-                    (isMac() ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
-                containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
-                permissions: 'ro'
-            };
-
             addVolumeWithoutConflicts(volumes, appVolume);
             addVolumeWithoutConflicts(volumes, srcVolume);
             addVolumeWithoutConflicts(volumes, debuggerVolume);
             addVolumeWithoutConflicts(volumes, nugetVolume);
-            if (await fse.pathExists(nugetFallbackVolume.localPath)) {
-                addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
-            }
-        }
-
-        if (userSecrets || ssl) {
-            const hostSecretsFolders = getHostSecretsFolders();
-            const containerSecretsFolders = getContainerSecretsFolders(runOptions.os);
-
-            const userSecretsVolume: DockerContainerVolume = {
-                localPath: hostSecretsFolders.hostUserSecretsFolder,
-                containerPath: containerSecretsFolders.containerUserSecretsFolder,
-                permissions: 'ro'
-            };
-
-            addVolumeWithoutConflicts(volumes, userSecretsVolume);
-
-            if (ssl) {
-                const certVolume: DockerContainerVolume = {
-                    localPath: hostSecretsFolders.hostCertificateFolder,
-                    containerPath: containerSecretsFolders.containerCertificateFolder,
-                    permissions: 'ro'
-                };
-
-                addVolumeWithoutConflicts(volumes, certVolume);
-            }
         }
 
         return volumes;

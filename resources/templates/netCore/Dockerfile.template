@@ -4,6 +4,18 @@ WORKDIR /app
 EXPOSE {{ . }}
 {{/each}}
 
+{{#if (eq platform '.NET: ASP.NET Core')}}
+{{#if ports}}
+ENV ASPNETCORE_URLS=http://+:{{ ports.[0] }}
+{{/if}}
+{{/if}}
+
+{{#unless (isRootPort ports)}}
+# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
+RUN useradd appuser && chown -R appuser /app
+USER appuser
+
+{{/unless}}
 FROM {{ netCoreSdkBaseImage }} AS build
 WORKDIR /src
 COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}/"]
