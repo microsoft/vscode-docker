@@ -260,7 +260,7 @@ function fixPathForMacIfNeeded(options: cp.SpawnOptions): void {
     }
 
     options = options ?? {};
-    options.env = options.env ?? process.env;
+    options.env = options.env ?? { ...process.env };
 
     ext.outputChannel.appendLine(localize('vscode-docker.utils.spawn.fixedPath', 'WARNING: Adding \'/usr/local/bin\' to the PATH because it is missing.'));
 
