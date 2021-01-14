@@ -19,5 +19,10 @@ export interface DockerNetworkInspection extends DockerObject {
                 readonly Gateway: string;
             }
         ]
-    }
+    };
+    readonly Containers?: {
+        [containerId: string]: {
+            readonly Name: string;
+        }
+    };
 }

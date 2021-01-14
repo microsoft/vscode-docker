@@ -320,11 +320,21 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const volume = this.dockerodeClient.getVolume(ref);
         const result = await this.callWithErrorHandling(context, async () => volume.inspect(), token);
 
+        // Sorely missing in the inspect result for a volume is the containers using it, so we will add that in, in the same-ish shape as networks' inspect result
+        const containersUsingVolume = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'volume': [ref] } }));
+
+        const containersObject = {};
+        for (const container of containersUsingVolume) {
+            const destination = container.Mounts?.find(m => m.Name === volume.name)?.Destination;
+            containersObject[container.Id] = { Name: getContainerName(container), Destination: destination };
+        }
+
         return {
             ...result,
             // eslint-disable-next-line @typescript-eslint/tslint/config, @typescript-eslint/no-explicit-any
             CreatedTime: new Date((result as any).CreatedAt).valueOf(),
             Id: undefined, // Not defined for volumes
+            Containers: containersObject,
         };
     }
 

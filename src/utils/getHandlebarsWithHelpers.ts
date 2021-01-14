@@ -62,6 +62,10 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
                 return a.concat(b);
             }
         });
+
+        handlebars.registerHelper('truncate', (a: string, length: number = 8) => {
+            return a.substr(0, length);
+        });
     }
 
     return handlebars;
