@@ -3,12 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MarkdownString } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageTreeItem extends AzExtTreeItemIntermediate {
@@ -76,4 +78,11 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
 
         return ext.dockerClient.removeImage(context, ref);
     }
+
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        return resolveTooltipMarkdown(imageTooltipTemplate, await ext.dockerClient.inspectImage(actionContext, this.imageId));
+    }
 }
+
+const imageTooltipTemplate = `
+`;

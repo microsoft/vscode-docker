@@ -12,6 +12,7 @@ import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from '../resolveTooltipMarkdown';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
@@ -22,11 +23,6 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
     private readonly _item: DockerContainerInfo;
     private children: AzExtTreeItem[] | undefined;
     private containerOS: DockerOSType;
-
-    public async resolveTooltip(): Promise<string> {
-        // @ts-expect-error
-        return new vscode.MarkdownString(`# Sit monstratum nubibus famulumque et et enim`);
-    }
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
@@ -140,7 +136,14 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
         return true;
     }
 
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
+        return resolveTooltipMarkdown(containerTooltipTemplate, await ext.dockerClient.inspectContainer(actionContext, this.containerId));
+    }
+
     private get isRunning(): boolean {
         return this._item.State.toLowerCase() === 'running';
     }
 }
+
+const containerTooltipTemplate = `
+`;
