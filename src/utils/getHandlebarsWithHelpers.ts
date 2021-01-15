@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ScaffoldingWizardContext } from '../scaffolding/wizard/ScaffoldingWizardContext';
+import { isWindows } from './osUtils';
 import { pathNormalize } from './pathNormalize';
 import { PlatformOS } from './platform';
 
@@ -65,6 +66,19 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
 
         handlebars.registerHelper('substr', (a: string, from: number, length?: number) => {
             return a.substr(from, length);
+        });
+
+        handlebars.registerHelper('friendlyBindHost', (hostPath: string) => {
+            if (!isWindows()) {
+                return hostPath;
+            }
+
+            // Bind mount host paths are ugly on Windows, e.g. /run/desktop/mnt/host/c/Path/To/Folder
+            // Let's make it nicer
+            const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
+            if (match && match.driveLetter && match.path) {
+                return `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
+            }
         });
     }
 
