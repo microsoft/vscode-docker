@@ -146,4 +146,21 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
 }
 
 const containerTooltipTemplate = `
+Container: {{ Name }} ({{ substr Id 0 12 }})
+
+Image: {{ Config.Image }} ({{ substr Image 7 12 }})
+
+Networks:
+{{#each NetworkSettings.Networks}}
+  - {{ @key }}
+{{/each}}
+
+Ports:
+{{#each HostConfig.PortBindings}}
+  - {{ this.[0].HostPort }} -> {{ @key }}
+{{/each}}
+
+Bind Mounts:
+
+Volumes:
 `;

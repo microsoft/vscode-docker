@@ -63,8 +63,8 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
             }
         });
 
-        handlebars.registerHelper('truncate', (a: string, length: number = 8) => {
-            return a.substr(0, length);
+        handlebars.registerHelper('substr', (a: string, from: number, length?: number) => {
+            return a.substr(from, length);
         });
     }
 
