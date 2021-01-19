@@ -12,6 +12,8 @@ export async function resolveTooltipMarkdown(templateString: string, context: un
     const template = handlebars.compile(templateString);
 
     const markdownString = template(context);
-    return new MarkdownString(markdownString, true);
+    const result = new MarkdownString(markdownString, true);
+    result.isTrusted = true;
+    return result;
 }
 

@@ -162,7 +162,7 @@ const containerTooltipTemplate = `
 {{#if @first}}
 ### Ports
 {{/if}}
-  - {{ this.[0].HostPort }} -> {{ @key }}
+  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) -> {{ @key }}
 {{/each}}
 
 {{#each Mounts}}
