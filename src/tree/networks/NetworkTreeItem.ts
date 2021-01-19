@@ -66,4 +66,12 @@ export class NetworkTreeItem extends AzExtTreeItemIntermediate {
 }
 
 const networkTooltipTemplate = `
+## {{ Name }}
+
+{{#each Containers}}
+{{#if @first}}
+### Associated Containers
+{{/if}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
 `;

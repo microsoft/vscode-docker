@@ -80,9 +80,17 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
-        return resolveTooltipMarkdown(imageTooltipTemplate, await ext.dockerClient.inspectImage(actionContext, this.imageId));
+        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
     }
 }
 
 const imageTooltipTemplate = `
+## {{ NormalizedName }} ({{ substr Id 7 12 }})
+
+{{#each Config.ExposedPorts}}
+{{#if @first}}
+### Exposed Ports
+{{/if}}
+  - {{ @key }}
+{{/each}}
 `;

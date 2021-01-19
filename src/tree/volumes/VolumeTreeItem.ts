@@ -56,4 +56,12 @@ export class VolumeTreeItem extends AzExtTreeItemIntermediate {
 }
 
 const volumeTooltipTemplate = `
+## {{ Name }}
+
+{{#each Containers}}
+{{#if @first}}
+### Associated Containers
+{{/if}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
 `;

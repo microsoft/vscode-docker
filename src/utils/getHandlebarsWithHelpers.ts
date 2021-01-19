@@ -64,8 +64,9 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
             }
         });
 
-        handlebars.registerHelper('substr', (a: string, from: number, length?: number) => {
-            return a.substr(from, length);
+        handlebars.registerHelper('substr', (a: string, from: number, length?: number | unknown) => {
+            // If length is unspecified, it has a weird function value which we should treat as undefined
+            return a.substr(from, typeof length === 'number' && Number.isInteger(length) ? length : undefined);
         });
 
         handlebars.registerHelper('friendlyBindHost', (hostPath: string) => {

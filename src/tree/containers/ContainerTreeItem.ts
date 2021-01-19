@@ -137,7 +137,7 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
-        return resolveTooltipMarkdown(containerTooltipTemplate, await ext.dockerClient.inspectContainer(actionContext, this.containerId));
+        return resolveTooltipMarkdown(containerTooltipTemplate, { NormalizedName: this.containerName, ...await ext.dockerClient.inspectContainer(actionContext, this.containerId) });
     }
 
     private get isRunning(): boolean {
@@ -146,31 +146,34 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
 }
 
 const containerTooltipTemplate = `
-**{{ Name }} ({{ substr Id 0 12 }})**
+## {{ NormalizedName }} ({{ substr Id 0 12 }})
 
-Image: {{ Config.Image }} ({{ substr Image 7 12 }})
+### Image
+{{ Config.Image }} ({{ substr Image 7 12 }})
 
-Networks:
 {{#each NetworkSettings.Networks}}
+{{#if @first}}
+### Networks
+{{/if}}
   - {{ @key }}
 {{/each}}
 
-Ports:
 {{#each HostConfig.PortBindings}}
+{{#if @first}}
+### Ports
+{{/if}}
   - {{ this.[0].HostPort }} -> {{ @key }}
 {{/each}}
 
-Bind Mounts:
 {{#each Mounts}}
-{{#if (eq this.Type 'bind') }}
-  - {{ friendlyBindHost this.Source }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
+{{#if @first}}
+### Volumes
 {{/if}}
-{{/each}}
-
-Volumes:
-{{#each Mounts}}
-{{#if (eq this.Type 'volume') }}
-  - {{ this.Name }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
+{{#if (eq this.Type 'bind')}}
+  - Bind Mount: {{ friendlyBindHost this.Source }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
+{{/if}}
+{{#if (eq this.Type 'volume')}}
+  - Volume: {{ this.Name }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
 {{/if}}
 {{/each}}
 `;
