@@ -76,9 +76,13 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
 
             // Bind mount host paths are ugly on Windows, e.g. /run/desktop/mnt/host/c/Path/To/Folder
             // Let's make it nicer
+            // TODO this code is hacky and bust for not Windows
             const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
             if (match && match.driveLetter && match.path) {
-                return `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
+                const nicePath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
+                const uri = vscode.Uri.file(nicePath);
+                const niceUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
+                return `[${nicePath}](${niceUri})`;
             }
         });
     }
