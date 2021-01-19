@@ -24,7 +24,7 @@ import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 
-export type DockerTaskProviderName = 'docker-build' | 'docker-run';
+export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
