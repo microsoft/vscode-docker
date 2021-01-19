@@ -1,5 +1,6 @@
-## 1.9.1 - 18 January 2021
+## 1.9.1 - 19 January 2021
 ### Fixed
+* Debugging .NET and Python is now possible in GitHub Codespaces! [#2389](https://github.com/microsoft/vscode-docker/issues/2389), [#2565](https://github.com/microsoft/vscode-docker/issues/2565)
 * Prompt to open a folder or workspace when executing commands that require one--instead of Report Issue button. [#2512](https://github.com/microsoft/vscode-docker/issues/2512)
 * Fixed "object null is not iterable" error when scaffolding Dockerfiles for .NET apps. [#2572](https://github.com/microsoft/vscode-docker/issues/2572)
 * Fixed some issues with understanding the state of containers in Azure Container Instances. [#2602](https://github.com/microsoft/vscode-docker/issues/2602)
