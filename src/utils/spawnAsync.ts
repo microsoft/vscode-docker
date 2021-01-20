@@ -6,7 +6,9 @@
 import * as cp from 'child_process';
 import { CancellationToken, Disposable } from 'vscode';
 import { UserCancelledError } from 'vscode-azureextensionui';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { isMac } from './osUtils';
 
 const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size is 1 MB, our actual usage is far less
 
@@ -32,6 +34,8 @@ export async function spawnAsync(
         // Without the shell option, it pukes on arguments
         options = options || {};
         options.shell = true;
+
+        fixPathForMacIfNeeded(options);
 
         const subprocess = cp.spawn(command, options);
 
@@ -239,4 +243,27 @@ export function bufferToString(buffer: Buffer): string {
     // Remove non-printing control characters and trailing newlines
     // eslint-disable-next-line no-control-regex
     return buffer.toString().replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F]|\r?\n$/g, '');
+}
+
+function fixPathForMacIfNeeded(options: cp.SpawnOptions): void {
+    if (!isMac()) {
+        // Do nothing: not Mac
+        return;
+    }
+
+    // Looks for `/usr/local/bin` in the PATH.
+    // Must be whole, i.e. the left side must be the beginning of the string or :, and the right side must be the end of the string or :
+    // Case-insensitive, because Mac is
+    if (/(?<=^|:)\/usr\/local\/bin(?=$|:)/i.test(options?.env?.PATH || process.env.PATH)) {
+        // Do nothing: PATH already contains `/usr/local/bin`
+        return;
+    }
+
+    options = options ?? {};
+    options.env = options.env ?? { ...process.env };
+
+    ext.outputChannel.appendLine(localize('vscode-docker.utils.spawn.fixedPath', 'WARNING: Adding \'/usr/local/bin\' to the PATH because it is missing.'));
+
+    // Put `/usr/local/bin` on the PATH at the end
+    options.env.PATH = `${options.env.PATH}:/usr/local/bin`;
 }
