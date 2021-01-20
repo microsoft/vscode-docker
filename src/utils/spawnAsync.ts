@@ -254,7 +254,7 @@ function fixPathForMacIfNeeded(options: cp.SpawnOptions): void {
     // Looks for `/usr/local/bin` in the PATH.
     // Must be whole, i.e. the left side must be the beginning of the string or :, and the right side must be the end of the string or :
     // Case-insensitive, because Mac is
-    if (/(?<=^|:)\/usr\/local\/bin(?=$|:)/i.test(options?.env?.PATH)) {
+    if (/(?<=^|:)\/usr\/local\/bin(?=$|:)/i.test(options?.env?.PATH || process.env.PATH)) {
         // Do nothing: PATH already contains `/usr/local/bin`
         return;
     }
