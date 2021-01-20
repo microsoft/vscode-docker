@@ -23,7 +23,7 @@ export interface DockerComposeTask extends Task {
 }
 
 export class DockerComposeTaskProvider extends DockerTaskProvider {
-    public constructor() { super('docker-build', undefined) }
+    public constructor() { super('docker-compose', undefined) }
 
     protected async executeTaskInternal(context: DockerComposeTaskContext, task: DockerComposeTask): Promise<void> {
         const definition = cloneObject(task.definition);

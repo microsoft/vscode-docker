@@ -15,7 +15,7 @@ export async function restartContainer(context: IActionContext, node?: Container
     nodes = await multiSelectNodes(
         { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.restart.noContainers', 'No containers are available to restart') },
         ext.containersTree,
-        /^(created|dead|exited|paused|running)Container$/i,
+        /^(created|dead|exited|paused|running|terminated)Container$/i,
         node,
         nodes
     );
