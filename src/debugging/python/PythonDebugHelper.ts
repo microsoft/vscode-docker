@@ -7,6 +7,7 @@ import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
+import { getVSCodeRemoteInfo, RemoteKind } from '../../utils/getVSCodeRemoteInfo';
 import { isLinux } from '../../utils/osUtils';
 import { PythonProjectType } from '../../utils/pythonUtils';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
@@ -133,9 +134,9 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     private async getDebugAdapterHost(context: DockerDebugContext): Promise<string> {
-        // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
+        // For Windows, Mac, and WSL, we ask debugpy to listen on localhost:{randomPort} and then
         // we use 'host.docker.internal' in the launcher to get the host's ip address.
-        if (!isLinux()) {
+        if (!isLinux() || getVSCodeRemoteInfo(context.actionContext).remoteKind === RemoteKind.wsl) {
             return 'localhost';
         }
 
