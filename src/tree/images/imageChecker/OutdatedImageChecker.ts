@@ -35,6 +35,9 @@ export class OutdatedImageChecker {
             json: true,
             resolveWithFullResponse: true,
             strictSSL: strictSSL,
+            headers: {
+                'X-Client-ID': '37B33876-D7FE-45E1-9DC9-0D9DAB28FE59',
+            },
         };
     }
 
