@@ -6,7 +6,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ScaffoldingWizardContext } from '../scaffolding/wizard/ScaffoldingWizardContext';
-import { isWindows } from './osUtils';
 import { pathNormalize } from './pathNormalize';
 import { PlatformOS } from './platform';
 
@@ -70,20 +69,26 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
         });
 
         handlebars.registerHelper('friendlyBindHost', (hostPath: string) => {
-            if (!isWindows()) {
-                return hostPath;
-            }
-
             // Bind mount host paths are ugly on Windows, e.g. /run/desktop/mnt/host/c/Path/To/Folder
             // Let's make it nicer
-            // TODO this code is hacky and bust for not Windows
             const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
             if (match && match.driveLetter && match.path) {
-                const nicePath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
-                const uri = vscode.Uri.file(nicePath);
-                const niceUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
-                return `[${nicePath}](${niceUri})`;
+                hostPath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
             }
+
+            // TODO: make this more robust; probably doesn't work in Codespaces
+            // Now let's turn it into a clickable URI
+            const uri = vscode.Uri.file(hostPath);
+            const clickableUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
+            return `[${hostPath}](${clickableUri})`;
+        });
+
+        handlebars.registerHelper('nonEmptyObj', (obj: unknown | undefined) => {
+            return obj && Object.keys(obj).length !== 0;
+        });
+
+        handlebars.registerHelper('toMb', (size: number) => {
+            return Math.round(size / (1024 * 1024));
         });
     }
 

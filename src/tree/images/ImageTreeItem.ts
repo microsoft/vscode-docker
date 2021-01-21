@@ -85,12 +85,32 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
 }
 
 const imageTooltipTemplate = `
-## {{ NormalizedName }} ({{ substr Id 7 12 }})
+### {{ NormalizedName }} ({{ substr Id 7 12 }})
 
-{{#each Config.ExposedPorts}}
-{{#if @first}}
-### Exposed Ports
+---
+
+#### Size
+{{ toMb Size }} MB
+
+---
+
+#### Associated Containers
+{{#if (nonEmptyObj Containers)}}
+{{#each Containers}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
+{{else}}
+_None_
 {{/if}}
+
+---
+
+#### Exposed Ports
+{{#if (nonEmptyObj Config.ExposedPorts)}}
+{{#each Config.ExposedPorts}}
   - {{ @key }}
 {{/each}}
+{{else}}
+_None_
+{{/if}}
 `;

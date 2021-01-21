@@ -235,10 +235,19 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const image = this.dockerodeClient.getImage(ref);
         const result = await this.callWithErrorHandling(context, async () => image.inspect(), token);
 
+        // Sorely missing in the inspect result for an image is the containers using it, so we will add that in, in the same-ish shape as networks' inspect result
+        const containersUsingImage = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'ancestor': [result.Id] } }));
+
+        const containersObject = {};
+        for (const container of containersUsingImage) {
+            containersObject[container.Id] = { Name: getContainerName(container) };
+        }
+
         return {
             ...result,
             CreatedTime: new Date(result.Created).valueOf(),
             Name: undefined, // Not needed on inspect info
+            Containers: containersObject,
         };
     }
 

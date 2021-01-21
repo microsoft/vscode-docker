@@ -149,16 +149,16 @@ const containerTooltipTemplate = `
 ### {{ NormalizedName }} ({{ substr Id 0 12 }})
 
 ---
+
 #### Image
 {{ Config.Image }} ({{ substr Image 7 12 }})
 
 ---
 
 #### Ports
-{{#if HostConfig.PortBindings}} # TODO NO GOOD
+{{#if (nonEmptyObj HostConfig.PortBindings)}}
 {{#each HostConfig.PortBindings}}
-$(debug-stackframe-dot) [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) $(arrow-right) {{ @key }}
-
+  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) ➔ {{ @key }}
 {{/each}}
 {{else}}
 _None_
@@ -166,23 +166,28 @@ _None_
 
 ---
 
-#### Volumes # TODO CONDITIONAL
+#### Volumes
+{{#if Mounts}}
 {{#each Mounts}}
 {{#if (eq this.Type 'bind')}}
-$(debug-stackframe-dot) {{ friendlyBindHost this.Source }} $(arrow-right) {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
-
+  - {{ friendlyBindHost this.Source }} ➔ {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
 {{/if}}
 {{#if (eq this.Type 'volume')}}
-$(debug-stackframe-dot) {{ this.Name }} $(arrow-right) {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
-
+  - {{ this.Name }} ➔ {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
 {{/if}}
 {{/each}}
+{{else}}
+_None_
+{{/if}}
 
 ---
 
-#### Networks # TODO Conditional?
+#### Networks
+{{#if (nonEmptyObj NetworkSettings.Networks)}}
 {{#each NetworkSettings.Networks}}
-$(circle-filled) {{ @key }}
-
+  - {{ @key }}
 {{/each}}
+{{else}}
+_None_
+{{/if}}
 `;

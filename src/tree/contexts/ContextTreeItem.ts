@@ -91,8 +91,10 @@ export class ContextTreeItem extends AzExtTreeItemIntermediate {
 }
 
 const contextTooltipTemplate = `
-## {{ Name }}
+### {{ Name }}
 
-### Docker Host
+---
+
+#### Docker Host Endpoint
 {{ Endpoints.docker.Host }}
 `;
