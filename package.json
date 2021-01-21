@@ -181,37 +181,22 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /^(?:(?!^docker-compose\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
+                    "when": "resourceFilename =~ /^(?:(?!compose.*\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
                     "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename == docker-compose.yml",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.down",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename == docker-compose.yml",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.restart",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename == docker-compose.yml",
-                    "command": "vscode-docker.compose.up",
-                    "group": "docker"
-                },
-                {
-                    "when": "resourceFilename == docker-compose.debug.yml",
-                    "command": "vscode-docker.compose.down",
-                    "group": "docker"
-                },
-                {
-                    "when": "resourceFilename == docker-compose.debug.yml",
-                    "command": "vscode-docker.compose.restart",
-                    "group": "docker"
-                },
-                {
-                    "when": "resourceFilename == docker-compose.debug.yml",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
                     "group": "docker"
                 },
@@ -228,22 +213,22 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /^(?:(?!^docker-compose\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
+                    "when": "resourceFilename =~ /^(?:(?!compose.*\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
                     "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /docker-compose/i",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.down",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /docker-compose/i",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.restart",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /docker-compose/i",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
                     "group": "docker"
                 },
