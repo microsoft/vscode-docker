@@ -171,6 +171,10 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             });
     }
 
+    public async putContainerFile(context: IActionContext, ref: string, path: string, content: Buffer, token?: CancellationToken): Promise<void> {
+        await Promise.resolve();
+    }
+
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
         const container = this.dockerodeClient.getContainer(ref);
         return this.callWithErrorHandling(context, async () => container.logs({ follow: true, stdout: true }));
