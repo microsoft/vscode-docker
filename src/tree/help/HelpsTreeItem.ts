@@ -39,7 +39,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get readDocumentationTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.readDocumentation', 'Docker Extension Documentation'),
+            localize('views.help.readDocumentation', 'Read Extension Documentation'),
             'https://aka.ms/helppanel_docs',
             getThemedIconPath('book')
         );
@@ -51,7 +51,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get watchVideosTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.watchVideos', 'Docker Extension Videos'),
+            localize('views.help.watchVideos', 'Watch Extension Tutorial Videos'),
             'https://aka.ms/helppanel_videos',
             new ThemeIcon('play-circle')
         );
