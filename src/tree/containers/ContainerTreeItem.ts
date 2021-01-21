@@ -146,34 +146,43 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
 }
 
 const containerTooltipTemplate = `
-## {{ NormalizedName }} ({{ substr Id 0 12 }})
+### {{ NormalizedName }} ({{ substr Id 0 12 }})
 
-### Image
+---
+#### Image
 {{ Config.Image }} ({{ substr Image 7 12 }})
 
-{{#each NetworkSettings.Networks}}
-{{#if @first}}
-### Networks
-{{/if}}
-  - {{ @key }}
-{{/each}}
+---
 
+#### Ports
+{{#if HostConfig.PortBindings}} # TODO NO GOOD
 {{#each HostConfig.PortBindings}}
-{{#if @first}}
-### Ports
-{{/if}}
-  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) -> {{ @key }}
-{{/each}}
+$(debug-stackframe-dot) [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) $(arrow-right) {{ @key }}
 
-{{#each Mounts}}
-{{#if @first}}
-### Volumes
+{{/each}}
+{{else}}
+_None_
 {{/if}}
+
+---
+
+#### Volumes # TODO CONDITIONAL
+{{#each Mounts}}
 {{#if (eq this.Type 'bind')}}
-  - Bind Mount: {{ friendlyBindHost this.Source }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
+$(debug-stackframe-dot) {{ friendlyBindHost this.Source }} $(arrow-right) {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
+
 {{/if}}
 {{#if (eq this.Type 'volume')}}
-  - Volume: {{ this.Name }} -> {{ this.Destination }} {{#if this.RW}}(RW){{else}}(RO){{/if}}
+$(debug-stackframe-dot) {{ this.Name }} $(arrow-right) {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
+
 {{/if}}
+{{/each}}
+
+---
+
+#### Networks # TODO Conditional?
+{{#each NetworkSettings.Networks}}
+$(circle-filled) {{ @key }}
+
 {{/each}}
 `;
