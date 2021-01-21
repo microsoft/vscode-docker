@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { IActionContext } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from '../../localize';
@@ -46,5 +47,8 @@ function getComposeWorkingDirectory(node: ContainerGroupTreeItem): string | unde
 function getComposeFiles(node: ContainerGroupTreeItem): string[] | undefined {
     // Find a container with the `com.docker.compose.project.config_files` label, which gives all the compose files (within the working directory) used to up this container
     const container = (node.ChildTreeItems as ContainerTreeItem[]).find(c => c.labels?.['com.docker.compose.project.config_files']);
-    return container?.labels?.['com.docker.compose.project.config_files']?.split(',');
+
+    // Paths may be subpaths, but working dir generally always directly contains the config files, so let's cut off the subfolder and get just the file name
+    // (In short, the working dir may not be the same as the cwd when the docker-compose up command was called, BUT the files are relative to that cwd)
+    return container?.labels?.['com.docker.compose.project.config_files']?.split(',')?.map(f => path.parse(f).base);
 }
