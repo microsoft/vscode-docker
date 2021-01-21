@@ -7,6 +7,7 @@ import { Response } from 'request';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
@@ -36,7 +37,7 @@ export class OutdatedImageChecker {
             resolveWithFullResponse: true,
             strictSSL: strictSSL,
             headers: {
-                'X-Client-ID': '37B33876-D7FE-45E1-9DC9-0D9DAB28FE59',
+                'X-Meta-Source-Client': ociClientId,
             },
         };
     }

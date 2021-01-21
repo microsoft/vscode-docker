@@ -49,3 +49,5 @@ export const builtInNetworks: string[] = ['bridge', 'host', 'none'];
 export const dockerComposeHeader = `version: '3.4'
 
 services:`;
+
+export const ociClientId = 'on-prem/vscode/docker';
