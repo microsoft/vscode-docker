@@ -188,6 +188,7 @@
     "vscode-docker.commands.compose.down": "Compose Down",
     "vscode-docker.commands.compose.restart": "Compose Restart",
     "vscode-docker.commands.compose.up": "Compose Up",
+    "vscode-docker.commands.compose.up.subset": "Compose Up - Choose Services",
     "vscode-docker.commands.configure": "Add Docker Files to Workspace...",
     "vscode-docker.commands.configureCompose": "Add Docker Compose Files to Workspace...",
     "vscode-docker.commands.containers.attachShell": "Attach Shell",
