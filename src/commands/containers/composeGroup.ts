@@ -49,5 +49,6 @@ function getComposeFiles(node: ContainerGroupTreeItem): string[] | undefined {
     const container = (node.ChildTreeItems as ContainerTreeItem[]).find(c => c.labels?.['com.docker.compose.project.config_files']);
 
     // Paths may be subpaths, but working dir generally always directly contains the config files, so let's cut off the subfolder and get just the file name
+    // (In short, the working dir may not be the same as the cwd when the docker-compose up command was called, BUT the files are relative to that cwd)
     return container?.labels?.['com.docker.compose.project.config_files']?.split(',')?.map(f => path.parse(f).base);
 }
