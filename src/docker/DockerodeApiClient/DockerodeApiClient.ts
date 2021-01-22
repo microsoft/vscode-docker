@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Dockerode = require('dockerode');
+import * as nodepath from 'path';
 import * as stream from 'stream';
 import * as tar from 'tar';
+import * as tarstream from 'tar-stream';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
@@ -172,7 +174,18 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async putContainerFile(context: IActionContext, ref: string, path: string, content: Buffer, token?: CancellationToken): Promise<void> {
-        await Promise.resolve();
+        const container = this.dockerodeClient.getContainer(ref);
+
+        const directory = nodepath.dirname(path);
+        const filename = nodepath.basename(path);
+
+        const pack = tarstream.pack();
+
+        pack.entry({ name: filename }, content);
+
+        pack.finalize();
+
+        await this.callWithErrorHandling(context, async () => container.putArchive(pack, { path: directory }));
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {
