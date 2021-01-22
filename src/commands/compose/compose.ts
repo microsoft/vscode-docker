@@ -53,7 +53,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
                 build
             );
 
-            if (command === 'upSubset') {
+            if (command === 'upSubset' && !serviceListPlaceholder.test(terminalCommand)) {
                 // eslint-disable-next-line no-template-curly-in-string
                 terminalCommand += ' ${serviceList}';
             }
