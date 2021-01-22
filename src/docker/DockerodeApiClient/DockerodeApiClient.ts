@@ -6,7 +6,6 @@
 import Dockerode = require('dockerode');
 import * as nodepath from 'path';
 import * as stream from 'stream';
-import * as tar from 'tar';
 import * as tarstream from 'tar-stream';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
@@ -151,25 +150,25 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         return await new Promise(
             (resolve, reject) => {
-                const tarParser = new tar.Parse();
+                const tarStream = tarstream.extract();
 
-                tarParser.on('entry', (entry: tar.ReadEntry) => {
+                tarStream.on('entry', (header, entryStream) => {
                     const chunks = [];
 
-                    entry.on('data', chunk => {
+                    entryStream.on('data', chunk => {
                         chunks.push(chunk);
                     });
 
-                    entry.on('error', error => {
+                    entryStream.on('error', error => {
                         reject(error);
                     });
 
-                    entry.on('end', () => {
+                    entryStream.on('end', () => {
                         resolve(Buffer.concat(chunks));
                     });
                 });
 
-                archiveStream.pipe(tarParser);
+                archiveStream.pipe(tarStream);
             });
     }
 
