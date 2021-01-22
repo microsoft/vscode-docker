@@ -19,7 +19,7 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
     public constructor() {
         super(
             localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. manage.py, app.py)'),
-            ['**/*.{[Pp][Yy]}'],
+            ['**/manage.py', '**/app.py', '**/*.{[Pp][Yy]}'], // Including manage.py and app.py here pushes them to the top of the pick list; resolveFilesOfPattern dedupes
             localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.')
         );
     }
