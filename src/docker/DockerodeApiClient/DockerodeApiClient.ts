@@ -150,22 +150,57 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         return await new Promise(
             (resolve, reject) => {
+                let entry: { content?: Buffer, error?: Error };
+
                 const tarStream = tarstream.extract();
 
-                tarStream.on('entry', (header, entryStream) => {
-                    const chunks = [];
+                tarStream.on('entry', (header, entryStream, next) => {
+                    if (entry) {
+                        //
+                        // We already extracted the first entry, so just skip the rest...
+                        //
 
-                    entryStream.on('data', chunk => {
-                        chunks.push(chunk);
-                    });
+                        // When the entry stream has been drained, go on to the next entry...
+                        entryStream.on('end', next);
 
-                    entryStream.on('error', error => {
-                        reject(error);
-                    });
+                        // Drain the entry stream...
+                        entryStream.resume();
+                    } else {
+                        //
+                        // This is the first entry, so extract its content...
+                        //
 
-                    entryStream.on('end', () => {
-                        resolve(Buffer.concat(chunks));
-                    });
+                        const chunks = [];
+
+                        entryStream.on('data', chunk => {
+                            chunks.push(chunk);
+                        });
+
+                        entryStream.on('error', error => {
+                            entry = { error };
+                        });
+
+                        entryStream.on('end', () => {
+                            entry = { content: Buffer.concat(chunks) };
+
+                            // The entry stream is done, so go on to the next entry...
+                            next();
+                        });
+                    }
+                });
+
+                tarStream.on('finish', () => {
+                    //
+                    // The archive has been extracted, so return the result...
+                    //
+
+                    if (entry.error) {
+                        reject(entry.error);
+                    } else if (entry.content) {
+                        resolve(entry.content);
+                    } else {
+                        reject(new Error(localize('vscode-docker.utils.dockerode.failedToExtractContainerFile', 'Failed to extract container file from archive.')));
+                    }
                 });
 
                 archiveStream.pipe(tarStream);
