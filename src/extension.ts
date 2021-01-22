@@ -68,8 +68,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
 }
 
-// TODO: Remove this
-// eslint-disable-next-line @typescript-eslint/tslint/config
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<unknown | undefined> {
     perfStats.loadEndTime = Date.now();
 
@@ -155,9 +153,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         void openStartPageAfterExtensionUpdate();
         void activateComposeUpSubsetExperiment();
-
-        // TODO: remove this
-        void vscode.commands.executeCommand('setContext', 'vscode-docker:composeSubsetExp', true);
     });
 
     // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
