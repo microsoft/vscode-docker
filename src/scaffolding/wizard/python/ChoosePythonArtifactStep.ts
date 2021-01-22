@@ -12,6 +12,9 @@ import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext
 
 const moduleRegex = /([a-z_]+[.])*([a-z_])/i;
 
+// Exclude Python files in the .venv folder from showing in the pick list
+const excludePattern = '.venv/**';
+
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {
     public constructor() {
         super(
@@ -22,7 +25,7 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
     }
 
     public async prompt(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
-        const items = await resolveFilesOfPattern(wizardContext.workspaceFolder, this.globPatterns) ?? [];
+        const items = await resolveFilesOfPattern(wizardContext.workspaceFolder, this.globPatterns, excludePattern) ?? [];
 
         const pickChoices: IAzureQuickPickItem<Item | undefined>[] = items.map(i => {
             return {
