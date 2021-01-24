@@ -32,6 +32,7 @@ export interface DockerRunOptions {
     envFiles?: string[];
     extraHosts?: DockerContainerExtraHost[];
     image?: string;
+    interactive?: boolean;
     labels?: DockerLabels;
     network?: string;
     networkAlias?: string;
