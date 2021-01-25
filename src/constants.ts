@@ -50,4 +50,4 @@ export const dockerComposeHeader = `version: '3.4'
 
 services:`;
 
-export const ociClientId = 'on-prem/vscode/docker';
+export const ociClientId = 'tools/microsoft/vscode/docker';
