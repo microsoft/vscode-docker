@@ -7,6 +7,7 @@ import { Response } from "request";
 import * as request from 'request-promise-native';
 import { URL } from "url";
 import { workspace } from "vscode";
+import { ociClientId } from "../constants";
 
 export function getNextLinkFromHeaders(response: Response): string | undefined {
     const linkHeader: string | undefined = response.headers && <string>response.headers.link;
@@ -26,6 +27,9 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         json: true,
         resolveWithFullResponse: true,
         strictSSL: strictSSL,
+        headers: {
+            'X-Meta-Source-Client': ociClientId,
+        },
         ...customOptions
     }
 
