@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
@@ -190,7 +191,14 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 }
             };
 
-        return method();
+        return callWithTelemetryAndErrorHandling(
+            `containerFilesProvider.writeFile`,
+            async actionContext => {
+                actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup.
+                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
+
+                await method();
+            });
     }
 
     public delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
