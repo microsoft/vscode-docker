@@ -6,6 +6,7 @@
 'use strict';
 
 import https = require('https');
+import { ociClientId } from './constants';
 import { localize } from './localize';
 import { httpsRequest } from './utils/httpRequest';
 
@@ -139,6 +140,7 @@ function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<
 function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
     opts.headers = opts.headers || {};
     opts.headers.Accept = 'application/json';
+    opts.headers['X-Meta-Source-Client'] = ociClientId;
     return httpsRequest(opts).then((data) => {
         return JSON.parse(data);
     })
