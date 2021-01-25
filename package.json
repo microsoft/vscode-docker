@@ -373,11 +373,13 @@
                 },
                 {
                     "command": "vscode-docker.containers.downloadFile",
-                    "when": "view == dockerContainers && viewItem == containerFile"
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "files_1@2"
                 },
                 {
                     "command": "vscode-docker.containers.openFile",
-                    "when": "view == dockerContainers && viewItem == containerFile"
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "files_1@1"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
@@ -603,6 +605,16 @@
                     "command": "vscode-docker.contexts.remove",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext/i",
                     "group": "contexts_2_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.containers.downloadFile",
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "inline@1"
                 }
             ]
         },
@@ -2209,7 +2221,8 @@
             {
                 "command": "vscode-docker.containers.downloadFile",
                 "title": "%vscode-docker.commands.containers.downloadFile%",
-                "category": "%vscode-docker.commands.category.dockerContainers%"
+                "category": "%vscode-docker.commands.category.dockerContainers%",
+                "icon": "$(desktop-download)"
             },
             {
                 "command": "vscode-docker.containers.inspect",
@@ -2219,7 +2232,8 @@
             {
                 "command": "vscode-docker.containers.openFile",
                 "title": "%vscode-docker.commands.containers.openFile%",
-                "category": "%vscode-docker.commands.category.dockerContainers%"
+                "category": "%vscode-docker.commands.category.dockerContainers%",
+                "icon": "$(go-to-file)"
             },
             {
                 "command": "vscode-docker.containers.prune",
