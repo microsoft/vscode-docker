@@ -2233,7 +2233,7 @@
                 "command": "vscode-docker.containers.openFile",
                 "title": "%vscode-docker.commands.containers.openFile%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
-                "icon": "$(file-symlink-file)"
+                "icon": "$(go-to-file)"
             },
             {
                 "command": "vscode-docker.containers.prune",
