@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Task } from 'vscode';
+import { run } from '../../test';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
@@ -82,7 +83,9 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
-            .create('docker', 'run', '-dt')
+            .create('docker', 'run', '-t')
+            .withFlagArg('-i', runOptions.interactive)
+            .withFlagArg('-d', !runOptions.interactive)
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)
             .withNamedArg('--network', runOptions.network)
