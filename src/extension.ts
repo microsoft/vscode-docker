@@ -134,9 +134,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
                 {
                     // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
                     isCaseSensitive: true,
-
-                    // TODO: Add support for editing container files (https://github.com/microsoft/vscode-docker/issues/2465)
-                    isReadonly: true
+                    isReadonly: false
                 })
         );
 
