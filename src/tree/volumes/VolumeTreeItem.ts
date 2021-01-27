@@ -42,7 +42,7 @@ export class VolumeTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public get iconPath(): ThemeIcon {
-        return new ThemeIcon('folder');
+        return new ThemeIcon('file-symlink-directory');
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {

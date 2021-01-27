@@ -36,7 +36,7 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Them
         case 'RepositoryNameAndTag':
             return new ThemeIcon('multiple-windows');
         case 'Tag':
-            return new ThemeIcon('tag');
+            return new ThemeIcon('bookmark');
         default:
             return getCommonGroupIcon(property);
     }

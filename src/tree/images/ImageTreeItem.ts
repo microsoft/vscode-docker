@@ -54,7 +54,7 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
 
         switch (ext.imagesRoot.labelSetting) {
             case 'Tag':
-                return new ThemeIcon('tag');
+                return new ThemeIcon('bookmark');
             default:
                 return new ThemeIcon('window');
         }

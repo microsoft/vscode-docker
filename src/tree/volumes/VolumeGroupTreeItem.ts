@@ -17,7 +17,7 @@ export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<DockerVolume, Vo
     public get iconPath(): ThemeIcon {
         switch (this.parent.groupBySetting) {
             case 'VolumeName':
-                return new ThemeIcon('folder');
+                return new ThemeIcon('file-symlink-directory');
             default:
                 return getCommonGroupIcon(this.parent.groupBySetting);
         }

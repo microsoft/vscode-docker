@@ -50,6 +50,6 @@ export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public get iconPath(): ThemeIcon {
-        return new ThemeIcon('tag');
+        return new ThemeIcon('bookmark');
     }
 }
