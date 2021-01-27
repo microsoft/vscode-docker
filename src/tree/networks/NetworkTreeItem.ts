@@ -52,7 +52,7 @@ export class NetworkTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public get iconPath(): ThemeIcon {
-        return new ThemeIcon('circuit-board');
+        return new ThemeIcon('repo-forked');
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {

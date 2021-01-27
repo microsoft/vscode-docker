@@ -36,7 +36,7 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContain
             case 'ContainerId':
             case 'ContainerName':
             case 'Networks':
-                return new ThemeIcon('circuit-board');
+                return new ThemeIcon('repo-forked');
             case 'Ports':
             case 'Status':
             case 'Compose Project Name':

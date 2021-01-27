@@ -19,7 +19,7 @@ export class NetworkGroupTreeItem extends LocalGroupTreeItemBase<DockerNetwork, 
             case 'NetworkDriver':
             case 'NetworkId':
             case 'NetworkName':
-                return new ThemeIcon('circuit-board');
+                return new ThemeIcon('repo-forked');
             default:
                 return getCommonGroupIcon(this.parent.groupBySetting);
         }
