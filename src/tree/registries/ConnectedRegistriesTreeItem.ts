@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../localize';
-import { getThemedIconPath } from "../IconPath";
 
 export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
     public contextValue: string = 'connectedRegistries';
@@ -15,7 +15,7 @@ export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
 
     public constructor(parent: AzExtParentTreeItem | undefined) {
         super(parent);
-        this.iconPath = getThemedIconPath('connectPlugged');
+        this.iconPath = new ThemeIcon('link');
     }
 
     public async loadMoreChildrenImpl(_clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {

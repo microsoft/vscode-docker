@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IconPath } from "../IconPath";
+import { ThemeIcon } from "vscode";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getImageGroupIcon, ImageProperty } from "./ImageProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
@@ -13,7 +13,7 @@ export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage,
     public readonly contextValue: string = ImageGroupTreeItem.contextValue;
     public childTypeLabel: string = 'image';
 
-    public get iconPath(): IconPath {
+    public get iconPath(): ThemeIcon {
         return getImageGroupIcon(this.parent.groupBySetting);
     }
 }

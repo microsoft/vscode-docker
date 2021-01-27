@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { workspace } from "vscode";
+import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
 import { DockerImage } from "../../docker/Images";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 
@@ -25,7 +24,7 @@ export const imageProperties: ITreePropertyInfo<ImageProperty>[] = [
     { property: 'Size', exampleValue: '27 MB' },
 ];
 
-export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): IconPath {
+export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): ThemeIcon {
     let icon: string;
     switch (property) {
         case 'Registry':
@@ -33,16 +32,13 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Icon
             break;
         case 'Repository':
         case 'RepositoryName':
-            icon = 'repository';
-            break;
+            return new ThemeIcon('archive');
         case 'FullTag':
         case 'ImageId':
         case 'RepositoryNameAndTag':
-            icon = 'applicationGroup';
-            break;
+            return new ThemeIcon('multiple-windows');
         case 'Tag':
-            icon = 'tag';
-            break;
+            return new ThemeIcon('tag');
         default:
             return getCommonGroupIcon(property);
     }

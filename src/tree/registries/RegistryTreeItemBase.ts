@@ -6,7 +6,6 @@
 import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { IRegistryAuthTreeItem } from "../../utils/registryRequestUtils";
-import { getThemedIconPath } from "../IconPath";
 import { getRegistryContextValue, registrySuffix } from "./registryContextValues";
 
 /**
