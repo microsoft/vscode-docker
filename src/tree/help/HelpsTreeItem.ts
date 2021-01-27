@@ -6,7 +6,7 @@
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from "../../localize";
-import { getThemedIconPath } from '../IconPath';
+import { getThemedIconPath } from '../getThemedIconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
 export class HelpsTreeItem extends AzExtParentTreeItem {
@@ -41,7 +41,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.readDocumentation', 'Read Extension Documentation'),
             'https://aka.ms/helppanel_docs',
-            getThemedIconPath('book')
+            new ThemeIcon('book')
         );
         node.id = '0';
 
@@ -65,7 +65,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.getStarted', 'Get Started with Docker Tutorial'),
             'https://aka.ms/helppanel_getstarted',
-            getThemedIconPath('star-empty')
+            new ThemeIcon('star-empty')
         );
         node.id = '20';
 
@@ -93,7 +93,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.reviewIssues', 'Review Issues'),
             'https://aka.ms/helppanel_reviewissues',
-            getThemedIconPath('issues')
+            new ThemeIcon('issues')
         );
         node.id = '40';
 
@@ -107,7 +107,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
                 label: localize('views.help.reportIssue', 'Report Issue'),
                 contextValue: 'Report Issue',
                 commandId: 'vscode-docker.help.reportIssue',
-                iconPath: getThemedIconPath('comment'),
+                iconPath: new ThemeIcon('comment'),
                 includeInTreeItemPicker: true,
             }
         );

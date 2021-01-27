@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { workspace } from "vscode";
+import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
 import { DockerImage } from "../../docker/Images";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 
@@ -25,29 +24,22 @@ export const imageProperties: ITreePropertyInfo<ImageProperty>[] = [
     { property: 'Size', exampleValue: '27 MB' },
 ];
 
-export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): IconPath {
-    let icon: string;
+export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): ThemeIcon {
     switch (property) {
         case 'Registry':
-            icon = 'registry';
-            break;
+            return new ThemeIcon('briefcase');
         case 'Repository':
         case 'RepositoryName':
-            icon = 'repository';
-            break;
+            return new ThemeIcon('repo');
         case 'FullTag':
         case 'ImageId':
         case 'RepositoryNameAndTag':
-            icon = 'applicationGroup';
-            break;
+            return new ThemeIcon('multiple-windows');
         case 'Tag':
-            icon = 'tag';
-            break;
+            return new ThemeIcon('bookmark');
         default:
             return getCommonGroupIcon(property);
     }
-
-    return getThemedIconPath(icon);
 }
 
 export function getImagePropertyValue(item: DockerImage, property: ImageProperty): string {

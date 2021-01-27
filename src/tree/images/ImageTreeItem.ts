@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { MarkdownString } from "vscode";
+import { MarkdownString, ThemeColor, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
@@ -48,20 +47,17 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
         return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.Outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
     }
 
-    public get iconPath(): IconPath {
+    public get iconPath(): ThemeIcon {
         if (this._item.Outdated) {
-            return getThemedIconPath('statusWarning');
+            return new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground'));
         }
 
-        let icon: string;
         switch (ext.imagesRoot.labelSetting) {
             case 'Tag':
-                icon = 'tag';
-                break;
+                return new ThemeIcon('bookmark');
             default:
-                icon = 'application';
+                return new ThemeIcon('window');
         }
-        return getThemedIconPath(icon);
     }
 
     public get size(): number {

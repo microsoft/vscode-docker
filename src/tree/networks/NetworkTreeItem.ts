@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { MarkdownString } from "vscode";
+import { MarkdownString, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
@@ -52,8 +51,8 @@ export class NetworkTreeItem extends AzExtTreeItemIntermediate {
         return ext.networksRoot.getTreeItemDescription(this._item);
     }
 
-    public get iconPath(): IconPath {
-        return getThemedIconPath('network');
+    public get iconPath(): ThemeIcon {
+        return new ThemeIcon('repo-forked');
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeIcon } from "vscode";
 import { DockerVolume } from "../../docker/Volumes";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getCommonGroupIcon } from "../settings/CommonProperties";
 import { VolumeProperty } from "./VolumeProperties";
@@ -14,16 +14,12 @@ export class VolumeGroupTreeItem extends LocalGroupTreeItemBase<DockerVolume, Vo
     public readonly contextValue: string = VolumeGroupTreeItem.contextValue;
     public childTypeLabel: string = 'volume';
 
-    public get iconPath(): IconPath {
-        let icon: string;
+    public get iconPath(): ThemeIcon {
         switch (this.parent.groupBySetting) {
             case 'VolumeName':
-                icon = 'volume';
-                break;
+                return new ThemeIcon('file-symlink-directory');
             default:
                 return getCommonGroupIcon(this.parent.groupBySetting);
         }
-
-        return getThemedIconPath(icon);
     }
 }
