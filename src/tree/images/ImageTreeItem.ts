@@ -11,6 +11,7 @@ import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
+import { getCommonPropertyValue } from "../settings/CommonProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageTreeItem extends AzExtTreeItemIntermediate {
@@ -80,7 +81,7 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
-        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
+        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, NormalizedSize: getCommonPropertyValue(this._item, 'Size'), ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
     }
 }
 
@@ -90,7 +91,7 @@ const imageTooltipTemplate = `
 ---
 
 #### Size
-{{ toMb Size }} MB
+{{ NormalizedSize }}
 
 ---
 

@@ -6,6 +6,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ScaffoldingWizardContext } from '../scaffolding/wizard/ScaffoldingWizardContext';
+import { DockerExtensionKind, getVSCodeRemoteInfo } from './getVSCodeRemoteInfo';
+import { isWindows } from './osUtils';
 import { pathNormalize } from './pathNormalize';
 import { PlatformOS } from './platform';
 
@@ -71,24 +73,29 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
         handlebars.registerHelper('friendlyBindHost', (hostPath: string) => {
             // Bind mount host paths are ugly on Windows, e.g. /run/desktop/mnt/host/c/Path/To/Folder
             // Let's make it nicer
-            const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
-            if (match && match.driveLetter && match.path) {
-                hostPath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
+            if (isWindows()) {
+                const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
+                if (match && match.driveLetter && match.path) {
+                    hostPath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
+                }
             }
 
-            // TODO: make this more robust; probably doesn't work in Codespaces
-            // Now let's turn it into a clickable URI
-            const uri = vscode.Uri.file(hostPath);
-            const clickableUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
-            return `[${hostPath}](${clickableUri})`;
+            // Now let's try to turn it into a clickable URI
+            try {
+                const uri = vscode.Uri.file(hostPath);
+
+                if (uri && getVSCodeRemoteInfo().extensionKind === DockerExtensionKind.local) {
+                    const clickableUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
+                    return `[${hostPath}](${clickableUri})`;
+                }
+            } catch { }
+
+            // If we can't work out a clickable URI just return the path as-is
+            return hostPath;
         });
 
         handlebars.registerHelper('nonEmptyObj', (obj: unknown | undefined) => {
             return obj && Object.keys(obj).length !== 0;
-        });
-
-        handlebars.registerHelper('toMb', (size: number) => {
-            return Math.round(size / (1024 * 1024));
         });
     }
 

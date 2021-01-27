@@ -96,6 +96,9 @@ const contextTooltipTemplate = `
 ---
 
 #### Docker Host Endpoint
-{{! TODO: This is not working for ACI contexts }}
+{{#if Endpoints.docker.Host}}
 {{ Endpoints.docker.Host }}
+{{else}}
+_{{ Metadata.Type }}_
+{{/if}}
 `;

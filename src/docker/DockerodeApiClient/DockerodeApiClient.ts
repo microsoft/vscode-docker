@@ -236,7 +236,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const result = await this.callWithErrorHandling(context, async () => image.inspect(), token);
 
         // Sorely missing in the inspect result for an image is the containers using it, so we will add that in, in the same-ish shape as networks' inspect result
-        const containersUsingImage = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'ancestor': [result.Id] } }));
+        const containersUsingImage = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'ancestor': [result.Id] }, all: true }));
 
         const containersObject = {};
         for (const container of containersUsingImage) {
@@ -335,7 +335,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const containersObject = {};
         for (const container of containersUsingVolume) {
             const destination = container.Mounts?.find(m => m.Name === volume.name)?.Destination;
-            containersObject[container.Id] = { Name: getContainerName(container), Destination: destination };
+            containersObject[container.Id] = { Name: getContainerName(container), Destination: destination || localize('vscode-docker.utils.dockerode.unknownDestination', '<Unknown>') };
         }
 
         return {

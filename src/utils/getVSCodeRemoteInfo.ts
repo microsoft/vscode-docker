@@ -38,7 +38,7 @@ export interface IVSCodeRemoteInfo {
     remoteKind: RemoteKind | undefined;
 }
 
-export function getVSCodeRemoteInfo(context: IActionContext): IVSCodeRemoteInfo {
+export function getVSCodeRemoteInfo(context?: IActionContext): IVSCodeRemoteInfo {
     let extensionKind: DockerExtensionKind;
     let remoteKind: RemoteKind | undefined;
 
@@ -70,9 +70,11 @@ export function getVSCodeRemoteInfo(context: IActionContext): IVSCodeRemoteInfo 
         extensionKind = DockerExtensionKind.local;
     }
 
-    context.telemetry.properties.extensionKind = extensionKind;
-    context.telemetry.properties.remoteKind = remoteKind;
-    context.telemetry.properties.rawRemoteKind = remoteName;
+    if (context) {
+        context.telemetry.properties.extensionKind = extensionKind;
+        context.telemetry.properties.remoteKind = remoteKind;
+        context.telemetry.properties.rawRemoteKind = remoteName;
+    }
 
     return {
         extensionKind,
