@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Dockerode = require('dockerode');
+import * as nodepath from 'path';
 import * as stream from 'stream';
-import * as tar from 'tar';
+import * as tarstream from 'tar-stream';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
@@ -149,26 +150,76 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         return await new Promise(
             (resolve, reject) => {
-                const tarParser = new tar.Parse();
+                let entry: { content?: Buffer, error?: Error };
 
-                tarParser.on('entry', (entry: tar.ReadEntry) => {
-                    const chunks = [];
+                const tarStream = tarstream.extract();
 
-                    entry.on('data', chunk => {
-                        chunks.push(chunk);
-                    });
+                tarStream.on('entry', (header, entryStream, next) => {
+                    if (entry) {
+                        //
+                        // We already extracted the first entry, so just skip the rest...
+                        //
 
-                    entry.on('error', error => {
-                        reject(error);
-                    });
+                        // When the entry stream has been drained, go on to the next entry...
+                        entryStream.on('end', next);
 
-                    entry.on('end', () => {
-                        resolve(Buffer.concat(chunks));
-                    });
+                        // Drain the entry stream...
+                        entryStream.resume();
+                    } else {
+                        //
+                        // This is the first entry, so extract its content...
+                        //
+
+                        const chunks = [];
+
+                        entryStream.on('data', chunk => {
+                            chunks.push(chunk);
+                        });
+
+                        entryStream.on('error', error => {
+                            entry = { error };
+                        });
+
+                        entryStream.on('end', () => {
+                            entry = { content: Buffer.concat(chunks) };
+
+                            // The entry stream is done, so go on to the next entry...
+                            next();
+                        });
+                    }
                 });
 
-                archiveStream.pipe(tarParser);
+                tarStream.on('finish', () => {
+                    //
+                    // The archive has been extracted, so return the result...
+                    //
+
+                    if (entry.error) {
+                        reject(entry.error);
+                    } else if (entry.content) {
+                        resolve(entry.content);
+                    } else {
+                        reject(new Error(localize('vscode-docker.utils.dockerode.failedToExtractContainerFile', 'Failed to extract container file from archive.')));
+                    }
+                });
+
+                archiveStream.pipe(tarStream);
             });
+    }
+
+    public async putContainerFile(context: IActionContext, ref: string, path: string, content: Buffer, token?: CancellationToken): Promise<void> {
+        const container = this.dockerodeClient.getContainer(ref);
+
+        const directory = nodepath.dirname(path);
+        const filename = nodepath.basename(path);
+
+        const pack = tarstream.pack();
+
+        pack.entry({ name: filename }, content);
+
+        pack.finalize();
+
+        await this.callWithErrorHandling(context, async () => container.putArchive(pack, { path: directory }));
     }
 
     public async getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream> {

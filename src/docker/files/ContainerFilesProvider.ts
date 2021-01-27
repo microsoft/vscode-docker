@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';
@@ -19,6 +20,12 @@ class MethodNotImplementedError extends Error {
 class UnrecognizedContainerOSError extends Error {
     public constructor() {
         super(localize('docker.files.containerFilesProvider.unrecognizedContainerOS', 'Unrecognized container OS.'));
+    }
+}
+
+class UnsupportedServerOSError extends Error {
+    public constructor() {
+        super(localize('docker.files.containerFilesProvider.supportedServerOS', 'This operation is not supported on this Docker host.'));
     }
 }
 
@@ -161,7 +168,37 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
-        throw new MethodNotImplementedError();
+        const method =
+            async (): Promise<void> => {
+                const dockerUri = DockerUri.parse(uri);
+
+                let serverOS = dockerUri.options?.serverOS;
+
+                if (serverOS === undefined) {
+                    const version = await this.dockerClientProvider().version(undefined);
+
+                    serverOS = version.Os;
+                }
+
+                switch (serverOS) {
+                    case 'linux':
+
+                        return await this.writeFileViaCopy(dockerUri, content);
+
+                    default:
+
+                        throw new UnsupportedServerOSError();
+                }
+            };
+
+        return callWithTelemetryAndErrorHandling(
+            `containerFilesProvider.writeFile`,
+            async actionContext => {
+                actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup.
+                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
+
+                await method();
+            });
     }
 
     public delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
@@ -228,5 +265,19 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         const buffer = Buffer.from(stdout, 'utf8');
 
         return Uint8Array.from(buffer);
+    }
+
+    private async writeFileViaCopy(dockerUri: DockerUri, content: Uint8Array): Promise<void> {
+        let containerOS = dockerUri.options?.containerOS;
+
+        if (containerOS === undefined) {
+            containerOS = await this.getContainerOS(dockerUri.containerId);
+        }
+
+        await this.dockerClientProvider().putContainerFile(
+            undefined, // context
+            dockerUri.containerId,
+            containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+            Buffer.from(content));
     }
 }
