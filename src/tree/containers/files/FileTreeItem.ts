@@ -11,6 +11,8 @@ import { AzExtTreeItemIntermediate } from '../../AzExtTreeItemIntermediate';
 export class FileTreeItem extends AzExtTreeItemIntermediate {
     public description?: string = '';
 
+    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
+
     public constructor(
         parent: AzExtParentTreeItem,
         private readonly name: string,

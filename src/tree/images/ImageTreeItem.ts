@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MarkdownString } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
+import { getCommonPropertyValue } from "../settings/CommonProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageTreeItem extends AzExtTreeItemIntermediate {
@@ -76,4 +79,39 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
 
         return ext.dockerClient.removeImage(context, ref);
     }
+
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, NormalizedSize: getCommonPropertyValue(this._item, 'Size'), ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
+    }
 }
+
+const imageTooltipTemplate = `
+### {{ NormalizedName }} ({{ substr Id 7 12 }})
+
+---
+
+#### Size
+{{ NormalizedSize }}
+
+---
+
+#### Associated Containers
+{{#if (nonEmptyObj Containers)}}
+{{#each Containers}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+
+---
+
+#### Exposed Ports
+{{#if (nonEmptyObj Config.ExposedPorts)}}
+{{#each Config.ExposedPorts}}
+  - {{ @key }}
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+`;

@@ -16,6 +16,8 @@ export type DirectoryItemProvider = (path: string | undefined) => Promise<Direct
 export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
     public description?: string = '';
 
+    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
+
     private children: AzExtTreeItem[] | undefined;
 
     public constructor(

@@ -12,6 +12,7 @@ import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from '../resolveTooltipMarkdown';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
@@ -135,7 +136,58 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
         return true;
     }
 
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
+        return resolveTooltipMarkdown(containerTooltipTemplate, { NormalizedName: this.containerName, ...await ext.dockerClient.inspectContainer(actionContext, this.containerId) });
+    }
+
     private get isRunning(): boolean {
         return this._item.State.toLowerCase() === 'running';
     }
 }
+
+const containerTooltipTemplate = `
+### {{ NormalizedName }} ({{ substr Id 0 12 }})
+
+---
+
+#### Image
+{{ Config.Image }} ({{ substr Image 7 12 }})
+
+---
+
+#### Ports
+{{#if (nonEmptyObj HostConfig.PortBindings)}}
+{{#each HostConfig.PortBindings}}
+  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) ➔ {{ @key }}
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+
+---
+
+#### Volumes
+{{#if Mounts}}
+{{#each Mounts}}
+{{#if (eq this.Type 'bind')}}
+  - {{ friendlyBindHost this.Source }} ➔ {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
+{{/if}}
+{{#if (eq this.Type 'volume')}}
+  - {{ this.Name }} ➔ {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
+{{/if}}
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+
+---
+
+#### Networks
+{{#if (nonEmptyObj NetworkSettings.Networks)}}
+{{#each NetworkSettings.Networks}}
+  - {{ @key }}
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+`;

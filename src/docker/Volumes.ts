@@ -19,4 +19,10 @@ export interface DockerVolumeInspection extends DockerObject {
 
     readonly Id: undefined; // Not defined for volumes
     readonly Description?: string;
+    readonly Containers?: { // Not a real part of volume inspection, but we add it because it's desperately needed
+        [containerId: string]: {
+            readonly Name: string;
+            readonly Destination: string;
+        }
+    };
 }
